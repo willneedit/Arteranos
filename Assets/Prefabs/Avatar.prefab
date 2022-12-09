@@ -93,7 +93,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 1347632025919585062}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5000001
   m_Height: 2
   m_Direction: 1
@@ -108,6 +108,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4555882031119795323}
   - component: {fileID: 8870966001720965986}
+  - component: {fileID: 8893325808074209758}
   m_Layer: 0
   m_Name: Avatar
   m_TagString: Untagged
@@ -150,6 +151,23 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &8893325808074209758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743643060655830876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7ed5e86fc44d454c9361b8046844f76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Position:
+    m_InternalValue: {x: 0, y: 0, z: 0}
+  Rotation:
+    m_InternalValue: {x: 0, y: 0, z: 0, w: 0}
+  Controller: {fileID: 0}
 --- !u!1 &3146286627077731838
 GameObject:
   m_ObjectHideFlags: 0
@@ -243,7 +261,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 3146286627077731838}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5000001
   m_Height: 2
   m_Direction: 1
@@ -341,7 +359,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 4185492351117743831}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5000001
   m_Height: 2
   m_Direction: 1
@@ -439,7 +457,7 @@ SphereCollider:
   m_GameObject: {fileID: 5229597798475363357}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}

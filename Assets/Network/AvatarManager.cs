@@ -2,7 +2,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-namespace HelloWorld
+namespace NetworkIO
 {
     public class AvatarManager : MonoBehaviour
     {
@@ -17,7 +17,7 @@ namespace HelloWorld
             {
                 StatusLabels();
 
-                SubmitNewPosition();
+                // SubmitNewPosition();
             }
 
             GUILayout.EndArea();
@@ -46,14 +46,14 @@ namespace HelloWorld
             {
                 if (NetworkManager.Singleton.IsServer && !NetworkManager.Singleton.IsClient)
                 {
-                    // foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
-                    //     NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<HelloWorldPlayer>().Move();
+                    foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
+                        NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<AvatarPlayer>().Move();
                 }
                 else
                 {
                     var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
-                    // var player = playerObject.GetComponent<HelloWorldPlayer>();
-                    // player.Move();
+                    var player = playerObject.GetComponent<AvatarPlayer>();
+                    player.Move();
                 }
             }
         }
