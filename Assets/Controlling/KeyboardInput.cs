@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInput : MonoBehaviour
+public class KeyboardInput : MonoBehaviour
 {
-    private PlayerInputActions _input;
+    private KeyboardActions _input;
     private CharacterController _cha;
     private Vector2 _inputMove;
     private float _inputRotation;
@@ -25,7 +25,7 @@ public class PlayerInput : MonoBehaviour
     {
         _cha = GetComponent<CharacterController>();
 
-        _input = new PlayerInputActions();
+        _input = new KeyboardActions();
         _input.Player.Enable();
         _input.Player.Walk.performed += Walk_performed;
         _input.Player.Walk.canceled += Walk_canceled;
