@@ -437,6 +437,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2ce2c7ac0eea1841b23fdd9344775fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  av_position: {x: 0, y: 0, z: 0}
+  av_rotation: {x: 0, y: 0, z: 0, w: 0}
+  av_pointsTo: {x: 0, y: 0, z: 0}
+  av_pointToObj: {fileID: 0}
+  av_actionButton: 0
+  av_grabButton: 0
 --- !u!143 &456429768
 CharacterController:
   m_ObjectHideFlags: 0
@@ -454,7 +460,7 @@ CharacterController:
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Center: {x: 0, y: 1.1, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

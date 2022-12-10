@@ -5,8 +5,16 @@ using UnityEngine.InputSystem;
 
 public class KeyboardInput : MonoBehaviour
 {
+    public Vector3 av_position;
+    public Quaternion av_rotation;
+    public Vector3 av_pointsTo;
+    public GameObject av_pointToObj;
+    public bool av_actionButton;
+    public bool av_grabButton;
+
     private KeyboardActions _input;
     private CharacterController _cha;
+    private Camera _cam;
     private Vector2 _inputMove;
     private float _inputRotation;
     private bool _running;
@@ -33,6 +41,15 @@ public class KeyboardInput : MonoBehaviour
         _input.Player.Run.canceled += Run_canceled;
         _input.Player.Turn.performed += Turn_performed;
         _input.Player.Turn.canceled += Turn_canceled;
+
+        _input.Player.PointTo.performed += PointTo_performed;
+        _input.Player.PointTo.canceled += PointTo_canceled;
+
+        _input.Player.Action.performed += Action_performed;
+        _input.Player.Action.canceled += Action_canceled;
+
+        _input.Player.Grab.performed += Grab_performed;
+        _input.Player.Grab.canceled += Grab_canceled;
     }
 
     // Update is called once per frame
@@ -82,11 +99,56 @@ public class KeyboardInput : MonoBehaviour
         _inputRotation = 0.0f;
     }
 
+    private void PointTo_performed(InputAction.CallbackContext obj)
+    {
+        av_pointsTo = obj.ReadValue<Vector2>();
+        Ray castPoint = Camera.main.ScreenPointToRay(av_pointsTo);
+        RaycastHit hit;
+        if (Physics.Raycast(castPoint, out hit, Mathf.Infinity))
+        {
+             av_pointsTo = hit.point;
+             av_pointToObj = hit.collider.gameObject;
+        }
+        else
+        {
+            av_pointToObj = null;
+            av_pointsTo = new Vector3(0.0f, -9000.0f, 0.0f);
+        }
+    }
+
+    private void PointTo_canceled(InputAction.CallbackContext obj)
+    {
+        av_pointsTo = Vector2.zero;
+    }
+
+    private void Action_performed(InputAction.CallbackContext obj)
+    {
+        av_actionButton = true;
+    }
+
+    private void Action_canceled(InputAction.CallbackContext obj)
+    {
+        av_actionButton = false;
+    }
+
+    private void Grab_performed(InputAction.CallbackContext obj)
+    {
+        av_grabButton = true;
+    }
+
+    private void Grab_canceled(InputAction.CallbackContext obj)
+    {
+        av_grabButton = false;
+    }
+
     private void Movement()
     {
         Vector3 move_speed = new Vector3(_inputMove.x, 0, _inputMove.y) * _speed;
         _cha.SimpleMove(transform.rotation * move_speed);
 
         transform.Rotate(new Vector3(0.0f, _inputRotation * _speed, 0.0f));
+
+        av_position = transform.position;
+        av_rotation = transform.rotation;
     }
 }

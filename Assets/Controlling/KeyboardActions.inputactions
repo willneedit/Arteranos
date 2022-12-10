@@ -1,5 +1,5 @@
 {
-    "name": "PlayerInputActions",
+    "name": "KeyboardActions",
     "maps": [
         {
             "name": "Player",
@@ -27,6 +27,42 @@
                     "name": "Turn",
                     "type": "Button",
                     "id": "25c27dc3-5d0e-47e2-8dda-eb91c03cbe56",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PointTo",
+                    "type": "Value",
+                    "id": "3ac69e0e-a79e-426d-912a-cb2217a4f3de",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Action",
+                    "type": "Button",
+                    "id": "8b7b9322-aebd-4114-858d-a8863b698460",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MouseMButton",
+                    "type": "Button",
+                    "id": "c8e1c9fe-49df-41dd-8a51-965fe8fe4f07",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Grab",
+                    "type": "Button",
+                    "id": "161ed183-cb84-4bad-9d2e-9ff18c8289d2",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -132,6 +168,50 @@
                     "action": "Turn",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "ea5d6462-690f-4f4b-b0ad-2e29a27b59ca",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PointTo",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "226e4c4d-e55a-4b7d-8152-1e99a7d23930",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "71660ef7-9ad6-4572-a1e0-4e6279b77deb",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MouseMButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c4b1f919-3634-468c-b851-ac02089a30c2",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Grab",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

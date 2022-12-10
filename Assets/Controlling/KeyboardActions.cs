@@ -53,6 +53,42 @@ public partial class @KeyboardActions : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PointTo"",
+                    ""type"": ""Value"",
+                    ""id"": ""3ac69e0e-a79e-426d-912a-cb2217a4f3de"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Action"",
+                    ""type"": ""Button"",
+                    ""id"": ""8b7b9322-aebd-4114-858d-a8863b698460"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MouseMButton"",
+                    ""type"": ""Button"",
+                    ""id"": ""c8e1c9fe-49df-41dd-8a51-965fe8fe4f07"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Grab"",
+                    ""type"": ""Button"",
+                    ""id"": ""161ed183-cb84-4bad-9d2e-9ff18c8289d2"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -154,6 +190,50 @@ public partial class @KeyboardActions : IInputActionCollection2, IDisposable
                     ""action"": ""Turn"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ea5d6462-690f-4f4b-b0ad-2e29a27b59ca"",
+                    ""path"": ""<Mouse>/position"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PointTo"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""226e4c4d-e55a-4b7d-8152-1e99a7d23930"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""71660ef7-9ad6-4572-a1e0-4e6279b77deb"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MouseMButton"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c4b1f919-3634-468c-b851-ac02089a30c2"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Grab"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -165,6 +245,10 @@ public partial class @KeyboardActions : IInputActionCollection2, IDisposable
         m_Player_Walk = m_Player.FindAction("Walk", throwIfNotFound: true);
         m_Player_Run = m_Player.FindAction("Run", throwIfNotFound: true);
         m_Player_Turn = m_Player.FindAction("Turn", throwIfNotFound: true);
+        m_Player_PointTo = m_Player.FindAction("PointTo", throwIfNotFound: true);
+        m_Player_Action = m_Player.FindAction("Action", throwIfNotFound: true);
+        m_Player_MouseMButton = m_Player.FindAction("MouseMButton", throwIfNotFound: true);
+        m_Player_Grab = m_Player.FindAction("Grab", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -227,6 +311,10 @@ public partial class @KeyboardActions : IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Walk;
     private readonly InputAction m_Player_Run;
     private readonly InputAction m_Player_Turn;
+    private readonly InputAction m_Player_PointTo;
+    private readonly InputAction m_Player_Action;
+    private readonly InputAction m_Player_MouseMButton;
+    private readonly InputAction m_Player_Grab;
     public struct PlayerActions
     {
         private @KeyboardActions m_Wrapper;
@@ -234,6 +322,10 @@ public partial class @KeyboardActions : IInputActionCollection2, IDisposable
         public InputAction @Walk => m_Wrapper.m_Player_Walk;
         public InputAction @Run => m_Wrapper.m_Player_Run;
         public InputAction @Turn => m_Wrapper.m_Player_Turn;
+        public InputAction @PointTo => m_Wrapper.m_Player_PointTo;
+        public InputAction @Action => m_Wrapper.m_Player_Action;
+        public InputAction @MouseMButton => m_Wrapper.m_Player_MouseMButton;
+        public InputAction @Grab => m_Wrapper.m_Player_Grab;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -252,6 +344,18 @@ public partial class @KeyboardActions : IInputActionCollection2, IDisposable
                 @Turn.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTurn;
                 @Turn.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTurn;
                 @Turn.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTurn;
+                @PointTo.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPointTo;
+                @PointTo.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPointTo;
+                @PointTo.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPointTo;
+                @Action.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAction;
+                @Action.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAction;
+                @Action.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAction;
+                @MouseMButton.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMouseMButton;
+                @MouseMButton.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMouseMButton;
+                @MouseMButton.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMouseMButton;
+                @Grab.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnGrab;
+                @Grab.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnGrab;
+                @Grab.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnGrab;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -265,6 +369,18 @@ public partial class @KeyboardActions : IInputActionCollection2, IDisposable
                 @Turn.started += instance.OnTurn;
                 @Turn.performed += instance.OnTurn;
                 @Turn.canceled += instance.OnTurn;
+                @PointTo.started += instance.OnPointTo;
+                @PointTo.performed += instance.OnPointTo;
+                @PointTo.canceled += instance.OnPointTo;
+                @Action.started += instance.OnAction;
+                @Action.performed += instance.OnAction;
+                @Action.canceled += instance.OnAction;
+                @MouseMButton.started += instance.OnMouseMButton;
+                @MouseMButton.performed += instance.OnMouseMButton;
+                @MouseMButton.canceled += instance.OnMouseMButton;
+                @Grab.started += instance.OnGrab;
+                @Grab.performed += instance.OnGrab;
+                @Grab.canceled += instance.OnGrab;
             }
         }
     }
@@ -274,5 +390,9 @@ public partial class @KeyboardActions : IInputActionCollection2, IDisposable
         void OnWalk(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
         void OnTurn(InputAction.CallbackContext context);
+        void OnPointTo(InputAction.CallbackContext context);
+        void OnAction(InputAction.CallbackContext context);
+        void OnMouseMButton(InputAction.CallbackContext context);
+        void OnGrab(InputAction.CallbackContext context);
     }
 }
