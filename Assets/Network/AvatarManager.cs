@@ -1,6 +1,8 @@
 
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace NetworkIO
 {
@@ -25,9 +27,20 @@ namespace NetworkIO
 
         static void StartButtons()
         {
-            if (GUILayout.Button("Host")) NetworkManager.Singleton.StartHost();
-            if (GUILayout.Button("Client")) NetworkManager.Singleton.StartClient();
-            if (GUILayout.Button("Server")) NetworkManager.Singleton.StartServer();
+            if (GUILayout.Button("Host"))
+            {
+                NetworkManager.Singleton.StartHost();
+            }
+            
+            if (GUILayout.Button("Client")) 
+            {
+                NetworkManager.Singleton.StartClient();
+            }
+
+            if (GUILayout.Button("Server")) 
+            {
+                NetworkManager.Singleton.StartServer();
+            }
         }
 
         static void StatusLabels()
