@@ -1333,7 +1333,7 @@ GameObject:
   - component: {fileID: 691494939}
   - component: {fileID: 691494940}
   - component: {fileID: 691494938}
-  - component: {fileID: 691494937}
+  - component: {fileID: 691494942}
   - component: {fileID: 691494941}
   m_Layer: 15
   m_Name: _XR Origin
@@ -1389,19 +1389,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &691494937
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 691494933}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01f69dc1cb084aa42b2f2f8cd87bc770, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_System: {fileID: 691494938}
 --- !u!114 &691494938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1521,6 +1508,19 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1.1, z: 0}
+--- !u!114 &691494942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 691494933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13ee5d73232048f43b9765c6781daff5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_System: {fileID: 691494938}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
