@@ -1814,6 +1814,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: _Scripts
       objectReference: {fileID: 0}
+    - target: {fileID: 3840780145527097114, guid: 0c924ef8e01e2974ba2fde7066698900,
+        type: 3}
+      propertyPath: enableVR
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0c924ef8e01e2974ba2fde7066698900, type: 3}
 --- !u!1001 &5092637814827381232

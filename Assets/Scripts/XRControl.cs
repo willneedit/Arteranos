@@ -15,6 +15,8 @@ public class XRControl : MonoBehaviour
         if (XRGeneralSettings.Instance.Manager.activeLoader == null)
         {
             Debug.LogError("Initializing XR Failed. Check Editor or Player log for details.");
+            enableVR = false;
+            currentVR = false;
         }
         else
         {
