@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7141498047530980216}
   - component: {fileID: 7141498047530980223}
   - component: {fileID: 7141498047530980222}
+  - component: {fileID: 7867527031845556352}
   m_Layer: 15
   m_Name: OneHand Controller
   m_TagString: Untagged
@@ -521,6 +522,38 @@ MonoBehaviour:
   m_SnapThresholdDistance: 10
   m_Reticle: {fileID: 0}
   m_StopLineAtFirstRaycastHit: 1
+--- !u!114 &7867527031845556352
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7141498047530980220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b0ab6c952d9ad44093699b870dc7401, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_KMRotationInput:
+    m_UseReference: 0
+    m_Action:
+      m_Name: KM Rotation Input
+      m_Type: 0
+      m_ExpectedControlType: Vector2
+      m_Id: bc5505e4-b676-49ec-be25-319650b47aca
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings:
+      - m_Name: 
+        m_Id: 84174e9b-9856-42b6-92b8-91d3b61a401e
+        m_Path: <Mouse>/position
+        m_Interactions: 
+        m_Processors: 
+        m_Groups: 
+        m_Action: KM Rotation Input
+        m_Flags: 0
+      m_Flags: 0
+    m_Reference: {fileID: 0}
 --- !u!1 &7141498047634495891
 GameObject:
   m_ObjectHideFlags: 0
