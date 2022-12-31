@@ -13,7 +13,7 @@ public class KeyboardInput : MonoBehaviour
     public bool av_grabButton;
 
     private KeyboardActions _input;
-    private CharacterController _cha;
+    private CharacterController _cha = null;
     private Camera _cam;
     private Vector2 _inputMove;
     private float _inputRotation;
@@ -55,18 +55,23 @@ public class KeyboardInput : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(_cha.isGrounded)
-            _lastGround = transform.position;
+        if (_cha != null)
+        {
+            if(_cha.isGrounded)
+                _lastGround = transform.position;
 
-        if(transform.position.y - _lastGround.y < -10.0f)
-        {
-            Debug.Log("I'm falling!");
-            transform.position = new Vector3(0.0f, 1.5f, 0.0f);
+            if(transform.position.y - _lastGround.y < -10.0f)
+            {
+                Debug.Log("I'm falling!");
+                transform.position = new Vector3(0.0f, 1.5f, 0.0f);
+            }
+            else if(!_cha.isGrounded || _inputMove != Vector2.zero || _inputRotation != 0.0f)
+            {
+                Movement();
+            }
         }
-        else if(!_cha.isGrounded || _inputMove != Vector2.zero || _inputRotation != 0.0f)
-        {
+        else
             Movement();
-        }
     }
 
     private void Walk_performed(InputAction.CallbackContext obj)
@@ -144,7 +149,13 @@ public class KeyboardInput : MonoBehaviour
     private void Movement()
     {
         Vector3 move_speed = new Vector3(_inputMove.x, 0, _inputMove.y) * _speed;
-        _cha.SimpleMove(transform.rotation * move_speed);
+
+        if(_cha != null)
+        {
+            _cha.SimpleMove(transform.rotation * move_speed);
+        }
+        else
+            transform.Translate(transform.rotation * move_speed * Time.deltaTime);
 
         transform.Rotate(new Vector3(0.0f, _inputRotation * _speed, 0.0f));
 
