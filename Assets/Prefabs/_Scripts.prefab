@@ -155,6 +155,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enableVR: 0
+  VRRig: {fileID: 6826848587015489432, guid: db551c4eeae27cd4990850962a0520c1, type: 3}
+  NoVRRig: {fileID: 7141498048079031363, guid: f377d58bd7dad7d40ad2d131fe5d1cc7, type: 3}
 --- !u!1 &3840780145540901929
 GameObject:
   m_ObjectHideFlags: 0
