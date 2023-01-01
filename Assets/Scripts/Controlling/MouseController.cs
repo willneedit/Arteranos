@@ -73,7 +73,7 @@ public class MouseController : MonoBehaviour
         Ray castPoint = Camera.main.ScreenPointToRay(m_KMCurrentRotation);
 
         Quaternion q = Quaternion.LookRotation(castPoint.direction, Vector3.up);
-        transform.localRotation = q;
+        transform.rotation = q;
 
     }
 
