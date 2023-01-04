@@ -569,7 +569,7 @@ GameObject:
   - component: {fileID: 7141498047634495896}
   - component: {fileID: 7141498047634495897}
   m_Layer: 15
-  m_Name: _AvatarView KM
+  m_Name: _AvatarView
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
