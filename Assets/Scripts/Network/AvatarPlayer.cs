@@ -27,10 +27,17 @@ namespace NetworkIO
 
         void Update()
         {
+            // Propagate the movement information to the server....
             if (Controller != null)
                 UpdateCurrentPositionServerRpc(Controller.transform.position, Controller.transform.rotation);
 
-            _self.PushTransform(transform);
+            // For the own avatar, copy the pose to the avatar rig.
+            // For the others, rely to the others
+            if(IsLocalPlayer)        
+                transform.SetPositionAndRotation(Controller.transform.position, Controller.transform.rotation);
+            else
+                _self.PushTransform(transform);
+            
         }
     }
 }
