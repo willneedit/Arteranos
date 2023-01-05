@@ -13,10 +13,7 @@ namespace NetworkIO
 
         public override void OnNetworkSpawn()
         {
-            if (IsOwner)
-            {
-                Controller = GameObject.Find("_XR Origin(Clone)") ?? GameObject.Find("_XR Origin KM(Clone)");
-            }
+
         }
 
         [ServerRpc]
@@ -27,16 +24,21 @@ namespace NetworkIO
 
         void Update()
         {
-            // Propagate the movement information to the server....
-            if (Controller != null)
-                UpdateCurrentPositionServerRpc(Controller.transform.position, Controller.transform.rotation);
+            if (IsOwner && Controller == null)
+                Controller = GameObject.Find("_XR Origin(Clone)") ?? GameObject.Find("_XR Origin KM(Clone)");
+
+            // For the others, update their transforms with the server's data.
+            if(!IsOwner)
+                transform.SetPositionAndRotation(_self.position, _self.rotation);
+
+            if (Controller == null)
+                return;
+
+            // Propagate the movement information to the server....            
+            UpdateCurrentPositionServerRpc(Controller.transform.position, Controller.transform.rotation);
 
             // For the own avatar, copy the pose to the avatar rig.
-            // For the others, rely to the others
-            if(IsLocalPlayer)        
-                transform.SetPositionAndRotation(Controller.transform.position, Controller.transform.rotation);
-            else
-                _self.PushTransform(transform);
+            transform.SetPositionAndRotation(Controller.transform.position, Controller.transform.rotation);
             
         }
     }
