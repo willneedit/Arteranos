@@ -1,14 +1,14 @@
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Rendering;
+using System;
 
 namespace NetworkIO
 {
+
     public class AvatarPlayer : NetworkBehaviour
     {
-        public NetworkVariable<Vector3>     Position = new NetworkVariable<Vector3>();
-        public NetworkVariable<Quaternion>  Rotation = new NetworkVariable<Quaternion>();
-
+        public NetworkTrackedBone _self = new NetworkTrackedBone();
         public GameObject Controller;
 
         public override void OnNetworkSpawn()
@@ -22,8 +22,8 @@ namespace NetworkIO
         [ServerRpc]
         public void UpdateCurrentPositionServerRpc(Vector3 position, Quaternion rotation, ServerRpcParams rpcParams = default)
         {
-            Position.Value = position;
-            Rotation.Value = rotation;
+            _self.position = position;
+            _self.rotation = rotation;
         }
 
         void Update()
@@ -31,8 +31,8 @@ namespace NetworkIO
             if (Controller != null)
                 UpdateCurrentPositionServerRpc(Controller.transform.position, Controller.transform.rotation);
 
-            transform.position = Position.Value;
-            transform.rotation = Rotation.Value;
+            transform.position = _self.position;
+            transform.rotation = _self.rotation;
         }
     }
 }
