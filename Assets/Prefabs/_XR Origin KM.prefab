@@ -568,6 +568,7 @@ GameObject:
   - component: {fileID: 7141498047634495903}
   - component: {fileID: 7141498047634495896}
   - component: {fileID: 7141498047634495897}
+  - component: {fileID: 8388097671174442840}
   m_Layer: 15
   m_Name: _AvatarView
   m_TagString: MainCamera
@@ -719,6 +720,24 @@ MonoBehaviour:
       type: 3}
   m_EulerAngles: {x: 0, y: 0, z: 0}
   m_RotationSpeed: 60
+--- !u!114 &8388097671174442840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7141498047634495891}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Device: 0
+  m_PoseSource: 2
+  m_PoseProviderComponent: {fileID: 0}
+  m_TrackingType: 0
+  m_UpdateType: 0
+  m_UseRelativeTransform: 0
 --- !u!1 &7141498048079031361
 GameObject:
   m_ObjectHideFlags: 0
