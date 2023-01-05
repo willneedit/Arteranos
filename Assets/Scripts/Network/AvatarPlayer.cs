@@ -2,6 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Rendering;
 using System;
+using Unity.XR.CoreUtils;
 
 namespace NetworkIO
 {
@@ -9,7 +10,7 @@ namespace NetworkIO
     public class AvatarPlayer : NetworkBehaviour
     {
         public NetworkTrackedBone _self = new NetworkTrackedBone();
-        public GameObject Controller;
+        public XROrigin Controller;
 
         public override void OnNetworkSpawn()
         {
@@ -25,7 +26,7 @@ namespace NetworkIO
         void Update()
         {
             if (IsOwner && Controller == null)
-                Controller = GameObject.Find("_XR Origin(Clone)") ?? GameObject.Find("_XR Origin KM(Clone)");
+                Controller = FindObjectOfType<XROrigin>();
 
             // For the others, update their transforms with the server's data.
             if(!IsOwner)
