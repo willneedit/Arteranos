@@ -15,15 +15,14 @@ namespace NetworkIO
         {
             if (IsOwner)
             {
-                Controller = GameObject.Find("_AvatarView");
+                Controller = GameObject.Find("_XR Origin(Clone)") ?? GameObject.Find("_XR Origin KM(Clone)");
             }
         }
 
         [ServerRpc]
         public void UpdateCurrentPositionServerRpc(Vector3 position, Quaternion rotation, ServerRpcParams rpcParams = default)
         {
-            _self.position = position;
-            _self.rotation = rotation;
+            _self.SetPositionAndRotation(position, rotation);
         }
 
         void Update()
@@ -31,8 +30,7 @@ namespace NetworkIO
             if (Controller != null)
                 UpdateCurrentPositionServerRpc(Controller.transform.position, Controller.transform.rotation);
 
-            transform.position = _self.position;
-            transform.rotation = _self.rotation;
+            _self.PushTransform(transform);
         }
     }
 }

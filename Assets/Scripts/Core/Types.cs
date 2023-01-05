@@ -51,12 +51,26 @@ public class NetworkTrackedBone : NetworkVariableBase {
         SetDirty(true);
     }
 
-    public void PullPositionAndRotation(Transform t)
+    public void PullTransform(Transform t)
+    {
+        this._position = t.position;
+        this._rotation = t.rotation;
+        SetDirty(true);
+    }
+
+    public void PullLocalTransform(Transform t)
+    {
+        this._position = t.localPosition;
+        this._rotation = t.localRotation;
+        SetDirty(true);
+    }
+
+    public void PushTransform(Transform t)
     {
         t.SetPositionAndRotation(_position, _rotation);
     }
 
-    public void PullLocalPositionAndRotation(Transform t)
+    public void PushLocalTransform(Transform t)
     {
         t.SetLocalPositionAndRotation(_position, _rotation);
     }
