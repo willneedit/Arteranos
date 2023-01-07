@@ -4,10 +4,11 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.Collections;
 using System;
+using ReadyPlayerMe;
 
 namespace NetworkIO
 {
-    public class AvatarLoader : NetworkBehaviour
+    public class AvatarReplacer : NetworkBehaviour
     {
 
         public NetworkVariable<FixedString512Bytes> m_AvatarURL = new NetworkVariable<FixedString512Bytes>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
@@ -16,10 +17,16 @@ namespace NetworkIO
         private bool loading = false;
 
         private GameObject m_SpawnedStandin = null;
+        private AvatarLoader m_AvatarLoader = null;
+
 
         public override void OnNetworkSpawn()
         {
             m_AvatarURL.OnValueChanged += OnAvatarURLChanged;
+
+            m_AvatarLoader = new AvatarLoader();
+            m_AvatarLoader.OnCompleted += AvatarLoadComplete;
+            m_AvatarLoader.OnFailed += AvatarLoadFailed;
 
             // DEBUG
             if(IsOwner)
@@ -40,7 +47,15 @@ namespace NetworkIO
         IEnumerator ProcessLoader(FixedString512Bytes current)
         {
             Debug.Log("Starting avatar loading: " + current);
-            yield return new WaitForSeconds(5);
+            yield return null;
+
+            m_AvatarLoader.LoadAvatar(current.ToString());
+        }
+
+        void AvatarLoadComplete(object sender, CompletionEventArgs args)
+        {
+            Debug.Log("Successfully loaded avatar");
+            loading = false;
 
             if(m_SpawnedStandin != null)
             {
@@ -48,10 +63,13 @@ namespace NetworkIO
                 m_SpawnedStandin = null;
             }
 
-            GameObject newAv = Instantiate(m_AvatarObject, transform.position, transform.rotation);
-            newAv.transform.SetParent(transform);
-            loading = false;
+            args.Avatar.transform.SetParent(transform);
         }
 
+        void AvatarLoadFailed(object sender, FailureEventArgs args)
+        {
+            Debug.Log($"Avatar loading failed with error message: {args.Message}");
+            loading = false;
+        }
     }
 }
