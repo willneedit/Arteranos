@@ -5,9 +5,9 @@ using Unity.Netcode;
 using Unity.Collections;
 using System;
 
-#if false
+#if true
 
-using ReadyPlayerMe;
+using ReadyPlayerMe.AvatarLoader;
 
 namespace NetworkIO
 {
@@ -20,14 +20,14 @@ namespace NetworkIO
         private bool loading = false;
 
         private GameObject m_SpawnedStandin = null;
-        private AvatarLoader m_AvatarLoader = null;
+        private AvatarObjectLoader m_AvatarLoader = null;
 
 
         public override void OnNetworkSpawn()
         {
             m_AvatarURL.OnValueChanged += OnAvatarURLChanged;
 
-            m_AvatarLoader = new AvatarLoader();
+            m_AvatarLoader = new AvatarObjectLoader();
             m_AvatarLoader.OnCompleted += AvatarLoadComplete;
             m_AvatarLoader.OnFailed += AvatarLoadFailed;
 
