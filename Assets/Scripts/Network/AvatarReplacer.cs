@@ -4,6 +4,9 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.Collections;
 using System;
+
+#if false
+
 using ReadyPlayerMe;
 
 namespace NetworkIO
@@ -73,3 +76,5 @@ namespace NetworkIO
         }
     }
 }
+
+#endif
