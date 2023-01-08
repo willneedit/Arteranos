@@ -9,11 +9,6 @@ public class NetworkTrackedBone : NetworkVariableBase {
 
     [SerializeField]
     private Quaternion _rotation = Quaternion.identity;
-    public NetworkTrackedBone()
-        : base(NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner)
-    {
-        
-    }
 
     public Vector3 position {
         get => _position;

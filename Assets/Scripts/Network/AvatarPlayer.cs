@@ -17,24 +17,29 @@ namespace NetworkIO
 
         }
 
-        // [ServerRpc]
-        // public void UpdateCurrentPositionServerRpc(Vector3 position, Quaternion rotation, ServerRpcParams rpcParams = default)
-        // {
-        //     _self.SetPositionAndRotation(position, rotation);
-        // }
+        [ServerRpc]
+        public void UpdateCurrentPositionServerRpc(Vector3 position, Quaternion rotation, ServerRpcParams rpcParams = default)
+        {
+            _self.SetPositionAndRotation(position, rotation);
+        }
 
         void Update()
         {
             if (IsOwner && Controller == null)
                 Controller = FindObjectOfType<XROrigin>();
 
+            // For the others, update their transforms with the server's data.
+            if(!IsOwner)
+                transform.SetPositionAndRotation(_self.position, _self.rotation);
 
-            // Propagate the movement information to the server, if we're ourselves...
-            if(IsOwner)
-                _self.SetPositionAndRotation(Controller.transform.position, Controller.transform.rotation);
-    
-            transform.SetPositionAndRotation(_self.position, _self.rotation);
+            if (Controller == null)
+                return;
 
+            // Propagate the movement information to the server....            
+            UpdateCurrentPositionServerRpc(Controller.transform.position, Controller.transform.rotation);
+
+            // For the own avatar, copy the pose to the avatar rig.
+            transform.SetPositionAndRotation(Controller.transform.position, Controller.transform.rotation);
             
         }
     }
