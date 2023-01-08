@@ -14,7 +14,7 @@ namespace NetworkIO
     public class AvatarReplacer : NetworkBehaviour
     {
 
-        public NetworkVariable<FixedString512Bytes> m_AvatarURL = new NetworkVariable<FixedString512Bytes>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+        public NetworkVariable<FixedString512Bytes> m_AvatarURL;
         public GameObject m_AvatarStandin = null;
         public GameObject m_AvatarObject = null;
         private bool loading = false;
@@ -31,12 +31,24 @@ namespace NetworkIO
             m_AvatarLoader.OnCompleted += AvatarLoadComplete;
             m_AvatarLoader.OnFailed += AvatarLoadFailed;
 
+            this.name = this.name + "_" + OwnerClientId;
+
             // DEBUG
             if(IsOwner)
-                m_AvatarURL.Value = "https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb";
+                UpdateAvatarServerRpc("https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb");
+
+            // The late-joining client's companions
+            if(!IsOwner)
+                StartCoroutine(ProcessLoader(m_AvatarURL.Value));
 
             m_SpawnedStandin = Instantiate(m_AvatarStandin, transform.position, transform.rotation);
             m_SpawnedStandin.transform.SetParent(transform);
+        }
+
+        [ServerRpc]
+        public void UpdateAvatarServerRpc(FixedString512Bytes avatarURL, ServerRpcParams rpcParams = default)
+        {
+            m_AvatarURL.Value = avatarURL;
         }
 
         void OnAvatarURLChanged(FixedString512Bytes old, FixedString512Bytes current)
@@ -66,6 +78,7 @@ namespace NetworkIO
                 m_SpawnedStandin = null;
             }
 
+            args.Avatar.name += args.Avatar.name + "_" + OwnerClientId;
             args.Avatar.transform.SetParent(transform);
         }
 
