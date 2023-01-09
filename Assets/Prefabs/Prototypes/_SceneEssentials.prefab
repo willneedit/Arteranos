@@ -432,8 +432,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3840780145527097117}
-  - component: {fileID: 3840780145527097115}
   - component: {fileID: 3840780145527097114}
+  - component: {fileID: 800188666929888847}
   m_Layer: 0
   m_Name: _Startup_Shutdown
   m_TagString: Untagged
@@ -456,18 +456,6 @@ Transform:
   m_Father: {fileID: 3840780144436917895}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3840780145527097115
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3840780145527097116}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3f034bf4d184f04183f8e9a845c3596, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &3840780145527097114
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -475,7 +463,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3840780145527097116}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 143bbda5891809f4586a562d9feeb515, type: 3}
   m_Name: 
@@ -483,6 +471,20 @@ MonoBehaviour:
   enableVR: 0
   VRRig: {fileID: 6826848587015489432, guid: db551c4eeae27cd4990850962a0520c1, type: 3}
   NoVRRig: {fileID: 7141498048079031363, guid: f377d58bd7dad7d40ad2d131fe5d1cc7, type: 3}
+--- !u!114 &800188666929888847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3840780145527097116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bde398d886b4f2c4989eb79575bf3514, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Client: {fileID: 0}
+  m_Server: {fileID: 0}
 --- !u!1 &3840780145540901929
 GameObject:
   m_ObjectHideFlags: 0

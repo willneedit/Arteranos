@@ -45,7 +45,9 @@ public class XRControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        UpdateXROrigin(false);
+        Core.SettingsManager sm = GetComponent<Core.SettingsManager>();
+        enableVR = sm.m_Client.VRMode;
+        UpdateXROrigin(false);  // Current VR mode is initially false, to enter it if necessary.
     }
 
     // Update is called once per frame

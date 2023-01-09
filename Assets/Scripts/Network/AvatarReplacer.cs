@@ -21,10 +21,14 @@ namespace NetworkIO
 
         private GameObject m_SpawnedStandin = null;
         private AvatarObjectLoader m_AvatarLoader = null;
+        private Core.SettingsManager m_SettingsManager = null;
 
 
         public override void OnNetworkSpawn()
         {
+            m_SettingsManager = FindObjectOfType<Core.SettingsManager>();
+            m_SettingsManager.m_Client.OnAvatarChanged += RequestAvatarChange;
+
             m_AvatarURL.OnValueChanged += OnAvatarURLChanged;
 
             m_AvatarLoader = new AvatarObjectLoader();
@@ -33,20 +37,34 @@ namespace NetworkIO
 
             this.name = this.name + "_" + OwnerClientId;
 
-            // DEBUG
-            if(IsOwner)
-                UpdateAvatarServerRpc("https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb");
-
-            // The late-joining client's companions
+            // The late-joining client's companions, or the newly joined clients.
             if(!IsOwner)
+                // FIXME: Burst mitigation
                 StartCoroutine(ProcessLoader(m_AvatarURL.Value));
+            else
+            {
+                RequestAvatarChange(null, m_SettingsManager.m_Client.AvatarURL);
+            }
 
             m_SpawnedStandin = Instantiate(m_AvatarStandin, transform.position, transform.rotation);
             m_SpawnedStandin.transform.SetParent(transform);
         }
 
+        public override void OnNetworkDespawn()
+        {
+            m_SettingsManager.m_Client.OnAvatarChanged -= RequestAvatarChange;
+            base.OnNetworkDespawn();
+        }
+
+        public void RequestAvatarChange(string old, string current)
+        {
+            if(current == m_AvatarURL.Value) return;
+
+            UpdateAvatarServerRpc(current);
+        }
+
         [ServerRpc]
-        public void UpdateAvatarServerRpc(FixedString512Bytes avatarURL, ServerRpcParams rpcParams = default)
+        private void UpdateAvatarServerRpc(FixedString512Bytes avatarURL, ServerRpcParams rpcParams = default)
         {
             m_AvatarURL.Value = avatarURL;
         }

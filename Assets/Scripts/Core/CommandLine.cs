@@ -5,63 +5,44 @@ using UnityEngine;
 using UnityEngine.XR;
 using System;
 
-public class CommandLine : MonoBehaviour
+namespace Core
 {
-    private NetworkManager netManager;
-
-    private bool ParseBoolArg(string boolParam)
+    public class CommandLine : ScriptableObject
     {
-        return boolParam == "on" || boolParam == "yes" || boolParam == "1";
-    }
+        public Dictionary<string, string> m_Commands = new Dictionary<string, string>();
 
-    private Dictionary<string, string> GetCommandlineArgs()
-    {
-        Dictionary<string, string> argDictionary = new Dictionary<string, string>();
+        private NetworkManager netManager;
 
-        var args = System.Environment.GetCommandLineArgs();
-
-        for (int i = 0; i < args.Length; ++i)
+        private bool ParseBoolArg(string boolParam)
         {
-            var arg = args[i].ToLower();
-            if (arg.StartsWith("-"))
-            {
-                var value = i < args.Length - 1 ? args[i + 1].ToLower() : null;
-                value = (value?.StartsWith("-") ?? false) ? null : value;
-
-                argDictionary.Add(arg, value);
-            }
+            return boolParam == "on" || boolParam == "yes" || boolParam == "1";
         }
-        return argDictionary;
-    }
 
-    private void ParseCommanLine()
-    {
-        netManager = GetComponentInParent<NetworkManager>();
-
-        if (Application.isEditor) return;
-
-        var args = GetCommandlineArgs();
-
-        if (args.TryGetValue("-mode", out string mode))
+        private Dictionary<string, string> GetCommandlineArgs()
         {
-            switch (mode)
-            {
-                case "server":
-                    netManager.StartServer();
-                    break;
-                case "host":
-                    netManager.StartHost();
-                    break;
-                case "client":
-                    netManager.StartClient();
-                    break;
-            }
-        }
-    }
 
-    
-    void Start()
-    {
-        ParseCommanLine();
-    }
+            var args = System.Environment.GetCommandLineArgs();
+
+            for (int i = 0; i < args.Length; ++i)
+            {
+                var arg = args[i].ToLower();
+                if (arg.StartsWith("-"))
+                {
+                    var value = i < args.Length - 1 ? args[i + 1].ToLower() : null;
+                    value = (value?.StartsWith("-") ?? false) ? null : value;
+
+                    m_Commands.Add(arg, value);
+                }
+            }
+            return m_Commands;
+        }
+
+        public void ParseCommandLine()
+        {
+
+            if (Application.isEditor) return;
+
+            var args = GetCommandlineArgs();
+        }
+    }    
 }
