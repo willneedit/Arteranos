@@ -14,7 +14,7 @@ namespace Core
             set {
                 string old = _AvatarURL;
                 _AvatarURL = value;
-                if(old != _AvatarURL) OnAvatarChanged(old, _AvatarURL);
+                if(old != _AvatarURL && OnAvatarChanged != null) OnAvatarChanged(old, _AvatarURL);
             }
         }
         public string _AvatarURL = "https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb";
@@ -25,7 +25,7 @@ namespace Core
             set {
                 bool old = _VRMode;
                 _VRMode = value;
-                if(old != _VRMode) OnVRModeChanged(old, _VRMode);
+                if(old != _VRMode && OnVRModeChanged != null) OnVRModeChanged(old, _VRMode);
             }
         }
         public bool _VRMode = false;

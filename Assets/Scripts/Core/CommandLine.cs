@@ -13,11 +13,6 @@ namespace Core
 
         private NetworkManager netManager;
 
-        private bool ParseBoolArg(string boolParam)
-        {
-            return boolParam == "on" || boolParam == "yes" || boolParam == "1";
-        }
-
         private Dictionary<string, string> GetCommandlineArgs()
         {
 

@@ -6,7 +6,7 @@ using UnityEngine.XR.Management;
 
 public class XRControl : MonoBehaviour
 {
-    public bool enableVR = false;
+    private bool enableVR = false;
     private bool currentVR = false;
 
 

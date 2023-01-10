@@ -6,7 +6,10 @@ namespace Core
     public class ServerSettings : ScriptableObject
     {
         [Tooltip("Load and show avatars in the server window")]
-        public bool ShowAvatars;
+        public bool ShowAvatars = true;
+
+        [Tooltip("Address to listen on")]
+        public string ListenAddress = "";
 
         public const string PATH_SERVER_SETTINGS = "Settings/ServerSettings";
 
