@@ -27,23 +27,26 @@ namespace NetworkIO
         public override void OnNetworkSpawn()
         {
             m_SettingsManager = FindObjectOfType<Core.SettingsManager>();
-            m_SettingsManager.m_Client.OnAvatarChanged += RequestAvatarChange;
-
-            m_AvatarURL.OnValueChanged += OnAvatarURLChanged;
-
-            m_AvatarLoader = new AvatarObjectLoader();
-            m_AvatarLoader.OnCompleted += AvatarLoadComplete;
-            m_AvatarLoader.OnFailed += AvatarLoadFailed;
 
             this.name = this.name + "_" + OwnerClientId;
 
-            // The late-joining client's companions, or the newly joined clients.
-            if(!IsOwner)
-                // FIXME: Burst mitigation
-                StartCoroutine(ProcessLoader(m_AvatarURL.Value));
-            else
+            if(m_SettingsManager.m_Server.ShowAvatars || !IsServer || IsHost)
             {
-                RequestAvatarChange(null, m_SettingsManager.m_Client.AvatarURL);
+                m_AvatarLoader = new AvatarObjectLoader();
+                m_AvatarLoader.OnCompleted += AvatarLoadComplete;
+                m_AvatarLoader.OnFailed += AvatarLoadFailed;
+
+                m_SettingsManager.m_Client.OnAvatarChanged += RequestAvatarChange;
+                m_AvatarURL.OnValueChanged += OnAvatarURLChanged;
+
+                // The late-joining client's companions, or the newly joined clients.
+                if(!IsOwner)
+                    // FIXME: Burst mitigation
+                    StartCoroutine(ProcessLoader(m_AvatarURL.Value));
+                else
+                {
+                    RequestAvatarChange(null, m_SettingsManager.m_Client.AvatarURL);
+                }
             }
 
             m_SpawnedStandin = Instantiate(m_AvatarStandin, transform.position, transform.rotation);

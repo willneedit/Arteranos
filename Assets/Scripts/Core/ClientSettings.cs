@@ -28,7 +28,7 @@ namespace Core
                 if(old != _VRMode && OnVRModeChanged != null) OnVRModeChanged(old, _VRMode);
             }
         }
-        public bool _VRMode = false;
+        public bool _VRMode = true;
 
         public delegate void DelStringChanged(string old, string current);
         public delegate void DelBoolChanged(bool old, bool current);

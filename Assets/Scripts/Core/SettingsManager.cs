@@ -36,7 +36,7 @@ namespace Core
                 if(GetCmdArg(key, out dummy))
                     return result = true;
 
-                if(GetCmdArg("no-" + key, out dummy))
+                if(GetCmdArg("-no" + key, out dummy))
                     return result = false;
                 
                 return def;
@@ -46,21 +46,21 @@ namespace Core
             m_Server = ServerSettings.LoadSettings();
             m_Command = ScriptableObject.CreateInstance<CommandLine>();
 
-            m_Command.ParseCommandLine();
+            m_Command.GetCommandlineArgs();
 
-            if(GetCmdArg("client", out string clientip))
+            if(GetCmdArg("-client", out string clientip))
             {
                 m_Client.ServerIP = clientip;
                 m_ConnectionMode = ConnectionMode.Client;
             }
 
-            if(GetCmdArg("server", out string serverip))
+            if(GetCmdArg("-server", out string serverip))
             {
                 m_Server.ListenAddress = serverip;
                 m_ConnectionMode = ConnectionMode.Server;
             }
 
-            if(GetCmdArg("host", out string hostip))
+            if(GetCmdArg("-host", out string hostip))
             {
                 m_Server.ListenAddress = hostip;
                 m_ConnectionMode = ConnectionMode.Host;
@@ -82,7 +82,7 @@ namespace Core
             //     }
             // }
 
-            m_Client.VRMode = GetBoolArg("vr", m_Client.VRMode);
+            m_Client.VRMode = GetBoolArg("-vr", m_Client.VRMode);
 
         }
 
@@ -97,7 +97,7 @@ namespace Core
 
         private void StartNetwork()
         {
-            NetworkManager netManager = GetComponentInParent<NetworkManager>();
+            NetworkManager netManager = NetworkManager.Singleton;
             UnityTransport transport = GetComponentInParent<UnityTransport>();
 
             switch(m_ConnectionMode)

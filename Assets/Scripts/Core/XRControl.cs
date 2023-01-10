@@ -6,8 +6,7 @@ using UnityEngine.XR.Management;
 
 public class XRControl : MonoBehaviour
 {
-    private bool enableVR = false;
-    private bool currentVR = false;
+    private Core.SettingsManager m_SettingsManager = null;
 
 
     public XROrigin VRRig;
@@ -21,8 +20,7 @@ public class XRControl : MonoBehaviour
         if (XRGeneralSettings.Instance.Manager.activeLoader == null)
         {
             Debug.LogError("Initializing XR Failed. Check Editor or Player log for details.");
-            enableVR = false;
-            currentVR = false;
+            m_SettingsManager.m_Client.VRMode = false;
         }
         else
         {
@@ -45,19 +43,17 @@ public class XRControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Core.SettingsManager sm = GetComponent<Core.SettingsManager>();
-        enableVR = sm.m_Client.VRMode;
-        UpdateXROrigin(false);  // Current VR mode is initially false, to enter it if necessary.
+        m_SettingsManager = GetComponent<Core.SettingsManager>();
+        m_SettingsManager.m_Client.OnVRModeChanged += OnVRModeChanged;
+        if(m_SettingsManager.m_Client.VRMode)
+            OnVRModeChanged(false, true);
+        else
+            UpdateXROrigin(false);
     }
 
-    // Update is called once per frame
-    void Update()
+    void OnVRModeChanged(bool old, bool current)
     {
-        if (enableVR == currentVR) return;
-
-        currentVR = enableVR;
-
-        if(enableVR)
+        if(current)
             StartCoroutine(StartXRCoroutine());
         else
             StopXR();
@@ -85,7 +81,7 @@ public class XRControl : MonoBehaviour
     void OnApplicationQuit()
     {
         // Debug.Log("Bye!");
-        if(enableVR)
+        if(m_SettingsManager.m_Client.VRMode)
             StopXR();
     }
 

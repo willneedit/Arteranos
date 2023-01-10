@@ -11,12 +11,14 @@ namespace Core
     {
         public Dictionary<string, string> m_Commands = new Dictionary<string, string>();
 
-        private NetworkManager netManager;
-
-        private Dictionary<string, string> GetCommandlineArgs()
+        public Dictionary<string, string> GetCommandlineArgs()
         {
-
+#if UNITY_EDITOR
+            // DEBUG: Commandline mocking in Editor
+            string[] args = {  };
+#else
             var args = System.Environment.GetCommandLineArgs();
+#endif
 
             for (int i = 0; i < args.Length; ++i)
             {
@@ -30,14 +32,6 @@ namespace Core
                 }
             }
             return m_Commands;
-        }
-
-        public void ParseCommandLine()
-        {
-
-            if (Application.isEditor) return;
-
-            var args = GetCommandlineArgs();
         }
     }    
 }
