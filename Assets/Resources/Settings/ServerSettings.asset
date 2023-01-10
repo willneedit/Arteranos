@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da4233134ee8ad2418f8ae7a554837b7, type: 3}
   m_Name: ServerSettings
   m_EditorClassIdentifier: 
-  ShowAvatars: 0
+  ShowAvatars: 1
+  ListenAddress: 
