@@ -1,0 +1,15 @@
+
+@startuml test
+scale 2
+skin rose
+left to right direction
+actor customer
+actor clerk
+rectangle checkout {
+    customer -- (checkout)
+    (checkout) .> (payment): include
+    (help) .> (checkout): extend
+    (checkout)-- clerk
+}
+@enduml
+
