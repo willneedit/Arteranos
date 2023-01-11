@@ -39,7 +39,7 @@
         "com.unity.ugui": "1.0.0",
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "75ee1be311a2c19b3ccddffcdcdb3a78ffac3544"
+      "hash": "f46be429c5d1deb2256af4256fe0ebb2876f7b3a"
     },
     "com.unity.burst": {
       "version": "1.7.3",
