@@ -1,0 +1,30 @@
+
+@startuml components
+    skin rose
+
+    [Viewer\n(Client)] as V
+
+    component "Cloud Storage" {
+        [World\nRepository] as WR
+        port "HTTP(s)" as WR_HTTP
+        WR <-- WR_HTTP
+    }
+    
+    component "World Server" {
+        database {
+            [User\ndatabase] as DB
+        }
+        [World Server\nCore] as WS
+
+        WS --> DB
+        port UDP as WS_UDP
+        port "HTTP(s)" as WS_HTTP
+        WS <-up- WS_UDP
+        WS <-right- WS_HTTP
+    }
+
+    V --> WR_HTTP
+    V --> WS_UDP
+    V --> WS_HTTP
+@enduml
+
