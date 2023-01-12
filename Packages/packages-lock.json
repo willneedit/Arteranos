@@ -20,7 +20,7 @@
         "com.unity.ugui": "1.0.0",
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "976616a2c317b90cbdc37257b34c465090458c18"
+      "hash": "bb129211f764afd468a5e11efbc962d5d47c0f5b"
     },
     "com.readyplayerme.core": {
       "version": "https://github.com/readyplayerme/Unity-core.git",
@@ -29,7 +29,7 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "2b68378f03b63fc9c746361ea915252d2658bdb1"
+      "hash": "4d9639389fabd51f626a51252944d1efdfbbef23"
     },
     "com.readyplayerme.webview": {
       "version": "https://github.com/readyplayerme/Unity-WebView.git#develop",
