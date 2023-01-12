@@ -335,7 +335,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3840780144436917895}
   - component: {fileID: 3840780144436917893}
-  - component: {fileID: 3840780144436917892}
+  - component: {fileID: 4035745600613239697}
   m_Layer: 0
   m_Name: _SceneEssentials
   m_TagString: Untagged
@@ -377,7 +377,7 @@ MonoBehaviour:
   LogLevel: 1
   NetworkConfig:
     ProtocolVersion: 0
-    NetworkTransport: {fileID: 3840780144436917892}
+    NetworkTransport: {fileID: 4035745600613239697}
     PlayerPrefab: {fileID: 2697617456504013145, guid: b745e62fc4808b74baf190b21ef2b9e4,
       type: 3}
     NetworkPrefabs: []
@@ -396,7 +396,7 @@ MonoBehaviour:
     LoadSceneTimeOut: 120
     SpawnTimeout: 1
     EnableNetworkLogs: 1
---- !u!114 &3840780144436917892
+--- !u!114 &4035745600613239697
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -405,24 +405,71 @@ MonoBehaviour:
   m_GameObject: {fileID: 3840780144436917897}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6960e84d07fb87f47956e7a81d71c4e6, type: 3}
+  m_Script: {fileID: 11500000, guid: e07b4f9ecc2b4fe4eb3a8bf5175b2a7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ProtocolType: 0
-  m_MaxPacketQueueSize: 128
-  m_MaxPayloadSize: 6144
-  m_HeartbeatTimeoutMS: 500
-  m_ConnectTimeoutMS: 1000
-  m_MaxConnectAttempts: 60
-  m_DisconnectTimeoutMS: 30000
-  ConnectionData:
-    Address: 127.0.0.1
-    Port: 7777
-    ServerListenAddress: 
-  DebugSimulator:
-    PacketDelayMS: 0
-    PacketJitterMS: 0
-    PacketDropRate: 0
+  ConnectAddress: 127.0.0.1
+  Port: 7777
+  TransportBufferSize: 8192
+  LogLevel: 1
+  EnableSyncronizationEvent: 0
+  EnableSyncronizedCallbacks: 0
+  EventQueueSize: 8192
+  ProcessingQueueSize: 8192
+  HeapPointersPoolSize: 1024
+  HeapMemoryPoolSize: 1024
+  MemoryWrapperPoolSize: 1024
+  ChannelPoolSize: 1024
+  PooledChannels: -1
+  UseIPv6Dual: 1
+  AllowUnconnectedMessages: 0
+  AllowBroadcasts: 0
+  EnableAckNotifications: 0
+  LogicDelay: 50
+  ReuseChannels: 1
+  LogicThreads: 1
+  SocketThreads: 1
+  ProcessingThreads: 0
+  MaxMergeMessageSize: 1024
+  MaxMergeDelay: 15
+  EnableMergedAcks: 1
+  MergedAckBytes: 8
+  MaximumMTU: 4096
+  MinimumMTU: 512
+  EnablePathMTU: 1
+  MaxMTUAttempts: 8
+  MTUAttemptDelay: 1000
+  MTUGrowthFactor: 1.25
+  MaxFragments: 512
+  MaxBufferSize: 5120
+  HandshakeTimeout: 20000
+  ConnectionTimeout: 20000
+  HeartbeatDelay: 5000
+  HandshakeResendDelay: 500
+  MaxHandshakeResends: 20
+  ConnectionRequestMinResendDelay: 500
+  MaxConnectionRequestResends: 5
+  ConnectionRequestTimeout: 5000
+  ChallengeDifficulty: 20
+  ConnectionChallengeHistory: 2048
+  ConnectionChallengeTimeWindow: 300
+  TimeBasedConnectionChallenge: 1
+  AmplificationPreventionHandshakePadding: 512
+  ReliabilityWindowSize: 512
+  ReliableAckFlowWindowSize: 1024
+  ReliabilityMaxResendAttempts: 30
+  ReliabilityResendRoundtripMultiplier: 1.2
+  ReliabilityMinPacketResendDelay: 100
+  ReliabilityMinAckResendDelay: 100
+  UseSimulator: 0
+  DropPercentage: 0.1
+  MaxLatency: 100
+  MinLatency: 30
+  EnableHeartbeats: 1
+  EnableTimeouts: 1
+  EnableChannelUpdates: 1
+  EnableConnectionRequestResends: 1
+  EnablePacketMerging: 1
 --- !u!1 &3840780145527097116
 GameObject:
   m_ObjectHideFlags: 0
@@ -468,7 +515,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 143bbda5891809f4586a562d9feeb515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enableVR: 0
   VRRig: {fileID: 6826848587015489432, guid: db551c4eeae27cd4990850962a0520c1, type: 3}
   NoVRRig: {fileID: 7141498048079031363, guid: f377d58bd7dad7d40ad2d131fe5d1cc7, type: 3}
 --- !u!114 &800188666929888847

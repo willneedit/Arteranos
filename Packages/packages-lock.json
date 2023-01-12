@@ -12,6 +12,13 @@
       },
       "hash": "76f76584a113b240a4ec11f324b17302bde9a53a"
     },
+    "com.community.netcode.transport.ruffles": {
+      "version": "https://github.com/Unity-Technologies/multiplayer-community-contributions.git?path=/Transports/com.community.netcode.transport.ruffles",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "c7246c713392424c1388fd516f2c6a1debaea14d"
+    },
     "com.readyplayerme.avatarloader": {
       "version": "https://github.com/readyplayerme/Unity-Avatar-Loader.git#develop",
       "depth": 0,

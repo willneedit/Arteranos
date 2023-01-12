@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
+
+using Netcode.Transports.Ruffles;
 
 namespace Core
 {
@@ -98,20 +99,20 @@ namespace Core
         private void StartNetwork()
         {
             NetworkManager netManager = NetworkManager.Singleton;
-            UnityTransport transport = GetComponentInParent<UnityTransport>();
+            RufflesTransport transport = GetComponentInParent<RufflesTransport>();
 
             switch(m_ConnectionMode)
             {
                 case ConnectionMode.Server:
-                    transport.ConnectionData.ServerListenAddress = m_Server.ListenAddress;
+                    transport.ConnectAddress = m_Server.ListenAddress;
                     netManager.StartServer();
                     break;
                 case ConnectionMode.Host:
-                    transport.ConnectionData.ServerListenAddress = m_Server.ListenAddress;
+                    transport.ConnectAddress = m_Server.ListenAddress;
                     netManager.StartHost();
                     break;
                 case ConnectionMode.Client:
-                    transport.ConnectionData.Address = m_Client.ServerIP;
+                    transport.ConnectAddress = m_Client.ServerIP;
                     netManager.StartClient();
                     break;
             }

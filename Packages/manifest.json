@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git#v5.0.0",
+    "com.community.netcode.transport.ruffles": "https://github.com/Unity-Technologies/multiplayer-community-contributions.git?path=/Transports/com.community.netcode.transport.ruffles",
     "com.readyplayerme.avatarloader": "https://github.com/readyplayerme/Unity-Avatar-Loader.git#develop",
     "com.readyplayerme.core": "https://github.com/readyplayerme/Unity-core.git",
     "com.readyplayerme.webview": "https://github.com/readyplayerme/Unity-WebView.git#develop",

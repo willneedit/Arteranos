@@ -28,3 +28,25 @@
     V --> WS_HTTP
 @enduml
 
+@startuml Movement_Pose_Seq
+    skin rose
+    participant User as "User input\ndevice"
+    participant c1 as "User's\nClient"
+    participant c2 as "Other's\nClients"
+    participant Server as "World\nServer"
+
+    User ->> c1 ++ : movement
+    note left of c1 #ff8888 : Need low \nlatency !
+
+    c1 -> c1 ++ : movement
+    note left of c1 : precompute IK\nfor complete pose
+    return  complete\npose
+    c1 ->> Server ++ : Avatar pose\nchange
+    deactivate c1
+
+    note left of Server : Announce user's\nmovement
+    Server ->> c2 ++ : Pose propagation
+    deactivate Server
+
+    c2 -> c2 : Update
+@enduml
