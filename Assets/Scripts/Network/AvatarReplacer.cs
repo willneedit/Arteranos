@@ -7,6 +7,7 @@ using System;
 
 #if true
 
+using DitzelGames.FastIK;
 using ReadyPlayerMe.AvatarLoader;
 
 namespace NetworkIO
@@ -88,6 +89,42 @@ namespace NetworkIO
             m_AvatarLoader.LoadAvatar(current.ToString());
         }
 
+        Transform FindRecursive(Transform t, string name)
+        {
+            if(t.name == name) return t;
+
+            for(int i = 0, c = t.childCount; i<c; i++)
+            {
+                Transform res = FindRecursive(t.GetChild(i), name);
+                if(res != null) return res;
+            }
+
+            return null;
+        }
+
+        GameObject RigIK(GameObject avatar, string limb)
+        {
+
+            Transform lHand = FindRecursive(avatar.transform, limb);
+            if(lHand == null)
+            {
+                Debug.LogWarning($"Missing limb: {0}", lHand);
+                return null;
+            }
+
+            GameObject handle = new GameObject("Handle_" + limb);
+            handle.transform.SetPositionAndRotation(lHand.position, lHand.rotation);
+
+            avatar.SetActive(false);
+            FastIKFabric lHandIK = lHand.gameObject.AddComponent<FastIKFabric>();
+
+            lHandIK.ChainLength = 2;
+            lHandIK.Target = handle.transform;
+            avatar.SetActive(true);
+
+            return handle;
+        }
+
         void AvatarLoadComplete(object sender, CompletionEventArgs args)
         {
             Debug.Log("Successfully loaded avatar");
@@ -101,6 +138,12 @@ namespace NetworkIO
 
             args.Avatar.name += args.Avatar.name + "_" + OwnerClientId;
             args.Avatar.transform.SetParent(transform);
+
+            if(!IsOwner) return;
+
+            GameObject lHand = RigIK(args.Avatar, "LeftHand");
+            GameObject rHand = RigIK(args.Avatar, "RightHand");
+
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)
