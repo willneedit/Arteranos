@@ -114,6 +114,7 @@ namespace NetworkIO
 
             GameObject handle = new GameObject("Handle_" + limb);
             handle.transform.SetPositionAndRotation(lHand.position, lHand.rotation);
+            handle.transform.SetParent(avatar.transform.parent);
 
             avatar.SetActive(false);
             FastIKFabric lHandIK = lHand.gameObject.AddComponent<FastIKFabric>();
