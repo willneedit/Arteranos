@@ -50,3 +50,49 @@
 
     c2 -> c2 : Update
 @enduml
+
+@startuml user_database
+
+    enum blocked_reason {
+        unspecified
+        harassment
+        illegal_content
+        griefing
+        other
+    }
+
+    enum acct_status {
+        active
+        banned
+    }
+
+    object users {
+        -guid id <b>key</b>
+        -string username
+        -string password
+        -acct_status status
+        +string nickname
+        +string avatarURL
+        -blob preferences
+    }
+
+    object friends {
+        -guid id <b>key</b>
+        #guid other_id
+        #timestamp last_seen
+    }
+
+    object blocking {
+        -guid id <b>key</b>
+        #guid blocking_id
+        #blocked_reason reason
+        #string reason2
+    }
+
+    users::id "1" --> "n" friends::other_id 
+    users::id "1" --> "n" blocking::other_id 
+
+    note "Associations must\nbe symmetrical" as N1
+    N1 .. friends
+
+@enduml

@@ -7,8 +7,20 @@ namespace Core
     {
         [Tooltip("Server to connect to")]
         public string ServerIP = "127.0.0.1";
-    
+
+        [SerializeField]
         [Tooltip("Complete URL or the RPM avatar shorthand")]
+        private string _AvatarURL = "https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb";
+
+        [SerializeField]
+        [Tooltip("VR enabled by default")]
+        private bool _VRMode = true;
+
+        public d_VarChanged<string> OnAvatarChanged;
+        public d_VarChanged<bool> OnVRModeChanged;
+
+        public delegate void d_VarChanged<T>(T old, T current);
+
         public string AvatarURL {
             get => _AvatarURL;
             set {
@@ -17,9 +29,7 @@ namespace Core
                 if(old != _AvatarURL && OnAvatarChanged != null) OnAvatarChanged(old, _AvatarURL);
             }
         }
-        public string _AvatarURL = "https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb";
 
-        [Tooltip("VR enabled by default")]
         public bool VRMode {
             get => _VRMode;
             set {
@@ -28,13 +38,6 @@ namespace Core
                 if(old != _VRMode && OnVRModeChanged != null) OnVRModeChanged(old, _VRMode);
             }
         }
-        public bool _VRMode = true;
-
-        public delegate void DelStringChanged(string old, string current);
-        public delegate void DelBoolChanged(bool old, bool current);
-
-        public DelStringChanged OnAvatarChanged;
-        public DelBoolChanged OnVRModeChanged;
 
         public const string PATH_CLIENT_SETTINGS = "Settings/ClientSettings";
 
