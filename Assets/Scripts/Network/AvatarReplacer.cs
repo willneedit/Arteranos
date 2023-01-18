@@ -9,6 +9,7 @@ using System;
 
 using DitzelGames.FastIK;
 using ReadyPlayerMe.AvatarLoader;
+using Arteranos.ExtensionMethods;
 
 namespace Arteranos.NetworkIO
 {
@@ -88,23 +89,10 @@ namespace Arteranos.NetworkIO
             m_AvatarLoader.LoadAvatar(current.ToString());
         }
 
-        Transform FindRecursive(Transform t, string name)
-        {
-            if(t.name == name) return t;
-
-            for(int i = 0, c = t.childCount; i<c; i++)
-            {
-                Transform res = FindRecursive(t.GetChild(i), name);
-                if(res != null) return res;
-            }
-
-            return null;
-        }
-
         GameObject RigIK(GameObject avatar, string limb)
         {
 
-            Transform lHand = FindRecursive(avatar.transform, limb);
+            Transform lHand = avatar.transform.FindRecursive(limb);
             if(lHand == null)
             {
                 Debug.LogWarning($"Missing limb: {0}", lHand);

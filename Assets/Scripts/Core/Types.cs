@@ -60,3 +60,22 @@ public class TrackedPose {
     public NetworkTrackedBone rightHand;
 
 }
+
+namespace Arteranos.ExtensionMethods
+{
+    public static class ExtendTransform
+    {
+        public static Transform FindRecursive(this Transform t, string name)
+        {
+            if(t.name == name) return t;
+
+            for(int i = 0, c = t.childCount; i<c; i++)
+            {
+                Transform res = FindRecursive(t.GetChild(i), name);
+                if(res != null) return res;
+            }
+
+            return null;
+        }
+    }
+}
