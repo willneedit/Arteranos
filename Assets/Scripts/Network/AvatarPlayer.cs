@@ -9,7 +9,6 @@ namespace Arteranos.NetworkIO
 
     public class AvatarPlayer : NetworkBehaviour
     {
-        public NetworkTrackedBone _self = new NetworkTrackedBone();
         public XROrigin Controller;
 
         public override void OnNetworkSpawn()
@@ -17,28 +16,18 @@ namespace Arteranos.NetworkIO
 
         }
 
-        [ServerRpc]
-        public void UpdateCurrentPositionServerRpc(Vector3 position, Quaternion rotation, ServerRpcParams rpcParams = default)
-        {
-            _self.SetPositionAndRotation(position, rotation);
-        }
-
         void Update()
         {
-            if (IsOwner && Controller == null)
-                Controller = FindObjectOfType<XROrigin>();
+            if(!IsOwner) return;
 
-            // For the others, update their transforms with the server's data.
-            if(!IsOwner)
-                transform.SetPositionAndRotation(_self.position, _self.rotation);
+            // Could drop to null b/c VR/2D transition
+            if (Controller == null)
+                Controller = FindObjectOfType<XROrigin>();
 
             if (Controller == null)
                 return;
 
-            // Propagate the movement information to the server....            
-            UpdateCurrentPositionServerRpc(Controller.transform.position, Controller.transform.rotation);
-
-            // For the own avatar, copy the pose to the avatar rig.
+            // Own avatar get copied from the controller, alien avatars by NetworkTransform.
             transform.SetPositionAndRotation(Controller.transform.position, Controller.transform.rotation);
             
         }
