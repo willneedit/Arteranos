@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Core
+namespace Arteranos.Core
 {
     [CreateAssetMenu(fileName = "ClientSettings", menuName = "Scriptable Objects/Application/Client Settings", order = 1)]
     public class ClientSettings : ScriptableObject

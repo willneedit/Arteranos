@@ -4,7 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.XR;
 
-namespace NetworkIO
+namespace Arteranos.NetworkIO
 {
     public class AvatarManager : MonoBehaviour
     {

@@ -6,7 +6,7 @@ using UnityEngine.XR.Management;
 
 public class XRControl : MonoBehaviour
 {
-    private Core.SettingsManager m_SettingsManager = null;
+    private Arteranos.Core.SettingsManager m_SettingsManager = null;
 
 
     public XROrigin VRRig;
@@ -43,7 +43,7 @@ public class XRControl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        m_SettingsManager = GetComponent<Core.SettingsManager>();
+        m_SettingsManager = GetComponent<Arteranos.Core.SettingsManager>();
         m_SettingsManager.m_Client.OnVRModeChanged += OnVRModeChanged;
         if(m_SettingsManager.m_Client.VRMode)
             OnVRModeChanged(false, true);

@@ -5,7 +5,7 @@ using Unity.Netcode;
 
 using Netcode.Transports.Ruffles;
 
-namespace Core
+namespace Arteranos.Core
 {
     public class SettingsManager : MonoBehaviour
     {

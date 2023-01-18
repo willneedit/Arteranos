@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.XR;
 using System;
 
-namespace Core
+namespace Arteranos.Core
 {
     public class CommandLine : ScriptableObject
     {

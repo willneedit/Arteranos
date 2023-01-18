@@ -10,24 +10,23 @@ using System;
 using DitzelGames.FastIK;
 using ReadyPlayerMe.AvatarLoader;
 
-namespace NetworkIO
+namespace Arteranos.NetworkIO
 {
     public class AvatarReplacer : NetworkBehaviour
     {
 
         public NetworkVariable<FixedString512Bytes> m_AvatarURL;
         public GameObject m_AvatarStandin = null;
-        public GameObject m_AvatarObject = null;
         private bool loading = false;
 
         private GameObject m_SpawnedStandin = null;
         private AvatarObjectLoader m_AvatarLoader = null;
-        private Core.SettingsManager m_SettingsManager = null;
+        private Arteranos.Core.SettingsManager m_SettingsManager = null;
 
 
         public override void OnNetworkSpawn()
         {
-            m_SettingsManager = FindObjectOfType<Core.SettingsManager>();
+            m_SettingsManager = FindObjectOfType<Arteranos.Core.SettingsManager>();
 
             this.name = this.name + "_" + OwnerClientId;
 

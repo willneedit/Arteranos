@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 using System;
 using Unity.XR.CoreUtils;
 
-namespace NetworkIO
+namespace Arteranos.NetworkIO
 {
 
     public class AvatarPlayer : NetworkBehaviour
