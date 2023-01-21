@@ -1,9 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using Unity.Collections;
-using System;
 
 #if true
 
@@ -23,6 +21,10 @@ namespace Arteranos.NetworkIO
         private GameObject m_SpawnedStandin = null;
         private AvatarObjectLoader m_AvatarLoader = null;
         private Arteranos.Core.SettingsManager m_SettingsManager = null;
+
+        public GameObject m_LeftHand = null;
+        public GameObject m_RightHand = null;
+        public GameObject m_CenterEye = null;
 
 
         public override void OnNetworkSpawn()
@@ -125,12 +127,21 @@ namespace Arteranos.NetworkIO
             }
 
             args.Avatar.name += args.Avatar.name + "_" + OwnerClientId;
-            args.Avatar.transform.SetParent(transform);
+            Transform rootTransform = args.Avatar.transform;
+            rootTransform.SetParent(transform);
 
             if(!IsOwner) return;
 
-            GameObject lHand = RigIK(args.Avatar, "LeftHand");
-            GameObject rHand = RigIK(args.Avatar, "RightHand");
+            m_LeftHand = RigIK(args.Avatar, "LeftHand");
+            m_RightHand = RigIK(args.Avatar, "RightHand");
+
+            Transform rEye = rootTransform.FindRecursive("RightEye");
+            Transform lEye = rootTransform.FindRecursive("LeftEye");
+            Vector3 cEyePos = (lEye.position + rEye.position) / 2;
+
+            m_CenterEye = new GameObject("Handle_centerEye");
+            m_CenterEye.transform.SetPositionAndRotation(cEyePos, rEye.rotation);
+            m_CenterEye.transform.SetParent(rootTransform.parent);
 
         }
 
