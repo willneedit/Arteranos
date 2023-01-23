@@ -31,12 +31,12 @@ namespace Arteranos.NetworkIO
             Vector3 cEyeOffset = m_AvatarData.m_CenterEye.transform.position - m_Camera.position;
 
             // FIXME: Hand rotation, 90° on the local X.
-            if(m_LeftHand)
+            if(m_LeftHand && m_AvatarData.m_LeftHand)
                 m_AvatarData.m_LeftHand.transform.SetPositionAndRotation(
                         m_LeftHand.position + cEyeOffset,
                         m_LeftHand.rotation);
             
-            if(m_RightHand)
+            if(m_RightHand && m_RightHand)
                 m_AvatarData.m_RightHand.transform.SetPositionAndRotation(
                         m_RightHand.position +cEyeOffset,
                         m_RightHand.rotation);
@@ -53,6 +53,10 @@ namespace Arteranos.NetworkIO
                 m_LeftHand = m_Controller.transform.FindRecursive("LeftHand Controller");
                 m_RightHand = m_Controller.transform.FindRecursive("RightHand Controller");
                 m_Camera = m_Controller.transform.FindRecursive("_AvatarView");
+
+                // FIXME: 2D controller, handedness
+                if(m_RightHand == null)
+                    m_Controller.transform.FindRecursive("OneHand Controller");
             }
 
             if (m_Controller == null)
