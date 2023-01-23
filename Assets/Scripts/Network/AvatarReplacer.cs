@@ -18,13 +18,14 @@ namespace Arteranos.NetworkIO
         public GameObject m_AvatarStandin = null;
         private bool loading = false;
 
-        private GameObject m_SpawnedStandin = null;
+        private GameObject m_AvatarGameObject = null;
         private AvatarObjectLoader m_AvatarLoader = null;
         private Arteranos.Core.SettingsManager m_SettingsManager = null;
 
         public GameObject m_LeftHand = null;
         public GameObject m_RightHand = null;
         public GameObject m_CenterEye = null;
+        public GameObject m_Head = null;
 
 
         public override void OnNetworkSpawn()
@@ -52,8 +53,8 @@ namespace Arteranos.NetworkIO
                 }
             }
 
-            m_SpawnedStandin = Instantiate(m_AvatarStandin, transform.position, transform.rotation);
-            m_SpawnedStandin.transform.SetParent(transform);
+            m_AvatarGameObject = Instantiate(m_AvatarStandin, transform.position, transform.rotation);
+            m_AvatarGameObject.transform.SetParent(transform);
         }
 
         public override void OnNetworkDespawn()
@@ -91,25 +92,51 @@ namespace Arteranos.NetworkIO
             m_AvatarLoader.LoadAvatar(current.ToString());
         }
 
-        GameObject RigIK(GameObject avatar, string limb)
+        GameObject RigNetworkIK(GameObject avatar, string limb, int bones = 2)
         {
-
-            Transform lHand = avatar.transform.FindRecursive(limb);
-            if(lHand == null)
+            GameObject handle = null;
+    
+            Transform limbT = avatar.transform.FindRecursive(limb);
+            if(limbT == null)
             {
-                Debug.LogWarning($"Missing limb: {0}", lHand);
+                Debug.LogWarning($"Missing limb: {limb}");
                 return null;
             }
 
-            GameObject handle = new GameObject("Handle_" + limb);
-            handle.transform.SetPositionAndRotation(lHand.position, lHand.rotation);
-            handle.transform.SetParent(avatar.transform.parent);
-
             avatar.SetActive(false);
-            FastIKFabric lHandIK = lHand.gameObject.AddComponent<FastIKFabric>();
 
-            lHandIK.ChainLength = 2;
-            lHandIK.Target = handle.transform;
+            // Owner is setting up the IK and the puppet handles...
+            if(IsOwner)
+            {
+                handle = new GameObject("Handle_" + limb);
+                handle.transform.SetPositionAndRotation(limbT.position, limbT.rotation);
+                handle.transform.SetParent(avatar.transform.parent);
+
+                FastIKFabric limbIK = limbT.gameObject.AddComponent<FastIKFabric>();
+
+                limbIK.ChainLength = bones;
+                limbIK.Target = handle.transform;
+            }
+
+            // ...and everyone has to set up the ClientNetworkTransform,
+            // the owner as the sender, everyone else the receiver.
+            Transform boneT = limbT;
+            for(int i=0; i<=bones; i++)
+            {
+                ClientNetworkTransform netT = boneT.gameObject.AddComponent<Arteranos.NetworkIO.ClientNetworkTransform>();
+
+                // In the body, the joints would rotate unless breaks them, of course.
+                netT.SyncPositionX = false;
+                netT.SyncPositionY = false;
+                netT.SyncPositionZ = false;
+                netT.SyncScaleX = false;
+                netT.SyncScaleY = false;
+                netT.SyncScaleZ = false;
+                netT.InLocalSpace = true;
+
+                boneT = boneT.parent;
+            }
+
             avatar.SetActive(true);
 
             return handle;
@@ -120,28 +147,26 @@ namespace Arteranos.NetworkIO
             Debug.Log("Successfully loaded avatar");
             loading = false;
 
-            if(m_SpawnedStandin != null)
-            {
-                Destroy(m_SpawnedStandin);
-                m_SpawnedStandin = null;
-            }
+            if(this.m_AvatarGameObject != null)
+                Destroy(this.m_AvatarGameObject);
 
-            args.Avatar.name += args.Avatar.name + "_" + OwnerClientId;
-            Transform rootTransform = args.Avatar.transform;
-            rootTransform.SetParent(transform);
+            m_AvatarGameObject = args.Avatar;
+            Transform agot = m_AvatarGameObject.transform;
 
-            if(!IsOwner) return;
+            m_AvatarGameObject.name += m_AvatarGameObject.name + "_" + OwnerClientId;
+            agot.SetParent(transform);
 
-            m_LeftHand = RigIK(args.Avatar, "LeftHand");
-            m_RightHand = RigIK(args.Avatar, "RightHand");
+            m_LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand");
+            m_RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand");
+            m_Head = RigNetworkIK(m_AvatarGameObject, "Head", 1);
 
-            Transform rEye = rootTransform.FindRecursive("RightEye");
-            Transform lEye = rootTransform.FindRecursive("LeftEye");
+            Transform rEye = agot.FindRecursive("RightEye");
+            Transform lEye = agot.FindRecursive("LeftEye");
             Vector3 cEyePos = (lEye.position + rEye.position) / 2;
 
             m_CenterEye = new GameObject("Handle_centerEye");
             m_CenterEye.transform.SetPositionAndRotation(cEyePos, rEye.rotation);
-            m_CenterEye.transform.SetParent(rootTransform.parent);
+            m_CenterEye.transform.SetParent(agot.parent);
 
         }
 
