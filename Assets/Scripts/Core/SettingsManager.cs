@@ -16,8 +16,8 @@ namespace Arteranos.Core
             Host
         }
 
-        public ClientSettings m_Client;
-        public ServerSettings m_Server;
+        public ClientSettings m_Client { get; internal set; }
+        public ServerSettings m_Server { get; internal set; }
         private CommandLine m_Command;
 
         private ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
