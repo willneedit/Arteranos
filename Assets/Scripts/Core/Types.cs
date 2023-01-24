@@ -2,67 +2,11 @@ using Unity.Netcode;
 using UnityEngine;
 using System;
 
-[Serializable]
-public class NetworkTrackedBone : NetworkVariableBase {
-    [SerializeField]
-    private Vector3 _position = Vector3.zero;
-
-    [SerializeField]
-    private Quaternion _rotation = Quaternion.identity;
-
-    public Vector3 position {
-        get => _position;
-        set { _position = value; SetDirty(true); }
-    }
-
-    public Quaternion rotation {
-        get => _rotation;
-        set { _rotation = value; SetDirty(true); }
-    }
-
-    public override void WriteField(FastBufferWriter writer)
-    {
-        writer.WriteValueSafe(_position);
-        writer.WriteValueSafe(_rotation);
-    }
-
-    public override void ReadField(FastBufferReader reader)
-    {
-        reader.ReadValueSafe(out _position);
-        reader.ReadValueSafe(out _rotation);
-    }
-
-    public override void WriteDelta(FastBufferWriter writer)
-    {
-        writer.WriteValueSafe(_position);
-        writer.WriteValueSafe(_rotation);
-    }
-
-    public override void ReadDelta(FastBufferReader reader, bool keepDirtyDelta)
-    {
-        reader.ReadValueSafe(out _position);
-        reader.ReadValueSafe(out _rotation);
-    }
-
-    public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
-    {
-        this._position = position;
-        this._rotation = rotation;
-        SetDirty(true);
-    }
-
-}
-
-[Serializable]
-public class TrackedPose {
-    public NetworkTrackedBone _self;
-    public NetworkTrackedBone leftHand;
-    public NetworkTrackedBone rightHand;
-
-}
 
 namespace Arteranos.ExtensionMethods
 {
+    using Arteranos.NetworkIO;
+
     public static class ExtendTransform
     {
         public static Transform FindRecursive(this Transform t, string name)
@@ -76,6 +20,83 @@ namespace Arteranos.ExtensionMethods
             }
 
             return null;
+        }
+    }
+
+    public static class ExtendNetworkGuid
+    {
+        
+        public static NetworkGuid ToNetworkGuid(this Guid id)
+        {
+            var networkId = new NetworkGuid();
+            networkId.FirstHalf = BitConverter.ToUInt64(id.ToByteArray(), 0);
+            networkId.SecondHalf = BitConverter.ToUInt64(id.ToByteArray(), 0);
+            return networkId;
+        }
+
+        public static Guid ToGuid(this NetworkGuid networkId)
+        {
+            var bytes = new byte[16];
+            Buffer.BlockCopy(BitConverter.GetBytes(networkId.FirstHalf), 0, bytes, 0, 8);
+            Buffer.BlockCopy(BitConverter.GetBytes(networkId.SecondHalf), 0, bytes, 8, 8);
+            return new Guid(bytes);
+        }
+
+    }
+    public static class ExtendNetworkRotation
+    {
+        public static NetworkRotation ToNetworkRotation(this Quaternion q)
+        {
+            Vector3 euler = q.eulerAngles;
+
+            var networkRot = new NetworkRotation();
+            networkRot.X = (Int16) (euler.x * 64);
+            networkRot.Y = (Int16) (euler.y * 64);
+            networkRot.Z = (Int16) (euler.z * 64);
+            return networkRot;
+        }
+
+        public static Quaternion ToQuaternion(this NetworkRotation networkRot)
+        {
+            return Quaternion.Euler(
+                ((float) networkRot.X) / 64.0f,
+                ((float) networkRot.Y) / 64.0f,
+                ((float) networkRot.Z) / 64.0f
+            );
+        }
+
+    }
+
+}
+
+namespace Arteranos.NetworkIO
+{
+    public class NetworkGuid : INetworkSerializable
+    {
+        public ulong FirstHalf;
+        public ulong SecondHalf;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref FirstHalf);
+            serializer.SerializeValue(ref SecondHalf);
+        }
+    }
+
+    /// <summary>
+    /// Represents a set of Euler angles down to six bytes payload, precision of the 1/64th of degree.
+    /// </summary>
+    public class NetworkRotation : INetworkSerializable
+    {
+        public Int16 X;
+        public Int16 Y;
+        public Int16 Z;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref X);
+            serializer.SerializeValue(ref Y);
+            serializer.SerializeValue(ref Z);
         }
     }
 }
