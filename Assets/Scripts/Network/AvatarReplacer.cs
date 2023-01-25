@@ -1,20 +1,19 @@
 using System.Collections;
 using UnityEngine;
-using Unity.Netcode;
 using Unity.Collections;
-
-#if true
 
 using DitzelGames.FastIK;
 using ReadyPlayerMe.AvatarLoader;
 using Arteranos.ExtensionMethods;
 
+using Mirror;
+
 namespace Arteranos.NetworkIO
 {
     public class AvatarReplacer : NetworkBehaviour
     {
-
-        public NetworkVariable<FixedString512Bytes> m_AvatarURL;
+        [SyncVar(hook = nameof(OnAvatarURLChanged))]
+        public string m_AvatarURL;
         public GameObject m_AvatarStandin = null;
         private bool loading = false;
 
@@ -28,25 +27,24 @@ namespace Arteranos.NetworkIO
         public GameObject m_Head = null;
 
 
-        public override void OnNetworkSpawn()
+        public override void OnStartClient()
         {
             m_SettingsManager = FindObjectOfType<Arteranos.Core.SettingsManager>();
 
-            this.name = this.name + "_" + OwnerClientId;
+            this.name = this.name + "_" + netIdentity;
 
-            if(m_SettingsManager.m_Server.ShowAvatars || !IsServer || IsHost)
+            if(m_SettingsManager.m_Server.ShowAvatars || !isServer || isLocalPlayer)
             {
                 m_AvatarLoader = new AvatarObjectLoader();
                 m_AvatarLoader.OnCompleted += AvatarLoadComplete;
                 m_AvatarLoader.OnFailed += AvatarLoadFailed;
 
                 m_SettingsManager.m_Client.OnAvatarChanged += RequestAvatarChange;
-                m_AvatarURL.OnValueChanged += OnAvatarURLChanged;
 
                 // The late-joining client's companions, or the newly joined clients.
-                if(!IsOwner)
+                if(!isOwned)
                     // FIXME: Burst mitigation
-                    StartCoroutine(ProcessLoader(m_AvatarURL.Value));
+                    StartCoroutine(ProcessLoader(m_AvatarURL));
                 else
                 {
                     RequestAvatarChange(null, m_SettingsManager.m_Client.AvatarURL);
@@ -55,28 +53,30 @@ namespace Arteranos.NetworkIO
 
             m_AvatarGameObject = Instantiate(m_AvatarStandin, transform.position, transform.rotation);
             m_AvatarGameObject.transform.SetParent(transform);
+
+            base.OnStartClient();
         }
 
-        public override void OnNetworkDespawn()
+        public override void OnStopClient()
         {
             m_SettingsManager.m_Client.OnAvatarChanged -= RequestAvatarChange;
-            base.OnNetworkDespawn();
+            base.OnStopClient();
         }
 
         public void RequestAvatarChange(string old, string current)
         {
-            if(current == m_AvatarURL.Value) return;
+            if(current == m_AvatarURL) return;
 
             UpdateAvatarServerRpc(current);
         }
 
-        [ServerRpc]
-        private void UpdateAvatarServerRpc(FixedString512Bytes avatarURL, ServerRpcParams rpcParams = default)
+        [Command]
+        private void UpdateAvatarServerRpc(string avatarURL)
         {
-            m_AvatarURL.Value = avatarURL;
+            m_AvatarURL = avatarURL;
         }
 
-        void OnAvatarURLChanged(FixedString512Bytes old, FixedString512Bytes current)
+        void OnAvatarURLChanged(string old, string current)
         {
             if(loading) return;
 
@@ -84,7 +84,7 @@ namespace Arteranos.NetworkIO
             StartCoroutine(ProcessLoader(current));
         }
 
-        IEnumerator ProcessLoader(FixedString512Bytes current)
+        IEnumerator ProcessLoader(string current)
         {
             Debug.Log("Starting avatar loading: " + current);
             yield return null;
@@ -106,7 +106,7 @@ namespace Arteranos.NetworkIO
             avatar.SetActive(false);
 
             // Owner is setting up the IK and the puppet handles...
-            if(IsOwner)
+            if(isOwned)
             {
                 handle = new GameObject("Handle_" + limb);
                 handle.transform.SetPositionAndRotation(limbT.position, limbT.rotation);
@@ -118,21 +118,11 @@ namespace Arteranos.NetworkIO
                 limbIK.Target = handle.transform;
             }
 
-            // ...and everyone has to set up the ClientNetworkTransform,
-            // the owner as the sender, everyone else the receiver.
+            // Owned and alien avatars have to set up the Skeleton IK data record.
             Transform boneT = limbT;
             for(int i=0; i<=bones; i++)
             {
-                ClientNetworkTransform netT = boneT.gameObject.AddComponent<Arteranos.NetworkIO.ClientNetworkTransform>();
-
-                // In the body, the joints would rotate unless breaks them, of course.
-                netT.SyncPositionX = false;
-                netT.SyncPositionY = false;
-                netT.SyncPositionZ = false;
-                netT.SyncScaleX = false;
-                netT.SyncScaleY = false;
-                netT.SyncScaleZ = false;
-                netT.InLocalSpace = true;
+                // FIXME
 
                 boneT = boneT.parent;
             }
@@ -153,7 +143,7 @@ namespace Arteranos.NetworkIO
             m_AvatarGameObject = args.Avatar;
             Transform agot = m_AvatarGameObject.transform;
 
-            m_AvatarGameObject.name += m_AvatarGameObject.name + "_" + OwnerClientId;
+            m_AvatarGameObject.name += m_AvatarGameObject.name + "_" + netIdentity;
             agot.SetParent(transform);
 
             m_LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand");
@@ -177,5 +167,3 @@ namespace Arteranos.NetworkIO
         }
     }
 }
-
-#endif

@@ -1,9 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Netcode;
 
-using Netcode.Transports.Ruffles;
+using Mirror;
 
 namespace Arteranos.Core
 {
@@ -67,22 +66,6 @@ namespace Arteranos.Core
                 m_ConnectionMode = ConnectionMode.Host;
             }
 
-            // if(GetCmdArg("mode", out string mode))
-            // {
-            //     switch(mode)
-            //     {
-            //         case "server":
-            //             m_ConnectionMode = ConnectionMode.Server;
-            //             break;
-            //         case "client":
-            //             m_ConnectionMode = ConnectionMode.Client;
-            //             break;
-            //         case "host":
-            //             m_ConnectionMode = ConnectionMode.Host;
-            //             break;
-            //     }
-            // }
-
             m_Client.VRMode = GetBoolArg("-vr", m_Client.VRMode);
 
         }
@@ -98,22 +81,21 @@ namespace Arteranos.Core
 
         private void StartNetwork()
         {
-            NetworkManager netManager = NetworkManager.Singleton;
-            RufflesTransport transport = GetComponentInParent<RufflesTransport>();
+            NetworkManager networkManager = GetComponentInParent<NetworkManager>();
 
             switch(m_ConnectionMode)
             {
                 case ConnectionMode.Server:
-                    transport.ConnectAddress = m_Server.ListenAddress;
-                    netManager.StartServer();
+                    networkManager.networkAddress = m_Server.ListenAddress;
+                    networkManager.StartServer();
                     break;
                 case ConnectionMode.Host:
-                    transport.ConnectAddress = m_Server.ListenAddress;
-                    netManager.StartHost();
+                    networkManager.networkAddress = m_Server.ListenAddress;
+                    networkManager.StartHost();
                     break;
                 case ConnectionMode.Client:
-                    transport.ConnectAddress = m_Client.ServerIP;
-                    netManager.StartClient();
+                    networkManager.networkAddress = m_Client.ServerIP;
+                    networkManager.StartClient();
                     break;
             }
         }

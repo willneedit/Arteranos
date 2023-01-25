@@ -1,10 +1,11 @@
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Rendering;
 using System;
 using Unity.XR.CoreUtils;
 
 using Arteranos.ExtensionMethods;
+
+using Mirror;
 
 namespace Arteranos.NetworkIO
 {
@@ -18,7 +19,7 @@ namespace Arteranos.NetworkIO
 
         private AvatarReplacer m_AvatarData = null;
 
-        public override void OnNetworkSpawn()
+        public override void OnStartClient()
         {
             m_AvatarData = FindObjectOfType<AvatarReplacer>();
         }
@@ -44,7 +45,7 @@ namespace Arteranos.NetworkIO
 
         void Update()
         {
-            if(!IsOwner) return;
+            if(!isOwned) return;
 
             // Could drop to null b/c VR/2D transition
             if (m_Controller == null)

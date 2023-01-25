@@ -1,4 +1,3 @@
-using Unity.Netcode;
 using UnityEngine;
 using System;
 
@@ -71,32 +70,21 @@ namespace Arteranos.ExtensionMethods
 
 namespace Arteranos.NetworkIO
 {
-    public class NetworkGuid : INetworkSerializable
+    public class NetworkGuid 
     {
         public ulong FirstHalf;
         public ulong SecondHalf;
 
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref FirstHalf);
-            serializer.SerializeValue(ref SecondHalf);
-        }
     }
 
     /// <summary>
     /// Represents a set of Euler angles down to six bytes payload, precision of the 1/64th of degree.
     /// </summary>
-    public class NetworkRotation : INetworkSerializable
+    public class NetworkRotation 
     {
         public Int16 X;
         public Int16 Y;
         public Int16 Z;
 
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref X);
-            serializer.SerializeValue(ref Y);
-            serializer.SerializeValue(ref Z);
-        }
     }
 }
