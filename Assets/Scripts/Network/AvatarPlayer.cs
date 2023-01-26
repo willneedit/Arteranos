@@ -3,9 +3,10 @@ using UnityEngine.Rendering;
 using System;
 using Unity.XR.CoreUtils;
 
-using Arteranos.ExtensionMethods;
-
 using Mirror;
+
+using Arteranos.ExtensionMethods;
+using Arteranos.XR;
 
 namespace Arteranos.NetworkIO
 {
@@ -22,6 +23,13 @@ namespace Arteranos.NetworkIO
         public override void OnStartClient()
         {
             m_AvatarData = FindObjectOfType<AvatarReplacer>();
+            if(isOwned)
+            {
+                XRControl xrc = FindObjectOfType<XRControl>();
+                xrc.m_XRSwitchEvent.AddListener(OnXRChanged);
+                OnXRChanged(xrc.m_UsingXR);
+            }
+
         }
 
         void UpdatePose()
@@ -43,13 +51,8 @@ namespace Arteranos.NetworkIO
                         m_RightHand.rotation);
         }
 
-        void Update()
+        void OnXRChanged(bool useXR)
         {
-            if(!isOwned) return;
-
-            // Could drop to null b/c VR/2D transition
-            if (m_Controller == null)
-            {
                 m_Controller = FindObjectOfType<XROrigin>();
                 m_LeftHand = m_Controller.transform.FindRecursive("LeftHand Controller");
                 m_RightHand = m_Controller.transform.FindRecursive("RightHand Controller");
@@ -58,10 +61,11 @@ namespace Arteranos.NetworkIO
                 // FIXME: 2D controller, handedness
                 if(m_RightHand == null)
                     m_Controller.transform.FindRecursive("OneHand Controller");
-            }
+        }
 
-            if (m_Controller == null)
-                return;
+        void Update()
+        {
+            if(!isOwned) return;
 
             // FIXME: laggy due to IK update.
             UpdatePose();
