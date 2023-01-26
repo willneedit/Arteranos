@@ -1,10 +1,11 @@
 using UnityEngine;
 using System;
 
+using Mirror;
 
 namespace Arteranos.ExtensionMethods
 {
-    using Arteranos.NetworkIO;
+    using Arteranos.NetworkTypes;
 
     public static class ExtendTransform
     {
@@ -41,6 +42,20 @@ namespace Arteranos.ExtensionMethods
             return new Guid(bytes);
         }
 
+        public static void WriteNetworkGuid(this NetworkWriter writer, NetworkGuid value)
+        {
+            writer.WriteULong(value.FirstHalf);
+            writer.WriteULong(value.SecondHalf);
+        }
+
+        public static NetworkGuid ReadNetworkGuid(this NetworkReader reader)
+        {
+            var res = new NetworkGuid();
+            res.FirstHalf = reader.ReadULong();
+            res.SecondHalf = reader.ReadULong();
+            return res;
+        }
+
     }
     public static class ExtendNetworkRotation
     {
@@ -49,9 +64,9 @@ namespace Arteranos.ExtensionMethods
             Vector3 euler = q.eulerAngles;
 
             var networkRot = new NetworkRotation();
-            networkRot.X = (Int16) (euler.x * 64);
-            networkRot.Y = (Int16) (euler.y * 64);
-            networkRot.Z = (Int16) (euler.z * 64);
+            networkRot.X = (short) (euler.x * 64);
+            networkRot.Y = (short) (euler.y * 64);
+            networkRot.Z = (short) (euler.z * 64);
             return networkRot;
         }
 
@@ -64,11 +79,26 @@ namespace Arteranos.ExtensionMethods
             );
         }
 
+        public static void WriteNetworkRotation(this NetworkWriter writer, NetworkRotation value)
+        {
+            writer.WriteShort(value.X);
+            writer.WriteShort(value.Y);
+            writer.WriteShort(value.Z);
+        }
+
+        public static NetworkRotation ReadNetworkRotation(this NetworkReader reader)
+        {
+            var res = new NetworkRotation();
+            res.X = reader.ReadShort();
+            res.Y = reader.ReadShort();
+            res.Z = reader.ReadShort();
+            return res;
+        }
     }
 
 }
 
-namespace Arteranos.NetworkIO
+namespace Arteranos.NetworkTypes
 {
     public class NetworkGuid 
     {
@@ -82,9 +112,9 @@ namespace Arteranos.NetworkIO
     /// </summary>
     public class NetworkRotation 
     {
-        public Int16 X;
-        public Int16 Y;
-        public Int16 Z;
+        public short X;
+        public short Y;
+        public short Z;
 
     }
 }
