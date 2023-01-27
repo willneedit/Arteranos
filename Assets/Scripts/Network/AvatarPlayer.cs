@@ -7,6 +7,7 @@ using Mirror;
 
 using Arteranos.ExtensionMethods;
 using Arteranos.XR;
+using Arteranos.NetworkTypes;
 
 namespace Arteranos.NetworkIO
 {
@@ -17,6 +18,13 @@ namespace Arteranos.NetworkIO
         public Transform m_LeftHand;
         public Transform m_RightHand;
         public Transform m_Camera;
+
+
+        // TODO More complex SyncObject like SyncList for pose data
+        public string[] m_JointNames = new string[16];
+
+        [SyncVar]
+        public NetworkRotation m_Joint = new NetworkRotation();
 
         private AvatarReplacer m_AvatarData = null;
 
