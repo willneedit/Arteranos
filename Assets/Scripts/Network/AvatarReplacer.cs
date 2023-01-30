@@ -7,6 +7,7 @@ using ReadyPlayerMe.AvatarLoader;
 using Arteranos.ExtensionMethods;
 
 using Mirror;
+using System.Collections.Generic;
 
 namespace Arteranos.NetworkIO
 {
@@ -92,7 +93,7 @@ namespace Arteranos.NetworkIO
             m_AvatarLoader.LoadAvatar(current.ToString());
         }
 
-        GameObject RigNetworkIK(GameObject avatar, string limb, int bones = 2)
+        GameObject RigNetworkIK(GameObject avatar, string limb, ref List<string> jointnames, int bones = 2)
         {
             GameObject handle = null;
     
@@ -122,8 +123,7 @@ namespace Arteranos.NetworkIO
             Transform boneT = limbT;
             for(int i=0; i<=bones; i++)
             {
-                // FIXME
-
+                jointnames.Add(boneT.name);
                 boneT = boneT.parent;
             }
 
@@ -146,9 +146,11 @@ namespace Arteranos.NetworkIO
             m_AvatarGameObject.name += m_AvatarGameObject.name + "_" + netIdentity;
             agot.SetParent(transform);
 
-            m_LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand");
-            m_RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand");
-            m_Head = RigNetworkIK(m_AvatarGameObject, "Head", 1);
+            List<string> jointnames = new List<string>();
+
+            m_LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames);
+            m_RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames);
+            m_Head = RigNetworkIK(m_AvatarGameObject, "Head", ref jointnames, 1);
 
             Transform rEye = agot.FindRecursive("RightEye");
             Transform lEye = agot.FindRecursive("LeftEye");
@@ -158,6 +160,9 @@ namespace Arteranos.NetworkIO
             m_CenterEye.transform.SetPositionAndRotation(cEyePos, rEye.rotation);
             m_CenterEye.transform.SetParent(agot.parent);
 
+            // Now upload the skeleton joint data to the Avatar Pose driver.
+            AvatarPlayer ap = this.GetComponent<AvatarPlayer>();
+            ap.UploadJointNames(jointnames.ToArray());
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)

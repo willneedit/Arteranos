@@ -47,13 +47,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b7ed5e86fc44d454c9361b8046844f76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
+  syncDirection: 1
   syncMode: 0
   syncInterval: 0.1
   m_Controller: {fileID: 0}
   m_LeftHand: {fileID: 0}
   m_RightHand: {fileID: 0}
   m_Camera: {fileID: 0}
+  m_JointTransforms:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  m_JointNames:
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
 --- !u!114 &244397833489866318
 MonoBehaviour:
   m_ObjectHideFlags: 0
