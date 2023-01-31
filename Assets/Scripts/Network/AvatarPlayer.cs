@@ -9,6 +9,7 @@ using Arteranos.ExtensionMethods;
 using Arteranos.XR;
 using Arteranos.NetworkTypes;
 using Unity.VisualScripting;
+using System.Collections.Generic;
 
 namespace Arteranos.NetworkIO
 {
@@ -31,7 +32,7 @@ namespace Arteranos.NetworkIO
 
         public void Awake()
         {
-            syncDirection = SyncDirection.ClientToServer;
+            syncDirection = SyncDirection.ServerToClient;
         }
 
         public override void OnStartClient()
@@ -66,6 +67,7 @@ namespace Arteranos.NetworkIO
         /// <param name="names">Array of the joint (aka bone) names</param>
         public void UploadJointNames(string[] names)
         {
+            Debug.Log($"UploadJointNames: {netIdentity.netId}");
             if(names.Length > SyncPose.MAX_JOINTS)
                 throw new ArgumentOutOfRangeException($"{name.Length} exceeds {SyncPose.MAX_JOINTS}");
 
@@ -81,6 +83,15 @@ namespace Arteranos.NetworkIO
                 if((m_JointTransforms[i2] = transform.FindRecursive(names[i2])) == null)
                     throw new ArgumentException($"Mismatch in skeleton: Nonexistent bone '{names[i2]}' in the loaded avatar");
             }
+
+            // TODO merge the updated skeleton for the already present pose
+        }
+
+        [Command]
+        public void SendToOwnPose(NetworkRotation[] pack)
+        {
+            for(int i = 0; i < pack.Length; i++)
+                m_Joint[i] = pack[i];
         }
 
         public void UpdateOwnPose()
@@ -101,9 +112,16 @@ namespace Arteranos.NetworkIO
                         m_RightHand.position + cEyeOffset,
                         m_RightHand.rotation);
 
-            for(int i = 0; i < SyncPose.MAX_JOINTS; i++)
+            List<NetworkRotation> lnr = new List<NetworkRotation>();
+
+            for (int i = 0; i < SyncPose.MAX_JOINTS; i++)
+            {
                 if (m_JointTransforms[i] != null)
                     m_Joint[i] = m_JointTransforms[i].localRotation.ToNetworkRotation();
+                lnr.Add(m_Joint[i]);
+            }
+
+            SendToOwnPose(lnr.ToArray());
         }
 
         public void UpdateAlienPose()

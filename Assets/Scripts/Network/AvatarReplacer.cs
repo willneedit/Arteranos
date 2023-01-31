@@ -32,7 +32,7 @@ namespace Arteranos.NetworkIO
         {
             m_SettingsManager = FindObjectOfType<Arteranos.Core.SettingsManager>();
 
-            this.name = this.name + "_" + netIdentity;
+            this.name = this.name + "_" + netIdentity.netId;
 
             if(m_SettingsManager.m_Server.ShowAvatars || !isServer || isLocalPlayer)
             {
@@ -43,11 +43,9 @@ namespace Arteranos.NetworkIO
                 m_SettingsManager.m_Client.OnAvatarChanged += RequestAvatarChange;
 
                 // The late-joining client's companions, or the newly joined clients.
-                if(!isOwned)
-                    // FIXME: Burst mitigation
-                    StartCoroutine(ProcessLoader(m_AvatarURL));
-                else
+                if(isOwned)
                 {
+                    // FIXME: Burst mitigation
                     RequestAvatarChange(null, m_SettingsManager.m_Client.AvatarURL);
                 }
             }
@@ -143,7 +141,7 @@ namespace Arteranos.NetworkIO
             m_AvatarGameObject = args.Avatar;
             Transform agot = m_AvatarGameObject.transform;
 
-            m_AvatarGameObject.name += m_AvatarGameObject.name + "_" + netIdentity;
+            m_AvatarGameObject.name += m_AvatarGameObject.name + "_" + netIdentity.netId;
             agot.SetParent(transform);
 
             List<string> jointnames = new List<string>();
@@ -156,9 +154,12 @@ namespace Arteranos.NetworkIO
             Transform lEye = agot.FindRecursive("LeftEye");
             Vector3 cEyePos = (lEye.position + rEye.position) / 2;
 
-            m_CenterEye = new GameObject("Handle_centerEye");
-            m_CenterEye.transform.SetPositionAndRotation(cEyePos, rEye.rotation);
-            m_CenterEye.transform.SetParent(agot.parent);
+            if(isOwned)
+            {
+                m_CenterEye = new GameObject("Handle_centerEye");
+                m_CenterEye.transform.SetPositionAndRotation(cEyePos, rEye.rotation);
+                m_CenterEye.transform.SetParent(agot.parent);
+            }
 
             // Now upload the skeleton joint data to the Avatar Pose driver.
             AvatarPlayer ap = this.GetComponent<AvatarPlayer>();

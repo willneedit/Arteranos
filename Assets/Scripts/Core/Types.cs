@@ -94,9 +94,7 @@ namespace Arteranos.ExtensionMethods
         public static NetworkRotation ReadNetworkRotation(this NetworkReader reader)
         {
             var res = new NetworkRotation();
-            res.X = reader.ReadShort();
-            res.Y = reader.ReadShort();
-            res.Z = reader.ReadShort();
+            reader.ReadNetworkRotation(ref res);
             return res;
         }
 
