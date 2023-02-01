@@ -99,7 +99,7 @@ public class KMTrackedPoseDriver : MonoBehaviour
         m_EulerAngles.x = Mathf.Clamp(m_EulerAngles.x, -80, 80);
         m_EulerAngles.y = Mathf.Clamp(m_EulerAngles.y, -80, 80);
 
-        transform.rotation = Quaternion.Euler(m_EulerAngles);
+        transform.localRotation = Quaternion.Euler(m_EulerAngles);
     }
 
     /// <summary>

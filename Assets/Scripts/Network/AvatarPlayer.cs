@@ -138,9 +138,10 @@ namespace Arteranos.NetworkIO
                 m_RightHand = m_Controller.transform.FindRecursive("RightHand Controller");
                 m_Camera = m_Controller.transform.FindRecursive("_AvatarView");
 
-                // FIXME: 2D controller, handedness
-                if(m_RightHand == null)
-                    m_RightHand = m_Controller.transform.FindRecursive("OneHand Controller");
+                // 2D: Maybe keep the hands disconnected and to stay in a neutral position.
+                //// FIXME: 2D controller, handedness
+                //if(m_RightHand == null)
+                //    m_RightHand = m_Controller.transform.FindRecursive("OneHand Controller");
 
                 // And, move the XR rig to the own avatar's position.
                 m_Controller.transform.SetPositionAndRotation(transform.position, transform.rotation);
