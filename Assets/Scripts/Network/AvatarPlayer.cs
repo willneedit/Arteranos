@@ -84,26 +84,6 @@ namespace Arteranos.NetworkIO
                 if((m_JointTransforms[i2] = transform.FindRecursive(names[i2])) == null)
                     throw new ArgumentException($"Mismatch in skeleton: Nonexistent bone '{names[i2]}' in the loaded avatar");
             }
-
-            // 2D: fix the skeleton to the 'attention' pose from the A- or T-pose.
-            if(!m_usingXR)
-            {
-                if (m_AvatarData.m_LeftHand != null || m_AvatarData.m_RightHand != null)
-                {
-                    // Leave the controller disconnected and to the hands to a neutral position
-                    Vector3 idle_lh = transform.rotation * new Vector3(-0.3f, 0, 0);
-                    Vector3 idle_rh = transform.rotation * new Vector3(0.3f, 0, 0);
-
-                    Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
-                    Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
-
-                    m_AvatarData.m_LeftHand.transform.localPosition = idle_lh;
-                    m_AvatarData.m_RightHand.transform.localPosition = idle_rh;
-
-                    m_AvatarData.m_LeftHand.transform.localRotation = idle_rlh;
-                    m_AvatarData.m_RightHand.transform.localRotation = idle_rrh;
-                }
-            }
         }
 
         [Command]
@@ -163,6 +143,10 @@ namespace Arteranos.NetworkIO
                 m_LeftHand = m_Controller.transform.FindRecursive("LeftHand Controller");
                 m_RightHand = m_Controller.transform.FindRecursive("RightHand Controller");
                 m_Camera = m_Controller.transform.FindRecursive("_AvatarView");
+            }
+            else
+            {
+                m_AvatarData.ResetPose();
             }
 
             // And, move the XR (or 2D) rig to the own avatar's position.

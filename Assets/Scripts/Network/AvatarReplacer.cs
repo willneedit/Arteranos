@@ -131,6 +131,28 @@ namespace Arteranos.NetworkIO
             return handle;
         }
 
+        /// <summary>
+        /// Reset the avatar to the 'attention' pose rather than the A- or T-pose, using
+        /// the IK handles.
+        /// </summary>
+        public void ResetPose()
+        {
+            if (m_LeftHand != null)
+            {
+                Vector3 idle_lh = new Vector3(-0.4f, 0, 0);
+                Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
+                m_LeftHand.transform.SetLocalPositionAndRotation(idle_lh, idle_rlh);
+            }
+
+            if (m_RightHand != null)
+            {
+                Vector3 idle_rh = new Vector3(0.4f, 0, 0);
+                Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
+                m_RightHand.transform.SetLocalPositionAndRotation(idle_rh, idle_rrh);
+            }
+
+        }
+
         void AvatarLoadComplete(object sender, CompletionEventArgs args)
         {
             Debug.Log("Successfully loaded avatar");
@@ -166,6 +188,8 @@ namespace Arteranos.NetworkIO
             // Now upload the skeleton joint data to the Avatar Pose driver.
             AvatarPlayer ap = this.GetComponent<AvatarPlayer>();
             ap.UploadJointNames(jointnames.ToArray());
+
+            ResetPose();
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)
