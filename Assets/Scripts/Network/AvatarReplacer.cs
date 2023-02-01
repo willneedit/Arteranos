@@ -52,6 +52,7 @@ namespace Arteranos.NetworkIO
 
             m_AvatarGameObject = Instantiate(m_AvatarStandin, transform.position, transform.rotation);
             m_AvatarGameObject.transform.SetParent(transform);
+            m_AvatarGameObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             base.OnStartClient();
         }
@@ -135,14 +136,15 @@ namespace Arteranos.NetworkIO
             Debug.Log("Successfully loaded avatar");
             loading = false;
 
-            if(this.m_AvatarGameObject != null)
-                Destroy(this.m_AvatarGameObject);
+            if(m_AvatarGameObject != null)
+                Destroy(m_AvatarGameObject);
 
             m_AvatarGameObject = args.Avatar;
             Transform agot = m_AvatarGameObject.transform;
 
             m_AvatarGameObject.name += m_AvatarGameObject.name + "_" + netIdentity.netId;
             agot.SetParent(transform);
+            agot.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             List<string> jointnames = new List<string>();
 
