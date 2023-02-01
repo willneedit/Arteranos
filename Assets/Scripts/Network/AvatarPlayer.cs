@@ -21,6 +21,7 @@ namespace Arteranos.NetworkIO
         public Transform m_RightHand;
         public Transform m_Camera;
 
+        private bool m_usingXR;
 
         // TODO More complex SyncObject like SyncList for pose data
         public Transform[] m_JointTransforms = new Transform[SyncPose.MAX_JOINTS];
@@ -84,7 +85,25 @@ namespace Arteranos.NetworkIO
                     throw new ArgumentException($"Mismatch in skeleton: Nonexistent bone '{names[i2]}' in the loaded avatar");
             }
 
-            // TODO merge the updated skeleton for the already present pose
+            // 2D: fix the skeleton to the 'attention' pose from the A- or T-pose.
+            if(!m_usingXR)
+            {
+                if (m_AvatarData.m_LeftHand != null || m_AvatarData.m_RightHand != null)
+                {
+                    // Leave the controller disconnected and to the hands to a neutral position
+                    Vector3 idle_lh = transform.rotation * new Vector3(-0.3f, 0, 0);
+                    Vector3 idle_rh = transform.rotation * new Vector3(0.3f, 0, 0);
+
+                    Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
+                    Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
+
+                    m_AvatarData.m_LeftHand.transform.localPosition = idle_lh;
+                    m_AvatarData.m_RightHand.transform.localPosition = idle_rh;
+
+                    m_AvatarData.m_LeftHand.transform.localRotation = idle_rlh;
+                    m_AvatarData.m_RightHand.transform.localRotation = idle_rrh;
+                }
+            }
         }
 
         [Command]
@@ -96,21 +115,24 @@ namespace Arteranos.NetworkIO
 
         public void UpdateOwnPose()
         {
-            if(m_AvatarData.m_CenterEye == null) return;
+            if(m_usingXR)
+            {
+                if (m_AvatarData.m_CenterEye == null) return;
 
-            // FIXME: Only intereested to the y offset.
-            Vector3 cEyeOffset = m_AvatarData.m_CenterEye.transform.position - m_Camera.position;
+                // FIXME: Only intereested to the y offset.
+                Vector3 cEyeOffset = m_AvatarData.m_CenterEye.transform.position - m_Camera.position;
 
-            // FIXME: Hand rotation, 90° on the local X.
-            if(m_LeftHand && m_AvatarData.m_LeftHand)
-                m_AvatarData.m_LeftHand.transform.SetPositionAndRotation(
-                        m_LeftHand.position + cEyeOffset,
-                        m_LeftHand.rotation);
-            
-            if(m_RightHand && m_AvatarData.m_RightHand)
-                m_AvatarData.m_RightHand.transform.SetPositionAndRotation(
-                        m_RightHand.position + cEyeOffset,
-                        m_RightHand.rotation);
+                // FIXME: Hand rotation, 90° on the local X.
+                if (m_LeftHand && m_AvatarData.m_LeftHand)
+                    m_AvatarData.m_LeftHand.transform.SetPositionAndRotation(
+                            m_LeftHand.position + cEyeOffset,
+                            m_LeftHand.rotation);
+
+                if (m_RightHand && m_AvatarData.m_RightHand)
+                    m_AvatarData.m_RightHand.transform.SetPositionAndRotation(
+                            m_RightHand.position + cEyeOffset,
+                            m_RightHand.rotation);
+            }
 
             List<NetworkRotation> lnr = new List<NetworkRotation>();
 
@@ -133,18 +155,18 @@ namespace Arteranos.NetworkIO
 
         void OnXRChanged(bool useXR)
         {
-                m_Controller = FindObjectOfType<XROrigin>();
+            m_usingXR = useXR;
+            m_Controller = FindObjectOfType<XROrigin>();
+
+            if (useXR)
+            {
                 m_LeftHand = m_Controller.transform.FindRecursive("LeftHand Controller");
                 m_RightHand = m_Controller.transform.FindRecursive("RightHand Controller");
                 m_Camera = m_Controller.transform.FindRecursive("_AvatarView");
+            }
 
-                // 2D: Maybe keep the hands disconnected and to stay in a neutral position.
-                //// FIXME: 2D controller, handedness
-                //if(m_RightHand == null)
-                //    m_RightHand = m_Controller.transform.FindRecursive("OneHand Controller");
-
-                // And, move the XR rig to the own avatar's position.
-                m_Controller.transform.SetPositionAndRotation(transform.position, transform.rotation);
+            // And, move the XR (or 2D) rig to the own avatar's position.
+            m_Controller.transform.SetPositionAndRotation(transform.position, transform.rotation);
         }
 
         void Update()
