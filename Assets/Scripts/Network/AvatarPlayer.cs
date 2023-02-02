@@ -87,14 +87,18 @@ namespace Arteranos.NetworkIO
         }
 
         [Command]
-        public void SendToOwnPose(NetworkRotation[] pack)
+        public void SendToOwnPose(ushort mask, List<NetworkRotation> pack)
         {
-            for(int i = 0; i < pack.Length; i++)
-                m_Joint[i] = pack[i];
+            for(int i = 0, j = 0; i<SyncPose.MAX_JOINTS; i++)
+            {
+                if((ushort)(mask & (1 << i)) != 0)
+                    m_Joint[i] = pack[j++];
+            }
         }
 
         public void UpdateOwnPose()
         {
+            // VR: pull the strings of the puppet handles...
             if(m_usingXR)
             {
                 if (m_AvatarData.m_CenterEye == null) return;
@@ -114,16 +118,29 @@ namespace Arteranos.NetworkIO
                             m_RightHand.rotation);
             }
 
+            // ...but, the IK has to be made it real in the course of the next frame.
+
+
+            // Pack the pose changes in the puppet...
+            ushort mask = 0;
             List<NetworkRotation> lnr = new List<NetworkRotation>();
 
             for (int i = 0; i < SyncPose.MAX_JOINTS; i++)
             {
                 if (m_JointTransforms[i] != null)
-                    m_Joint[i] = m_JointTransforms[i].localRotation.ToNetworkRotation();
-                lnr.Add(m_Joint[i]);
+                {
+                    NetworkRotation nr = m_JointTransforms[i].localRotation.ToNetworkRotation();
+                    if(m_Joint[i] != nr)
+                    {
+                        m_Joint[i] = nr;
+                        lnr.Add(m_Joint[i]);
+                        mask = (ushort)(mask | (1 << i));
+                    }
+                }
             }
 
-            SendToOwnPose(lnr.ToArray());
+            // ... and propagate it to the others to view it.
+            SendToOwnPose(mask, lnr);
         }
 
         public void UpdateAlienPose()
@@ -150,7 +167,9 @@ namespace Arteranos.NetworkIO
             }
 
             // And, move the XR (or 2D) rig to the own avatar's position.
+            Debug.Log("Moving rig");
             m_Controller.transform.SetPositionAndRotation(transform.position, transform.rotation);
+            Physics.SyncTransforms();
         }
 
         void Update()
