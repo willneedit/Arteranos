@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ServerIP: 127.0.0.1
   _AvatarURL: https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb
-  _VRMode: 0
+  _VRMode: 1
