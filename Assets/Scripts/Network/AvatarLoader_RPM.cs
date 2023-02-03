@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace Arteranos.NetworkIO
 {
-    public class AvatarReplacer : NetworkBehaviour, IAvatarReplacer
+    public class AvatarLoader_RPM : NetworkBehaviour, IAvatarLoader
     {
         [SyncVar(hook = nameof(OnAvatarURLChanged))]
         public string m_AvatarURL;

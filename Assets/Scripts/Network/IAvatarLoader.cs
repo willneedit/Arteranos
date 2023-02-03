@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Arteranos.NetworkIO
 {
-    public interface IAvatarReplacer
+    public interface IAvatarLoader
     {
         public Transform LeftHand { get; }
         public Transform RightHand { get; }

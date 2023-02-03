@@ -28,7 +28,7 @@ namespace Arteranos.NetworkIO
 
         public readonly SyncPose m_Joint = new SyncPose();
 
-        private IAvatarReplacer m_AvatarData = null;
+        private IAvatarLoader m_AvatarData = null;
 
         public void Awake()
         {
@@ -39,7 +39,7 @@ namespace Arteranos.NetworkIO
         {
             base.OnStartClient();
 
-            m_AvatarData = GetComponent<AvatarReplacer>();
+            m_AvatarData = GetComponent<AvatarLoader_RPM>();
             if(isOwned)
             {
                 XRControl xrc = FindObjectOfType<XRControl>();
