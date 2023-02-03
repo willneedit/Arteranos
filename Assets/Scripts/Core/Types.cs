@@ -224,11 +224,6 @@ namespace Arteranos.NetworkTypes
             }
         }
 
-        public void UpdateJoint(int index, Quaternion q)
-        {
-
-        }
-
         public event Action<int> Callback;
 
         protected virtual void InvokeCallback(int index) => Callback?.Invoke(index);

@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace Arteranos.NetworkIO
 {
-    public class AvatarReplacer : NetworkBehaviour
+    public class AvatarReplacer : NetworkBehaviour, IAvatarReplacer
     {
         [SyncVar(hook = nameof(OnAvatarURLChanged))]
         public string m_AvatarURL;
@@ -22,11 +22,15 @@ namespace Arteranos.NetworkIO
         private AvatarObjectLoader m_AvatarLoader = null;
         private Arteranos.Core.SettingsManager m_SettingsManager = null;
 
-        public GameObject m_LeftHand = null;
-        public GameObject m_RightHand = null;
-        public GameObject m_CenterEye = null;
-        public GameObject m_Head = null;
+        public Transform LeftHand { get; private set; }
+        public Transform RightHand { get; private set; }
+        public Transform LeftFoot { get; private set; }
+        public Transform RightFoot { get; private set; }
+        public Transform CenterEye { get; private set; }
+        public Transform Head { get; private set; }
 
+        public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
+        public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
 
         public override void OnStartClient()
         {
@@ -92,9 +96,9 @@ namespace Arteranos.NetworkIO
             m_AvatarLoader.LoadAvatar(current.ToString());
         }
 
-        GameObject RigNetworkIK(GameObject avatar, string limb, ref List<string> jointnames, int bones = 2)
+        Transform RigNetworkIK(GameObject avatar, string limb, ref List<string> jointnames, int bones = 2)
         {
-            GameObject handle = null;
+            Transform handle = null;
     
             Transform limbT = avatar.transform.FindRecursive(limb);
             if(limbT == null)
@@ -108,14 +112,14 @@ namespace Arteranos.NetworkIO
             // Owner is setting up the IK and the puppet handles...
             if(isOwned)
             {
-                handle = new GameObject("Handle_" + limb);
-                handle.transform.SetPositionAndRotation(limbT.position, limbT.rotation);
-                handle.transform.SetParent(avatar.transform.parent);
+                handle = new GameObject("Handle_" + limb).transform;
+                handle.SetPositionAndRotation(limbT.position, limbT.rotation);
+                handle.SetParent(avatar.transform.parent);
 
                 FastIKFabric limbIK = limbT.gameObject.AddComponent<FastIKFabric>();
 
                 limbIK.ChainLength = bones;
-                limbIK.Target = handle.transform;
+                limbIK.Target = handle;
             }
 
             // Owned and alien avatars have to set up the Skeleton IK data record.
@@ -137,18 +141,18 @@ namespace Arteranos.NetworkIO
         /// </summary>
         public void ResetPose()
         {
-            if (m_LeftHand != null)
+            if (LeftHand != null)
             {
                 Vector3 idle_lh = new Vector3(-0.4f, 0, 0);
                 Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
-                m_LeftHand.transform.SetLocalPositionAndRotation(idle_lh, idle_rlh);
+                LeftHand.SetLocalPositionAndRotation(idle_lh, idle_rlh);
             }
 
-            if (m_RightHand != null)
+            if (RightHand != null)
             {
                 Vector3 idle_rh = new Vector3(0.4f, 0, 0);
                 Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
-                m_RightHand.transform.SetLocalPositionAndRotation(idle_rh, idle_rrh);
+                RightHand.SetLocalPositionAndRotation(idle_rh, idle_rrh);
             }
 
         }
@@ -170,9 +174,9 @@ namespace Arteranos.NetworkIO
 
             List<string> jointnames = new List<string>();
 
-            m_LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames);
-            m_RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames);
-            m_Head = RigNetworkIK(m_AvatarGameObject, "Head", ref jointnames, 1);
+            LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames);
+            RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames);
+            Head = RigNetworkIK(m_AvatarGameObject, "Head", ref jointnames, 1);
 
             Transform rEye = agot.FindRecursive("RightEye");
             Transform lEye = agot.FindRecursive("LeftEye");
@@ -180,14 +184,14 @@ namespace Arteranos.NetworkIO
 
             if(isOwned)
             {
-                m_CenterEye = new GameObject("Handle_centerEye");
-                m_CenterEye.transform.SetPositionAndRotation(cEyePos, rEye.rotation);
-                m_CenterEye.transform.SetParent(agot.parent);
+                CenterEye = new GameObject("Handle_centerEye").transform;
+                CenterEye.SetPositionAndRotation(cEyePos, rEye.rotation);
+                CenterEye.SetParent(agot.parent);
             }
 
             // Now upload the skeleton joint data to the Avatar Pose driver.
-            AvatarPlayer ap = this.GetComponent<AvatarPlayer>();
-            ap.UploadJointNames(jointnames.ToArray());
+            AvatarPoseDriver apd = this.GetComponent<AvatarPoseDriver>();
+            apd.UploadJointNames(jointnames.ToArray());
 
             ResetPose();
         }
