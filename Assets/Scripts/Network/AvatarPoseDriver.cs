@@ -16,7 +16,8 @@ namespace Arteranos.NetworkIO
 
     public class AvatarPoseDriver : NetworkBehaviour
     {
-        public XROrigin m_Controller;
+        public XROrigin m_Origin;
+        public XRControl m_Controller;
         public Transform m_LeftHand;
         public Transform m_RightHand;
         public Transform m_Camera;
@@ -42,9 +43,10 @@ namespace Arteranos.NetworkIO
             m_AvatarData = GetComponent<AvatarLoader_RPM>();
             if(isOwned)
             {
-                XRControl xrc = FindObjectOfType<XRControl>();
-                xrc.m_XRSwitchEvent.AddListener(OnXRChanged);
-                OnXRChanged(xrc.m_UsingXR);
+                m_Origin = GetComponent<XROrigin>();
+                m_Controller = FindObjectOfType<XRControl>();
+                m_Controller.m_XRSwitchEvent.AddListener(OnXRChanged);
+                OnXRChanged(m_Controller.m_UsingXR);
             }
 
         }
@@ -54,10 +56,7 @@ namespace Arteranos.NetworkIO
             base.OnStopClient();
 
             if(isOwned)
-            {
-                XRControl xrc = FindObjectOfType<XRControl>();
-                xrc.m_XRSwitchEvent.RemoveListener(OnXRChanged);
-            }
+                m_Controller.m_XRSwitchEvent.RemoveListener(OnXRChanged);
         }
 
         /// <summary>
@@ -151,14 +150,14 @@ namespace Arteranos.NetworkIO
         void OnXRChanged(bool useXR)
         {
             m_usingXR = useXR;
-            m_Controller = FindObjectOfType<XROrigin>();
+            m_Origin = FindObjectOfType<XROrigin>();
 
             if (useXR)
             {
                 // In VR, connect the VR hand controllers to the puppet's hands strings.
-                m_LeftHand = m_Controller.transform.FindRecursive("LeftHand Controller");
-                m_RightHand = m_Controller.transform.FindRecursive("RightHand Controller");
-                m_Camera = m_Controller.transform.FindRecursive("_AvatarView");
+                m_LeftHand = m_Origin.transform.FindRecursive("LeftHand Controller");
+                m_RightHand = m_Origin.transform.FindRecursive("RightHand Controller");
+                m_Camera = m_Origin.transform.FindRecursive("_AvatarView");
             }
             else
             {
@@ -168,7 +167,7 @@ namespace Arteranos.NetworkIO
 
             // And, move the XR (or 2D) rig to the own avatar's position.
             Debug.Log("Moving rig");
-            m_Controller.transform.SetPositionAndRotation(transform.position, transform.rotation);
+            m_Origin.transform.SetPositionAndRotation(transform.position, transform.rotation);
             Physics.SyncTransforms();
         }
 
@@ -179,8 +178,14 @@ namespace Arteranos.NetworkIO
                 // FIXME: laggy due to IK update.
                 UpdateOwnPose();
 
+                Camera cam = m_Origin.Camera;
+
+                Vector3 playSpace = cam.transform.localPosition - m_Controller.m_CameraLocalOffset;
+
                 // Own avatar get copied from the controller, alien avatars by NetworkTransform.
-                transform.SetPositionAndRotation(m_Controller.transform.position, m_Controller.transform.rotation);
+                transform.SetPositionAndRotation(m_Origin.transform.position + 
+                    m_Origin.transform.rotation * playSpace,
+                    m_Origin.transform.rotation);
             } 
             else
             {

@@ -8,6 +8,7 @@ using Arteranos.ExtensionMethods;
 
 using Mirror;
 using System.Collections.Generic;
+using Unity.XR.CoreUtils;
 
 namespace Arteranos.NetworkIO
 {
@@ -176,6 +177,8 @@ namespace Arteranos.NetworkIO
 
             LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames);
             RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames);
+            LeftFoot = RigNetworkIK(m_AvatarGameObject, "LeftFoot", ref jointnames);
+            RightFoot = RigNetworkIK(m_AvatarGameObject, "RightFoot", ref jointnames);
             Head = RigNetworkIK(m_AvatarGameObject, "Head", ref jointnames, 1);
 
             Transform rEye = agot.FindRecursive("RightEye");
@@ -194,6 +197,15 @@ namespace Arteranos.NetworkIO
             apd.UploadJointNames(jointnames.ToArray());
 
             ResetPose();
+
+            // And reconfigure the XR Rig to match the avatar's dimensions.
+            XR.XRControl xrc = FindObjectOfType<XR.XRControl>();
+            Transform fullHeight = agot.FindRecursive("HeadTop_End");
+
+            xrc.m_EyeHeight = cEyePos.y - transform.position.y;
+            xrc.m_BodyHeight = fullHeight.transform.position.y - transform.position.y;
+
+            xrc.ReconfigureXRRig();
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)
