@@ -29,7 +29,7 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "4d9639389fabd51f626a51252944d1efdfbbef23"
+      "hash": "39d3c866dc303d717bf3a7b1f3fd5347c155d94f"
     },
     "com.readyplayerme.webview": {
       "version": "https://github.com/readyplayerme/Unity-WebView.git#develop",
