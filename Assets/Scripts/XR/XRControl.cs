@@ -1,6 +1,7 @@
 using Arteranos.ExtensionMethods;
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.Events;
@@ -14,20 +15,33 @@ namespace Arteranos.XR
 
     public class XRControl : MonoBehaviour
     {
+        public static XRControl Singleton { get; private set; }
+        public static XROrigin CurrentVRRig { get; private set; }
+        public static ev_XRSwitch XRSwitchEvent { get; private set; } = new ev_XRSwitch();
+        public static bool UsingXR { get; private set; }
+        public static Vector3 CameraLocalOffset { get; private set; }
+
         public XROrigin VRRig;
         public XROrigin NoVRRig;
 
-        public bool m_UsingXR { get; private set; }
 
         private Core.SettingsManager m_SettingsManager = null;
-
-        public ev_XRSwitch m_XRSwitchEvent { get; private set; } = new ev_XRSwitch();
 
         public float m_EyeHeight { get; set; }
 
         public float m_BodyHeight { get; set; }
 
-        public Vector3 m_CameraLocalOffset { get; private set; }
+
+        public void Awake()
+        {
+            Singleton = this;
+            CurrentVRRig = FindObjectOfType<XROrigin>();
+        }
+
+        public void OnDestroy()
+        {
+            Singleton = null;
+        }
 
         public IEnumerator StartXRCoroutine()
         {
@@ -78,23 +92,23 @@ namespace Arteranos.XR
 
         void UpdateXROrigin(bool useVR)
         {
-            XROrigin oldXROigin = FindObjectOfType<XROrigin>();
+            CurrentVRRig = FindObjectOfType<XROrigin>();
 
             Vector3 position = Vector3.zero;
             Quaternion rotation = Quaternion.identity;
 
-            if(oldXROigin != null)
+            if(CurrentVRRig != null)
             {
-                position = oldXROigin.transform.position;
-                rotation = oldXROigin.transform.rotation;
+                position = CurrentVRRig.transform.position;
+                rotation = CurrentVRRig.transform.rotation;
 
-                Destroy(oldXROigin);
+                Destroy(CurrentVRRig);
             }
 
-            XROrigin xro = Instantiate(useVR ? VRRig : NoVRRig, position, rotation);
-            ReconfigureXRRig(xro);
-            m_XRSwitchEvent.Invoke(useVR);
-            m_UsingXR = useVR;
+            CurrentVRRig = Instantiate(useVR ? VRRig : NoVRRig, position, rotation);
+            ReconfigureXRRig();
+            XRSwitchEvent.Invoke(useVR);
+            UsingXR = useVR;
         }
 
         // Cleanly shut down XR on exit.
@@ -109,22 +123,18 @@ namespace Arteranos.XR
         /// Reconfigure the XR rig to the new dimensions if we're switched
         /// from VR to 2D mode or switched avatars.
         /// </summary>
-        /// <param name="xro">The new or xurrent XROrigin</param>
-        public void ReconfigureXRRig(XROrigin xro = null)
+        public void ReconfigureXRRig()
         {
-            if(xro == null)
-                xro = FindObjectOfType<XROrigin>();
+            Camera cam = CurrentVRRig.Camera;
+            GameObject offsetObject = CurrentVRRig.CameraFloorOffsetObject;
 
-            Camera cam = xro.Camera;
-            GameObject offsetObject = xro.CameraFloorOffsetObject;
+            CameraLocalOffset = cam.transform.localPosition;
 
-            m_CameraLocalOffset = cam.transform.localPosition;
+            CurrentVRRig.RequestedTrackingOriginMode = XROrigin.TrackingOriginMode.NotSpecified;
+            CurrentVRRig.CameraYOffset = m_EyeHeight - CameraLocalOffset.y;
+            offsetObject.transform.localPosition = new Vector3(0, m_EyeHeight, 0.2f) - CameraLocalOffset;
 
-            xro.RequestedTrackingOriginMode = XROrigin.TrackingOriginMode.NotSpecified;
-            xro.CameraYOffset = m_EyeHeight - m_CameraLocalOffset.y;
-            offsetObject.transform.localPosition = new Vector3(0, m_EyeHeight, 0.2f) - m_CameraLocalOffset;
-
-            CharacterController cc = xro.GetComponent<CharacterController>();
+            CharacterController cc = CurrentVRRig.GetComponent<CharacterController>();
             cc.height = m_BodyHeight;
             cc.center = new Vector3(0, m_BodyHeight / 2, 0);
 

@@ -199,7 +199,7 @@ namespace Arteranos.NetworkIO
             ResetPose();
 
             // And reconfigure the XR Rig to match the avatar's dimensions.
-            XR.XRControl xrc = FindObjectOfType<XR.XRControl>();
+            XR.XRControl xrc = XR.XRControl.Singleton;
             Transform fullHeight = agot.FindRecursive("HeadTop_End");
 
             xrc.m_EyeHeight = cEyePos.y - transform.position.y;
