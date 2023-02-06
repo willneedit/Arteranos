@@ -17,7 +17,7 @@ namespace Arteranos.XR
     {
         public static XRControl Singleton { get; private set; }
         public static XROrigin CurrentVRRig { get; private set; }
-        public static ev_XRSwitch XRSwitchEvent { get; private set; } = new ev_XRSwitch();
+        public static ev_XRSwitch XRSwitchEvent { get; private set; } = new();
         public static bool UsingXR { get; private set; }
         public static Vector3 CameraLocalOffset { get; private set; }
 

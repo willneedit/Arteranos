@@ -81,7 +81,7 @@ namespace Arteranos.NetworkIO
             m_AvatarURL = avatarURL;
         }
 
-        void OnAvatarURLChanged(string old, string current)
+        void OnAvatarURLChanged(string _, string current)
         {
             if(loading) return;
 
@@ -144,21 +144,21 @@ namespace Arteranos.NetworkIO
         {
             if (LeftHand != null)
             {
-                Vector3 idle_lh = new Vector3(-0.4f, 0, 0);
+                Vector3 idle_lh = new(-0.4f, 0, 0);
                 Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
                 LeftHand.SetLocalPositionAndRotation(idle_lh, idle_rlh);
             }
 
             if (RightHand != null)
             {
-                Vector3 idle_rh = new Vector3(0.4f, 0, 0);
+                Vector3 idle_rh = new(0.4f, 0, 0);
                 Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
                 RightHand.SetLocalPositionAndRotation(idle_rh, idle_rrh);
             }
 
         }
 
-        void AvatarLoadComplete(object sender, CompletionEventArgs args)
+        void AvatarLoadComplete(object _, CompletionEventArgs args)
         {
             Debug.Log("Successfully loaded avatar");
             loading = false;
@@ -173,7 +173,7 @@ namespace Arteranos.NetworkIO
             agot.SetParent(transform);
             agot.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
-            List<string> jointnames = new List<string>();
+            List<string> jointnames = new();
 
             LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames);
             RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames);
@@ -183,7 +183,9 @@ namespace Arteranos.NetworkIO
 
             Transform rEye = agot.FindRecursive("RightEye");
             Transform lEye = agot.FindRecursive("LeftEye");
-            Vector3 cEyePos = (lEye.position + rEye.position) / 2;
+
+            // FIXME Fixup for the VR device specific skew?
+            Vector3 cEyePos = (lEye.position + rEye.position) / 2 + new Vector3(0, 0, 0.11f);
 
             if(isOwned)
             {

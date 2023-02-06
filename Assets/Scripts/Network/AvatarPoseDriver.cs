@@ -16,14 +16,11 @@ namespace Arteranos.NetworkIO
     {
         public Transform m_LeftHand;
         public Transform m_RightHand;
-        public Transform m_Camera;
-
-        private bool m_usingXR;
 
         public Transform[] m_JointTransforms = new Transform[SyncPose.MAX_JOINTS];
         public string[] m_JointNames = new string[SyncPose.MAX_JOINTS];
 
-        public readonly SyncPose m_Joint = new SyncPose();
+        public readonly SyncPose m_Joint = new();
 
         private IAvatarLoader m_AvatarData = null;
 
@@ -91,12 +88,14 @@ namespace Arteranos.NetworkIO
         public void UpdateOwnPose()
         {
             // VR: pull the strings of the puppet handles...
-            if(m_usingXR)
+            if(XRControl.UsingXR)
             {
                 if (m_AvatarData.CenterEye == null) return;
 
-                // FIXME: Only intereested to the y offset.
-                Vector3 cEyeOffset = m_AvatarData.CenterEye.position - m_Camera.position;
+                Transform cam = XRControl.CurrentVRRig.Camera.transform;
+
+                Vector3 cEyeOffset = m_AvatarData.CenterEye.position - 
+                    cam.position;
 
                 if (m_LeftHand && m_AvatarData.LeftHand)
                     m_AvatarData.LeftHand.SetPositionAndRotation(
@@ -107,6 +106,9 @@ namespace Arteranos.NetworkIO
                     m_AvatarData.RightHand.SetPositionAndRotation(
                             m_RightHand.position + cEyeOffset,
                             m_RightHand.rotation * m_AvatarData.RhrOffset);
+
+                if(m_AvatarData.Head)
+                    m_AvatarData.Head.rotation = cam.rotation;
             }
 
             // ...but, the IK has to be made it real in the course of the next frame.
@@ -114,7 +116,7 @@ namespace Arteranos.NetworkIO
 
             // Pack the pose changes in the puppet...
             ushort mask = 0;
-            List<NetworkRotation> lnr = new List<NetworkRotation>();
+            List<NetworkRotation> lnr = new();
 
             for (int i = 0; i < SyncPose.MAX_JOINTS; i++)
             {
@@ -143,7 +145,6 @@ namespace Arteranos.NetworkIO
 
         void OnXRChanged(bool useXR)
         {
-            m_usingXR = useXR;
             Transform xrot = XRControl.CurrentVRRig.transform;
 
             if (useXR)
