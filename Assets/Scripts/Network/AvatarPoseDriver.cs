@@ -111,9 +111,6 @@ namespace Arteranos.NetworkIO
                     m_AvatarData.Head.rotation = cam.rotation;
             }
 
-            // ...but, the IK has to be made it real in the course of the next frame.
-
-
             // Pack the pose changes in the puppet...
             ushort mask = 0;
             List<NetworkRotation> lnr = new();
@@ -169,9 +166,6 @@ namespace Arteranos.NetworkIO
         {
             if(isOwned)
             {
-                // FIXME: laggy due to IK update.
-                UpdateOwnPose();
-
                 XROrigin xro = XRControl.CurrentVRRig;
                 Camera cam = xro.Camera;
 
@@ -181,7 +175,11 @@ namespace Arteranos.NetworkIO
                 transform.SetPositionAndRotation(xro.transform.position + 
                     xro.transform.rotation * playSpace,
                     xro.transform.rotation);
-            } 
+
+                // Needs to update the pose AFTER the position and rotation because
+                // of a nasty flickering.
+                UpdateOwnPose();
+            }
             else
             {
                 UpdateAlienPose();
