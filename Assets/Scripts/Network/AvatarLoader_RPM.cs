@@ -9,6 +9,7 @@ using Arteranos.ExtensionMethods;
 using Mirror;
 using System.Collections.Generic;
 using Unity.XR.CoreUtils;
+using Mono.Cecil;
 
 namespace Arteranos.NetworkIO
 {
@@ -35,13 +36,14 @@ namespace Arteranos.NetworkIO
 
         public override void OnStartClient()
         {
-            m_SettingsManager = FindObjectOfType<Arteranos.Core.SettingsManager>();
+            m_SettingsManager = FindObjectOfType<Core.SettingsManager>();
 
             this.name = this.name + "_" + netIdentity.netId;
 
             if(m_SettingsManager.m_Server.ShowAvatars || !isServer || isLocalPlayer)
             {
                 m_AvatarLoader = new AvatarObjectLoader();
+                // m_AvatarLoader.SaveInProjectFolder = true;
                 m_AvatarLoader.OnCompleted += AvatarLoadComplete;
                 m_AvatarLoader.OnFailed += AvatarLoadFailed;
 
@@ -116,9 +118,9 @@ namespace Arteranos.NetworkIO
             // Owner is setting up the IK and the puppet handles...
             if(isOwned)
             {
-                handle = new GameObject("Handle_" + limb).transform;
+                handle = new GameObject("Target_" + limb).transform;
                 handle.SetPositionAndRotation(limbT.position, limbT.rotation);
-                handle.SetParent(avatar.transform.parent);
+                handle.SetParent(avatar.transform);
 
                 if(poleOffset != null)
                 {
@@ -126,7 +128,7 @@ namespace Arteranos.NetworkIO
                     pole.SetPositionAndRotation(
                         limbT.position + avatar.transform.rotation * poleOffset.Value,
                         limbT.rotation);
-                    pole.SetParent(avatar.transform.parent);
+                    pole.SetParent(avatar.transform);
                 }
                 FastIKFabric limbIK = limbT.gameObject.AddComponent<FastIKFabric>();
 
@@ -170,14 +172,8 @@ namespace Arteranos.NetworkIO
 
         }
 
-        void AvatarLoadComplete(object _, CompletionEventArgs args)
+        private void SetupAvatar(CompletionEventArgs args)
         {
-            Debug.Log("Successfully loaded avatar");
-            loading = false;
-
-            if(m_AvatarGameObject != null)
-                Destroy(m_AvatarGameObject);
-
             m_AvatarGameObject = args.Avatar;
             Transform agot = m_AvatarGameObject.transform;
 
@@ -187,8 +183,8 @@ namespace Arteranos.NetworkIO
 
             List<string> jointnames = new();
 
-            LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames, new Vector3(0, 0, -2));
-            RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames, new Vector3(0, 0, -2));
+            LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames);
+            RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames);
             LeftFoot = RigNetworkIK(m_AvatarGameObject, "LeftFoot", ref jointnames, new Vector3(0, 0, 2));
             RightFoot = RigNetworkIK(m_AvatarGameObject, "RightFoot", ref jointnames, new Vector3(0, 0, 2));
             Head = RigNetworkIK(m_AvatarGameObject, "Head", ref jointnames, null, 1);
@@ -201,9 +197,15 @@ namespace Arteranos.NetworkIO
 
             if(isOwned)
             {
-                CenterEye = new GameObject("Handle_centerEye").transform;
+                CenterEye = new GameObject("Target_centerEye").transform;
                 CenterEye.SetPositionAndRotation(cEyePos, rEye.rotation);
-                CenterEye.SetParent(agot.parent);
+                CenterEye.SetParent(agot);
+
+                Animator anim = args.Avatar.GetComponent<Animator>();
+                anim.avatar = null;
+
+                RuntimeAnimatorController rac = Resources.Load<RuntimeAnimatorController>("BaseRPMAnimator");
+                anim.runtimeAnimatorController = rac;
             }
 
             // Now upload the skeleton joint data to the Avatar Pose driver.
@@ -220,6 +222,21 @@ namespace Arteranos.NetworkIO
             xrc.m_BodyHeight = fullHeight.transform.position.y - transform.position.y;
 
             xrc.ReconfigureXRRig();
+
+            // Lastly, breathe some life into the avatar.
+            EyeAnimationHandler eah = args.Avatar.AddComponent<EyeAnimationHandler>();
+            eah.BlinkInterval = 6; // 3 seconds is a little bit too fast.
+        }
+
+        void AvatarLoadComplete(object _, CompletionEventArgs args)
+        {
+            Debug.Log("Successfully loaded avatar");
+            loading = false;
+
+            if(m_AvatarGameObject != null)
+                Destroy(m_AvatarGameObject);
+
+            SetupAvatar(args);
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)

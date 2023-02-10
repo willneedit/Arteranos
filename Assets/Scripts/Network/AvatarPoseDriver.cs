@@ -129,6 +129,19 @@ namespace Arteranos.NetworkIO
                 }
             }
 
+            XROrigin xro = XRControl.CurrentVRRig;
+            CharacterController cc = xro.GetComponent<CharacterController>();
+            Animator anim = GetComponentInChildren<Animator>();
+
+            if(anim != null)
+            {
+                Vector3 moveSpeed = cc.velocity;
+                if(moveSpeed.sqrMagnitude > 0.1f)
+                    anim.SetBool("isWalking", true);
+                else
+                    anim.SetBool("isWalking", false);
+            }
+
             // ... and propagate it to the others to view it.
             SendToOwnPose(mask, lnr);
         }
