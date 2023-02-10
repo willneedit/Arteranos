@@ -9,8 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b50d26d65b1fce41a02e310760cd025, type: 3}
-  m_Name: AvatarLoaderSettings
+  m_Script: {fileID: 11500000, guid: 3663d6a9358ae4149aad3496e56d4601, type: 3}
+  m_Name: Default Avatar Configuration
   m_EditorClassIdentifier: 
-  AvatarCachingEnabled: 1
-  AvatarConfig: {fileID: 11400000, guid: 5ee7effaa8b811b439614860b93d5a59, type: 2}
+  MeshLod: 0
+  Pose: 0
+  TextureAtlas: 1
+  TextureSizeLimit: 1024
+  UseHands: 0
+  UseDracoCompression: 0
+  MorphTargets:
+  - eyeBlinkLeft
+  - eyeBlinkRight
+  - mouthOpen
