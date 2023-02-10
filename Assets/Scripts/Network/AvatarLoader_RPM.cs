@@ -97,9 +97,12 @@ namespace Arteranos.NetworkIO
             m_AvatarLoader.LoadAvatar(current.ToString());
         }
 
-        Transform RigNetworkIK(GameObject avatar, string limb, ref List<string> jointnames, int bones = 2)
+        Transform RigNetworkIK(
+            GameObject avatar, string limb, ref List<string> jointnames,
+            Vector3? poleOffset = null, int bones = 2)
         {
             Transform handle = null;
+            Transform pole = null;
     
             Transform limbT = avatar.transform.FindRecursive(limb);
             if(limbT == null)
@@ -117,10 +120,19 @@ namespace Arteranos.NetworkIO
                 handle.SetPositionAndRotation(limbT.position, limbT.rotation);
                 handle.SetParent(avatar.transform.parent);
 
+                if(poleOffset != null)
+                {
+                    pole = new GameObject("Pole_" + limb).transform;
+                    pole.SetPositionAndRotation(
+                        limbT.position + avatar.transform.rotation * poleOffset.Value,
+                        limbT.rotation);
+                    pole.SetParent(avatar.transform.parent);
+                }
                 FastIKFabric limbIK = limbT.gameObject.AddComponent<FastIKFabric>();
 
                 limbIK.ChainLength = bones;
                 limbIK.Target = handle;
+                limbIK.Pole = pole;
             }
 
             // Owned and alien avatars have to set up the Skeleton IK data record.
@@ -175,11 +187,11 @@ namespace Arteranos.NetworkIO
 
             List<string> jointnames = new();
 
-            LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames);
-            RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames);
-            LeftFoot = RigNetworkIK(m_AvatarGameObject, "LeftFoot", ref jointnames);
-            RightFoot = RigNetworkIK(m_AvatarGameObject, "RightFoot", ref jointnames);
-            Head = RigNetworkIK(m_AvatarGameObject, "Head", ref jointnames, 1);
+            LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames, new Vector3(0, 0, -2));
+            RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames, new Vector3(0, 0, -2));
+            LeftFoot = RigNetworkIK(m_AvatarGameObject, "LeftFoot", ref jointnames, new Vector3(0, 0, 2));
+            RightFoot = RigNetworkIK(m_AvatarGameObject, "RightFoot", ref jointnames, new Vector3(0, 0, 2));
+            Head = RigNetworkIK(m_AvatarGameObject, "Head", ref jointnames, null, 1);
 
             Transform rEye = agot.FindRecursive("RightEye");
             Transform lEye = agot.FindRecursive("LeftEye");
