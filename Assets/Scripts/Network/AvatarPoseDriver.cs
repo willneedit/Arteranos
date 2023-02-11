@@ -24,6 +24,8 @@ namespace Arteranos.NetworkIO
 
         private IAvatarLoader m_AvatarData = null;
 
+        public Vector3 m_Debug_Velocity;
+
         public void Awake()
         {
             syncDirection = SyncDirection.ServerToClient;
@@ -135,11 +137,8 @@ namespace Arteranos.NetworkIO
 
             if(anim != null)
             {
-                Vector3 moveSpeed = cc.velocity;
-                if(moveSpeed.sqrMagnitude > 0.1f)
-                    anim.SetBool("isWalking", true);
-                else
-                    anim.SetBool("isWalking", false);
+                Vector3 moveSpeed = m_Debug_Velocity =  Quaternion.Inverse(transform.rotation) * cc.velocity;
+                anim.SetFloat("Walking", moveSpeed.z);
             }
 
             // ... and propagate it to the others to view it.
