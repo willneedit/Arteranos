@@ -136,7 +136,7 @@ namespace Arteranos.XR
 
             CharacterController cc = CurrentVRRig.GetComponent<CharacterController>();
             cc.height = m_BodyHeight;
-            cc.center = new Vector3(0, m_BodyHeight / 2, 0);
+            cc.center = new Vector3(0, m_BodyHeight / 2 + cc.skinWidth, 0);
 
         }
 
