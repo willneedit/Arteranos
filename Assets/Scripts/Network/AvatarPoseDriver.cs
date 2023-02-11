@@ -1,3 +1,5 @@
+// #define DEBUG_POSE
+
 using UnityEngine;
 using System;
 using Unity.XR.CoreUtils;
@@ -8,6 +10,7 @@ using Arteranos.ExtensionMethods;
 using Arteranos.XR;
 using Arteranos.NetworkTypes;
 using System.Collections.Generic;
+
 
 namespace Arteranos.NetworkIO
 {
@@ -23,8 +26,6 @@ namespace Arteranos.NetworkIO
         public readonly SyncPose m_Joint = new();
 
         private IAvatarLoader m_AvatarData = null;
-
-        public Vector3 m_Debug_Velocity;
 
         public void Awake()
         {
@@ -87,6 +88,23 @@ namespace Arteranos.NetworkIO
             }
         }
 
+#if DEBUG_POSE
+        Vector3 m_Debug_nr = new();
+        float m_Debug_time = 0.0f;
+
+        public void Debug_NRLog()
+        {
+            if(m_Joint[6].X != m_Debug_nr.x || m_Joint[6].Y != m_Debug_nr.y || m_Joint[6].Z != m_Debug_nr.z)
+            {
+                float current = Time.timeSinceLevelLoad;
+                Debug.Log($"x={m_Debug_nr.x}, y={m_Debug_nr.y}, z={m_Debug_nr.z}, deltatime={current - m_Debug_time}");
+                m_Debug_nr.x = m_Joint[6].X;
+                m_Debug_nr.y = m_Joint[6].Y;
+                m_Debug_nr.z = m_Joint[6].Z;
+                m_Debug_time = current;
+            }
+        }
+#endif
         public void UpdateOwnPose()
         {
             // VR: pull the strings of the puppet handles...
@@ -131,13 +149,17 @@ namespace Arteranos.NetworkIO
                 }
             }
 
+#if DEBUG_POSE
+            Debug_NRLog();
+#endif
+
             XROrigin xro = XRControl.CurrentVRRig;
             CharacterController cc = xro.GetComponent<CharacterController>();
             Animator anim = GetComponentInChildren<Animator>();
 
             if(anim != null)
             {
-                Vector3 moveSpeed = m_Debug_Velocity =  Quaternion.Inverse(transform.rotation) * cc.velocity;
+                Vector3 moveSpeed = Quaternion.Inverse(transform.rotation) * cc.velocity;
                 anim.SetFloat("Walking", moveSpeed.z);
             }
 
@@ -150,6 +172,10 @@ namespace Arteranos.NetworkIO
             for (int i = 0; i < SyncPose.MAX_JOINTS; i++)
                 if (m_JointTransforms[i] != null)
                     m_JointTransforms[i].localRotation = m_Joint[i].ToQuaternion();
+
+#if DEBUG_POSE
+            Debug_NRLog();
+#endif
         }
 
         void OnXRChanged(bool useXR)
