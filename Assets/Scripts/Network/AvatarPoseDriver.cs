@@ -20,12 +20,8 @@ namespace Arteranos.NetworkIO
         public Transform m_LeftHand;
         public Transform m_RightHand;
 
-        public Transform[] m_JointTransforms = new Transform[SyncPose.MAX_JOINTS];
-        public string[] m_JointNames = new string[SyncPose.MAX_JOINTS];
-
-        public readonly SyncPose m_Joint = new();
-
         private IAvatarLoader m_AvatarData = null;
+        private NetworkPose m_Poser = null;
 
         public void Awake()
         {
@@ -37,6 +33,8 @@ namespace Arteranos.NetworkIO
             base.OnStartClient();
 
             m_AvatarData = GetComponent<AvatarLoader_RPM>();
+            m_Poser = GetComponent<NetworkPose>();
+
             if(isOwned)
             {
                 XRControl.XRSwitchEvent.AddListener(OnXRChanged);
@@ -60,51 +58,9 @@ namespace Arteranos.NetworkIO
         /// <param name="names">Array of the joint (aka bone) names</param>
         public void UploadJointNames(string[] names)
         {
-            Debug.Log($"UploadJointNames: {netIdentity.netId}");
-            if(names.Length > SyncPose.MAX_JOINTS)
-                throw new ArgumentOutOfRangeException($"{name.Length} exceeds {SyncPose.MAX_JOINTS}");
-
-            for (int i1 = 0; i1 < SyncPose.MAX_JOINTS; i1++)
-            {
-                m_JointNames[i1] = String.Empty;
-                m_JointTransforms[i1] = null;
-            }
-
-            for(int i2 = 0; i2 < names.Length; i2++)
-            {
-                m_JointNames[i2] = names[i2];
-                if((m_JointTransforms[i2] = transform.FindRecursive(names[i2])) == null)
-                    throw new ArgumentException($"Mismatch in skeleton: Nonexistent bone '{names[i2]}' in the loaded avatar");
-            }
+            m_Poser.UploadJointNames(names);
         }
 
-        [Command]
-        public void SendToOwnPose(ushort mask, List<NetworkRotation> pack)
-        {
-            for(int i = 0, j = 0; i<SyncPose.MAX_JOINTS; i++)
-            {
-                if((ushort)(mask & (1 << i)) != 0)
-                    m_Joint[i] = pack[j++];
-            }
-        }
-
-#if DEBUG_POSE
-        Vector3 m_Debug_nr = new();
-        float m_Debug_time = 0.0f;
-
-        public void Debug_NRLog()
-        {
-            if(m_Joint[6].X != m_Debug_nr.x || m_Joint[6].Y != m_Debug_nr.y || m_Joint[6].Z != m_Debug_nr.z)
-            {
-                float current = Time.timeSinceLevelLoad;
-                Debug.Log($"x={m_Debug_nr.x}, y={m_Debug_nr.y}, z={m_Debug_nr.z}, deltatime={current - m_Debug_time}");
-                m_Debug_nr.x = m_Joint[6].X;
-                m_Debug_nr.y = m_Joint[6].Y;
-                m_Debug_nr.z = m_Joint[6].Z;
-                m_Debug_time = current;
-            }
-        }
-#endif
         public void UpdateOwnPose()
         {
             // VR: pull the strings of the puppet handles...
@@ -131,28 +87,6 @@ namespace Arteranos.NetworkIO
                     m_AvatarData.Head.rotation = cam.rotation;
             }
 
-            // Pack the pose changes in the puppet...
-            ushort mask = 0;
-            List<NetworkRotation> lnr = new();
-
-            for (int i = 0; i < SyncPose.MAX_JOINTS; i++)
-            {
-                if (m_JointTransforms[i] != null)
-                {
-                    NetworkRotation nr = m_JointTransforms[i].localRotation.ToNetworkRotation();
-                    if(m_Joint[i] != nr)
-                    {
-                        m_Joint[i] = nr;
-                        lnr.Add(m_Joint[i]);
-                        mask = (ushort)(mask | (1 << i));
-                    }
-                }
-            }
-
-#if DEBUG_POSE
-            Debug_NRLog();
-#endif
-
             XROrigin xro = XRControl.CurrentVRRig;
             CharacterController cc = xro.GetComponent<CharacterController>();
             Animator anim = GetComponentInChildren<Animator>();
@@ -162,20 +96,11 @@ namespace Arteranos.NetworkIO
                 Vector3 moveSpeed = Quaternion.Inverse(transform.rotation) * cc.velocity;
                 anim.SetFloat("Walking", moveSpeed.z);
             }
-
-            // ... and propagate it to the others to view it.
-            SendToOwnPose(mask, lnr);
         }
 
         public void UpdateAlienPose()
         {
-            for (int i = 0; i < SyncPose.MAX_JOINTS; i++)
-                if (m_JointTransforms[i] != null)
-                    m_JointTransforms[i].localRotation = m_Joint[i].ToQuaternion();
 
-#if DEBUG_POSE
-            Debug_NRLog();
-#endif
         }
 
         void OnXRChanged(bool useXR)

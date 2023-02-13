@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 244397833489866318}
   - component: {fileID: 2032202113796676651}
   - component: {fileID: 4281725133606322112}
+  - component: {fileID: 3802344986434043942}
   m_Layer: 0
   m_Name: Avatar_Loading
   m_TagString: Untagged
@@ -50,44 +51,8 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
-  m_Controller: {fileID: 0}
   m_LeftHand: {fileID: 0}
   m_RightHand: {fileID: 0}
-  m_Camera: {fileID: 0}
-  m_JointTransforms:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  m_JointNames:
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
 --- !u!114 &244397833489866318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,10 +71,6 @@ MonoBehaviour:
   m_AvatarURL: 
   m_AvatarStandin: {fileID: 3985354216906982376, guid: 67b69500f6853f9409549929b49e4dc2,
     type: 3}
-  m_LeftHand: {fileID: 0}
-  m_RightHand: {fileID: 0}
-  m_CenterEye: {fileID: 0}
-  m_Head: {fileID: 0}
 --- !u!114 &2032202113796676651
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,3 +117,24 @@ MonoBehaviour:
   compressRotation: 0
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &3802344986434043942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2697617456504013145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de1631256bdb4a747be0294dcb6a6bb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  jointNames: []
+  jointTransforms: []
+  onlySyncOnChange: 0
+  onlySyncOnChangeCorrectionMultiplier: 2
+  rotationSensitivity: 0.001
+  compressRotation: 1
