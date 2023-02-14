@@ -23,7 +23,9 @@ namespace Arteranos.NetworkIO
 
         public static PoseSnapshot Interpolate(PoseSnapshot from, PoseSnapshot to, double t)
         {
-            Debug.Assert(from.rotation.Length == to.rotation.Length);
+            Debug.Assert(to.rotation.Length == MAX_SIZE);
+            Debug.Assert(from.rotation.Length == MAX_SIZE);
+
             Quaternion[] interpolated = new Quaternion[to.rotation.Length];
             for(int i = 0; i < from.rotation.Length; i++)
                 interpolated[i] = Quaternion.SlerpUnclamped(from.rotation[i], to.rotation[i], (float)t);
@@ -37,17 +39,18 @@ namespace Arteranos.NetworkIO
                 interpolated);
         }
 
-        public ushort Changed(PoseSnapshot last, float rotationSensitivity)
+        public ushort Changed(Quaternion[] last, float rotationSensitivity)
         {
             // last.rotation == null means there's never been a 'last' one.
 
-            if(last.rotation == null || 
-                last.rotation.Length != rotation.Length) return (ushort) ((1 << MAX_SIZE) - 1);
+            if(last == null) return (ushort) ((1 << MAX_SIZE) - 1);
 
-            Debug.Assert(rotation.Length <= MAX_SIZE);
+            Debug.Assert(rotation.Length == MAX_SIZE);
+            Debug.Assert(last.Length == MAX_SIZE);
+
             int mask = 0;
-            for(int i = 0; i < last.rotation.Length; i++)
-                if(Quaternion.Angle(last.rotation[i], rotation[i]) > rotationSensitivity)
+            for(int i = 0; i < last.Length; i++)
+                if(Quaternion.Angle(last[i], rotation[i]) > rotationSensitivity)
                     mask |= 1 << i;
 
             return (ushort) mask;
@@ -55,34 +58,44 @@ namespace Arteranos.NetworkIO
     }
     public static class ExtendPoseSnapshot
     {
-        public static void WritePoseSnapshot(this NetworkWriter writer, Quaternion[] quats, bool compressRotation)
+        public static void WritePoseSnapshot(this NetworkWriter writer, 
+            Quaternion[] quats,
+            ref Quaternion[] lastQuats,
+            ushort mask, 
+            bool compressRotation)
         {
-            writer.WriteByte((byte) quats.Length);
+            Debug.Assert(quats.Length == PoseSnapshot.MAX_SIZE);
+
+            writer.WriteUShort(mask);
 
             for(int i = 0; i < quats.Length; i++)
-            {
-                if(compressRotation)
-                    writer.WriteUInt(Compression.CompressQuaternion(quats[i]));
-                else
-                    writer.WriteQuaternion(quats[i]);
-            }
+                if((mask & (1 << i)) != 0)
+                {
+                    if(compressRotation)
+                        writer.WriteUInt(Compression.CompressQuaternion(quats[i]));
+                    else
+                        writer.WriteQuaternion(quats[i]);
+
+                    // lastQuats are to be only updated when sent, to avoid 'drifting' if
+                    // the small changes repeatedly go under the threshold's radar.
+                    lastQuats[i] = quats[i];
+                }
         }
 
-        public static Quaternion[] ReadPoseSnapshot(this NetworkReader reader, bool compressRotation)
+        public static Quaternion[] ReadPoseSnapshot(this NetworkReader reader, ref Quaternion[] quats, bool compressRotation)
         {
-            int length = reader.ReadByte();
+            Debug.Assert(quats.Length == PoseSnapshot.MAX_SIZE);
 
-            Debug.Assert(length <= PoseSnapshot.MAX_SIZE);
-
-            Quaternion[] quats = new Quaternion[length];
+            ushort mask = reader.ReadUShort();
 
             for(int i = 0; i < quats.Length; i++)
-            {
-                if(compressRotation)
-                    quats[i] = Compression.DecompressQuaternion(reader.ReadUInt());
-                else
-                    quats[i] = reader.ReadQuaternion();
-            }
+                if((mask & (1 << i)) != 0)
+                {
+                    if(compressRotation)
+                        quats[i] = Compression.DecompressQuaternion(reader.ReadUInt());
+                    else
+                        quats[i] = reader.ReadQuaternion();
+                }
 
             return quats;
         }

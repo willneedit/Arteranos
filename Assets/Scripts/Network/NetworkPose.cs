@@ -23,7 +23,7 @@ namespace Arteranos.NetworkIO
         protected PoseSnapshot last;
 
         protected virtual bool Changed(PoseSnapshot current) =>
-            current.Changed(last, rotationSensitivity) != 0;
+            current.Changed(last.rotation, rotationSensitivity) != 0;
 
         // only sync on change /////////////////////////////////////////////////
         // snap interp. needs a continous flow of packets.
@@ -117,9 +117,8 @@ namespace Arteranos.NetworkIO
             syncDirection == SyncDirection.ClientToServer &&
             serverSnapshots.Count > 0;
 
-        // NT may be used on client/server/host to Owner/Observers with
-        // ServerToClient or ClientToServer.
-        // however, OnSerialize should always delta against last.
+        Quaternion[] lastSerializedRotations = null;
+
         public override void OnSerialize(NetworkWriter writer, bool initialState)
         {
             // get current snapshot for broadcasting.
@@ -135,28 +134,34 @@ namespace Arteranos.NetworkIO
                 // Debug.Log($"Skipped snapshot queue for {name} to snapshot[{serverSnapshots.Count-1}]");
             }
 
-            // TODO dirty mask? [compression is very good w/o it already]
-            // each vector's component is delta compressed.
-            // an unchanged component would still require 1 byte.
-            // let's use a dirty bit mask to filter those out as well.
+            ushort mask;
+            if(initialState || lastSerializedRotations == null)
+            {
+                // initial - serialize all of these
+                mask = (1 << PoseSnapshot.MAX_SIZE) - 1;
+                lastSerializedRotations = new Quaternion[PoseSnapshot.MAX_SIZE];
+            }
+            else // ... and delta
+                mask = snapshot.Changed(lastSerializedRotations, rotationSensitivity);
 
-            // initial & delta
-            if (syncRotation)
-                writer.WritePoseSnapshot(snapshot.rotation, compressRotation);
+            writer.WritePoseSnapshot(snapshot.rotation, ref lastSerializedRotations, mask, compressRotation);
 
             // set 'last'
             last = snapshot;
         }
 
+        Quaternion[] lastDeserializedRotations = null;
+
         public override void OnDeserialize(NetworkReader reader, bool initialState)
         {
             Quaternion[] rotation = null;
 
-            // initial & delta
-            if (syncRotation)
-            {
-                rotation = reader.ReadPoseSnapshot(compressRotation);
-            }
+            // initial...
+            if(initialState || lastDeserializedRotations == null)
+                lastDeserializedRotations = new Quaternion[PoseSnapshot.MAX_SIZE];
+
+            // ... and delta
+            rotation = reader.ReadPoseSnapshot(ref lastDeserializedRotations, compressRotation);
 
             // handle depending on server / client / host.
             // server has priority for host mode.

@@ -14,8 +14,6 @@ namespace Arteranos.NetworkIO
         public readonly SortedList<double, PoseSnapshot> clientSnapshots = new SortedList<double, PoseSnapshot>();
         public readonly SortedList<double, PoseSnapshot> serverSnapshots = new SortedList<double, PoseSnapshot>();
 
-        public const bool syncRotation = true;
-
         public string[] jointNames = null;
         public Transform[] jointTransforms = null;
 
@@ -51,13 +49,6 @@ namespace Arteranos.NetworkIO
             return rotations;
         }
 
-        public void ApplyPoseData(Quaternion[] data)
-        {
-            for(int i = 0; i < jointTransforms.Length; i++)
-                if(jointTransforms[i] != null)
-                    jointTransforms[i].transform.localRotation = data[i];
-        }
-
         protected virtual void OnValidate()
         {
             syncDirection = SyncDirection.ClientToServer;
@@ -88,7 +79,11 @@ namespace Arteranos.NetworkIO
 
         protected virtual void Apply(PoseSnapshot interpolated)
         {
-            if (syncRotation) ApplyPoseData(interpolated.rotation);
+            Quaternion[] data = interpolated.rotation;
+
+            for(int i = 0; i < jointTransforms.Length; i++)
+                if(jointTransforms[i] != null)
+                    jointTransforms[i].transform.localRotation = data[i];
         }
 
         public virtual void Reset()
