@@ -66,7 +66,11 @@ namespace Arteranos.NetworkIO
             Ray ray = new(foot.position + Vector3.up * 0.5f, Vector3.down);
             RaycastHit hitInfo = new();
             if(Physics.SphereCast(ray, 0.10f, out hitInfo, 0.50f))
+            {
                 foot.position = hitInfo.point + Vector3.up * 0.10f;
+                foot.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal) 
+                    * foot.rotation;
+            }
         }
 
         public void UpdateOwnPose()
