@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.adrenak.univoice": {
+      "version": "2.0.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://registry.npmjs.org"
+    },
     "com.atteneder.gltfast": {
       "version": "https://github.com/atteneder/glTFast.git#v5.0.0",
       "depth": 0,
