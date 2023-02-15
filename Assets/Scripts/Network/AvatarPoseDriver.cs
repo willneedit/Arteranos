@@ -61,24 +61,32 @@ namespace Arteranos.NetworkIO
             m_Poser.UploadJointNames(names);
         }
 
+        private void AdjustFootIK(Transform foot)
+        {
+            Ray ray = new(foot.position + Vector3.up * 0.5f, Vector3.down);
+            RaycastHit hitInfo = new();
+            if(Physics.SphereCast(ray, 0.10f, out hitInfo, 0.50f))
+                foot.position = hitInfo.point + Vector3.up * 0.10f;
+        }
+
         public void UpdateOwnPose()
         {
-            // VR: pull the strings of the puppet handles...
+            // VR: Hand and head tracking
             if(XRControl.UsingXR)
             {
-                if (m_AvatarData.CenterEye == null) return;
+                if(m_AvatarData.CenterEye == null) return;
 
                 Transform cam = XRControl.CurrentVRRig.Camera.transform;
 
-                Vector3 cEyeOffset = m_AvatarData.CenterEye.position - 
+                Vector3 cEyeOffset = m_AvatarData.CenterEye.position -
                     cam.position;
 
-                if (m_LeftHand && m_AvatarData.LeftHand)
+                if(m_LeftHand && m_AvatarData.LeftHand)
                     m_AvatarData.LeftHand.SetPositionAndRotation(
                             m_LeftHand.position + cEyeOffset,
                             m_LeftHand.rotation * m_AvatarData.LhrOffset);
 
-                if (m_RightHand && m_AvatarData.RightHand)
+                if(m_RightHand && m_AvatarData.RightHand)
                     m_AvatarData.RightHand.SetPositionAndRotation(
                             m_RightHand.position + cEyeOffset,
                             m_RightHand.rotation * m_AvatarData.RhrOffset);
@@ -87,6 +95,7 @@ namespace Arteranos.NetworkIO
                     m_AvatarData.Head.rotation = cam.rotation;
             }
 
+            // VR + 2D: Walking animation (only with loaded avatars)
             XROrigin xro = XRControl.CurrentVRRig;
             CharacterController cc = xro.GetComponent<CharacterController>();
             Animator anim = GetComponentInChildren<Animator>();
@@ -96,6 +105,16 @@ namespace Arteranos.NetworkIO
                 Vector3 moveSpeed = Quaternion.Inverse(transform.rotation) * cc.velocity;
                 anim.SetFloat("Walking", moveSpeed.z);
             }
+        }
+
+        public void LateUpdate()
+        {
+            // VR + 2D: Feet IK (only with feet, of course)
+            if(m_AvatarData.LeftFoot)
+                AdjustFootIK(m_AvatarData.LeftFoot);
+
+            if(m_AvatarData.RightFoot)
+                AdjustFootIK(m_AvatarData.RightFoot);
         }
 
         public void UpdateAlienPose()

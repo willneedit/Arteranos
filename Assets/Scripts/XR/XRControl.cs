@@ -138,6 +138,10 @@ namespace Arteranos.XR
             cc.height = m_BodyHeight;
             cc.center = new Vector3(0, m_BodyHeight / 2 + cc.skinWidth, 0);
 
+            // TODO Too wide means the floating feet, or I have to
+            //      improve the feet IK up to the root pose.
+            cc.radius = 0.01f;
+
         }
 
     }
