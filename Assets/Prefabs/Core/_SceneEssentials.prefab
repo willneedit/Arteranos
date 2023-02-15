@@ -335,8 +335,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3840780144436917895}
   - component: {fileID: 276582954756076773}
+  - component: {fileID: -746876566335505752}
   - component: {fileID: 6214853735780843845}
-  - component: {fileID: 2386804981583191994}
   - component: {fileID: 3772151105963276859}
   - component: {fileID: 3920265309524186210}
   m_Layer: 0
@@ -381,7 +381,7 @@ MonoBehaviour:
   sendRate: 30
   offlineScene: 
   onlineScene: 
-  transport: {fileID: 2386804981583191994}
+  transport: {fileID: -746876566335505752}
   networkAddress: localhost
   maxConnections: 100
   authenticator: {fileID: 0}
@@ -391,6 +391,30 @@ MonoBehaviour:
   playerSpawnMethod: 0
   spawnPrefabs: []
   timeInterpolationGui: 0
+--- !u!114 &-746876566335505752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3840780144436917897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7424c1070fad4ba2a7a96b02fbeb4bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  port: 7777
+  NoDelay: 1
+  SendTimeout: 5000
+  ReceiveTimeout: 30000
+  serverMaxMessageSize: 16384
+  serverMaxReceivesPerTick: 10000
+  serverSendQueueLimitPerConnection: 10000
+  serverReceiveQueueLimitPerConnection: 10000
+  clientMaxMessageSize: 16384
+  clientMaxReceivesPerTick: 1000
+  clientSendQueueLimit: 10000
+  clientReceiveQueueLimit: 10000
 --- !u!114 &6214853735780843845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -405,33 +429,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   offsetX: 0
   offsetY: 0
---- !u!114 &2386804981583191994
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3840780144436917897}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b0fecffa3f624585964b0d0eb21b18e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Port: 7777
-  DualMode: 1
-  NoDelay: 1
-  Interval: 10
-  Timeout: 10000
-  FastResend: 2
-  SendWindowSize: 4096
-  ReceiveWindowSize: 4096
-  MaxRetransmit: 40
-  MaximizeSocketBuffers: 1
-  ReliableMaxMessageSize: 298449
-  UnreliableMaxMessageSize: 1199
-  debugLog: 0
-  statisticsGUI: 0
-  statisticsLog: 0
 --- !u!114 &3772151105963276859
 MonoBehaviour:
   m_ObjectHideFlags: 0
