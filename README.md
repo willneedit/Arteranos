@@ -21,3 +21,7 @@ To chat with the team and other users: join the [Arteranos Development Discussio
 
 ---
 ## License
+
+This product is licensed under the [Mozilla Public License 2.0](LICENSE.md), copyright 2023 by willneedit.
+
+This package contains third-party software components, owned and licensed by [this list](ThirdPartyNotices.md)
