@@ -81,19 +81,12 @@ public class KMTrackedPoseDriver : MonoBehaviour
         m_KMCurrentRotation = Vector2.zero;
     }
 
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     // Update is called once per frame
     void Update()
     {
         if (m_KMCurrentRotation == Vector2.zero) return;
 
-        Vector3 x = Time.deltaTime * new Vector3(-m_KMCurrentRotation.y, m_KMCurrentRotation.x, 0) * m_RotationSpeed;
+        Vector3 x = m_RotationSpeed * Time.deltaTime * new Vector3(-m_KMCurrentRotation.y, m_KMCurrentRotation.x, 0);
         m_EulerAngles += x;
 
         m_EulerAngles.x = Mathf.Clamp(m_EulerAngles.x, -80, 80);

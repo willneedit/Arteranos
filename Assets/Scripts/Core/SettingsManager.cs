@@ -30,14 +30,11 @@ namespace Arteranos.Core
 
             bool GetBoolArg(string key, bool def = false)
             {
-                string dummy;
-                bool result = def;
+                if(GetCmdArg(key, out _))
+                    return true;
 
-                if(GetCmdArg(key, out dummy))
-                    return result = true;
-
-                if(GetCmdArg("-no" + key, out dummy))
-                    return result = false;
+                if(GetCmdArg("-no" + key, out _))
+                    return false;
                 
                 return def;
             }

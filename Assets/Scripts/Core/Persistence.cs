@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Persistence : MonoBehaviour
@@ -8,11 +6,5 @@ public class Persistence : MonoBehaviour
     void Start()
     {
         MonoBehaviour.DontDestroyOnLoad(this);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

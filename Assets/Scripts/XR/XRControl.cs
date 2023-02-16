@@ -130,6 +130,9 @@ namespace Arteranos.XR
 
             CameraLocalOffset = cam.transform.localPosition;
 
+            // Oculus Quest 2's floor-to-eye adjustment is horribly lacking.
+            // Even with in a seated position, the height measurement was off.
+            // So, use the avatar's grounded standing eye height as the reference.
             CurrentVRRig.RequestedTrackingOriginMode = XROrigin.TrackingOriginMode.NotSpecified;
             CurrentVRRig.CameraYOffset = m_EyeHeight - CameraLocalOffset.y;
             offsetObject.transform.localPosition = new Vector3(0, m_EyeHeight, 0.2f) - CameraLocalOffset;

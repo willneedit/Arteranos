@@ -83,18 +83,6 @@ public class MouseController : MonoBehaviour
         m_KMCurrentRotation = Vector2.zero;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     /// <summary>
     /// This function is called when the object becomes enabled and active.
     /// </summary>

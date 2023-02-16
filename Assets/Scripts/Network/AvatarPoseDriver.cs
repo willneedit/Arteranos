@@ -1,16 +1,12 @@
 // #define DEBUG_POSE
 
 using UnityEngine;
-using System;
 using Unity.XR.CoreUtils;
 
 using Mirror;
 
 using Arteranos.ExtensionMethods;
 using Arteranos.XR;
-using Arteranos.NetworkTypes;
-using System.Collections.Generic;
-
 
 namespace Arteranos.NetworkIO
 {
@@ -64,12 +60,10 @@ namespace Arteranos.NetworkIO
         private void AdjustFootIK(Transform foot)
         {
             Ray ray = new(foot.position + Vector3.up * 0.5f, Vector3.down);
-            RaycastHit hitInfo = new();
-            if(Physics.SphereCast(ray, 0.10f, out hitInfo, 0.50f))
+            if(Physics.SphereCast(ray, 0.12f, out RaycastHit hitInfo, 0.50f))
             {
-                foot.position = hitInfo.point + Vector3.up * 0.10f;
-                foot.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal) 
-                    * foot.rotation;
+                foot.SetPositionAndRotation(hitInfo.point + Vector3.up * 0.12f,
+                    Quaternion.FromToRotation(Vector3.up, hitInfo.normal) * foot.rotation);
             }
         }
 
@@ -123,7 +117,10 @@ namespace Arteranos.NetworkIO
 
         public void UpdateAlienPose()
         {
+            // Locomotion: NetworkTransform.
+            // Pose: NetworkPose.
 
+            // Maybe TODO: Face morphing and hand morphing for trigger/grip usage
         }
 
         void OnXRChanged(bool useXR)
