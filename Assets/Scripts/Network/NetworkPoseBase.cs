@@ -1,10 +1,14 @@
-using System;
+/*
+ * Copyright (c) 2015, Unity Technologies
+ * Copyright (c) 2019, vis2k, Paul and Contributors
+ * Copyright (c) 2023, willneedit
+ */
+
 using System.Collections.Generic;
 using UnityEngine;
 
 using Mirror;
 using Arteranos.ExtensionMethods;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Arteranos.NetworkIO
 {

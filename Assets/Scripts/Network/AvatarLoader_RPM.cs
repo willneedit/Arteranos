@@ -1,6 +1,12 @@
+/*
+ * Copyright (c) 2023, willneedit
+ * 
+ * Licensed by the Mozilla Public License 2.0,
+ * residing in the LICENSE.md file in the project's root directory.
+ */
+
 using System.Collections;
 using UnityEngine;
-using Unity.Collections;
 
 using DitzelGames.FastIK;
 using ReadyPlayerMe.AvatarLoader;
@@ -8,8 +14,6 @@ using Arteranos.ExtensionMethods;
 
 using Mirror;
 using System.Collections.Generic;
-using Unity.XR.CoreUtils;
-using Mono.Cecil;
 
 namespace Arteranos.NetworkIO
 {

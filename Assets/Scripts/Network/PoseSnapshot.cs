@@ -1,5 +1,10 @@
+/*
+ * Copyright (c) 2015, Unity Technologies
+ * Copyright (c) 2019, vis2k, Paul and Contributors
+ * Copyright (c) 2023, willneedit
+ */
+
 using Mirror;
-using System;
 using UnityEngine;
 
 namespace Arteranos.NetworkIO
