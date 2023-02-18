@@ -20,14 +20,14 @@
       "hash": "76f76584a113b240a4ec11f324b17302bde9a53a"
     },
     "com.readyplayerme.avatarloader": {
-      "version": "https://github.com/readyplayerme/Unity-Avatar-Loader.git#v0.1.1",
+      "version": "https://github.com/readyplayerme/Unity-Avatar-Loader.git#v1.0.0",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.ugui": "1.0.0",
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "9c8a38251c66014aad3c96d8caf781a64c33f12b"
+      "hash": "64b065ec8f8f9c0c3fca78f11342172d985be434"
     },
     "com.readyplayerme.core": {
       "version": "https://github.com/readyplayerme/Unity-core.git",
@@ -36,17 +36,17 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "39d3c866dc303d717bf3a7b1f3fd5347c155d94f"
+      "hash": "4bccdb4898db9ffa2037bd34b6588f4222f56069"
     },
     "com.readyplayerme.webview": {
-      "version": "https://github.com/readyplayerme/Unity-WebView.git#develop",
+      "version": "https://github.com/readyplayerme/Unity-WebView.git#v1.0.0",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.ugui": "1.0.0",
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "f46be429c5d1deb2256af4256fe0ebb2876f7b3a"
+      "hash": "3aeabe72aaa7de09f8525cda8d47e310a2b450fe"
     },
     "com.unity.burst": {
       "version": "1.7.3",
