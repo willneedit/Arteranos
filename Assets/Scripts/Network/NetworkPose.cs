@@ -148,7 +148,9 @@ namespace Arteranos.NetworkIO
                 lastSerializedRotations = new Quaternion[PoseSnapshot.MAX_SIZE];
             }
             else // ... and delta
+            {
                 mask = snapshot.Changed(lastSerializedRotations, rotationSensitivity);
+            }
 
             writer.WritePoseSnapshot(snapshot.rotation, ref lastSerializedRotations, mask, compressRotation);
 
@@ -160,14 +162,12 @@ namespace Arteranos.NetworkIO
 
         public override void OnDeserialize(NetworkReader reader, bool initialState)
         {
-            Quaternion[] rotation = null;
-
             // initial...
             if(initialState || lastDeserializedRotations == null)
                 lastDeserializedRotations = new Quaternion[PoseSnapshot.MAX_SIZE];
 
             // ... and delta
-            rotation = reader.ReadPoseSnapshot(ref lastDeserializedRotations, compressRotation);
+            Quaternion[] rotation = reader.ReadPoseSnapshot(ref lastDeserializedRotations, compressRotation);
 
             // handle depending on server / client / host.
             // server has priority for host mode.
@@ -277,9 +277,6 @@ namespace Arteranos.NetworkIO
             else if (isClient) UpdateClient();
         }
 
-        public override void Reset()
-        {
-            base.Reset();
-        }
+        public override void Reset() => base.Reset();
     }
 }

@@ -15,8 +15,8 @@ namespace Arteranos.NetworkIO
     public abstract class NetworkPoseBase : NetworkBehaviour
     {
         protected bool IsClientWithAuthority => isClient && authority;
-        public readonly SortedList<double, PoseSnapshot> clientSnapshots = new SortedList<double, PoseSnapshot>();
-        public readonly SortedList<double, PoseSnapshot> serverSnapshots = new SortedList<double, PoseSnapshot>();
+        public readonly SortedList<double, PoseSnapshot> clientSnapshots = new();
+        public readonly SortedList<double, PoseSnapshot> serverSnapshots = new();
 
         public string[] jointNames = null;
         public Transform[] jointTransforms = null;
@@ -47,8 +47,10 @@ namespace Arteranos.NetworkIO
             Quaternion[] rotations = new Quaternion[jointTransforms.Length];
 
             for(int i = 0; i < jointTransforms.Length; i++)
+            {
                 if(jointTransforms[i] != null)
                     rotations[i] = jointTransforms[i].transform.localRotation;
+            }
 
             return rotations;
         }
@@ -86,8 +88,10 @@ namespace Arteranos.NetworkIO
             Quaternion[] data = interpolated.rotation;
 
             for(int i = 0; i < jointTransforms.Length; i++)
+            {
                 if(jointTransforms[i] != null)
                     jointTransforms[i].transform.localRotation = data[i];
+            }
         }
 
         public virtual void Reset()

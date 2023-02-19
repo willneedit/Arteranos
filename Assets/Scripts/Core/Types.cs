@@ -35,7 +35,7 @@ namespace Arteranos.ExtensionMethods
         
         public static NetworkGuid ToNetworkGuid(this Guid id)
         {
-            var networkId = new NetworkGuid
+            NetworkGuid networkId = new()
             {
                 FirstHalf = BitConverter.ToUInt64(id.ToByteArray(), 0),
                 SecondHalf = BitConverter.ToUInt64(id.ToByteArray(), 0)
@@ -45,7 +45,7 @@ namespace Arteranos.ExtensionMethods
 
         public static Guid ToGuid(this NetworkGuid networkId)
         {
-            var bytes = new byte[16];
+            byte[] bytes = new byte[16];
             Buffer.BlockCopy(BitConverter.GetBytes(networkId.FirstHalf), 0, bytes, 0, 8);
             Buffer.BlockCopy(BitConverter.GetBytes(networkId.SecondHalf), 0, bytes, 8, 8);
             return new Guid(bytes);
@@ -59,7 +59,7 @@ namespace Arteranos.ExtensionMethods
 
         public static NetworkGuid ReadNetworkGuid(this NetworkReader reader)
         {
-            var res = new NetworkGuid
+            NetworkGuid res = new()
             {
                 FirstHalf = reader.ReadULong(),
                 SecondHalf = reader.ReadULong()

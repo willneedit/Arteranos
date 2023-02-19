@@ -55,8 +55,10 @@ namespace Arteranos.NetworkIO
 
             int mask = 0;
             for(int i = 0; i < last.Length; i++)
+            {
                 if(Quaternion.Angle(last[i], rotation[i]) > rotationSensitivity)
                     mask |= 1 << i;
+            }
 
             return (ushort) mask;
         }
@@ -74,6 +76,7 @@ namespace Arteranos.NetworkIO
             writer.WriteUShort(mask);
 
             for(int i = 0; i < quats.Length; i++)
+            {
                 if((mask & (1 << i)) != 0)
                 {
                     if(compressRotation)
@@ -85,6 +88,7 @@ namespace Arteranos.NetworkIO
                     // the small changes repeatedly go under the threshold's radar.
                     lastQuats[i] = quats[i];
                 }
+            }
         }
 
         public static Quaternion[] ReadPoseSnapshot(this NetworkReader reader, ref Quaternion[] quats, bool compressRotation)
@@ -94,6 +98,7 @@ namespace Arteranos.NetworkIO
             ushort mask = reader.ReadUShort();
 
             for(int i = 0; i < quats.Length; i++)
+            {
                 if((mask & (1 << i)) != 0)
                 {
                     if(compressRotation)
@@ -101,6 +106,7 @@ namespace Arteranos.NetworkIO
                     else
                         quats[i] = reader.ReadQuaternion();
                 }
+            }
 
             return quats;
         }

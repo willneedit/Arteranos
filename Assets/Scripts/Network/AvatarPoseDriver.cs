@@ -24,10 +24,7 @@ namespace Arteranos.NetworkIO
         private IAvatarLoader m_AvatarData = null;
         private NetworkPose m_Poser = null;
 
-        public void Awake()
-        {
-            syncDirection = SyncDirection.ServerToClient;
-        }
+        public void Awake() => syncDirection = SyncDirection.ServerToClient;
 
         public override void OnStartClient()
         {
@@ -57,10 +54,7 @@ namespace Arteranos.NetworkIO
         /// synced by Replacer, so need not to sync here, too.
         /// </summary>
         /// <param name="names">Array of the joint (aka bone) names</param>
-        public void UploadJointNames(string[] names)
-        {
-            m_Poser.UploadJointNames(names);
-        }
+        public void UploadJointNames(string[] names) => m_Poser.UploadJointNames(names);
 
         private void AdjustFootIK(Transform foot)
         {
@@ -85,14 +79,18 @@ namespace Arteranos.NetworkIO
                     cam.position;
 
                 if(m_LeftHand && m_AvatarData.LeftHand)
+                {
                     m_AvatarData.LeftHand.SetPositionAndRotation(
                             m_LeftHand.position + cEyeOffset,
                             m_LeftHand.rotation * m_AvatarData.LhrOffset);
+                }
 
                 if(m_RightHand && m_AvatarData.RightHand)
+                {
                     m_AvatarData.RightHand.SetPositionAndRotation(
                             m_RightHand.position + cEyeOffset,
                             m_RightHand.rotation * m_AvatarData.RhrOffset);
+                }
 
                 if(m_AvatarData.Head)
                     m_AvatarData.Head.rotation = cam.rotation;

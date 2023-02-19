@@ -48,9 +48,6 @@ namespace Arteranos.Core
 
         public const string PATH_CLIENT_SETTINGS = "Settings/ClientSettings";
 
-        public static ClientSettings LoadSettings()
-        {
-            return Resources.Load<ClientSettings>(PATH_CLIENT_SETTINGS);
-        }
+        public static ClientSettings LoadSettings() => Resources.Load<ClientSettings>(PATH_CLIENT_SETTINGS);
     }
 }

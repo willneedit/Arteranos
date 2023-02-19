@@ -12,7 +12,7 @@ namespace Arteranos.Core
 {
     public class CommandLine : ScriptableObject
     {
-        public Dictionary<string, string> m_Commands = new Dictionary<string, string>();
+        public Dictionary<string, string> m_Commands = new();
 
         public Dictionary<string, string> GetCommandlineArgs()
         {
@@ -25,10 +25,10 @@ namespace Arteranos.Core
 
             for (int i = 0; i < args.Length; ++i)
             {
-                var arg = args[i].ToLower();
+                string arg = args[i].ToLower();
                 if (arg.StartsWith("-"))
                 {
-                    var value = i < args.Length - 1 ? args[i + 1].ToLower() : null;
+                    string value = i < args.Length - 1 ? args[i + 1].ToLower() : null;
                     value = (value?.StartsWith("-") ?? false) ? null : value;
 
                     m_Commands.Add(arg, value);

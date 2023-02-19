@@ -82,10 +82,7 @@ namespace Arteranos.NetworkIO
         }
 
         [Command]
-        private void UpdateAvatarServerRpc(string avatarURL)
-        {
-            m_AvatarURL = avatarURL;
-        }
+        private void UpdateAvatarServerRpc(string avatarURL) => m_AvatarURL = avatarURL;
 
         void OnAvatarURLChanged(string _, string current)
         {

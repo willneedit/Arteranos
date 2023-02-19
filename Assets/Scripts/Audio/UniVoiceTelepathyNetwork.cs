@@ -82,9 +82,7 @@ namespace Arteranos.Audio {
             client?.Tick(100);
         }
 
-        void OnDestroy() {
-            Dispose();
-        }
+        void OnDestroy() => Dispose();
 
         public void Dispose() {
             client.Disconnect();
@@ -151,7 +149,7 @@ namespace Arteranos.Audio {
                 foreach (short peer in PeerIDs) {
                     // Let the new client know its ID
                     if (peer == id) {
-                        var peersForNewClient = PeerIDs
+                        List<short> peersForNewClient = PeerIDs
                             .Where(x => x != peer)
                             .ToList();
                         peersForNewClient.Add(0);
@@ -188,7 +186,9 @@ namespace Arteranos.Audio {
                     OnAudioReceived?.Invoke(audioSender, segment);
                 }
                 else if (PeerIDs.Contains(recipient))
+                {
                     server.Send(recipient, new ArraySegment<byte>(segmentBytes));
+                }
             }
         }
 
@@ -217,7 +217,9 @@ namespace Arteranos.Audio {
                 }
             }
             else
+            {
                 Debug.LogWarning("HostChatroom failed. Already hosting a chatroom. Close and host again.");
+            }
         }
 
         /// <summary>
@@ -236,7 +238,9 @@ namespace Arteranos.Audio {
                 OnClosedChatroom?.Invoke();
             }
             else
+            {
                 Debug.LogWarning("CloseChatroom failed. Not hosting a chatroom currently");
+            }
         }
 
         /// <summary>
@@ -279,7 +283,7 @@ namespace Arteranos.Audio {
         public void SendAudioSegment(short peerID, ChatroomAudioSegment data) {
             if (!server.Active && !client.Connected) return;
 
-            var packet = new NetworkWriter();
+            NetworkWriter packet = new();
             packet.WriteByte((byte) PacketType.AudioSegment);
             // Sender
             packet.WriteShort(OwnID);
