@@ -76,7 +76,7 @@ namespace Arteranos.Core
         {
             StartNetwork();
 
-            GetComponent<Arteranos.XR.XRControl>().enabled = true;
+            GetComponent<XR.XRControl>().enabled = true;
 
             this.enabled = false;
         }
