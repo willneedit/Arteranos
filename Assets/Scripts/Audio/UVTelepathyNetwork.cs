@@ -22,7 +22,7 @@ using Mirror;
 using Telepathy;
 
 namespace Arteranos.Audio {
-    public class UniVoiceTelepathyNetwork : MonoBehaviour, IChatroomNetwork {
+    public class UVTelepathyNetwork : MonoBehaviour, IChatroomNetwork {
         enum PacketType : byte
         {
             Invalid,
@@ -59,11 +59,11 @@ namespace Arteranos.Audio {
         int port;
 
         [Obsolete("Use UniVoiceTelepathyNetwork.New static method instead of new keyword", true)]
-        public UniVoiceTelepathyNetwork() { }
+        public UVTelepathyNetwork() { }
 
-        public static UniVoiceTelepathyNetwork New(int port) {
+        public static UVTelepathyNetwork New(int port) {
             GameObject go = new("UniVoiceTelepathyNetwork");
-            UniVoiceTelepathyNetwork cted = go.AddComponent<UniVoiceTelepathyNetwork>();
+            UVTelepathyNetwork cted = go.AddComponent<UVTelepathyNetwork>();
             DontDestroyOnLoad(go);
             cted.port = port;
             cted.server = new Server(32 * 1024);

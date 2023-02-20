@@ -8,6 +8,7 @@
 using UnityEngine;
 
 using Mirror;
+using Adrenak.UniVoice;
 
 namespace Arteranos.Core
 {
@@ -84,6 +85,14 @@ namespace Arteranos.Core
         private void StartNetwork()
         {
             NetworkManager networkManager = GetComponentInParent<NetworkManager>();
+            ChatroomAgent ca = new(
+                Audio.UVTelepathyNetwork.New(7778),
+                new Audio.UVMicInput(),
+                new Audio.UVAudioOutput.Factory());
+
+            // ca.Network.HostChatroom();
+
+            ca.Network.JoinChatroom();
 
             switch(m_ConnectionMode)
             {
