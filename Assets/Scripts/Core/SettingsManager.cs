@@ -77,22 +77,17 @@ namespace Arteranos.Core
         {
             StartNetwork();
 
+            // Startup of dependent services...
             GetComponent<XR.XRControl>().enabled = true;
+            GetComponent<Audio.VoiceManager>().enabled = true;
 
+            // And finish the startup.
             this.enabled = false;
         }
 
         private void StartNetwork()
         {
             NetworkManager networkManager = GetComponentInParent<NetworkManager>();
-            ChatroomAgent ca = new(
-                Audio.UVTelepathyNetwork.New(7778),
-                new Audio.UVMicInput(),
-                new Audio.UVAudioOutput.Factory());
-
-            // ca.Network.HostChatroom();
-
-            ca.Network.JoinChatroom();
 
             switch(m_ConnectionMode)
             {
