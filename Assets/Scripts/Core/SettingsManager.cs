@@ -21,14 +21,17 @@ namespace Arteranos.Core
             Host
         }
 
-        public ClientSettings m_Client { get; internal set; }
-        public ServerSettings m_Server { get; internal set; }
+        public static SettingsManager Instance { get; private set; } = null;
+        public static ClientSettings Client { get; internal set; }
+        public static ServerSettings Server { get; internal set; }
         private CommandLine m_Command;
 
         private ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
 
         private void Awake()
         {
+            Instance = this;
+
             bool GetCmdArg(string key, out string val)
             {
                 return m_Command.m_Commands.TryGetValue(key, out val);
@@ -45,31 +48,31 @@ namespace Arteranos.Core
                 return def;
             }
 
-            m_Client = ClientSettings.LoadSettings();
-            m_Server = ServerSettings.LoadSettings();
+            Client = ClientSettings.LoadSettings();
+            Server = ServerSettings.LoadSettings();
             m_Command = ScriptableObject.CreateInstance<CommandLine>();
 
             m_Command.GetCommandlineArgs();
 
             if(GetCmdArg("-client", out string clientip))
             {
-                m_Client.ServerIP = clientip;
+                Client.ServerIP = clientip;
                 m_ConnectionMode = ConnectionMode.Client;
             }
 
             if(GetCmdArg("-server", out string serverip))
             {
-                m_Server.ListenAddress = serverip;
+                Server.ListenAddress = serverip;
                 m_ConnectionMode = ConnectionMode.Server;
             }
 
             if(GetCmdArg("-host", out string hostip))
             {
-                m_Server.ListenAddress = hostip;
+                Server.ListenAddress = hostip;
                 m_ConnectionMode = ConnectionMode.Host;
             }
 
-            m_Client.VRMode = GetBoolArg("-vr", m_Client.VRMode);
+            Client.VRMode = GetBoolArg("-vr", Client.VRMode);
 
         }
 
@@ -92,15 +95,15 @@ namespace Arteranos.Core
             switch(m_ConnectionMode)
             {
                 case ConnectionMode.Server:
-                    networkManager.networkAddress = m_Server.ListenAddress;
+                    networkManager.networkAddress = Server.ListenAddress;
                     networkManager.StartServer();
                     break;
                 case ConnectionMode.Host:
-                    networkManager.networkAddress = m_Server.ListenAddress;
+                    networkManager.networkAddress = Server.ListenAddress;
                     networkManager.StartHost();
                     break;
                 case ConnectionMode.Client:
-                    networkManager.networkAddress = m_Client.ServerIP;
+                    networkManager.networkAddress = Client.ServerIP;
                     networkManager.StartClient();
                     break;
             }

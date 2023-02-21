@@ -20,7 +20,7 @@ namespace Arteranos.XR
 
     public class XRControl : MonoBehaviour
     {
-        public static XRControl Singleton { get; private set; }
+        public static XRControl Instance { get; private set; }
         public static XROrigin CurrentVRRig { get; private set; }
         public static ev_XRSwitch XRSwitchEvent { get; private set; } = new();
         public static bool UsingXR { get; private set; }
@@ -29,9 +29,6 @@ namespace Arteranos.XR
         public XROrigin VRRig;
         public XROrigin NoVRRig;
 
-
-        private Core.SettingsManager m_SettingsManager = null;
-
         public float m_EyeHeight { get; set; }
 
         public float m_BodyHeight { get; set; }
@@ -39,14 +36,11 @@ namespace Arteranos.XR
 
         public void Awake()
         {
-            Singleton = this;
+            Instance = this;
             CurrentVRRig = FindObjectOfType<XROrigin>();
         }
 
-        public void OnDestroy()
-        {
-            Singleton = null;
-        }
+        public void OnDestroy() => Instance = null;
 
         public IEnumerator StartXRCoroutine()
         {
@@ -56,7 +50,7 @@ namespace Arteranos.XR
             if (XRGeneralSettings.Instance.Manager.activeLoader == null)
             {
                 Debug.LogError("Initializing XR Failed. Check Editor or Player log for details.");
-                m_SettingsManager.m_Client.VRMode = false;
+                Core.SettingsManager.Client.VRMode = false;
             }
             else
             {
@@ -79,9 +73,8 @@ namespace Arteranos.XR
         // Start is called before the first frame update
         void Start()
         {
-            m_SettingsManager = GetComponent<Core.SettingsManager>();
-            m_SettingsManager.m_Client.OnVRModeChanged += OnVRModeChanged;
-            if(m_SettingsManager.m_Client.VRMode)
+            Core.SettingsManager.Client.OnVRModeChanged += OnVRModeChanged;
+            if(Core.SettingsManager.Client.VRMode)
                 OnVRModeChanged(false, true);
             else
                 UpdateXROrigin(false);
@@ -120,7 +113,7 @@ namespace Arteranos.XR
         void OnApplicationQuit()
         {
             // Debug.Log("Bye!");
-            if(m_SettingsManager.m_Client.VRMode)
+            if(Core.SettingsManager.Client.VRMode)
                 StopXR();
         }
 

@@ -17,6 +17,8 @@ using System.Collections.Generic;
 
 namespace Arteranos.NetworkIO
 {
+    [RequireComponent(typeof(AvatarPoseDriver))]
+    [RequireComponent(typeof(NetworkIdentity))]
     public class AvatarLoader_RPM : NetworkBehaviour, IAvatarLoader
     {
         [SyncVar(hook = nameof(OnAvatarURLChanged))]
@@ -26,7 +28,6 @@ namespace Arteranos.NetworkIO
 
         private GameObject m_AvatarGameObject = null;
         private AvatarObjectLoader_mod m_AvatarLoader = null;
-        private Arteranos.Core.SettingsManager m_SettingsManager = null;
 
         public Transform LeftHand { get; private set; }
         public Transform RightHand { get; private set; }
@@ -40,24 +41,25 @@ namespace Arteranos.NetworkIO
 
         public override void OnStartClient()
         {
-            m_SettingsManager = FindObjectOfType<Core.SettingsManager>();
+            name += "_" + netIdentity.netId;
 
-            this.name += "_" + netIdentity.netId;
+            Core.ServerSettings serverSettings = Core.SettingsManager.Server;
+            Core.ClientSettings clientSettings = Core.SettingsManager.Client;
 
-            if(m_SettingsManager.m_Server.ShowAvatars || !isServer || isLocalPlayer)
+            if(serverSettings.ShowAvatars || !isServer || isLocalPlayer)
             {
                 m_AvatarLoader = new AvatarObjectLoader_mod();
                 // m_AvatarLoader.SaveInProjectFolder = true;
                 m_AvatarLoader.OnCompleted += AvatarLoadComplete;
                 m_AvatarLoader.OnFailed += AvatarLoadFailed;
 
-                m_SettingsManager.m_Client.OnAvatarChanged += RequestAvatarChange;
+                clientSettings.OnAvatarChanged += RequestAvatarChange;
 
                 // The late-joining client's companions, or the newly joined clients.
                 if(isOwned)
                 {
                     // FIXME: Burst mitigation
-                    RequestAvatarChange(null, m_SettingsManager.m_Client.AvatarURL);
+                    RequestAvatarChange(null, clientSettings.AvatarURL);
                 }
             }
 
@@ -70,7 +72,7 @@ namespace Arteranos.NetworkIO
 
         public override void OnStopClient()
         {
-            m_SettingsManager.m_Client.OnAvatarChanged -= RequestAvatarChange;
+            Core.SettingsManager.Client.OnAvatarChanged -= RequestAvatarChange;
             base.OnStopClient();
         }
 
@@ -105,7 +107,6 @@ namespace Arteranos.NetworkIO
             Vector3? poleOffset = null, int bones = 2)
         {
             Transform handle = null;
-            Transform pole = null;
     
             Transform limbT = avatar.transform.FindRecursive(limb);
             if(limbT == null)
@@ -119,6 +120,8 @@ namespace Arteranos.NetworkIO
             // Owner is setting up the IK and the puppet handles...
             if(isOwned)
             {
+                Transform pole = null;
+
                 handle = new GameObject("Target_" + limb).transform;
                 handle.SetPositionAndRotation(limbT.position, limbT.rotation);
                 handle.SetParent(avatar.transform);
@@ -205,18 +208,16 @@ namespace Arteranos.NetworkIO
                 Animator anim = args.Avatar.GetComponent<Animator>();
                 anim.avatar = null;
 
-                RuntimeAnimatorController rac = Resources.Load<RuntimeAnimatorController>("BaseRPMAnimator");
-                anim.runtimeAnimatorController = rac;
+                anim.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("BaseRPMAnimator");
             }
 
             // Now upload the skeleton joint data to the Avatar Pose driver.
-            AvatarPoseDriver apd = this.GetComponent<AvatarPoseDriver>();
-            apd.UploadJointNames(jointnames.ToArray());
+            GetComponent<AvatarPoseDriver>().UploadJointNames(jointnames.ToArray());
 
             ResetPose();
 
             // And reconfigure the XR Rig to match the avatar's dimensions.
-            XR.XRControl xrc = XR.XRControl.Singleton;
+            XR.XRControl xrc = XR.XRControl.Instance;
             Transform fullHeight = agot.FindRecursive("HeadTop_End");
 
             xrc.m_EyeHeight = cEyePos.y - transform.position.y;
