@@ -25,7 +25,7 @@ namespace Arteranos.NetworkIO
         private bool loading = false;
 
         private GameObject m_AvatarGameObject = null;
-        private AvatarObjectLoader m_AvatarLoader = null;
+        private AvatarObjectLoader_mod m_AvatarLoader = null;
         private Arteranos.Core.SettingsManager m_SettingsManager = null;
 
         public Transform LeftHand { get; private set; }
@@ -42,11 +42,11 @@ namespace Arteranos.NetworkIO
         {
             m_SettingsManager = FindObjectOfType<Core.SettingsManager>();
 
-            this.name = this.name + "_" + netIdentity.netId;
+            this.name += "_" + netIdentity.netId;
 
             if(m_SettingsManager.m_Server.ShowAvatars || !isServer || isLocalPlayer)
             {
-                m_AvatarLoader = new AvatarObjectLoader();
+                m_AvatarLoader = new AvatarObjectLoader_mod();
                 // m_AvatarLoader.SaveInProjectFolder = true;
                 m_AvatarLoader.OnCompleted += AvatarLoadComplete;
                 m_AvatarLoader.OnFailed += AvatarLoadFailed;
@@ -178,7 +178,7 @@ namespace Arteranos.NetworkIO
             m_AvatarGameObject = args.Avatar;
             Transform agot = m_AvatarGameObject.transform;
 
-            m_AvatarGameObject.name += m_AvatarGameObject.name + "_" + netIdentity.netId;
+            m_AvatarGameObject.name += "_" + netIdentity.netId;
             agot.SetParent(transform);
             agot.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
