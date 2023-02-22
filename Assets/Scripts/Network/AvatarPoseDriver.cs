@@ -35,7 +35,7 @@ namespace Arteranos.NetworkIO
 
             if(isOwned)
             {
-                XRControl.XRSwitchEvent.AddListener(OnXRChanged);
+                XRControl.XRSwitchEvent += OnXRChanged;
                 OnXRChanged(XRControl.UsingXR);
             }
 
@@ -46,7 +46,7 @@ namespace Arteranos.NetworkIO
             base.OnStopClient();
 
             if(isOwned)
-                XRControl.XRSwitchEvent.RemoveListener(OnXRChanged);
+                XRControl.XRSwitchEvent -= OnXRChanged;
         }
 
         /// <summary>
@@ -58,6 +58,9 @@ namespace Arteranos.NetworkIO
 
         private void AdjustFootIK(Transform foot)
         {
+            // FIXME Elevation of the foot joint to the floor needed
+            //       Currently hardcoded to 0.12f, but it has to be changed for
+            //       a stiletto heels, for example.
             Ray ray = new(foot.position + Vector3.up * 0.5f, Vector3.down);
             if(Physics.SphereCast(ray, 0.12f, out RaycastHit hitInfo, 0.50f))
             {

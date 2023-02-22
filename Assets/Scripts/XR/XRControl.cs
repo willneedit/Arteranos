@@ -14,15 +14,12 @@ using UnityEngine.XR.Management;
 
 namespace Arteranos.XR
 {
-    [Serializable]
-    public class ev_XRSwitch : UnityEvent<bool> { }
-
-
     public class XRControl : MonoBehaviour
     {
         public static XRControl Instance { get; private set; }
         public static XROrigin CurrentVRRig { get; private set; }
-        public static ev_XRSwitch XRSwitchEvent { get; private set; } = new();
+
+        public static event Action<bool> XRSwitchEvent;
         public static bool UsingXR { get; private set; }
         public static Vector3 CameraLocalOffset { get; private set; }
 
@@ -105,7 +102,7 @@ namespace Arteranos.XR
 
             CurrentVRRig = Instantiate(useVR ? VRRig : NoVRRig, position, rotation);
             ReconfigureXRRig();
-            XRSwitchEvent.Invoke(useVR);
+            XRSwitchEvent?.Invoke(useVR);
             UsingXR = useVR;
         }
 
