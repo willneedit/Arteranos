@@ -113,10 +113,12 @@ namespace Arteranos.NetworkIO
         public void LateUpdate()
         {
             // VR + 2D: Feet IK (only with feet, of course)
-            if(m_AvatarData.LeftFoot)
+
+            // Edge case: Client disconnected between the Update()'s and LateUpdate().
+            if(m_AvatarData?.LeftFoot)
                 AdjustFootIK(m_AvatarData.LeftFoot);
 
-            if(m_AvatarData.RightFoot)
+            if(m_AvatarData?.RightFoot)
                 AdjustFootIK(m_AvatarData.RightFoot);
         }
 
