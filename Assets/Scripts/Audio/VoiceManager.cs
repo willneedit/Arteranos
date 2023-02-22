@@ -16,15 +16,16 @@ namespace Arteranos.Audio
         public int Port = 7778;
 
         public static VoiceManager Instance { get; private set; }
-        public static ChatroomAgent ChatServer { get; private set; }
+        public static ChatroomAgent ChatroomAgent { get; private set; }
 
-        private bool active = false;
+        private bool serverActive = false;
+        private bool clientActive = false;
 
         private void Awake()
         {
             Instance = this;
 
-            ChatServer = new(
+            ChatroomAgent = new(
                 UVTelepathyNetwork.New(Port),
                 new UVMicInput(),
                 new UVAudioOutput.Factory());
@@ -33,15 +34,40 @@ namespace Arteranos.Audio
         // Update is called once per frame
         void Update()
         {
-            if (NetworkServer.active && !active) 
+            // Follow the voice server setup (or connection) state through the
+            // world server's (or connection's) state.
+
+            // Transition offline --> Server or Host
+            if(NetworkServer.active && !serverActive)
             {
-                ChatServer.Network.HostChatroom();
-                active = true;
+                ChatroomAgent.Network.HostChatroom();
+                serverActive = true;
             }
-            else if (!NetworkServer.active && active)
+            // Transition Server or Host --> offline 
+            else if (!NetworkServer.active && serverActive) 
             {
-                ChatServer.Network.CloseChatroom();                
-                active = false;
+                ChatroomAgent.Network.CloseChatroom();                
+                serverActive = false;
+            }
+
+            bool isRemoteClient = !NetworkServer.active && NetworkClient.isConnected;
+
+            // Transition offline --> (remote) Client
+            if (isRemoteClient && !clientActive)
+            {
+                ChatroomAgent.Network.JoinChatroom(NetworkManager.singleton.networkAddress);
+                clientActive = true;
+            }
+
+            // Transition (remote) Client --> offline
+            if (!isRemoteClient && clientActive)
+            {
+                // We may have been disconnected to the voice server together with the world server.
+                // That would be okay, but no point trying to announce my leaving.
+                if(ChatroomAgent.CurrentMode != ChatroomAgentMode.Unconnected)
+                    ChatroomAgent.Network.LeaveChatroom();
+
+                clientActive = false;
             }
         }
     }

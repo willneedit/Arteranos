@@ -135,6 +135,11 @@ namespace Arteranos.Audio {
                 OnChatroomJoinFailed?.Invoke(new Exception("Could not join chatroom"));
                 return;
             }
+
+            // Lost connection means that all the others have gone until rejoined.
+            foreach(short peer in PeerIDs)
+                OnPeerLeftChatroom?.Invoke(peer);
+                
             PeerIDs.Clear();
             OwnID = -1;
             OnLeftChatroom?.Invoke();
