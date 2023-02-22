@@ -17,12 +17,17 @@ namespace Arteranos.Audio
 
         public static VoiceManager Instance { get; private set; }
         public static ChatroomAgent ChatServer { get; private set; }
+        public static Transform Purgatory { get; private set; }
 
         private bool active = false;
 
         private void Awake()
         {
             Instance = this;
+            Purgatory = new GameObject("_Purgatory").transform;
+            Purgatory.position = new Vector3(0, -9000, 0);
+            DontDestroyOnLoad(Purgatory.gameObject);
+
             ChatServer = new(
                 UVTelepathyNetwork.New(Port),
                 new UVMicInput(),
@@ -36,7 +41,6 @@ namespace Arteranos.Audio
             {
                 ChatServer.Network.HostChatroom();
                 active = true;
-
             }
             else if (!NetworkServer.active && active)
             {

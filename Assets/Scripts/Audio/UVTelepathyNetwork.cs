@@ -91,7 +91,7 @@ namespace Arteranos.Audio {
 
         void OnData_Client(ArraySegment<byte> data) {
             try {
-                NetworkReader packet = new(data.Array);
+                NetworkReader packet = new(data);
                 PacketType tag = (PacketType) packet.ReadByte();
                 
                 switch (tag) {

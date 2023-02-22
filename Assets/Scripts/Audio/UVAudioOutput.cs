@@ -69,8 +69,11 @@ namespace Arteranos.Audio
         /// </param>
         public static UVAudioOutput New(RingBuffer buffer, AudioSource source, int minSegCount = 0)
         {
-            UVAudioOutput ctd = source.gameObject.AddComponent<UVAudioOutput>();
-            DontDestroyOnLoad(ctd.gameObject);
+            GameObject go = source.gameObject;
+            DontDestroyOnLoad(go);
+            go.transform.SetParent(VoiceManager.Purgatory);
+
+            UVAudioOutput ctd = go.AddComponent<UVAudioOutput>();
 
             source.loop = true;
             source.clip = buffer.AudioClip;
