@@ -9,7 +9,6 @@ using System;
 using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.XR.Management;
 
 namespace Arteranos.XR
@@ -26,9 +25,9 @@ namespace Arteranos.XR
         public XROrigin VRRig;
         public XROrigin NoVRRig;
 
-        public float m_EyeHeight { get; set; }
+        public float EyeHeight { get; set; }
 
-        public float m_BodyHeight { get; set; }
+        public float BodyHeight { get; set; }
 
 
         public void Awake()
@@ -46,7 +45,7 @@ namespace Arteranos.XR
 
             if (XRGeneralSettings.Instance.Manager.activeLoader == null)
             {
-                Debug.LogError("Initializing XR Failed. Check Editor or Player log for details.");
+                Debug.LogWarning("Initializing XR Failed. Check Editor or Player log for details. Maybe there's no VR device available.");
                 Core.SettingsManager.Client.VRMode = false;
             }
             else
@@ -129,12 +128,12 @@ namespace Arteranos.XR
             // Even with in a seated position, the height measurement was off.
             // So, use the avatar's grounded standing eye height as the reference.
             CurrentVRRig.RequestedTrackingOriginMode = XROrigin.TrackingOriginMode.NotSpecified;
-            CurrentVRRig.CameraYOffset = m_EyeHeight - CameraLocalOffset.y;
-            offsetObject.transform.localPosition = new Vector3(0, m_EyeHeight, 0.2f) - CameraLocalOffset;
+            CurrentVRRig.CameraYOffset = EyeHeight - CameraLocalOffset.y;
+            offsetObject.transform.localPosition = new Vector3(0, EyeHeight, 0.2f) - CameraLocalOffset;
 
             CharacterController cc = CurrentVRRig.GetComponent<CharacterController>();
-            cc.height = m_BodyHeight;
-            cc.center = new Vector3(0, m_BodyHeight / 2 + cc.skinWidth, 0);
+            cc.height = BodyHeight;
+            cc.center = new Vector3(0, BodyHeight / 2 + cc.skinWidth, 0);
 
             // TODO Too wide means the floating feet, or I have to
             //      improve the feet IK up to the root pose.

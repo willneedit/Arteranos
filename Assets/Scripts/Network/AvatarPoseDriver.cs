@@ -18,9 +18,8 @@ namespace Arteranos.NetworkIO
 
     public class AvatarPoseDriver : NetworkBehaviour
     {
-        public Transform m_LeftHand;
-        public Transform m_RightHand;
-
+        private Transform LeftHand = null;
+        private Transform RightHand = null;
         private IAvatarLoader m_AvatarData = null;
         private NetworkPose m_Poser = null;
 
@@ -81,18 +80,18 @@ namespace Arteranos.NetworkIO
                 Vector3 cEyeOffset = m_AvatarData.CenterEye.position -
                     cam.position;
 
-                if(m_LeftHand && m_AvatarData.LeftHand)
+                if(LeftHand && m_AvatarData.LeftHand)
                 {
                     m_AvatarData.LeftHand.SetPositionAndRotation(
-                            m_LeftHand.position + cEyeOffset,
-                            m_LeftHand.rotation * m_AvatarData.LhrOffset);
+                            LeftHand.position + cEyeOffset,
+                            LeftHand.rotation * m_AvatarData.LhrOffset);
                 }
 
-                if(m_RightHand && m_AvatarData.RightHand)
+                if(RightHand && m_AvatarData.RightHand)
                 {
                     m_AvatarData.RightHand.SetPositionAndRotation(
-                            m_RightHand.position + cEyeOffset,
-                            m_RightHand.rotation * m_AvatarData.RhrOffset);
+                            RightHand.position + cEyeOffset,
+                            RightHand.rotation * m_AvatarData.RhrOffset);
                 }
 
                 if(m_AvatarData.Head)
@@ -136,8 +135,8 @@ namespace Arteranos.NetworkIO
             if (useXR)
             {
                 // In VR, connect the VR hand controllers to the puppet's hands strings.
-                m_LeftHand = xrot.FindRecursive("LeftHand Controller");
-                m_RightHand = xrot.FindRecursive("RightHand Controller");
+                LeftHand = xrot.FindRecursive("LeftHand Controller");
+                RightHand = xrot.FindRecursive("RightHand Controller");
             }
             else
             {

@@ -24,6 +24,8 @@ namespace Arteranos.Core
         public static SettingsManager Instance { get; private set; } = null;
         public static ClientSettings Client { get; internal set; }
         public static ServerSettings Server { get; internal set; }
+        public static Transform Purgatory { get; private set; }
+
         private CommandLine m_Command;
 
         private ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
@@ -32,6 +34,21 @@ namespace Arteranos.Core
         {
             Instance = this;
 
+            SetupPurgatory();
+
+            ParseSettingsAndCmdLine();
+
+        }
+
+        private void SetupPurgatory()
+        {
+            Purgatory = new GameObject("_Purgatory").transform;
+            Purgatory.position = new Vector3(0, -9000, 0);
+            DontDestroyOnLoad(Purgatory.gameObject);
+        }
+
+        private void ParseSettingsAndCmdLine()
+        {
             bool GetCmdArg(string key, out string val)
             {
                 return m_Command.m_Commands.TryGetValue(key, out val);
@@ -44,7 +61,7 @@ namespace Arteranos.Core
 
                 if(GetCmdArg("-no" + key, out _))
                     return false;
-                
+
                 return def;
             }
 
@@ -73,7 +90,6 @@ namespace Arteranos.Core
             }
 
             Client.VRMode = GetBoolArg("-vr", Client.VRMode);
-
         }
 
         private void Update()

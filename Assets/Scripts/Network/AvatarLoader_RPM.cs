@@ -220,8 +220,8 @@ namespace Arteranos.NetworkIO
             XR.XRControl xrc = XR.XRControl.Instance;
             Transform fullHeight = agot.FindRecursive("HeadTop_End");
 
-            xrc.m_EyeHeight = cEyePos.y - transform.position.y;
-            xrc.m_BodyHeight = fullHeight.transform.position.y - transform.position.y;
+            xrc.EyeHeight = cEyePos.y - transform.position.y;
+            xrc.BodyHeight = fullHeight.transform.position.y - transform.position.y;
 
             xrc.ReconfigureXRRig();
 

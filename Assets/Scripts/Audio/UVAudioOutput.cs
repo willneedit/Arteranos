@@ -71,7 +71,7 @@ namespace Arteranos.Audio
         {
             GameObject go = source.gameObject;
             DontDestroyOnLoad(go);
-            go.transform.SetParent(VoiceManager.Purgatory);
+            go.transform.SetParent(Core.SettingsManager.Purgatory);
 
             UVAudioOutput ctd = go.AddComponent<UVAudioOutput>();
 
