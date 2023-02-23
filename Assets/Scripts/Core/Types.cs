@@ -75,20 +75,6 @@ namespace Arteranos.ExtensionMethods
         }
 
     }
-
-    public static class ExtendAudioSource
-    {
-        // FIXME Not sure to use the time measurement, not the PCM count, but they're
-        //       not available in the current clip, unless I use GetData()... 
-
-        /// <summary>
-        /// Returns the normalized play position of the source's current clip.
-        /// </summary>
-        /// <param name="audioSource">The audio source in question</param>
-        /// <returns>The position in the current clip, ranged in [0..1].</returns>
-        public static float Position(this AudioSource audioSource) 
-            => audioSource.time / audioSource.clip.length;
-    }
 }
 
 namespace Arteranos.NetworkTypes

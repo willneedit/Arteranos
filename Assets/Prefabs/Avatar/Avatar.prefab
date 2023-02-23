@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2032202113796676651}
   - component: {fileID: 4281725133606322112}
   - component: {fileID: 3802344986434043942}
+  - component: {fileID: 6554906922202367433}
   m_Layer: 0
   m_Name: Avatar
   m_TagString: Untagged
@@ -136,3 +137,18 @@ MonoBehaviour:
   onlySyncOnChangeCorrectionMultiplier: 2
   rotationSensitivity: 0.001
   compressRotation: 1
+--- !u!114 &6554906922202367433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2697617456504013145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf1fefe436a507b4984a3109d568f633, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0.1
