@@ -22,14 +22,16 @@ using Mirror;
 using Telepathy;
 
 namespace Arteranos.Audio {
-    public class UVTelepathyNetwork : MonoBehaviour, IChatroomNetwork {
+    public class UVTelepathyNetwork : MonoBehaviour, IChatroomNetworkV2
+    {
         enum PacketType : byte
         {
             Invalid,
             ClientInit,
             ClientJoined,
             ClientLeft,
-            AudioSegment
+            // AudioSegment, // Deprecated
+            MulticastAudioSegment,
         }
 
         // HOSTING EVENTS
@@ -114,10 +116,10 @@ namespace Arteranos.Audio {
                             PeerIDs.Remove(leftID);
                         OnPeerLeftChatroom?.Invoke(leftID);
                         break;
-                    case PacketType.AudioSegment:
+                    case PacketType.MulticastAudioSegment:
                         short sender = packet.ReadShort();
-                        short recepient = packet.ReadShort();
-                        if(recepient == OwnID) {
+                        short[] recepients = packet.ReadArray<short>();
+                        if(recepients.Contains(OwnID)) {
                             ChatroomAudioSegment segment = FromByteArray<ChatroomAudioSegment>(packet.ReadArray<byte>());
                             OnAudioReceived?.Invoke(sender, segment);
                         }
@@ -177,22 +179,28 @@ namespace Arteranos.Audio {
             }
         }
 
+        // FIXME Use an array of recipients to multicast the audio segment to
+        //       reduce the incoming bandwidth. Needs work on the ChatroomAgent.
         void OnData_Server(int sender, ArraySegment<byte> data) {
             NetworkReader packet = new(data);
             PacketType tag = (PacketType) packet.ReadByte();
 
-            if (tag == PacketType.AudioSegment) {
+            if (tag == PacketType.MulticastAudioSegment) {
                 short audioSender = packet.ReadShort();
-                short recipient = packet.ReadShort();
+                List<short> recipients = packet.ReadArray<short>().ToList();
                 byte[] segmentBytes = packet.ReadArray<byte>();
 
-                if (recipient == OwnID) {
+                if (recipients.Contains(OwnID)) {
+                    // It's the hosting user. Tee off its stream.
                     ChatroomAudioSegment segment = FromByteArray<ChatroomAudioSegment>(segmentBytes);
                     OnAudioReceived?.Invoke(audioSender, segment);
+                    recipients.Remove(OwnID);
                 }
-                else if (PeerIDs.Contains(recipient))
+                
+                foreach(short recipient in recipients)
                 {
-                    server.Send(recipient, new ArraySegment<byte>(segmentBytes));
+                    // Otherwise, we'll pass it on to the desired client.
+                    if(PeerIDs.Contains(recipient)) server.Send(recipient, data);
                 }
             }
         }
@@ -285,23 +293,32 @@ namespace Arteranos.Audio {
         /// </summary>
         /// <param name="peerID"></param>
         /// <param name="data"></param>
-        public void SendAudioSegment(short peerID, ChatroomAudioSegment data) {
-            if (!server.Active && !client.Connected) return;
+        public void SendAudioSegment(short peerID, ChatroomAudioSegment data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendAudioSegment(short[] peerIDs, ChatroomAudioSegment data)
+        {
+            if(!server.Active && !client.Connected) return;
 
             NetworkWriter packet = new();
-            packet.WriteByte((byte) PacketType.AudioSegment);
+            packet.WriteByte((byte) PacketType.MulticastAudioSegment);
             // Sender
             packet.WriteShort(OwnID);
-            // Recipient
-            packet.WriteShort(peerID);
+            // Recipients
+            packet.WriteArray(peerIDs);
             packet.WriteArray(ToByteArray(data));
 
-            if (server.Active) 
-                server.Send(peerID, packet.ToArraySegment());
-            else if (client.Connected) 
-                client.Send(packet.ToArraySegment());
+            foreach(short peerID in peerIDs)
+            {
+                if(server.Active)
+                    server.Send(peerID, packet.ToArraySegment());
+                else if(client.Connected)
+                    client.Send(packet.ToArraySegment());
 
-            OnAudioSent?.Invoke(peerID, data);
+                OnAudioSent?.Invoke(peerID, data);
+            }
         }
 
         public byte[] ToByteArray<T>(T obj) {
@@ -321,5 +338,6 @@ namespace Arteranos.Audio {
             object obj = bf.Deserialize(ms);
             return (T) obj;
         }
+
     }
 }

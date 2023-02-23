@@ -97,7 +97,7 @@ namespace Arteranos.Audio
         {
             if(AudioSource.clip == null) return;
 
-            int index = (int) (AudioSource.Position() * RingBuffer.SegCount);
+            int index = (int) (AudioSource.GetCurrentPosition() * RingBuffer.SegCount);
 
             // Check every frame to see if the AudioSource has 
             // just moved to a new segment in the AudioBuffer 
@@ -145,7 +145,7 @@ namespace Arteranos.Audio
             // It's been passed already without playing.
             if(segments.ContainsKey(index)) return;
 
-            int locIdx = (int) (AudioSource.Position() * RingBuffer.SegCount);
+            int locIdx = (int) (AudioSource.GetCurrentPosition() * RingBuffer.SegCount);
             locIdx = Mathf.Clamp(locIdx, 0, RingBuffer.SegCount - 1);
 
             int bufferIndex = RingBuffer.GetNormalizedIndex(index);
