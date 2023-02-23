@@ -1,0 +1,1 @@
+This is the modified versions of the Adrenak UniVoice (ref. Third Part Notices) for reducing the outgoing bandwidth.
