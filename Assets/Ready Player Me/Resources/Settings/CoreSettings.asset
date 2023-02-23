@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: CoreSettings
   m_EditorClassIdentifier: 
   Subdomain: demo
-  EnableLogging: 1
+  EnableLogging: 0
