@@ -48,8 +48,8 @@ namespace Arteranos.Audio {
         public event Action<short> OnPeerLeftChatroom;
 
         // AUDIO EVENTS
-        public event Action<short, ChatroomAudioSegment> OnAudioReceived;
-        public event Action<short, ChatroomAudioSegment> OnAudioSent;
+        public event Action<short, ChatroomAudioSegmentV2> OnAudioReceived;
+        public event Action<short, ChatroomAudioSegmentV2> OnAudioSent;
 
         public short OwnID { get; private set; } = -1;
 
@@ -119,7 +119,7 @@ namespace Arteranos.Audio {
                         short sender = packet.ReadShort();
                         short[] recepients = packet.ReadArray<short>();
                         if(recepients.Contains(OwnID)) {
-                            ChatroomAudioSegment segment = FromByteArray<ChatroomAudioSegment>(packet.ReadArray<byte>());
+                            ChatroomAudioSegmentV2 segment = FromByteArray<ChatroomAudioSegmentV2>(packet.ReadArray<byte>());
                             OnAudioReceived?.Invoke(sender, segment);
                         }
                         break;
@@ -189,7 +189,7 @@ namespace Arteranos.Audio {
 
                 if (recipients.Contains(OwnID)) {
                     // It's the hosting user. Tee off its stream.
-                    ChatroomAudioSegment segment = FromByteArray<ChatroomAudioSegment>(segmentBytes);
+                    ChatroomAudioSegmentV2 segment = FromByteArray<ChatroomAudioSegmentV2>(segmentBytes);
                     OnAudioReceived?.Invoke(audioSender, segment);
                     recipients.Remove(OwnID);
                 }
@@ -290,14 +290,7 @@ namespace Arteranos.Audio {
         /// </summary>
         /// <param name="peerID"></param>
         /// <param name="data"></param>
-        public void SendAudioSegment(short peerID, ChatroomAudioSegment data)
-        {
-            // Compatiblity wrapper for a 1-to-1 chat transmission.
-            short[] peerIDs = new short[] { peerID };
-            SendAudioSegment(peerIDs, data);
-        }
-
-        public void SendAudioSegment(short[] peerIDs, ChatroomAudioSegment data)
+        public void SendAudioSegment(short[] peerIDs, ChatroomAudioSegmentV2 data)
         {
             if(!server.Active && !client.Connected) return;
 

@@ -9,9 +9,9 @@ namespace Arteranos.Audio
     /// An <see cref="IAudioInput"/> implementation based on UniMic.
     /// For more on UniMic, visit https://www.github.com/adrenak/unimic
     /// </summary>
-    public class UVMicInput : IAudioInput
+    public class UVMicInput : IAudioInputV2
     {
-        public event Action<int, float[]> OnSegmentReady;
+        public event Action<int, byte[]> OnSegmentReady;
 
         public int Frequency => Mic.Instance.Frequency;
 
@@ -25,11 +25,13 @@ namespace Arteranos.Audio
                 throw new Exception("Must have recording devices for Microphone input");
             Mic.Instance.SetDeviceIndex(deviceIndex);
             Mic.Instance.StartRecording(frequency, sampleLen);
-            Mic.Instance.OnSampleReady += Mic_OnSampleReady;
+            //Mic.Instance.OnSampleReady += Mic_OnSampleReady;
         }
 
-        void Mic_OnSampleReady(int segmentIndex, float[] samples) => OnSegmentReady?.Invoke(segmentIndex, samples);
+        void Mic_OnSampleReady(int segmentIndex, byte[] samples) => OnSegmentReady?.Invoke(segmentIndex, samples);
 
-        public void Dispose() => Mic.Instance.OnSampleReady -= Mic_OnSampleReady;
+        public void Dispose()
+        { }
+        //=> Mic.Instance.OnSampleReady -= Mic_OnSampleReady;
     }
 }

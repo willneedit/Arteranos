@@ -1,9 +1,7 @@
 {
     "name": "Arteranos.UniVoiceV2",
     "rootNamespace": "",
-    "references": [
-        "GUID:6b289bb677194eb40b60db3a566aab7b"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

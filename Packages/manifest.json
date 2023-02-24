@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "com.adrenak.unimic": "1.1.0",
-    "com.adrenak.univoice": "2.0.2",
     "com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git#v5.0.0",
     "com.readyplayerme.avatarloader": "https://github.com/readyplayerme/Unity-Avatar-Loader.git#v1.0.0",
     "com.readyplayerme.core": "https://github.com/readyplayerme/Unity-core.git",

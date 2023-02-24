@@ -20,14 +20,14 @@ namespace Adrenak.UniVoice {
         /// Source of outgoing audio that can be 
         /// transmitted over the network to peers
         /// </summary>
-        public IAudioInput AudioInput { get; private set; }
+        public IAudioInputV2 AudioInput { get; private set; }
 
         /// <summary>
         /// A factory that returns an <see cref="IAudioOutput"/> 
         /// instance. Used every time a Peer connects for that peer to get
         /// an output for that peer.
         /// </summary>
-        public IAudioOutputFactory AudioOutputFactory { get; private set; }
+        public IAudioOutputFactoryV2 AudioOutputFactory { get; private set; }
 
         /// <summary>
         /// There is a <see cref="IAudioOutput"/> for each peer that gets
@@ -35,7 +35,7 @@ namespace Adrenak.UniVoice {
         /// The <see cref="IAudioOutput"/> instance corresponding to a peer is
         /// responsible for playing the audio that we receive that peer. 
         /// </summary>
-        public Dictionary<short, IAudioOutput> PeerOutputs;
+        public Dictionary<short, IAudioOutputV2> PeerOutputs;
 
         /// <summary>
         /// The current <see cref="ChatroomAgentMode"/> of this agent
@@ -88,8 +88,8 @@ namespace Adrenak.UniVoice {
         /// </param>
         public ChatroomAgentV2(
             IChatroomNetworkV2 chatroomNetwork,
-            IAudioInput audioInput,
-            IAudioOutputFactory audioOutputFactory
+            IAudioInputV2 audioInput,
+            IAudioOutputFactoryV2 audioOutputFactory
         ) {
             AudioInput = audioInput ??
             throw new ArgumentNullException(nameof(audioInput));
@@ -104,7 +104,7 @@ namespace Adrenak.UniVoice {
             MuteOthers = false;
             MuteSelf = false;
             PeerSettings = new Dictionary<short, ChatroomPeerSettings>();
-            PeerOutputs = new Dictionary<short, IAudioOutput>();
+            PeerOutputs = new Dictionary<short, IAudioOutputV2>();
 
             LinkDependencies();
         }
@@ -157,7 +157,7 @@ namespace Adrenak.UniVoice {
                 int index = data.segmentIndex;
                 int frequency = data.frequency;
                 int channels = data.channelCount;
-                float[] samples = data.samples;
+                byte[] samples = data.samples;
 
                 if (PeerSettings.ContainsKey(peerID) && !PeerSettings[peerID].muteThem)
                     PeerOutputs[peerID].Feed(index, frequency, channels, samples);
@@ -172,7 +172,7 @@ namespace Adrenak.UniVoice {
                     .Where(x => PeerSettings.ContainsKey(x) && !PeerSettings[x].muteSelf);
 
                 // Send the audio segment to every deserving recipient
-                Network.SendAudioSegment(recipients.ToArray(), new ChatroomAudioSegment {
+                Network.SendAudioSegment(recipients.ToArray(), new ChatroomAudioSegmentV2 {
                     segmentIndex = index,
                     frequency = AudioInput.Frequency,
                     channelCount = AudioInput.ChannelCount,
@@ -185,7 +185,7 @@ namespace Adrenak.UniVoice {
             if (!PeerSettings.ContainsKey(id))
                 PeerSettings.Add(id, new ChatroomPeerSettings());
             if(!PeerOutputs.ContainsKey(id)) {
-                IAudioOutput output = AudioOutputFactory.Create(
+                IAudioOutputV2 output = AudioOutputFactory.Create(
                     AudioInput.Frequency,
                     AudioInput.ChannelCount,
                     AudioInput.Frequency * AudioInput.ChannelCount / AudioInput.SegmentRate
