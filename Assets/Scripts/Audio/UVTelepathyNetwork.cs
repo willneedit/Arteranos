@@ -30,8 +30,7 @@ namespace Arteranos.Audio {
             ClientInit,
             ClientJoined,
             ClientLeft,
-            // AudioSegment, // Deprecated
-            MulticastAudioSegment,
+            AudioSegment,
         }
 
         // HOSTING EVENTS
@@ -116,7 +115,7 @@ namespace Arteranos.Audio {
                             PeerIDs.Remove(leftID);
                         OnPeerLeftChatroom?.Invoke(leftID);
                         break;
-                    case PacketType.MulticastAudioSegment:
+                    case PacketType.AudioSegment:
                         short sender = packet.ReadShort();
                         short[] recepients = packet.ReadArray<short>();
                         if(recepients.Contains(OwnID)) {
@@ -179,13 +178,11 @@ namespace Arteranos.Audio {
             }
         }
 
-        // FIXME Use an array of recipients to multicast the audio segment to
-        //       reduce the incoming bandwidth. Needs work on the ChatroomAgent.
         void OnData_Server(int sender, ArraySegment<byte> data) {
             NetworkReader packet = new(data);
             PacketType tag = (PacketType) packet.ReadByte();
 
-            if (tag == PacketType.MulticastAudioSegment) {
+            if (tag == PacketType.AudioSegment) {
                 short audioSender = packet.ReadShort();
                 List<short> recipients = packet.ReadArray<short>().ToList();
                 byte[] segmentBytes = packet.ReadArray<byte>();
@@ -295,7 +292,9 @@ namespace Arteranos.Audio {
         /// <param name="data"></param>
         public void SendAudioSegment(short peerID, ChatroomAudioSegment data)
         {
-            throw new NotImplementedException();
+            // Compatiblity wrapper for a 1-to-1 chat transmission.
+            short[] peerIDs = new short[] { peerID };
+            SendAudioSegment(peerIDs, data);
         }
 
         public void SendAudioSegment(short[] peerIDs, ChatroomAudioSegment data)
@@ -303,7 +302,7 @@ namespace Arteranos.Audio {
             if(!server.Active && !client.Connected) return;
 
             NetworkWriter packet = new();
-            packet.WriteByte((byte) PacketType.MulticastAudioSegment);
+            packet.WriteByte((byte) PacketType.AudioSegment);
             // Sender
             packet.WriteShort(OwnID);
             // Recipients
