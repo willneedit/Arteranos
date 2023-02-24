@@ -7,6 +7,7 @@
 
 using Adrenak.UniVoice;
 using Mirror;
+using System.Collections;
 using UnityEngine;
 
 namespace Arteranos.Audio
@@ -20,6 +21,8 @@ namespace Arteranos.Audio
 
         private bool serverActive = false;
 
+        private IEnumerator cs_cr = null;
+
         private void Awake()
         {
             Instance = this;
@@ -30,24 +33,42 @@ namespace Arteranos.Audio
                 new UVAudioOutput.Factory());
         }
 
-        // Update is called once per frame
-        void Update()
+        private void Start()
         {
-            // Follow the voice server setup (or connection) state through the
-            // world server's (or connection's) state.
+            cs_cr = ManageChatServer();
 
-            // Transition offline --> Server or Host
-            if(NetworkServer.active && !serverActive)
+            StartCoroutine(cs_cr);
+        }
+
+        private void OnDestroy()
+        {
+            if(cs_cr != null)
+                StopCoroutine(cs_cr);
+        }
+
+        private IEnumerator ManageChatServer()
+        {
+            while(true)
             {
-                ChatroomAgent.Network.HostChatroom();
-                ChatroomAgent.MuteSelf = true;
-                serverActive = true;
-            }
-            // Transition Server or Host --> offline 
-            else if (!NetworkServer.active && serverActive) 
-            {
-                ChatroomAgent.Network.CloseChatroom();                
-                serverActive = false;
+                yield return new WaitForSeconds(2);
+
+                // Follow the voice server setup (or connection) state through the
+                // world server's (or connection's) state.
+
+                // Transition offline --> Server or Host
+                if(NetworkServer.active && !serverActive)
+                {
+                    ChatroomAgent.Network.HostChatroom();
+                    ChatroomAgent.MuteSelf = true;
+                    serverActive = true;
+                }
+                // Transition Server or Host --> offline 
+                else if(!NetworkServer.active && serverActive)
+                {
+                    ChatroomAgent.Network.CloseChatroom();
+                    serverActive = false;
+                }
+
             }
         }
     }
