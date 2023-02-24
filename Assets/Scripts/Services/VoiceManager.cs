@@ -6,11 +6,13 @@
  */
 
 using Adrenak.UniVoice;
+using Arteranos.Audio;
+using Arteranos.Core;
 using Mirror;
 using System.Collections;
 using UnityEngine;
 
-namespace Arteranos.Audio
+namespace Arteranos.Services
 {
     public class VoiceManager : MonoBehaviour
     {

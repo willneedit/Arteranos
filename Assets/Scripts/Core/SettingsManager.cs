@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2023, willneedit
  * 
  * Licensed by the Mozilla Public License 2.0,
@@ -7,28 +7,27 @@
 
 using UnityEngine;
 
-using Mirror;
-using Adrenak.UniVoice;
-
 namespace Arteranos.Core
 {
     public class SettingsManager : MonoBehaviour
     {
-        private enum ConnectionMode {
+
+        protected enum ConnectionMode
+        {
             Disconnected = 0,
             Client,
             Server,
             Host
         }
 
-        public static SettingsManager Instance { get; private set; } = null;
-        public static ClientSettings Client { get; internal set; }
-        public static ServerSettings Server { get; internal set; }
-        public static Transform Purgatory { get; private set; }
-
         private CommandLine m_Command;
 
-        private ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
+        protected ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
+
+        public static SettingsManager Instance { get; private set; } = null;
+        public static Transform Purgatory { get; private set; }
+        public static ClientSettings Client { get; internal set; }
+        public static ServerSettings Server { get; internal set; }
 
         private void Awake()
         {
@@ -38,13 +37,6 @@ namespace Arteranos.Core
 
             ParseSettingsAndCmdLine();
 
-        }
-
-        private void SetupPurgatory()
-        {
-            Purgatory = new GameObject("_Purgatory").transform;
-            Purgatory.position = new Vector3(0, -9000, 0);
-            DontDestroyOnLoad(Purgatory.gameObject);
         }
 
         private void ParseSettingsAndCmdLine()
@@ -92,38 +84,13 @@ namespace Arteranos.Core
             Client.VRMode = GetBoolArg("-vr", Client.VRMode);
         }
 
-        private void Update()
+        private void SetupPurgatory()
         {
-            StartNetwork();
-
-            // Startup of dependent services...
-            GetComponent<XR.XRControl>().enabled = true;
-            GetComponent<Audio.VoiceManager>().enabled = true;
-
-            // And finish the startup.
-            this.enabled = false;
+            Purgatory = new GameObject("_Purgatory").transform;
+            Purgatory.position = new Vector3(0, -9000, 0);
+            DontDestroyOnLoad(Purgatory.gameObject);
         }
 
-        private void StartNetwork()
-        {
-            NetworkManager networkManager = GetComponentInParent<NetworkManager>();
-
-            switch(m_ConnectionMode)
-            {
-                case ConnectionMode.Server:
-                    networkManager.networkAddress = Server.ListenAddress;
-                    networkManager.StartServer();
-                    break;
-                case ConnectionMode.Host:
-                    networkManager.networkAddress = Server.ListenAddress;
-                    networkManager.StartHost();
-                    break;
-                case ConnectionMode.Client:
-                    networkManager.networkAddress = Client.ServerIP;
-                    networkManager.StartClient();
-                    break;
-            }
-        }
+        protected virtual void Update() { }
     }
 }
-

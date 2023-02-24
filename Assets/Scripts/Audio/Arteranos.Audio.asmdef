@@ -1,0 +1,21 @@
+{
+    "name": "Arteranos.Audio",
+    "rootNamespace": "",
+    "references": [
+        "GUID:f87ecb857e752164ab814a3de8eb0262",
+        "GUID:6b289bb677194eb40b60db3a566aab7b",
+        "GUID:20a6a777694e9fc4b8c39ab61d32d5da",
+        "GUID:725ee7191c021de4dbf9269590ded755",
+        "GUID:30817c1a0e6d646d99c048fc403f5979",
+        "GUID:d45d38686917d5944a10b14bda25f882"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

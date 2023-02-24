@@ -1,0 +1,25 @@
+{
+    "name": "Arteranos.Avatar",
+    "rootNamespace": "",
+    "references": [
+        "GUID:30817c1a0e6d646d99c048fc403f5979",
+        "GUID:d45d38686917d5944a10b14bda25f882",
+        "GUID:4e24a671543c28043a5debc449902c3f",
+        "GUID:4c0b8f282b2bc844a842612eb74795c9",
+        "GUID:81aa489aad9fdd1479e588fc5dd0a3ee",
+        "GUID:20a6a777694e9fc4b8c39ab61d32d5da",
+        "GUID:ac716f01d4e419a48aecf125b777ad52",
+        "GUID:69ab3f10cf42d0b42a6cd1353c374377",
+        "GUID:dc960734dc080426fa6612f1c5fe95f3",
+        "GUID:6b289bb677194eb40b60db3a566aab7b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

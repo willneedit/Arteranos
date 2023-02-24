@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 
 using Adrenak.UniVoice;
-using Arteranos.ExtensionMethods;
 
 namespace Arteranos.Audio
 {
