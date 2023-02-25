@@ -31,7 +31,7 @@ namespace Arteranos.Services
 
             ChatroomAgent = new(
                 UVTelepathyNetwork.New(Port),
-                new UVMicInput(),
+                UVMicInput.New(4),
                 new UVAudioOutput.Factory());
         }
 

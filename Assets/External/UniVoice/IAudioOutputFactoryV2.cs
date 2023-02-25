@@ -11,6 +11,6 @@
         /// <param name="frequency">Frequency/sample rate of the audio </param>
         /// <param name="channelCount">Number of audio channels in data</param>
         /// <param name="samplesLen">Number of samples in audio segment</param>
-        IAudioOutputV2 Create(int frequency, int channelCount, int samplesLen);
+        IAudioOutputV2 Create(int frequency, int channelCount);
     }
 }

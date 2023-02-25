@@ -16,7 +16,7 @@ namespace Arteranos.Audio
 
         public readonly List<float> receiveBuffer = new();
 
-        public Channels opusChannels = Channels.Stereo;
+        public Channels opusChannels = Channels.Mono;
         public SamplingRate opusSamplingRate = SamplingRate.Sampling48000;
 
         public string ID
@@ -31,7 +31,7 @@ namespace Arteranos.Audio
         public static UVAudioOutput New(int samplingRate, int channelCount)
         {
             Debug.Assert(samplingRate == 48000);
-            Debug.Assert(channelCount == 2);
+            Debug.Assert(channelCount == 1);
 
             GameObject go = new($"UniVoiceAudioSourceOutput");
             DontDestroyOnLoad(go);
@@ -58,7 +58,7 @@ namespace Arteranos.Audio
         public void Feed(int _, int frequency, int channelCount, byte[] encodedData)
         {
             Debug.Assert(frequency == 48000);
-            Debug.Assert(channelCount == 2);
+            Debug.Assert(channelCount == 1);
 
             // Tack on the decoded data to the receive buffer.
             receiveBuffer.AddRange(decoder.DecodePacketFloat(encodedData));
@@ -93,7 +93,7 @@ namespace Arteranos.Audio
         {
             public Factory() { }
 
-            public IAudioOutputV2 Create(int samplingRate, int channelCount, int _) => New(samplingRate, channelCount);
+            public IAudioOutputV2 Create(int samplingRate, int channelCount) => New(samplingRate, channelCount);
         }
     }
 }

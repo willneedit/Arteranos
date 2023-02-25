@@ -187,8 +187,7 @@ namespace Adrenak.UniVoice {
             if(!PeerOutputs.ContainsKey(id)) {
                 IAudioOutputV2 output = AudioOutputFactory.Create(
                     AudioInput.Frequency,
-                    AudioInput.ChannelCount,
-                    AudioInput.Frequency * AudioInput.ChannelCount / AudioInput.SegmentRate
+                    AudioInput.ChannelCount
                 );
                 output.ID = id.ToString();
                 PeerOutputs.Add(id, output);
