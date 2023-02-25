@@ -154,13 +154,10 @@ namespace Adrenak.UniVoice {
                 // if we're muting all, no point continuing.
                 if (MuteOthers) return;
 
-                int index = data.segmentIndex;
-                int frequency = data.frequency;
-                int channels = data.channelCount;
                 byte[] samples = data.samples;
 
                 if (PeerSettings.ContainsKey(peerID) && !PeerSettings[peerID].muteThem)
-                    PeerOutputs[peerID].Feed(index, frequency, channels, samples);
+                    PeerOutputs[peerID].Feed(samples);
             };
 
             AudioInput.OnSegmentReady += (index, samples) => {
@@ -173,9 +170,6 @@ namespace Adrenak.UniVoice {
 
                 // Send the audio segment to every deserving recipient
                 Network.SendAudioSegment(recipients.ToArray(), new ChatroomAudioSegmentV2 {
-                    segmentIndex = index,
-                    frequency = AudioInput.Frequency,
-                    channelCount = AudioInput.ChannelCount,
                     samples = samples
                 });
             };

@@ -17,28 +17,16 @@ namespace Arteranos.Audio
     {
         public event Action<int, byte[]> OnSegmentReady;
 
-        public AudioSource audiorecorder = null;
-        private readonly List<float> micBuffer = new();
-        int packageSize;
-
-        int packageIndex = 0;
-
-        OpusEncoder encoder;
-
-        private bool recording = true;
-
-        // other values then stereo will not yet work
-        Channels opusChannels = Channels.Mono;
-        // other values then 48000 do not work at the moment, it requires and additional conversion before sending and at receiving
-        // also osx runs at 44100 i think, this causes also some hickups
-        SamplingRate opusSamplingRate = SamplingRate.Sampling48000;
-
-        // TODO Cleanup
-        public int Frequency => 48000;
-        public int ChannelCount => 1;
-        public int SegmentRate => 4096;
+        public int Frequency { get; private set; }
+        public int ChannelCount { get; private set; }
 
         public string deviceName;
+
+        private AudioSource audiorecorder = null;
+        private readonly List<float> micBuffer = new();
+        private OpusEncoder encoder;
+        private int packageIndex = 0;
+        private int packageSize;
 
         private event Action<float[]> OnSampleReady;
 
@@ -51,30 +39,49 @@ namespace Arteranos.Audio
             GameObject go = new("_Microphone");
             DontDestroyOnLoad(go);
             go.transform.SetParent(Core.SettingsManager.Purgatory);
+            go.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             return go.AddComponent<UVMicInput>().New_(micDeviceId);
         }
 
         private UVMicInput New_(int micDeviceId)
         {
-            encoder = new(opusSamplingRate, opusChannels);
-            encoder.EncoderDelay = Delay.Delay20ms;
-            Debug.Log("Opustest.Start: framesize: " + encoder.FrameSizePerChannel + " " + encoder.InputChannels);
-
-            // the encoder delay has some influence on the amout of data we need to send, but it's not a multiplication of it
-            packageSize = encoder.FrameSizePerChannel * (int) opusChannels;
-
+            Frequency = AudioSettings.outputSampleRate;
             deviceName = Microphone.devices[micDeviceId];
 
-            Debug.Log($"setup mic with {deviceName}, samplerate={AudioSettings.outputSampleRate}");
+            Debug.Log($"setup mic with {deviceName}, samplerate={Frequency}");
             audiorecorder = gameObject.AddComponent<AudioSource>();
             audiorecorder.loop = true;
             audiorecorder.clip = Microphone.Start(
                 deviceName,
                 true,
                 1,
-                AudioSettings.outputSampleRate);
+                Frequency);
 
-            Debug.Log($"Clip sanples={audiorecorder.clip.samples}");
+            ChannelCount = audiorecorder.clip.channels;
+
+            Debug.Log($"Clip samples={audiorecorder.clip.samples}, channels={ChannelCount}");
+
+            // The SamplingRate enum match the actual numbers, as well as the Mono/Stereo,
+            // let's hope....
+            encoder = new((SamplingRate) Frequency, (Channels) ChannelCount)
+            {
+                EncoderDelay = Delay.Delay20ms,
+                SignalHint = SignalHint.Voice,
+                MaxBandwidth = Bandwidth.Wideband
+            };
+
+            //encoder.ForceChannels = POpusCodec.Enums.ForceChannels.NoForce;
+            //encoder.Bitrate = samplerate;
+            //encoder.Complexity = POpusCodec.Enums.Complexity.Complexity0;
+            //encoder.DtxEnabled = true;
+            //encoder.ExpectedPacketLossPercentage = 0;
+            //encoder.UseInbandFEC = true;
+            //encoder.UseUnconstrainedVBR = true;
+
+            Debug.Log($"Framesize: {encoder.FrameSizePerChannel}, {encoder.InputChannels}");
+
+            // the encoder delay has some influence on the amout of data we need to send, but it's not a multiplication of it
+            packageSize = encoder.FrameSizePerChannel * ChannelCount;
 
             OnSampleReady += DeliverCompressedAudio;
             StartCoroutine(ReadRawAudio());
@@ -96,7 +103,7 @@ namespace Arteranos.Audio
 
             AudioClip AudioClip = audiorecorder.clip;
 
-            int ClipDataLength = AudioSettings.outputSampleRate / 10;
+            int ClipDataLength = Frequency / 10;
 
             float[] temp = new float[ClipDataLength];
 
@@ -111,8 +118,8 @@ namespace Arteranos.Audio
                         loops++;
                     prevPos = currPos;
 
-                    var currAbsPos = loops * AudioClip.samples + currPos;
-                    var nextReadAbsPos = readAbsPos + temp.Length;
+                    int currAbsPos = loops * AudioClip.samples + currPos;
+                    int nextReadAbsPos = readAbsPos + temp.Length;
 
                     if(nextReadAbsPos < currAbsPos)
                     {
@@ -124,7 +131,9 @@ namespace Arteranos.Audio
                         isNewDataAvailable = true;
                     }
                     else
+                    {
                         isNewDataAvailable = false;
+                    }
                 }
                 yield return null;
             }
@@ -137,7 +146,7 @@ namespace Arteranos.Audio
             while(micBuffer.Count > packageSize)
             {
                 byte[] encodedData = encoder.Encode(micBuffer.GetRange(0, packageSize).ToArray());
-                Debug.Log("OpusNetworked.SendData: " + encodedData.Length);
+                // Debug.Log("OpusNetworked.SendData: " + encodedData.Length);
                 micBuffer.RemoveRange(0, packageSize);
                 OnSegmentReady?.Invoke(packageIndex++, encodedData);
             }

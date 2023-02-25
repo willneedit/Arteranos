@@ -12,12 +12,11 @@ namespace Arteranos.Audio
     public class UVAudioOutput : MonoBehaviour, IAudioOutputV2
     {
         public AudioSource AudioSource { get; private set; }
-        public OpusDecoder decoder;
 
-        public readonly List<float> receiveBuffer = new();
-
-        public Channels opusChannels = Channels.Mono;
-        public SamplingRate opusSamplingRate = SamplingRate.Sampling48000;
+        private OpusDecoder decoder;
+        private readonly List<float> receiveBuffer = new();
+        private int SamplingRate;
+        private int ChannelCount;
 
         public string ID
         {
@@ -36,18 +35,26 @@ namespace Arteranos.Audio
             GameObject go = new($"UniVoiceAudioSourceOutput");
             DontDestroyOnLoad(go);
             go.transform.SetParent(Core.SettingsManager.Purgatory);
+            go.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             UVAudioOutput ctd = go.AddComponent<UVAudioOutput>();
 
-            return ctd.SetupDecoder(go.AddComponent<AudioSource>());
+            return ctd.SetupDecoder(go.AddComponent<AudioSource>(), samplingRate, channelCount);
         }
 
-        private UVAudioOutput SetupDecoder(AudioSource source) 
+        private UVAudioOutput SetupDecoder(AudioSource source, int samplingRate, int channelCount) 
         {
-            AudioSource = source;
-            decoder = new OpusDecoder(opusSamplingRate, opusChannels);
+            SamplingRate = samplingRate;
+            ChannelCount = channelCount;
 
-            AudioClip myClip = AudioClip.Create("MyPlayback", (int) opusSamplingRate, (int) opusChannels, (int) opusSamplingRate, true, OnPlaybackRead, OnPlaybackSetPosition);
+            AudioSource = source;
+            decoder = new OpusDecoder((SamplingRate) SamplingRate, (Channels) ChannelCount);
+
+            AudioClip myClip = AudioClip.Create("MyPlayback", 
+                SamplingRate, 
+                ChannelCount, 
+                SamplingRate,
+                true, OnPlaybackRead, OnPlaybackSetPosition);
             AudioSource.loop = true;
             AudioSource.clip = myClip;
             AudioSource.Play();
@@ -55,11 +62,8 @@ namespace Arteranos.Audio
             return this;
         }
 
-        public void Feed(int _, int frequency, int channelCount, byte[] encodedData)
+        public void Feed(byte[] encodedData)
         {
-            Debug.Assert(frequency == 48000);
-            Debug.Assert(channelCount == 1);
-
             // Tack on the decoded data to the receive buffer.
             receiveBuffer.AddRange(decoder.DecodePacketFloat(encodedData));
         }

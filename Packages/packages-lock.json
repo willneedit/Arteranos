@@ -1,12 +1,5 @@
 {
   "dependencies": {
-    "com.adrenak.unimic": {
-      "version": "1.1.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://registry.npmjs.org"
-    },
     "com.atteneder.gltfast": {
       "version": "https://github.com/atteneder/glTFast.git#v5.0.0",
       "depth": 0,

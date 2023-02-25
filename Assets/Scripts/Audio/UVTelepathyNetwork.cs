@@ -21,7 +21,9 @@ using Adrenak.UniVoice;
 using Mirror;
 using Telepathy;
 
-namespace Arteranos.Audio {
+
+namespace Arteranos.Audio 
+{
     public class UVTelepathyNetwork : MonoBehaviour, IChatroomNetworkV2
     {
         enum PacketType : byte
@@ -118,8 +120,8 @@ namespace Arteranos.Audio {
                     case PacketType.AudioSegment:
                         short sender = packet.ReadShort();
                         short[] recepients = packet.ReadArray<short>();
+                        ChatroomAudioSegmentV2 segment = packet.ReadCASV2();
                         if(recepients.Contains(OwnID)) {
-                            ChatroomAudioSegmentV2 segment = FromByteArray<ChatroomAudioSegmentV2>(packet.ReadArray<byte>());
                             OnAudioReceived?.Invoke(sender, segment);
                         }
                         break;
@@ -185,11 +187,10 @@ namespace Arteranos.Audio {
             if (tag == PacketType.AudioSegment) {
                 short audioSender = packet.ReadShort();
                 List<short> recipients = packet.ReadArray<short>().ToList();
-                byte[] segmentBytes = packet.ReadArray<byte>();
+                ChatroomAudioSegmentV2 segment = packet.ReadCASV2();
 
                 if (recipients.Contains(OwnID)) {
                     // It's the hosting user. Tee off its stream.
-                    ChatroomAudioSegmentV2 segment = FromByteArray<ChatroomAudioSegmentV2>(segmentBytes);
                     OnAudioReceived?.Invoke(audioSender, segment);
                     recipients.Remove(OwnID);
                 }
@@ -300,7 +301,7 @@ namespace Arteranos.Audio {
             packet.WriteShort(OwnID);
             // Recipients
             packet.WriteArray(peerIDs);
-            packet.WriteArray(ToByteArray(data));
+            packet.WriteArray(data.samples);
 
             foreach(short peerID in peerIDs)
             {
@@ -312,24 +313,19 @@ namespace Arteranos.Audio {
                 OnAudioSent?.Invoke(peerID, data);
             }
         }
+    }
 
-        public byte[] ToByteArray<T>(T obj) {
-            if (obj == null)
-                return null;
-            BinaryFormatter bf = new();
-            using MemoryStream ms = new();
-            bf.Serialize(ms, obj);
-            return ms.ToArray();
+    public static class ExtendCASV2
+    {
+        public static void WriteCASV2(this NetworkWriter writer, ChatroomAudioSegmentV2 cas)
+            => writer.WriteArray(cas.samples);
+
+        public static ChatroomAudioSegmentV2 ReadCASV2(this NetworkReader reader)
+        {
+            return new ChatroomAudioSegmentV2()
+            {
+                samples = reader.ReadArray<byte>()
+            };
         }
-
-        public T FromByteArray<T>(byte[] data) {
-            if (data == null)
-                return default;
-            BinaryFormatter bf = new();
-            using MemoryStream ms = new(data);
-            object obj = bf.Deserialize(ms);
-            return (T) obj;
-        }
-
     }
 }

@@ -18,26 +18,9 @@ namespace Adrenak.UniVoice {
         /// <summary>
         /// Feeds the data to the output implementation 
         /// </summary>
-        /// 
-        /// <param name="segmentIndex">
-        /// The index of the segment of samples from the audio
-        /// </param>
-        /// 
-        /// <param name="frequency">
-        /// The frequency/sampling rate of the audio
-        /// </param>
-        /// 
-        /// <param name="channelCount">
-        /// The number of channels in the audio
-        /// </param>
-        /// 
         /// <param name="audioSamples">
         /// The audio samples/segment being fed
         /// </param>
-        void Feed(int segmentIndex,
-            int frequency,
-            int channelCount,
-            byte[] audioSamples
-        );
+        void Feed(byte[] audioSamples);
     }
 }
