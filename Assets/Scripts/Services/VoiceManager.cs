@@ -7,7 +7,6 @@
 
 using Arteranos.UniVoice;
 using Arteranos.Audio;
-using Arteranos.Core;
 using Mirror;
 using System.Collections;
 using UnityEngine;
@@ -29,9 +28,10 @@ namespace Arteranos.Services
         {
             Instance = this;
 
+            // FIXME Client/User setting, desired sample setting
             ChatroomAgent = new(
                 UVTelepathyNetwork.New(Port),
-                UVMicInput.New(4),
+                UVMicInput.New(4, 24000),
                 new UVAudioOutput.Factory());
         }
 

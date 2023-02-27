@@ -29,9 +29,6 @@ namespace Arteranos.Audio
 
         public static UVAudioOutput New(int samplingRate, int channelCount)
         {
-            Debug.Assert(samplingRate == 48000);
-            Debug.Assert(channelCount == 1);
-
             GameObject go = new($"UniVoiceAudioSourceOutput");
             DontDestroyOnLoad(go);
             go.transform.SetParent(Core.SettingsManager.Purgatory);
@@ -88,7 +85,12 @@ namespace Arteranos.Audio
         /// <summary>
         /// Disposes the instance by deleting the GameObject of the component.
         /// </summary>
-        public void Dispose() => Destroy(gameObject);
+        public void Dispose()
+        {
+            AudioSource.Stop();
+            decoder.Dispose();
+            Destroy(gameObject);
+        }
 
         /// <summary>
         /// Creates <see cref="UVAudioOutput"/> instances

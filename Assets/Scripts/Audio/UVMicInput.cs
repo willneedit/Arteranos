@@ -25,27 +25,51 @@ namespace Arteranos.Audio
         private AudioSource audiorecorder = null;
         private readonly List<float> micBuffer = new();
         private OpusEncoder encoder;
-        private int packageIndex = 0;
-        private int packageSize;
+        private int packetndex = 0;
+        private int packetSize;
 
         private event Action<float[]> OnSampleReady;
 
         [Obsolete("Cannot use new keyword to create an instance. Use .New() method instead")]
         public UVMicInput() { }
 
+        private int ValidateSampleRate(int sampleRate)
+        {
+            switch((SamplingRate) sampleRate)
+            {
+                case SamplingRate.Sampling08000:
+                    break;
+                case SamplingRate.Sampling12000:
+                    break;
+                case SamplingRate.Sampling16000:
+                    break;
+                case SamplingRate.Sampling24000:
+                    break;
+                case SamplingRate.Sampling48000:
+                    break;
+                default:
+                    Debug.LogWarning($"SamplingRate of {sampleRate} outside of the Opus specification, setting to 8kHz");
+                    sampleRate = (int) SamplingRate.Sampling08000;
+                    break;
+            }
 
-        public static UVMicInput New(int micDeviceId = 0)
+            return sampleRate;
+        }
+
+        public static UVMicInput New(int micDeviceId = 0, int? desiredRate = null)
         {
             GameObject go = new("_Microphone");
             DontDestroyOnLoad(go);
             go.transform.SetParent(Core.SettingsManager.Purgatory);
             go.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            return go.AddComponent<UVMicInput>().New_(micDeviceId);
+            return go.AddComponent<UVMicInput>().New_(micDeviceId, desiredRate);
         }
 
-        private UVMicInput New_(int micDeviceId)
+        private UVMicInput New_(int micDeviceId, int? desiredRate)
         {
-            SampleRate = AudioSettings.outputSampleRate;
+            SampleRate = desiredRate ?? AudioSettings.outputSampleRate;
+            SampleRate = ValidateSampleRate(SampleRate);
+
             deviceName = Microphone.devices[micDeviceId];
 
             Debug.Log($"setup mic with {deviceName}, samplerate={SampleRate}");
@@ -81,7 +105,7 @@ namespace Arteranos.Audio
             Debug.Log($"Framesize: {encoder.FrameSizePerChannel}, {encoder.InputChannels}");
 
             // the encoder delay has some influence on the amout of data we need to send, but it's not a multiplication of it
-            packageSize = encoder.FrameSizePerChannel * ChannelCount;
+            packetSize = encoder.FrameSizePerChannel * ChannelCount;
 
             OnSampleReady += DeliverCompressedAudio;
             StartCoroutine(ReadRawAudio());
@@ -93,6 +117,7 @@ namespace Arteranos.Audio
         {
             StopCoroutine(ReadRawAudio());
             OnSampleReady -= DeliverCompressedAudio;
+            encoder.Dispose();
         }
 
         IEnumerator ReadRawAudio()
@@ -109,9 +134,7 @@ namespace Arteranos.Audio
 
             while(true)
             {
-                bool isNewDataAvailable = true;
-
-                while(isNewDataAvailable)
+                while(true)
                 {
                     int currPos = Microphone.GetPosition(deviceName);
                     if(currPos < prevPos)
@@ -121,19 +144,13 @@ namespace Arteranos.Audio
                     int currAbsPos = loops * AudioClip.samples + currPos;
                     int nextReadAbsPos = readAbsPos + temp.Length;
 
-                    if(nextReadAbsPos < currAbsPos)
-                    {
-                        AudioClip.GetData(temp, readAbsPos % AudioClip.samples);
+                    if(nextReadAbsPos >= currAbsPos) break;
 
-                        OnSampleReady?.Invoke(temp);
+                    AudioClip.GetData(temp, readAbsPos % AudioClip.samples);
 
-                        readAbsPos = nextReadAbsPos;
-                        isNewDataAvailable = true;
-                    }
-                    else
-                    {
-                        isNewDataAvailable = false;
-                    }
+                    OnSampleReady?.Invoke(temp);
+
+                    readAbsPos = nextReadAbsPos;
                 }
                 yield return null;
             }
@@ -143,13 +160,13 @@ namespace Arteranos.Audio
         {
             micBuffer.AddRange(data);
 
-            while(micBuffer.Count > packageSize)
+            int packets = micBuffer.Count / packetSize;
+            for(int i = 0; i < packets; i++)
             {
-                byte[] encodedData = encoder.Encode(micBuffer.GetRange(0, packageSize).ToArray());
-                // Debug.Log("OpusNetworked.SendData: " + encodedData.Length);
-                micBuffer.RemoveRange(0, packageSize);
-                OnSegmentReady?.Invoke(packageIndex++, encodedData);
+                byte[] encodedData = encoder.Encode(micBuffer.GetRange(i * packetSize, packetSize).ToArray());
+                OnSegmentReady?.Invoke(packetndex++, encodedData);
             }
+            micBuffer.RemoveRange(0, packets * packetSize);
         }
 
         public void Dispose() => Destroy(audiorecorder.gameObject);
