@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Adrenak.UniVoice;
+using Arteranos.UniVoice;
 
 using POpusCodec;
 using POpusCodec.Enums;
@@ -17,7 +17,7 @@ namespace Arteranos.Audio
     {
         public event Action<int, byte[]> OnSegmentReady;
 
-        public int Frequency { get; private set; }
+        public int SampleRate { get; private set; }
         public int ChannelCount { get; private set; }
 
         public string deviceName;
@@ -45,17 +45,17 @@ namespace Arteranos.Audio
 
         private UVMicInput New_(int micDeviceId)
         {
-            Frequency = AudioSettings.outputSampleRate;
+            SampleRate = AudioSettings.outputSampleRate;
             deviceName = Microphone.devices[micDeviceId];
 
-            Debug.Log($"setup mic with {deviceName}, samplerate={Frequency}");
+            Debug.Log($"setup mic with {deviceName}, samplerate={SampleRate}");
             audiorecorder = gameObject.AddComponent<AudioSource>();
             audiorecorder.loop = true;
             audiorecorder.clip = Microphone.Start(
                 deviceName,
                 true,
                 1,
-                Frequency);
+                SampleRate);
 
             ChannelCount = audiorecorder.clip.channels;
 
@@ -63,7 +63,7 @@ namespace Arteranos.Audio
 
             // The SamplingRate enum match the actual numbers, as well as the Mono/Stereo,
             // let's hope....
-            encoder = new((SamplingRate) Frequency, (Channels) ChannelCount)
+            encoder = new((SamplingRate) SampleRate, (Channels) ChannelCount)
             {
                 EncoderDelay = Delay.Delay20ms,
                 SignalHint = SignalHint.Voice,
@@ -103,7 +103,7 @@ namespace Arteranos.Audio
 
             AudioClip AudioClip = audiorecorder.clip;
 
-            int ClipDataLength = Frequency / 10;
+            int ClipDataLength = SampleRate / 10;
 
             float[] temp = new float[ClipDataLength];
 

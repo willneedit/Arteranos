@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Adrenak.UniVoice
+namespace Arteranos.UniVoice
 {
     /// <summary>
     /// A chatroom specific networking interface for creating & joining 

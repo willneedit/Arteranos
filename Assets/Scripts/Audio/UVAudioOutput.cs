@@ -3,7 +3,7 @@ using System.Linq;
 
 using UnityEngine;
 
-using Adrenak.UniVoice;
+using Arteranos.UniVoice;
 using POpusCodec;
 using POpusCodec.Enums;
 

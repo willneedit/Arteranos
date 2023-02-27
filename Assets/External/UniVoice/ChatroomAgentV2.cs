@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Adrenak.UniVoice {
+namespace Arteranos.UniVoice {
     /// <summary>
     /// Provides the means to host or connect to a chatroom.
     /// </summary>
@@ -180,7 +180,7 @@ namespace Adrenak.UniVoice {
                 PeerSettings.Add(id, new ChatroomPeerSettings());
             if(!PeerOutputs.ContainsKey(id)) {
                 IAudioOutputV2 output = AudioOutputFactory.Create(
-                    AudioInput.Frequency,
+                    AudioInput.SampleRate,
                     AudioInput.ChannelCount
                 );
                 output.ID = id.ToString();

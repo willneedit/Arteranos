@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Mirror;
-using Adrenak.UniVoice;
+using Arteranos.UniVoice;
 
 using Arteranos.Services;
 using Arteranos.Core;

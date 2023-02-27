@@ -1,6 +1,6 @@
 using System;
 
-namespace Adrenak.UniVoice {
+namespace Arteranos.UniVoice {
     /// <summary>
     /// Responsible for playing audio that is sent to it. 
     /// You'd normally want a <see cref="UnityEngine.AudioSource"/> 

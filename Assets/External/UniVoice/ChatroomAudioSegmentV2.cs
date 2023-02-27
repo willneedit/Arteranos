@@ -1,4 +1,4 @@
-﻿namespace Adrenak.UniVoice {
+﻿namespace Arteranos.UniVoice {
 
     /// <summary>
     /// A data structure representing the audio transmitted over the network.

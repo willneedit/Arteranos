@@ -5,7 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Adrenak.UniVoice;
+using Arteranos.UniVoice;
 using Arteranos.Audio;
 using Arteranos.Core;
 using Mirror;

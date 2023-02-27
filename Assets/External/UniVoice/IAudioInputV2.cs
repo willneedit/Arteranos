@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Adrenak.UniVoice {
+namespace Arteranos.UniVoice {
     /// <summary>
     /// Source of user voice input. This would usually be implemented 
     /// over a microphone to get the users voice. But it can also be used
@@ -16,7 +16,7 @@ namespace Adrenak.UniVoice {
         /// <summary>
         /// The sampling frequency of the audio
         /// </summary>
-        int Frequency { get; }
+        int SampleRate { get; }
 
         /// <summary>
         /// The number of channels in the audio

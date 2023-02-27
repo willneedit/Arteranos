@@ -17,7 +17,7 @@ using System.IO;
 using UnityEngine;
 using System.Linq;
 
-using Adrenak.UniVoice;
+using Arteranos.UniVoice;
 using Mirror;
 using Telepathy;
 
@@ -160,6 +160,7 @@ namespace Arteranos.Audio
                         List<short> peersForNewClient = PeerIDs
                             .Where(x => x != peer)
                             .ToList();
+                        // TODO Server-only setting?
                         peersForNewClient.Add(0);
 
                         NetworkWriter newClientPacket = new();

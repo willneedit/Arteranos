@@ -1,4 +1,4 @@
-﻿namespace Adrenak.UniVoice {
+﻿namespace Arteranos.UniVoice {
     /// <summary>
     /// An abstract factory that creates <see cref="IAudioOutput"/> based on
     /// given parameters.
