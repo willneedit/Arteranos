@@ -54,6 +54,7 @@ namespace Arteranos.Audio
                 true, OnPlaybackRead, OnPlaybackSetPosition);
             AudioSource.loop = true;
             AudioSource.clip = myClip;
+            AudioSource.spatialBlend = 1.0f;
             AudioSource.Play();
 
             return this;
