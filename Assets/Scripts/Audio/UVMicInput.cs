@@ -85,17 +85,15 @@ namespace Arteranos.Audio
 
             Debug.Log($"Clip samples={audiorecorder.clip.samples}, channels={ChannelCount}");
 
-            // The SamplingRate enum match the actual numbers, as well as the Mono/Stereo,
-            // let's hope....
             encoder = new((SamplingRate) SampleRate, (Channels) ChannelCount)
             {
                 EncoderDelay = Delay.Delay20ms,
                 SignalHint = SignalHint.Voice,
-                MaxBandwidth = Bandwidth.Wideband
+                MaxBandwidth = Bandwidth.Wideband,
+                Bitrate = SampleRate
             };
 
             //encoder.ForceChannels = POpusCodec.Enums.ForceChannels.NoForce;
-            //encoder.Bitrate = samplerate;
             //encoder.Complexity = POpusCodec.Enums.Complexity.Complexity0;
             //encoder.DtxEnabled = true;
             //encoder.ExpectedPacketLossPercentage = 0;
