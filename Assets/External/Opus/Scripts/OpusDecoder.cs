@@ -12,7 +12,7 @@ namespace POpusCodec
         //private string _version = string.Empty;
         private const int MaxFrameSize = 5760;
         private bool _previousPacketInvalid = false;
-        private int _channelCount = 2;
+        private readonly int _channelCount = 2;
 
         /*public string Version
         {
@@ -49,7 +49,7 @@ namespace POpusCodec
             }
 
             _channelCount = (int)numChannels;
-            _handle = Wrapper.opus_decoder_create(outputSamplingRateHz, numChannels);
+            _handle = Wrapper.Opus_decoder_create(outputSamplingRateHz, numChannels);
             //_version = Wrapper.opus_get_version_string();
 
             if (_handle == IntPtr.Zero)
@@ -64,7 +64,7 @@ namespace POpusCodec
 
             short[] tempData = new short[MaxFrameSize * _channelCount];
 
-            int numSamplesDecoded = Wrapper.opus_decode(_handle, null, tempData, 0, _channelCount);
+            int numSamplesDecoded = Wrapper.Opus_decode(_handle, null, tempData, 0, _channelCount);
 
             if (numSamplesDecoded == 0)
                 return new short[] { };
@@ -81,7 +81,7 @@ namespace POpusCodec
 
             float[] tempData = new float[MaxFrameSize * _channelCount];
 
-            int numSamplesDecoded = Wrapper.opus_decode(_handle, null, tempData, 0, _channelCount);
+            int numSamplesDecoded = Wrapper.Opus_decode(_handle, null, tempData, 0, _channelCount);
 
             if (numSamplesDecoded == 0)
                 return new float[] { };
@@ -92,24 +92,23 @@ namespace POpusCodec
             return pcm;
         }
 
-
+        private short[] tempDataShort = null;
         public short[] DecodePacket(byte[] packetData)
         {
-            short[] tempData = new short[MaxFrameSize * _channelCount];
+            tempDataShort ??= new short[MaxFrameSize * _channelCount];
 
             int bandwidth = Wrapper.opus_packet_get_bandwidth(packetData);
 
-            int numSamplesDecoded = 0;
-
-            if (bandwidth == (int)OpusStatusCode.InvalidPacket)
+            int numSamplesDecoded;
+            if(bandwidth == (int)OpusStatusCode.InvalidPacket)
             {
-                numSamplesDecoded = Wrapper.opus_decode(_handle, null, tempData, 0, _channelCount);
+                numSamplesDecoded = Wrapper.Opus_decode(_handle, null, tempDataShort, 0, _channelCount);
                 _previousPacketInvalid = true;
             }
             else
             {
                 _previousPacketBandwidth = (Bandwidth)bandwidth;
-                numSamplesDecoded = Wrapper.opus_decode(_handle, packetData, tempData, _previousPacketInvalid ? 1 : 0, _channelCount);
+                numSamplesDecoded = Wrapper.Opus_decode(_handle, packetData, tempDataShort, _previousPacketInvalid ? 1 : 0, _channelCount);
                 
                 _previousPacketInvalid = false;
             }
@@ -117,29 +116,26 @@ namespace POpusCodec
             if (numSamplesDecoded == 0)
                 return new short[] { };
 
-            short[] pcm = new short[numSamplesDecoded * _channelCount];
-            Buffer.BlockCopy(tempData, 0, pcm, 0, pcm.Length * sizeof(short));
-
-            return pcm;
+            return tempDataShort[..(numSamplesDecoded * _channelCount)];
         }
 
+        private float[] tempDataFloat = null;
         public float[] DecodePacketFloat(byte[] packetData)
         {
-            float[] tempData = new float[MaxFrameSize * _channelCount];
+            tempDataFloat ??= new float[MaxFrameSize * _channelCount];
 
             int bandwidth = Wrapper.opus_packet_get_bandwidth(packetData);
 
-            int numSamplesDecoded = 0;
-
-            if (bandwidth == (int)OpusStatusCode.InvalidPacket)
+            int numSamplesDecoded;
+            if(bandwidth == (int)OpusStatusCode.InvalidPacket)
             {
-                numSamplesDecoded = Wrapper.opus_decode(_handle, null, tempData, 0, _channelCount);
+                numSamplesDecoded = Wrapper.Opus_decode(_handle, null, tempDataFloat, 0, _channelCount);
                 _previousPacketInvalid = true;
             }
             else
             {
                 _previousPacketBandwidth = (Bandwidth)bandwidth;
-                numSamplesDecoded = Wrapper.opus_decode(_handle, packetData, tempData, _previousPacketInvalid ? 1 : 0, _channelCount);
+                numSamplesDecoded = Wrapper.Opus_decode(_handle, packetData, tempDataFloat, _previousPacketInvalid ? 1 : 0, _channelCount);
 
                 _previousPacketInvalid = false;
             }
@@ -147,17 +143,14 @@ namespace POpusCodec
             if (numSamplesDecoded == 0)
                 return new float[] { };
 
-            float[] pcm = new float[numSamplesDecoded * _channelCount];
-            Buffer.BlockCopy(tempData, 0, pcm, 0, pcm.Length * sizeof(float));
-
-            return pcm;
+            return tempDataFloat[..(numSamplesDecoded * _channelCount)];
         }
 
         public void Dispose()
         {
             if (_handle != IntPtr.Zero)
             {
-                Wrapper.opus_decoder_destroy(_handle);
+                Wrapper.Opus_decoder_destroy(_handle);
                 _handle = IntPtr.Zero;
             }
         }
