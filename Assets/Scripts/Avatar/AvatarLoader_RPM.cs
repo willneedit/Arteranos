@@ -35,12 +35,15 @@ namespace Arteranos.NetworkIO
         public Transform RightFoot { get; private set; }
         public Transform CenterEye { get; private set; }
         public Transform Head { get; private set; }
+        public float FootElevation { get; private set; }
 
         public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
 
         public override void OnStartClient()
         {
+            base.OnStartClient();
+
             name += "_" + netIdentity.netId;
 
             Core.ServerSettings serverSettings = Core.SettingsManager.Server;
@@ -66,8 +69,6 @@ namespace Arteranos.NetworkIO
             m_AvatarGameObject = Instantiate(m_AvatarStandin, transform.position, transform.rotation);
             m_AvatarGameObject.transform.SetParent(transform);
             m_AvatarGameObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-
-            base.OnStartClient();
         }
 
         public override void OnStopClient()
@@ -198,6 +199,9 @@ namespace Arteranos.NetworkIO
 
             // FIXME Fixup for the VR device specific skew?
             Vector3 cEyePos = (lEye.position + rEye.position) / 2 + new Vector3(0, 0, 0.11f);
+
+            // Height of feet joints to the floor
+            FootElevation = (LeftFoot.position.y + RightFoot.position.y) / 2 - agot.position.y;
 
             if(isOwned)
             {

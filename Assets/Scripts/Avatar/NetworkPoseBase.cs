@@ -72,10 +72,6 @@ namespace Arteranos.NetworkIO
 
         protected void AddSnapshot(SortedList<double, PoseSnapshot> snapshots, double timeStamp, Quaternion[] rotation)
         {
-            // FIXME snapshots with missing data?
-            // if(!rotation.HasValue) rotation = snapshots.Count > 0 ? snapshots.Values[snapshots.Count - 1].rotation : target.localRotation;
-
-            // insert transform snapshot
             SnapshotInterpolation.InsertIfNotExists(snapshots, new PoseSnapshot(
                 timeStamp, // arrival remote timestamp. NOT remote time.
                 Time.timeAsDouble,

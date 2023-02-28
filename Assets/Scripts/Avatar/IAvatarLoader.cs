@@ -24,6 +24,8 @@ namespace Arteranos.NetworkIO
         public Transform CenterEye { get; }
         public Transform Head { get; }
 
+        public float FootElevation { get; }
+
         public abstract void ResetPose();
     }
 }

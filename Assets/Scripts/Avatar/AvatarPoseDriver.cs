@@ -57,13 +57,10 @@ namespace Arteranos.NetworkIO
 
         private void AdjustFootIK(Transform foot)
         {
-            // FIXME Elevation of the foot joint to the floor needed
-            //       Currently hardcoded to 0.12f, but it has to be changed for
-            //       a stiletto heels, for example.
             Ray ray = new(foot.position + Vector3.up * 0.5f, Vector3.down);
-            if(Physics.SphereCast(ray, 0.12f, out RaycastHit hitInfo, 0.50f))
+            if(Physics.SphereCast(ray, m_AvatarData.FootElevation, out RaycastHit hitInfo, 0.50f))
             {
-                foot.SetPositionAndRotation(hitInfo.point + Vector3.up * 0.12f,
+                foot.SetPositionAndRotation(hitInfo.point + Vector3.up * m_AvatarData.FootElevation,
                     Quaternion.FromToRotation(Vector3.up, hitInfo.normal) * foot.rotation);
             }
         }
