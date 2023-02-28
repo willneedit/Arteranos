@@ -126,9 +126,9 @@ namespace Arteranos.Audio
 
             AudioClip AudioClip = audiorecorder.clip;
 
-            int ClipDataLength = SampleRate / 10;
-
-            float[] temp = new float[ClipDataLength];
+            // was SampleRate / 10 -- the amount of 1/10th of a second,
+            // and with the 20ms encoder delay, five packets amount to 100ms.
+            float[] temp = new float[packetSize * 5];
 
             while(true)
             {

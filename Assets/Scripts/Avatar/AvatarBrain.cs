@@ -32,10 +32,12 @@ namespace Arteranos.NetworkIO
         public readonly SyncDictionary<AVFloatKeys, float> m_floats = new();
         public readonly SyncDictionary<AVStringKeys, string> m_strings = new();
 
+        public Transform Voice { get; private set; } = null;
+
         void Awake()
         {
             syncDirection = SyncDirection.ServerToClient;
-            cra = VoiceManager.ChatroomAgent;
+            cran = VoiceManager.ChatroomAgent.Network;
         }
 
         public override void OnStartClient()
@@ -53,8 +55,8 @@ namespace Arteranos.NetworkIO
             }
             else if(isOwned)
             {
-                cra.Network.OnJoinedChatroom += PropagateVoiceChatID;
-                cra.Network.JoinChatroom(NetworkManager.singleton.networkAddress);
+                cran.OnJoinedChatroom += PropagateVoiceChatID;
+                cran.JoinChatroom(NetworkManager.singleton.networkAddress);
             }
         }
 
@@ -70,8 +72,8 @@ namespace Arteranos.NetworkIO
             }
             else if(isOwned)
             {
-                cra.Network.LeaveChatroom();
-                cra.Network.OnJoinedChatroom -= PropagateVoiceChatID;
+                cran.LeaveChatroom();
+                cran.OnJoinedChatroom -= PropagateVoiceChatID;
             }
 
             base.OnStopClient();
@@ -96,7 +98,7 @@ namespace Arteranos.NetworkIO
         // ---------------------------------------------------------------
         #region Voice handling
 
-        private ChatroomAgentV2 cra = null;
+        private IChatroomNetworkV2 cran = null;
         private IEnumerator fdv_cr = null;
 
         [Command]
@@ -104,17 +106,15 @@ namespace Arteranos.NetworkIO
 
         IEnumerator FindDelayedVoice(int ChatOwnID)
         {
-            Transform voice = null;
-
-            while(voice == null)
+            while(Voice == null)
             {
                 yield return new WaitForSeconds(1);
 
-                voice = SettingsManager.Purgatory.Find("UniVoice Peer #" + ChatOwnID);
+                Voice = SettingsManager.Purgatory.Find("UniVoice Peer #" + ChatOwnID);
             }
 
-            voice.SetParent(transform);
-            voice.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            Voice.SetParent(transform);
+            Voice.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             fdv_cr = null;
         }
 

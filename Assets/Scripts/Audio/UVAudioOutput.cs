@@ -62,8 +62,10 @@ namespace Arteranos.Audio
 
         public void Feed(byte[] encodedData)
         {
+            // FIXME Concurrency?
             // Tack on the decoded data to the receive buffer.
-            receiveBuffer.AddRange(decoder.DecodePacketFloat(encodedData));
+            float[] samples = decoder.DecodePacketFloat(encodedData);
+            receiveBuffer.AddRange(samples);
         }
 
         void OnPlaybackRead(float[] data)
@@ -91,6 +93,22 @@ namespace Arteranos.Audio
             AudioSource.Stop();
             decoder.Dispose();
             Destroy(gameObject);
+        }
+
+        private float[] samples = null;
+
+        public float MeasureAmplitude(float integralDuration = 0.3f)
+        {
+            // Standard for a VU meter, 300ms for -20 to 0
+            samples ??= new float[(int) integralDuration * SamplingRate];
+
+            AudioSource.clip.GetData(samples, AudioSource.timeSamples);
+            float amplitude = 0f;
+
+            foreach(float sample in samples)
+                amplitude += Mathf.Abs(sample);
+
+            return Mathf.Clamp01(amplitude / samples.Length);
         }
 
         /// <summary>
