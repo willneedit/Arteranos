@@ -316,7 +316,7 @@ namespace Arteranos.Audio
         }
     }
 
-    public static class ExtendCASV2
+    internal static class ExtendCASV2
     {
         public static void WriteCASV2(this NetworkWriter writer, ChatroomAudioSegmentV2 cas)
             => writer.WriteArray(cas.samples);

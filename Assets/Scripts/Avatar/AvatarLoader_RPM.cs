@@ -10,6 +10,7 @@ using UnityEngine;
 
 using DitzelGames.FastIK;
 using ReadyPlayerMe.AvatarLoader;
+
 using Arteranos.ExtensionMethods;
 
 using Mirror;
@@ -39,6 +40,7 @@ namespace Arteranos.NetworkIO
 
         public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
+
 
         public override void OnStartClient()
         {
@@ -102,6 +104,9 @@ namespace Arteranos.NetworkIO
 
             m_AvatarLoader.LoadAvatar(current.ToString());
         }
+
+        // --------------------------------------------------------------------
+        #region Skeleton/Pose measurement
 
         Transform RigNetworkIK(
             GameObject avatar, string limb, ref List<string> jointnames,
@@ -177,6 +182,56 @@ namespace Arteranos.NetworkIO
 
         }
 
+        #endregion
+
+        // --------------------------------------------------------------------
+        #region Mouth morphing
+
+        private const string MOUTH_OPEN_BLEND_SHAPE_NAME = "mouthOpen";
+        private const int AMPLITUDE_MULTIPLIER = 50;
+
+        private SkinnedMeshRenderer headMesh;
+        private SkinnedMeshRenderer beardMesh;
+        private SkinnedMeshRenderer teethMesh;
+
+        private int mouthOpenBlendShapeIndexOnHeadMesh = -1;
+        private int mouthOpenBlendShapeIndexOnBeardMesh = -1;
+        private int mouthOpenBlendShapeIndexOnTeethMesh = -1;
+
+        private void SetupMouthBlendShapes(GameObject ago)
+        {
+            headMesh = GetMeshAndSetIndex(ago, MeshType.HeadMesh, ref mouthOpenBlendShapeIndexOnHeadMesh);
+            beardMesh = GetMeshAndSetIndex(ago, MeshType.BeardMesh, ref mouthOpenBlendShapeIndexOnBeardMesh);
+            teethMesh = GetMeshAndSetIndex(ago, MeshType.TeethMesh, ref mouthOpenBlendShapeIndexOnTeethMesh);
+        }
+
+        private void SetBlendShapeWeights(float weight)
+        {
+            SetBlendShapeWeight(headMesh, mouthOpenBlendShapeIndexOnHeadMesh);
+            SetBlendShapeWeight(beardMesh, mouthOpenBlendShapeIndexOnBeardMesh);
+            SetBlendShapeWeight(teethMesh, mouthOpenBlendShapeIndexOnTeethMesh);
+
+            void SetBlendShapeWeight(SkinnedMeshRenderer mesh, int index)
+            {
+                if(index >= 0)
+                    mesh.SetBlendShapeWeight(index, weight);
+            }
+        }
+
+        private SkinnedMeshRenderer GetMeshAndSetIndex(GameObject ago, MeshType meshType, ref int index)
+        {
+            SkinnedMeshRenderer mesh = ago.GetMeshRenderer(meshType);
+            if(mesh != null)
+                index = mesh.sharedMesh.GetBlendShapeIndex(MOUTH_OPEN_BLEND_SHAPE_NAME);
+
+            return mesh;
+        }
+
+        public void UpdateOpenMouth(float amount) => SetBlendShapeWeights(Mathf.Clamp01(amount * AMPLITUDE_MULTIPLIER));
+
+
+        #endregion
+
         private void SetupAvatar(CompletionEventArgs args)
         {
             m_AvatarGameObject = args.Avatar;
@@ -200,9 +255,6 @@ namespace Arteranos.NetworkIO
             // FIXME Fixup for the VR device specific skew?
             Vector3 cEyePos = (lEye.position + rEye.position) / 2 + new Vector3(0, 0, 0.11f);
 
-            // Height of feet joints to the floor
-            FootElevation = (LeftFoot.position.y + RightFoot.position.y) / 2 - agot.position.y;
-
             if(isOwned)
             {
                 CenterEye = new GameObject("Target_centerEye").transform;
@@ -211,8 +263,10 @@ namespace Arteranos.NetworkIO
 
                 Animator anim = args.Avatar.GetComponent<Animator>();
                 anim.avatar = null;
-
                 anim.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("BaseRPMAnimator");
+
+                // Height of feet joints to the floor
+                FootElevation = (LeftFoot.position.y + RightFoot.position.y) / 2 - agot.position.y;
             }
 
             // Now upload the skeleton joint data to the Avatar Pose driver.
@@ -232,6 +286,8 @@ namespace Arteranos.NetworkIO
             // Lastly, breathe some life into the avatar.
             EyeAnimationHandler eah = args.Avatar.AddComponent<EyeAnimationHandler>();
             eah.BlinkInterval = 6; // 3 seconds is a little bit too fast.
+
+            SetupMouthBlendShapes(m_AvatarGameObject);
         }
 
         void AvatarLoadComplete(object _, CompletionEventArgs args)
@@ -250,5 +306,6 @@ namespace Arteranos.NetworkIO
             Debug.Log($"Avatar loading failed with error message: {args.Message}");
             loading = false;
         }
+
     }
 }

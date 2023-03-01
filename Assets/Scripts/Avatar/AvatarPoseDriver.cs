@@ -12,6 +12,8 @@ using Mirror;
 
 using Arteranos.ExtensionMethods;
 using Arteranos.XR;
+using Arteranos.Audio;
+using System;
 
 namespace Arteranos.NetworkIO
 {
@@ -23,13 +25,16 @@ namespace Arteranos.NetworkIO
         private IAvatarLoader m_AvatarData = null;
         private NetworkPose m_Poser = null;
 
+        private IVoiceOutput m_IVoiceOutput = null;
+
         public void Awake() => syncDirection = SyncDirection.ServerToClient;
 
         public override void OnStartClient()
         {
             base.OnStartClient();
 
-            m_AvatarData = GetComponent<AvatarLoader_RPM>();
+            GetComponent<AvatarBrain>().OnVoiceOutputChanged += UseThisVoice;
+            m_AvatarData = GetComponent<IAvatarLoader>();
             m_Poser = GetComponent<NetworkPose>();
 
             if(isOwned)
@@ -42,10 +47,34 @@ namespace Arteranos.NetworkIO
 
         public override void OnStopClient()
         {
-            base.OnStopClient();
-
             if(isOwned)
                 XRControl.XRSwitchEvent -= OnXRChanged;
+
+            GetComponent<AvatarBrain>().OnVoiceOutputChanged -= UseThisVoice;
+
+            base.OnStopClient();
+        }
+
+        private void OnXRChanged(bool useXR)
+        {
+            Transform xrot = XRControl.CurrentVRRig.transform;
+
+            if(useXR)
+            {
+                // In VR, connect the VR hand controllers to the puppet's hands strings.
+                LeftHand = xrot.FindRecursive("LeftHand Controller");
+                RightHand = xrot.FindRecursive("RightHand Controller");
+            }
+            else
+            {
+                // In 2D, just use the default pose and leave it be.
+                m_AvatarData.ResetPose();
+            }
+
+            // And, move the XR (or 2D) rig to the own avatar's position.
+            Debug.Log("Moving rig");
+            xrot.transform.SetPositionAndRotation(transform.position, transform.rotation);
+            Physics.SyncTransforms();
         }
 
         /// <summary>
@@ -54,6 +83,11 @@ namespace Arteranos.NetworkIO
         /// </summary>
         /// <param name="names">Array of the joint (aka bone) names</param>
         public void UploadJointNames(string[] names) => m_Poser.UploadJointNames(names);
+
+        private void UseThisVoice(IVoiceOutput voice) => m_IVoiceOutput = voice;
+
+        // --------------------------------------------------------------------
+        #region Pose updating
 
         private void AdjustFootIK(Transform foot)
         {
@@ -127,27 +161,21 @@ namespace Arteranos.NetworkIO
             // Maybe TODO: Face morphing and hand morphing for trigger/grip usage
         }
 
-        void OnXRChanged(bool useXR)
+        #endregion
+
+        // --------------------------------------------------------------------
+        #region Face/Voice morphing
+
+        private void RouteVoice()
         {
-            Transform xrot = XRControl.CurrentVRRig.transform;
+            if(m_IVoiceOutput == null) return;
 
-            if (useXR)
-            {
-                // In VR, connect the VR hand controllers to the puppet's hands strings.
-                LeftHand = xrot.FindRecursive("LeftHand Controller");
-                RightHand = xrot.FindRecursive("RightHand Controller");
-            }
-            else
-            {
-                // In 2D, just use the default pose and leave it be.
-                m_AvatarData.ResetPose();
-            }
+            float amount = m_IVoiceOutput.MeasureAmplitude();
 
-            // And, move the XR (or 2D) rig to the own avatar's position.
-            Debug.Log("Moving rig");
-            xrot.transform.SetPositionAndRotation(transform.position, transform.rotation);
-            Physics.SyncTransforms();
+            m_AvatarData.UpdateOpenMouth(amount);
         }
+
+        #endregion
 
         void Update()
         {
@@ -172,6 +200,7 @@ namespace Arteranos.NetworkIO
                 UpdateAlienPose();
             }
 
+            RouteVoice();
         }
     }
 }

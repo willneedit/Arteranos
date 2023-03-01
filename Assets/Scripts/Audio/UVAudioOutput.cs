@@ -9,7 +9,7 @@ using POpusCodec.Enums;
 
 namespace Arteranos.Audio
 {
-    public class UVAudioOutput : MonoBehaviour, IAudioOutputV2
+    public class UVAudioOutput : MonoBehaviour, IAudioOutputV2, IVoiceOutput
     {
         public AudioSource AudioSource { get; private set; }
 
@@ -39,7 +39,7 @@ namespace Arteranos.Audio
             return ctd.SetupDecoder(go.AddComponent<AudioSource>(), samplingRate, channelCount);
         }
 
-        private UVAudioOutput SetupDecoder(AudioSource source, int samplingRate, int channelCount) 
+        private UVAudioOutput SetupDecoder(AudioSource source, int samplingRate, int channelCount)
         {
             SamplingRate = samplingRate;
             ChannelCount = channelCount;
@@ -47,9 +47,9 @@ namespace Arteranos.Audio
             AudioSource = source;
             decoder = new OpusDecoder((SamplingRate) SamplingRate, (Channels) ChannelCount);
 
-            AudioClip myClip = AudioClip.Create("MyPlayback", 
-                SamplingRate, 
-                ChannelCount, 
+            AudioClip myClip = AudioClip.Create("MyPlayback",
+                SamplingRate,
+                ChannelCount,
                 SamplingRate,
                 true, OnPlaybackRead, OnPlaybackSetPosition);
             AudioSource.loop = true;
@@ -68,10 +68,28 @@ namespace Arteranos.Audio
             receiveBuffer.AddRange(samples);
         }
 
+        private volatile float charge = 0;
+        private const float kCharge = 0.1f;
+        private const float kDischarge = 0.05f;
+
+        private void AdvanceCharge(float value)
+        {
+            value = Mathf.Abs(value);
+
+            if(value > charge)
+                charge = (charge * (1 - kCharge)) + (value * kCharge);
+            else
+                charge *= (1 - kDischarge);
+        }
+
         void OnPlaybackRead(float[] data)
         {
             int pullSize = Mathf.Min(data.Length, receiveBuffer.Count);
             float[] dataBuf = receiveBuffer.GetRange(0, pullSize).ToArray();
+
+            foreach(float sample in dataBuf)
+                AdvanceCharge(sample);
+
             dataBuf.CopyTo(data, 0);
             receiveBuffer.RemoveRange(0, pullSize);
 
@@ -95,21 +113,8 @@ namespace Arteranos.Audio
             Destroy(gameObject);
         }
 
-        private float[] samples = null;
 
-        public float MeasureAmplitude(float integralDuration = 0.3f)
-        {
-            // Standard for a VU meter, 300ms for -20 to 0
-            samples ??= new float[(int) integralDuration * SamplingRate];
-
-            AudioSource.clip.GetData(samples, AudioSource.timeSamples);
-            float amplitude = 0f;
-
-            foreach(float sample in samples)
-                amplitude += Mathf.Abs(sample);
-
-            return Mathf.Clamp01(amplitude / samples.Length);
-        }
+        public float MeasureAmplitude() => charge;
 
         /// <summary>
         /// Creates <see cref="UVAudioOutput"/> instances

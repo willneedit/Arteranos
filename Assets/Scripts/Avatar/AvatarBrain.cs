@@ -7,6 +7,8 @@ using Arteranos.UniVoice;
 
 using Arteranos.Services;
 using Arteranos.Core;
+using Arteranos.Audio;
+using System;
 
 namespace Arteranos.NetworkIO
 {
@@ -33,6 +35,8 @@ namespace Arteranos.NetworkIO
         public readonly SyncDictionary<AVStringKeys, string> m_strings = new();
 
         public Transform Voice { get; private set; } = null;
+
+        public event Action<IVoiceOutput> OnVoiceOutputChanged;
 
         void Awake()
         {
@@ -79,20 +83,35 @@ namespace Arteranos.NetworkIO
             base.OnStopClient();
         }
 
-        // TODO Incomplete
         private void ResyncInitialValues()
         {
             foreach(KeyValuePair<AVIntKeys, int> kvpi in m_ints) 
                 OnMIntsChanged(SyncDictionary<AVIntKeys, int>.Operation.OP_ADD, kvpi.Key, kvpi.Value);
+
+            foreach(KeyValuePair<AVFloatKeys, float> kvpf in m_floats)
+                OnMFloatsChanged(SyncDictionary<AVFloatKeys, float>.Operation.OP_ADD, kvpf.Key, kvpf.Value);
+
+            foreach(KeyValuePair<AVStringKeys, string> kvps in m_strings)
+                OnMStringsChanged(SyncDictionary<AVFloatKeys, float>.Operation.OP_ADD, kvps.Key, kvps.Value);
         }
 
-        // TODO Incomplete
         private void OnMIntsChanged(SyncDictionary<AVIntKeys, int>.Operation op, AVIntKeys key, int value)
         {
             // Give that avatar its corresponding voice - except its owner.
             if(key == AVIntKeys.ChatOwnID)
                 UpdateVoiceID(value);
         }
+#pragma warning disable IDE0060 // Nicht verwendete Parameter entfernen - RFU
+        private void OnMFloatsChanged(SyncIDictionary<AVFloatKeys, float>.Operation op, AVFloatKeys key, float value)
+        {
+            // Reserved for future use
+        }
+
+        private void OnMStringsChanged(SyncIDictionary<AVFloatKeys, float>.Operation op, AVStringKeys key, string value)
+        {
+            // Reserved for future use
+        }
+#pragma warning restore IDE0060 // Nicht verwendete Parameter entfernen - RFU
 
 
         // ---------------------------------------------------------------
@@ -115,6 +134,8 @@ namespace Arteranos.NetworkIO
 
             Voice.SetParent(transform);
             Voice.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            OnVoiceOutputChanged?.Invoke(Voice.GetComponent<IVoiceOutput>());
+
             fdv_cr = null;
         }
 
@@ -135,15 +156,12 @@ namespace Arteranos.NetworkIO
         {
             if(fdv_cr != null) StopCoroutine(fdv_cr);
 
-            // At first when your mortal body will go out, your voice stays, for a time.
-            if(m_ints.TryGetValue(AVIntKeys.ChatOwnID, out int chatid))
+            if(Voice != null)
             {
-                Transform voice = transform.Find("UniVoice Peer #" + chatid);
-                if(voice != null)
-                {
-                    voice.SetParent(SettingsManager.Purgatory);
-                    voice.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-                }
+                OnVoiceOutputChanged?.Invoke(null);
+                Voice.SetParent(SettingsManager.Purgatory);
+                Voice.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                Voice = null;
             }
         }
 

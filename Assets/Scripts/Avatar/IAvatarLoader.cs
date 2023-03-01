@@ -26,6 +26,15 @@ namespace Arteranos.NetworkIO
 
         public float FootElevation { get; }
 
+        /// <summary>
+        /// Reset the the avatar to an 'Attention' pose
+        /// </summary>
         public abstract void ResetPose();
+
+        /// <summary>
+        /// Update the mouth open/closed state
+        /// </summary>
+        /// <param name="amount">Normalized state, with 1 being fully open</param>
+        public abstract void UpdateOpenMouth(float amount);
     }
 }
