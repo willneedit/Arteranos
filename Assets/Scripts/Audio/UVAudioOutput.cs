@@ -6,6 +6,7 @@ using UnityEngine;
 using Arteranos.UniVoice;
 using POpusCodec;
 using POpusCodec.Enums;
+using Arteranos.Core;
 
 namespace Arteranos.Audio
 {
@@ -14,10 +15,12 @@ namespace Arteranos.Audio
         public AudioSource AudioSource { get; private set; }
 
         private OpusDecoder decoder;
-        private readonly List<float> receiveBuffer = new();
+        private RingBuffer<float[]> frameBuffer = null;
+        private RingBuffer<float> vuBuffer = null;
         private int SamplingRate;
         private int ChannelCount;
 
+        private int FrameSize = -1;
         public string ID
         {
             get => gameObject.name;
@@ -46,29 +49,44 @@ namespace Arteranos.Audio
 
             AudioSource = source;
             decoder = new OpusDecoder((SamplingRate) SamplingRate, (Channels) ChannelCount);
+            vuBuffer = new(samplingRate);
+            vuBuffer.PushBack(0.0f);
 
             AudioClip myClip = AudioClip.Create("MyPlayback",
                 SamplingRate,
                 ChannelCount,
                 SamplingRate,
-                true, OnPlaybackRead, OnPlaybackSetPosition);
+                false);
             AudioSource.loop = true;
             AudioSource.clip = myClip;
             AudioSource.spatialBlend = 1.0f;
-            AudioSource.Play();
 
             return this;
         }
 
+        // NB: A streaming AudioSource buffers at around one second, regardless the
+        //     sampling rate. To synchronize, we have to use a sliding window.
         public void Feed(byte[] encodedData)
         {
             // FIXME Concurrency?
             // Tack on the decoded data to the receive buffer.
             float[] samples = decoder.DecodePacketFloat(encodedData);
-            receiveBuffer.AddRange(samples);
+            
+            if(FrameSize < 0)
+            {
+                FrameSize = samples.Length;
+                frameBuffer = new(SamplingRate / FrameSize);
+
+                Debug.Log($"FrameSize={FrameSize}, {frameBuffer.Capacity} frames/s");
+            }
+
+            foreach(float sample in samples)
+                AdvanceCharge(sample);
+
+            frameBuffer.PushBack(samples);
         }
 
-        private volatile float charge = 0;
+        private float charge = 0;
         private const float kCharge = 0.1f;
         private const float kDischarge = 0.05f;
 
@@ -80,27 +98,31 @@ namespace Arteranos.Audio
                 charge = (charge * (1 - kCharge)) + (value * kCharge);
             else
                 charge *= (1 - kDischarge);
+
+            vuBuffer.PushBack(value);
         }
 
-        void OnPlaybackRead(float[] data)
+        private int usingFrame = 0;
+        private void Update()
         {
-            int pullSize = Mathf.Min(data.Length, receiveBuffer.Count);
-            float[] dataBuf = receiveBuffer.GetRange(0, pullSize).ToArray();
+            if(frameBuffer == null) return;
 
-            foreach(float sample in dataBuf)
-                AdvanceCharge(sample);
+            if(frameBuffer.Size < 3)
+            {
+                AudioSource.Stop();
+                usingFrame = 0;
+                return;
+            }
+            else if(frameBuffer.Size > 5 && !AudioSource.isPlaying)
+            {
+                AudioSource.Play();
+            }
 
-            dataBuf.CopyTo(data, 0);
-            receiveBuffer.RemoveRange(0, pullSize);
-
-            // clear rest of data
-            for(int i = pullSize; i < data.Length; i++)
-                data[i] = 0;
-        }
-
-        void OnPlaybackSetPosition(int newPosition)
-        {
-            // we dont need the audio position at the moment
+            while (frameBuffer.Size > 3)
+            {
+                AudioSource.clip.SetData(frameBuffer.Front(), (usingFrame++ % frameBuffer.Capacity) * FrameSize);
+                frameBuffer.PopFront();
+            }
         }
 
         /// <summary>
@@ -114,7 +136,7 @@ namespace Arteranos.Audio
         }
 
 
-        public float MeasureAmplitude() => charge;
+        public float MeasureAmplitude() => vuBuffer.Front();
 
         /// <summary>
         /// Creates <see cref="UVAudioOutput"/> instances
