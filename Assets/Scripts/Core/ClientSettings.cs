@@ -24,6 +24,9 @@ namespace Arteranos.Core
         [Tooltip("VR enabled by default")]
         private bool _VRMode = true;
 
+        [HideInInspector]
+        public string MicDeviceName = "<unknown>";
+
         public event Action<string, string> OnAvatarChanged;
         public event Action<bool> OnVRModeChanged;
 
