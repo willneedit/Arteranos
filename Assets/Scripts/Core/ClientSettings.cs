@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using System;
 using UnityEngine;
 
 namespace Arteranos.Core
@@ -23,17 +24,15 @@ namespace Arteranos.Core
         [Tooltip("VR enabled by default")]
         private bool _VRMode = true;
 
-        public d_VarChanged<string> OnAvatarChanged;
-        public d_VarChanged<bool> OnVRModeChanged;
-
-        public delegate void d_VarChanged<T>(T old, T current);
+        public event Action<string, string> OnAvatarChanged;
+        public event Action<bool> OnVRModeChanged;
 
         public string AvatarURL {
             get => _AvatarURL;
             set {
                 string old = _AvatarURL;
                 _AvatarURL = value;
-                if(old != _AvatarURL && OnAvatarChanged != null) OnAvatarChanged(old, _AvatarURL);
+                if(old != _AvatarURL) OnAvatarChanged?.Invoke(old, _AvatarURL);
             }
         }
 
@@ -42,7 +41,7 @@ namespace Arteranos.Core
             set {
                 bool old = _VRMode;
                 _VRMode = value;
-                if(old != _VRMode && OnVRModeChanged != null) OnVRModeChanged(old, _VRMode);
+                if(old != _VRMode) OnVRModeChanged?.Invoke(_VRMode);
             }
         }
 

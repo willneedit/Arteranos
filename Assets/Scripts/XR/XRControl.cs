@@ -71,12 +71,12 @@ namespace Arteranos.XR
         {
             Core.SettingsManager.Client.OnVRModeChanged += OnVRModeChanged;
             if(Core.SettingsManager.Client.VRMode)
-                OnVRModeChanged(false, true);
+                OnVRModeChanged(true);
             else
                 UpdateXROrigin(false);
         }
 
-        void OnVRModeChanged(bool old, bool current)
+        void OnVRModeChanged(bool current)
         {
             if(current)
                 StartCoroutine(StartXRCoroutine());
