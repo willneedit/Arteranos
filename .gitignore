@@ -2,6 +2,18 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
+
+# Place _your_ works in a subdirectory below /Assets to not to taint your
+# repository by Asset Store items.
+/[Aa]ssets/*
+
+# !! The real project root. !!
+!/[Aa]ssets/Arteranos*
+
+# The asset store loader to guide the new user to download (or, purchase as
+# it needs) and include the project's working tree, not into this repository.
+!/[Aa]ssets/AssetStoreLoader*
+
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
