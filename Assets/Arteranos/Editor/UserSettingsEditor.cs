@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
+#if UNITY_EDITOR
+
 using UnityEngine;
 using UnityEditor;
 
 using Arteranos.Core;
-using log4net;
 
 namespace Arteranos.Editing
 {
@@ -12,10 +11,7 @@ namespace Arteranos.Editing
     public class UserSettingsEditor : Editor
     {
         SerializedProperty MicDeviceName;
-        void OnEnable()
-        {
-            MicDeviceName = serializedObject.FindProperty("MicDeviceName");
-        }
+        void OnEnable() => MicDeviceName = serializedObject.FindProperty("MicDeviceName");
 
         public override void OnInspectorGUI()
         {
@@ -58,3 +54,5 @@ namespace Arteranos.Editing
         }
     }
 }
+
+#endif
