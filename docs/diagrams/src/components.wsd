@@ -96,3 +96,129 @@
     N1 .. friends
 
 @enduml
+
+	
+
+@startsalt example
+{
+  Just plain text
+  [This is my button]
+  ()  Unchecked radio
+  (X) Checked radio
+  []  Unchecked box
+  [X] Checked box
+  "Enter text here   "
+  ^This is a droplist^
+}
+@endsalt
+
+@startuml
+listopeniconic
+@enduml
+
+@startuml login
+!unquoted procedure SALT($x)
+"{{
+salt
+%invoke_procedure("_"+$x)
+}}" as $x
+!endprocedure
+
+!procedure _login()
+{^  
+    {
+        <&hard-drive> World | "localhost"
+        <&person> Login     | "Name     "
+        <&key> Password     | "****     "
+    }
+    ---
+    [Login with Discord]
+    [Login with GitHub ]
+    ---
+    [Login as guest    ]
+
+    [X] Invisible
+}
+!endprocedure
+
+!procedure _createworld()
+{^
+    {
+        <b>Start a new server</b>
+        World to load
+        "<&hard-drive> World Repo URL  "
+        [Advanced configuration]
+    }
+
+    | [Create Server]
+}
+!endprocedure
+
+!procedure _joinworld()
+{^
+    {
+        <b>Server list</b>
+        {SI
+        Iwontsay's Cabin (idle)
+        Unnamed World 2 (Campfire)
+        Lorelle's World (Arteranos 101)
+        .
+        .
+        .
+        "                        "
+        }
+        [ ] Idle Only
+        [ ] Requires Password
+    }
+    [Join Server] 
+}
+!endprocedure
+
+!procedure _advanced()
+{^
+    {
+        [ ] Unlisted
+        [X] Password protected
+        "<&key> Password        "
+        ---
+        [X] Only registered users
+        "Max users          "
+    }
+}
+!endprocedure
+
+!procedure _choosemode()
+{
+    [Join World  ]
+    [Create World]
+}
+!endprocedure
+
+
+(*) --> SALT(login)
+note top
+Allow saved
+login
+end note
+
+login --right--> SALT(choosemode)
+
+choosemode --right--> [join world] SALT(joinworld)
+note top
+  Can omitted with saved settings (mobile) or
+  commandline arguments (PC)
+
+  Use 'landing world' if the server is idle or
+  world URL is omitted
+end note
+
+choosemode --down--> [create world] SALT(createworld)
+
+createworld --left--> [advanced] SALT(advanced)
+advanced --right--> createworld
+
+joinworld --> (*)
+createworld --> (*)
+@enduml
+
+start
