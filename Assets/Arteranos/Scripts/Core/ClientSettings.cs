@@ -10,46 +10,111 @@ using UnityEngine;
 
 namespace Arteranos.Core
 {
-    [CreateAssetMenu(fileName = "ClientSettings", menuName = "Scriptable Objects/Application/Client Settings", order = 1)]
-    public class ClientSettings : ScriptableObject
+
+    public enum LoginProvider
     {
-        [Tooltip("Server to connect to")]
-        public string ServerIP = "127.0.0.1";
+        Invalid = 0,    // Invalid, is guest or unverified
+        Native,         // Native. uses user@ser.ver
+        Github,         // Github. uses the login name (eg. 'willneedit')
+        Discord,        // Discord. uses the user handle (eg. 'iwontsay#0000')
+        Mastodon        // Mastodon. uses the user handle (eg. user@mas.to.don)
+    }
 
-        [SerializeField]
-        [Tooltip("Complete URL or the RPM avatar shorthand")]
-        private string _AvatarURL = "https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb";
+    public enum AvatarProvider
+    {
+        Invalid = 0,    // Invalid, use fallback avatar
+        Raw,            // Raw URL to download the avatar model
+        RPM,            // Ready Player Me avatar URL or Shortcode
+    }
 
-        [SerializeField]
-        [Tooltip("VR enabled by default")]
-        private bool _VRMode = true;
+    public enum Visibility
+    {
+        Invalid = 0,
+        Invisible,      // Appear offline
+        DND,            // Do Not Disturb - no direct messaging
+        AFK,            // Been idle / HMD on standby
+        Online          // Ready
+    }
 
+    [CreateAssetMenu(fileName = "ClientSettings", menuName = "Scriptable Objects/Application/Client Settings", order = 1)]
+    [Serializable]
+    public class ClientSettingsJSON : ScriptableObject
+    {
+        // The display name of the user. Generate if null
+        public string Nickname = null;
+
+        // The user name of the user, valid only for the selected login provider
+        // Ask for login or as guest if null.
+        public string Username = null;
+
+        // The login provider the user logs in to
+        public LoginProvider LoginProvider = LoginProvider.Invalid;
+
+        // The bearer token bestowed during the last login. May use to verify unknown user's details
+        public string BearerToken = null;
+
+        // Server to connect to, ask if null
+        public string ServerIP = null;
+
+        // World repository URL to load and enter the server with, null if user enters the server as-is
+        public string WorldURL = null;
+
+        // Avatar designator, valid only for the selected avatar provider
+        public string AvatarURL = "https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb";
+
+        // Avatar provider to get the user's avatar
+        public AvatarProvider AvatarProvider = AvatarProvider.RPM;
+
+        // VR mode, if available
+        public bool VRMode = true;
+
+        // Microphone device if available, default if null
         [HideInInspector]
-        public string MicDeviceName = "<unknown>";
+        public string MicDeviceName = null;
+
+        // Guides the online and availability state
+        public Visibility Visibility = Visibility.Online;
+    }
+
+    public class ClientSettings
+    {
+        private readonly ClientSettingsJSON _s = new();
 
         public event Action<string, string> OnAvatarChanged;
         public event Action<bool> OnVRModeChanged;
 
-        public string AvatarURL {
-            get => _AvatarURL;
+        public string ServerIP
+        { get => _s.ServerIP; set => _s.ServerIP = value; }
+
+        public string AvatarURL
+        {
+            get => _s.AvatarURL;
             set {
-                string old = _AvatarURL;
-                _AvatarURL = value;
-                if(old != _AvatarURL) OnAvatarChanged?.Invoke(old, _AvatarURL);
+                string old = _s.AvatarURL;
+                _s.AvatarURL = value;
+                if(old != _s.AvatarURL) OnAvatarChanged?.Invoke(old, _s.AvatarURL);
             }
         }
 
-        public bool VRMode {
-            get => _VRMode;
+        public bool VRMode
+        {
+            get => _s.VRMode;
             set {
-                bool old = _VRMode;
-                _VRMode = value;
-                if(old != _VRMode) OnVRModeChanged?.Invoke(_VRMode);
+                bool old = _s.VRMode;
+                _s.VRMode = value;
+                if(old != _s.VRMode) OnVRModeChanged?.Invoke(_s.VRMode);
             }
         }
+
+        public string MicDeviceName
+        { get => _s.MicDeviceName; set => _s.MicDeviceName = value; }
 
         public const string PATH_CLIENT_SETTINGS = "Settings/ClientSettings";
 
-        public static ClientSettings LoadSettings() => Resources.Load<ClientSettings>(PATH_CLIENT_SETTINGS);
+        public static ClientSettings LoadSettings()
+        {
+            //return Resources.Load<ClientSettings>(PATH_CLIENT_SETTINGS);
+            return new();
+        }
     }
 }

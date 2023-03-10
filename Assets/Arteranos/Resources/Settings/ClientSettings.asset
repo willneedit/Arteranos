@@ -9,10 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 723e08f3a8ddf1844b04b8a720f5927b, type: 3}
+  m_Script: {fileID: 0}
   m_Name: ClientSettings
-  m_EditorClassIdentifier: 
-  ServerIP: 127.0.0.1
-  _AvatarURL: https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb
-  _VRMode: 0
+  m_EditorClassIdentifier: Arteranos.Core:Arteranos.Core:ClientSettingsJSON
+  Nickname: 
+  Username: 
+  LoginProvider: 0
+  BearerToken: 
+  ServerIP: localhost
+  WorldURL: 
+  AvatarURL: https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb
+  AvatarProvider: 2
+  VRMode: 1
   MicDeviceName: "Kopfh\xF6rermikrofon (3- CORSAIR VOID ELITE Wireless Gaming Headset)"
+  Visibility: 4

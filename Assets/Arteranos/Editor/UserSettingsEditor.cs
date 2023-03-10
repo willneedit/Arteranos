@@ -7,7 +7,7 @@ using Arteranos.Core;
 
 namespace Arteranos.Editing
 {
-    [CustomEditor(typeof(ClientSettings))]
+    [CustomEditor(typeof(ClientSettingsJSON))]
     public class UserSettingsEditor : Editor
     {
         SerializedProperty MicDeviceName;
