@@ -36,9 +36,8 @@ namespace Arteranos.Core
         Online          // Ready
     }
 
-    [CreateAssetMenu(fileName = "ClientSettings", menuName = "Scriptable Objects/Application/Client Settings", order = 1)]
     [Serializable]
-    public class ClientSettingsJSON : ScriptableObject
+    public class ClientSettingsJSON
     {
         // The display name of the user. Generate if null
         public string Nickname = null;
@@ -69,12 +68,12 @@ namespace Arteranos.Core
         public bool VRMode = true;
 
         // Microphone device if available, default if null
-        [HideInInspector]
         public string MicDeviceName = null;
 
         // Guides the online and availability state
         public Visibility Visibility = Visibility.Online;
     }
+
 
     public class ClientSettings
     {
