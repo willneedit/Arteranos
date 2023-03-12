@@ -22,8 +22,6 @@ namespace Arteranos.NetworkIO
     [RequireComponent(typeof(NetworkIdentity))]
     public class AvatarLoader_RPM : NetworkBehaviour, IAvatarLoader
     {
-        [SyncVar(hook = nameof(OnAvatarURLChanged))]
-        public string m_AvatarURL;
         public GameObject m_AvatarStandin = null;
         private bool loading = false;
 
@@ -49,7 +47,6 @@ namespace Arteranos.NetworkIO
             name += "_" + netIdentity.netId;
 
             Core.ServerSettings serverSettings = Core.SettingsManager.Server;
-            Core.ClientSettings clientSettings = Core.SettingsManager.Client;
 
             if(serverSettings.ShowAvatars || !isServer || isLocalPlayer)
             {
@@ -57,14 +54,20 @@ namespace Arteranos.NetworkIO
                 // m_AvatarLoader.SaveInProjectFolder = true;
                 m_AvatarLoader.OnCompleted += AvatarLoadComplete;
                 m_AvatarLoader.OnFailed += AvatarLoadFailed;
-
-                clientSettings.OnAvatarChanged += RequestAvatarChange;
+                GetComponent<AvatarBrain>().OnAvatarChanged += RequestAvatarChange;
 
                 // The late-joining client's companions, or the newly joined clients.
                 if(isOwned)
                 {
-                    // FIXME: Burst mitigation
-                    RequestAvatarChange(null, clientSettings.AvatarURL);
+                    if(GetComponent<AvatarBrain>().m_strings.TryGetValue(AVStringKeys.AvatarURL, out string url))
+                    {
+                        // FIXME: Burst mitigation
+                        RequestAvatarChange(url);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"No avatar URL");
+                    }
                 }
             }
 
@@ -75,21 +78,11 @@ namespace Arteranos.NetworkIO
 
         public override void OnStopClient()
         {
-            Core.SettingsManager.Client.OnAvatarChanged -= RequestAvatarChange;
+            GetComponent<AvatarBrain>().OnAvatarChanged -= RequestAvatarChange;
             base.OnStopClient();
         }
 
-        public void RequestAvatarChange(string old, string current)
-        {
-            if(current == m_AvatarURL) return;
-
-            UpdateAvatarServerRpc(current);
-        }
-
-        [Command]
-        private void UpdateAvatarServerRpc(string avatarURL) => m_AvatarURL = avatarURL;
-
-        void OnAvatarURLChanged(string _, string current)
+        void RequestAvatarChange(string current)
         {
             if(loading) return;
 

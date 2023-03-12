@@ -9,6 +9,8 @@ using UnityEngine;
 using System;
 
 using Mirror;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace Arteranos.ExtensionMethods
 {
@@ -83,6 +85,25 @@ namespace Arteranos.NetworkTypes
     {
         public ulong FirstHalf;
         public ulong SecondHalf;
+
+    }
+}
+
+namespace Arteranos.Core
+{
+    class Utils
+    {
+        /// <summary>
+        /// Allows to tack on a Description attribute to enum values, e.g. a display name.
+        /// </summary>
+        /// <param name="enumVal">The particularvalue of the enum set</param>
+        /// <returns>The string in the value's description</returns>
+        public static string GetEnumDescription(Enum enumVal)
+        {
+            MemberInfo[] memInfo = enumVal.GetType().GetMember(enumVal.ToString());
+            DescriptionAttribute attribute = CustomAttributeExtensions.GetCustomAttribute<DescriptionAttribute>(memInfo[0]);
+            return attribute?.Description ?? "<no description>";
+        }
 
     }
 }

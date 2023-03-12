@@ -26,6 +26,7 @@ namespace Arteranos.NetworkIO
     public enum AVStringKeys : int
     {
         _Invalid = 0,
+        AvatarURL,
     }
 
     public class AvatarBrain : NetworkBehaviour
@@ -37,6 +38,7 @@ namespace Arteranos.NetworkIO
         public Transform Voice { get; private set; } = null;
 
         public event Action<IVoiceOutput> OnVoiceOutputChanged;
+        public event Action<string> OnAvatarChanged;
 
         void Awake()
         {
@@ -49,38 +51,43 @@ namespace Arteranos.NetworkIO
             base.OnStartClient();
 
             m_ints.Callback += OnMIntsChanged;
+            m_floats.Callback += OnMFloatsChanged;
+            m_strings.Callback += OnMStringsChanged;
+
+            SettingsManager.Client.OnAvatarChanged += PropagateAvatarChanged;
 
             ResyncInitialValues();
 
-            if(isServer && isOwned)
-            {
-                // Host mode, this is the host user. Voice chat is always implied.
-                PropagateVoiceChatID(0);
-            }
-            else if(isOwned)
-            {
-                cran.OnJoinedChatroom += PropagateVoiceChatID;
-                cran.JoinChatroom(NetworkManager.singleton.networkAddress);
-            }
+            DownloadClientSettings();
+
+            InitializeVoice();
         }
 
         public override void OnStopClient()
         {
+            DeinitializeVoice();
+
+            SettingsManager.Client.OnAvatarChanged -= PropagateAvatarChanged;
+
             m_ints.Callback -= OnMIntsChanged;
-
-            LoseVoice();
-
-            if(isServer && isOwned)
-            {
-
-            }
-            else if(isOwned)
-            {
-                cran.LeaveChatroom();
-                cran.OnJoinedChatroom -= PropagateVoiceChatID;
-            }
+            m_floats.Callback -= OnMFloatsChanged;
+            m_strings.Callback -= OnMStringsChanged;
 
             base.OnStopClient();
+        }
+
+        /// <summary>
+        /// Download the user's client settings to his avatar's brain, and announce
+        /// the data to the server to spread it to the clones.
+        /// </summary>
+        private void DownloadClientSettings()
+        {
+            ClientSettings cs = SettingsManager.Client;
+
+            if(isOwned)
+            {
+                PropagateAvatarChanged(cs.AvatarURL);
+            }
         }
 
         private void ResyncInitialValues()
@@ -92,26 +99,32 @@ namespace Arteranos.NetworkIO
                 OnMFloatsChanged(SyncDictionary<AVFloatKeys, float>.Operation.OP_ADD, kvpf.Key, kvpf.Value);
 
             foreach(KeyValuePair<AVStringKeys, string> kvps in m_strings)
-                OnMStringsChanged(SyncDictionary<AVFloatKeys, float>.Operation.OP_ADD, kvps.Key, kvps.Value);
+                OnMStringsChanged(SyncDictionary<AVStringKeys, string>.Operation.OP_ADD, kvps.Key, kvps.Value);
         }
 
         private void OnMIntsChanged(SyncDictionary<AVIntKeys, int>.Operation op, AVIntKeys key, int value)
         {
             // Give that avatar its corresponding voice - except its owner.
-            if(key == AVIntKeys.ChatOwnID)
-                UpdateVoiceID(value);
+            switch(key)
+            {
+                case AVIntKeys.ChatOwnID:
+                    UpdateVoiceID(value); break;
+            }
         }
-#pragma warning disable IDE0060 // Nicht verwendete Parameter entfernen - RFU
+
         private void OnMFloatsChanged(SyncIDictionary<AVFloatKeys, float>.Operation op, AVFloatKeys key, float value)
         {
             // Reserved for future use
         }
 
-        private void OnMStringsChanged(SyncIDictionary<AVFloatKeys, float>.Operation op, AVStringKeys key, string value)
+        private void OnMStringsChanged(SyncIDictionary<AVStringKeys, string>.Operation op, AVStringKeys key, string value)
         {
-            // Reserved for future use
+            switch(key)
+            {
+                case AVStringKeys.AvatarURL:
+                    OnAvatarChanged?.Invoke(value); break;
+            }
         }
-#pragma warning restore IDE0060 // Nicht verwendete Parameter entfernen - RFU
 
 
         // ---------------------------------------------------------------
@@ -165,7 +178,40 @@ namespace Arteranos.NetworkIO
             }
         }
 
+        private void InitializeVoice()
+        {
+            if(isServer && isOwned)
+            {
+                // Host mode, this is the host user. Voice chat is always implied.
+                PropagateVoiceChatID(0);
+            }
+            else if(isOwned)
+            {
+                cran.OnJoinedChatroom += PropagateVoiceChatID;
+                cran.JoinChatroom(NetworkManager.singleton.networkAddress);
+            }
+        }
+
+        private void DeinitializeVoice()
+        {
+            LoseVoice();
+
+            if(isServer && isOwned)
+            {
+
+            }
+            else if(isOwned)
+            {
+                cran.LeaveChatroom();
+                cran.OnJoinedChatroom -= PropagateVoiceChatID;
+            }
+        }
+
+
         #endregion
         // ---------------------------------------------------------------
+
+        [Command]
+        private void PropagateAvatarChanged(string _new) => m_strings[AVStringKeys.AvatarURL] = _new;
     }
 }
