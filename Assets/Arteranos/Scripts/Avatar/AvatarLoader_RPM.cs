@@ -20,6 +20,7 @@ namespace Arteranos.NetworkIO
 {
     [RequireComponent(typeof(AvatarPoseDriver))]
     [RequireComponent(typeof(NetworkIdentity))]
+    [RequireComponent(typeof(AvatarBrain))]
     public class AvatarLoader_RPM : NetworkBehaviour, IAvatarLoader
     {
         public GameObject m_AvatarStandin = null;
@@ -59,15 +60,9 @@ namespace Arteranos.NetworkIO
                 // The late-joining client's companions, or the newly joined clients.
                 if(isOwned)
                 {
-                    if(GetComponent<AvatarBrain>().m_strings.TryGetValue(AVStringKeys.AvatarURL, out string url))
-                    {
-                        // FIXME: Burst mitigation
-                        RequestAvatarChange(url);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"No avatar URL");
-                    }
+                    string url = GetComponent<AvatarBrain>().AvatarURL;
+                    // FIXME: Burst mitigation
+                    RequestAvatarChange(url);
                 }
             }
 
@@ -84,7 +79,7 @@ namespace Arteranos.NetworkIO
 
         void RequestAvatarChange(string current)
         {
-            if(loading) return;
+            if(loading || current == null) return;
 
             loading = true;
             StartCoroutine(ProcessLoader(current));

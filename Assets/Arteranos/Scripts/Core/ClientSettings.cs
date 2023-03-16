@@ -23,6 +23,8 @@ namespace Arteranos.Core
         Guest = 0,      // Invalid, is guest
         [Description("Arteranos shard")]
         Native,         // Native. uses user@ser.ver
+        [Description("Google")]
+        Google,         // Google, uses user@gmail.com
         [Description("Github")]
         Github,         // Github. uses the login name (eg. 'willneedit')
         [Description("Discord")]

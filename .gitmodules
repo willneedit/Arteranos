@@ -1,0 +1,3 @@
+[submodule "Assets/Arteranos-keys"]
+	path = Assets/Arteranos-keys
+	url = git@github.com:willneedit/Arteranos-keys.git

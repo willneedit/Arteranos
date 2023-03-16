@@ -12,33 +12,76 @@ using System;
 
 namespace Arteranos.NetworkIO
 {
-    public enum AVIntKeys : int
+    public enum AVIntKeys : byte
     {
         _Invalid = 0,
         ChatOwnID,
     }
 
-    public enum AVFloatKeys : int
+    public enum AVFloatKeys : byte
     {
         _Invalid = 0,
     }
 
-    public enum AVStringKeys : int
+    public enum AVStringKeys : byte
     {
         _Invalid = 0,
         AvatarURL,
     }
 
+    public enum AVBlobKeys : byte
+    {
+        _Invalid = 0,
+        UserHash,
+    }
+
     public class AvatarBrain : NetworkBehaviour
     {
-        public readonly SyncDictionary<AVIntKeys, int> m_ints = new();
-        public readonly SyncDictionary<AVFloatKeys, float> m_floats = new();
-        public readonly SyncDictionary<AVStringKeys, string> m_strings = new();
-
         public Transform Voice { get; private set; } = null;
 
         public event Action<IVoiceOutput> OnVoiceOutputChanged;
         public event Action<string> OnAvatarChanged;
+
+        public int ChatOwnID
+        {
+            get => m_ints.ContainsKey(AVIntKeys.ChatOwnID) ? m_ints[AVIntKeys.ChatOwnID] : -1;
+            set => PropagateInt(AVIntKeys.ChatOwnID, value);
+        }
+
+        public string AvatarURL
+        {
+            get => m_strings.ContainsKey(AVStringKeys.AvatarURL) ? m_strings[AVStringKeys.AvatarURL] : null;
+            set => PropagateString(AVStringKeys.AvatarURL, value);
+        }
+
+        public byte[] UserHash
+        {
+            get => m_blobs.ContainsKey(AVBlobKeys.UserHash) ? m_blobs[AVBlobKeys.UserHash] : null;
+            private set => PropagateBlob(AVBlobKeys.UserHash, value); 
+        }
+
+        /// <summary>
+        /// Download the user's client settings to his avatar's brain, and announce
+        /// the data to the server to spread it to the clones.
+        /// </summary>
+        private void DownloadClientSettings()
+        {
+            ClientSettings cs = SettingsManager.Client;
+
+            if(isOwned)
+            {
+                AvatarURL = cs.AvatarURL;
+                UserHash = cs.UserHash;
+            }
+        }
+
+        // ---------------------------------------------------------------
+        #region Networking
+
+        private readonly SyncDictionary<AVIntKeys, int> m_ints = new();
+        private readonly SyncDictionary<AVFloatKeys, float> m_floats = new();
+        private readonly SyncDictionary<AVStringKeys, string> m_strings = new();
+        private readonly SyncDictionary<AVBlobKeys, byte[]> m_blobs = new();
 
         void Awake()
         {
@@ -53,8 +96,9 @@ namespace Arteranos.NetworkIO
             m_ints.Callback += OnMIntsChanged;
             m_floats.Callback += OnMFloatsChanged;
             m_strings.Callback += OnMStringsChanged;
+            m_blobs.Callback += OnMBlobsChanged;
 
-            SettingsManager.Client.OnAvatarChanged += PropagateAvatarChanged;
+            SettingsManager.Client.OnAvatarChanged += (x) => AvatarURL = x;
 
             ResyncInitialValues();
 
@@ -67,27 +111,14 @@ namespace Arteranos.NetworkIO
         {
             DeinitializeVoice();
 
-            SettingsManager.Client.OnAvatarChanged -= PropagateAvatarChanged;
+            SettingsManager.Client.OnAvatarChanged -= (x) => AvatarURL = x;
 
             m_ints.Callback -= OnMIntsChanged;
             m_floats.Callback -= OnMFloatsChanged;
             m_strings.Callback -= OnMStringsChanged;
+            m_blobs.Callback -= OnMBlobsChanged;
 
             base.OnStopClient();
-        }
-
-        /// <summary>
-        /// Download the user's client settings to his avatar's brain, and announce
-        /// the data to the server to spread it to the clones.
-        /// </summary>
-        private void DownloadClientSettings()
-        {
-            ClientSettings cs = SettingsManager.Client;
-
-            if(isOwned)
-            {
-                PropagateAvatarChanged(cs.AvatarURL);
-            }
         }
 
         private void ResyncInitialValues()
@@ -100,6 +131,10 @@ namespace Arteranos.NetworkIO
 
             foreach(KeyValuePair<AVStringKeys, string> kvps in m_strings)
                 OnMStringsChanged(SyncDictionary<AVStringKeys, string>.Operation.OP_ADD, kvps.Key, kvps.Value);
+
+            foreach(KeyValuePair<AVBlobKeys, byte[]> kvpb in m_blobs)
+                OnMBlobsChanged(SyncDictionary<AVBlobKeys, byte[]>.Operation.OP_ADD, kvpb.Key, kvpb.Value);
+
         }
 
         private void OnMIntsChanged(SyncDictionary<AVIntKeys, int>.Operation op, AVIntKeys key, int value)
@@ -126,15 +161,32 @@ namespace Arteranos.NetworkIO
             }
         }
 
+        private void OnMBlobsChanged(SyncIDictionary<AVBlobKeys, byte[]>.Operation op, AVBlobKeys key, byte[] value)
+        {
+            // Reserved for future use
+        }
 
+
+        [Command]
+        private void PropagateInt(AVIntKeys key, int value) => m_ints[key] = value;
+
+#pragma warning disable IDE0051 // Nicht verwendete private Member entfernen
+        [Command]
+        private void PropagateFloat(AVFloatKeys key, float value) => m_floats[key] = value;
+#pragma warning restore IDE0051 // Nicht verwendete private Member entfernen
+
+        [Command]
+        private void PropagateString(AVStringKeys key, string value) => m_strings[key] = value;
+
+        [Command]
+        private void PropagateBlob(AVBlobKeys key, byte[] value) => m_blobs[key] = value;
+
+        #endregion
         // ---------------------------------------------------------------
         #region Voice handling
 
         private IChatroomNetworkV2 cran = null;
         private IEnumerator fdv_cr = null;
-
-        [Command]
-        private void PropagateVoiceChatID(short OwnID) => m_ints[AVIntKeys.ChatOwnID] = OwnID;
 
         IEnumerator FindDelayedVoice(int ChatOwnID)
         {
@@ -183,11 +235,11 @@ namespace Arteranos.NetworkIO
             if(isServer && isOwned)
             {
                 // Host mode, this is the host user. Voice chat is always implied.
-                PropagateVoiceChatID(0);
+                ChatOwnID = 0;
             }
             else if(isOwned)
             {
-                cran.OnJoinedChatroom += PropagateVoiceChatID;
+                cran.OnJoinedChatroom += (x) => ChatOwnID = x;
                 cran.JoinChatroom(NetworkManager.singleton.networkAddress);
             }
         }
@@ -203,7 +255,7 @@ namespace Arteranos.NetworkIO
             else if(isOwned)
             {
                 cran.LeaveChatroom();
-                cran.OnJoinedChatroom -= PropagateVoiceChatID;
+                cran.OnJoinedChatroom -= (x) => ChatOwnID = x;
             }
         }
 
@@ -211,7 +263,5 @@ namespace Arteranos.NetworkIO
         #endregion
         // ---------------------------------------------------------------
 
-        [Command]
-        private void PropagateAvatarChanged(string _new) => m_strings[AVStringKeys.AvatarURL] = _new;
     }
 }
