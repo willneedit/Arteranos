@@ -29,6 +29,7 @@ namespace Arteranos.XR
 
         public float BodyHeight { get; set; }
 
+        private bool VRRunning = false;
 
         public void Awake()
         {
@@ -52,6 +53,7 @@ namespace Arteranos.XR
             {
                 Debug.Log("Starting XR...");
                 XRGeneralSettings.Instance.Manager.StartSubsystems();
+                VRRunning = true;
                 UpdateXROrigin(true);
             }
         }
@@ -63,6 +65,7 @@ namespace Arteranos.XR
             XRGeneralSettings.Instance.Manager.StopSubsystems();
             XRGeneralSettings.Instance.Manager.DeinitializeLoader();
             Debug.Log("XR stopped completely.");
+            VRRunning = false;
             UpdateXROrigin(false);
         }
         
@@ -70,7 +73,7 @@ namespace Arteranos.XR
         void Start()
         {
             Core.SettingsManager.Client.OnVRModeChanged += OnVRModeChanged;
-            if(Core.SettingsManager.Client.VRMode)
+            if(Core.SettingsManager.Client.VRMode != VRRunning)
                 OnVRModeChanged(true);
             else
                 UpdateXROrigin(false);
@@ -78,6 +81,8 @@ namespace Arteranos.XR
 
         void OnVRModeChanged(bool current)
         {
+            if(current == VRRunning) return;
+
             if(current)
                 StartCoroutine(StartXRCoroutine());
             else
