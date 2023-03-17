@@ -11,6 +11,8 @@ using Cdm.Authentication.Browser;
 using Cdm.Authentication.Clients;
 using Cdm.Authentication.OAuth2;
 using System.Threading.Tasks;
+using System;
+using Cdm.Authentication;
 
 namespace Arteranos.UI
 {
@@ -66,10 +68,57 @@ namespace Arteranos.UI
 
             using AuthenticationSession authenticationSession = new(auth, crossPlatformBrowser);
 
-            // Opens a browser to log user in
-            AccessTokenResponse accessTokenResponse = await authenticationSession.AuthenticateAsync();
+            AccessTokenResponse accessTokenResponse = null;
+            try
+            {
+                // Opens a browser to log user in
+                accessTokenResponse = await authenticationSession.AuthenticateAsync();
+
+            }
+            catch(Exception e)
+            {
+                Debug.LogError($"Login failed: {e.Message}, falling back to a guest login");
+                SettingsManager.Client.LoginProvider = LoginProvider.Guest;
+
+                // Fall back into a guest login
+                SettingsManager.Client.RefreshAuthentication();
+                return;
+            }
+
+            string username = null;
+            if(authenticationSession.SupportsUserInfo())
+            {
+                IUserInfo info = await authenticationSession.GetUserInfoAsync();
+                Debug.Log($"Login successful, id={info.id} username={info.name}, email={info.email}");
+                username = info.id;
+            }
+            else
+            {
+                Debug.Log("Loging successful, but no further info.");
+                username = "anonymous";
+            }
+            Debug.Log("Saving...");
+            SaveLogin(new_lp, accessTokenResponse.accessToken, username);
+            Debug.Log("Saving done.");
+
 
         }
+
+        private void SaveLogin(LoginProvider lp, string token, string Username)
+        {
+            ClientSettings cs = SettingsManager.Client;
+
+            Debug.Log($"Saving lp={lp}, token={token}, Username={Username}");
+            cs.BearerToken = token;
+            cs.LoginProvider = lp;
+            cs.Username = Username;
+            cs.RefreshAuthentication();
+
+            cs.SaveSettings();
+            Debug.Log("Saving succeeded");
+        }
+
+
 #if false
 var crossPlatformBrowser = new CrossPlatformBrowser();
 var crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsEditor, new StandaloneBrowser());

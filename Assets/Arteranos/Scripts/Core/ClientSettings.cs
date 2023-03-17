@@ -135,13 +135,16 @@ namespace Arteranos.Core
             UserHash = hashBytes;
         }
 
-        private void RefreshAuthentication()
+        public void RefreshAuthentication()
         {
             if(LoginProvider == LoginProvider.Guest)
             {
                 int rnd = UnityEngine.Random.Range(100000000, 999999999);
                 Username = $"Guest{rnd}";
+                BearerToken = null;
             }
+
+            ComputeUserHash();
         }
 
         public void SaveSettings()
@@ -153,7 +156,7 @@ namespace Arteranos.Core
             }
             catch(Exception e)
             {
-                Debug.LogWarning($"Failed to load user settings: {e.Message}");
+                Debug.LogWarning($"Failed to save user settings: {e.Message}");
             }
         }
 
@@ -174,7 +177,6 @@ namespace Arteranos.Core
 
             // Postprocessing to generate the derived values
             cs.RefreshAuthentication();
-            cs.ComputeUserHash();
 
             // Save the settings back
             cs.SaveSettings();
