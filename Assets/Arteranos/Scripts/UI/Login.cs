@@ -7,12 +7,14 @@ using UnityEngine.UI;
 
 
 using Arteranos.Core;
+using Arteranos.Auth;
 using Cdm.Authentication.Browser;
 using Cdm.Authentication.Clients;
 using Cdm.Authentication.OAuth2;
 using System.Threading.Tasks;
 using System;
 using Cdm.Authentication;
+using Codice.Client.BaseCommands;
 
 namespace Arteranos.UI
 {
@@ -45,7 +47,7 @@ namespace Arteranos.UI
                 case 0:
                     lp = LoginProvider.Google; break;
                 case 1:
-                    lp = LoginProvider.Github; break;
+                    lp = LoginProvider.Native; break;
                 default:
                     Debug.LogError($"Unknown choice of the login provider: {Chooser.value}");
                     break;
@@ -57,7 +59,8 @@ namespace Arteranos.UI
         private async Task CommitSignin(LoginProvider new_lp)
         {
 
-            AuthorizationCodeFlow auth = OAuth2ClientKeys.GetOAuthData(new_lp);
+            ILoginPackage lpack = OAuth2ClientKeys.GetOAuthData(new_lp);
+            AuthorizationCodeFlow auth = lpack.GetAuthorizationCodeFlow();
 
             CrossPlatformBrowser crossPlatformBrowser = new();
             crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsEditor, new StandaloneBrowser());
@@ -68,40 +71,23 @@ namespace Arteranos.UI
 
             using AuthenticationSession authenticationSession = new(auth, crossPlatformBrowser);
 
-            AccessTokenResponse accessTokenResponse = null;
             try
             {
                 // Opens a browser to log user in
-                accessTokenResponse = await authenticationSession.AuthenticateAsync();
+                AccessTokenResponse accessTokenResponse = await authenticationSession.AuthenticateAsync();
+                string id = await lpack.GetUserIDAsync(authenticationSession);
 
+                Debug.Log("Login successful.");
+                Debug.Log("Saving...");
+                SaveLogin(new_lp, accessTokenResponse.accessToken, id);
+                Debug.Log("Saving done.");
             }
             catch(Exception e)
             {
                 Debug.LogError($"Login failed: {e.Message}, falling back to a guest login");
-                SettingsManager.Client.LoginProvider = LoginProvider.Guest;
-
-                // Fall back into a guest login
-                SettingsManager.Client.RefreshAuthentication();
+                SaveLogin(LoginProvider.Guest, null, null);
                 return;
             }
-
-            string username = null;
-            if(authenticationSession.SupportsUserInfo())
-            {
-                IUserInfo info = await authenticationSession.GetUserInfoAsync();
-                Debug.Log($"Login successful, id={info.id} username={info.name}, email={info.email}");
-                username = info.id;
-            }
-            else
-            {
-                Debug.Log("Loging successful, but no further info.");
-                username = "anonymous";
-            }
-            Debug.Log("Saving...");
-            SaveLogin(new_lp, accessTokenResponse.accessToken, username);
-            Debug.Log("Saving done.");
-
-
         }
 
         private void SaveLogin(LoginProvider lp, string token, string Username)
