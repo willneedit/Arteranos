@@ -9,65 +9,126 @@ using UnityEngine.UI;
 using Arteranos.Core;
 using Arteranos.Auth;
 using Cdm.Authentication.Browser;
-using Cdm.Authentication.Clients;
 using Cdm.Authentication.OAuth2;
 using System.Threading.Tasks;
 using System;
-using Cdm.Authentication;
-using Codice.Client.BaseCommands;
+using System.Linq;
 
 namespace Arteranos.UI
 {
     public class Login : UIBehaviour
     {
+        public TMP_Text Status = null;
         public TMP_Dropdown Chooser = null;
         public Button SignIn = null;
         public Button GuestLogin = null;
         public Button JoinServer = null;
         public Button CreateServer = null;
 
+        private string[] PackageNames = null;
+
+        private CrossPlatformBrowser crossPlatformBrowser = null;
+
+        private event Action<string, string> OnRefreshLoginUI;
+
+        private string status_template = null;
+
         protected override void Awake()
         {
             base.Awake();
 
-            SignIn.onClick.AddListener(SignIn_btn);
-            //GuestLogin.onClick += null;
-            //JoinServer.onClick += null;
-            //CreateServer += null;
-        }
-
-        protected override void Start() => base.Start();
-
-        private void SignIn_btn()
-        {
-            LoginProvider lp = LoginProvider.Guest;
-
-            switch(Chooser.value)
-            {
-                case 0:
-                    lp = LoginProvider.Google; break;
-                case 1:
-                    lp = LoginProvider.Native; break;
-                default:
-                    Debug.LogError($"Unknown choice of the login provider: {Chooser.value}");
-                    break;
-            }
-
-            _ = CommitSignin(lp);
-        }
-
-        private async Task CommitSignin(LoginProvider new_lp)
-        {
-
-            ILoginPackage lpack = OAuth2ClientKeys.GetOAuthData(new_lp);
-            AuthorizationCodeFlow auth = lpack.GetAuthorizationCodeFlow();
-
-            CrossPlatformBrowser crossPlatformBrowser = new();
+            crossPlatformBrowser = new();
             crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsEditor, new StandaloneBrowser());
             crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsPlayer, new StandaloneBrowser());
             crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXEditor, new StandaloneBrowser());
             crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXPlayer, new StandaloneBrowser());
             crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.IPhonePlayer, new ASWebAuthenticationSessionBrowser());
+
+            PackageNames = LoginPackages.GetPackageNames();
+
+            List<string> options = (from x in PackageNames select $"Login with {x}").ToList();
+            Chooser.ClearOptions();
+            Chooser.AddOptions( options );
+
+            status_template = Status.text;
+
+            SignIn.onClick.AddListener(SignIn_btn);
+            //GuestLogin.onClick += null;
+            //JoinServer.onClick += null;
+            //CreateServer += null;
+
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+
+            OnRefreshLoginUI += UpdateLoginUI;
+            _ = AttemptRefreshTokenAsync();
+        }
+
+        private void SignIn_btn()
+        {
+            string lp = PackageNames[Chooser.value];
+            _ = CommitSigninAsync(lp);
+        }
+
+
+        private async Task AttemptRefreshTokenAsync()
+        {
+            string lp;
+            string old_token;
+            string id;
+
+            (lp, old_token, id) = RetrieveLogin();
+
+            ILoginPackage lpack = LoginPackages.GetPackage(lp);
+
+            if(lpack == null)
+            {
+                OnRefreshLoginUI?.Invoke(null, null);
+                return;
+            }
+
+            AuthorizationCodeFlow auth = lpack.GetAuthorizationCodeFlow();
+
+            using AuthenticationSession authenticationSession = new(auth, crossPlatformBrowser);
+            try
+            {
+                AccessTokenResponse newAccessTokenResponse = await authenticationSession.RefreshTokenAsync(old_token);
+                Debug.Log("Login renewal successful.");
+                SaveLogin(lp, newAccessTokenResponse.accessToken, id);
+            }
+            catch(Exception e) 
+            {
+                Debug.LogError($"Login renewal failed: {e.Message}, reverting to a guest login");
+                SaveLogin(null, null, null);
+            }
+        }
+
+        private void UpdateLoginUI(string lp, string username)
+        {
+            if(lp != null && username != null)
+            {
+                Status.text = string.Format(status_template, lp, username);
+                Status.enabled = true;
+                SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Switch account";
+                GuestLogin.GetComponentInChildren<TextMeshProUGUI>().text = "Log out";
+                GuestLogin.enabled = true;
+            }
+            else
+            {
+                Status.enabled = false;
+                SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Log in";
+                GuestLogin.enabled = false;
+            }
+
+        }
+
+        private async Task CommitSigninAsync(string new_lp)
+        {
+            ILoginPackage lpack = LoginPackages.GetPackage(new_lp);
+            AuthorizationCodeFlow auth = lpack.GetAuthorizationCodeFlow();
 
             using AuthenticationSession authenticationSession = new(auth, crossPlatformBrowser);
 
@@ -78,19 +139,22 @@ namespace Arteranos.UI
                 string id = await lpack.GetUserIDAsync(authenticationSession);
 
                 Debug.Log("Login successful.");
-                Debug.Log("Saving...");
                 SaveLogin(new_lp, accessTokenResponse.accessToken, id);
-                Debug.Log("Saving done.");
             }
             catch(Exception e)
             {
                 Debug.LogError($"Login failed: {e.Message}, falling back to a guest login");
-                SaveLogin(LoginProvider.Guest, null, null);
-                return;
+                SaveLogin(null, null, null);
             }
         }
 
-        private void SaveLogin(LoginProvider lp, string token, string Username)
+        private (string, string, string) RetrieveLogin()
+        {
+            ClientSettings cs = SettingsManager.Client;
+            return (cs.LoginProvider, cs.BearerToken, cs.Username);
+        }
+
+        private void SaveLogin(string lp, string token, string Username)
         {
             ClientSettings cs = SettingsManager.Client;
 
@@ -102,6 +166,7 @@ namespace Arteranos.UI
 
             cs.SaveSettings();
             Debug.Log("Saving succeeded");
+            OnRefreshLoginUI?.Invoke(lp, Username);
         }
 
 
