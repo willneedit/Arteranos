@@ -17,21 +17,21 @@ using System.ComponentModel;
 namespace Arteranos.Core
 {
 
-    public enum LoginProvider
-    {
-        [Description("Guest")]
-        Guest = 0,      // Invalid, is guest
-        [Description("Arteranos shard")]
-        Native,         // Native. uses user@ser.ver
-        [Description("Google")]
-        Google,         // Google, uses user@gmail.com
-        [Description("Github")]
-        Github,         // Github. uses the login name (eg. 'willneedit')
-        [Description("Discord")]
-        Discord,        // Discord. uses the user handle (eg. 'iwontsay#0000')
-        [Description("Mastodon")]
-        Mastodon        // Mastodon. uses the user handle (eg. user@mas.to.don)
-    }
+    //public enum LoginProvider
+    //{
+    //    [Description("Guest")]
+    //    Guest = 0,      // Invalid, is guest
+    //    [Description("Arteranos shard")]
+    //    Native,         // Native. uses user@ser.ver
+    //    [Description("Google")]
+    //    Google,         // Google, uses user@gmail.com
+    //    [Description("Github")]
+    //    Github,         // Github. uses the login name (eg. 'willneedit')
+    //    [Description("Discord")]
+    //    Discord,        // Discord. uses the user handle (eg. 'iwontsay#0000')
+    //    [Description("Mastodon")]
+    //    Mastodon        // Mastodon. uses the user handle (eg. user@mas.to.don)
+    //}
 
     public enum AvatarProvider
     {
@@ -65,7 +65,7 @@ namespace Arteranos.Core
         public virtual string Username { get; set; } = null;
 
         // The login provider the user logs in to
-        public virtual LoginProvider LoginProvider { get; set; } = LoginProvider.Guest;
+        public virtual string LoginProvider { get; set; } = null;
 
         // The bearer token bestowed during the last login. May use to verify unknown user's details
         public virtual string BearerToken { get; set; } = null;
@@ -124,8 +124,7 @@ namespace Arteranos.Core
 
         private void ComputeUserHash()
         {
-            // Regardless the enums are subject of change, the resulting hash will be the same.
-            string source = $"{Utils.GetEnumDescription(LoginProvider)}_{Username}";
+            string source = $"{LoginProvider}_{Username}";
 
             byte[] bytes = Encoding.UTF8.GetBytes(source);
             SHA256Managed hash = new();
@@ -137,7 +136,7 @@ namespace Arteranos.Core
 
         public void RefreshAuthentication()
         {
-            if(LoginProvider == LoginProvider.Guest)
+            if(LoginProvider == null)
             {
                 int rnd = UnityEngine.Random.Range(100000000, 999999999);
                 Username = $"Guest{rnd}";
