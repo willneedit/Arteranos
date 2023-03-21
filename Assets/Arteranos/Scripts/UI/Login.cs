@@ -32,6 +32,7 @@ namespace Arteranos.UI
         private event Action<string, string> OnRefreshLoginUI;
 
         private string status_template = null;
+        private string friendlyName = null;
 
         protected override void Awake()
         {
@@ -52,8 +53,8 @@ namespace Arteranos.UI
 
             status_template = Status.text;
 
-            SignIn.onClick.AddListener(SignIn_btn);
-            //GuestLogin.onClick += null;
+            SignIn.onClick.AddListener(() => _ = CommitSigninAsync(PackageNames[Chooser.value]));
+            GuestLogin.onClick.AddListener(() => CommitSignOut());
             //JoinServer.onClick += null;
             //CreateServer += null;
 
@@ -66,13 +67,6 @@ namespace Arteranos.UI
             OnRefreshLoginUI += UpdateLoginUI;
             _ = AttemptRefreshTokenAsync();
         }
-
-        private void SignIn_btn()
-        {
-            string lp = PackageNames[Chooser.value];
-            _ = CommitSigninAsync(lp);
-        }
-
 
         private async Task AttemptRefreshTokenAsync()
         {
@@ -90,14 +84,23 @@ namespace Arteranos.UI
                 return;
             }
 
+            if(string.IsNullOrEmpty(old_token))
+            {
+                Debug.LogWarning($"No refresh token for this login, continuing without authorization backup.");
+                OnRefreshLoginUI?.Invoke(lp, id);
+                return;
+            }
+
             AuthorizationCodeFlow auth = lpack.GetAuthorizationCodeFlow();
 
             using AuthenticationSession authenticationSession = new(auth, crossPlatformBrowser);
             try
             {
-                AccessTokenResponse newAccessTokenResponse = await authenticationSession.RefreshTokenAsync(old_token);
+                AccessTokenResponse accessTokenResponse = await authenticationSession.RefreshTokenAsync(old_token);
+                (id, friendlyName) = await lpack.GetUserIDAsync(authenticationSession);
+
                 Debug.Log("Login renewal successful.");
-                SaveLogin(lp, newAccessTokenResponse.accessToken, id);
+                SaveLogin(lp, accessTokenResponse.HasRefreshToken() ? accessTokenResponse.refreshToken : null, id);
             }
             catch(Exception e) 
             {
@@ -110,17 +113,17 @@ namespace Arteranos.UI
         {
             if(lp != null && username != null)
             {
-                Status.text = string.Format(status_template, lp, username);
+                Status.text = string.Format(status_template, lp, friendlyName);
                 Status.enabled = true;
                 SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Switch account";
                 GuestLogin.GetComponentInChildren<TextMeshProUGUI>().text = "Log out";
-                GuestLogin.enabled = true;
+                GuestLogin.gameObject.SetActive(true);
             }
             else
             {
                 Status.enabled = false;
                 SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Log in";
-                GuestLogin.enabled = false;
+                GuestLogin.gameObject.SetActive(false); // Reminder: to entirely hide the button, not just disable it.
             }
 
         }
@@ -134,12 +137,13 @@ namespace Arteranos.UI
 
             try
             {
+                string id;
                 // Opens a browser to log user in
                 AccessTokenResponse accessTokenResponse = await authenticationSession.AuthenticateAsync();
-                string id = await lpack.GetUserIDAsync(authenticationSession);
+                (id, friendlyName) = await lpack.GetUserIDAsync(authenticationSession);
 
                 Debug.Log("Login successful.");
-                SaveLogin(new_lp, accessTokenResponse.accessToken, id);
+                SaveLogin(new_lp, accessTokenResponse.HasRefreshToken() ? accessTokenResponse.refreshToken : null, id);
             }
             catch(Exception e)
             {
@@ -147,6 +151,8 @@ namespace Arteranos.UI
                 SaveLogin(null, null, null);
             }
         }
+
+        private void CommitSignOut() => SaveLogin(null, null, null);
 
         private (string, string, string) RetrieveLogin()
         {
