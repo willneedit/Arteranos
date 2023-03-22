@@ -87,6 +87,7 @@ namespace Arteranos.UI
             if(string.IsNullOrEmpty(old_token))
             {
                 Debug.LogWarning($"No refresh token for this login, continuing without authorization backup.");
+                friendlyName = "(unverified)";
                 OnRefreshLoginUI?.Invoke(lp, id);
                 return;
             }

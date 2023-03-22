@@ -25,9 +25,9 @@ namespace Arteranos.XR
         public XROrigin VRRig;
         public XROrigin NoVRRig;
 
-        public float EyeHeight { get; set; }
+        public float EyeHeight { get; set; } = 1.75f;
 
-        public float BodyHeight { get; set; }
+        public float BodyHeight { get; set; } = 1.85f;
 
         private bool VRRunning = false;
 
@@ -48,6 +48,7 @@ namespace Arteranos.XR
             {
                 Debug.LogWarning("Initializing XR Failed. Check Editor or Player log for details. Maybe there's no VR device available.");
                 Core.SettingsManager.Client.VRMode = false;
+                UpdateXROrigin(false);
             }
             else
             {
