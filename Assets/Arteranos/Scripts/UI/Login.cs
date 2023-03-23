@@ -39,11 +39,16 @@ namespace Arteranos.UI
         {
             base.Awake();
 
+            StandaloneBrowser sb = new()
+            {
+                closePageResponse = "<html><body><script>window.close();</script><b>DONE!</b><br>(You can close this tab/window now)</body></html>"
+            };
+
             crossPlatformBrowser = new();
-            crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsEditor, new StandaloneBrowser());
-            crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsPlayer, new StandaloneBrowser());
-            crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXEditor, new StandaloneBrowser());
-            crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXPlayer, new StandaloneBrowser());
+            crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsEditor, sb);
+            crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsPlayer, sb);
+            crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXEditor, sb);
+            crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXPlayer, sb);
             crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.IPhonePlayer, new ASWebAuthenticationSessionBrowser());
 
             PackageNames = LoginPackages.GetPackageNames();
@@ -130,14 +135,14 @@ namespace Arteranos.UI
 
         }
 
-        CancellationTokenSource source = null;
+        CancellationTokenSource CancelSource = null;
 
         private async Task CommitSigninAsync(string new_lp)
         {
-            if(source != null)
+            if(CancelSource != null)
             {
-                source.Cancel();
-                source= null;
+                CancelSource.Cancel();
+                CancelSource= null;
                 return;
             }
 
@@ -148,13 +153,13 @@ namespace Arteranos.UI
 
             try
             {
-                source = new();
+                CancelSource = new();
                 SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Abort login attempt";
                 GuestLogin.gameObject.SetActive(false);
 
                 string id;
                 // Opens a browser to log user in
-                AccessTokenResponse accessTokenResponse = await authenticationSession.AuthenticateAsync(source.Token);
+                AccessTokenResponse accessTokenResponse = await authenticationSession.AuthenticateAsync(CancelSource.Token);
                 (id, friendlyName) = await lpack.GetUserIDAsync(authenticationSession);
 
                 Debug.Log("Login successful.");
@@ -166,8 +171,8 @@ namespace Arteranos.UI
                 SaveLogin(null, null, null);
             }
 
-            source.Dispose();
-            source = null;
+            CancelSource.Dispose();
+            CancelSource = null;
         }
 
         private void CommitSignOut() => SaveLogin(null, null, null);
