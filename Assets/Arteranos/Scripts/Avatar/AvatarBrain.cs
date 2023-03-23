@@ -78,11 +78,17 @@ namespace Arteranos.NetworkIO
         // ---------------------------------------------------------------
         #region Networking
 
+#if UNITY_EDITOR
+        public readonly SyncDictionary<AVIntKeys, int> m_ints = new();
+        public readonly SyncDictionary<AVFloatKeys, float> m_floats = new();
+        public readonly SyncDictionary<AVStringKeys, string> m_strings = new();
+        public readonly SyncDictionary<AVBlobKeys, byte[]> m_blobs = new();
+#else
         private readonly SyncDictionary<AVIntKeys, int> m_ints = new();
         private readonly SyncDictionary<AVFloatKeys, float> m_floats = new();
         private readonly SyncDictionary<AVStringKeys, string> m_strings = new();
         private readonly SyncDictionary<AVBlobKeys, byte[]> m_blobs = new();
-
+#endif
         void Awake()
         {
             syncDirection = SyncDirection.ServerToClient;
@@ -181,9 +187,9 @@ namespace Arteranos.NetworkIO
         [Command]
         private void PropagateBlob(AVBlobKeys key, byte[] value) => m_blobs[key] = value;
 
-        #endregion
+#endregion
         // ---------------------------------------------------------------
-        #region Voice handling
+#region Voice handling
 
         private IChatroomNetworkV2 cran = null;
         private IEnumerator fdv_cr = null;
@@ -260,7 +266,7 @@ namespace Arteranos.NetworkIO
         }
 
 
-        #endregion
+#endregion
         // ---------------------------------------------------------------
 
     }
