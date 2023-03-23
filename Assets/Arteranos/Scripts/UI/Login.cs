@@ -13,6 +13,7 @@ using Cdm.Authentication.OAuth2;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace Arteranos.UI
 {
@@ -29,7 +30,7 @@ namespace Arteranos.UI
 
         private CrossPlatformBrowser crossPlatformBrowser = null;
 
-        private event Action<string, string> OnRefreshLoginUI;
+        private event Action<string> OnRefreshLoginUI;
 
         private string status_template = null;
         private string friendlyName = null;
@@ -80,7 +81,7 @@ namespace Arteranos.UI
 
             if(lpack == null)
             {
-                OnRefreshLoginUI?.Invoke(null, null);
+                OnRefreshLoginUI?.Invoke(null);
                 return;
             }
 
@@ -88,7 +89,7 @@ namespace Arteranos.UI
             {
                 Debug.LogWarning($"No refresh token for this login, continuing without authorization backup.");
                 friendlyName = "(unverified)";
-                OnRefreshLoginUI?.Invoke(lp, id);
+                OnRefreshLoginUI?.Invoke(lp);
                 return;
             }
 
@@ -110,9 +111,9 @@ namespace Arteranos.UI
             }
         }
 
-        private void UpdateLoginUI(string lp, string username)
+        private void UpdateLoginUI(string lp)
         {
-            if(lp != null && username != null)
+            if(lp != null)
             {
                 Status.text = string.Format(status_template, lp, friendlyName);
                 Status.enabled = true;
@@ -129,8 +130,17 @@ namespace Arteranos.UI
 
         }
 
+        CancellationTokenSource source = null;
+
         private async Task CommitSigninAsync(string new_lp)
         {
+            if(source != null)
+            {
+                source.Cancel();
+                source= null;
+                return;
+            }
+
             ILoginPackage lpack = LoginPackages.GetPackage(new_lp);
             AuthorizationCodeFlow auth = lpack.GetAuthorizationCodeFlow();
 
@@ -138,9 +148,13 @@ namespace Arteranos.UI
 
             try
             {
+                source = new();
+                SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Abort login attempt";
+                GuestLogin.gameObject.SetActive(false);
+
                 string id;
                 // Opens a browser to log user in
-                AccessTokenResponse accessTokenResponse = await authenticationSession.AuthenticateAsync();
+                AccessTokenResponse accessTokenResponse = await authenticationSession.AuthenticateAsync(source.Token);
                 (id, friendlyName) = await lpack.GetUserIDAsync(authenticationSession);
 
                 Debug.Log("Login successful.");
@@ -151,6 +165,9 @@ namespace Arteranos.UI
                 Debug.LogError($"Login failed: {e.Message}, falling back to a guest login");
                 SaveLogin(null, null, null);
             }
+
+            source.Dispose();
+            source = null;
         }
 
         private void CommitSignOut() => SaveLogin(null, null, null);
@@ -173,7 +190,7 @@ namespace Arteranos.UI
 
             cs.SaveSettings();
             Debug.Log("Saving succeeded");
-            OnRefreshLoginUI?.Invoke(lp, Username);
+            OnRefreshLoginUI?.Invoke(lp);
         }
 
 
