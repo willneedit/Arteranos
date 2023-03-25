@@ -5,6 +5,10 @@ using UnityEngine.EventSystems;
 using Newtonsoft.Json;
 using UnityEngine.UI;
 using TMPro;
+using Codice.Client.Commands.WkTree;
+using System;
+using PlasticPipe.PlasticProtocol.Messages;
+using UnityEngine.Events;
 
 namespace Arteranos.UI
 {
@@ -50,6 +54,8 @@ namespace Arteranos.UI
 
         public void LayoutKeyboard()
         {
+            UnityAction makeKeyPressedFunc(int row, int col) => () => OnKeyPressed(row, col);
+
             Keymap mmap = current_map[0];
 
             float y = TopLeft.y;
@@ -68,12 +74,18 @@ namespace Arteranos.UI
                     rt.localPosition = new Vector2(x, y);
                     rt.sizeDelta = new(rt.sizeDelta.x * keywidth, rt.sizeDelta.y);
                     btn.GetComponentInChildren<TextMeshProUGUI>().text = name;
+                    btn.onClick.AddListener(makeKeyPressedFunc(row, col));
 
                     x += keywidth * GridSize.x;
                 }
 
                 y -= GridSize.y;
             }
+        }
+
+        private void OnKeyPressed(int row, int col)
+        {
+            Debug.Log($"Key pressed: {row},{col}");
         }
     }
 }

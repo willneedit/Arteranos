@@ -37,20 +37,20 @@
           "key": "0"
         },
         {
-          "key": "ß"
+          "key": "ÃŸ"
         },
         {
-          "key": "´"
+          "key": "Â´"
         },
         {
-          "key": "0x08",
+          "key": "\u0008",
           "name": "<-",
           "width": 2.5
         }
       ],
       [
         {
-          "key": "0x09",
+          "key": "\u0009",
           "name": "Tab",
           "width": 1.5
         },
@@ -85,7 +85,7 @@
           "key": "p"
         },
         {
-          "key": "ü"
+          "key": "Ã¼"
         },
         {
           "key": "+"
@@ -93,7 +93,7 @@
       ],
       [
         {
-          "key": "==>Shift",
+          "key": "==>shift",
           "name": "Caps",
           "width": 2.0
         },
@@ -125,23 +125,23 @@
           "key": "l"
         },
         {
-          "key": "ö"
+          "key": "Ã¶"
         },
         {
-          "key": "ä"
+          "key": "Ã¤"
         },
         {
           "key": "#"
         },
         {
-          "key": "0x0d",
+          "key": "\u000d",
           "name": "Ret",
           "width": 1.5
         }
       ],
       [
         {
-          "key": "-->Shift",
+          "key": "-->shift",
           "name": "Shift",
           "width": 1.5
         },
@@ -179,19 +179,19 @@
           "key": "-"
         },
         {
-          "key": "-->Shift",
+          "key": "-->shift",
           "name": "Shift",
           "width": 3.0
         }
       ],
       [
         {
-          "key": "-->Ctrl",
+          "key": "-->ctrl",
           "name": "Ctrl",
           "width": 2.0
         },
         {
-          "key": "-->Alt",
+          "key": "-->alt",
           "name": "Alt",
           "width": 2.0
         },
@@ -200,12 +200,12 @@
           "width": 7.5
         },
         {
-          "key": "-->Alt",
+          "key": "-->alt",
           "name": "Alt",
           "width": 2.0
         },
         {
-          "key": "-->Ctrl",
+          "key": "-->ctrl",
           "name": "Ctrl",
           "width": 2.0
         }
@@ -213,20 +213,20 @@
     ]
   },
   {
-    "mode": "Shift",
+    "mode": "shift",
     "map": [
       [
         {
-          "key": "°"
+          "key": "Â°"
         },
         {
           "key": "!"
         },
         {
-          "key": "0x22"
+          "key": "\u0022"
         },
         {
-          "key": "§"
+          "key": "Â§"
         },
         {
           "key": "$"
@@ -256,15 +256,14 @@
           "key": "`"
         },
         {
-          "key": "0x08",
+          "key": "\u0008",
           "name": "<-"
         }
       ],
       [
         {
-          "key": "0x09",
-          "name": "Tab",
-          "width": 1.5
+          "key": "\u0009",
+          "name": "Tab"
         },
         {
           "key": "Q"
@@ -297,7 +296,7 @@
           "key": "P"
         },
         {
-          "key": "Ü"
+          "key": "Ãœ"
         },
         {
           "key": "*"
@@ -306,8 +305,7 @@
       [
         {
           "key": "-->default",
-          "name": "Caps",
-          "width": 2.0
+          "name": "Caps"
         },
         {
           "key": "A"
@@ -337,24 +335,23 @@
           "key": "L"
         },
         {
-          "key": "Ö"
+          "key": "Ã–"
         },
         {
-          "key": "Ä"
+          "key": "Ã„"
         },
         {
-          "key": "0x27"
+          "key": "'"
         },
         {
-          "key": "0x0d",
+          "key": "\u000d",
           "name": "Ret"
         }
       ],
       [
         {
           "key": "-->default",
-          "name": "Shift",
-          "width": 1.5
+          "name": "Shift"
         },
         {
           "key": ">"
@@ -391,34 +388,230 @@
         },
         {
           "key": "-->default",
-          "name": "Shift",
-          "width": 3.0
+          "name": "Shift"
         }
       ],
       [
         {
-          "key": "-->Ctrl",
-          "name": "Ctrl",
-          "width": 2.0
+          "key": "-->ctrl",
+          "name": "Ctrl"
         },
         {
-          "key": "-->Alt",
-          "name": "Alt",
-          "width": 2.0
+          "key": "-->alt",
+          "name": "Alt"
         },
         {
-          "key": " ",
-          "width": 6.0
+          "key": " "
         },
         {
-          "key": "-->Alt",
-          "name": "Alt",
-          "width": 2.0
+          "key": "-->alt",
+          "name": "Alt"
         },
         {
-          "key": "-->Ctrl",
-          "name": "Ctrl",
-          "width": 2.0
+          "key": "-->ctrl",
+          "name": "Ctrl"
+        }
+      ]
+    ]
+  },
+  {
+    "mode": "alt",
+    "map": [
+      [
+        {
+          "key": ""
+        },
+        {
+          "key": "Â²"
+        },
+        {
+          "key": "Â³"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": "{"
+        },
+        {
+          "key": "["
+        },
+        {
+          "key": "]"
+        },
+        {
+          "key": "}"
+        },
+        {
+          "key": "\\"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": "\u0008",
+          "name": "<-"
+        }
+      ],
+      [
+        {
+          "key": "\u0009",
+          "name": "Tab"
+        },
+        {
+          "key": "@"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": "â‚¬"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": "~"
+        }
+      ],
+      [
+        {
+          "key": "-->default",
+          "name": "Caps"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": "\u000d",
+          "name": "Ret"
+        }
+      ],
+      [
+        {
+          "key": "-->default",
+          "name": "Shift"
+        },
+        {
+          "key": "|"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": "Âµ"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": "-->default",
+          "name": "Shift"
+        }
+      ],
+      [
+        {
+          "key": "-->ctrl",
+          "name": "Ctrl"
+        },
+        {
+          "key": "-->alt",
+          "name": "Alt"
+        },
+        {
+          "key": " "
+        },
+        {
+          "key": "-->alt",
+          "name": "Alt"
+        },
+        {
+          "key": "-->ctrl",
+          "name": "Ctrl"
         }
       ]
     ]
