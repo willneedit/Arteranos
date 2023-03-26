@@ -44,7 +44,7 @@
         },
         {
           "key": "\u0008",
-          "name": "<-",
+          "name": "Backsp",
           "width": 2.5
         }
       ],
@@ -200,13 +200,13 @@
           "width": 7.5
         },
         {
-          "key": "-->alt",
-          "name": "Alt",
+          "key": "*left",
+          "name": "\u2190",
           "width": 2.0
         },
         {
-          "key": "-->ctrl",
-          "name": "Ctrl",
+          "key": "*right",
+          "name": "\u2192",
           "width": 2.0
         }
       ]
@@ -257,7 +257,7 @@
         },
         {
           "key": "\u0008",
-          "name": "<-"
+          "name": "Backsp"
         }
       ],
       [
@@ -404,12 +404,12 @@
           "key": " "
         },
         {
-          "key": "-->alt",
-          "name": "Alt"
+          "key": "*lend",
+          "name": "\u2190"
         },
         {
-          "key": "-->ctrl",
-          "name": "Ctrl"
+          "key": "*rend",
+          "name": "\u2192"
         }
       ]
     ]
@@ -459,7 +459,7 @@
         },
         {
           "key": "\u0008",
-          "name": "<-"
+          "name": "Backsp"
         }
       ],
       [
@@ -599,19 +599,19 @@
           "name": "Ctrl"
         },
         {
-          "key": "-->alt",
+          "key": "-->default",
           "name": "Alt"
         },
         {
           "key": " "
         },
         {
-          "key": "-->alt",
-          "name": "Alt"
+          "key": "*left",
+          "name": "\u2190"
         },
         {
-          "key": "-->ctrl",
-          "name": "Ctrl"
+          "key": "*right",
+          "name": "\u2192"
         }
       ]
     ]
