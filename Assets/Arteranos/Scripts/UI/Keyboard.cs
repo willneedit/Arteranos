@@ -5,11 +5,7 @@ using UnityEngine.EventSystems;
 using Newtonsoft.Json;
 using UnityEngine.UI;
 using TMPro;
-using Codice.Client.Commands.WkTree;
-using System;
-using PlasticPipe.PlasticProtocol.Messages;
 using UnityEngine.Events;
-using System.Linq;
 
 namespace Arteranos.UI
 {
@@ -33,9 +29,10 @@ namespace Arteranos.UI
         public string layout = "de";
         public CanvasRenderer KeyboardBackplate = null;
         public Button KeyCap = null;
+        public TMP_InputField PreviewField = null;
 
-        public Vector2 TopLeft = new(1, -1);
-        public Vector2 GridSize = new(10, 10);
+        public Vector2 TopLeft = new(1, -21);
+        public Vector2 GridSize = new(20, 20);
 
         private int current_modeIndex = 0;
         private bool current_modeLock = false;
@@ -175,8 +172,27 @@ namespace Arteranos.UI
                 return;
             }
 
+            SynthesizeAndSendKeyDownEvent(PreviewField, (KeyCode) keyaction[0], keyaction[0]);
+
             Debug.Log($"Keypress: {keyaction}");
             if(!current_modeLock) current_modeIndex = ShowModeChange(0);
+        }
+
+        void SynthesizeAndSendKeyDownEvent(TMP_InputField panel, KeyCode code, 
+            char character = '\0', EventModifiers modifiers = EventModifiers.None)
+        {
+            // Create a UnityEngine.Event to hold initialization data.
+            // Also, this event will be forwarded to IMGUIContainer.m_OnGUIHandler
+            Event evt = new()
+            {
+                type = EventType.KeyDown,
+                keyCode = code,
+                character = character,
+                modifiers = modifiers
+            };
+
+            panel.Select();
+            panel.ProcessEvent(evt);
         }
     }
 }
