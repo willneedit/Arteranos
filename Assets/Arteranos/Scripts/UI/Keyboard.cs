@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
+using System;
 
 namespace Arteranos.UI
 {
@@ -35,6 +36,14 @@ namespace Arteranos.UI
         public Button KeyCap = null;
         public TMP_InputField PreviewField = null;
 
+        public event Action<string> OnSubmit;
+
+        public string Text
+        {
+            get => PreviewField.text;
+            set => PreviewField.text = value;
+        }
+
         public Vector2 TopLeft = new(1, -21);
         public Vector2 GridSize = new(20, 20);
 
@@ -44,9 +53,9 @@ namespace Arteranos.UI
 
         private readonly List<List<TextMeshProUGUI>> description = new();
 
-        protected override void Awake()
+        protected override void Start()
         {
-            base.Awake();
+            base.Start();
 
             TextAsset json = Resources.Load<TextAsset>(PATH_KEYBOARDLAYOUTS + layout);
             current_map = JsonConvert.DeserializeObject<Keymap[]>(json.text);
@@ -198,6 +207,15 @@ namespace Arteranos.UI
 
                 SynthesizeAndSendKeyDownEvent(code, '\0', modifiers);
 
+                return;
+            }
+
+            // Return, submit.
+            if(keyaction[0] == '\u000d')
+            {
+                OnSubmit?.Invoke(Text);
+                Debug.Log("Submitting.");
+                Destroy(gameObject);
                 return;
             }
 

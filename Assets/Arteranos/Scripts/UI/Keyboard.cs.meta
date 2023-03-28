@@ -3,7 +3,10 @@ guid: b66cdd2434fe3294eae39c6fd39b04ea
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - KeyboardBackplate: {instanceID: 0}
+  - KeyCap: {fileID: 166798528294049839, guid: f617b1b74423c6748b3adb9894326f84, type: 3}
+  - PreviewField: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

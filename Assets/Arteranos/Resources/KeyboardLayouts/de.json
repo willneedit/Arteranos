@@ -713,7 +713,7 @@
         },
         {
           "action": "selectall",
-          "name": "All"
+          "name": "A"
         },
         {
           "key": ""
@@ -766,15 +766,15 @@
         },
         {
           "action": "cut",
-          "name":  "Cut"
+          "name": "X"
         },
         {
           "action": "copy",
-          "name": "Copy"
+          "name": "C"
         },
         {
           "action": "paste",
-          "name": "Paste"
+          "name": "V"
         },
         {
           "key": ""
