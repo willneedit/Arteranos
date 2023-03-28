@@ -93,7 +93,7 @@
       ],
       [
         {
-          "key": "==>shift",
+          "modelock": "shift",
           "name": "Caps",
           "width": 2.0
         },
@@ -141,7 +141,7 @@
       ],
       [
         {
-          "key": "-->shift",
+          "modeswitch": "shift",
           "name": "Shift",
           "width": 1.5
         },
@@ -179,19 +179,19 @@
           "key": "-"
         },
         {
-          "key": "-->shift",
+          "modeswitch": "shift",
           "name": "Shift",
           "width": 3.0
         }
       ],
       [
         {
-          "key": "-->ctrl",
+          "modeswitch": "ctrl",
           "name": "Ctrl",
           "width": 2.0
         },
         {
-          "key": "-->alt",
+          "modeswitch": "alt",
           "name": "Alt",
           "width": 2.0
         },
@@ -200,12 +200,12 @@
           "width": 7.5
         },
         {
-          "key": "*left",
+          "action": "left",
           "name": "\u2190",
           "width": 2.0
         },
         {
-          "key": "*right",
+          "action": "right",
           "name": "\u2192",
           "width": 2.0
         }
@@ -304,7 +304,7 @@
       ],
       [
         {
-          "key": "-->default",
+          "modeswitch": "default",
           "name": "Caps"
         },
         {
@@ -350,7 +350,7 @@
       ],
       [
         {
-          "key": "-->default",
+          "modeswitch": "default",
           "name": "Shift"
         },
         {
@@ -387,28 +387,28 @@
           "key": "_"
         },
         {
-          "key": "-->default",
+          "modeswitch": "default",
           "name": "Shift"
         }
       ],
       [
         {
-          "key": "-->ctrl",
+          "modeswitch": "ctrl",
           "name": "Ctrl"
         },
         {
-          "key": "-->alt",
+          "modeswitch": "alt",
           "name": "Alt"
         },
         {
           "key": " "
         },
         {
-          "key": "*lend",
+          "action": "left",
           "name": "\u2190"
         },
         {
-          "key": "*rend",
+          "action": "right",
           "name": "\u2192"
         }
       ]
@@ -506,7 +506,7 @@
       ],
       [
         {
-          "key": "-->default",
+          "modeswitch": "default",
           "name": "Caps"
         },
         {
@@ -552,7 +552,7 @@
       ],
       [
         {
-          "key": "-->default",
+          "modeswitch": "default",
           "name": "Shift"
         },
         {
@@ -589,31 +589,238 @@
           "key": ""
         },
         {
-          "key": "-->default",
+          "modeswitch": "default",
           "name": "Shift"
         }
       ],
       [
         {
-          "key": "-->ctrl",
+          "modeswitch": "ctrl",
           "name": "Ctrl"
         },
         {
-          "key": "-->default",
+          "modeswitch": "default",
           "name": "Alt"
         },
         {
           "key": " "
         },
         {
-          "key": "*left",
+          "action": "left",
           "name": "\u2190"
         },
         {
-          "key": "*right",
+          "action": "right",
+          "name": "\u2192"
+        }
+      ]
+    ]
+  },
+  {
+    "mode": "ctrl",
+    "map": [
+      [
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": "\u0008",
+          "name": "Backsp"
+        }
+      ],
+      [
+        {
+          "key": "\u0009",
+          "name": "Tab"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        }
+      ],
+      [
+        {
+          "modelock": "shift",
+          "name": "Caps"
+        },
+        {
+          "action": "selectall",
+          "name": "All"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": "\u000d",
+          "name": "Ret"
+        }
+      ],
+      [
+        {
+          "modeswitch": "shift",
+          "name": "Shift"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "action": "cut",
+          "name":  "Cut"
+        },
+        {
+          "action": "copy",
+          "name": "Copy"
+        },
+        {
+          "action": "paste",
+          "name": "Paste"
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "key": ""
+        },
+        {
+          "modeswitch": "shift",
+          "name": "Shift"
+        }
+      ],
+      [
+        {
+          "modeswitch": "default",
+          "name": "Ctrl"
+        },
+        {
+          "modeswitch": "alt",
+          "name": "Alt"
+        },
+        {
+          "key": ""
+        },
+        {
+          "action": "left",
+          "name": "\u2190"
+        },
+        {
+          "action": "right",
           "name": "\u2192"
         }
       ]
     ]
   }
+
 ]

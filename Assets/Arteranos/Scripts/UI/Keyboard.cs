@@ -14,6 +14,10 @@ namespace Arteranos.UI
         public string key;
         public string name;
         public float width;
+
+        public string modeswitch;
+        public string modelock;
+        public string action;
     }
 
     internal struct Keymap
@@ -144,42 +148,69 @@ namespace Arteranos.UI
 
         private void OnKeyPressed(int row, int col)
         {
-            //Debug.Log($"Key pressed: {row},{col}");
+            Keycap keycap = current_map[current_modeIndex].map[row][col];
+            string keyaction = keycap.key;
 
-            string keyaction = current_map[current_modeIndex].map[row][col].key;
+            if(keycap.modeswitch != null)
+            {
+                current_modeIndex = ShowModeChange(keycap.modeswitch);
+                current_modeLock = false;
+                Debug.Log($"Mode change: {keycap.modeswitch} ({current_modeIndex})");
+                return;
+            }
+            else if(keycap.modelock != null)
+            {
+                current_modeIndex = ShowModeChange(keycap.modelock);
+                current_modeLock = true;
+                Debug.Log($"Mode lock: {keycap.modelock} ({current_modeIndex})");
+                return;
+            }
+            else if(keycap.action != null)
+            {
+                string mode = current_map[current_modeIndex].mode;
+                string action = keycap.action;
+
+                EventModifiers modifiers = EventModifiers.None;
+                KeyCode code = 0;
+
+                switch(mode)
+                {
+                    case "shift": modifiers = EventModifiers.Shift; break;
+                    case "alt": modifiers = EventModifiers.Alt; break;
+                    case "ctrl": modifiers = EventModifiers.Control; break;
+                    default:
+                        break;
+                }
+
+                switch(action)
+                {
+                    case "left": code = KeyCode.LeftArrow; break;
+                    case "right": code = KeyCode.RightArrow; break;
+
+                    case "selectall": code = KeyCode.A; modifiers = EventModifiers.Control; break;
+                    case "cut": code = KeyCode.X; modifiers = EventModifiers.Control; break;
+                    case "copy": code = KeyCode.C; modifiers = EventModifiers.Control; break;
+                    case "paste": code = KeyCode.V; modifiers = EventModifiers.Control; break;
+
+                    default:
+                        break;
+                }
+
+                SynthesizeAndSendKeyDownEvent(code, '\0', modifiers);
+
+                return;
+            }
 
             if(string.IsNullOrEmpty(keyaction)) return;
 
-            if(keyaction.Length > 3 && keyaction[..3] == "-->")
-            {
-                string mode = keyaction[3..];
-                current_modeIndex = ShowModeChange(mode);
-                current_modeLock = false;
-                Debug.Log($"Mode change: {mode} ({current_modeIndex})");
-                return;
-            }
-            else if(keyaction.Length > 3 && keyaction[..3] == "==>")
-            {
-                string mode = keyaction[3..];
-                current_modeIndex = ShowModeChange(mode);
-                current_modeLock = true;
-                Debug.Log($"Mode lock: {mode} ({current_modeIndex})");
-                return;
-            }
-            else if(keyaction.Length > 1 && keyaction[..1] == "*")
-            {
-                Debug.Log($"Action key: {keyaction}");
-                return;
-            }
-
-            SynthesizeAndSendKeyDownEvent(PreviewField, (KeyCode) keyaction[0], keyaction[0]);
+            SynthesizeAndSendKeyDownEvent((KeyCode) keyaction[0], keyaction[0]);
 
             Debug.Log($"Keypress: {keyaction}");
             if(!current_modeLock) current_modeIndex = ShowModeChange(0);
         }
 
-        void SynthesizeAndSendKeyDownEvent(TMP_InputField panel, KeyCode code, 
-            char character = '\0', EventModifiers modifiers = EventModifiers.None)
+        void SynthesizeAndSendKeyDownEvent(KeyCode code, char character = '\0',
+            EventModifiers modifiers = EventModifiers.None)
         {
             // Create a UnityEngine.Event to hold initialization data.
             // Also, this event will be forwarded to IMGUIContainer.m_OnGUIHandler
@@ -191,8 +222,8 @@ namespace Arteranos.UI
                 modifiers = modifiers
             };
 
-            panel.Select();
-            panel.ProcessEvent(evt);
+            PreviewField.Select();
+            PreviewField.ProcessEvent(evt);
         }
     }
 }
