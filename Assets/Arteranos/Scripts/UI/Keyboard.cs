@@ -59,9 +59,9 @@ namespace Arteranos.UI
 
         private readonly List<List<TextMeshProUGUI>> description = new();
 
-        protected override void Start()
+        protected override void Awake()
         {
-            base.Start();
+            base.Awake();
 
             TextAsset json = Resources.Load<TextAsset>(PATH_KEYBOARDLAYOUTS + layout);
             current_map = JsonConvert.DeserializeObject<Keymap[]>(json.text);
@@ -70,9 +70,15 @@ namespace Arteranos.UI
 
             LayoutKeyboard();
 
-            ShowModeChange(0);
-
             Debug.Log($"Loaded keyboard layout: {layout}");
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            // Reset the leftover mode from the previous use.
+            ShowModeChange(0);
         }
 
         public void SanityCheck()
@@ -170,14 +176,12 @@ namespace Arteranos.UI
             {
                 current_modeIndex = ShowModeChange(keycap.modeswitch);
                 current_modeLock = false;
-                Debug.Log($"Mode change: {keycap.modeswitch} ({current_modeIndex})");
                 return;
             }
             else if(keycap.modelock != null)
             {
                 current_modeIndex = ShowModeChange(keycap.modelock);
                 current_modeLock = true;
-                Debug.Log($"Mode lock: {keycap.modelock} ({current_modeIndex})");
                 return;
             }
             else if(keycap.action != null)
