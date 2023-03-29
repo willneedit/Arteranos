@@ -36,12 +36,18 @@ namespace Arteranos.UI
         public Button KeyCap = null;
         public TMP_InputField PreviewField = null;
 
-        public event Action<string> OnSubmit;
+        public event Action<string, bool> OnFinishing;
 
         public string Text
         {
             get => PreviewField.text;
             set => PreviewField.text = value;
+        }
+
+        public int StringPosition
+        {
+            get => PreviewField.stringPosition;
+            set => PreviewField.stringPosition = value;
         }
 
         public Vector2 TopLeft = new(1, -21);
@@ -205,25 +211,37 @@ namespace Arteranos.UI
                         break;
                 }
 
+                // Typical for that worm ridden fruit. Having to add more lines to satisfy these...
+                if(modifiers == EventModifiers.Control)
+                {
+                    modifiers = SystemInfo.operatingSystemFamily == OperatingSystemFamily.MacOSX 
+                        ? EventModifiers.Command
+                        : EventModifiers.Control;
+                }
+
                 SynthesizeAndSendKeyDownEvent(code, '\0', modifiers);
 
                 return;
             }
 
+            if(string.IsNullOrEmpty(keyaction)) return;
+
             // Return, submit.
             if(keyaction[0] == '\u000d')
             {
-                OnSubmit?.Invoke(Text);
-                Debug.Log("Submitting.");
-                Destroy(gameObject);
+                OnFinishing?.Invoke(Text, true);
                 return;
             }
 
-            if(string.IsNullOrEmpty(keyaction)) return;
+            // Esc, cancel.
+            if(keyaction[0] == '\u001b')
+            {
+                OnFinishing?.Invoke(Text, false);
+                return;
+            }
 
             SynthesizeAndSendKeyDownEvent((KeyCode) keyaction[0], keyaction[0]);
 
-            Debug.Log($"Keypress: {keyaction}");
             if(!current_modeLock) current_modeIndex = ShowModeChange(0);
         }
 

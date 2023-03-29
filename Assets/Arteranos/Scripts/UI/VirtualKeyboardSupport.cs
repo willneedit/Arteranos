@@ -35,13 +35,16 @@ namespace Arteranos.UI
                     transform.position + Vector3.forward * -0.01f, // Move a little bit to me to prevent z-fighting
                     transform.rotation);
                 AttachedKB.Text = field.text;
-                AttachedKB.OnSubmit += (string text) => CommitEditing(field, text);
+                AttachedKB.StringPosition = field.text.Length;
+                AttachedKB.OnFinishing += (string text, bool completed) => CommitEditing(field, text, completed);
             }
         }
 
-        private void CommitEditing(TMP_InputField field, string text)
+        private void CommitEditing(TMP_InputField field, string text, bool completed)
         {
-            field.text = text;
+            if(completed) field.text = text;
+            Destroy(AttachedKB.gameObject);
+            AttachedKB = null;
         }
     }
 }
