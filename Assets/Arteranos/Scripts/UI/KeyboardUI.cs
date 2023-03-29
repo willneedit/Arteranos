@@ -27,7 +27,7 @@ namespace Arteranos.UI
         public Keycap[][] map; // Row, column
     }
 
-    public class Keyboard : UIBehaviour
+    public class KeyboardUI : UIBehaviour
     {
         public const string PATH_KEYBOARDLAYOUTS = "KeyboardLayouts/";
 

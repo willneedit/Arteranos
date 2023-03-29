@@ -17,7 +17,7 @@ using System.Threading;
 
 namespace Arteranos.UI
 {
-    public class Login : UIBehaviour
+    public class LoginUI : UIBehaviour
     {
         public TMP_Text Status = null;
         public TMP_Dropdown Chooser = null;

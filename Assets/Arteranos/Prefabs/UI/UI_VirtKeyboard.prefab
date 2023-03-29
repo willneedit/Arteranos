@@ -301,7 +301,7 @@ GameObject:
   - component: {fileID: 5654005654892557593}
   - component: {fileID: 5654005654892557598}
   m_Layer: 5
-  m_Name: VirtKeyboard
+  m_Name: UI_VirtKeyboard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

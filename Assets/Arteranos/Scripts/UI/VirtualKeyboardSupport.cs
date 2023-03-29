@@ -8,11 +8,11 @@ namespace Arteranos.UI
 {
     public class VirtualKeyboardSupport : UIBehaviour
     {
-        public Keyboard SoftKeyboard = null;
+        public KeyboardUI SoftKeyboard = null;
         public bool FollowsCamera = true;
 
         private TMP_InputField[] TextFields;
-        private Keyboard AttachedKB = null;
+        private KeyboardUI AttachedKB = null;
 
         // Start is called before the first frame update
         protected override void Start()
