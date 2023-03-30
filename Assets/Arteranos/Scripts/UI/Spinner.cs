@@ -3,72 +3,75 @@ using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Spinner : UIBehaviour
+namespace Arteranos.UI
 {
-    public Button ArrowDown = null;
-    public Button ArrowUp = null;
-    public TextMeshProUGUI Selection = null;
-
-    public ColorBlock colors = ColorBlock.defaultColorBlock;
-
-    public string[] Options = null;
-    public int CurrentlySelected = 0;
-
-    public event Action<int, bool> OnChanged = null;
-
-    private Image Background = null;
-
-    protected override void Awake()
+    public class Spinner : UIBehaviour
     {
-        base.Awake();
+        public Button ArrowDown = null;
+        public Button ArrowUp = null;
+        public TextMeshProUGUI Selection = null;
 
-        Background = Selection.GetComponentInParent<Image>();
-    }
+        public ColorBlock colors = ColorBlock.defaultColorBlock;
 
-    protected override void Start()
-    {
-        base.Start();
+        public string[] Options = null;
+        public int CurrentlySelected = 0;
 
-        ArrowUp.colors = colors;
-        ArrowDown.colors = colors;
+        public event Action<int, bool> OnChanged = null;
 
-        ArrowDown.onClick.AddListener(() => OnMakeChange(false));
-        ArrowUp.onClick.AddListener(() => OnMakeChange(true));
+        private Image Background = null;
 
-        if(Options?.Length == 0) return;
+        protected override void Awake()
+        {
+            base.Awake();
 
-        Selection.text = Options[CurrentlySelected];
-    }
+            Background = Selection.GetComponentInParent<Image>();
+        }
 
-    protected override void OnEnable()
-    {
-        base.OnEnable();
+        protected override void Start()
+        {
+            base.Start();
 
-        ArrowDown.interactable = true; 
-        ArrowUp.interactable = true;
+            ArrowUp.colors = colors;
+            ArrowDown.colors = colors;
 
-        Background.color = colors.normalColor;
-    }
+            ArrowDown.onClick.AddListener(() => OnMakeChange(false));
+            ArrowUp.onClick.AddListener(() => OnMakeChange(true));
 
-    protected override void OnDisable()
-    {
-        base.OnDisable();
+            if(Options?.Length == 0) return;
 
-        ArrowDown.interactable = false;
-        ArrowUp.interactable = false;
+            Selection.text = Options[CurrentlySelected];
+        }
 
-        Background.color = colors.disabledColor;
-    }
+        protected override void OnEnable()
+        {
+            base.OnEnable();
 
-    private void OnMakeChange(bool up)
-    {
-        if(Options?.Length == 0) return;
+            ArrowDown.interactable = true;
+            ArrowUp.interactable = true;
 
-        CurrentlySelected += up ? 1 : -1 + Options.Length;
-        CurrentlySelected %= Options.Length;
+            Background.color = colors.normalColor;
+        }
 
-        Selection.text = Options[CurrentlySelected];
+        protected override void OnDisable()
+        {
+            base.OnDisable();
 
-        OnChanged?.Invoke(CurrentlySelected, up);
+            ArrowDown.interactable = false;
+            ArrowUp.interactable = false;
+
+            Background.color = colors.disabledColor;
+        }
+
+        private void OnMakeChange(bool up)
+        {
+            if(Options?.Length == 0) return;
+
+            CurrentlySelected += up ? 1 : -1 + Options.Length;
+            CurrentlySelected %= Options.Length;
+
+            Selection.text = Options[CurrentlySelected];
+
+            OnChanged?.Invoke(CurrentlySelected, up);
+        }
     }
 }
