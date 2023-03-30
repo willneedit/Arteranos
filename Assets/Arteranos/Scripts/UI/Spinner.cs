@@ -9,15 +9,28 @@ public class Spinner : UIBehaviour
     public Button ArrowUp = null;
     public TextMeshProUGUI Selection = null;
 
-    public string[] Options = null;
+    public ColorBlock colors = ColorBlock.defaultColorBlock;
 
-    public int CurrentlySelected { get; set; } = 0;
+    public string[] Options = null;
+    public int CurrentlySelected = 0;
 
     public event Action<int, bool> OnChanged = null;
+
+    private Image Background = null;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        Background = Selection.GetComponentInParent<Image>();
+    }
 
     protected override void Start()
     {
         base.Start();
+
+        ArrowUp.colors = colors;
+        ArrowDown.colors = colors;
 
         ArrowDown.onClick.AddListener(() => OnMakeChange(false));
         ArrowUp.onClick.AddListener(() => OnMakeChange(true));
@@ -27,12 +40,31 @@ public class Spinner : UIBehaviour
         Selection.text = Options[CurrentlySelected];
     }
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+
+        ArrowDown.interactable = true; 
+        ArrowUp.interactable = true;
+
+        Background.color = colors.normalColor;
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+
+        ArrowDown.interactable = false;
+        ArrowUp.interactable = false;
+
+        Background.color = colors.disabledColor;
+    }
+
     private void OnMakeChange(bool up)
     {
         if(Options?.Length == 0) return;
 
-        CurrentlySelected += up ? 1 : -1;
-        if(CurrentlySelected < 0) CurrentlySelected += Options.Length;
+        CurrentlySelected += up ? 1 : -1 + Options.Length;
         CurrentlySelected %= Options.Length;
 
         Selection.text = Options[CurrentlySelected];
