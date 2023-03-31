@@ -20,7 +20,7 @@ namespace Arteranos.UI
     public class LoginUI : UIBehaviour
     {
         public TMP_Text Status = null;
-        public TMP_Dropdown Chooser = null;
+        public Spinner Chooser = null;
         public Button SignIn = null;
         public Button GuestLogin = null;
         public Button JoinServer = null;
@@ -53,9 +53,8 @@ namespace Arteranos.UI
 
             PackageNames = LoginPackages.GetPackageNames();
 
-            List<string> options = (from x in PackageNames select $"Login with {x}").ToList();
-            Chooser.ClearOptions();
-            Chooser.AddOptions( options );
+            string[] options = (from x in PackageNames select $"Login with {x}").ToArray();
+            Chooser.Options = options;
 
             status_template = Status.text;
 

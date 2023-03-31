@@ -14,7 +14,7 @@ namespace Arteranos.UI
         public ColorBlock colors = ColorBlock.defaultColorBlock;
 
         public string[] Options = null;
-        public int CurrentlySelected = 0;
+        public int value = 0;
 
         public event Action<int, bool> OnChanged = null;
 
@@ -39,7 +39,7 @@ namespace Arteranos.UI
 
             if(Options?.Length == 0) return;
 
-            Selection.text = Options[CurrentlySelected];
+            Selection.text = Options[value];
         }
 
         protected override void OnEnable()
@@ -66,12 +66,12 @@ namespace Arteranos.UI
         {
             if(Options?.Length == 0) return;
 
-            CurrentlySelected += up ? 1 : -1 + Options.Length;
-            CurrentlySelected %= Options.Length;
+            value += up ? 1 : -1 + Options.Length;
+            value %= Options.Length;
 
-            Selection.text = Options[CurrentlySelected];
+            Selection.text = Options[value];
 
-            OnChanged?.Invoke(CurrentlySelected, up);
+            OnChanged?.Invoke(value, up);
         }
     }
 }
