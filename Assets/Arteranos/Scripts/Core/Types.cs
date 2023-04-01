@@ -11,6 +11,13 @@ using System;
 using Mirror;
 using System.ComponentModel;
 using System.Reflection;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using Cdm.Authentication.Browser;
+using Cdm.Authentication.OAuth2;
+using Cdm.Authentication.Clients;
+using System.Linq;
 
 namespace Arteranos.ExtensionMethods
 {
@@ -106,4 +113,54 @@ namespace Arteranos.Core
         }
 
     }
+}
+
+namespace Arteranos.Auth
+{
+    public interface ILoginPackage
+    {
+        public AuthorizationCodeFlow GetAuthorizationCodeFlow();
+        public Task<(string, string)> GetUserIDAsync(AuthenticationSession session);
+    }
+
+    public class MockServerPackage : ILoginPackage
+    {
+        public AuthorizationCodeFlow GetAuthorizationCodeFlow()
+        {
+            AuthorizationCodeFlow.Configuration configMock = new()
+            {
+                clientId = "my_client_id",
+                clientSecret = "my_client_secret",
+#if UNITY_IOS && !UNITY_EDITOR
+                redirectUri = "com.cdm.myauthapp:/oauth2",
+#else
+                redirectUri = "http://localhost:8080/myauthapp/oauth2/",
+#endif
+                scope = "openid email profile"
+            };
+            return new MockServerAuth(configMock, "http://localhost:8001");
+        }
+        public async Task<(string, string)> GetUserIDAsync(AuthenticationSession session) => await Task.Run(() => ("MockServerUser", "MSU#0000"));
+    }
+
+    public struct PackageListEntry
+    {
+        public string name;
+        public ILoginPackage pack;
+    }
+
+#if !ARTERANOS_KEYS
+    public static class LoginPackageList
+    {
+        public static readonly List<PackageListEntry> PackageList = new()
+        {
+            new PackageListEntry
+            {
+                name = "Mock",
+                pack = new MockServerPackage()
+            },
+        };    
+    }
+#endif
+
 }

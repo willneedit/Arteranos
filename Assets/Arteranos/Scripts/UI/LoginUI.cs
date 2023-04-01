@@ -5,15 +5,36 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-
 using Arteranos.Core;
-using Arteranos.Auth;
-using Cdm.Authentication.Browser;
-using Cdm.Authentication.OAuth2;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
 using System.Threading;
+using Cdm.Authentication.Browser;
+using Cdm.Authentication.OAuth2;
+
+using Arteranos.Auth;
+
+namespace Arteranos.Auth
+{
+    public static class LoginPackages
+    {
+        public static ILoginPackage GetPackage(string name)
+        {
+            ILoginPackage[] query = (
+                from x in LoginPackageList.PackageList
+                where x.name == name
+                select x.pack).ToArray();
+
+            if(query.Length > 1) throw new ArgumentException($"{name}: ambiguous");
+
+            return query.Length > 0 ? query[0] : null;
+        }
+
+        public static string[] GetPackageNames() => (from x in LoginPackageList.PackageList select x.name).ToArray();
+
+    }
+}
 
 namespace Arteranos.UI
 {

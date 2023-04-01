@@ -2,7 +2,8 @@
     "name": "Arteranos.Core",
     "rootNamespace": "",
     "references": [
-        "GUID:30817c1a0e6d646d99c048fc403f5979"
+        "GUID:30817c1a0e6d646d99c048fc403f5979",
+        "GUID:3413dadb4adff1a408c25509ca9ad129"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
