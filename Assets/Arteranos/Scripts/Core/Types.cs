@@ -149,18 +149,4 @@ namespace Arteranos.Auth
         public ILoginPackage pack;
     }
 
-#if !ARTERANOS_KEYS
-    public static class LoginPackageList
-    {
-        public static readonly List<PackageListEntry> PackageList = new()
-        {
-            new PackageListEntry
-            {
-                name = "Mock",
-                pack = new MockServerPackage()
-            },
-        };    
-    }
-#endif
-
 }

@@ -17,6 +17,20 @@ using Arteranos.Auth;
 
 namespace Arteranos.Auth
 {
+#if !ARTERANOS_KEYS
+    public static class LoginPackageList
+    {
+        public static readonly List<PackageListEntry> PackageList = new()
+        {
+            new PackageListEntry
+            {
+                name = "Mock",
+                pack = new MockServerPackage()
+            },
+        };
+    }
+#endif
+
     public static class LoginPackages
     {
         public static ILoginPackage GetPackage(string name)
