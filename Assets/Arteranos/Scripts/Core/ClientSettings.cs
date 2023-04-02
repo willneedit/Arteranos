@@ -102,6 +102,17 @@ namespace Arteranos.Core
         [JsonIgnore]
         public byte[] UserHash { get; internal set; } = null;
 
+        [JsonIgnore]
+        public string UserID
+        {
+            get
+            {
+                string hashString = string.Empty;
+                foreach(byte x in UserHash) hashString += String.Format("{0:x2}", x);
+                return hashString;
+            }
+        }
+
         public override string AvatarURL
         {
             get => base.AvatarURL;
