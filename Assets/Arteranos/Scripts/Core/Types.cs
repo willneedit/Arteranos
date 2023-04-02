@@ -98,18 +98,18 @@ namespace Arteranos.NetworkTypes
 
 namespace Arteranos.Core
 {
-    class Utils
+    public class Utils
     {
         /// <summary>
         /// Allows to tack on a Description attribute to enum values, e.g. a display name.
         /// </summary>
-        /// <param name="enumVal">The particularvalue of the enum set</param>
-        /// <returns>The string in the value's description</returns>
+        /// <param name="enumVal">The particular value of the enum set</param>
+        /// <returns>The string in the value's description, null if there isn't</returns>
         public static string GetEnumDescription(Enum enumVal)
         {
             MemberInfo[] memInfo = enumVal.GetType().GetMember(enumVal.ToString());
             DescriptionAttribute attribute = CustomAttributeExtensions.GetCustomAttribute<DescriptionAttribute>(memInfo[0]);
-            return attribute?.Description ?? "<no description>";
+            return attribute?.Description;
         }
 
     }
