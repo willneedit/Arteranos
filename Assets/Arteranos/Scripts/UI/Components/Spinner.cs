@@ -14,11 +14,19 @@ namespace Arteranos.UI
         public ColorBlock colors = ColorBlock.defaultColorBlock;
 
         public string[] Options = null;
-        public int value = 0;
+
+#pragma warning disable IDE1006 // Benennungsstile
+        public int value
+        {
+            get => m_value;
+            set { m_value = value; Selection.text = Options[m_value]; }
+        }
+#pragma warning restore IDE1006 // Benennungsstile
 
         public event Action<int, bool> OnChanged = null;
 
         private Image Background = null;
+        private int m_value = 0;
 
         protected override void Awake()
         {
@@ -66,12 +74,12 @@ namespace Arteranos.UI
         {
             if(Options?.Length == 0) return;
 
-            value += up ? 1 : -1 + Options.Length;
-            value %= Options.Length;
+            m_value += up ? 1 : -1 + Options.Length;
+            m_value %= Options.Length;
 
-            Selection.text = Options[value];
+            Selection.text = Options[m_value];
 
-            OnChanged?.Invoke(value, up);
+            OnChanged?.Invoke(m_value, up);
         }
     }
 }
