@@ -14,6 +14,10 @@
 # it needs) and include the project's working tree, not into this repository.
 !/[Aa]ssets/AssetStoreLoader*
 
+# Script Templates must reside in the Assets root folder.
+!/[Aa]ssets/ScriptTemplates*
+
+
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/

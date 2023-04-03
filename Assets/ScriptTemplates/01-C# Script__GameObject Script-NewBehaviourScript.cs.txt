@@ -1,0 +1,23 @@
+/*
+ * Copyright (c) 2023, willneedit
+ * 
+ * Licensed by the Mozilla Public License 2.0,
+ * residing in the LICENSE.md file in the project's root directory.
+ */
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class #SCRIPTNAME# : MonoBehaviour
+{
+    // Start is called before the first frame update
+    void Start()
+    {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+    }
+}
