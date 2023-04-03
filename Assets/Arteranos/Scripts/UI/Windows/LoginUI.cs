@@ -70,6 +70,8 @@ namespace Arteranos.UI
         private string status_template = null;
         private string friendlyName = null;
 
+        private readonly SemaphoreSlim loginFinished = new(0, 1);
+
         protected override void Awake()
         {
             base.Awake();
@@ -207,9 +209,15 @@ namespace Arteranos.UI
 
             CancelSource.Dispose();
             CancelSource = null;
+
+            loginFinished.Release();
         }
 
-        private void CommitSignOut() => SaveLogin(null, null, null);
+        private void CommitSignOut()
+        {
+            SaveLogin(null, null, null);
+            loginFinished.Release();
+        }
 
         private (string, string, string) RetrieveLogin()
         {
@@ -232,31 +240,11 @@ namespace Arteranos.UI
             OnRefreshLoginUI?.Invoke(lp);
         }
 
+        public async Task PerformLoginAsync()
+        {
+            await loginFinished.WaitAsync();
 
-#if false
-var crossPlatformBrowser = new CrossPlatformBrowser();
-var crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsEditor, new StandaloneBrowser());
-var crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.WindowsPlayer, new StandaloneBrowser());
-var crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXEditor, new StandaloneBrowser());
-var crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.OSXPlayer, new StandaloneBrowser());
-var crossPlatformBrowser.platformBrowsers.Add(RuntimePlatform.IPhonePlayer, new ASWebAuthenticationSessionBrowser());
-
-using var authenticationSession = new AuthenticationSession(auth, crossPlatformBrowser);
-
-// Opens a browser to log user in
-AccessTokenResponse accessTokenResponse = await authenticationSession.AuthenticateAsync();
-
-// Authentication header can be used to make authorized http calls.
-AuthenticationHeaderValue authenticationHeader = accessTokenResponse.GetAuthenticationHeader();
-
-// Gets the current acccess token, or refreshes if it is expired.
-accessTokenResponse = await authenticationSession.GetOrRefreshTokenAsync();
-
-// Gets new access token by using the refresh token.
-AccessTokenResponse newAccessTokenResponse = await authenticationSession.RefreshTokenAsync();
-
-// Or you can get new access token with specified refresh token (i.e. stored on the local disk to prevent multiple sign-in for each app launch)
-newAccessTokenResponse = await authenticationSession.RefreshTokenAsync("my_refresh_token");
-#endif
+            Destroy(gameObject);
+        }
     }
 }

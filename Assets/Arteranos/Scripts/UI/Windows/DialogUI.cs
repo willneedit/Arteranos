@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -15,6 +16,8 @@ public class DialogUI : UIBehaviour
     public GameObject ButtonPane = null;
 
     public event Action<int> OnDialogDone;
+
+    private readonly SemaphoreSlim dialogFinished = new(0, 1);
 
     protected override void Start()
     {
@@ -49,21 +52,10 @@ public class DialogUI : UIBehaviour
 
     }
 
-    private void OnButtonClicked(int index) => OnDialogDone?.Invoke(index);
-
-    // There must a way to wait for an event to occur.
-    // Both in Java and C++ have the concept of Future<>'s ?
-    private int PerformDialogLoop()
+    private void OnButtonClicked(int index)
     {
-        int rc = -1;
-
-        OnDialogDone += (index) => rc = index;
-
-        while(rc < 0)
-            System.Threading.Thread.Sleep(200);
-
-        OnDialogDone -= (index) => rc = index;
-        return rc;
+        OnDialogDone?.Invoke(index);
+        dialogFinished.Release();
     }
 
     // Purely convenient for write a process driven control flow rather than
@@ -73,7 +65,11 @@ public class DialogUI : UIBehaviour
         this.text = text;
         this.buttons = buttons;
 
-        int rc = await Task.Run(PerformDialogLoop);
+        int rc = -1;
+
+        OnDialogDone += (index) => rc = index;
+        await dialogFinished.WaitAsync();
+        OnDialogDone -= (index) => rc = index;
 
         Destroy(gameObject);
 
