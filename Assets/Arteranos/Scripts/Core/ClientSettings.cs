@@ -145,16 +145,21 @@ namespace Arteranos.Core
             UserHash = hashBytes;
         }
 
-        public void RefreshAuthentication()
+        public bool RefreshAuthentication()
         {
+            bool dirty = false;
+
             if(LoginProvider == null)
             {
                 int rnd = UnityEngine.Random.Range(100000000, 999999999);
                 Username = $"Guest{rnd}";
                 BearerToken = null;
+                dirty = true;
             }
 
             ComputeUserHash();
+
+            return dirty;
         }
 
         public void SaveSettings()
@@ -186,10 +191,9 @@ namespace Arteranos.Core
             }
 
             // Postprocessing to generate the derived values
-            cs.RefreshAuthentication();
-
-            // Save the settings back
-            cs.SaveSettings();
+            if(cs.RefreshAuthentication())
+                // Save the settings back if the randomized guest login occurs and the login token is deleted.
+                cs.SaveSettings();
             return cs;
         }
     }

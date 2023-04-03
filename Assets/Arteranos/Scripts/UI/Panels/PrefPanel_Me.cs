@@ -24,6 +24,7 @@ namespace Arteranos.UI
         private readonly Dictionary<string, AvatarProvider> APNames = new();
 
         private ClientSettings cs = null;
+        private bool dirty = false;
 
         protected override void Awake()
         {
@@ -64,6 +65,9 @@ namespace Arteranos.UI
             tro_UserID.text = cs.UserID;
             txt_AvatarURL.text = cs.AvatarURL;
             tro_AvatarProvider.text = Utils.GetEnumDescription(cs.AvatarProvider);
+
+            // Reset the state as it's the initial state, not the blank slate.
+            dirty = false;
         }
 
         protected override void OnDisable()
@@ -71,12 +75,22 @@ namespace Arteranos.UI
             base.OnDisable();
 
             // Might be to disabled before it's really started, so cs may be null yet.
-            cs?.SaveSettings();
+            if(dirty) cs?.SaveSettings();
+            dirty = false;
         }
 
 
-        private void OnAvatarURLChanged(string current) => cs.AvatarURL = current;
-        private void OnNicknameChanged(string current) => cs.Nickname = current;
+        private void OnAvatarURLChanged(string current)
+        {
+            cs.AvatarURL = current;
+            dirty = true;
+        }
+
+        private void OnNicknameChanged(string current)
+        {
+            cs.Nickname = current;
+            dirty = true;
+        }
 
         private void OnVisibilityChanged(int old, bool current)
         {
@@ -84,6 +98,8 @@ namespace Arteranos.UI
 
             if(statusNames.TryGetValue(vname, out Visibility v))
                 cs.Visibility = v;
+
+            dirty = true;
         }
     }
 }
