@@ -102,7 +102,7 @@ namespace Arteranos.XR
                 position = CurrentVRRig.transform.position;
                 rotation = CurrentVRRig.transform.rotation;
 
-                Destroy(CurrentVRRig);
+                Destroy(CurrentVRRig.gameObject);
             }
 
             CurrentVRRig = Instantiate(useVR ? VRRig : NoVRRig, position, rotation);

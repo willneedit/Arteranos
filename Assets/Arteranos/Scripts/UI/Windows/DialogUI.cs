@@ -70,14 +70,12 @@ public class DialogUI : UIBehaviour
     // a event driven one and reducing the boilerplate.
     public async Task<int> PerformDialogAsync(string text, string[] buttons)
     {
-        DialogUI go = Instantiate(gameObject).GetComponent<DialogUI>();
-
-        go.text = text;
-        go.buttons = buttons;
+        this.text = text;
+        this.buttons = buttons;
 
         int rc = await Task.Run(PerformDialogLoop);
 
-        Destroy(go.gameObject);
+        Destroy(gameObject);
 
         return rc;
     }
