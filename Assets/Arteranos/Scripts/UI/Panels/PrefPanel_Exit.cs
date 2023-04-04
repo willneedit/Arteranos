@@ -5,11 +5,8 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -35,9 +32,9 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            btn_ModeSwitch.onClick.AddListener(onModeSwitchClick);
-            btn_LoginUI.onClick.AddListener(() => { _ = onLoginUIClick(); });
-            btn_Exit.onClick.AddListener(() => { _ = onExitClick(); });
+            btn_ModeSwitch.onClick.AddListener(OnModeSwitchClick);
+            btn_LoginUI.onClick.AddListener(() => { _ = OnLoginUIClick(); });
+            btn_Exit.onClick.AddListener(() => { _ = OnExitClick(); });
         }
 
         protected override void Start()
@@ -68,7 +65,7 @@ namespace Arteranos.UI
                 current ? "Switch to Desktop" : "Switch to VR";
         }
 
-        private void onModeSwitchClick()
+        private void OnModeSwitchClick()
         {
             IEnumerator SwitchVRMode()
             {
@@ -81,17 +78,18 @@ namespace Arteranos.UI
             StartCoroutine(SwitchVRMode());
         }
 
-        private async Task onLoginUIClick()
+        private async Task OnLoginUIClick()
         {
             gameObject.SetActive(false);
-            LoginUI = Instantiate(LoginUI);
+            LoginUI go = Instantiate(LoginUI);
+            go.CancelEnabled = true;
 
-            await LoginUI.PerformLoginAsync();
+            await go.PerformLoginAsync();
 
             gameObject.SetActive(true);
         }
 
-        private async Task onExitClick()
+        private async Task OnExitClick()
         {
             gameObject.SetActive(false);
             DialogUI go = Instantiate(DialogUI);
