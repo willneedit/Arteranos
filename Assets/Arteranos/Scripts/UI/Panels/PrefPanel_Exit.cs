@@ -80,18 +80,18 @@ namespace Arteranos.UI
 
         private async Task OnLoginUIClick()
         {
-            gameObject.SetActive(false);
+            btn_LoginUI.interactable = false;
             LoginUI go = Instantiate(LoginUI);
             go.CancelEnabled = true;
 
             await go.PerformLoginAsync();
 
-            gameObject.SetActive(true);
+            btn_LoginUI.interactable = true;
         }
 
         private async Task OnExitClick()
         {
-            gameObject.SetActive(false);
+            btn_Exit.interactable = false;
             DialogUI go = Instantiate(DialogUI);
             int rc = await go.PerformDialogAsync(
                 "Do you really want to quit?",
@@ -104,7 +104,7 @@ namespace Arteranos.UI
                 Application.Quit();
 #endif
             else
-                gameObject.SetActive(true);
+                btn_Exit.interactable = true;
         }
 
 
