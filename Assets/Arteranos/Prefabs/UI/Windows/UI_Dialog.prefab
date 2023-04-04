@@ -549,8 +549,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Delay: 2
   m_Duration: 5
-  m_Tolerance: 1
-  m_offset: {x: 0, y: 0, z: 1}
+  m_Tolerance: 0.5
+  m_offset: {x: 0, y: 0, z: 0.9}
 --- !u!1 &1401308523170195920
 GameObject:
   m_ObjectHideFlags: 0
