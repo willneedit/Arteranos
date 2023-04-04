@@ -31,6 +31,8 @@ namespace Arteranos.UI
         {
             base.Start();
 
+            cs = SettingsManager.Client;
+
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
         }
