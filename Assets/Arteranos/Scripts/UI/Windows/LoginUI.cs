@@ -54,12 +54,14 @@ namespace Arteranos.UI
 {
     public class LoginUI : UIBehaviour
     {
-        public TMP_Text Status = null;
-        public Spinner Chooser = null;
-        public Button SignIn = null;
-        public Button GuestLogin = null;
-        public Button JoinServer = null;
-        public Button CreateServer = null;
+        public TMP_Text lbl_Status = null;
+        public Spinner spn_Chooser = null;
+        public Button btn_SignIn = null;
+        public Button btn_GuestLogin = null;
+        public Button btn_Cancel = null;
+        public RectTransform grp_Cancel = null;
+
+        public bool CancelEnabled = false;
 
         private string[] PackageNames = null;
 
@@ -91,20 +93,20 @@ namespace Arteranos.UI
             PackageNames = LoginPackages.GetPackageNames();
 
             string[] options = (from x in PackageNames select $"Login with {x}").ToArray();
-            Chooser.Options = options;
+            spn_Chooser.Options = options;
 
-            status_template = Status.text;
+            status_template = lbl_Status.text;
 
-            SignIn.onClick.AddListener(() => _ = CommitSigninAsync(PackageNames[Chooser.value]));
-            GuestLogin.onClick.AddListener(() => CommitSignOut());
-            //JoinServer.onClick += null;
-            //CreateServer += null;
-
+            btn_SignIn.onClick.AddListener(() => _ = CommitSigninAsync(PackageNames[spn_Chooser.value]));
+            btn_GuestLogin.onClick.AddListener(CommitSignOut);
+            btn_Cancel.onClick.AddListener(CancelLogin);
         }
 
         protected override void Start()
         {
             base.Start();
+
+            grp_Cancel.gameObject.SetActive(CancelEnabled);
 
             OnRefreshLoginUI += UpdateLoginUI;
             _ = AttemptRefreshTokenAsync();
@@ -156,17 +158,17 @@ namespace Arteranos.UI
         {
             if(lp != null)
             {
-                Status.text = string.Format(status_template, lp, friendlyName);
-                Status.enabled = true;
-                SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Switch account";
-                GuestLogin.GetComponentInChildren<TextMeshProUGUI>().text = "Log out";
-                GuestLogin.gameObject.SetActive(true);
+                lbl_Status.text = string.Format(status_template, lp, friendlyName);
+                lbl_Status.enabled = true;
+                btn_SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Switch account";
+                btn_GuestLogin.GetComponentInChildren<TextMeshProUGUI>().text = "Log out";
+                btn_GuestLogin.gameObject.SetActive(true);
             }
             else
             {
-                Status.enabled = false;
-                SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Log in";
-                GuestLogin.gameObject.SetActive(false); // Reminder: to entirely hide the button, not just disable it.
+                lbl_Status.enabled = false;
+                btn_SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Log in";
+                btn_GuestLogin.gameObject.SetActive(false); // Reminder: to entirely hide the button, not just disable it.
             }
 
         }
@@ -190,8 +192,8 @@ namespace Arteranos.UI
             try
             {
                 CancelSource = new();
-                SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Abort login attempt";
-                GuestLogin.gameObject.SetActive(false);
+                btn_SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Abort login attempt";
+                btn_GuestLogin.gameObject.SetActive(false);
 
                 string id;
                 // Opens a browser to log user in
@@ -216,6 +218,12 @@ namespace Arteranos.UI
         private void CommitSignOut()
         {
             SaveLogin(null, null, null);
+            loginFinished.Release();
+        }
+
+        private void CancelLogin()
+        {
+            // Nothing more to do...
             loginFinished.Release();
         }
 
