@@ -6,13 +6,10 @@
  */
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEngine.UI.Slider;
 
 namespace Arteranos.UI
 {
@@ -20,13 +17,8 @@ namespace Arteranos.UI
     public class NumberedSlider : UIBehaviour
     {
         public string Format = "{0:F1}";
-        public SliderEvent onValueChanged {
-            get => m_OnValueChanged;
-            set => m_OnValueChanged = value; 
-        }
 
-        [SerializeField]
-        private SliderEvent m_OnValueChanged = new();
+        public event Action<float> OnValueChanged = null;
 
         private Slider sld_Slider = null;
         private TextMeshProUGUI lbl_number = null;
@@ -44,7 +36,7 @@ namespace Arteranos.UI
         private void OnInternalValueChanged(float newValue)
         {
             lbl_number.text = string.Format(Format, newValue);
-            m_OnValueChanged.Invoke(newValue);
+            OnValueChanged?.Invoke(newValue);
         }
 
         protected override void Start() => base.Start();

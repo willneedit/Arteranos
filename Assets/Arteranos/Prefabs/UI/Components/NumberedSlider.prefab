@@ -176,9 +176,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Format: '{0:F1}'
-  m_OnValueChanged:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &2491021218109700001
 GameObject:
   m_ObjectHideFlags: 0
