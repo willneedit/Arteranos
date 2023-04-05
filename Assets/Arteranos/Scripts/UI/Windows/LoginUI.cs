@@ -194,6 +194,7 @@ namespace Arteranos.UI
                 CancelSource = new();
                 btn_SignIn.GetComponentInChildren<TextMeshProUGUI>().text = "Abort login attempt";
                 btn_GuestLogin.gameObject.SetActive(false);
+                btn_Cancel.interactable = false;
 
                 string id;
                 // Opens a browser to log user in
@@ -209,6 +210,7 @@ namespace Arteranos.UI
                 SaveLogin(null, null, null);
             }
 
+            btn_Cancel.interactable = true;
             CancelSource.Dispose();
             CancelSource = null;
 
