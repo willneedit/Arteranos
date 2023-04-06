@@ -92,6 +92,12 @@ namespace Arteranos.XR
 
         void UpdateXROrigin(bool useVR)
         {
+            IEnumerator ReconfigureCR()
+            {
+                yield return new WaitForSeconds(5);
+                ReconfigureXRRig();
+            };
+
             CurrentVRRig = FindObjectOfType<XROrigin>();
 
             Vector3 position = Vector3.zero;
@@ -106,7 +112,7 @@ namespace Arteranos.XR
             }
 
             CurrentVRRig = Instantiate(useVR ? VRRig : NoVRRig, position, rotation);
-            ReconfigureXRRig();
+            StartCoroutine(ReconfigureCR());
             XRSwitchEvent?.Invoke(useVR);
             UsingXR = useVR;
         }
