@@ -61,6 +61,8 @@ namespace Arteranos.UI
         public Button btn_Cancel = null;
         public RectTransform grp_Cancel = null;
 
+        public DialogUI DialogUI = null;
+
         public bool CancelEnabled = false;
 
         private string[] PackageNames = null;
@@ -196,6 +198,8 @@ namespace Arteranos.UI
                 btn_GuestLogin.gameObject.SetActive(false);
                 btn_Cancel.interactable = false;
 
+                ManageVRLoginFlow(true);
+
                 string id;
                 // Opens a browser to log user in
                 AccessTokenResponse accessTokenResponse = await authenticationSession.AuthenticateAsync(CancelSource.Token);
@@ -210,11 +214,43 @@ namespace Arteranos.UI
                 SaveLogin(null, null, null);
             }
 
+            ManageVRLoginFlow(false);
+
             btn_Cancel.interactable = true;
             CancelSource.Dispose();
             CancelSource = null;
 
             loginFinished.Release();
+        }
+
+        private DialogUI m_DialogUI = null;
+
+        private void ManageVRLoginFlow(bool inProgress)
+        {
+            ClientSettings cs = SettingsManager.Client;
+            if(inProgress)
+            {
+                // Already in Desktop mode, nothing to do.
+                if(!cs.VRMode) return;
+
+                m_DialogUI = Instantiate(DialogUI);
+                m_DialogUI.text =
+                    "Put down your VR headset,\n" +
+                    "or switch into Desktop mode.\n" +
+                    "Taking to the login window in a\n" +
+                    "separate browser.";
+                m_DialogUI.buttons = null;
+
+                // Leave it in VR mode to be able to show the message.
+            }
+            else
+            {
+                if(m_DialogUI != null)
+                {
+                    Destroy(m_DialogUI.gameObject);
+                    cs.VRMode = true;
+                }
+            }
         }
 
         private void CommitSignOut()
@@ -223,11 +259,9 @@ namespace Arteranos.UI
             loginFinished.Release();
         }
 
-        private void CancelLogin()
-        {
+        private void CancelLogin() =>
             // Nothing more to do...
             loginFinished.Release();
-        }
 
         private (string, string, string) RetrieveLogin()
         {

@@ -1939,6 +1939,8 @@ MonoBehaviour:
   btn_GuestLogin: {fileID: 745566904951116670}
   btn_Cancel: {fileID: 745566903739192673}
   grp_Cancel: {fileID: 2078504631783164548}
+  DialogUI: {fileID: 1401308523161811383, guid: b08a789bff0e5e746b4efea304237fc2,
+    type: 3}
   CancelEnabled: 0
 --- !u!114 &745566904668032599
 MonoBehaviour:

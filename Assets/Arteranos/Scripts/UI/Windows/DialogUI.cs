@@ -22,20 +22,31 @@ public class DialogUI : UIBehaviour
     protected override void Start()
     {
         UnityAction makeButtonPressedAction(int index) => () => OnButtonClicked(index);
+        GameObject sampleButton = ButtonPane.transform.GetChild(0).gameObject;
+        GameObject sampleSpacer = ButtonPane.transform.GetChild(1).gameObject;
 
         base.Start();
 
         Caption.text = text;
 
-        Debug.Assert(buttons != null && buttons.Length > 0, "Dialog must have at least one button");
+        // No buttons, only to close by outside means.
+        if(buttons == null)
+        {
+            Destroy(sampleButton);
+            Destroy(sampleSpacer);
+            return;
+        }
 
-        GameObject sampleButton = ButtonPane.transform.GetChild(0).gameObject;
-        GameObject sampleSpacer = ButtonPane.transform.GetChild(1).gameObject;
+        if(buttons.Length != 0)
+        {
+            sampleButton.GetComponent<Button>().onClick.AddListener(makeButtonPressedAction(0));
+            sampleButton.GetComponentInChildren<TMP_Text>().text = buttons[0];
+        }
+        else
+            Destroy(sampleButton);
 
-        sampleButton.GetComponent<Button>().onClick.AddListener(makeButtonPressedAction(0));
-        sampleButton.GetComponentInChildren<TMP_Text>().text = buttons[0];
 
-        if(buttons.Length == 1)
+        if(buttons.Length < 2)
             Destroy(sampleSpacer);
 
         for(int i = 1; i < buttons.Length; i++)
