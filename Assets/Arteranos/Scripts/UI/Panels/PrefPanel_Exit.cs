@@ -101,7 +101,7 @@ namespace Arteranos.UI
 #if UNITY_EDITOR
                 EditorApplication.ExitPlaymode();
 #else
-                Application.Quit();
+                UnityEngine.Application.Quit();
 #endif
             else
                 btn_Exit.interactable = true;
