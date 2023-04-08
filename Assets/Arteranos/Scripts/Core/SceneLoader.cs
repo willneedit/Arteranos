@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 
 namespace Arteranos.Core
 {
@@ -47,12 +48,45 @@ namespace Arteranos.Core
 
             Debug.Log($"Streamed Assed Bundle? {myLoadedAssetBundle.isStreamedSceneAssetBundle}");
 
+            if(myLoadedAssetBundle.isStreamedSceneAssetBundle)
+            {
+                Debug.LogError("This is a streamed scene assetbundle, which we don't want to.");
+                yield break;
+            }
+
             foreach(string assName in myLoadedAssetBundle.GetAllAssetNames())
                 Debug.Log($"Asset: {assName}");
 
             foreach(string scenePath in myLoadedAssetBundle.GetAllScenePaths())
                 Debug.Log($"Scene: {scenePath}");
 
+            Scene prev = SceneManager.GetActiveScene();
+
+            Scene sc = SceneManager.CreateScene("NewScene");
+
+            yield return null;
+
+            SceneManager.SetActiveScene(sc);
+
+            yield return null;
+
+            string prefabName = myLoadedAssetBundle.GetAllAssetNames()[0];
+
+            GameObject environment = myLoadedAssetBundle.LoadAsset<GameObject>(prefabName);
+            environment.SetActive(false);
+
+            Debug.Log("Populating scene...");
+            GameObject go = Instantiate(environment);
+            Debug.Log("Populating scene done, setting active...");
+            go.SetActive(true);
+            Debug.Log("Scene is live.");
+
+            _ = SceneManager.UnloadSceneAsync(prev);
+
+            Debug.Log("Finished.");
+
+
+#if false
             string first = myLoadedAssetBundle.GetAllScenePaths()[0];
 
             Scene prev = SceneManager.GetActiveScene();
@@ -110,12 +144,8 @@ namespace Arteranos.Core
 
             Debug.Log("Scene loading completed.");
 
-
+#endif
         }
 
-        private void OnCompleted(AsyncOperation obj)
-        {
-            Debug.Log($"Completed, Objects={SceneManager.GetActiveScene().GetRootGameObjects().Length}");
-        }
     }
 }

@@ -32,7 +32,6 @@ namespace Arteranos.Editor
             if(sc.isDirty)
                 EditorSceneManager.SaveScene(sc);
 
-
             string tmpSceneName = Path.Combine("Assets", "_" + Path.GetRandomFileName() + ".unity");
 
             // Save in a temporary scene, using a different file name
@@ -76,6 +75,17 @@ namespace Arteranos.Editor
                 DestroyImmediate(p.gameObject);
         }
 
+        private static string BuildEnvironsPrefab()
+        {
+            GameObject env = GameObject.Find("Environment");
+
+            string tmpPrefabName = Path.Combine("Assets", "_" + Path.GetRandomFileName() + ".prefab");
+
+            PrefabUtility.SaveAsPrefabAsset(env, tmpPrefabName);
+
+            return tmpPrefabName;
+        }
+
         [MenuItem("Arteranos/Build scene as world", false, 10)]
         public static void BuildSceneAsWorld()
         {
@@ -86,6 +96,14 @@ namespace Arteranos.Editor
             Debug.Log(tmpScenePath);
             Debug.Log(itemPath);
 
+            string tmpPrefabName = BuildEnvironsPrefab();
+
+            Debug.Log(tmpPrefabName);
+
+            string txt = File.ReadAllText(tmpScenePath);
+            TextAsset ta = new TextAsset(txt);
+            AssetDatabase.CreateAsset(ta, tmpScenePath + ".asset");
+
             List<BuildTarget> targets = new()
             {
                 BuildTarget.StandaloneWindows64
@@ -93,13 +111,18 @@ namespace Arteranos.Editor
 
             string[] assetFiles = new string[]
             {
-                tmpScenePath
+                tmpPrefabName,
+                //tmpScenePath + ".asset"
             };
 
             Common.BuildAssetBundle(assetFiles, targets, itemPath);
 
             EditorSceneManager.OpenScene(itemPath);
+
+            AssetDatabase.DeleteAsset(tmpScenePath + ".asset");
             AssetDatabase.DeleteAsset(tmpScenePath);
+
+            AssetDatabase.DeleteAsset(tmpPrefabName);
         }
 
 
@@ -115,7 +138,7 @@ namespace Arteranos.Editor
             string ABName = Common.OpenFileDialog("", false, false, ".unity");
             if(string.IsNullOrEmpty(ABName)) return;
 
-            GameObject go = new GameObject("SceneLoader");
+            GameObject go = new("SceneLoader");
             go.AddComponent<Persistence>();
             SceneLoader sl = go.AddComponent<SceneLoader>();
 
