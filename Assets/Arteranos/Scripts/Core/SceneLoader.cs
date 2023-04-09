@@ -5,28 +5,26 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UnityEngine.Rendering.VirtualTexturing.Debugging;
 
 namespace Arteranos.Core
 {
     public class SceneLoader : MonoBehaviour
     {
-#if false
+        public string Name = null;
+
         // Start is called before the first frame update
         void Start()
         {
+            Debug.Log($"Loader deployed, name={Name}");
+            if(Name != null)
+            {
+                InitiateLoad(Name);
+                Name = null;
+            }
         }
-
-        // Update is called once per frame
-        void Update()
-        {
-        }
-#endif
 
         public void InitiateLoad(string name) => StartCoroutine(LoadScene(name));
 
@@ -37,8 +35,8 @@ namespace Arteranos.Core
         {
             yield return null;
 
-            AssetBundle myLoadedAssetBundle = AssetBundle.LoadFromFile(name);
-            if(myLoadedAssetBundle == null)
+            AssetBundle loadedAB = AssetBundle.LoadFromFile(name);
+            if(loadedAB == null)
             {
                 Debug.Log("Failed to load AssetBundle!");
                 yield break;
@@ -46,33 +44,40 @@ namespace Arteranos.Core
 
             Debug.Log("Done loading AssetBundle.");
 
-            Debug.Log($"Streamed Assed Bundle? {myLoadedAssetBundle.isStreamedSceneAssetBundle}");
+            Debug.Log($"Streamed Assed Bundle? {loadedAB.isStreamedSceneAssetBundle}");
 
-            if(myLoadedAssetBundle.isStreamedSceneAssetBundle)
+            if(loadedAB.isStreamedSceneAssetBundle)
             {
                 Debug.LogError("This is a streamed scene assetbundle, which we don't want to.");
                 yield break;
             }
 
-            foreach(string assName in myLoadedAssetBundle.GetAllAssetNames())
+            foreach(string assName in loadedAB.GetAllAssetNames())
                 Debug.Log($"Asset: {assName}");
 
-            foreach(string scenePath in myLoadedAssetBundle.GetAllScenePaths())
+            foreach(string scenePath in loadedAB.GetAllScenePaths())
                 Debug.Log($"Scene: {scenePath}");
 
             Scene prev = SceneManager.GetActiveScene();
-
             Scene sc = SceneManager.CreateScene("NewScene");
-
-            yield return null;
-
             SceneManager.SetActiveScene(sc);
 
-            yield return null;
+            AssetBundleRequest abr = loadedAB.LoadAssetAsync<GameObject>("Assets/Environment.prefab");
 
-            string prefabName = myLoadedAssetBundle.GetAllAssetNames()[0];
+            while(!abr.isDone)
+            {
+                yield return null;
 
-            GameObject environment = myLoadedAssetBundle.LoadAsset<GameObject>(prefabName);
+                Debug.Log($"Progress: {abr.progress}");
+            }
+
+            GameObject environment = abr.asset as GameObject;
+            if(environment == null)
+            {
+                Debug.LogError("Cannot load the Environment asset");
+                yield break;
+            }
+
             environment.SetActive(false);
 
             Debug.Log("Populating scene...");
@@ -83,7 +88,8 @@ namespace Arteranos.Core
 
             _ = SceneManager.UnloadSceneAsync(prev);
 
-            Debug.Log("Finished.");
+            Debug.Log("Loader finished, cleaning up.");
+            Destroy(gameObject);
 
 
 #if false

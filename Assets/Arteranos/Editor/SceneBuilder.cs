@@ -79,7 +79,7 @@ namespace Arteranos.Editor
         {
             GameObject env = GameObject.Find("Environment");
 
-            string tmpPrefabName = Path.Combine("Assets", "_" + Path.GetRandomFileName() + ".prefab");
+            string tmpPrefabName = "Assets/Environment.prefab";
 
             PrefabUtility.SaveAsPrefabAsset(env, tmpPrefabName);
 
@@ -101,7 +101,7 @@ namespace Arteranos.Editor
             Debug.Log(tmpPrefabName);
 
             string txt = File.ReadAllText(tmpScenePath);
-            TextAsset ta = new TextAsset(txt);
+            TextAsset ta = new(txt);
             AssetDatabase.CreateAsset(ta, tmpScenePath + ".asset");
 
             List<BuildTarget> targets = new()
@@ -129,22 +129,39 @@ namespace Arteranos.Editor
         [MenuItem("Arteranos/Test world...", false, 20)]
         public static void TestWorld()
         {
-            if(!EditorApplication.isPlaying)
-            {
-                Debug.LogError("Needs to be in play mode.");
-                return;
-            }
 
             string ABName = Common.OpenFileDialog("", false, false, ".unity");
             if(string.IsNullOrEmpty(ABName)) return;
 
-            GameObject go = new("SceneLoader");
+            GameObject go = new("_SceneLoader");
             go.AddComponent<Persistence>();
             SceneLoader sl = go.AddComponent<SceneLoader>();
+            sl.Name = ABName;
 
-            sl.InitiateLoad(ABName);
+            if(!EditorApplication.isPlaying)
+                EditorApplication.EnterPlaymode();
+
         }
 
+        // Wipe off the scene loader in the saved scene in Edit mode on reentering it.
+        [InitializeOnLoad]
+        public static class OnReenterEditMode
+        {
+            static OnReenterEditMode()
+            {
+                EditorApplication.playModeStateChanged += LogPlayModeState;
+            }
+
+            private static void LogPlayModeState(PlayModeStateChange state)
+            {
+                // Debug.Log(state);
+                if(state == PlayModeStateChange.EnteredEditMode)
+                {
+                    SceneLoader sl = FindObjectOfType<SceneLoader>();
+                    if(sl != null) DestroyImmediate(sl.gameObject);
+                }
+            }
+        }
 #if false
         static IEnumerator InstantiateObject()
         {
