@@ -6,6 +6,8 @@
  */
 
 using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,7 +17,38 @@ namespace Arteranos.Core
     {
         public string Name = null;
 
-        // Start is called before the first frame update
+        private readonly List<string> TNWhitelist = new()
+        {
+            "UnityEngine.",
+            "TMPro.",
+            "Arteranos.User"
+        };
+
+        private readonly List<string> AssWhiteList = new()
+        {
+            "UnityEngine.AnimationModule",
+            "UnityEngine.AudioModule",
+            "UnityEngine.ClothModule",
+            "UnityEngine.CoreModule",
+            "UnityEngine.DirectorModule",
+            "UnityEngine.GIModule",
+            "UnityEngine.ParticleSystemModule",
+            "UnityEngine.PhysicsModule",
+            "UnityEngine.SpriteMaskModule",
+            "UnityEngine.SpriteShapeModule",
+            "UnityEngine.TerrainModule",
+            "UnityEngine.TerrainPhysicsModule",
+            "UnityEngine.UIModule",
+
+            "UnityEngine.UI",
+            "Unity.XR.Interaction.Toolkit",
+            "Unity.RenderPipelines.Universal.Runtime",
+            "Unity.TextMeshPro",
+
+            "Arteranos.User"
+
+        };
+
         void Start()
         {
             Debug.Log($"Loader deployed, name={Name}");
@@ -28,8 +61,55 @@ namespace Arteranos.Core
 
         public void InitiateLoad(string name) => StartCoroutine(LoadScene(name));
 
+        private bool MatchWith(string name, List<string> patterns)
+        {
+            foreach(string pattern in patterns)
+                if(name.StartsWith(pattern)) return true;
 
-        public AsyncOperation loaderOp = null;
+            return false;
+        }
+
+        public bool CheckComponent(Component component)
+        {
+            System.Type type = component.GetType();
+            if(type == null) return false;
+
+            if(!MatchWith(type.FullName, TNWhitelist)) return false;
+
+            Assembly asm = type.Assembly;
+
+            if(!MatchWith(asm.GetName().Name, AssWhiteList)) return false;
+
+            return true;
+        }
+
+        public void StripScripts(Transform transform)
+        {
+            Component[] components = transform.GetComponents<Component>();
+            foreach(Component component in components)
+            {
+                if(component == null)
+                {
+                    // Can't grasp it because it has missing code.
+                    // Debug.LogWarning($"Detected defunct component in {transform.name}");
+                }
+                else if(!CheckComponent(component))
+                {
+                    System.Type type = component.GetType();
+                    Assembly asm = type.Assembly;
+
+                    Debug.LogWarning($"Removing {component.GetType().FullName} ({asm.GetName().Name}) in {transform.name}");
+                    if(component as Behaviour != null)
+                        (component as Behaviour).enabled = false;
+
+                    // Really have to use it. Unwanted scripts have to move away as quick as possible.
+                    DestroyImmediate(component);
+                }
+            }
+
+            for(int i = 0, c = transform.childCount; i < c; ++i)
+                StripScripts(transform.GetChild(i));
+        }
 
         public IEnumerator LoadScene(string name)
         {
@@ -82,6 +162,8 @@ namespace Arteranos.Core
 
             Debug.Log("Populating scene...");
             GameObject go = Instantiate(environment);
+            StripScripts(go.transform);
+
             Debug.Log("Populating scene done, setting active...");
             go.SetActive(true);
             Debug.Log("Scene is live.");
