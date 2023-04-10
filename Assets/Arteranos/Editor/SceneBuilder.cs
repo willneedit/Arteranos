@@ -22,6 +22,19 @@ namespace Arteranos.Editor
 {
     public class SceneBuilder : MonoBehaviour
     {
+        public static List<string> gatheredAssets = new();
+
+        public static void GatherAsset(Object asset, string path)
+        {
+            AssetDatabase.CreateAsset(asset, path);
+            gatheredAssets.Add(path);
+        }
+
+        public static void GatherPrefab(GameObject instanceRoot, string path)
+        {
+            PrefabUtility.SaveAsPrefabAsset(instanceRoot, path);
+            gatheredAssets.Add(path);
+        }
 
         public static (string, string) BuildTemplateScene()
         {
@@ -75,20 +88,31 @@ namespace Arteranos.Editor
                 DestroyImmediate(p.gameObject);
         }
 
-        private static string BuildEnvironsPrefab()
+        private static void SaveRenderSettingsAssets()
         {
-            GameObject env = GameObject.Find("Environment");
+            RenderSettingsJSON j = new();
+            string json = j.BackupRS();
 
-            string tmpPrefabName = "Assets/Environment.prefab";
+            TextAsset ta = new(json);
+            GatherAsset(ta, "Assets/RenderSettings.json.asset");
 
-            PrefabUtility.SaveAsPrefabAsset(env, tmpPrefabName);
+            if(RenderSettings.customReflection != null)
+                GatherAsset(RenderSettings.customReflection, "Assets/SkyReflectTexture.png");
 
-            return tmpPrefabName;
+            if(RenderSettings.skybox != null)
+            {
+                Material mat = new(RenderSettings.skybox);
+                GatherAsset(mat, "Assets/Skybox.mat");
+            }
         }
 
         [MenuItem("Arteranos/Build scene as world", false, 10)]
         public static void BuildSceneAsWorld()
         {
+            gatheredAssets.Clear();
+
+            SaveRenderSettingsAssets();
+
             string tmpScenePath;
             string itemPath;
             (tmpScenePath, itemPath) = BuildTemplateScene();
@@ -96,33 +120,22 @@ namespace Arteranos.Editor
             Debug.Log(tmpScenePath);
             Debug.Log(itemPath);
 
-            string tmpPrefabName = BuildEnvironsPrefab();
-
-            Debug.Log(tmpPrefabName);
-
-            string txt = File.ReadAllText(tmpScenePath);
-            TextAsset ta = new(txt);
-            AssetDatabase.CreateAsset(ta, tmpScenePath + ".asset");
+            GatherPrefab(GameObject.Find("Environment"), "Assets/Environment.prefab");
 
             List<BuildTarget> targets = new()
             {
                 BuildTarget.StandaloneWindows64
             };
 
-            string[] assetFiles = new string[]
-            {
-                tmpPrefabName,
-                //tmpScenePath + ".asset"
-            };
 
-            Common.BuildAssetBundle(assetFiles, targets, itemPath);
+            Common.BuildAssetBundle(gatheredAssets.ToArray(), targets, itemPath);
 
             EditorSceneManager.OpenScene(itemPath);
 
-            AssetDatabase.DeleteAsset(tmpScenePath + ".asset");
             AssetDatabase.DeleteAsset(tmpScenePath);
 
-            AssetDatabase.DeleteAsset(tmpPrefabName);
+            foreach(string path in gatheredAssets)
+                AssetDatabase.DeleteAsset(path);
         }
 
 

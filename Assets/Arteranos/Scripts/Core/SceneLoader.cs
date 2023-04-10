@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Newtonsoft.Json;
+
 
 namespace Arteranos.Core
 {
@@ -54,12 +56,9 @@ namespace Arteranos.Core
             Debug.Log($"Loader deployed, name={Name}");
             if(Name != null)
             {
-                InitiateLoad(Name);
-                Name = null;
+                StartCoroutine(LoadScene(Name));
             }
         }
-
-        public void InitiateLoad(string name) => StartCoroutine(LoadScene(name));
 
         private bool MatchWith(string name, List<string> patterns)
         {
@@ -113,6 +112,8 @@ namespace Arteranos.Core
 
         public IEnumerator LoadScene(string name)
         {
+            Name = null;
+
             yield return null;
 
             AssetBundle loadedAB = AssetBundle.LoadFromFile(name);
@@ -139,19 +140,36 @@ namespace Arteranos.Core
                 Debug.Log($"Scene: {scenePath}");
 
             Scene prev = SceneManager.GetActiveScene();
-            Scene sc = SceneManager.CreateScene("NewScene");
-            SceneManager.SetActiveScene(sc);
+            string target = "Arteranos/Scenes/Blank-1";
 
-            AssetBundleRequest abr = loadedAB.LoadAssetAsync<GameObject>("Assets/Environment.prefab");
+            if(prev.name == "Blank-1")
+                target = "Arteranos/Scenes/Blank-2";
 
-            while(!abr.isDone)
-            {
+            SceneManager.LoadSceneAsync(target);
+
+            AssetBundleRequest abrGO = loadedAB.LoadAssetAsync<GameObject>("Assets/Environment.prefab");
+            AssetBundleRequest abrSB = loadedAB.LoadAssetAsync<Material>("Assets/Skybox.mat");
+            AssetBundleRequest abrRS = loadedAB.LoadAssetAsync<TextAsset>("Assets/RenderSettings.json.asset");
+
+            while(!abrRS.isDone)
                 yield return null;
 
-                Debug.Log($"Progress: {abr.progress}");
+            if(abrRS.asset as TextAsset != null)
+            {
+                RenderSettingsJSON j = new();
+                j.RestoreRS((abrRS.asset as TextAsset).text);
             }
 
-            GameObject environment = abr.asset as GameObject;
+            while(!abrSB.isDone)
+                yield return null;
+
+            if(abrSB.asset as Material != null)
+                RenderSettings.skybox = abrSB.asset as Material;
+
+            while(!abrGO.isDone)
+                yield return null;
+
+            GameObject environment = abrGO.asset as GameObject;
             if(environment == null)
             {
                 Debug.LogError("Cannot load the Environment asset");
@@ -161,79 +179,134 @@ namespace Arteranos.Core
             environment.SetActive(false);
 
             Debug.Log("Populating scene...");
+
+            Scene sc = SceneManager.GetActiveScene();
+
+            GameObject[] gobs = sc.GetRootGameObjects();
+
+            foreach(GameObject gob in gobs)
+                Destroy(gob);
+
             GameObject go = Instantiate(environment);
             StripScripts(go.transform);
 
+
             Debug.Log("Populating scene done, setting active...");
             go.SetActive(true);
+
             Debug.Log("Scene is live.");
 
-            _ = SceneManager.UnloadSceneAsync(prev);
-
             Debug.Log("Loader finished, cleaning up.");
+
+            loadedAB.Unload(false);
+
             Destroy(gameObject);
 
-
-#if false
-            string first = myLoadedAssetBundle.GetAllScenePaths()[0];
-
-            Scene prev = SceneManager.GetActiveScene();
-
-            Debug.Log($"Loading first scene: {first}");
-
-            loaderOp = SceneManager.LoadSceneAsync(first);
-            loaderOp.allowSceneActivation = false;
-            loaderOp.completed += OnCompleted;
-            loaderOp.priority = 90000;
-
-            Scene loaded = SceneManager.GetSceneByPath(first);
-
-            Debug.Log($"Done loading the scene {loaded.name}");
-
-            //foreach(GameObject go in sc.GetRootGameObjects())
-            //{
-            //    Debug.Log($"Deactivating {go.name}");
-            //    go.SetActive(false);
-            //}
-
-            //Debug.Log("Deactivating all root objects done");
-
-
-            //myLoadedAssetBundle.Unload(false);
-
-            Scene boot = SceneManager.CreateScene("Bootstrap");
-
-            if(SceneManager.SetActiveScene(boot))
-                Debug.Log("Switching to bootstrap");
-
-            _ = SceneManager.UnloadSceneAsync(prev);
-
-            // SceneManager.UnloadScene(loaded);
-
-            Debug.Log("Loader function finished.");
-
-            while(loaderOp.progress < 0.9f)
-                yield return null;
-
-            loaderOp.allowSceneActivation = true;
-
-            Debug.Log($"Allowed scene activation. Progress={loaderOp.progress}, Objects={loaded.GetRootGameObjects().Length}");
-
-            yield return null;
-
-            Debug.Log($"List of objects, Objects={loaded.GetRootGameObjects().Length}");
-
-            yield return null;
-
-            Debug.Log($"List of objects, Objects={loaded.GetRootGameObjects().Length}");
-
-
-            // SceneManager.SetActiveScene(boot);
-
-            Debug.Log("Scene loading completed.");
-
-#endif
         }
 
+    }
+
+    public class RenderSettingsJSON
+    {
+        public Color ambientSkyColor;
+        public Color ambientEquatorColor;
+        public Color ambientGroundColor;
+        public float ambientIntensity;
+        public Color ambientLight;
+        public UnityEngine.Rendering.AmbientMode ambientMode;
+        // public Rendering.SphericalHarmonicsL2 ambientProbe;
+        public UnityEngine.Rendering.DefaultReflectionMode defaultReflectionMode;
+        public int defaultReflectionResolution;
+        public float flareFadeSpeed;
+        public float flareStrength;
+        public bool fog;
+        public Color fogColor;
+        public float fogDensity;
+        public float fogEndDistance;
+        public float fogStartDistance;
+        public FogMode fogMode;
+        public float haloStrength;
+        public int reflectionBounces;
+        public float reflectionIntensity;
+        public Color subtractiveShadowColor;
+        public Light sun;
+
+        private Texture customReflection;
+        private Material skybox;
+
+        public string BackupRS()
+        {
+            ambientSkyColor = RenderSettings.ambientSkyColor;
+            ambientEquatorColor = RenderSettings.ambientEquatorColor;
+            ambientGroundColor = RenderSettings.ambientGroundColor;
+            ambientIntensity = RenderSettings.ambientIntensity;
+            ambientLight = RenderSettings.ambientLight;
+            ambientMode = RenderSettings.ambientMode;
+            //ambientProbe = RenderSettings.ambientProbe;
+            defaultReflectionMode = RenderSettings.defaultReflectionMode;
+            defaultReflectionResolution = RenderSettings.defaultReflectionResolution;
+            flareFadeSpeed = RenderSettings.flareFadeSpeed;
+            flareStrength = RenderSettings.flareStrength;
+            fog = RenderSettings.fog;
+            fogColor = RenderSettings.fogColor;
+            fogDensity = RenderSettings.fogDensity;
+            fogEndDistance = RenderSettings.fogEndDistance;
+            fogStartDistance = RenderSettings.fogStartDistance;
+            fogMode = RenderSettings.fogMode;
+            haloStrength = RenderSettings.haloStrength;
+            reflectionBounces = RenderSettings.reflectionBounces;
+            reflectionIntensity = RenderSettings.reflectionIntensity;
+            subtractiveShadowColor = RenderSettings.subtractiveShadowColor;
+            sun = RenderSettings.sun;
+
+            customReflection = RenderSettings.customReflection;
+            skybox = RenderSettings.skybox;
+
+            return JsonUtility.ToJson(this);
+        }
+
+        public void RestoreRS(string json)
+        {
+            JsonUtility.FromJsonOverwrite(json, this);
+
+            RenderSettings.ambientMode = ambientMode;
+            switch(ambientMode)
+            {
+                case UnityEngine.Rendering.AmbientMode.Skybox:
+                    RenderSettings.ambientIntensity = ambientIntensity;
+                    break;
+                case UnityEngine.Rendering.AmbientMode.Trilight:
+                    RenderSettings.ambientSkyColor = ambientSkyColor;
+                    RenderSettings.ambientEquatorColor = ambientEquatorColor;
+                    RenderSettings.ambientGroundColor = ambientGroundColor;
+                    break;
+                case UnityEngine.Rendering.AmbientMode.Flat:
+                    RenderSettings.ambientSkyColor = ambientSkyColor;
+                    break;
+                case UnityEngine.Rendering.AmbientMode.Custom:
+                    RenderSettings.ambientLight = ambientLight;
+                    break;
+            }
+
+            //RenderSettings.ambientProbe = ambientProbe;
+            RenderSettings.defaultReflectionMode = defaultReflectionMode;
+            RenderSettings.defaultReflectionResolution = defaultReflectionResolution;
+            RenderSettings.flareFadeSpeed = flareFadeSpeed;
+            RenderSettings.flareStrength = flareStrength;
+            RenderSettings.fog = fog;
+            RenderSettings.fogColor = fogColor;
+            RenderSettings.fogDensity = fogDensity;
+            RenderSettings.fogEndDistance = fogEndDistance;
+            RenderSettings.fogStartDistance = fogStartDistance;
+            RenderSettings.fogMode = fogMode;
+            RenderSettings.haloStrength = haloStrength;
+            RenderSettings.reflectionBounces = reflectionBounces;
+            RenderSettings.reflectionIntensity = reflectionIntensity;
+            RenderSettings.subtractiveShadowColor = subtractiveShadowColor;
+            RenderSettings.sun = sun;
+
+            // RenderSettings.customReflection = customReflection;
+            // RenderSettings.skybox = skybox;
+        }
     }
 }
