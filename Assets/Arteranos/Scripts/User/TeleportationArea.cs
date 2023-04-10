@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
-[AddComponentMenu("XR/Dynamic Teleportation Area", 11)]
-public class DynamicTeleportationArea : BaseTeleportationInteractable
+namespace Arteranos.User
 {
+    [AddComponentMenu("XR/Teleportation Area", 12)]
+    public class TeleportationArea : BaseTeleportationInteractable
+    {
         protected override bool GenerateTeleportRequest(IXRInteractor interactor, RaycastHit raycastHit, ref TeleportRequest teleportRequest)
         {
-            if (raycastHit.collider == null)
+            if(raycastHit.collider == null)
                 return false;
 
             teleportRequest.destinationPosition = raycastHit.point;
@@ -19,7 +21,7 @@ public class DynamicTeleportationArea : BaseTeleportationInteractable
         {
             if(teleportationProvider == null)
                 teleportationProvider = FindObjectOfType<TeleportationProvider>();
-            
+
             base.OnSelectEntered(args);
         }
 
@@ -28,7 +30,7 @@ public class DynamicTeleportationArea : BaseTeleportationInteractable
         {
             if(teleportationProvider == null)
                 teleportationProvider = FindObjectOfType<TeleportationProvider>();
-            
+
             base.OnSelectExited(args);
         }
 
@@ -37,7 +39,7 @@ public class DynamicTeleportationArea : BaseTeleportationInteractable
         {
             if(teleportationProvider == null)
                 teleportationProvider = FindObjectOfType<TeleportationProvider>();
-            
+
             base.OnActivated(args);
         }
 
@@ -46,8 +48,9 @@ public class DynamicTeleportationArea : BaseTeleportationInteractable
         {
             if(teleportationProvider == null)
                 teleportationProvider = FindObjectOfType<TeleportationProvider>();
-            
+
             base.OnDeactivated(args);
         }
 
+    }
 }
