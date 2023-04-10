@@ -8,8 +8,6 @@
 using Arteranos.XR;
 using Arteranos.Core;
 
-using Codice.Utils;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -54,6 +52,8 @@ namespace Arteranos.Editor
 
             ReparentObjects(sc);
 
+            RelayerTree();
+
             EditorSceneManager.SaveScene(sc);
 
             return (tmpSceneName, origPath);
@@ -73,6 +73,16 @@ namespace Arteranos.Editor
             // Reparent all the loose objects below "Environment"
             foreach(GameObject l in looseObjects) l.transform.SetParent(env.transform);
         }
+
+        private static void RelayerTree() => RelayerTree(GameObject.Find("Environment"));
+
+        private static void RelayerTree(GameObject go)
+        {
+            go.layer = 0;
+            for(int i = 0; i < go.transform.childCount; ++i)
+                RelayerTree(go.transform.GetChild(i).gameObject);
+        }
+
 
         private static void ScrubEssentials()
         {
