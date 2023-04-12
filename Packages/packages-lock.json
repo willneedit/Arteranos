@@ -160,6 +160,13 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.editorcoroutines": {
+      "version": "1.0.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.unity.ext.nunit": {
       "version": "1.0.6",
       "depth": 1,
@@ -411,6 +418,15 @@
         "com.unity.inputsystem": "1.4.2"
       },
       "url": "https://packages.unity.com"
+    },
+    "li.lightingtools.lightmapswitcher": {
+      "version": "https://github.com/willneedit/lightmap-switching-tool.git#package",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.editorcoroutines": "0.1.0-preview.1"
+      },
+      "hash": "a3ccbf04797cf300a995af71ffe7694607976d5b"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

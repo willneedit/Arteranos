@@ -21,6 +21,7 @@
     "com.unity.xr.interaction.toolkit": "2.0.4",
     "com.unity.xr.management": "4.2.1",
     "com.unity.xr.openxr": "1.5.3",
+    "li.lightingtools.lightmapswitcher": "https://github.com/willneedit/lightmap-switching-tool.git#package",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -52,13 +53,5 @@
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
   },
-  "scopedRegistries": [
-    {
-      "name": "NPM",
-      "url": "https://registry.npmjs.org",
-      "scopes": [
-        "com.adrenak"
-      ]
-    }
-  ]
+  "scopedRegistries": []
 }
