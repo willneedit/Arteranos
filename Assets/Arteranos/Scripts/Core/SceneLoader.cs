@@ -11,7 +11,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Newtonsoft.Json;
-
+using UnityEditor;
 
 namespace Arteranos.Core
 {
@@ -147,17 +147,11 @@ namespace Arteranos.Core
 
             SceneManager.LoadSceneAsync(target);
 
-            AssetBundleRequest abrGO = loadedAB.LoadAssetAsync<GameObject>("Assets/Environment.prefab");
-            AssetBundleRequest abrSB = loadedAB.LoadAssetAsync<Material>("Assets/Skybox.mat");
+            AssetBundleRequest abrGO = loadedAB.LoadAssetAsync<GameObject>("Assets/Root/Environment.prefab");
+            AssetBundleRequest abrLL = loadedAB.LoadAssetAsync<GameObject>("Assets/Root/LevelLightmapData.prefab");
+            AssetBundleRequest abrLS = loadedAB.LoadAssetAsync<LightingSettings>("Assets/Root/LightingSettings.lighting");
 
-            while(!abrSB.isDone)
-                yield return null;
-
-            if(abrSB.asset as Material != null)
-                RenderSettings.skybox = abrSB.asset as Material;
-
-            while(!abrGO.isDone)
-                yield return null;
+            while(!abrGO.isDone) yield return null;
 
             GameObject environment = abrGO.asset as GameObject;
             if(environment == null)
@@ -170,6 +164,10 @@ namespace Arteranos.Core
 
             Debug.Log("Populating scene...");
 
+            while(!abrLS.isDone) yield return null;
+
+            Lightmapping.lightingSettings = abrLS.asset as LightingSettings;
+
             Scene sc = SceneManager.GetActiveScene();
 
             GameObject[] gobs = sc.GetRootGameObjects();
@@ -180,9 +178,19 @@ namespace Arteranos.Core
             GameObject go = Instantiate(environment);
             StripScripts(go.transform);
 
+            Debug.Log("Adding lighting data...");
+
+            while(!abrLL.isDone) yield return null;
+
+            GameObject llGO = Instantiate(abrLL.asset as GameObject);
+
+            LevelLightmapData lld = llGO.GetComponent<LevelLightmapData>();
 
             Debug.Log("Populating scene done, setting active...");
             go.SetActive(true);
+
+            lld.allowLoadingLightingScenes = false;
+            lld.LoadLightingScenarioData(0);
 
             Debug.Log("Scene is live.");
 
