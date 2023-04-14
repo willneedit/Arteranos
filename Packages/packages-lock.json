@@ -426,7 +426,7 @@
       "dependencies": {
         "com.unity.editorcoroutines": "0.1.0-preview.1"
       },
-      "hash": "a3ccbf04797cf300a995af71ffe7694607976d5b"
+      "hash": "94c4878d39114a5757577efef894dd1d8482e148"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

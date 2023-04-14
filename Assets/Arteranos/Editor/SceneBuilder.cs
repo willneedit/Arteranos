@@ -15,11 +15,15 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
+using Unity.EditorCoroutines.Editor;
 
 namespace Arteranos.Editor
 {
     public class SceneBuilder : MonoBehaviour
     {
+        public static readonly string ROOT_PATH = "Assets/Root/";
+
         public static List<string> gatheredAssets = new();
 
         public static void GatherAsset(Object asset, string path)
@@ -34,6 +38,12 @@ namespace Arteranos.Editor
             gatheredAssets.Add(path);
         }
 
+        public static void GatherCopiedAsset(Object asset, string path)
+        {
+            AssetDatabase.CopyAsset(AssetDatabase.GetAssetPath(asset), path);
+            gatheredAssets.Add(path);
+        }
+
         public static (string, string) BuildTemplateScene()
         {
             Scene sc = SceneManager.GetActiveScene();
@@ -43,7 +53,7 @@ namespace Arteranos.Editor
             if(sc.isDirty)
                 EditorSceneManager.SaveScene(sc);
 
-            string tmpSceneName = Path.Combine("Assets", "_" + Path.GetRandomFileName() + ".unity");
+            string tmpSceneName = ROOT_PATH + "_" + Path.GetRandomFileName() + ".unity";
 
             // Save in a temporary scene, using a different file name
             EditorSceneManager.SaveScene(sc, tmpSceneName);
@@ -98,56 +108,72 @@ namespace Arteranos.Editor
                 DestroyImmediate(p.gameObject);
         }
 
-        private static void SaveRenderSettingsAssets()
+        private static void SaveLightData()
         {
-            RenderSettingsJSON j = new();
-            string json = j.BackupRS();
+            SetupLLDMenuItem.BootstrapLLD(out LevelLightmapData lld, out LightingScenarioData lsd);
 
-            TextAsset ta = new(json);
-            GatherAsset(ta, "Assets/RenderSettings.json.asset");
+            GatherAsset(lsd, ROOT_PATH + "LightingScenarioData.asset");
+            GatherPrefab(lld.gameObject, ROOT_PATH + "LevelLightmapData.prefab");
 
-            if(RenderSettings.customReflection != null)
-                GatherAsset(RenderSettings.customReflection, "Assets/SkyReflectTexture.png");
+            LightingSettings ls = Lightmapping.lightingSettings;
 
-            if(RenderSettings.skybox != null)
-            {
-                Material mat = new(RenderSettings.skybox);
-                GatherAsset(mat, "Assets/Skybox.mat");
-            }
+            if(ls != null)
+                GatherCopiedAsset(ls, ROOT_PATH + "LightingSettings.lighting");
         }
 
         [MenuItem("Arteranos/Build scene as world", false, 10)]
         public static void BuildSceneAsWorld()
         {
-            gatheredAssets.Clear();
+            static IEnumerator Cleanup(string itemPath)
+            {
+                EditorSceneManager.OpenScene(itemPath);
 
-            SaveRenderSettingsAssets();
+                yield return null;
+
+                AssetDatabase.DeleteAsset(ROOT_PATH[0..^1]);
+            }
+
+            AssetDatabase.CreateFolder("Assets", "Root");
+
+            gatheredAssets.Clear();
 
             string tmpScenePath;
             string itemPath;
             (tmpScenePath, itemPath) = BuildTemplateScene();
 
+            SaveLightData();
+
             Debug.Log(tmpScenePath);
             Debug.Log(itemPath);
 
-            GatherPrefab(GameObject.Find("Environment"), "Assets/Environment.prefab");
+            GatherPrefab(GameObject.Find("Environment"), ROOT_PATH + "Environment.prefab");
+
+            LightingScenarioDataFactory f = ObjectFactory.CreateInstance<LightingScenarioDataFactory>();
+            f.OnBakingDone += () =>
+            {
+                CompileWorldData(itemPath);
+                EditorCoroutineUtility.StartCoroutineOwnerless(Cleanup(itemPath));
+                DestroyImmediate(f);
+            };
+
+            LevelLightmapData lld = FindObjectOfType<LevelLightmapData>();
+            lld.lightingScenariosData[0].storeRendererInfos = true;
+            lld.lightingScenariosData[0].geometrySceneName = itemPath;
+
+            f.GenerateLightingScenarioData(lld.lightingScenariosData[0], false);
+        }
+
+        private static void CompileWorldData(string itemPath)
+        {
+            Debug.Log("Baking done, compiling Asset Bundle");
 
             List<BuildTarget> targets = new()
             {
                 BuildTarget.StandaloneWindows64
             };
 
-
             Common.BuildAssetBundle(gatheredAssets.ToArray(), targets, itemPath);
-
-            EditorSceneManager.OpenScene(itemPath);
-
-            AssetDatabase.DeleteAsset(tmpScenePath);
-
-            foreach(string path in gatheredAssets)
-                AssetDatabase.DeleteAsset(path);
         }
-
 
         [MenuItem("Arteranos/Test world...", false, 20)]
         public static void TestWorld()
