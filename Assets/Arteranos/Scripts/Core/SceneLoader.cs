@@ -140,10 +140,10 @@ namespace Arteranos.Core
                 Debug.Log($"Scene: {scenePath}");
 
             Scene prev = SceneManager.GetActiveScene();
-            string target = "Arteranos/Scenes/Blank-1";
 
-            if(prev.name == "Blank-1")
-                target = "Arteranos/Scenes/Blank-2";
+            string target = (prev.name == "Blank-1")
+                ? "Arteranos/Scenes/Blank-2"
+                : "Arteranos/Scenes/Blank-1";
 
             SceneManager.LoadSceneAsync(target);
 
