@@ -6,7 +6,6 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -15,26 +14,47 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
+using Arteranos.Core;
+using System.Threading;
+
 namespace Arteranos.Web
 {
-    public class WorldDownloader : MonoBehaviour
+    internal class WorldDownloaderContext : Context
     {
-        public async Task<string> UnzipWorldFile(string worldZipFile)
+        public string url = null;
+        public string targetfile = null;
+        public bool reload = false;
+        public string cachedir = null;
+        public bool cacheHit = false;
+        public string worldZipFile = null;
+        public string worldAssetBundleFile = null;
+    }
+
+    internal class UnzipWorldFileOp : IAsyncOperation<WorldDownloaderContext>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 2.0f;
+        public string Caption { get; set; } = "Uncompressing file";
+        public Action<float> ProgressChanged { get; set; }
+
+        public async Task<WorldDownloaderContext> ExecuteAsync(WorldDownloaderContext context, CancellationToken token)
         {
             return await Task.Run(() =>
             {
-                string path = Path.ChangeExtension(worldZipFile, "dir");
+                if(string.IsNullOrEmpty(context.worldZipFile)) return context;
+
+                string path = Path.ChangeExtension(context.worldZipFile, "dir");
 
                 if(Directory.Exists(path))
                     Directory.Delete(path, true);
                 try
                 {
-                    ZipFile.ExtractToDirectory(worldZipFile, path);
+                    ZipFile.ExtractToDirectory(context.worldZipFile, path);
                 }
                 catch(Exception ex)
                 {
                     Debug.LogException(ex);
-                    return null;
+                    return context;
                 }
 
                 string archPath = "AssetBundles";
@@ -49,75 +69,89 @@ namespace Arteranos.Web
                 if(!Directory.Exists(path))
                 {
                     Debug.LogWarning($"No {archPath} directory in the zip file. Maybe it's the wrong world zip file or not at all.");
-                    return null;
+                    return context;
                 }
 
                 foreach(string file in Directory.EnumerateFiles(path, "*.unity"))
-                    return file;
-
+                {
+                    context.worldZipFile = file;
+                    return context;
+                }
 
                 Debug.LogWarning("No suitable AssetBundle found in the zipfile.");
-                return null;
+                return context;
             });
         }
+    }
 
+    internal class DownloadOp : IAsyncOperation<WorldDownloaderContext>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 8.0f;
+        public string Caption { 
+            get => "Downloading...";
+            set { }
+        }
 
-        public IEnumerator Download(string URL, string targetfile = null, Action<string> callback = null, bool reload = false)
+        public Action<float> ProgressChanged { get; set; }
+
+        public async Task<WorldDownloaderContext> ExecuteAsync(WorldDownloaderContext context, CancellationToken token)
         {
-            targetfile ??= "somefile";
-            string worldzip = $"{GetCacheDir(URL)}/{targetfile}";
+            if(string.IsNullOrEmpty(context.worldZipFile)) return context;
 
-            // reload means to skip the cache check and go straight on to the loading.
-            if(!reload)
-            {
-                bool cacheResult = false;
+            if(context.cacheHit && !context.reload) return context;
 
-                // https://stackoverflow.com/questions/20985022/nested-coroutines-using-ienumerator-vs-ienumerable-in-unity3d
-                // Nested Coroutines? Hmmm....
-                yield return StartCoroutine(CheckCached(URL, targetfile, (x) => cacheResult = x));
+            using UnityWebRequest uwr = new(context.url, UnityWebRequest.kHttpVerbGET);
 
-                if(cacheResult)
-                {
-                    callback?.Invoke(worldzip);
-                    yield break;
-                }  
-            }
-
-            DownloadHandlerFile dhf = new(worldzip);
-            UnityWebRequest uwr = new(URL, UnityWebRequest.kHttpVerbGET, dhf, null);
+            uwr.timeout = Timeout;
+            uwr.downloadHandler = new DownloadHandlerFile(context.worldZipFile);
 
             UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
 
-            while(!uwr_ao.isDone)
+            while(!uwr_ao.isDone && !token.IsCancellationRequested)
             {
-                Debug.Log($"Progress: {uwr_ao.progress}");
-                yield return null;
+                await Task.Yield();
+                ProgressChanged?.Invoke(uwr.downloadProgress);
             }
 
-            if(uwr.result != UnityWebRequest.Result.Success)
+            if(uwr.result == UnityWebRequest.Result.ProtocolError ||
+                uwr.result == UnityWebRequest.Result.ConnectionError)
             {
-                Debug.Log($"Download failure: {uwr.result}");
-
-                // delete the 404-page (or any others), too.
-                File.Delete(worldzip);
-                callback?.Invoke(null);
-                yield break;
+                context.worldZipFile = null;
+                return context;
             }
 
-            callback?.Invoke(worldzip);
+            return context;
+        }
+    }
+
+    internal class CheckCacheOp : IAsyncOperation<WorldDownloaderContext>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 1.0f;
+        public string Caption
+        {
+            get => "Connecting";
+            set { }
         }
 
-        public IEnumerator CheckCached(string URL, string targetfile, Action<bool> callback = null)
+        public Action<float> ProgressChanged { get; set; }
+
+        public async Task<WorldDownloaderContext> ExecuteAsync(WorldDownloaderContext context, CancellationToken token)
         {
-            string worldzip = $"{GetCacheDir(URL)}/{targetfile}";
+            Hash128 hash = new();
+            byte[] bytes = Encoding.UTF8.GetBytes(context.url);
+            hash.Append(bytes);
+            string hashstr = hash.ToString();
+
+            context.cachedir = $"{Application.temporaryCachePath}/WorldCache/{hashstr[0..2]}/{hashstr[2..]}";
+
+            string worldzip = $"{context.cachedir}/{context.targetfile}";
             bool result = File.Exists(worldzip);
 
-            // No local file at all.
-            if(!result) 
-            {
-                callback?.Invoke(false);
-                yield break;
-            }
+            context.worldZipFile = worldzip;
+
+            if(!result) return context;
 
             FileInfo fi = new(worldzip);
 
@@ -128,18 +162,24 @@ namespace Arteranos.Web
             // and require a forced cache flush.
             if((DateTime.Now - locDT) < TimeSpan.FromMinutes(10))
             {
-                callback?.Invoke(true);
-                yield break;
+                context.cacheHit = true;
+                return context;
             }
 
-            UnityWebRequest uwr = new(URL, UnityWebRequest.kHttpVerbHEAD);
-            yield return uwr.SendWebRequest();
+            using UnityWebRequest uwr = new(context.url, UnityWebRequest.kHttpVerbHEAD);
+            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
+
+            while(!uwr_ao.isDone && !token.IsCancellationRequested)
+            {
+                await Task.Yield();
+                ProgressChanged?.Invoke(uwr.downloadProgress);
+            }
 
             // No network response, but we have a local file to work with it.
             if(uwr.result != UnityWebRequest.Result.Success)
             {
-                callback?.Invoke(true);
-                yield break;
+                context.cacheHit = true;
+                return context;
             }
 
             DateTime netDT = DateTime.UnixEpoch;
@@ -156,63 +196,54 @@ namespace Arteranos.Web
             // It's outdated if it's newer in the net, or the reported size differs.
             bool outdated = (netDT > locDT) || (netSize != locSize);
 
-            callback?.Invoke(!outdated);
+            context.cacheHit = !outdated;
+            return context;
         }
+    }
 
-        private string GetCacheDir(string URL, bool create = false)
+    
+    public class WorldDownloader : MonoBehaviour
+    {
+
+        private async void DownloadWorldAsync(string url, bool reload = false)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(URL);
-            Hash128 hash = new();
-            hash.Append(bytes);
-            string result = hash.ToString();
-
-            result = $"{Application.temporaryCachePath}/WorldCache/{result[0..2]}/{result[2..]}";
-
-            if(create)
-                Directory.CreateDirectory(result);
-
-            return result;
-        }
-
-        public IEnumerator DownloadAndUnzip(string URL, Action<string> callback = null, bool reload = false)
-        {
-            string worldzippath = null;
-
-            Debug.Log("Start downloading...");
-
-            yield return StartCoroutine(Download(
-                URL,
-                "world.zip",
-                (x) => worldzippath = x,
-                reload));
-
-            if(string.IsNullOrEmpty(worldzippath))
+            WorldDownloaderContext context = new()
             {
-                Debug.LogWarning("Download failure.");
-                callback?.Invoke(null);
-                yield break;
+                url = url,
+                reload = reload,
+                targetfile = "world.zip"
+            };
+
+
+            AsyncOperationExecutor<WorldDownloaderContext> executor = new(new IAsyncOperation<WorldDownloaderContext>[]
+            {
+                new CheckCacheOp(),
+                new DownloadOp(),
+                new UnzipWorldFileOp()
+            });
+
+            // FIXME: 10 minutes?
+            executor.Timeout = 600;
+            executor.Completed += (context) =>
+            {
+                Debug.Log($"Completed, file {context.worldZipFile}");
+            };
+
+            try
+            {
+                context = await executor.ExecuteAsync(context);
             }
-
-            Debug.Log("Got the archived file, unzipping it...");
-
-            Task<string> ao = UnzipWorldFile(worldzippath);
-
-            // How to convert from async/await method to Coroutine usage...
-            yield return new WaitUntil(() =>
-                ao.Status == TaskStatus.RanToCompletion ||
-                ao.Status == TaskStatus.Faulted);
-
-            string result = ao.Result;
-
-            Debug.Log($"Unzipping done, {result}");
-            callback?.Invoke(result);
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
         private void OnEnable()
         {
-            StartCoroutine(DownloadAndUnzip(
+            DownloadWorldAsync(
                 "https://github.com/willneedit/willneedit.github.io/blob/master/Abbey.zip?raw=true"
                 // "file://C:/Users/willneedit/Desktop/world.zip"
-                ));
+                );
 
         }
     }
