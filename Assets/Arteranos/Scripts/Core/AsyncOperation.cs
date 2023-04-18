@@ -3,6 +3,8 @@
  * 
  * Licensed by the Mozilla Public License 2.0,
  * residing in the LICENSE.md file in the project's root directory.
+ * 
+ * Code idea seen in Ready Player Me SDK, modified and extended by willneedit
  */
 
 using System;
@@ -30,7 +32,6 @@ namespace Arteranos.Core
     {
         public event Action<float, string> ProgressChanged;
         public event Action<T> Completed;
-        public event Action<Exception, T> Failed;
 
         public int Timeout;
         public bool IsCancelled => tokenSource.IsCancellationRequested;
@@ -77,10 +78,9 @@ namespace Arteranos.Core
 
                     weightSoFar += operation.Weight;
                 }
-                catch(Exception ex)
+                catch
                 {
                     if(tokenSource.IsCancellationRequested) tokenSource.Dispose();
-                    Failed?.Invoke(ex, context);
                     throw;
                 }
 

@@ -41,21 +41,12 @@ namespace Arteranos.Web
         {
             return await Task.Run(() =>
             {
-                if(string.IsNullOrEmpty(context.worldZipFile)) return context;
-
                 string path = Path.ChangeExtension(context.worldZipFile, "dir");
 
                 if(Directory.Exists(path))
                     Directory.Delete(path, true);
-                try
-                {
-                    ZipFile.ExtractToDirectory(context.worldZipFile, path);
-                }
-                catch(Exception ex)
-                {
-                    Debug.LogException(ex);
-                    return context;
-                }
+
+                ZipFile.ExtractToDirectory(context.worldZipFile, path);
 
                 string archPath = "AssetBundles";
                 RuntimePlatform p = Application.platform;
@@ -67,19 +58,16 @@ namespace Arteranos.Web
                 path += "/" + archPath;
 
                 if(!Directory.Exists(path))
-                {
-                    Debug.LogWarning($"No {archPath} directory in the zip file. Maybe it's the wrong world zip file or not at all.");
-                    return context;
-                }
+                    throw new FileNotFoundException($"No {archPath} directory in {context.worldZipFile}");
+
 
                 foreach(string file in Directory.EnumerateFiles(path, "*.unity"))
                 {
-                    context.worldZipFile = file;
+                    context.worldAssetBundleFile = file;
                     return context;
                 }
 
-                Debug.LogWarning("No suitable AssetBundle found in the zipfile.");
-                return context;
+                throw new FileNotFoundException("No suitable AssetBundle found in the zipfile.");
             });
         }
     }
@@ -97,9 +85,7 @@ namespace Arteranos.Web
 
         public async Task<WorldDownloaderContext> ExecuteAsync(WorldDownloaderContext context, CancellationToken token)
         {
-            if(string.IsNullOrEmpty(context.worldZipFile)) return context;
-
-            if(context.cacheHit && !context.reload) return context;
+            if(context.cacheHit) return context;
 
             using UnityWebRequest uwr = new(context.url, UnityWebRequest.kHttpVerbGET);
 
@@ -116,10 +102,7 @@ namespace Arteranos.Web
 
             if(uwr.result == UnityWebRequest.Result.ProtocolError ||
                 uwr.result == UnityWebRequest.Result.ConnectionError)
-            {
-                context.worldZipFile = null;
-                return context;
-            }
+                throw new FileNotFoundException(uwr.error, context.worldZipFile);
 
             return context;
         }
@@ -145,15 +128,21 @@ namespace Arteranos.Web
             string hashstr = hash.ToString();
 
             context.cachedir = $"{Application.temporaryCachePath}/WorldCache/{hashstr[0..2]}/{hashstr[2..]}";
+            context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
 
-            string worldzip = $"{context.cachedir}/{context.targetfile}";
-            bool result = File.Exists(worldzip);
+            if(context.reload)
+            {
+                context.cacheHit = false;
+                return context;
+            }
 
-            context.worldZipFile = worldzip;
+            if(!File.Exists(context.worldZipFile))
+            {
+                context.cacheHit = false;
+                return context;
+            }
 
-            if(!result) return context;
-
-            FileInfo fi = new(worldzip);
+            FileInfo fi = new(context.worldZipFile);
 
             DateTime locDT = fi.LastWriteTime;
             long locSize = fi.Length;
@@ -205,7 +194,7 @@ namespace Arteranos.Web
     public class WorldDownloader : MonoBehaviour
     {
 
-        private async void DownloadWorldAsync(string url, bool reload = false)
+        private async void DownloadWorldAsync(string url, bool reload = false, int timeout = 600)
         {
             WorldDownloaderContext context = new()
             {
@@ -222,11 +211,14 @@ namespace Arteranos.Web
                 new UnzipWorldFileOp()
             });
 
-            // FIXME: 10 minutes?
-            executor.Timeout = 600;
+            executor.Timeout = timeout;
+
+            //executor.ProgressChanged +=
+            //    (progress, caption) => Debug.Log($"Progress: {caption}, {progress * 100.0f}%");
+
             executor.Completed += (context) =>
             {
-                Debug.Log($"Completed, file {context.worldZipFile}");
+                Debug.Log($"Completed, file {context.worldAssetBundleFile}");
             };
 
             try
@@ -235,6 +227,7 @@ namespace Arteranos.Web
             }
             catch (Exception ex)
             {
+                Debug.LogWarning("Caught exception...");
                 Debug.LogException(ex);
             }
         }
@@ -245,6 +238,7 @@ namespace Arteranos.Web
                 // "file://C:/Users/willneedit/Desktop/world.zip"
                 );
 
+            Debug.Log("Spawned the downloader in the background, we'll see...");
         }
     }
 }
