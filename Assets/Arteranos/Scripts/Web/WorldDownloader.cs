@@ -16,6 +16,7 @@ using UnityEngine.Networking;
 
 using Arteranos.Core;
 using System.Threading;
+using static Codice.CM.WorkspaceServer.WorkspaceTreeDataStore;
 
 namespace Arteranos.Web
 {
@@ -30,15 +31,17 @@ namespace Arteranos.Web
         public string worldAssetBundleFile = null;
     }
 
-    internal class UnzipWorldFileOp : IAsyncOperation<WorldDownloaderContext>
+    internal class UnzipWorldFileOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 2.0f;
         public string Caption { get; set; } = "Uncompressing file";
         public Action<float> ProgressChanged { get; set; }
 
-        public async Task<WorldDownloaderContext> ExecuteAsync(WorldDownloaderContext context, CancellationToken token)
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
+            WorldDownloaderContext context = _context as WorldDownloaderContext;
+
             return await Task.Run(() =>
             {
                 string path = Path.ChangeExtension(context.worldZipFile, "dir");
@@ -72,7 +75,7 @@ namespace Arteranos.Web
         }
     }
 
-    internal class DownloadOp : IAsyncOperation<WorldDownloaderContext>
+    internal class DownloadOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 8.0f;
@@ -83,8 +86,10 @@ namespace Arteranos.Web
 
         public Action<float> ProgressChanged { get; set; }
 
-        public async Task<WorldDownloaderContext> ExecuteAsync(WorldDownloaderContext context, CancellationToken token)
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
+            WorldDownloaderContext context = _context as WorldDownloaderContext;
+
             if(context.cacheHit) return context;
 
             using UnityWebRequest uwr = new(context.url, UnityWebRequest.kHttpVerbGET);
@@ -108,7 +113,7 @@ namespace Arteranos.Web
         }
     }
 
-    internal class CheckCacheOp : IAsyncOperation<WorldDownloaderContext>
+    internal class CheckCacheOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 1.0f;
@@ -120,8 +125,10 @@ namespace Arteranos.Web
 
         public Action<float> ProgressChanged { get; set; }
 
-        public async Task<WorldDownloaderContext> ExecuteAsync(WorldDownloaderContext context, CancellationToken token)
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
+            WorldDownloaderContext context = _context as WorldDownloaderContext;
+
             Hash128 hash = new();
             byte[] bytes = Encoding.UTF8.GetBytes(context.url);
             hash.Append(bytes);
@@ -191,10 +198,10 @@ namespace Arteranos.Web
     }
 
     
-    public class WorldDownloader : MonoBehaviour
+    public class WorldDownloader
     {
 
-        private async void DownloadWorldAsync(string url, bool reload = false, int timeout = 600)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(string url, bool reload = false, int timeout = 600)
         {
             WorldDownloaderContext context = new()
             {
@@ -204,7 +211,7 @@ namespace Arteranos.Web
             };
 
 
-            AsyncOperationExecutor<WorldDownloaderContext> executor = new(new IAsyncOperation<WorldDownloaderContext>[]
+            AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
             {
                 new CheckCacheOp(),
                 new DownloadOp(),
@@ -213,32 +220,24 @@ namespace Arteranos.Web
 
             executor.Timeout = timeout;
 
-            //executor.ProgressChanged +=
-            //    (progress, caption) => Debug.Log($"Progress: {caption}, {progress * 100.0f}%");
+            return (executor, context);
 
-            executor.Completed += (context) =>
-            {
-                Debug.Log($"Completed, file {context.worldAssetBundleFile}");
-            };
-
-            try
-            {
-                context = await executor.ExecuteAsync(context);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning("Caught exception...");
-                Debug.LogException(ex);
-            }
         }
-        private void OnEnable()
+
+        public static string GetWorldAssetBundle(Context _context)
         {
-            DownloadWorldAsync(
-                "https://github.com/willneedit/willneedit.github.io/blob/master/Abbey.zip?raw=true"
-                // "file://C:/Users/willneedit/Desktop/world.zip"
-                );
-
-            Debug.Log("Spawned the downloader in the background, we'll see...");
+            WorldDownloaderContext context = _context as WorldDownloaderContext;
+            return context.worldAssetBundleFile;
         }
+
+        //private void OnEnable()
+        //{
+        //    DownloadWorldAsync(
+        //        "https://github.com/willneedit/willneedit.github.io/blob/master/Abbey.zip?raw=true"
+        //        // "file://C:/Users/willneedit/Desktop/world.zip"
+        //        );
+
+        //    Debug.Log("Spawned the downloader in the background, we'll see...");
+        //}
     }
 }

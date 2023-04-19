@@ -1747,6 +1747,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5483533141505094443}
   - component: {fileID: 5483533141505094440}
+  - component: {fileID: 8078237096226495410}
   m_Layer: 5
   m_Name: PrefPanel_Moderation
   m_TagString: Untagged
@@ -1802,6 +1803,26 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &8078237096226495410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5483533141505094442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bacd90486f5587f4aad794c2c3b51ee8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  txt_WorldURL: {fileID: 2148941897861213112}
+  btn_LoadWorld: {fileID: 2755159638592691290}
+  btn_WorldGallery: {fileID: 4610469535893372581}
+  chk_Guests: {fileID: 5173962493202607939}
+  chk_CustomAvatars: {fileID: 4461444601837497753}
+  chk_Flying: {fileID: 2979457288832135865}
+  bp_ProgressUI: {fileID: 8788437879684674956, guid: 85d5da75405e4214098e161d385b6368,
+    type: 3}
 --- !u!1 &5483533142090762273
 GameObject:
   m_ObjectHideFlags: 0

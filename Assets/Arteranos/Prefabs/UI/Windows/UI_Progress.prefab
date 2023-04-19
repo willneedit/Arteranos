@@ -70,6 +70,8 @@ GameObject:
   - component: {fileID: 2306558801302682174}
   - component: {fileID: 2306558801302682175}
   - component: {fileID: 2306558801302682168}
+  - component: {fileID: 8788437879684674956}
+  - component: {fileID: 2070465809179731356}
   m_Layer: 5
   m_Name: UI_Progress
   m_TagString: Untagged
@@ -141,7 +143,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &2306558801302682175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -178,6 +180,39 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RaycastTriggerInteraction: 1
+--- !u!114 &8788437879684674956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2306558801302682169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 567eae569b3e3794d9bb49998bc84620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Panel: {fileID: 7681602168893414166}
+  PatienceThreshold: 5
+  AlmostFinishedThreshold: 1
+  Tip: 
+  AllowCancel: 0
+--- !u!114 &2070465809179731356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2306558801302682169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d61ee9cfd392d9340ada687ac4daaa2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delay: 2
+  m_Duration: 5
+  m_Tolerance: 1
+  m_offset: {x: 0.5, y: -0.5, z: 0.5}
 --- !u!1 &2613065973329851003
 GameObject:
   m_ObjectHideFlags: 0

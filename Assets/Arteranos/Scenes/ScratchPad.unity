@@ -142,7 +142,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &283428096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -469,7 +469,7 @@ PrefabInstance:
         type: 3}
       propertyPath: ChoiceEntries.Array.data[6].UI
       value: 
-      objectReference: {fileID: 2071027444668359036, guid: 98cf5c799cd879e41bee0fc8758403b5,
+      objectReference: {fileID: 5483533141505094440, guid: 1a518f2e6a311fc41853b65a83802728,
         type: 3}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
@@ -641,22 +641,22 @@ PrefabInstance:
     - target: {fileID: 3995104436472947779, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3995104436472947779, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3995104436472947779, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 25
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3995104436472947779, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -8
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e0188d43f9de31042ac67bbff8de2205, type: 3}
@@ -797,7 +797,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1089605323
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -912,7 +912,6 @@ GameObject:
   - component: {fileID: 1187311014}
   - component: {fileID: 1187311018}
   - component: {fileID: 1187311019}
-  - component: {fileID: 1187311020}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -1021,18 +1020,6 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6547c87a153b0c5489aefca83373ad13, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1187311020
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1187311013}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 475760efe583fe44d9d4784700744b77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &1261124874
