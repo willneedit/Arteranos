@@ -67,21 +67,25 @@ namespace Arteranos.UI
 
             ProgressUI pui = Instantiate(bp_ProgressUI);
 
+            //pui.PatienceThreshold = 0f;
+            //pui.AlmostFinishedThreshold = 0f;
+
+            pui.AllowCancel = true;
+
             (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(url, true);
 
-            pui.Completed += (context) => OnLoadWorldComplete(pui, context);
-            pui.Faulted += (ex, context) => OnLoadWorldFaulted(pui, ex, context);
+            pui.Completed += OnLoadWorldComplete;
+            pui.Faulted += OnLoadWorldFaulted;
         }
 
-        private void OnLoadWorldFaulted(ProgressUI pui, Exception ex, Context context)
+        private void OnLoadWorldFaulted(Exception ex, Context _context)
         {
             Debug.LogWarning($"Error in loading world: {ex.Message}");
-            Destroy(pui.gameObject);
 
             btn_LoadWorld.interactable = true;
         }
 
-        private void OnLoadWorldComplete(ProgressUI pui, Context _context)
+        private void OnLoadWorldComplete(Context _context)
         {
             string worldABF = WorldDownloader.GetWorldAssetBundle(_context);
 
@@ -95,8 +99,6 @@ namespace Arteranos.UI
 
             // Or, the newly scene will destroy both the progress indicator and the system menu.
             //btn_LoadWorld.interactable = true;
-
-            //Destroy(pui.gameObject);
 
         }
     }
