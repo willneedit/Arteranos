@@ -5,7 +5,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 namespace Arteranos.User
 {
-    [AddComponentMenu("XR/Teleportation Area", 12)]
+    [AddComponentMenu("User/Teleportation Area", 10)]
     public class TeleportationArea : BaseTeleportationInteractable
     {
         protected override bool GenerateTeleportRequest(IXRInteractor interactor, RaycastHit raycastHit, ref TeleportRequest teleportRequest)
