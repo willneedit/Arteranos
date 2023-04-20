@@ -16,7 +16,6 @@ using UnityEngine.Networking;
 
 using Arteranos.Core;
 using System.Threading;
-using static Codice.CM.WorkspaceServer.WorkspaceTreeDataStore;
 
 namespace Arteranos.Web
 {

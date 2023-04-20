@@ -167,7 +167,7 @@ namespace Arteranos.Core
             try
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                File.WriteAllText(Path.Combine(Application.persistentDataPath, PATH_CLIENT_SETTINGS), json);
+                File.WriteAllText($"{Application.persistentDataPath}/{PATH_CLIENT_SETTINGS}", json);
             }
             catch(Exception e)
             {
@@ -181,7 +181,7 @@ namespace Arteranos.Core
 
             try
             {
-                string json = File.ReadAllText(Path.Combine(Application.persistentDataPath,PATH_CLIENT_SETTINGS));
+                string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_CLIENT_SETTINGS}");
                 cs = JsonConvert.DeserializeObject<ClientSettings>(json);
             }
             catch(Exception e)
