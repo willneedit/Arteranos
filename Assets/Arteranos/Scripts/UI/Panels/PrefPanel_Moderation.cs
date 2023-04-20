@@ -28,6 +28,8 @@ namespace Arteranos.UI
         public ProgressUI bp_ProgressUI = null;
 
         private ClientSettings cs = null;
+        private ServerSettings ss = null;
+
         private bool dirty = false;
 
         protected override void Awake()
@@ -41,6 +43,12 @@ namespace Arteranos.UI
             base.Start();
 
             cs = SettingsManager.Client;
+            ss = SettingsManager.Server;
+
+            txt_WorldURL.text = ss.WorldURL;
+            chk_Guests.isOn = ss.AllowGuests;
+            chk_CustomAvatars.isOn = ss.AllowCustomAvatars;
+            chk_Flying.isOn = ss.AllowFlying;
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
@@ -49,6 +57,16 @@ namespace Arteranos.UI
         protected override void OnDisable()
         {
             base.OnDisable();
+
+            if(ss != null)
+            {
+                // Only when the world loading is committed, not only the entry of the URL.
+                // ss.WorldURL = txt_WorldURL.text;
+
+                ss.AllowFlying = chk_Flying.isOn;
+                ss.AllowCustomAvatars = chk_CustomAvatars.isOn;
+                ss.AllowGuests = chk_Guests.isOn;
+            }
 
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty) cs?.SaveSettings();
@@ -71,7 +89,7 @@ namespace Arteranos.UI
 
             (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(url, true);
 
-            pui.Completed += OnLoadWorldComplete;
+            pui.Completed += (context) => OnLoadWorldComplete(url, context);
             pui.Faulted += OnLoadWorldFaulted;
         }
 
@@ -79,10 +97,11 @@ namespace Arteranos.UI
         {
             Debug.LogWarning($"Error in loading world: {ex.Message}");
 
+            // One more chance to correct a typo, then to attempt a reload.
             btn_LoadWorld.interactable = true;
         }
 
-        private void OnLoadWorldComplete(Context _context)
+        private void OnLoadWorldComplete(string worldURL, Context _context)
         {
             string worldABF = WorldDownloader.GetWorldAssetBundle(_context);
 
@@ -94,8 +113,9 @@ namespace Arteranos.UI
             SceneLoader sl = go.AddComponent<SceneLoader>();
             sl.Name = worldABF;
 
-            // Or, the newly scene will destroy both the progress indicator and the system menu.
-            //btn_LoadWorld.interactable = true;
+            // Only then the URL is saved on the successful loading, otherwise the server
+            // setting in this session is discarded.
+            ss.WorldURL = worldURL;
 
         }
     }
