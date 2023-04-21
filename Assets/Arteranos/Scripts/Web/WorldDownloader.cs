@@ -223,11 +223,24 @@ namespace Arteranos.Web
 
         }
 
-        public static string GetWorldAssetBundle(Context _context)
+        public static void EnterDownloadedWorld(Context _context)
         {
             WorldDownloaderContext context = _context as WorldDownloaderContext;
-            return context.worldAssetBundleFile;
+
+            string worldABF = context.worldAssetBundleFile;
+
+            Debug.Log($"Download complete, world={worldABF}");
+
+            // Deploy the scene loader.
+            GameObject go = new("_SceneLoader");
+            go.AddComponent<Persistence>();
+            SceneLoader sl = go.AddComponent<SceneLoader>();
+            sl.Name = worldABF;
+
+            // TODO Placing the avatars in the spawn points (or to 0,0,0)
+            //      Need an OnFinishSceneLoad event.
         }
+
 
         //private void OnEnable()
         //{

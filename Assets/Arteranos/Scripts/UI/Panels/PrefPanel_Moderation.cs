@@ -25,8 +25,6 @@ namespace Arteranos.UI
         public Toggle chk_CustomAvatars = null;
         public Toggle chk_Flying = null;
 
-        public ProgressUI bp_ProgressUI = null;
-
         private ClientSettings cs = null;
         private ServerSettings ss = null;
 
@@ -80,7 +78,7 @@ namespace Arteranos.UI
 
             string url = txt_WorldURL.text;
 
-            ProgressUI pui = Instantiate(bp_ProgressUI);
+            ProgressUI pui = ProgressUI.New();
 
             //pui.PatienceThreshold = 0f;
             //pui.AlmostFinishedThreshold = 0f;
@@ -103,18 +101,13 @@ namespace Arteranos.UI
 
         private void OnLoadWorldComplete(string worldURL, Context _context)
         {
-            string worldABF = WorldDownloader.GetWorldAssetBundle(_context);
-
-            Debug.Log($"Download complete, world={worldABF}");
-
-            // Deploy the scene loader.
-            GameObject go = new("_SceneLoader");
-            go.AddComponent<Persistence>();
-            SceneLoader sl = go.AddComponent<SceneLoader>();
-            sl.Name = worldABF;
+            WorldDownloader.EnterDownloadedWorld(_context);
 
             // Only then the URL is saved on the successful loading, otherwise the server
             // setting in this session is discarded.
+
+            // Like with a smartphone - To restart a world, turn it off and back on.
+            ss.WorldURL = null;
             ss.WorldURL = worldURL;
 
         }
