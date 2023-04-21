@@ -18,7 +18,6 @@ namespace Arteranos.UI
 {
     public class PrefPanel_Exit : UIBehaviour
     {
-        public DialogUI DialogUI = null;
         public LoginUI LoginUI = null;
 
         public Button btn_ModeSwitch = null;
@@ -92,7 +91,7 @@ namespace Arteranos.UI
         private async Task OnExitClick()
         {
             btn_Exit.interactable = false;
-            DialogUI go = Instantiate(DialogUI);
+            DialogUI go = DialogUI.New();
             int rc = await go.PerformDialogAsync(
                 "Do you really want to quit?",
                 new string[] {"OK", "Cancel"});

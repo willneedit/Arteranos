@@ -61,8 +61,6 @@ namespace Arteranos.UI
         public Button btn_Cancel = null;
         public RectTransform grp_Cancel = null;
 
-        public DialogUI DialogUI = null;
-
         public bool CancelEnabled = false;
 
         private string[] PackageNames = null;
@@ -233,7 +231,7 @@ namespace Arteranos.UI
                 // Already in Desktop mode, nothing to do.
                 if(!cs.VRMode) return;
 
-                m_DialogUI = Instantiate(DialogUI);
+                m_DialogUI = DialogUI.New();
                 m_DialogUI.text =
                     "Put down your VR headset,\n" +
                     "or switch into Desktop mode.\n" +
