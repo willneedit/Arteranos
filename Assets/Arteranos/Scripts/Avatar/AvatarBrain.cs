@@ -9,6 +9,8 @@ using Arteranos.Services;
 using Arteranos.Core;
 using Arteranos.Audio;
 using System;
+using Arteranos.UI;
+using Arteranos.Web;
 
 namespace Arteranos.NetworkIO
 {
@@ -37,10 +39,10 @@ namespace Arteranos.NetworkIO
 
     public class AvatarBrain : NetworkBehaviour
     {
-        public Transform Voice { get; private set; } = null;
-
         public event Action<IVoiceOutput> OnVoiceOutputChanged;
         public event Action<string> OnAvatarChanged;
+
+        private Transform Voice = null;
 
         public int ChatOwnID
         {
@@ -105,6 +107,7 @@ namespace Arteranos.NetworkIO
             m_blobs.Callback += OnMBlobsChanged;
 
             SettingsManager.Client.OnAvatarChanged += (x) => AvatarURL = x;
+            SettingsManager.Server.OnWorldURLChanged += CommitWorldChanged;
 
             ResyncInitialValues();
 
@@ -117,6 +120,7 @@ namespace Arteranos.NetworkIO
         {
             DeinitializeVoice();
 
+            SettingsManager.Server.OnWorldURLChanged -= CommitWorldChanged;
             SettingsManager.Client.OnAvatarChanged -= (x) => AvatarURL = x;
 
             m_ints.Callback -= OnMIntsChanged;
@@ -187,9 +191,9 @@ namespace Arteranos.NetworkIO
         [Command]
         private void PropagateBlob(AVBlobKeys key, byte[] value) => m_blobs[key] = value;
 
-#endregion
+        #endregion
         // ---------------------------------------------------------------
-#region Voice handling
+        #region Voice handling
 
         private IChatroomNetworkV2 cran = null;
         private IEnumerator fdv_cr = null;
@@ -266,8 +270,102 @@ namespace Arteranos.NetworkIO
         }
 
 
-#endregion
+        #endregion
         // ---------------------------------------------------------------
+        #region World change event handling
+
+        [ClientRpc]
+        private void ReceiveWorldTransition(string worldURL)
+        {
+            ServerSettings ss = SettingsManager.Server;
+
+            // Alien avatars come along, in their devices
+            if(!isOwned) return;
+
+            // worldURL could be null means reloading the same world.
+            if(worldURL == null) return;
+
+            // Only differing if it's the remote change announce - the local is done
+            // in the PrefPanel_Moderation.
+            if(ss.WorldURL == worldURL)
+            {
+                Debug.Log("World transition - already in that targeted world.");
+                return;
+            }
+
+            // Now that's the real deal.
+            Debug.Log($"WORLD TRANSITION: From {ss.WorldURL} to {worldURL} - Choose now!");
+            
+            UI.DialogUI dialog = UI.DialogUI.New();
+            
+            dialog.text =
+                "The server is about to change the world to\n" +
+                $"{worldURL}\n" +
+                "What to do?";
+
+            dialog.buttons = new string[]
+            {
+                "Go offline",
+                "In Server",
+                "Follow"
+            };
+
+            dialog.OnDialogDone += (response) => OnWorldChangeAnswer(dialog, worldURL, response);
+        }
+
+        private void OnWorldChangeAnswer(DialogUI dialog, string worldURL, int response)
+        {
+            Destroy(dialog.gameObject);
+
+            // Disconnect, go offline
+            // TODO revert to offline world
+            if(response == 0)
+            {
+                // Only the client disconnected, but the server part of the host
+                // remains
+                NetworkClient.Disconnect();
+                return;
+            }
+
+            // TODO dispatch to a server selector in an offline world
+
+            // Here on now, remote triggered world change.
+            if(response == 2)
+            {
+                ProgressUI pui = ProgressUI.New();
+
+                pui.AllowCancel = true;
+
+                (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(worldURL, true);
+
+                pui.Completed += (context) => OnLoadWorldComplete(worldURL, context);
+                pui.Faulted += OnLoadWorldFaulted;
+            }
+        }
+        private void OnLoadWorldFaulted(Exception ex, Context _context)
+        {
+            Debug.LogWarning($"Error in loading world: {ex.Message}");
+        }
+
+        private void OnLoadWorldComplete(string worldURL, Context _context)
+        {
+            WorldDownloader.EnterDownloadedWorld(_context);
+        }
+
+        [Command]
+        private void PropagateWorldTransition(string worldURL) => ReceiveWorldTransition(worldURL);
+
+        private void CommitWorldChanged(string worldURL)
+        {
+            // We already have transitioned, now we have to tell that the world has changed,
+            // and we have to wake up, and for us it is just to find ourselves.
+            if(isOwned)
+            {
+                PropagateWorldTransition(worldURL);
+            }
+        }
+
+        #endregion
 
     }
 }
