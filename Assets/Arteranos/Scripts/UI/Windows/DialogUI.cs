@@ -19,6 +19,12 @@ public class DialogUI : UIBehaviour
 
     private readonly SemaphoreSlim dialogFinished = new(0, 1);
 
+    public static DialogUI New()
+    {
+        GameObject go = Instantiate(Resources.Load("UI/UI_Dialog") as GameObject);
+        return go.GetComponent<DialogUI>();
+    }
+
     protected override void Start()
     {
         UnityAction makeButtonPressedAction(int index) => () => OnButtonClicked(index);

@@ -47,6 +47,12 @@ namespace Arteranos.UI
         private GameObject go_buttonArea = null;
         private Button btn_cancelButton = null;
 
+        public static ProgressUI New()
+        {
+            GameObject go = Instantiate(Resources.Load("UI/UI_Progress") as GameObject);
+            return go.GetComponent<ProgressUI>();
+        }
+
         protected override void Awake()
         {
             base.Awake();
