@@ -10,8 +10,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Newtonsoft.Json;
 using UnityEditor;
+using System.IO;
 
 namespace Arteranos.Core
 {
@@ -141,11 +141,11 @@ namespace Arteranos.Core
 
             Scene prev = SceneManager.GetActiveScene();
 
-            string target = (prev.name == "Blank-1")
-                ? "Arteranos/Scenes/Blank-2"
-                : "Arteranos/Scenes/Blank-1";
+            Scene newScene = SceneManager.CreateScene($"Scene_{Path.GetRandomFileName()}");
 
-            SceneManager.LoadSceneAsync(target);
+            yield return null;
+
+            SceneManager.SetActiveScene(newScene);
 
             AssetBundleRequest abrGO = loadedAB.LoadAssetAsync<GameObject>("Assets/Root/Environment.prefab");
             AssetBundleRequest abrLL = loadedAB.LoadAssetAsync<GameObject>("Assets/Root/LevelLightmapData.prefab");
@@ -156,7 +156,9 @@ namespace Arteranos.Core
             GameObject environment = abrGO.asset as GameObject;
             if(environment == null)
             {
+                // Must be horribly wrong. Or, someone tampered with the world data.
                 Debug.LogError("Cannot load the Environment asset");
+                SceneManager.UnloadSceneAsync(newScene);
                 yield break;
             }
 
@@ -167,13 +169,6 @@ namespace Arteranos.Core
             while(!abrLS.isDone) yield return null;
 
             Lightmapping.lightingSettings = abrLS.asset as LightingSettings;
-
-            Scene sc = SceneManager.GetActiveScene();
-
-            GameObject[] gobs = sc.GetRootGameObjects();
-
-            foreach(GameObject gob in gobs)
-                Destroy(gob);
 
             GameObject go = Instantiate(environment);
             StripScripts(go.transform);
@@ -197,6 +192,8 @@ namespace Arteranos.Core
             Debug.Log("Loader finished, cleaning up.");
 
             loadedAB.Unload(false);
+
+            SceneManager.UnloadSceneAsync(prev);
 
             Destroy(gameObject);
 
