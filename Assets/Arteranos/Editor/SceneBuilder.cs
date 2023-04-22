@@ -19,14 +19,155 @@ using System.Collections;
 using Unity.EditorCoroutines.Editor;
 using Arteranos.UI;
 using Arteranos.Web;
+using Newtonsoft.Json;
 
 namespace Arteranos.Editor
 {
-    public class SceneBuilder : MonoBehaviour
+    public class MetaDataJSON
+    {
+        public const string PATH_METADATA_DEFAULTS = "MetadataDefaults.json";
+
+        public string WorldName = "Unnamed World";
+        public string Author = "Anonymous";
+
+        public void SaveDefaults()
+        {
+            try
+            {
+                string json = JsonConvert.SerializeObject(this, Formatting.Indented);
+                File.WriteAllText($"{Application.persistentDataPath}/{PATH_METADATA_DEFAULTS}", json);
+            }
+            catch(System.Exception ex)
+            {
+                Debug.LogWarning($"Failed to save the metadata defaults: {ex.Message}");
+            }
+        }
+
+        public static MetaDataJSON LoadDefaults()
+        {
+            MetaDataJSON mdj;
+            try
+            {
+                string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_METADATA_DEFAULTS}");
+                mdj = JsonConvert.DeserializeObject<MetaDataJSON>(json);
+            }
+            catch(System.Exception ex)
+            {
+                Debug.LogWarning($"Failed to load the metadata defaults: {ex.Message}");
+                mdj = new();
+            }
+
+            return mdj;
+        }
+    }
+
+    public class SceneBuilderGUI : EditorWindow
+    {
+        public MetaDataJSON metadata = null;
+        public string targetFile = string.Empty;
+        public string screenshotFile = string.Empty;
+
+        public bool inProgress = false;
+
+
+        [MenuItem("Arteranos/Build scene as world", false, 10)]
+        public static void ShowScenebuilderGUI()
+        {
+            SceneBuilderGUI window = GetWindow<SceneBuilderGUI>("World building");
+            window.Show();
+        }
+
+        public void OnGUI()
+        {
+            if(inProgress)
+            {
+
+                GUIStyle style = new GUIStyle() { 
+                    fontStyle = FontStyle.Bold, 
+                    fontSize = 24,
+                    alignment= TextAnchor.MiddleCenter,
+                };
+
+                style.normal.textColor = new Color(0.80f, 0, 0);
+                EditorGUILayout.LabelField("Build in progress...", style);
+                return;
+            }
+
+            if(metadata == null) metadata = MetaDataJSON.LoadDefaults();
+
+            EditorGUILayout.BeginVertical(new GUIStyle { padding = new RectOffset(10, 10, 10, 10) });
+
+            metadata.WorldName = EditorGUILayout.TextField("World Name", metadata.WorldName);
+
+            metadata.Author = EditorGUILayout.TextField("Author Name", metadata.Author);
+
+            screenshotFile = Common.FileSelectionField(
+                new GUIContent("Screenshot"),
+                false,
+                false,
+                screenshotFile);
+
+            targetFile = Common.FileSelectionField(
+                new GUIContent("Target Zip File"),
+                false,
+                true,
+                targetFile,
+                "zip");
+
+            EditorGUILayout.Space(10);
+
+            if(GUILayout.Button("Build World Zip File", new GUIStyle(GUI.skin.button)
+                {
+                    fontStyle = FontStyle.Bold
+                }))
+                CommitBuild(metadata, targetFile, screenshotFile);
+
+            EditorGUILayout.Space(10);
+
+            if(GUILayout.Button("Reload defaults"))
+            {
+                metadata = MetaDataJSON.LoadDefaults();
+                Repaint();
+            }
+
+            if(GUILayout.Button("Save defaults"))
+                metadata.SaveDefaults();
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private void CommitBuild(MetaDataJSON metadata, string targetFile, string screenshotFile)
+        {
+            void CompletedBuild()
+            {
+                inProgress = false;
+                // Close();
+                SceneBuilder.OnCompletedBuild -= CompletedBuild;
+            }
+
+            inProgress = true;
+
+            SceneBuilder.metadata = metadata;
+            SceneBuilder.targetFile = targetFile;
+            SceneBuilder.screenshotFile = screenshotFile;
+
+            SceneBuilder.OnCompletedBuild += CompletedBuild;
+
+            SceneBuilder.BuildSceneAsWorld();
+        }
+    }
+
+    public class SceneBuilder : ScriptableObject
     {
         public static readonly string ROOT_PATH = "Assets/Root/";
 
-        public static List<string> gatheredAssets = new();
+        public static event System.Action OnCompletedBuild;
+
+        public static MetaDataJSON metadata;
+        public static string screenshotFile;
+        public static string targetFile;
+
+        private static List<string> gatheredAssets = new();
 
         public static void GatherAsset(Object asset, string path)
         {
@@ -95,7 +236,6 @@ namespace Arteranos.Editor
                 RelayerTree(go.transform.GetChild(i).gameObject);
         }
 
-
         private static void ScrubEssentials()
         {
             foreach(Camera camera in FindObjectsOfType<Camera>())
@@ -123,7 +263,6 @@ namespace Arteranos.Editor
                 GatherCopiedAsset(ls, ROOT_PATH + "LightingSettings.lighting");
         }
 
-        [MenuItem("Arteranos/Build scene as world", false, 10)]
         public static void BuildSceneAsWorld()
         {
             static IEnumerator Cleanup(string itemPath)
@@ -133,6 +272,7 @@ namespace Arteranos.Editor
                 yield return null;
 
                 AssetDatabase.DeleteAsset(ROOT_PATH[0..^1]);
+                OnCompletedBuild?.Invoke();
             }
 
             AssetDatabase.CreateFolder("Assets", "Root");
@@ -164,6 +304,7 @@ namespace Arteranos.Editor
 
         private static void CompileWorldData(string itemPath)
         {
+
             Debug.Log("Baking done, compiling Asset Bundle");
 
             List<BuildTarget> targets = new()
@@ -171,7 +312,17 @@ namespace Arteranos.Editor
                 BuildTarget.StandaloneWindows64
             };
 
-            Common.BuildAssetBundle(gatheredAssets.ToArray(), targets, itemPath);
+            string metadataTxt = JsonConvert.SerializeObject(metadata, Formatting.Indented);
+
+            if(string.IsNullOrEmpty(targetFile)) targetFile = null;
+
+            Common.BuildAssetBundle(
+                gatheredAssets.ToArray(),
+                targets,
+                itemPath,
+                metadataTxt,
+                screenshotFile,
+                targetFile);
         }
 
         [MenuItem("Arteranos/Test world...", false, 20)]

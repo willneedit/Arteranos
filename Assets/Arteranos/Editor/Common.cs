@@ -211,11 +211,11 @@ namespace Arteranos.Editor
                 return null;
             }
 
-            if(screenshotFile != null)
+            if(!string.IsNullOrEmpty(screenshotFile))
                 File.Copy(screenshotFile, $"{tmpSaveLocation}/Screenshot.${Path.GetExtension(screenshotFile)}", true);
 
-            if(metadataTxt != null)
-                File.WriteAllText(metadataTxt, $"{tmpSaveLocation}/Metadata.json");
+            if(!string.IsNullOrEmpty(metadataTxt))
+                File.WriteAllText($"{tmpSaveLocation}/Metadata.json", metadataTxt);
 
             AssetBundleBuild[] abb =
             {
