@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEditor;
 using System.IO;
 
 namespace Arteranos.Core
@@ -149,7 +148,7 @@ namespace Arteranos.Core
 
             AssetBundleRequest abrGO = loadedAB.LoadAssetAsync<GameObject>("Assets/Root/Environment.prefab");
             AssetBundleRequest abrLL = loadedAB.LoadAssetAsync<GameObject>("Assets/Root/LevelLightmapData.prefab");
-            AssetBundleRequest abrLS = loadedAB.LoadAssetAsync<LightingSettings>("Assets/Root/LightingSettings.lighting");
+            // AssetBundleRequest abrLS = loadedAB.LoadAssetAsync<LightingSettings>("Assets/Root/LightingSettings.lighting");
 
             while(!abrGO.isDone) yield return null;
 
@@ -166,9 +165,10 @@ namespace Arteranos.Core
 
             Debug.Log("Populating scene...");
 
-            while(!abrLS.isDone) yield return null;
+            //Do we really need it in a playback setting?
+            //while(!abrLS.isDone) yield return null;
 
-            Lightmapping.lightingSettings = abrLS.asset as LightingSettings;
+            //Lightmapping.lightingSettings = abrLS.asset as LightingSettings;
 
             GameObject go = Instantiate(environment);
             StripScripts(go.transform);
