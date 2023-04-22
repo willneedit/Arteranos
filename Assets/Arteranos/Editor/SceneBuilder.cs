@@ -17,6 +17,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using Unity.EditorCoroutines.Editor;
+using Arteranos.UI;
+using Arteranos.Web;
 
 namespace Arteranos.Editor
 {
@@ -143,9 +145,6 @@ namespace Arteranos.Editor
 
             SaveLightData();
 
-            Debug.Log(tmpScenePath);
-            Debug.Log(itemPath);
-
             GatherPrefab(GameObject.Find("Environment"), ROOT_PATH + "Environment.prefab");
 
             LightingScenarioDataFactory f = ObjectFactory.CreateInstance<LightingScenarioDataFactory>();
@@ -178,14 +177,16 @@ namespace Arteranos.Editor
         [MenuItem("Arteranos/Test world...", false, 20)]
         public static void TestWorld()
         {
+            if(EditorApplication.isPlaying)
+            {
+                Debug.LogError("You already are in the play mode - this menu item is supposed to test the world while editing.");
+                return;
+            }
 
-            string ABName = Common.OpenFileDialog("", false, false, ".unity");
-            if(string.IsNullOrEmpty(ABName)) return;
+            string worldZipName = Common.OpenFileDialog("", false, false, ".zip");
+            if(string.IsNullOrEmpty(worldZipName)) return;
 
-            GameObject go = new("_SceneLoader");
-            go.AddComponent<Persistence>();
-            SceneLoader sl = go.AddComponent<SceneLoader>();
-            sl.Name = ABName;
+            SessionState.SetString("ENTER_TEST_WORLD", $"file://{worldZipName}");
 
             if(!EditorApplication.isPlaying)
                 EditorApplication.EnterPlaymode();
@@ -194,21 +195,46 @@ namespace Arteranos.Editor
 
         // Wipe off the scene loader in the saved scene in Edit mode on reentering it.
         [InitializeOnLoad]
-        public static class OnReenterEditMode
+        public static class OnEditModeChanged
         {
-            static OnReenterEditMode()
+            static OnEditModeChanged()
             {
                 EditorApplication.playModeStateChanged += LogPlayModeState;
             }
 
             private static void LogPlayModeState(PlayModeStateChange state)
             {
-                // Debug.Log(state);
                 if(state == PlayModeStateChange.EnteredEditMode)
                 {
                     SceneLoader sl = FindObjectOfType<SceneLoader>();
                     if(sl != null) DestroyImmediate(sl.gameObject);
                 }
+
+                if(state == PlayModeStateChange.EnteredPlayMode)
+                {
+                    string testWorldZip = SessionState.GetString("ENTER_TEST_WORLD", string.Empty);
+                    SessionState.EraseString("ENTER_TEST_WORLD");
+
+                    if(!string.IsNullOrEmpty(testWorldZip))
+                    {
+                        ProgressUI pui = ProgressUI.New();
+
+                        (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(testWorldZip, true);
+
+                        pui.Completed += (context) => OnLoadWorldComplete(testWorldZip, context);
+                        pui.Faulted += OnLoadWorldFaulted;
+                    }
+                }
+            }
+
+            private static void OnLoadWorldFaulted(System.Exception ex, Context _context)
+            {
+                Debug.LogError($"Error in loading world: {ex.Message}");
+            }
+            private static void OnLoadWorldComplete(string testWorldZip, Context _context)
+            {
+                Debug.Log("World data file loading and unpacking succeeded.");
+                WorldDownloader.EnterDownloadedWorld(_context);
             }
         }
 #if false
