@@ -5,8 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-#if UNITY_EDITOR
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,29 +24,7 @@ namespace Arteranos.Editor
 
     public class Common
     {
-        public static readonly int currentUnityVersion = 20203;
-        public static readonly int minimumUnityVersion = 20203;
-
-        public static readonly string relaxedUnityVersion = "2020.3";
-        public static readonly string strictUnityVersion = "2020.3.18f1";
-
-        private static int _usingUnityVersion = 0;
-
         private static string _resourceDirectory = null;
-
-        public static int UsingUnityVersion
-        {
-            get
-            {
-                if (_usingUnityVersion == 0)
-                {
-                    string[] parts = Application.unityVersion.Split('.');
-                    int.TryParse(parts[0] + parts[1], out _usingUnityVersion);
-                }
-
-                return _usingUnityVersion;
-            }
-        }
 
         public static string ResourceDirectory
         {
@@ -58,7 +34,7 @@ namespace Arteranos.Editor
                 {
                     UnityEditor.PackageManager.PackageInfo p = UnityEditor.PackageManager.PackageInfo.FindForAssembly(Assembly.GetExecutingAssembly());
                     if (p != null)
-                        _resourceDirectory = Path.Combine("Packages", p.name, "Resources");
+                        _resourceDirectory = $"Packages/{p.name}/Resources";
                 }
 
                 if(String.IsNullOrEmpty(_resourceDirectory))
@@ -70,7 +46,7 @@ namespace Arteranos.Editor
                         _resourceDirectory = AssetDatabase.GUIDToAssetPath(g[0]);
                         _resourceDirectory = Path.GetDirectoryName(_resourceDirectory);
                         _resourceDirectory = Path.GetDirectoryName(_resourceDirectory);
-                        _resourceDirectory = Path.Combine(_resourceDirectory, "Resources");
+                        _resourceDirectory = $"{_resourceDirectory}/Resources";
                     }
                 }
 
@@ -135,28 +111,6 @@ namespace Arteranos.Editor
             return t;
         }
 
-        private class VersionInfo
-        {
-            public int version = 0;
-            public DateTime created = new();
-
-            public string Datestring => created.ToShortDateString() + ", " + created.ToShortTimeString();
-
-            public string Versionstring
-            {
-                get
-                {
-                    if (version == 0)
-                        return null;
-                    else if (version != Common.currentUnityVersion)
-                        return "outdated (version " + version + ")";
-                    else
-                        return "current (version " + Common.currentUnityVersion + ")";
-                }
-            }
-
-            public bool Present => version != 0;
-        }
 
         /// <summary>
         /// Offers a combined text entry/file selection dialog for the editor GUI
@@ -227,7 +181,7 @@ namespace Arteranos.Editor
             string tmpDirName;
             do
             {
-                tmpDirName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                tmpDirName = $"{Path.GetTempPath()}/{Path.GetRandomFileName()}";
             } while (Directory.Exists(tmpDirName));
 
             Directory.CreateDirectory(tmpDirName);
@@ -243,40 +197,25 @@ namespace Arteranos.Editor
         /// <param name="tgtRootName">Target root name (must match upload file name of zip file)</param>
         /// <param name="targetFileName">File name to locally save to (incl. .zip) or null to open dialog</param>
         /// <returns>The chosen filename</returns>
-        public static string BuildAssetBundle(string[] assetFiles, List<BuildTarget> architectures, string tgtRootName, string[] screenshotFiles = null, string targetFileName = null)
+        public static string BuildAssetBundle(string[] assetFiles, List<BuildTarget> architectures, string tgtRootName, string metadataTxt = null, string screenshotFile = null, string targetFileName = null)
         {
             string tmpSaveLocation = CreateTempDirectory();
 
-            if(screenshotFiles != null)
-            {
-                string screenshotsSave = Path.Combine(tmpSaveLocation, "Screenshots");
-
-                // Gather screenshots
-                if(screenshotFiles.Length > 0)
-                {
-                    if(!Directory.Exists(screenshotsSave))
-                        Directory.CreateDirectory(screenshotsSave);
-
-                    foreach(string srcFile in screenshotFiles)
-                    {
-                        if(Path.GetExtension(srcFile) != ".png")
-                            continue;
-
-                        string srcFileName = Path.GetFileName(srcFile);
-                        File.Copy(srcFile, Path.Combine(screenshotsSave, srcFileName));
-                    }
-                }
-            }
-
             tgtRootName = SanitizeFileName(tgtRootName).ToLower();
 
-            targetFileName ??= OpenFileDialog(Path.Combine(Application.dataPath, tgtRootName + ".zip"), false, true, "zip");
+            targetFileName ??= OpenFileDialog($"{Application.dataPath}/{tgtRootName}.zip", false, true, "zip");
 
             if (string.IsNullOrEmpty(targetFileName))
             {
                 Debug.Log("Build has been canceled.");
                 return null;
             }
+
+            if(screenshotFile != null)
+                File.Copy(screenshotFile, $"{tmpSaveLocation}/Screenshot.${Path.GetExtension(screenshotFile)}", true);
+
+            if(metadataTxt != null)
+                File.WriteAllText(metadataTxt, $"{tmpSaveLocation}/Metadata.json");
 
             AssetBundleBuild[] abb =
             {
@@ -289,19 +228,20 @@ namespace Arteranos.Editor
 
             foreach (BuildTarget architecture in architectures)
             {
-                string assetBundlesSave = Path.Combine(tmpSaveLocation, "AssetBundles");
+                string assetBundlesSave = $"{tmpSaveLocation}/AssetBundles";
                 if (architecture == BuildTarget.Android)
-                    assetBundlesSave = Path.Combine(assetBundlesSave, "Android");
+                    assetBundlesSave = $"{tmpSaveLocation}/Android";
                 else if (architecture == BuildTarget.StandaloneOSX)
-                    assetBundlesSave = Path.Combine(assetBundlesSave, "Mac");
+                    assetBundlesSave = $"{tmpSaveLocation}/Mac";
 
                 if (!Directory.Exists(assetBundlesSave))
                     Directory.CreateDirectory(assetBundlesSave);
-                    BuildPipeline.BuildAssetBundles(
-                        assetBundlesSave,
-                        abb,
-                        BuildAssetBundleOptions.StrictMode,
-                        architecture);
+
+                BuildPipeline.BuildAssetBundles(
+                    assetBundlesSave,
+                    abb,
+                    BuildAssetBundleOptions.StrictMode,
+                    architecture);
             }
 
             File.Delete(targetFileName);
@@ -343,44 +283,6 @@ namespace Arteranos.Editor
             return res;
         }
 
-        /// <summary>
-        /// Install a named resource from a template file within the package
-        /// </summary>
-        /// <param name="resname">Name of the resource</param>
-        /// <param name="tgtpath">(optional) subdirectory within the assets folder</param>
-        /// <returns></returns>
-        public static bool InstallResource(string resName, string tgtPath = null)
-        {
-            string destPath;
-
-            if(!string.IsNullOrEmpty(tgtPath))
-            {
-                Directory.CreateDirectory(Path.Combine("Assets", tgtPath));
-                destPath = Path.Combine("Assets", tgtPath, resName);
-            }
-            else
-            {
-                destPath = Path.Combine("Assets", resName);
-            }
-
-            if(File.Exists(destPath))
-            {
-                Debug.Log("Skipped copying: " + destPath);
-                return false;
-            }
-
-            string srcPath = Path.Combine(ResourceDirectory, resName);
-
-            File.Copy(srcPath + ".in", destPath);
-            if(File.Exists(srcPath + ".meta.in"))
-                File.Copy(srcPath + ".meta.in", destPath + ".meta");
-
-            Debug.Log("Copied " + resName + " to " + destPath);
-            return true;
-        }
-
         private static void CreateZip(string sourceDirectory, string outputFile) => ZipFile.CreateFromDirectory(sourceDirectory, outputFile);
     }
 }
-
-#endif // UNITY_EDITOR
