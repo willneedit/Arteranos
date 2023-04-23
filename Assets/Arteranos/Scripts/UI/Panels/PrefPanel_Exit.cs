@@ -11,15 +11,12 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using System.Threading.Tasks;
 using UnityEditor;
 
 namespace Arteranos.UI
 {
     public class PrefPanel_Exit : UIBehaviour
     {
-        public LoginUI LoginUI = null;
-
         public Button btn_ModeSwitch = null;
         public Button btn_LoginUI = null;
         public Button btn_Exit = null;
@@ -32,8 +29,8 @@ namespace Arteranos.UI
             base.Awake();
 
             btn_ModeSwitch.onClick.AddListener(OnModeSwitchClick);
-            btn_LoginUI.onClick.AddListener(() => { _ = OnLoginUIClick(); });
-            btn_Exit.onClick.AddListener(() => { _ = OnExitClick(); });
+            btn_LoginUI.onClick.AddListener(OnLoginUIClick);
+            btn_Exit.onClick.AddListener(OnExitClick);
         }
 
         protected override void Start()
@@ -77,10 +74,10 @@ namespace Arteranos.UI
             StartCoroutine(SwitchVRMode());
         }
 
-        private async Task OnLoginUIClick()
+        private async void OnLoginUIClick()
         {
             btn_LoginUI.interactable = false;
-            LoginUI go = Instantiate(LoginUI);
+            LoginUI go = LoginUI.New();
             go.CancelEnabled = true;
 
             await go.PerformLoginAsync();
@@ -88,7 +85,7 @@ namespace Arteranos.UI
             btn_LoginUI.interactable = true;
         }
 
-        private async Task OnExitClick()
+        private async void OnExitClick()
         {
             btn_Exit.interactable = false;
             DialogUI go = DialogUI.New();

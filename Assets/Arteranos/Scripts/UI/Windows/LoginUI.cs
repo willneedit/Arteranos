@@ -74,6 +74,12 @@ namespace Arteranos.UI
 
         private readonly SemaphoreSlim loginFinished = new(0, 1);
 
+        public static LoginUI New()
+        {
+            GameObject go = Instantiate(Resources.Load("UI/UI_Login") as GameObject);
+            return go.GetComponent<LoginUI>();
+        }
+
         protected override void Awake()
         {
             base.Awake();
