@@ -22,6 +22,7 @@ namespace Arteranos.Web
     internal class WorldDownloaderContext : Context
     {
         public string url = null;
+        public string hashed = null;
         public string targetfile = null;
         public bool reload = false;
         public string cachedir = null;
@@ -128,12 +129,8 @@ namespace Arteranos.Web
         {
             WorldDownloaderContext context = _context as WorldDownloaderContext;
 
-            Hash128 hash = new();
-            byte[] bytes = Encoding.UTF8.GetBytes(context.url);
-            hash.Append(bytes);
-            string hashstr = hash.ToString();
-
-            context.cachedir = $"{Application.temporaryCachePath}/WorldCache/{hashstr[0..2]}/{hashstr[2..]}";
+            context.hashed = WorldDownloader.GetURLHash(context.url);
+            context.cachedir = $"{Application.temporaryCachePath}/WorldCache/{context.hashed}";
             context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
 
             if(context.reload)
@@ -194,11 +191,21 @@ namespace Arteranos.Web
             context.cacheHit = !outdated;
             return context;
         }
-    }
 
+    }
     
     public class WorldDownloader
     {
+        public static string GetURLHash(string url)
+        {
+            Hash128 hash = new();
+            byte[] bytes = Encoding.UTF8.GetBytes(url);
+            hash.Append(bytes);
+            string hashstr = hash.ToString();
+
+            string hashed = $"{hashstr[0..2]}/{hashstr[2..]}";
+            return hashed;
+        }
 
         public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(string url, bool reload = false, int timeout = 600)
         {
