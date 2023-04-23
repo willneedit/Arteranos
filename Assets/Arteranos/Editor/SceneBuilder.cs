@@ -19,51 +19,12 @@ using System.Collections;
 using Unity.EditorCoroutines.Editor;
 using Arteranos.UI;
 using Arteranos.Web;
-using Newtonsoft.Json;
 
 namespace Arteranos.Editor
 {
-    public class MetaDataJSON
-    {
-        public const string PATH_METADATA_DEFAULTS = "MetadataDefaults.json";
-
-        public string WorldName = "Unnamed World";
-        public string Author = "Anonymous";
-
-        public void SaveDefaults()
-        {
-            try
-            {
-                string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                File.WriteAllText($"{Application.persistentDataPath}/{PATH_METADATA_DEFAULTS}", json);
-            }
-            catch(System.Exception ex)
-            {
-                Debug.LogWarning($"Failed to save the metadata defaults: {ex.Message}");
-            }
-        }
-
-        public static MetaDataJSON LoadDefaults()
-        {
-            MetaDataJSON mdj;
-            try
-            {
-                string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_METADATA_DEFAULTS}");
-                mdj = JsonConvert.DeserializeObject<MetaDataJSON>(json);
-            }
-            catch(System.Exception ex)
-            {
-                Debug.LogWarning($"Failed to load the metadata defaults: {ex.Message}");
-                mdj = new();
-            }
-
-            return mdj;
-        }
-    }
-
     public class SceneBuilderGUI : EditorWindow
     {
-        public MetaDataJSON metadata = null;
+        public WorldMetaData metadata = null;
         public string targetFile = string.Empty;
         public string screenshotFile = string.Empty;
 
@@ -82,18 +43,18 @@ namespace Arteranos.Editor
             if(inProgress)
             {
 
-                GUIStyle style = new GUIStyle() { 
+                GUIStyle style = new() { 
                     fontStyle = FontStyle.Bold, 
                     fontSize = 24,
                     alignment= TextAnchor.MiddleCenter,
                 };
 
                 style.normal.textColor = new Color(0.80f, 0, 0);
-                EditorGUILayout.LabelField("Build in progress...", style);
+                EditorGUILayout.LabelField("\nBuild in progress...", style);
                 return;
             }
 
-            if(metadata == null) metadata = MetaDataJSON.LoadDefaults();
+            metadata ??= WorldMetaData.LoadDefaults();
 
             EditorGUILayout.BeginVertical(new GUIStyle { padding = new RectOffset(10, 10, 10, 10) });
 
@@ -120,13 +81,15 @@ namespace Arteranos.Editor
                 {
                     fontStyle = FontStyle.Bold
                 }))
+            {
                 CommitBuild(metadata, targetFile, screenshotFile);
+            }
 
             EditorGUILayout.Space(10);
 
             if(GUILayout.Button("Reload defaults"))
             {
-                metadata = MetaDataJSON.LoadDefaults();
+                metadata = WorldMetaData.LoadDefaults();
                 Repaint();
             }
 
@@ -136,7 +99,7 @@ namespace Arteranos.Editor
             EditorGUILayout.EndVertical();
         }
 
-        private void CommitBuild(MetaDataJSON metadata, string targetFile, string screenshotFile)
+        private void CommitBuild(WorldMetaData metadata, string targetFile, string screenshotFile)
         {
             void CompletedBuild()
             {
@@ -163,11 +126,11 @@ namespace Arteranos.Editor
 
         public static event System.Action OnCompletedBuild;
 
-        public static MetaDataJSON metadata;
+        public static WorldMetaData metadata;
         public static string screenshotFile;
         public static string targetFile;
 
-        private static List<string> gatheredAssets = new();
+        private static readonly List<string> gatheredAssets = new();
 
         public static void GatherAsset(Object asset, string path)
         {
@@ -312,15 +275,13 @@ namespace Arteranos.Editor
                 BuildTarget.StandaloneWindows64
             };
 
-            string metadataTxt = JsonConvert.SerializeObject(metadata, Formatting.Indented);
-
             if(string.IsNullOrEmpty(targetFile)) targetFile = null;
 
             Common.BuildAssetBundle(
                 gatheredAssets.ToArray(),
                 targets,
                 itemPath,
-                metadataTxt,
+                metadata.Serialize(),
                 screenshotFile,
                 targetFile);
         }
@@ -372,17 +333,14 @@ namespace Arteranos.Editor
 
                         (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(testWorldZip, true);
 
-                        pui.Completed += (context) => OnLoadWorldComplete(testWorldZip, context);
+                        pui.Completed += (context) => OnLoadWorldComplete(context);
                         pui.Faulted += OnLoadWorldFaulted;
                     }
                 }
             }
 
-            private static void OnLoadWorldFaulted(System.Exception ex, Context _context)
-            {
-                Debug.LogError($"Error in loading world: {ex.Message}");
-            }
-            private static void OnLoadWorldComplete(string testWorldZip, Context _context)
+            private static void OnLoadWorldFaulted(System.Exception ex, Context _context) => Debug.LogError($"Error in loading world: {ex.Message}");
+            private static void OnLoadWorldComplete(Context _context)
             {
                 Debug.Log("World data file loading and unpacking succeeded.");
                 WorldDownloader.EnterDownloadedWorld(_context);
