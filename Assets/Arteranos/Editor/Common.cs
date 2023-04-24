@@ -212,7 +212,7 @@ namespace Arteranos.Editor
             }
 
             if(!string.IsNullOrEmpty(screenshotFile))
-                File.Copy(screenshotFile, $"{tmpSaveLocation}/Screenshot.${Path.GetExtension(screenshotFile)}", true);
+                File.Copy(screenshotFile, $"{tmpSaveLocation}/Screenshot{Path.GetExtension(screenshotFile)}", true);
 
             if(!string.IsNullOrEmpty(metadataTxt))
                 File.WriteAllText($"{tmpSaveLocation}/Metadata.json", metadataTxt);

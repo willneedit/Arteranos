@@ -275,6 +275,8 @@ namespace Arteranos.Editor
 
             if(string.IsNullOrEmpty(targetFile)) targetFile = null;
 
+            metadata.Created = System.DateTime.Now;
+
             Common.BuildAssetBundle(
                 gatheredAssets.ToArray(),
                 targets,

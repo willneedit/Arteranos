@@ -8,6 +8,7 @@
 using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
+using System;
 
 namespace Arteranos.Web
 {
@@ -17,6 +18,8 @@ namespace Arteranos.Web
 
         public string WorldName = "Unnamed World";
         public string Author = "Anonymous";
+        public DateTime Created = DateTime.MinValue;
+        public DateTime Updated = DateTime.MinValue;
 
         public void SaveDefaults()
         {

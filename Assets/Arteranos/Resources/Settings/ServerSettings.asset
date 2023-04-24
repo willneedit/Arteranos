@@ -14,3 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowAvatars: 1
   ListenAddress: 
+  m_WorldURL: 
+  AllowGuests: 1
+  AllowCustomAvatars: 0
+  AllowFlying: 0

@@ -32,7 +32,8 @@ namespace Arteranos.Web
             string screenshotFile = null;
             foreach(string file in Directory.EnumerateFiles(rootPath, "Screenshot.*"))
             {
-                screenshotFile = file;
+                // In Unity, we use forward slash.
+                screenshotFile = $"{rootPath}/{Path.GetFileName(file)}";
                 break;
             }    
 

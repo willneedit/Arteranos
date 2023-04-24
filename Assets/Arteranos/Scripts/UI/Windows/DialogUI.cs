@@ -75,6 +75,8 @@ namespace Arteranos.UI
         {
             OnDialogDone?.Invoke(index);
             dialogFinished.Release();
+
+            Destroy(gameObject);
         }
 
         // Purely convenient for write a process driven control flow rather than
@@ -89,8 +91,6 @@ namespace Arteranos.UI
             OnDialogDone += (index) => rc = index;
             await dialogFinished.WaitAsync();
             OnDialogDone -= (index) => rc = index;
-
-            Destroy(gameObject);
 
             return rc;
         }

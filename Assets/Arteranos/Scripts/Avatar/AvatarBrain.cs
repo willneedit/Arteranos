@@ -9,8 +9,6 @@ using Arteranos.Services;
 using Arteranos.Core;
 using Arteranos.Audio;
 using System;
-using Arteranos.UI;
-using Arteranos.Web;
 
 namespace Arteranos.NetworkIO
 {
@@ -295,9 +293,14 @@ namespace Arteranos.NetworkIO
 
             // Now that's the real deal.
             Debug.Log($"WORLD TRANSITION: From {ss.WorldURL} to {worldURL} - Choose now!");
-            
+
+            PopupWorldChangeDialog(worldURL);
+        }
+
+        private void PopupWorldChangeDialog(string worldURL)
+        {
             UI.DialogUI dialog = UI.DialogUI.New();
-            
+
             dialog.text =
                 "The server is about to change the world to\n" +
                 $"{worldURL}\n" +
@@ -310,13 +313,11 @@ namespace Arteranos.NetworkIO
                 "Follow"
             };
 
-            dialog.OnDialogDone += (response) => OnWorldChangeAnswer(dialog, worldURL, response);
+            dialog.OnDialogDone += (response) => OnWorldChangeAnswer(worldURL, response);
         }
 
-        private void OnWorldChangeAnswer(DialogUI dialog, string worldURL, int response)
+        private void OnWorldChangeAnswer(string worldURL, int response)
         {
-            Destroy(dialog.gameObject);
-
             // Disconnect, go offline
             // TODO revert to offline world
             if(response == 0)
@@ -331,25 +332,7 @@ namespace Arteranos.NetworkIO
 
             // Here on now, remote triggered world change.
             if(response == 2)
-            {
-                ProgressUI pui = ProgressUI.New();
-
-                pui.AllowCancel = true;
-
-                (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(worldURL, true);
-
-                pui.Completed += (context) => OnLoadWorldComplete(worldURL, context);
-                pui.Faulted += OnLoadWorldFaulted;
-            }
-        }
-        private void OnLoadWorldFaulted(Exception ex, Context _context)
-        {
-            Debug.LogWarning($"Error in loading world: {ex.Message}");
-        }
-
-        private void OnLoadWorldComplete(string worldURL, Context _context)
-        {
-            WorldDownloader.EnterDownloadedWorld(_context);
+                UI.WorldTransitionUI.InitiateTransition(worldURL);
         }
 
         [Command]

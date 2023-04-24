@@ -5,14 +5,11 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
 using TMPro;
-using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using Arteranos.Web;
 
 namespace Arteranos.UI
 {
@@ -76,40 +73,8 @@ namespace Arteranos.UI
             // Lengthy operation, avoid double clicking.
             btn_LoadWorld.interactable = false;
 
-            string url = txt_WorldURL.text;
-
-            ProgressUI pui = ProgressUI.New();
-
-            //pui.PatienceThreshold = 0f;
-            //pui.AlmostFinishedThreshold = 0f;
-
-            pui.AllowCancel = true;
-
-            (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(url, true);
-
-            pui.Completed += (context) => OnLoadWorldComplete(url, context);
-            pui.Faulted += OnLoadWorldFaulted;
+            WorldTransitionUI.InitiateTransition(txt_WorldURL.text, () => btn_LoadWorld.interactable = true);
         }
 
-        private void OnLoadWorldFaulted(Exception ex, Context _context)
-        {
-            Debug.LogWarning($"Error in loading world: {ex.Message}");
-
-            // One more chance to correct a typo, then to attempt a reload.
-            btn_LoadWorld.interactable = true;
-        }
-
-        private void OnLoadWorldComplete(string worldURL, Context _context)
-        {
-            WorldDownloader.EnterDownloadedWorld(_context);
-
-            // Only then the URL is saved on the successful loading, otherwise the server
-            // setting in this session is discarded.
-
-            // Like with a smartphone - To restart a world, turn it off and back on.
-            ss.WorldURL = null;
-            ss.WorldURL = worldURL;
-
-        }
     }
 }
