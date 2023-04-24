@@ -220,10 +220,8 @@ namespace Arteranos.Editor
             GatherAsset(lsd, ROOT_PATH + "LightingScenarioData.asset");
             GatherPrefab(lld.gameObject, ROOT_PATH + "LevelLightmapData.prefab");
 
-            LightingSettings ls = Lightmapping.lightingSettings;
-
-            if(ls != null)
-                GatherCopiedAsset(ls, ROOT_PATH + "LightingSettings.lighting");
+            if(Lightmapping.lightingSettings != null)
+                GatherCopiedAsset(Lightmapping.lightingSettings, ROOT_PATH + "LightingSettings.lighting");
         }
 
         public static void BuildSceneAsWorld()
