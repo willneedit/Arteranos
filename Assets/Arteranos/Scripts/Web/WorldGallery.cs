@@ -40,6 +40,22 @@ namespace Arteranos.Web
             return (metadataFile, screenshotFile);
         }
 
+        public static WorldMetaData RetrieveWorldMetaData(string url)
+        {
+            string metadatafile;
+
+            (metadatafile, _) = RetrieveWorld(url, true);
+
+            if(metadatafile == null)
+                (metadatafile, _) = RetrieveWorld(url, false);
+
+            if(metadatafile == null)
+                return null;
+
+            string json = File.ReadAllText(metadatafile);
+            return WorldMetaData.Deserialize(json);
+        }
+
         public static bool StoreWorld(string url)
         {
             string metadataFile;

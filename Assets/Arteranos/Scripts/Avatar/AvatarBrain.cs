@@ -277,8 +277,7 @@ namespace Arteranos.NetworkIO
         {
             ServerSettings ss = SettingsManager.Server;
 
-            // Alien avatars come along, in their devices
-            if(!isOwned) return;
+            Debug.Log($"Received world transition: isServer={isServer}, isOwned={isOwned}, Source World={ss.WorldURL}, Target World={worldURL}");
 
             // worldURL could be null means reloading the same world.
             if(worldURL == null) return;
@@ -294,32 +293,13 @@ namespace Arteranos.NetworkIO
             // Now that's the real deal.
             Debug.Log($"WORLD TRANSITION: From {ss.WorldURL} to {worldURL} - Choose now!");
 
-            PopupWorldChangeDialog(worldURL);
-        }
-
-        private void PopupWorldChangeDialog(string worldURL)
-        {
-            UI.DialogUI dialog = UI.DialogUI.New();
-
-            dialog.text =
-                "The server is about to change the world to\n" +
-                $"{worldURL}\n" +
-                "What to do?";
-
-            dialog.buttons = new string[]
-            {
-                "Go offline",
-                "In Server",
-                "Follow"
-            };
-
-            dialog.OnDialogDone += (response) => OnWorldChangeAnswer(worldURL, response);
+            UI.WorldTransitionUI.ShowWorldChangeDialog(worldURL, 
+            (response) => OnWorldChangeAnswer(worldURL, response));
         }
 
         private void OnWorldChangeAnswer(string worldURL, int response)
         {
             // Disconnect, go offline
-            // TODO revert to offline world
             if(response == 0)
             {
                 // Only the client disconnected, but the server part of the host
@@ -343,9 +323,7 @@ namespace Arteranos.NetworkIO
             // We already have transitioned, now we have to tell that the world has changed,
             // and we have to wake up, and for us it is just to find ourselves.
             if(isOwned)
-            {
                 PropagateWorldTransition(worldURL);
-            }
         }
 
         #endregion

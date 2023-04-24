@@ -15,6 +15,30 @@ namespace Arteranos.UI
 {
     public class WorldTransitionUI
     {
+        public static void ShowWorldChangeDialog(string worldURL, Action<int> resposeCallback)
+        {
+
+            WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
+
+            string worldname = md?.WorldName ?? worldURL;
+
+            DialogUI dialog = DialogUI.New();
+
+            dialog.text =
+                "This server is about to change the world to\n" +
+                $"{worldname}\n" +
+                "What to do?";
+
+            dialog.buttons = new string[]
+            {
+                "Go offline",
+                "Stay",
+                "Follow"
+            };
+
+            dialog.OnDialogDone += resposeCallback;
+        }
+
         public static void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null)
         {
             ProgressUI pui = ProgressUI.New();
@@ -27,10 +51,10 @@ namespace Arteranos.UI
             (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(url, true);
 
             pui.Completed += (context) => OnLoadWorldComplete(url, context, successCallback);
-            pui.Faulted += (ex, context) => OnLoadWorldFaulted(ex, context, failureCallback);
+            pui.Faulted += (ex, context) => OnLoadWorldFaulted(ex, failureCallback);
         }
 
-        private static void OnLoadWorldFaulted(Exception ex, Context _context, Action failureCallback)
+        private static void OnLoadWorldFaulted(Exception ex, Action failureCallback)
         {
             Debug.LogWarning($"Error in loading world: {ex.Message}");
 

@@ -105,8 +105,7 @@ namespace Arteranos.Web
                 ProgressChanged?.Invoke(uwr.downloadProgress);
             }
 
-            if(uwr.result == UnityWebRequest.Result.ProtocolError ||
-                uwr.result == UnityWebRequest.Result.ConnectionError)
+            if(uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.ConnectionError)
                 throw new FileNotFoundException(uwr.error, context.worldZipFile);
 
             return context;

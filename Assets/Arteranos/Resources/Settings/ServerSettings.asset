@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowAvatars: 1
   ListenAddress: 
-  m_WorldURL: 
+  m_WorldURL: file://D:/Users/carsten/Desktop/world.zip
   AllowGuests: 1
   AllowCustomAvatars: 0
   AllowFlying: 0
