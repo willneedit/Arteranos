@@ -21,8 +21,17 @@ namespace Arteranos.Core
         [Tooltip("Address to listen on")]
         public string ListenAddress = string.Empty;
 
-        [Tooltip("The world URL to load")]
-        [SerializeField]
+        [Tooltip("Guests allowed?")]
+        public bool AllowGuests = true;
+
+        [Tooltip("Custom/Homebaked avatars allowed?")]
+        public bool AllowCustomAvatars = false;
+
+        [Tooltip("Allow flying?")]
+        public bool AllowFlying = false;
+
+
+        // The world URL to load
         private string m_WorldURL = string.Empty;
 
         public string WorldURL
@@ -36,14 +45,6 @@ namespace Arteranos.Core
             }
         }
 
-        [Tooltip("Guests allowed?")]
-        public bool AllowGuests = true;
-
-        [Tooltip("Custom/Homebaked avatars allowed?")]
-        public bool AllowCustomAvatars = false;
-
-        [Tooltip("Allow flying?")]
-        public bool AllowFlying = false;
 
         public const string PATH_SERVER_SETTINGS = "Settings/ServerSettings";
 
