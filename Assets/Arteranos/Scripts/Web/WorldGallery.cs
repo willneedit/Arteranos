@@ -83,7 +83,11 @@ namespace Arteranos.Web
         {
             string rootPath = GetRootPath(url, false);
 
-            if(Directory.Exists(rootPath)) Directory.Delete(rootPath);
+            if(Directory.Exists(rootPath)) Directory.Delete(rootPath, true);
+
+            rootPath = GetRootPath(url, true);
+
+            if(Directory.Exists(rootPath)) Directory.Delete(rootPath, true);
         }
     }
 }

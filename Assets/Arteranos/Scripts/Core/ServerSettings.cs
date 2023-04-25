@@ -30,8 +30,8 @@ namespace Arteranos.Core
         [Tooltip("Allow flying?")]
         public bool AllowFlying = false;
 
-
         // The world URL to load
+        [NonSerialized]
         private string m_WorldURL = string.Empty;
 
         public string WorldURL

@@ -45,7 +45,9 @@ namespace Arteranos.UI
             btn_Visit.onHover += OnShowChildControls;
             btn_Delete.onHover += OnShowChildControls;
 
+            btn_Add.onClick.AddListener(OnAddClicked);
             btn_Visit.onClick.AddListener(OnVisitClicked);
+            btn_Delete.onClick.AddListener(OnDeleteClicked);
 
             go_Overlay.SetActive(false);
         }
@@ -87,6 +89,9 @@ namespace Arteranos.UI
             string metadataFile;
             string screenshotFile;
 
+            btn_Add.gameObject.SetActive(true);
+            btn_Delete.gameObject.SetActive(true);
+
             // It's stored in the persistent storage?
             (metadataFile, screenshotFile) = WorldGallery.RetrieveWorld(worldURL, false);
 
@@ -108,7 +113,10 @@ namespace Arteranos.UI
             }
 
             // ... right...?
-            throw new ArgumentException("World is neither in cache nor the persistent storage.");
+            lbl_Caption.text = $"({worldURL})";
+
+            btn_Add.gameObject.SetActive(true);
+            btn_Delete.gameObject.SetActive(true);
         }
 
         private void VisualizeWorldData(string metadataFile, string screenshotFile)
@@ -125,7 +133,10 @@ namespace Arteranos.UI
                         new Rect(0, 0, screenshot.width, screenshot.height),
                         new Vector2(0, 0));
                 }
-                else Debug.Log(www.error);
+                else
+                {
+                    Debug.Log(www.error);
+                }
             }
 
             string json = File.ReadAllText(metadataFile);
@@ -140,6 +151,45 @@ namespace Arteranos.UI
             StartCoroutine(GetTexture(screenshotFile));
         }
 
-        private void OnVisitClicked() => WorldTransitionUI.InitiateTransition(worldURL);
+        private void OnVisitClicked()
+        {
+            if(!string.IsNullOrEmpty(worldURL)) WorldTransitionUI.InitiateTransition(worldURL);
+        }
+
+        private void OnAddClicked()
+        {
+            ClientSettings cs = SettingsManager.Client;
+
+            // Transfer the metadata in our persistent storage.
+            WorldGallery.StoreWorld(worldURL);
+
+            // Then, put it down into our bookmark list.
+            if(!cs.WorldList.Contains(worldURL))
+            {
+                cs.WorldList.Add(worldURL);
+                cs.SaveSettings();
+            }
+
+            // And lastly, visualize the changed state.
+            PopulateWorldData(worldURL);
+        }
+
+        private void OnDeleteClicked()
+        {
+            ClientSettings cs = SettingsManager.Client;
+
+            // Remove the metadata from the persistent storage.
+            WorldGallery.DeleteWorld(worldURL);
+
+            // Then, strike it from our list
+            if(cs.WorldList.Contains(worldURL))
+            {
+                cs.WorldList.Remove(worldURL);
+                cs.SaveSettings();
+            }
+
+            // And, zip, gone.
+            Destroy(gameObject);
+        }
     }
 }

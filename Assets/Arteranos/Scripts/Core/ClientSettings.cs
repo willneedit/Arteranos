@@ -13,6 +13,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace Arteranos.Core
 {
@@ -73,9 +74,6 @@ namespace Arteranos.Core
         // Server to connect to, ask if null
         public virtual string ServerIP { get; set; } = null;
 
-        // World repository URL to load and enter the server with, null if user enters the server as-is
-        public virtual string WorldURL { get; set; } = null;
-
         // Avatar designator, valid only for the selected avatar provider
         public virtual string AvatarURL { get; set; } = "https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb";
 
@@ -90,6 +88,9 @@ namespace Arteranos.Core
 
         // Guides the online and availability state
         public virtual Visibility Visibility { get; set; } = Visibility.Online;
+
+        // The user's world collection
+        public virtual List<string> WorldList { get; set; } = new();
     }
 
     public class ClientSettings : ClientSettingsJSON
