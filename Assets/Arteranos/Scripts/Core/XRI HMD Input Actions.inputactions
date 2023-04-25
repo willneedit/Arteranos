@@ -1,5 +1,5 @@
 {
-    "name": "XRI Default Input Actions",
+    "name": "XRI HMD Input Actions",
     "maps": [
         {
             "name": "XRI Head",
@@ -1080,6 +1080,56 @@
                     "processors": "StickDeadzone",
                     "groups": "Continuous Move",
                     "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "XRI SysMenu",
+            "id": "3d645976-d12f-4f71-bc39-fb766fef7b31",
+            "actions": [
+                {
+                    "name": "PopUp",
+                    "type": "Button",
+                    "id": "a6eb8e5c-2684-4996-ad7c-c1757f3dfe56",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "12f759c9-a51b-4cb2-9c50-b695dd74b92b",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PopUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "59ad0b9a-2ea7-46cc-aece-5ac8e496747d",
+                    "path": "<XRController>{LeftHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PopUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6c9c7e33-38c8-4af8-8815-d8872c31c3ba",
+                    "path": "<XRController>{RightHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PopUp",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

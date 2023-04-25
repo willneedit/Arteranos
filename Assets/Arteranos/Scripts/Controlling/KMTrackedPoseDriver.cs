@@ -12,6 +12,7 @@ using UnityEngine.InputSystem;
 [Serializable]
 public class KMTrackedPoseDriver : MonoBehaviour
 {
+    private bool m_KMRotationBound;
 
     [SerializeField]
     InputActionProperty m_KMRotationInput;
@@ -20,30 +21,18 @@ public class KMTrackedPoseDriver : MonoBehaviour
         get => m_KMRotationInput;
         set 
         {
-            if (Application.isPlaying)
-                UnbindRotation();
-
+            if (Application.isPlaying) UnbindRotation();
             m_KMRotationInput = value;
-
-            if (Application.isPlaying && isActiveAndEnabled)
-                BindRotation();
-
+            if (Application.isPlaying && isActiveAndEnabled) BindRotation();
         }
     }
 
-    bool m_KMRotationBound;
-    Vector2 m_KMCurrentRotation;
-    public Vector3 m_EulerAngles;
-    public float m_RotationSpeed;
-
     void BindRotation()
     {
-        if (m_KMRotationBound)
-            return;
+        if (m_KMRotationBound) return;
 
-        var action = m_KMRotationInput.action;
-        if (action == null)
-            return;
+        InputAction action = m_KMRotationInput.action;
+        if (action == null) return;
 
         action.performed += OnRotationPerformed;
         action.canceled += OnRotationCanceled;
@@ -58,20 +47,25 @@ public class KMTrackedPoseDriver : MonoBehaviour
 
     void UnbindRotation()
     {
-        if (!m_KMRotationBound)
-            return;
+        if (!m_KMRotationBound) return;
 
-        var action = m_KMRotationInput.action;
-        if (action == null)
-            return;
+        InputAction action = m_KMRotationInput.action;
+        if (action == null) return;
 
-        if (m_KMRotationInput.reference == null)
-            action.Disable();
+        if (m_KMRotationInput.reference == null) action.Disable();
 
         action.performed -= OnRotationPerformed;
         action.canceled -= OnRotationCanceled;
         m_KMRotationBound = false;
     }
+
+    protected void OnEnable() => BindRotation();
+
+    protected void OnDisable() => UnbindRotation();
+
+    Vector2 m_KMCurrentRotation;
+    public Vector3 m_EulerAngles;
+    public float m_RotationSpeed;
 
     void OnRotationPerformed(InputAction.CallbackContext context)
     {
@@ -98,22 +92,5 @@ public class KMTrackedPoseDriver : MonoBehaviour
 
         transform.localRotation = Quaternion.Euler(m_EulerAngles);
     }
-
-    /// <summary>
-    /// This function is called when the object becomes enabled and active.
-    /// </summary>
-    protected void OnEnable()
-    {
-        BindRotation();
-    }
-
-    /// <summary>
-    /// This function is called when the object becomes disabled or inactive.
-    /// </summary>
-    protected void OnDisable()
-    {
-        UnbindRotation();
-    }
-
 
 }

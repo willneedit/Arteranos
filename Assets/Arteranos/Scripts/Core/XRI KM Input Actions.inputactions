@@ -552,6 +552,34 @@
                     "isPartOfComposite": true
                 }
             ]
+        },
+        {
+            "name": "XRI KM SysMenu",
+            "id": "2ff2285d-b0e3-4d19-802b-df4eeda1ec4e",
+            "actions": [
+                {
+                    "name": "PopUp",
+                    "type": "Button",
+                    "id": "bd6c3171-aca1-4471-8bdd-11fa798ebea2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "eeb997d5-d2f6-4de3-97f0-57922e2654bb",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PopUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
