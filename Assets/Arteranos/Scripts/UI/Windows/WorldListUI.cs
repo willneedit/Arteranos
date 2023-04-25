@@ -5,16 +5,12 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using static UnityEditor.Progress;
 
 namespace Arteranos.UI
 {
@@ -34,13 +30,6 @@ namespace Arteranos.UI
             return go.GetComponent<WorldListUI>();
         }
 
-        private WorldListItem CreateWLItem()
-        {
-            GameObject go = Instantiate(Resources.Load("UI/WorldListItem") as GameObject);
-            go.transform.SetParent(lvc_WorldList.transform, false);
-            return go.GetComponent<WorldListItem>();
-        }
-
         protected override void Awake()
         {
             base.Awake();
@@ -50,30 +39,20 @@ namespace Arteranos.UI
 
         protected override void Start()
         {
+            base.Start();
+
             cs = SettingsManager.Client;
             ss = SettingsManager.Server;
 
-            base.Start();
-
             // Current one on top...
             if(!string.IsNullOrEmpty(ss.WorldURL))
-            {
-                WorldListItem item = CreateWLItem();
-                item.worldURL = ss.WorldURL;
-            }
+                WorldListItem.New(lvc_WorldList.transform, ss.WorldURL);
 
             // ... and the rest.
             foreach(string url in cs.WorldList)
-            {
-                WorldListItem item = CreateWLItem();
-                item.worldURL = url;
-            }
+                WorldListItem.New(lvc_WorldList.transform, url);
         }
 
-        private void OnAddWorldClicked()
-        {
-            WorldListItem item = CreateWLItem();
-            item.worldURL = txt_AddWorldURL.text;
-        }
+        private void OnAddWorldClicked() => WorldListItem.New(lvc_WorldList.transform, txt_AddWorldURL.text);
     }
 }

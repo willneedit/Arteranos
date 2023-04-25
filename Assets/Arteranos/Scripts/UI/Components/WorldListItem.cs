@@ -34,6 +34,15 @@ namespace Arteranos.UI
 
         private bool ChildControlEntered = false;
 
+        public static WorldListItem New(Transform parent, string url)
+        {
+            GameObject go = Instantiate(Resources.Load("UI/WorldListItem") as GameObject);
+            go.transform.SetParent(parent, false);
+            WorldListItem worldListItem = go.GetComponent<WorldListItem>();
+            worldListItem.worldURL = url;
+            return worldListItem;
+        }
+
         protected override void Awake()
         {
             base.Awake();
