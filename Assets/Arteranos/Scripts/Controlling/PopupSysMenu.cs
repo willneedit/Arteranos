@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,10 +18,7 @@ namespace Arteranos
     {
         public InputActionHandler SystemMenu;
 
-        public void Awake()
-        {
-            SystemMenu.PerformCallback = OnPerformSysMenu;
-        }
+        public void Awake() => SystemMenu.PerformCallback = OnPerformSysMenu;
 
         public void OnEnable() => SystemMenu.BindAction();
 
@@ -28,15 +26,13 @@ namespace Arteranos
 
         private void OnPerformSysMenu(InputAction.CallbackContext obj)
         {
-            SysMenuKind menu = FindObjectOfType<SysMenuKind>();
-
-            if (menu != null)
+            if(FindObjectOfType<SysMenuKind>() != null)
             {
-                Destroy(menu.gameObject);
+                SysMenuKind.CloseSystemMenus();
                 return;
             }
 
-            GameObject go = Instantiate(Resources.Load("UI/UI_SysMenu") as GameObject);
+            Instantiate(Resources.Load("UI/UI_SysMenu") as GameObject);
         }
     }
 }

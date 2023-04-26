@@ -7,10 +7,16 @@
 
 using UnityEngine;
 
-namespace Arteranos
+namespace Arteranos.UI
 {
     public class SysMenuKind : MonoBehaviour
     {
         public string Name;
+
+        public static void CloseSystemMenus()
+        {
+            foreach(SysMenuKind menu in FindObjectsOfType<SysMenuKind>())
+                Destroy(menu.gameObject);
+        }
     }
 }

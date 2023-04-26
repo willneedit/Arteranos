@@ -145,6 +145,8 @@ GameObject:
   - component: {fileID: 1889180529585697681}
   - component: {fileID: 1889180529585697686}
   - component: {fileID: 1889180529585697677}
+  - component: {fileID: 8001599642481973709}
+  - component: {fileID: 2383748473476550683}
   m_Layer: 5
   m_Name: UI_WorldList
   m_TagString: Untagged
@@ -268,6 +270,35 @@ MonoBehaviour:
   lvc_WorldList: {fileID: 1482913777636466994}
   txt_AddWorldURL: {fileID: 1889180529782393170}
   btn_AddWorld: {fileID: 1889180529675457230}
+--- !u!114 &8001599642481973709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1889180529585697687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 335f52dc3b98f97488484f170db81e99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Name: World List
+--- !u!114 &2383748473476550683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1889180529585697687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d61ee9cfd392d9340ada687ac4daaa2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delay: 2
+  m_Duration: 5
+  m_Tolerance: 1
+  m_offset: {x: 0, y: 0, z: 1}
 --- !u!1 &1889180529675457229
 GameObject:
   m_ObjectHideFlags: 0

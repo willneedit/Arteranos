@@ -12,7 +12,7 @@ public class CameraUITracker : MonoBehaviour
     public float m_Delay = 2.0f;
     public float m_Duration = 5.0f;
     public float m_Tolerance = 1.00f;
-    public Vector3 m_offset = new(0, 0, 0.5f);
+    public Vector3 m_offset = Vector3.forward;
 
     private float m_countdown;
     private GameObject m_camera;

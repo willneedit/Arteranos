@@ -10,13 +10,12 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
+using System;
 
 namespace Arteranos.UI
 {
     public class PrefPanel_Moderation : UIBehaviour
     {
-        public TMP_InputField txt_WorldURL = null;
-        public Button btn_LoadWorld = null;
         public Button btn_WorldGallery = null;
         public Toggle chk_Guests = null;
         public Toggle chk_CustomAvatars = null;
@@ -29,8 +28,9 @@ namespace Arteranos.UI
 
         protected override void Awake()
         {
-            btn_LoadWorld.onClick.AddListener(OnLoadWorldButtonClicked);
             base.Awake();
+
+            btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
         }
 
         protected override void Start()
@@ -40,7 +40,6 @@ namespace Arteranos.UI
             cs = SettingsManager.Client;
             ss = SettingsManager.Server;
 
-            txt_WorldURL.text = ss.WorldURL;
             chk_Guests.isOn = ss.AllowGuests;
             chk_CustomAvatars.isOn = ss.AllowCustomAvatars;
             chk_Flying.isOn = ss.AllowFlying;
@@ -68,13 +67,11 @@ namespace Arteranos.UI
             dirty = false;
         }
 
-        private void OnLoadWorldButtonClicked()
+        private void OnWorldGalleryClicked()
         {
-            // Lengthy operation, avoid double clicking.
-            btn_LoadWorld.interactable = false;
+            SysMenuKind.CloseSystemMenus();
 
-            WorldTransitionUI.InitiateTransition(txt_WorldURL.text, () => btn_LoadWorld.interactable = true);
+            WorldListUI.New();
         }
-
     }
 }
