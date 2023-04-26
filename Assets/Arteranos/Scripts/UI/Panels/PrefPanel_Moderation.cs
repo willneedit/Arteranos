@@ -31,7 +31,13 @@ namespace Arteranos.UI
             base.Awake();
 
             btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
+
+            chk_CustomAvatars.onValueChanged.AddListener(SetDirty);
+            chk_Flying.onValueChanged.AddListener(SetDirty);
+            chk_Guests.onValueChanged.AddListener(SetDirty);
         }
+
+        private void SetDirty(bool _) => dirty = true;
 
         protected override void Start()
         {
@@ -63,7 +69,7 @@ namespace Arteranos.UI
             }
 
             // Might be to disabled before it's really started, so cs may be null yet.
-            if(dirty) cs?.SaveSettings();
+            if(dirty) ss?.SaveSettings();
             dirty = false;
         }
 

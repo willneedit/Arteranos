@@ -5,35 +5,46 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Newtonsoft.Json;
 using System;
+using System.IO;
 using UnityEngine;
 
 namespace Arteranos.Core
 {
-    [CreateAssetMenu(fileName = "ServerSettings", menuName = "Scriptable Objects/Application/Server Settings", order = 1)]
-    public class ServerSettings : ScriptableObject
+    public class ServerSettingsJSON
+    {
+        // Allow avatars from a URL outside of the avatar generator's scope.
+        public bool AllowCustomAvatars = false;
+
+        // Allow flying
+        public bool AllowFlying = false;
+
+        // Allow connections of unverified users
+        public bool AllowGuests = true;
+
+        // Server listen address. Empty means allowing connections from anywhere.
+        public string ListenAddress = string.Empty;
+
+        // Allow viewing avatars in the server mode like in a spectator mode.
+        public bool ShowAvatars = true;
+
+        // The server nickname.
+        public string Name = string.Empty;
+
+        // The short server description.
+        public string Description = string.Empty;
+    }
+
+    public class ServerSettings : ServerSettingsJSON
     {
         public event Action<string> OnWorldURLChanged;
 
-        [Tooltip("Load and show avatars in the server window")]
-        public bool ShowAvatars = true;
-
-        [Tooltip("Address to listen on")]
-        public string ListenAddress = string.Empty;
-
-        [Tooltip("Guests allowed?")]
-        public bool AllowGuests = true;
-
-        [Tooltip("Custom/Homebaked avatars allowed?")]
-        public bool AllowCustomAvatars = false;
-
-        [Tooltip("Allow flying?")]
-        public bool AllowFlying = false;
-
         // The world URL to load
-        [NonSerialized]
+        [JsonIgnore]
         private string m_WorldURL = string.Empty;
 
+        [JsonIgnore]
         public string WorldURL
         {
             get => m_WorldURL;
@@ -46,8 +57,37 @@ namespace Arteranos.Core
         }
 
 
-        public const string PATH_SERVER_SETTINGS = "Settings/ServerSettings";
+        public const string PATH_SERVER_SETTINGS = "ServerSettings.json";
 
-        public static ServerSettings LoadSettings() => Resources.Load<ServerSettings>(PATH_SERVER_SETTINGS);
+        public void SaveSettings()
+        {
+            try
+            {
+                string json = JsonConvert.SerializeObject(this, Formatting.Indented);
+                File.WriteAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}", json);
+            }
+            catch(Exception e)
+            {
+                Debug.LogWarning($"Failed to save server settings: {e.Message}");
+            }
+        }
+
+        public static ServerSettings LoadSettings()
+        {
+            ServerSettings ss;
+
+            try
+            {
+                string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}");
+                ss = JsonConvert.DeserializeObject<ServerSettings>(json);
+            }
+            catch(Exception e)
+            {
+                Debug.LogWarning($"Failed to load server settings: {e.Message}");
+                ss = new();
+            }
+
+            return ss;
+        }
     }
 }
