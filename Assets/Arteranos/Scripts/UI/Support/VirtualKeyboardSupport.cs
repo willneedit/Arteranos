@@ -11,24 +11,34 @@ namespace Arteranos.UI
         public KeyboardUI SoftKeyboard = null;
         public bool FollowsCamera = true;
 
-        private TMP_InputField[] TextFields;
+        public bool initial = true;
+
         private KeyboardUI AttachedKB = null;
 
-        // Start is called before the first frame update
-        protected override void Start()
+        private void Update()
         {
-            base.Start();
+            if(initial)
+            {
+                FindHookableTextFields(gameObject);
+                initial = false;
+            }
+        }
 
-            UnityAction<string> makeAttachmentFunc(TMP_InputField field) 
+        private void FindHookableTextFields(GameObject go)
+        {
+            UnityAction<string> makeAttachmentFunc(TMP_InputField field)
                 => (string x) => HookVirtualKB(field);
 
-            TextFields = GetComponentsInChildren<TMP_InputField>();
-
-            foreach(TMP_InputField text in TextFields)
+            TMP_InputField text = go.GetComponent<TMP_InputField>();
+            if(text != null)
             {
                 text.onSelect.AddListener(makeAttachmentFunc(text));
             }
-
+            else
+            {
+                for(int i = 0, c = go.transform.childCount; i < c; ++i)
+                    FindHookableTextFields(go.transform.GetChild(i).gameObject);
+            }
         }
 
         private Action<string, bool> MakeKbdCallback(TMP_InputField field) 
@@ -39,13 +49,13 @@ namespace Arteranos.UI
             if(AttachedKB == null)
             {
                 AttachedKB = Instantiate(SoftKeyboard, 
-                    transform.position + (transform.rotation * Vector3.forward * -0.01f), // Move a little bit to me to prevent z-fighting
+                    transform.position + (transform.rotation * Vector3.forward * 0.99f), // Move a little bit to me to prevent z-fighting
                     transform.rotation);
                 
                 if (FollowsCamera)
                 {
                     CameraUITracker ct = AttachedKB.gameObject.AddComponent<CameraUITracker>();
-                    ct.m_offset = Vector3.forward;
+                    ct.m_offset = Vector3.forward * 0.99f;
                 }
             }
 

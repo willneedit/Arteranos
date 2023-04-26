@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4193041269047191915}
   - component: {fileID: 1103715556050105036}
   - component: {fileID: 8802878131033308863}
+  - component: {fileID: 1098347119006914656}
   m_Layer: 5
   m_Name: UI_SysMenu
   m_TagString: Untagged
@@ -152,6 +153,22 @@ MonoBehaviour:
   m_Duration: 5
   m_Tolerance: 1
   m_offset: {x: 0, y: 0, z: 1}
+--- !u!114 &1098347119006914656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4193041269047191700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e6ce88586872ae48ab3a9b3930b67f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SoftKeyboard: {fileID: 5654005654892557598, guid: a605ef848eb2b014e806d20b600f40cc,
+    type: 3}
+  FollowsCamera: 1
+  TextFields: []
 --- !u!1001 &4193041269754509611
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -395,24 +412,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e0188d43f9de31042ac67bbff8de2205, type: 3}
---- !u!1 &955284842016247778 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3995104435120682697, guid: e0188d43f9de31042ac67bbff8de2205,
-    type: 3}
-  m_PrefabInstance: {fileID: 4193041269754509611}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4193041270059727199
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 955284842016247778}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6547c87a153b0c5489aefca83373ad13, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &955284842016247779 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3995104435120682696, guid: e0188d43f9de31042ac67bbff8de2205,

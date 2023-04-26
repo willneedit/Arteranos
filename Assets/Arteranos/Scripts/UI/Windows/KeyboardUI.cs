@@ -79,6 +79,8 @@ namespace Arteranos.UI
 
             // Reset the leftover mode from the previous use.
             ShowModeChange(0);
+            current_modeIndex= 0;
+            current_modeLock= false;
         }
 
         public void SanityCheck()

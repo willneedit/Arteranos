@@ -23,7 +23,7 @@ public class ChoiceBook : UIBehaviour
     private Transform ButtonList = null;
     private Transform PaneList = null;
 
-    protected override void Start()
+    protected override void Awake()
     {
         UnityAction makeButtonPressedAction(int index) => () => OnButtonClicked(index);
 

@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 1889180529585697677}
   - component: {fileID: 8001599642481973709}
   - component: {fileID: 2383748473476550683}
+  - component: {fileID: -3480630777290480473}
   m_Layer: 5
   m_Name: UI_WorldList
   m_TagString: Untagged
@@ -299,6 +300,22 @@ MonoBehaviour:
   m_Duration: 5
   m_Tolerance: 1
   m_offset: {x: 0, y: 0, z: 1}
+--- !u!114 &-3480630777290480473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1889180529585697687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e6ce88586872ae48ab3a9b3930b67f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SoftKeyboard: {fileID: 5654005654892557598, guid: a605ef848eb2b014e806d20b600f40cc,
+    type: 3}
+  FollowsCamera: 1
+  initial: 1
 --- !u!1 &1889180529675457229
 GameObject:
   m_ObjectHideFlags: 0
