@@ -19,6 +19,7 @@ public class CameraUITracker : MonoBehaviour
     private float m_currentSpeed = 0.0f;
     private bool m_moving = false;
 
+    private bool initial = true;
 
     // Update is called once per frame
     void Update()
@@ -27,6 +28,15 @@ public class CameraUITracker : MonoBehaviour
         if(m_camera == null) return;
 
         Vector3 relOffset = m_camera.transform.rotation * m_offset;
+
+        if(initial)
+        {
+            // VR guideline: approach the viewer from the front, a bit to the side.
+            Vector3 iniOffset = m_camera.transform.rotation * new Vector3(5, 0, 10);
+            transform.SetPositionAndRotation(m_camera.transform.position + iniOffset, m_camera.transform.rotation);
+            initial = false;
+            return;
+        }
 
         float tolerance = m_moving ? 0.001f : m_Tolerance;
         float dist = Vector3.Distance(transform.position - relOffset, m_camera.transform.position);

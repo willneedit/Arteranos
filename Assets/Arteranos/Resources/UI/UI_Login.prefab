@@ -1813,6 +1813,7 @@ GameObject:
   - component: {fileID: 745566904668032621}
   - component: {fileID: 745566904668032598}
   - component: {fileID: 745566904668032599}
+  - component: {fileID: 6022021459024287302}
   m_Layer: 5
   m_Name: UI_Login
   m_TagString: Untagged
@@ -1884,7 +1885,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &745566904668032618
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1939,8 +1940,6 @@ MonoBehaviour:
   btn_GuestLogin: {fileID: 745566904951116670}
   btn_Cancel: {fileID: 745566903739192673}
   grp_Cancel: {fileID: 2078504631783164548}
-  DialogUI: {fileID: 1401308523161811383, guid: b08a789bff0e5e746b4efea304237fc2,
-    type: 3}
   CancelEnabled: 0
 --- !u!114 &745566904668032599
 MonoBehaviour:
@@ -1958,6 +1957,19 @@ MonoBehaviour:
   m_Duration: 5
   m_Tolerance: 1
   m_offset: {x: 0, y: -0.25, z: 0.9}
+--- !u!114 &6022021459024287302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 745566904668032620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 335f52dc3b98f97488484f170db81e99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Name: Login
 --- !u!1 &745566904689628992
 GameObject:
   m_ObjectHideFlags: 0

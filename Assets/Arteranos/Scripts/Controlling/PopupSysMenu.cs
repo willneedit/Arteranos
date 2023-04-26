@@ -28,7 +28,15 @@ namespace Arteranos
 
         private void OnPerformSysMenu(InputAction.CallbackContext obj)
         {
-            Debug.Log("SysMenu pressed");
+            SysMenuKind menu = FindObjectOfType<SysMenuKind>();
+
+            if (menu != null)
+            {
+                Destroy(menu.gameObject);
+                return;
+            }
+
+            GameObject go = Instantiate(Resources.Load("UI/UI_SysMenu") as GameObject);
         }
     }
 }

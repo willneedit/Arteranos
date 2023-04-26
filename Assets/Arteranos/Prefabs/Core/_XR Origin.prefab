@@ -758,6 +758,7 @@ GameObject:
   - component: {fileID: 6826848587015489425}
   - component: {fileID: 6826848587015489426}
   - component: {fileID: 8516093202599599435}
+  - component: {fileID: 7286732725309435813}
   m_Layer: 15
   m_Name: _XR Origin
   m_TagString: Untagged
@@ -956,6 +957,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 504c971a29732eb4eb888fcb0f455b49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7286732725309435813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6826848587015489434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aee7c7c376a0cf4a9d44a8ed87b4454, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SystemMenu:
+    m_ActionInput:
+      m_UseReference: 1
+      m_Action:
+        m_Name: Action Input
+        m_Type: 0
+        m_ExpectedControlType: 
+        m_Id: 9ce3b51f-7e4a-412e-ab98-f06f53ed7eb2
+        m_Processors: 
+        m_Interactions: 
+        m_SingletonActionBindings: []
+        m_Flags: 0
+      m_Reference: {fileID: 3808255286811244706, guid: c348712bda248c246b8c49b3db54643f,
+        type: 3}
 --- !u!1 &6826848588470939954
 GameObject:
   m_ObjectHideFlags: 0
