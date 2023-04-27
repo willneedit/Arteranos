@@ -46,21 +46,25 @@ namespace Arteranos.UI
 
         private void HookVirtualKB(TMP_InputField field)
         {
+            AttachedKB = FindObjectOfType<KeyboardUI>(true);
+
             if(AttachedKB == null)
             {
                 AttachedKB = Instantiate(SoftKeyboard, 
                     transform.position + (transform.rotation * Vector3.forward * 0.99f), // Move a little bit to me to prevent z-fighting
                     transform.rotation);
-                
-                if (FollowsCamera)
-                {
-                    CameraUITracker ct = AttachedKB.gameObject.AddComponent<CameraUITracker>();
-                    ct.m_offset = Vector3.forward * 0.99f;
-                }
+
+                CameraUITracker new_ct = AttachedKB.gameObject.AddComponent<CameraUITracker>();
+                new_ct.m_offset = Vector3.forward * 0.99f;
             }
 
+            CameraUITracker ct = AttachedKB.gameObject.AddComponent<CameraUITracker>();
+            ct.enabled = FollowsCamera;
+
+            AttachedKB.gameObject.SetActive(false);
             AttachedKB.Text = field.text;
             AttachedKB.StringPosition = field.text.Length;
+            AttachedKB.characterLimit = field.characterLimit;
             AttachedKB.OnFinishing += MakeKbdCallback(field);
             AttachedKB.gameObject.SetActive(true);
         }

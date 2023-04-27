@@ -7,6 +7,8 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
 using System;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Arteranos.UI
 {
@@ -35,6 +37,7 @@ namespace Arteranos.UI
         public CanvasRenderer KeyboardBackplate = null;
         public Button KeyCap = null;
         public TMP_InputField PreviewField = null;
+        public TextMeshProUGUI lbl_RemainingChars = null;
 
         public event Action<string, bool> OnFinishing;
 
@@ -48,6 +51,15 @@ namespace Arteranos.UI
         {
             get => PreviewField.stringPosition;
             set => PreviewField.stringPosition = value;
+        }
+
+        public int characterLimit
+        {
+            get => PreviewField.characterLimit;
+            set {
+                PreviewField.characterLimit = value;
+                lbl_RemainingChars.gameObject.SetActive(value != 0);
+            }
         }
 
         public Vector2 TopLeft = new(1, -21);
@@ -70,12 +82,20 @@ namespace Arteranos.UI
 
             LayoutKeyboard();
 
+            PreviewField.onValueChanged.AddListener(OnValueChanged);
+
             Debug.Log($"Loaded keyboard layout: {layout}");
         }
+
+        private void OnValueChanged(string text) => lbl_RemainingChars.text = (PreviewField.characterLimit - text.Length).ToString();
 
         protected override void OnEnable()
         {
             base.OnEnable();
+
+            // Update the new current character limit, if any
+            lbl_RemainingChars.gameObject.SetActive(PreviewField.characterLimit != 0);
+            lbl_RemainingChars.text = (PreviewField.characterLimit - PreviewField.text.Length).ToString();
 
             // Reset the leftover mode from the previous use.
             ShowModeChange(0);
