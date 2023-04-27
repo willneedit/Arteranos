@@ -23,7 +23,7 @@ namespace Arteranos.UI
 
         public static DialogUI New()
         {
-            GameObject go = Instantiate(Resources.Load("UI/UI_Dialog") as GameObject);
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_Dialog"));
             return go.GetComponent<DialogUI>();
         }
 

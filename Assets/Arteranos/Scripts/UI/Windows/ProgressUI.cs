@@ -49,7 +49,7 @@ namespace Arteranos.UI
 
         public static ProgressUI New()
         {
-            GameObject go = Instantiate(Resources.Load("UI/UI_Progress") as GameObject);
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_Progress"));
             return go.GetComponent<ProgressUI>();
         }
 

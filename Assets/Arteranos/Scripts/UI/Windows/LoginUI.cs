@@ -76,7 +76,7 @@ namespace Arteranos.UI
 
         public static LoginUI New()
         {
-            GameObject go = Instantiate(Resources.Load("UI/UI_Login") as GameObject);
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_Login"));
             return go.GetComponent<LoginUI>();
         }
 

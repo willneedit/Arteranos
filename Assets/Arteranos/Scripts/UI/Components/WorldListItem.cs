@@ -26,7 +26,7 @@ namespace Arteranos.UI
 
         public static WorldListItem New(Transform parent, string url)
         {
-            GameObject go = Instantiate(Resources.Load("UI/WorldListItem") as GameObject);
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/WorldListItem"));
             go.transform.SetParent(parent, false);
             WorldListItem worldListItem = go.GetComponent<WorldListItem>();
             worldListItem.worldURL = url;

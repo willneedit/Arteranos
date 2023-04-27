@@ -26,7 +26,7 @@ namespace Arteranos.UI
 
         public static WorldListUI New()
         {
-            GameObject go = Instantiate(Resources.Load("UI/UI_WorldList") as GameObject);
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_WorldList"));
             return go.GetComponent<WorldListUI>();
         }
 

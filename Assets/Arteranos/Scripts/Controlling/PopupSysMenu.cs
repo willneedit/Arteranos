@@ -32,7 +32,7 @@ namespace Arteranos
                 return;
             }
 
-            Instantiate(Resources.Load("UI/UI_SysMenu") as GameObject);
+            Instantiate(Resources.Load<GameObject>("UI/UI_SysMenu"));
         }
     }
 }
