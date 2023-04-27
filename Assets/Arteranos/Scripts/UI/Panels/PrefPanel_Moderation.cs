@@ -10,18 +10,25 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using System;
+using UnityEngine;
+using UnityEngine.Networking;
+using System.Collections;
 
 namespace Arteranos.UI
 {
     public class PrefPanel_Moderation : UIBehaviour
     {
+        public TMP_InputField txt_ServerName = null;
+        public TMP_InputField txt_Description = null;
+        public Button btn_Icon = null;
+        public Image img_IconImage = null;
+        public TMP_InputField txt_IconURL = null;
+
         public Button btn_WorldGallery = null;
         public Toggle chk_Guests = null;
         public Toggle chk_CustomAvatars = null;
         public Toggle chk_Flying = null;
 
-        private ClientSettings cs = null;
         private ServerSettings ss = null;
 
         private bool dirty = false;
@@ -30,6 +37,11 @@ namespace Arteranos.UI
         {
             base.Awake();
 
+            txt_ServerName.onValueChanged.AddListener(SetDirty);
+            txt_Description.onValueChanged.AddListener(SetDirty);
+
+            btn_Icon.onClick.AddListener(OnIconClicked);
+
             btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
 
             chk_CustomAvatars.onValueChanged.AddListener(SetDirty);
@@ -37,14 +49,21 @@ namespace Arteranos.UI
             chk_Guests.onValueChanged.AddListener(SetDirty);
         }
 
+
         private void SetDirty(bool _) => dirty = true;
+        private void SetDirty(string _) => dirty = true;
 
         protected override void Start()
         {
             base.Start();
 
-            cs = SettingsManager.Client;
             ss = SettingsManager.Server;
+
+            txt_ServerName.text = ss.Name;
+            txt_Description.text = ss.Description;
+
+            if(ss.Icon != null && ss.Icon.Length != 0)
+                UpdateIcon(ss.Icon);
 
             chk_Guests.isOn = ss.AllowGuests;
             chk_CustomAvatars.isOn = ss.AllowCustomAvatars;
@@ -63,6 +82,9 @@ namespace Arteranos.UI
                 // Only when the world loading is committed, not only the entry of the URL.
                 // ss.WorldURL = txt_WorldURL.text;
 
+                ss.Name = txt_ServerName.text;
+                ss.Description = txt_Description.text;
+
                 ss.AllowFlying = chk_Flying.isOn;
                 ss.AllowCustomAvatars = chk_CustomAvatars.isOn;
                 ss.AllowGuests = chk_Guests.isOn;
@@ -78,6 +100,50 @@ namespace Arteranos.UI
             SysMenuKind.CloseSystemMenus();
 
             WorldListUI.New();
+        }
+
+        private void OnIconClicked()
+        {
+            IEnumerator GetTexture(string iconURL)
+            {
+                UnityWebRequest www = UnityWebRequestTexture.GetTexture(iconURL);
+                yield return www.SendWebRequest();
+
+                if(www.result == UnityWebRequest.Result.Success)
+                {
+                    DownloadHandler dh = www.downloadHandler;
+                    byte[] data = dh.nativeData.ToArray();
+
+                    Texture2D tex = new(2, 2);
+                    ImageConversion.LoadImage(tex, data);
+
+                    if(tex.width > 512 || tex.height > 512)
+                        yield break;
+
+                    if(tex.width < 128 || tex.height < 128)
+                        yield break;
+
+                    ss.Icon = data;
+                    UpdateIcon(data, tex);
+                    dirty = true;
+                }
+                else
+                {
+                    Debug.Log(www.error);
+                }
+            }
+
+            StartCoroutine(GetTexture(txt_IconURL.text));
+        }
+
+        private void UpdateIcon(byte[] data, Texture2D tex = null)
+        {
+            tex ??= new(2, 2);
+
+            ImageConversion.LoadImage(tex, data);
+            img_IconImage.sprite = Sprite.Create(tex,
+                new Rect(0, 0, tex.width, tex.height),
+                Vector2.zero);
         }
     }
 }

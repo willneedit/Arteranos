@@ -98,7 +98,7 @@ namespace Arteranos.UI
                     Texture2D screenshot = ((DownloadHandlerTexture) www.downloadHandler).texture;
                     img_Screenshot.sprite = Sprite.Create(screenshot,
                         new Rect(0, 0, screenshot.width, screenshot.height),
-                        new Vector2(0, 0));
+                        Vector2.zero);
                 }
                 else
                 {

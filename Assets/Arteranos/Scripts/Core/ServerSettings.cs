@@ -14,6 +14,12 @@ namespace Arteranos.Core
 {
     public class ServerSettingsJSON
     {
+        // Server listen address. Empty means allowing connections from anywhere.
+        public string ListenAddress = string.Empty;
+
+        // Allow viewing avatars in the server mode like in a spectator mode.
+        public bool ShowAvatars = true;
+
         // Allow avatars from a URL outside of the avatar generator's scope.
         public bool AllowCustomAvatars = false;
 
@@ -23,17 +29,14 @@ namespace Arteranos.Core
         // Allow connections of unverified users
         public bool AllowGuests = true;
 
-        // Server listen address. Empty means allowing connections from anywhere.
-        public string ListenAddress = string.Empty;
-
-        // Allow viewing avatars in the server mode like in a spectator mode.
-        public bool ShowAvatars = true;
-
         // The server nickname.
         public string Name = string.Empty;
 
         // The short server description.
         public string Description = string.Empty;
+
+        // The server icon. PNG file bytes, at least 128x128, at most 512x512
+        public byte[] Icon = new byte[] { };
     }
 
     public class ServerSettings : ServerSettingsJSON
