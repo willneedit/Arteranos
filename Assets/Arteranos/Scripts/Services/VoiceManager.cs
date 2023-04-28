@@ -10,13 +10,12 @@ using Arteranos.Audio;
 using Mirror;
 using System.Collections;
 using UnityEngine;
+using Arteranos.Core;
 
 namespace Arteranos.Services
 {
     public class VoiceManager : MonoBehaviour
     {
-        public int Port = 7778;
-
         public static VoiceManager Instance { get; private set; }
         public static ChatroomAgentV2 ChatroomAgent { get; private set; }
 
@@ -28,15 +27,16 @@ namespace Arteranos.Services
         {
             Instance = this;
 
-            // FIXME Client/User setting, desired sample setting
-            ChatroomAgent = new(
-                UVTelepathyNetwork.New(Port),
-                UVMicInput.New(4, 24000),
-                new UVAudioOutput.Factory());
         }
 
         private void Start()
         {
+            // FIXME Client/User setting, desired sample setting
+            ChatroomAgent = new(
+                UVTelepathyNetwork.New(SettingsManager.Server.VoicePort),
+                UVMicInput.New(4, 24000),
+                new UVAudioOutput.Factory());
+
             cs_cr = ManageChatServer();
 
             StartCoroutine(cs_cr);
