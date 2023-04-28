@@ -71,8 +71,8 @@ namespace Arteranos.UI
 
         private void CommitEditing(TMP_InputField field, string text, bool completed)
         {
-            AttachedKB.gameObject.SetActive(false);
             AttachedKB.OnFinishing -= MakeKbdCallback(field);
+            Destroy(AttachedKB.gameObject);
             if(completed) field.text = text;
         }
     }
