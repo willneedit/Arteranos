@@ -168,7 +168,7 @@ MonoBehaviour:
   SoftKeyboard: {fileID: 5654005654892557598, guid: a605ef848eb2b014e806d20b600f40cc,
     type: 3}
   FollowsCamera: 1
-  TextFields: []
+  initial: 1
 --- !u!1001 &4193041269754509611
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -221,7 +221,7 @@ PrefabInstance:
         type: 3}
       propertyPath: ChoiceEntries.Array.data[6].UI
       value: 
-      objectReference: {fileID: 5483533141505094440, guid: 1a518f2e6a311fc41853b65a83802728,
+      objectReference: {fileID: 8078237096226495410, guid: 1a518f2e6a311fc41853b65a83802728,
         type: 3}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}

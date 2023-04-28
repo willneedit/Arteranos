@@ -14,6 +14,15 @@ namespace Arteranos.Core
 {
     public class ServerSettingsJSON
     {
+        // The main server listen port.
+        public int ServerPort = 9777;
+
+        // The voice server listen port.
+        public int VoicePort = 9778;
+
+        // The server metadata retrieval port.
+        public int MetadataPort = 9779;
+
         // Server listen address. Empty means allowing connections from anywhere.
         public string ListenAddress = string.Empty;
 

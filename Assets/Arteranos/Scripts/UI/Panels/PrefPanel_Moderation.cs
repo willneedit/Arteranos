@@ -13,18 +13,24 @@ using Arteranos.Core;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
+using System;
 
 namespace Arteranos.UI
 {
     public class PrefPanel_Moderation : UIBehaviour
     {
         public TMP_InputField txt_ServerName = null;
+        public TMP_InputField txt_ServerPort = null;
+        public TMP_InputField txt_VoicePort = null;
+        public TMP_InputField txt_MetdadataPort = null;
+
         public TMP_InputField txt_Description = null;
         public Button btn_Icon = null;
         public Image img_IconImage = null;
         public TMP_InputField txt_IconURL = null;
 
         public Button btn_WorldGallery = null;
+
         public Toggle chk_Guests = null;
         public Toggle chk_CustomAvatars = null;
         public Toggle chk_Flying = null;
@@ -40,6 +46,15 @@ namespace Arteranos.UI
             txt_ServerName.onValueChanged.AddListener(SetDirty);
             txt_Description.onValueChanged.AddListener(SetDirty);
 
+            txt_ServerPort.onValueChanged.AddListener(SetDirty);
+            //txt_ServerPort.onValidateInput += OnValidatePort;
+
+            txt_VoicePort.onValueChanged.AddListener(SetDirty);
+            //txt_VoicePort.onValidateInput += OnValidatePort;
+
+            txt_MetdadataPort.onValueChanged.AddListener(SetDirty);
+            //txt_MetdadataPort.onValidateInput += OnValidatePort;
+
             btn_Icon.onClick.AddListener(OnIconClicked);
 
             btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
@@ -49,6 +64,12 @@ namespace Arteranos.UI
             chk_Guests.onValueChanged.AddListener(SetDirty);
         }
 
+        //private char OnValidatePort(string text, int charIndex, char addedChar)
+        //{
+        //    if(addedChar < '0' || addedChar > '9') return '\0';
+
+        //    return addedChar;
+        //}
 
         private void SetDirty(bool _) => dirty = true;
         private void SetDirty(string _) => dirty = true;
@@ -58,6 +79,10 @@ namespace Arteranos.UI
             base.Start();
 
             ss = SettingsManager.Server;
+
+            txt_ServerPort.text = ss.ServerPort.ToString();
+            txt_VoicePort.text = ss.VoicePort.ToString();
+            txt_MetdadataPort.text = ss.MetadataPort.ToString();
 
             txt_ServerName.text = ss.Name;
             txt_Description.text = ss.Description;
@@ -81,6 +106,10 @@ namespace Arteranos.UI
             {
                 // Only when the world loading is committed, not only the entry of the URL.
                 // ss.WorldURL = txt_WorldURL.text;
+
+                ss.ServerPort = int.Parse(txt_ServerPort.text);
+                ss.VoicePort = int.Parse(txt_VoicePort.text);
+                ss.MetadataPort = int.Parse(txt_MetdadataPort.text);
 
                 ss.Name = txt_ServerName.text;
                 ss.Description = txt_Description.text;
@@ -138,7 +167,7 @@ namespace Arteranos.UI
 
         private void UpdateIcon(byte[] data, Texture2D tex = null)
         {
-            tex ??= new(2, 2);
+            tex = tex != null ? tex : new(2, 2);
 
             ImageConversion.LoadImage(tex, data);
             img_IconImage.sprite = Sprite.Create(tex,
