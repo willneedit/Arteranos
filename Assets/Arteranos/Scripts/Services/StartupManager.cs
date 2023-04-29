@@ -12,7 +12,7 @@ namespace Arteranos.Services
 {
     public class StartupManager : SettingsManager
     {
-        protected override void Update()
+        protected void Update()
         {
             StartNetwork();
 

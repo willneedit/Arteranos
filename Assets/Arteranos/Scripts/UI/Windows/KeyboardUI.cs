@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,8 +6,6 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
 using System;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Arteranos.UI
 {

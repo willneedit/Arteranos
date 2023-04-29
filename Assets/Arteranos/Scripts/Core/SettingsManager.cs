@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Arteranos.Core
@@ -24,19 +25,17 @@ namespace Arteranos.Core
 
         protected ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
 
-        public static SettingsManager Instance { get; private set; } = null;
         public static Transform Purgatory { get; private set; }
         public static ClientSettings Client { get; internal set; }
         public static ServerSettings Server { get; internal set; }
 
+        public static List<string> Users { get; internal set; } = new();
+
         private void Awake()
         {
-            Instance = this;
-
             SetupPurgatory();
 
             ParseSettingsAndCmdLine();
-
         }
 
         private void ParseSettingsAndCmdLine()
@@ -91,6 +90,15 @@ namespace Arteranos.Core
             DontDestroyOnLoad(Purgatory.gameObject);
         }
 
-        protected virtual void Update() { }
+        public static void RegisterUser(string userHash)
+        {
+            Users.Add(userHash);
+        }
+
+        public static void UnregisterUser(string userHash)
+        {
+            if(Users.Contains(userHash))
+                Users.Remove(userHash);
+        }
     }
 }

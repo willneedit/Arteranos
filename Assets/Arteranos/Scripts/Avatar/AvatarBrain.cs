@@ -60,6 +60,16 @@ namespace Arteranos.NetworkIO
             private set => PropagateBlob(AVBlobKeys.UserHash, value); 
         }
 
+        public string UserID
+        {
+            get
+            {
+                string hashString = string.Empty;
+                foreach(byte x in UserHash) hashString += String.Format("{0:x2}", x);
+                return hashString;
+            }
+        }
+
         /// <summary>
         /// Download the user's client settings to his avatar's brain, and announce
         /// the data to the server to spread it to the clones.
@@ -97,6 +107,8 @@ namespace Arteranos.NetworkIO
 
         public override void OnStartClient()
         {
+            ClientSettings cs = SettingsManager.Client;
+
             base.OnStartClient();
 
             m_ints.Callback += OnMIntsChanged;
@@ -110,6 +122,10 @@ namespace Arteranos.NetworkIO
             ResyncInitialValues();
 
             DownloadClientSettings();
+
+            // Using directly from Client Settings, because the UserID derived from UserHash hasn't
+            // done the full round trip from the server propagation.
+            RegisterUser(cs.UserID);
 
             InitializeVoice();
         }
@@ -127,6 +143,12 @@ namespace Arteranos.NetworkIO
             m_blobs.Callback -= OnMBlobsChanged;
 
             base.OnStopClient();
+        }
+
+        public void OnDestroy()
+        {
+            if(isServer)
+                SettingsManager.UnregisterUser(UserID);
         }
 
         private void ResyncInitialValues()
@@ -188,6 +210,10 @@ namespace Arteranos.NetworkIO
 
         [Command]
         private void PropagateBlob(AVBlobKeys key, byte[] value) => m_blobs[key] = value;
+
+
+        [Command]
+        private void RegisterUser(string UserHash) => SettingsManager.RegisterUser(UserHash);
 
         #endregion
         // ---------------------------------------------------------------
@@ -322,7 +348,7 @@ namespace Arteranos.NetworkIO
             ReceiveWorldTransition(worldURL);
 
             // Pure server needs to be notified and transitioned, too.
-            if(isServer && !isClient)
+            if(isServer && !isClient && !string.IsNullOrEmpty(worldURL))
             {
                 SettingsManager.Server.WorldURL = worldURL;
                 UI.WorldTransitionUI.InitiateTransition(worldURL);
