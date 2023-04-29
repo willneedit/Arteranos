@@ -248,6 +248,7 @@ namespace Arteranos.NetworkIO
             else if(isOwned)
             {
                 cran.OnJoinedChatroom += (x) => ChatOwnID = x;
+                // FIXME Use conndata with the remote hostname and port
                 cran.JoinChatroom(NetworkManager.singleton.networkAddress);
             }
         }
@@ -316,7 +317,17 @@ namespace Arteranos.NetworkIO
         }
 
         [Command]
-        private void PropagateWorldTransition(string worldURL) => ReceiveWorldTransition(worldURL);
+        private void PropagateWorldTransition(string worldURL)
+        {
+            ReceiveWorldTransition(worldURL);
+
+            // Pure server needs to be notified and transitioned, too.
+            if(isServer && !isClient)
+            {
+                SettingsManager.Server.WorldURL = worldURL;
+                UI.WorldTransitionUI.InitiateTransition(worldURL);
+            }
+        }
 
         private void CommitWorldChanged(string worldURL)
         {

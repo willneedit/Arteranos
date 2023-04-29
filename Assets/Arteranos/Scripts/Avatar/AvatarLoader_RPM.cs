@@ -287,9 +287,6 @@ namespace Arteranos.NetworkIO
                 Destroy(m_AvatarGameObject);
 
             SetupAvatar(args);
-
-            // Make sure that the _body_ survives the world transition, not only the soul...
-            gameObject.AddComponent<Persistence>();
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)
