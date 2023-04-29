@@ -75,7 +75,7 @@ namespace Arteranos.Core
         {
             try
             {
-                string json = JsonConvert.SerializeObject(this, Formatting.Indented);
+                string json = ExportSettings();
                 File.WriteAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}", json);
             }
             catch(Exception e)
@@ -83,6 +83,8 @@ namespace Arteranos.Core
                 Debug.LogWarning($"Failed to save server settings: {e.Message}");
             }
         }
+
+        public string ExportSettings() => JsonConvert.SerializeObject(this, Formatting.Indented);
 
         public static ServerSettings LoadSettings()
         {
