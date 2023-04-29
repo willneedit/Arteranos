@@ -16,18 +16,11 @@ namespace Arteranos.Services
 {
     public class VoiceManager : MonoBehaviour
     {
-        public static VoiceManager Instance { get; private set; }
         public static ChatroomAgentV2 ChatroomAgent { get; private set; }
 
         private bool serverActive = false;
 
         private IEnumerator cs_cr = null;
-
-        private void Awake()
-        {
-            Instance = this;
-
-        }
 
         private void Start()
         {

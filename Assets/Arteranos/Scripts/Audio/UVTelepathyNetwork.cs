@@ -20,7 +20,7 @@ using System.Linq;
 using Arteranos.UniVoice;
 using Mirror;
 using Telepathy;
-
+using Arteranos.Core;
 
 namespace Arteranos.Audio 
 {
@@ -59,16 +59,16 @@ namespace Arteranos.Audio
 
         Server server;
         Client client;
-        int port;
+        int VoiceServerPort;
 
         [Obsolete("Use UniVoiceTelepathyNetwork.New static method instead of new keyword", true)]
         public UVTelepathyNetwork() { }
 
-        public static UVTelepathyNetwork New(int port) {
+        public static UVTelepathyNetwork New(int VoiceServerPort) {
             GameObject go = new("UniVoiceTelepathyNetwork");
             UVTelepathyNetwork cted = go.AddComponent<UVTelepathyNetwork>();
             DontDestroyOnLoad(go);
-            cted.port = port;
+            cted.VoiceServerPort = VoiceServerPort;
             cted.server = new Server(32 * 1024);
             cted.server.OnConnected += cted.OnConnected_Server;
             cted.server.OnDisconnected += cted.OnDisconnected_Server;
@@ -222,7 +222,7 @@ namespace Arteranos.Audio
 
         public void HostChatroom(object data = null) {
             if (!server.Active) {
-                if(server.Start(port)) {
+                if(server.Start(VoiceServerPort)) {
                     OwnID = 0;
                     PeerIDs.Clear();
                     OnCreatedChatroom?.Invoke();
@@ -255,6 +255,20 @@ namespace Arteranos.Audio
             }
         }
 
+        public struct Conndata
+        {
+            public string ip;
+            public int port;
+
+            public Conndata(string _ip = null, int _port = 0)
+            {
+                ip = _ip ?? "localhost";
+                port = (_port == 0)
+                    ? SettingsManager.Server.VoicePort
+                    : _port;
+            }         
+        }
+
         /// <summary>
         /// Joins a chatroom. If passed null, will connect to "localhost"
         /// </summary>
@@ -270,8 +284,19 @@ namespace Arteranos.Audio
                 Debug.LogWarning("JoinChatroom failed. Currently attempting to connect to a chatroom. Leave and join again");
                 return;
             }
-            string ip = (data != null) ? (string) data : "localhost";
-            client.Connect(ip, port);
+
+            if(data == null)
+            {
+                client.Connect("localhost", SettingsManager.Server.VoicePort);
+                return;
+            }
+
+            if(data is not Conndata)
+                throw new ArgumentException($"Invalid argument - connection data needs to be {nameof(Conndata)}");
+
+            Conndata cd = (Conndata) data;
+
+            client.Connect(cd.ip, cd.port);
         }
 
         /// <summary>
