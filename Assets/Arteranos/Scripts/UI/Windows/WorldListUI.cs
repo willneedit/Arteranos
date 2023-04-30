@@ -50,7 +50,7 @@ namespace Arteranos.UI
 
             // ... and the rest.
             foreach(string url in cs.WorldList)
-                WorldListItem.New(lvc_WorldList.transform, url);
+                if(url != ss.WorldURL) WorldListItem.New(lvc_WorldList.transform, url);
         }
 
         private void OnAddWorldClicked() => WorldListItem.New(lvc_WorldList.transform, txt_AddWorldURL.text);

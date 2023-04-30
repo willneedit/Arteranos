@@ -44,16 +44,32 @@ namespace Arteranos.Web
         {
             string metadatafile;
 
-            (metadatafile, _) = RetrieveWorld(url, true);
+            (metadatafile, _) = RetrieveWorld(url, false);
 
             if(metadatafile == null)
-                (metadatafile, _) = RetrieveWorld(url, false);
+                (metadatafile, _) = RetrieveWorld(url, true);
 
             if(metadatafile == null)
                 return null;
 
             string json = File.ReadAllText(metadatafile);
             return WorldMetaData.Deserialize(json);
+        }
+
+        public static void StoreWorldMetaData(string url, WorldMetaData worldMetaData)
+        {
+            string metadatafile;
+
+            (metadatafile, _) = RetrieveWorld(url, false);
+
+            if(metadatafile == null)
+                (metadatafile, _) = RetrieveWorld(url, true);
+
+            if(metadatafile == null)
+                throw new FileNotFoundException("Unknown worls URL for the given data");
+
+            string json = worldMetaData.Serialize();
+            File.WriteAllText(metadatafile, json);
         }
 
         public static bool StoreWorld(string url)

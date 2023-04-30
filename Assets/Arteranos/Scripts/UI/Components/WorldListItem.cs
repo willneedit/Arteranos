@@ -120,7 +120,14 @@ namespace Arteranos.UI
 
         private void OnVisitClicked()
         {
-            if(!string.IsNullOrEmpty(worldURL)) WorldTransitionUI.InitiateTransition(worldURL);
+            if(!string.IsNullOrEmpty(worldURL))
+            {
+                WorldTransitionUI.InitiateTransition(worldURL);
+
+                WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
+                md.Updated = DateTime.Now;
+                WorldGallery.StoreWorldMetaData(worldURL, md);
+            }
         }
 
         private void OnAddClicked()
