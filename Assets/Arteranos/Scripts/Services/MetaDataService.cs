@@ -9,7 +9,6 @@ using Arteranos.Core;
 using Mirror;
 using Newtonsoft.Json;
 using System.Collections;
-using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,13 +51,6 @@ namespace Arteranos.Services
                 }
             }
         }
-    }
-
-    internal class MetadataJSON
-    {
-        public ServerSettingsJSON Settings = null;
-        public string CurrentWorld = null;
-        public List<string> CurrentUsers = new();
     }
 
     internal class MetaDataServer
@@ -128,7 +120,7 @@ namespace Arteranos.Services
 
         private static async void YieldMetadata(HttpListenerResponse response)
         {
-            MetadataJSON mdj = new()
+            ServerMetadataJSON mdj = new()
             {
                 Settings = SettingsManager.Server,
                 CurrentWorld = SettingsManager.Server.WorldURL,

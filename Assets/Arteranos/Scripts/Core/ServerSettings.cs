@@ -12,42 +12,6 @@ using UnityEngine;
 
 namespace Arteranos.Core
 {
-    public class ServerSettingsJSON
-    {
-        // The main server listen port.
-        public int ServerPort = 9777;
-
-        // The voice server listen port.
-        public int VoicePort = 9778;
-
-        // The server metadata retrieval port.
-        public int MetadataPort = 9779;
-
-        // Server listen address. Empty means allowing connections from anywhere.
-        public string ListenAddress = string.Empty;
-
-        // Allow viewing avatars in the server mode like in a spectator mode.
-        public bool ShowAvatars = true;
-
-        // Allow avatars from a URL outside of the avatar generator's scope.
-        public bool AllowCustomAvatars = false;
-
-        // Allow flying
-        public bool AllowFlying = false;
-
-        // Allow connections of unverified users
-        public bool AllowGuests = true;
-
-        // The server nickname.
-        public string Name = string.Empty;
-
-        // The short server description.
-        public string Description = string.Empty;
-
-        // The server icon. PNG file bytes, at least 128x128, at most 512x512
-        public byte[] Icon = new byte[] { };
-    }
-
     public class ServerSettings : ServerSettingsJSON
     {
         public event Action<string> OnWorldURLChanged;
