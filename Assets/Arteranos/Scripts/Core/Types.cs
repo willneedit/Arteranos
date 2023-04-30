@@ -12,6 +12,7 @@ using Mirror;
 using System.ComponentModel;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Arteranos.ExtensionMethods
 {
@@ -106,6 +107,21 @@ namespace Arteranos.Core
             return attribute?.Description;
         }
 
+        /// <summary>
+        /// Generate a directory of a hashed URL suitable for a cache directory tree.
+        /// </summary>
+        /// <param name="url">The URL</param>
+        /// <returns>the two directory levels, without a root path</returns>
+        public static string GetURLHash(string url)
+        {
+            Hash128 hash = new();
+            byte[] bytes = Encoding.UTF8.GetBytes(url);
+            hash.Append(bytes);
+            string hashstr = hash.ToString();
+
+            string hashed = $"{hashstr[0..2]}/{hashstr[2..]}";
+            return hashed;
+        }
     }
 
     /// <summary>
@@ -157,4 +173,5 @@ namespace Arteranos.Core
         public string CurrentWorld = null;
         public List<string> CurrentUsers = new();
     }
+
 }

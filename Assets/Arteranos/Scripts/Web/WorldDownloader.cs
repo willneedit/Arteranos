@@ -128,7 +128,7 @@ namespace Arteranos.Web
         {
             WorldDownloaderContext context = _context as WorldDownloaderContext;
 
-            context.hashed = WorldDownloader.GetURLHash(context.url);
+            context.hashed = Utils.GetURLHash(context.url);
             context.cachedir = $"{Application.temporaryCachePath}/WorldCache/{context.hashed}";
             context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
 
@@ -195,17 +195,6 @@ namespace Arteranos.Web
     
     public class WorldDownloader
     {
-        public static string GetURLHash(string url)
-        {
-            Hash128 hash = new();
-            byte[] bytes = Encoding.UTF8.GetBytes(url);
-            hash.Append(bytes);
-            string hashstr = hash.ToString();
-
-            string hashed = $"{hashstr[0..2]}/{hashstr[2..]}";
-            return hashed;
-        }
-
         public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(string url, bool reload = false, int timeout = 600)
         {
             WorldDownloaderContext context = new()

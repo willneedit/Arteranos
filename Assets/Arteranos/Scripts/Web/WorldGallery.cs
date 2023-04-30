@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using System.IO;
 using UnityEngine;
 
@@ -15,8 +16,8 @@ namespace Arteranos.Web
         private static string GetRootPath(string url, bool cached)
         {
             return cached
-                ? $"{Application.temporaryCachePath}/WorldCache/{WorldDownloader.GetURLHash(url)}/world.dir"
-                : $"{Application.persistentDataPath}/WorldGallery/{WorldDownloader.GetURLHash(url)}";
+                ? $"{Application.temporaryCachePath}/WorldCache/{Utils.GetURLHash(url)}/world.dir"
+                : $"{Application.persistentDataPath}/WorldGallery/{Utils.GetURLHash(url)}";
         }
 
         public static (string, string) RetrieveWorld(string url, bool cached = false)
