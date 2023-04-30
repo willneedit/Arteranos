@@ -91,6 +91,9 @@ namespace Arteranos.Core
 
         // The user's world collection
         public virtual List<string> WorldList { get; set; } = new();
+
+        // The user's server collection
+        public virtual List<string> ServerList { get; set; } = new();
     }
 
     public class ClientSettings : ClientSettingsJSON
@@ -113,6 +116,9 @@ namespace Arteranos.Core
                 return hashString;
             }
         }
+
+        [JsonIgnore]
+        public ServerSettingsJSON ConnectedServer { get; set; } = null;
 
         public override string AvatarURL
         {

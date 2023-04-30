@@ -127,6 +127,11 @@ namespace Arteranos.NetworkIO
             // done the full round trip from the server propagation.
             RegisterUser(cs.UserID);
 
+            // TODO Need to implement the server data maintenance in the connection establishment,
+            // like the Server List UI.
+            //if(isOwned)
+            //    SettingsManager.Client.ConnectedServer = null;
+
             InitializeVoice();
         }
 
@@ -149,6 +154,9 @@ namespace Arteranos.NetworkIO
         {
             if(isServer)
                 SettingsManager.UnregisterUser(UserID);
+
+            if(isOwned)
+                SettingsManager.Client.ConnectedServer = null;
         }
 
         private void ResyncInitialValues()
