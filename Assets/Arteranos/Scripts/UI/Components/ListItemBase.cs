@@ -48,9 +48,9 @@ namespace Arteranos.UI
             go_Overlay.SetActive(entered);
         }
 
-        private void OnShowChildControls(bool entered) => ChildControlEntered = entered;
+        protected void OnShowChildControls(bool entered) => ChildControlEntered = entered;
 
-        private void OnShowControls(bool entered)
+        protected void OnShowControls(bool entered)
         {
             if(ChildControlEntered) return;
 
