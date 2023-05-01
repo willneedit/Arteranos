@@ -125,7 +125,8 @@ namespace Arteranos.NetworkIO
 
             // Using directly from Client Settings, because the UserID derived from UserHash hasn't
             // done the full round trip from the server propagation.
-            RegisterUser(cs.UserID);
+            if(isOwned)
+                RegisterUser(cs.UserID);
 
             // TODO Need to implement the server data maintenance in the connection establishment,
             // like the Server List UI.
