@@ -282,8 +282,11 @@ namespace Arteranos.NetworkIO
             else if(isOwned)
             {
                 cran.OnJoinedChatroom += (x) => ChatOwnID = x;
-                // FIXME Use conndata with the remote hostname and port
-                cran.JoinChatroom(NetworkManager.singleton.networkAddress);
+
+                string ip = NetworkManager.singleton.networkAddress;
+                int port = SettingsManager.Client.ConnectedServer.VoicePort;
+
+                cran.JoinChatroom($"{ip}:{port}");
             }
         }
 
