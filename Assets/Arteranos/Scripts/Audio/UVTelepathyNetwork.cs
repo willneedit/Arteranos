@@ -255,19 +255,6 @@ namespace Arteranos.Audio
             }
         }
 
-        public struct Conndata
-        {
-            public string ip;
-            public int port;
-
-            public Conndata(string _ip = null, int _port = 0)
-            {
-                ip = _ip ?? "localhost";
-                port = (_port == 0)
-                    ? SettingsManager.Server.VoicePort
-                    : _port;
-            }         
-        }
 
         /// <summary>
         /// Joins a chatroom. If passed null, will connect to "localhost"
@@ -285,18 +272,16 @@ namespace Arteranos.Audio
                 return;
             }
 
+            Uri uri = null;
+
             if(data == null)
-            {
-                client.Connect("localhost", SettingsManager.Server.VoicePort);
-                return;
-            }
+                uri = new($"tcp4://localhost:{SettingsManager.Server.VoicePort}");
+            else if(data is string)
+                uri = new($"tcp4://{(string) data}");
 
-            if(data is not Conndata)
-                throw new ArgumentException($"Invalid argument - connection data needs to be {nameof(Conndata)}");
+            int port = (uri.Port < 0) ? SettingsManager.Server.VoicePort : uri.Port;
 
-            Conndata cd = (Conndata) data;
-
-            client.Connect(cd.ip, cd.port);
+            client.Connect(uri.Host, port);
         }
 
         /// <summary>
