@@ -16,6 +16,7 @@ namespace Arteranos.NetworkIO
     {
         _Invalid = 0,
         ChatOwnID,
+        VoicePort,
     }
 
     public enum AVFloatKeys : byte
@@ -27,6 +28,7 @@ namespace Arteranos.NetworkIO
     {
         _Invalid = 0,
         AvatarURL,
+        CurrentWorld,
     }
 
     public enum AVBlobKeys : byte
@@ -105,6 +107,14 @@ namespace Arteranos.NetworkIO
             cran = VoiceManager.ChatroomAgent.Network;
         }
 
+        public override void OnStartServer()
+        {
+            base.OnStartServer();
+
+            m_strings[AVStringKeys.CurrentWorld] = SettingsManager.Server.WorldURL;
+            m_ints[AVIntKeys.VoicePort] = SettingsManager.Server.VoicePort;
+        }
+
         public override void OnStartClient()
         {
             ClientSettings cs = SettingsManager.Client;
@@ -123,15 +133,16 @@ namespace Arteranos.NetworkIO
 
             DownloadClientSettings();
 
-            // Using directly from Client Settings, because the UserID derived from UserHash hasn't
-            // done the full round trip from the server propagation.
             if(isOwned)
+            {
+                // Using directly from Client Settings, because the UserID derived from UserHash hasn't
+                // done the full round trip from the server propagation.
                 RegisterUser(cs.UserID);
 
-            // TODO Need to implement the server data maintenance in the connection establishment,
-            // like the Server List UI.
-            //if(isOwned)
-            //    SettingsManager.Client.ConnectedServer = null;
+                // The server already uses a world, so download and transition into the targeted world immediately.
+                if(!string.IsNullOrEmpty(m_strings[AVStringKeys.CurrentWorld]))
+                    UI.WorldTransitionUI.InitiateTransition(m_strings[AVStringKeys.CurrentWorld]);
+            }
 
             InitializeVoice();
         }
@@ -155,9 +166,6 @@ namespace Arteranos.NetworkIO
         {
             if(isServer)
                 SettingsManager.UnregisterUser(UserID);
-
-            if(isOwned)
-                SettingsManager.Client.ConnectedServer = null;
         }
 
         private void ResyncInitialValues()
@@ -285,7 +293,7 @@ namespace Arteranos.NetworkIO
                 cran.OnJoinedChatroom += (x) => ChatOwnID = x;
 
                 string ip = NetworkManager.singleton.networkAddress;
-                int port = SettingsManager.Client.ConnectedServer.VoicePort;
+                int port = m_ints[AVIntKeys.VoicePort];
 
                 cran.JoinChatroom($"{ip}:{port}");
             }
@@ -321,8 +329,7 @@ namespace Arteranos.NetworkIO
             // worldURL could be null means reloading the same world.
             if(worldURL == null) return;
 
-            // Only differing if it's the remote change announce - the local is done
-            // in the PrefPanel_Moderation.
+            // It could be a latecoming user entering, or a laggard answering the dialogue.
             if(ss.WorldURL == worldURL)
             {
                 Debug.Log("World transition - already in that targeted world.");
