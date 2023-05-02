@@ -2,8 +2,7 @@
     "name": "Arteranos.User",
     "rootNamespace": "",
     "references": [
-        "GUID:fe685ec1767f73d42b749ea8045bfe43",
-        "GUID:30817c1a0e6d646d99c048fc403f5979"
+        "GUID:fe685ec1767f73d42b749ea8045bfe43"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

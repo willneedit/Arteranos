@@ -5,7 +5,8 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Mirror;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Arteranos.User
@@ -14,8 +15,31 @@ namespace Arteranos.User
     [AddComponentMenu("User/Spawn Point")]
     public class SpawnPoint : MonoBehaviour
     {
-        public void Awake() => NetworkManager.RegisterStartPosition(transform);
+        public void Awake() => SpawnManager.RegisterSpawnPoint(transform);
 
-        public void OnDestroy() => NetworkManager.UnRegisterStartPosition(transform);
+        public void OnDestroy() => SpawnManager.UnregisterSpawnPoint(transform);
+    }
+
+    public class SpawnManager
+    {
+        public static List<Transform> spawnPoints = new();
+
+        public static void RegisterSpawnPoint(Transform start)
+        {
+            spawnPoints.Add(start);
+            spawnPoints = spawnPoints.OrderBy(transform => transform.GetSiblingIndex()).ToList();
+        }
+
+        public static void UnregisterSpawnPoint(Transform start) => spawnPoints.Remove(start);
+
+        public static Transform GetStartPosition()
+        {
+            // first remove any dead transforms
+            spawnPoints.RemoveAll(t => t == null);
+
+            if(spawnPoints.Count == 0) return null;
+    
+            return spawnPoints[Random.Range(0, spawnPoints.Count)];
+        }
     }
 }
