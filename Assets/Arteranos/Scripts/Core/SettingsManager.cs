@@ -29,6 +29,9 @@ namespace Arteranos.Core
         public static ClientSettings Client { get; internal set; }
         public static ServerSettings Server { get; internal set; }
 
+        public static ServerSettingsJSON ConnectedServer { get; set; } = null;
+        public static string ConnectedWorld { get; set; } = null;
+
         public static List<string> Users { get; internal set; } = new();
 
         private void Awake()

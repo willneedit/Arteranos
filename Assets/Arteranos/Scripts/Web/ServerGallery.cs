@@ -185,7 +185,7 @@ namespace Arteranos
 
             // Only update the data when the connection is established?
             // Doesn't matter. Either one is idle or in host mode.
-            SettingsManager.Client.ConnectedServer = ssj;
+            SettingsManager.ConnectedServer = ssj;
 
             // Here goes nothing...
             return true;

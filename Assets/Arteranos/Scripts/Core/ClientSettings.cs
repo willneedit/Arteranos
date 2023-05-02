@@ -117,9 +117,6 @@ namespace Arteranos.Core
             }
         }
 
-        [JsonIgnore]
-        public ServerSettingsJSON ConnectedServer { get; set; } = null;
-
         public override string AvatarURL
         {
             get => base.AvatarURL;
