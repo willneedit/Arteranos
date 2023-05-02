@@ -31,6 +31,7 @@ namespace Arteranos.Services
         private void OnDestroy()
         {
             if(MDServiceCoroutine != null) StopCoroutine(MDServiceCoroutine);
+            MetaDataServer.Stop();
         }
 
         private IEnumerator ManageMetaDataServer()
