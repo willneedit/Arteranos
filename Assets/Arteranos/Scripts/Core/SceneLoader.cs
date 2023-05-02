@@ -11,12 +11,15 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
+using System;
 
 namespace Arteranos.Core
 {
     public class SceneLoader : MonoBehaviour
     {
         public string Name = null;
+
+        public event Action OnFinishingSceneChange;
 
         private readonly List<string> TNWhitelist = new()
         {
@@ -192,6 +195,10 @@ namespace Arteranos.Core
             Debug.Log("Loader finished, cleaning up.");
 
             loadedAB.Unload(false);
+
+            // Give the chance to move the own avatar BEFORE to unload the old scene
+            // to prevent to pull the rug away fom under your feet.
+            OnFinishingSceneChange?.Invoke();
 
             SceneManager.UnloadSceneAsync(prev);
 

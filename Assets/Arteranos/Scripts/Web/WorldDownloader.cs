@@ -9,13 +9,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
 using Arteranos.Core;
 using System.Threading;
+using Unity.XR.CoreUtils;
+using Mirror;
+using Utils = Arteranos.Core.Utils;
 
 namespace Arteranos.Web
 {
@@ -230,10 +232,31 @@ namespace Arteranos.Web
             GameObject go = new("_SceneLoader");
             go.AddComponent<Persistence>();
             SceneLoader sl = go.AddComponent<SceneLoader>();
+            sl.OnFinishingSceneChange += MoveToDownloadedWorld;
             sl.Name = worldABF;
+        }
 
-            // TODO Placing the avatars in the spawn points (or to 0,0,0)
-            //      Need an OnFinishSceneLoad event.
+        private static void MoveToDownloadedWorld()
+        {
+            XROrigin xro = XR.XRControl.CurrentVRRig;
+            Vector3 startPosition = Vector3.zero;
+            Quaternion startRotation = Quaternion.identity;
+
+            Transform spawn = User.SpawnManager.GetStartPosition();
+
+            if(spawn != null)
+            {
+                startPosition = spawn.position;
+                startRotation = spawn.rotation;
+            }
+
+            Vector3 heightAdjustment = xro.Origin.transform.up * xro.CameraInOriginSpaceHeight;
+
+            startPosition += heightAdjustment;
+
+            xro.MatchOriginUpCameraForward(startRotation * Vector3.up, startRotation * Vector3.forward);
+            xro.MoveCameraToWorldLocation(startPosition);
+            Physics.SyncTransforms();
         }
 
 
