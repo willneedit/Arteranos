@@ -145,7 +145,7 @@ GameObject:
   - component: {fileID: 1889180529585697680}
   - component: {fileID: 1889180529585697681}
   - component: {fileID: 1889180529585697686}
-  - component: {fileID: 1889180529585697677}
+  - component: {fileID: 1943824474716096331}
   - component: {fileID: 8001599642481973709}
   - component: {fileID: 2383748473476550683}
   - component: {fileID: -3480630777290480473}
@@ -220,7 +220,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &1889180529585697681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -257,7 +257,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RaycastTriggerInteraction: 1
---- !u!114 &1889180529585697677
+--- !u!114 &1943824474716096331
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -266,12 +266,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1889180529585697687}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8dc2b8c05294414587a7f33af43d0bb, type: 3}
+  m_Script: {fileID: 11500000, guid: 8a38ff47c64262745af835502b9e2d35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lvc_WorldList: {fileID: 1482913777636466994}
-  txt_AddWorldURL: {fileID: 1889180529782393170}
-  btn_AddWorld: {fileID: 1889180529675457230}
+  lvc_ServerList: {fileID: 1482913777636466994}
+  txt_AddServerURL: {fileID: 1889180529782393170}
+  btn_AddServer: {fileID: 1889180529675457230}
+  btn_Reload: {fileID: 1757457740035590199}
 --- !u!114 &8001599642481973709
 MonoBehaviour:
   m_ObjectHideFlags: 0

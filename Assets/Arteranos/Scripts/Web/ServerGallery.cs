@@ -92,57 +92,6 @@ namespace Arteranos
             callback(resultUrl, smdj);
         }
 
-        public static event Action OnReloadDone;
-        public static bool ReloadInProgress { get; internal set; } = false;
-        public static ConcurrentDictionary<string, ServerMetadataJSON> UpdatedServerList { get; internal set; } = new();
-        private readonly static Queue<string> RemainingServers = new();
-        private static int InProgress = 0;
-
-        public static async void ReloadServerList()
-        {
-            static void GotMetadata(string url, ServerMetadataJSON smdj)
-            {
-                UpdatedServerList[url] = smdj;
-                Debug.Log($"Reload: Server={url}, Data? {smdj != null}");
-                InProgress--;
-            }
-
-            if(ReloadInProgress) return;
-            ReloadInProgress = true;
-
-            RemainingServers.Clear();
-
-            foreach(string server in SettingsManager.Client.ServerList)
-                RemainingServers.Enqueue(server);
-
-            Debug.Log($"Reload started, queued {RemainingServers.Count} servers");
-
-            // As long as something to do or waiting to do....
-            while(InProgress > 0 || RemainingServers.Count > 0)
-            {
-                // And, as long as the workers left idle...
-                while(InProgress < 5)
-                {
-                    // And, there are jobs in the inbox...
-                    if(RemainingServers.Count == 0) break;
-
-                    // Take one of the jobs and order one worker what to do.
-                    string server = RemainingServers.Dequeue();
-                    DownloadServerMetadataAsync(server, GotMetadata);
-                    InProgress++;
-                }
-
-                // Time to look elsewhere for now.
-                await Task.Yield();
-            }
-
-            ReloadInProgress = false;
-            Debug.Log($"Reload finished");
-
-            OnReloadDone?.Invoke();
-        }
-
-
         public static async Task<bool> ConnectToServer(string serverURL)
         {
             // Only if the client module is idle, not even in the connection pending state.
@@ -189,19 +138,8 @@ namespace Arteranos
         /// Able to connect outgoing connections?
         /// </summary>
         /// <param name="serverURL">The server you ant to connect to</param>
-        /// <returns>true if the client is inactive, and only for localhost if the server mode is running</returns>
-        public static bool CanDoConnect(string serverURL)
-        {
-            if(NetworkClient.active) return false;
-
-            Uri uri= new(serverURL);
-
-            // Just to be safe. Host mode (server & client) is okay,
-            // but dual mode (server and having an outgoing connection) is a no-go.
-            if(NetworkServer.active && uri.Host != "localhost") return false;
-
-            return true;
-        }
+        /// <returns>true if the client is inactive</returns>
+        public static bool CanDoConnect() => (!NetworkClient.active && !NetworkServer.active);
 
         /// <summary>
         /// Ready to listen to incoming connections?

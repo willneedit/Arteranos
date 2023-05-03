@@ -57,9 +57,6 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            // TODO DEBUG
-            serverURL = "http://localhost:9779";
-
             PopulateServerData();
         }
 
@@ -68,9 +65,14 @@ namespace Arteranos.UI
             // Not for me?
             if(url != serverURL) return;
 
-            ssj = smdj.Settings;
-            CurrentWorld = smdj.CurrentWorld;
-            CurrentUsers = smdj.CurrentUsers.Count;
+            if(smdj != null)
+            {
+                ssj = smdj.Settings;
+                CurrentWorld = smdj.CurrentWorld;
+                CurrentUsers = smdj.CurrentUsers.Count;
+            }
+            else
+                Debug.LogWarning($"{url} yielded no data.");
 
             StoreUpdatedServerListItem();
 
@@ -80,7 +82,7 @@ namespace Arteranos.UI
         public void PopulateServerData()
         {
             btn_Add.gameObject.SetActive(false);
-            btn_Visit.gameObject.SetActive(ServerGallery.CanDoConnect(serverURL));
+            btn_Visit.gameObject.SetActive(ServerGallery.CanDoConnect());
             btn_Delete.gameObject.SetActive(false);
 
             ssj = ServerGallery.RetrieveServerSettings(serverURL);
@@ -129,6 +131,9 @@ namespace Arteranos.UI
                 Vector2.zero);
 
             string serverstr = ssj.Name;
+
+            if(string.IsNullOrEmpty(CurrentWorld)) CurrentWorld = null;
+
             if(CurrentUsers >= 0) serverstr = $"{ssj.Name} (Users: {CurrentUsers})";
 
             lbl_Caption.text = $"Server: {serverstr}\nCurrent World: {CurrentWorld ?? "Unknown"}";
@@ -149,6 +154,15 @@ namespace Arteranos.UI
         {
             // Transfer the metadata in our persistent storage.
             ServerGallery.StoreServerSettings(serverURL, ssj);
+
+            ClientSettings cs = SettingsManager.Client;
+
+            // Put it down into our bookmark list.
+            if(!cs.ServerList.Contains(serverURL))
+            {
+                cs.ServerList.Add(serverURL);
+                cs.SaveSettings();
+            }
 
             // Visualize the changed state.
             PopulateServerData();
