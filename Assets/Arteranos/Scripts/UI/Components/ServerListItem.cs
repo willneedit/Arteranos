@@ -22,6 +22,8 @@ namespace Arteranos.UI
         public Image img_Icon = null;
         public TMP_Text lbl_Caption = null;
 
+        public event Action<ServerListItem> OnUpdateFinished;
+
         private ServerSettingsJSON ssj = null;
         private string CurrentWorld = null;
         private int CurrentUsers = -1;
@@ -58,7 +60,7 @@ namespace Arteranos.UI
             // TODO DEBUG
             serverURL = "http://localhost:9779";
 
-            if(!string.IsNullOrEmpty(serverURL)) PopulateServerData(serverURL);
+            PopulateServerData();
         }
 
         private void GotSMD(string url, ServerMetadataJSON smdj)
@@ -71,9 +73,11 @@ namespace Arteranos.UI
             CurrentUsers = smdj.CurrentUsers.Count;
 
             StoreUpdatedServerListItem();
+
+            OnUpdateFinished?.Invoke(this);
         }
 
-        private void PopulateServerData(string serverURL)
+        public void PopulateServerData()
         {
             btn_Add.gameObject.SetActive(false);
             btn_Visit.gameObject.SetActive(ServerGallery.CanDoConnect(serverURL));
@@ -97,6 +101,20 @@ namespace Arteranos.UI
             // try to retrieve the probably offline server.
             btn_Add.gameObject.SetActive(true);
             btn_Delete.gameObject.SetActive(true);
+        }
+
+        public void InvalidateServerData()
+        {
+            CurrentUsers = -1;
+            CurrentWorld = null;
+
+            PopulateServerData();
+        }
+
+        public void ReloadServerData()
+        {
+            InvalidateServerData();
+            ServerGallery.DownloadServerMetadataAsync(serverURL, GotSMD);
         }
 
         private void VisualizeServerData()
@@ -129,12 +147,11 @@ namespace Arteranos.UI
 
         private void StoreUpdatedServerListItem()
         {
-
             // Transfer the metadata in our persistent storage.
             ServerGallery.StoreServerSettings(serverURL, ssj);
 
             // Visualize the changed state.
-            PopulateServerData(serverURL);
+            PopulateServerData();
         }
 
         private void OnAddClicked()
