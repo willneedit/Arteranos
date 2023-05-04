@@ -83,7 +83,7 @@ namespace Arteranos.UI
         public void PopulateServerData()
         {
             btn_Add.gameObject.SetActive(false);
-            btn_Visit.gameObject.SetActive(ConnectionManager.CanDoConnect());
+            btn_Visit.gameObject.SetActive(true);
             btn_Delete.gameObject.SetActive(false);
 
             ssj = ServerGallery.RetrieveServerSettings(serverURL);
