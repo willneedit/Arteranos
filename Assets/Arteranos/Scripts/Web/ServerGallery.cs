@@ -14,11 +14,9 @@ using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
-
-using Mirror;
 using Utils = Arteranos.Core.Utils;
 
-namespace Arteranos
+namespace Arteranos.Web
 {
     public class ServerGallery
     {
@@ -56,12 +54,12 @@ namespace Arteranos
         }
 
         public static async Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(
-            string url, 
+            string url,
             int timeout = 20)
         {
             DownloadHandlerBuffer dh = new();
             using UnityWebRequest uwr = new(
-                $"{url}/metadata.json", 
+                $"{url}/metadata.json",
                 UnityWebRequest.kHttpVerbGET,
                 dh,
                 null);
@@ -92,58 +90,5 @@ namespace Arteranos
             callback(resultUrl, smdj);
         }
 
-        public static async Task<bool> ConnectToServer(string serverURL)
-        {
-            // Only if the client module is idle, not even in the connection pending state.
-            if(NetworkClient.active) return false;
-
-            ServerSettingsJSON ssj = RetrieveServerSettings(serverURL);
-            
-            if(ssj == null)
-            {
-                Debug.Log($"{serverURL} has no meta data, downloading...");
-                ServerMetadataJSON smdj;
-                (_, smdj) = await DownloadServerMetadataAsync(serverURL);
-
-                Debug.Log($"Metadata download: {smdj != null}");
-
-                ssj = smdj?.Settings;
-
-                if(ssj == null)
-                {
-                    Debug.Log("Still no viable metadata, giving up.");
-                    return false;
-                }
-
-                // Store it for the posterity.
-                StoreServerSettings(serverURL, ssj);
-            }
-
-            Uri serverURI = new(serverURL);
-
-            // FIXME Telepathy Transport specific.
-            Uri connectionUri = new($"tcp4://{serverURI.Host}:{ssj.ServerPort}");
-
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
-
-            Debug.Log($"Attempting to connect to {connectionUri.ToString()}...");
-
-            manager.StartClient(connectionUri);
-
-            // Here goes nothing...
-            return true;
-        }
-
-        /// <summary>
-        /// Able to connect outgoing connections?
-        /// </summary>
-        /// <param name="serverURL">The server you ant to connect to</param>
-        /// <returns>true if the client is inactive</returns>
-        public static bool CanDoConnect() => (!NetworkClient.active && !NetworkServer.active);
-
-        /// <summary>
-        /// Ready to listen to incoming connections?
-        /// </summary>
-        public static bool CanGetConnected() => NetworkServer.active;
     }
 }

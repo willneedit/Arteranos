@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Arteranos.Core;
+using Arteranos.Web;
 
 namespace Arteranos.UI
 {
@@ -82,7 +83,7 @@ namespace Arteranos.UI
         public void PopulateServerData()
         {
             btn_Add.gameObject.SetActive(false);
-            btn_Visit.gameObject.SetActive(ServerGallery.CanDoConnect());
+            btn_Visit.gameObject.SetActive(ConnectionManager.CanDoConnect());
             btn_Delete.gameObject.SetActive(false);
 
             ssj = ServerGallery.RetrieveServerSettings(serverURL);
@@ -145,7 +146,7 @@ namespace Arteranos.UI
             btn_Visit.interactable = false;
 
             if(!string.IsNullOrEmpty(serverURL))
-                await ServerGallery.ConnectToServer(serverURL);
+                await ConnectionManager.ConnectToServer(serverURL);
 
             btn_Visit.interactable = true;
         }
