@@ -18,8 +18,13 @@ namespace Arteranos.Web
     {
         public static async Task<bool> ConnectToServer(string serverURL)
         {
-            // Only if the client module is idle, not even in the connection pending state.
-            if(NetworkClient.active) return false;
+            if(NetworkClient.active || NetworkServer.active)
+            {
+                // Anything but idle, cut off all connections before connecting to the desired server.
+                StopHost();
+
+                await Task.Delay(3000);
+            }
 
             ServerSettingsJSON ssj = ServerGallery.RetrieveServerSettings(serverURL);
             
@@ -56,6 +61,20 @@ namespace Arteranos.Web
 
             // Here goes nothing...
             return true;
+        }
+
+        public static void StopHost()
+        {
+            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+
+            manager.StopHost();
+        }
+
+        public static void StartHost()
+        {
+            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+
+            manager.StartHost();
         }
 
         /// <summary>
