@@ -124,6 +124,66 @@ namespace Arteranos.Core
         }
     }
 
+    public class ServerPermissionsJSON
+    {
+        // Allow avatars from a URL outside of the avatar generator's scope.
+        public bool? CustomAvatars = false;
+
+        // Allow flying
+        public bool? Flying = false;
+
+        // Allow connections of unverified users
+        public bool? Guests = true;
+
+        // CONTENT MODERATION / FILTERING
+        // null allowed, and the user's filter could yield an inexact match, second only
+        // to an exact one, like....
+        //
+        //  Setting     User        Priority
+        //  false       false           1
+        //  false       true            --
+        //  false       null            1 (because the user says 'don't care')
+        //  true        false           --
+        //  true        true            1
+        //  true        null            1 (because the user says 'don't care')
+        //  null        false           2
+        //  null        true            2
+        //  null        null            2 (see below)
+        //
+        // as a side effect, server adminitrators get their servers a better ranking if they
+        // put down a definite answer, in opposite being wishy-washy.
+        //
+        // ref. https://www.techdirt.com/2023/04/20/bluesky-plans-decentralized-composable-moderation/
+        //      Defaults to Bluesky in the aforementioned website, with modifications
+
+        // Explicit Sexual Images
+        public bool? ExplicitNudes = null;
+
+        // Other Nudity (eg. non-sexual or artistic)
+        public bool? Nudity = true;
+
+        // Sexually suggestive (does not include nudity)
+        public bool? Suggestive = true;
+
+        // Violence (Cartoon / "Clean" violence)
+        public bool? Violence = null;
+
+        // NEW
+        //
+        // Excessive Violence / Blood (Gore, self-harm, torture)
+        public bool? ExcessiveViolence = false;
+
+        // OMITTED
+        //
+        // (Political) Hate Groups - FALSE - Conflicts the law in many occasions
+        // (eg. Germany, §1 GG, §130 StGB)
+        //
+        // Spam - FALSE - Self-explanatory
+        //
+        // Impersonation - FALSE - Self-explanatory
+
+    }
+
     /// <summary>
     /// The static server configuration data.
     /// </summary>
@@ -144,15 +204,6 @@ namespace Arteranos.Core
         // Allow viewing avatars in the server mode like in a spectator mode.
         public bool ShowAvatars = true;
 
-        // Allow avatars from a URL outside of the avatar generator's scope.
-        public bool AllowCustomAvatars = false;
-
-        // Allow flying
-        public bool AllowFlying = false;
-
-        // Allow connections of unverified users
-        public bool AllowGuests = true;
-
         // The server nickname.
         public string Name = string.Empty;
 
@@ -161,6 +212,9 @@ namespace Arteranos.Core
 
         // The server icon. PNG file bytes, at least 128x128, at most 512x512
         public byte[] Icon = new byte[] { };
+
+        // The server's permissions
+        public ServerPermissionsJSON Permissions = new();
     }
 
 

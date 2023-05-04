@@ -90,9 +90,9 @@ namespace Arteranos.UI
             if(ss.Icon != null && ss.Icon.Length != 0)
                 UpdateIcon(ss.Icon);
 
-            chk_Guests.isOn = ss.AllowGuests;
-            chk_CustomAvatars.isOn = ss.AllowCustomAvatars;
-            chk_Flying.isOn = ss.AllowFlying;
+            chk_Guests.isOn = ss.Permissions.Guests ?? false;
+            chk_CustomAvatars.isOn = ss.Permissions.CustomAvatars ?? false;
+            chk_Flying.isOn = ss.Permissions.Flying ?? true;
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
@@ -114,9 +114,9 @@ namespace Arteranos.UI
                 ss.Name = txt_ServerName.text;
                 ss.Description = txt_Description.text;
 
-                ss.AllowFlying = chk_Flying.isOn;
-                ss.AllowCustomAvatars = chk_CustomAvatars.isOn;
-                ss.AllowGuests = chk_Guests.isOn;
+                ss.Permissions.Flying = chk_Flying.isOn;
+                ss.Permissions.CustomAvatars = chk_CustomAvatars.isOn;
+                ss.Permissions.Guests = chk_Guests.isOn;
             }
 
             // Might be to disabled before it's really started, so cs may be null yet.
