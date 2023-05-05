@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
+using Codice.ThemeImages;
 
 namespace Arteranos.ExtensionMethods
 {
@@ -93,6 +94,22 @@ namespace Arteranos.NetworkTypes
 
 namespace Arteranos.Core
 {
+    public static class Extensions
+    {
+        /// <summary>
+        /// Returns a relevance index for the comparison.
+        /// </summary>
+        /// <param name="setting">The server settings</param>
+        /// <param name="user">The user's search filter</param>
+        /// <returns>5 for an exact determinate match, 1 for an inexact match, 0 for a mismatch</returns>
+        public static int FuzzyEq(this bool? setting, bool? user)
+        {
+            if(setting == null) return 1;
+
+            return !setting != user ? 5 : 0;
+        }
+    }
+
     public class Utils
     {
         /// <summary>
@@ -181,6 +198,46 @@ namespace Arteranos.Core
         // Spam - FALSE - Self-explanatory
         //
         // Impersonation - FALSE - Self-explanatory
+
+        /// <summary>
+        /// Compute a match index for the server's settings against the user's filter preferences
+        /// </summary>
+        /// <param name="user">The user's server filter preferences</param>
+        /// <returns>The match score, higher is better</returns>
+        public int MatchIndex(ServerPermissionsJSON user)
+        {
+            int index = 0;
+
+            bool usesGuest = SettingsManager.Client?.isGuest ?? true;
+
+            bool usesCustomAvatar = SettingsManager.Client?.isCustomAvatar ?? true;
+
+            // The 'Big Three' are true booleans - either true or false, no inbetweens.
+
+            // Trying to use a guest login would be a disqualification criterium.
+            if(usesGuest && !(Guests ?? true)) return 0;
+
+            // Same as with custom avatars.
+            if(usesCustomAvatar && !(CustomAvatars ?? true)) return 0;
+
+            // Double weight for one of the 'Big Three'
+            index += Flying.FuzzyEq(user.Flying) * 2;
+
+
+            // Aggregate the matches of the permission settings against the user's
+            // filter settings.
+            index += ExplicitNudes.FuzzyEq(user.ExplicitNudes);
+
+            index += Nudity.FuzzyEq(user.Nudity);
+
+            index += Suggestive.FuzzyEq(user.Suggestive);
+
+            index += Violence.FuzzyEq(user.Violence);
+
+            index += ExcessiveViolence.FuzzyEq(user.ExcessiveViolence);
+
+            return index;
+        }
 
     }
 

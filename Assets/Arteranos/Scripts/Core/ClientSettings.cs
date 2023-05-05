@@ -136,6 +136,11 @@ namespace Arteranos.Core
                 if(old != base.VRMode) OnVRModeChanged?.Invoke(base.VRMode);
             }
         }
+        [JsonIgnore]
+        public bool isGuest { get => LoginProvider == null; }
+
+        [JsonIgnore]
+        public bool isCustomAvatar { get => AvatarProvider != AvatarProvider.RPM; }
 
         private void ComputeUserHash()
         {
