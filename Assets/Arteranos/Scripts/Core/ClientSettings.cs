@@ -136,11 +136,13 @@ namespace Arteranos.Core
                 if(old != base.VRMode) OnVRModeChanged?.Invoke(base.VRMode);
             }
         }
+#pragma warning disable IDE1006 // Benennungsstile
         [JsonIgnore]
         public bool isGuest { get => LoginProvider == null; }
 
         [JsonIgnore]
         public bool isCustomAvatar { get => AvatarProvider != AvatarProvider.RPM; }
+#pragma warning restore IDE1006 // Benennungsstile
 
         private void ComputeUserHash()
         {
