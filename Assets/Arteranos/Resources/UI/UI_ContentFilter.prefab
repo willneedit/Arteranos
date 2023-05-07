@@ -603,6 +603,7 @@ GameObject:
   - component: {fileID: 4304480360161841478}
   - component: {fileID: 5167542839486902226}
   - component: {fileID: 5874943495881875811}
+  - component: {fileID: -4601102561122606601}
   m_Layer: 5
   m_Name: UI_ContentFilter
   m_TagString: Untagged
@@ -738,6 +739,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: Content Filter
+--- !u!114 &-4601102561122606601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4304480360161841479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d61ee9cfd392d9340ada687ac4daaa2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delay: 2
+  m_Duration: 5
+  m_Tolerance: 1
+  m_offset: {x: 0, y: 0, z: 1}
 --- !u!1 &4742153997017928858
 GameObject:
   m_ObjectHideFlags: 0
