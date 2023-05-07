@@ -79,7 +79,14 @@ namespace Arteranos.UI
 
         private void OnSetContentClicked()
         {
-            throw new NotImplementedException();
+            SysMenuKind.CloseSystemMenus();
+
+            ContentFilterUI cui = ContentFilterUI.New();
+
+            cui.spj = SettingsManager.Client.ContentFilterPreferences;
+
+            cui.OnFinishConfiguring +=
+                () => SettingsManager.Client?.SaveSettings();
         }
 
         private async void OnToggleHostClicked()

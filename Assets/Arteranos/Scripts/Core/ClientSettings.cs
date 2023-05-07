@@ -94,6 +94,9 @@ namespace Arteranos.Core
 
         // The user's server collection
         public virtual List<string> ServerList { get; set; } = new();
+
+        // The user's content filter preferences for sorting the servers
+        public virtual ServerPermissionsJSON ContentFilterPreferences { get; set; } = new();
     }
 
     public class ClientSettings : ClientSettingsJSON
