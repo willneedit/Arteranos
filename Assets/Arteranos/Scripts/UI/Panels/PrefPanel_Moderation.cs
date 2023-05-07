@@ -30,6 +30,7 @@ namespace Arteranos.UI
         public TMP_InputField txt_IconURL = null;
 
         public Button btn_WorldGallery = null;
+        public Button btn_ContentPermissions = null;
 
         public Toggle chk_Guests = null;
         public Toggle chk_CustomAvatars = null;
@@ -58,6 +59,7 @@ namespace Arteranos.UI
             btn_Icon.onClick.AddListener(OnIconClicked);
 
             btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
+            btn_ContentPermissions.onClick.AddListener(OnContentPermissionsClicked);
 
             chk_CustomAvatars.onValueChanged.AddListener(SetDirty);
             chk_Flying.onValueChanged.AddListener(SetDirty);
@@ -129,6 +131,18 @@ namespace Arteranos.UI
             SysMenuKind.CloseSystemMenus();
 
             WorldListUI.New();
+        }
+
+        private void OnContentPermissionsClicked()
+        {
+            SysMenuKind.CloseSystemMenus();
+
+            ContentFilterUI cui = ContentFilterUI.New();
+
+            cui.spj = SettingsManager.Server.Permissions;
+
+            cui.OnFinishConfiguring +=
+                () => SettingsManager.Server?.SaveSettings();
         }
 
         private void OnIconClicked()
