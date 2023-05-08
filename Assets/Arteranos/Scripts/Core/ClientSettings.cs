@@ -56,6 +56,27 @@ namespace Arteranos.Core
         Online          // Ready
     }
 
+    public class ClientAudioSettingsJSON
+    {
+        // Master Volume, 0 to 100
+        public float MasterVolume = 100;
+
+        // Voice volume, 0 to 100
+        public float VoiceVolume = 100;
+
+        // Environment volume, 0 to 100
+        public float EnvVolume = 100;
+
+        // Mic Input Device, null means system default device
+        public string InputDevice = null;
+
+        // Mic Input Gain in dB, -6 to +6, meaning factor 0.5 to 2
+        public float MicInputGain = 0;
+
+        // Automatic Gain Control level, from none to high
+        public int AGCLevel = 0;
+    }
+
     public class ClientSettingsJSON
     {
         // The display name of the user. Generate if null
@@ -89,14 +110,17 @@ namespace Arteranos.Core
         // Guides the online and availability state
         public virtual Visibility Visibility { get; set; } = Visibility.Online;
 
+        // The user's audio settings
+        public virtual ClientAudioSettingsJSON AudioSettings { get; set; } = new();
+
+        // The user's content filter preferences for sorting the servers
+        public virtual ServerPermissionsJSON ContentFilterPreferences { get; set; } = new();
+
         // The user's world collection
         public virtual List<string> WorldList { get; set; } = new();
 
         // The user's server collection
         public virtual List<string> ServerList { get; set; } = new();
-
-        // The user's content filter preferences for sorting the servers
-        public virtual ServerPermissionsJSON ContentFilterPreferences { get; set; } = new();
     }
 
     public class ClientSettings : ClientSettingsJSON
