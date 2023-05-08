@@ -11,6 +11,7 @@ using Mirror;
 using System.Collections;
 using UnityEngine;
 using Arteranos.Core;
+using System;
 
 namespace Arteranos.Services
 {
@@ -24,15 +25,27 @@ namespace Arteranos.Services
 
         private void Start()
         {
-            // FIXME Client/User setting, desired sample setting
             ChatroomAgent = new(
                 UVTelepathyNetwork.New(SettingsManager.Server.VoicePort),
-                UVMicInput.New(4, 24000),
+                UVMicInput.New(GetDeviceId(), 24000),
                 new UVAudioOutput.Factory());
 
             cs_cr = ManageChatServer();
 
             StartCoroutine(cs_cr);
+        }
+
+        public static void RenewMic()
+        {
+            UVMicInput.Renew(GetDeviceId(), 24000);
+        }
+
+        public static int? GetDeviceId()
+        {
+            string device = SettingsManager.Client.AudioSettings.InputDevice;
+            int? deviceId = Array.IndexOf(Microphone.devices, device);
+            deviceId = (deviceId < 0) ? null : deviceId;
+            return deviceId;
         }
 
         private void OnDestroy()
@@ -54,7 +67,7 @@ namespace Arteranos.Services
                 if(NetworkServer.active && !serverActive)
                 {
                     ChatroomAgent.Network.HostChatroom();
-                    ChatroomAgent.MuteSelf = true;
+                    // ChatroomAgent.MuteSelf = true;
                     serverActive = true;
                 }
                 // Transition Server or Host --> offline 

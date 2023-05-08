@@ -28,6 +28,11 @@ namespace Arteranos.Audio
         private int packetndex = 0;
         private int packetSize;
 
+        private AudioClip recorderClip { 
+            get => audiorecorder.clip; 
+            set => audiorecorder.clip = value;
+        }
+
         private event Action<float[]> OnSampleReady;
 
         [Obsolete("Cannot use new keyword to create an instance. Use .New() method instead")]
@@ -56,7 +61,7 @@ namespace Arteranos.Audio
             return sampleRate;
         }
 
-        public static UVMicInput New(int micDeviceId = 0, int? desiredRate = null)
+        public static UVMicInput New(int? micDeviceId = 0, int? desiredRate = null)
         {
             GameObject go = new("_Microphone");
             DontDestroyOnLoad(go);
@@ -65,25 +70,25 @@ namespace Arteranos.Audio
             return go.AddComponent<UVMicInput>().New_(micDeviceId, desiredRate);
         }
 
-        private UVMicInput New_(int micDeviceId, int? desiredRate)
+        public static UVMicInput Renew(int? micDeviceId = 0, int? desiredRate = null)
         {
-            SampleRate = desiredRate ?? AudioSettings.outputSampleRate;
-            SampleRate = ValidateSampleRate(SampleRate);
+            UVMicInput uvmi = FindObjectOfType<UVMicInput>();
+            return uvmi.Renew_(micDeviceId, desiredRate);
+        }
 
-            deviceName = Microphone.devices[micDeviceId];
+        private UVMicInput Renew_(int? micDeviceId, int? desiredRate)
+        {
+            SetupMic(micDeviceId, desiredRate, true);
 
-            Debug.Log($"setup mic with {deviceName}, samplerate={SampleRate}");
+            return this;
+        }
+
+        private UVMicInput New_(int? micDeviceId, int? desiredRate)
+        {
             audiorecorder = gameObject.AddComponent<AudioSource>();
             audiorecorder.loop = true;
-            audiorecorder.clip = Microphone.Start(
-                deviceName,
-                true,
-                1,
-                SampleRate);
 
-            ChannelCount = audiorecorder.clip.channels;
-
-            Debug.Log($"Clip samples={audiorecorder.clip.samples}, channels={ChannelCount}");
+            SetupMic(micDeviceId, desiredRate);
 
             encoder = new((SamplingRate) SampleRate, (Channels) ChannelCount)
             {
@@ -111,6 +116,31 @@ namespace Arteranos.Audio
             return this;
         }
 
+        private void SetupMic(int? micDeviceId, int? desiredRate, bool renew = false)
+        {
+            string oldDeviceName = deviceName;
+
+            SampleRate = desiredRate ?? AudioSettings.outputSampleRate;
+            SampleRate = ValidateSampleRate(SampleRate);
+
+            deviceName = micDeviceId.HasValue ? Microphone.devices[micDeviceId.Value] : null;
+
+            Debug.Log($"setup mic with {deviceName}, samplerate={SampleRate}");
+
+            if(renew)
+                Microphone.End(oldDeviceName);
+
+            recorderClip = Microphone.Start(
+                deviceName,
+                true,
+                1,
+                SampleRate);
+
+            ChannelCount = recorderClip.channels;
+
+            Debug.Log($"Clip samples={recorderClip.samples}, channels={ChannelCount}");
+        }
+
         private void OnDestroy()
         {
             StopCoroutine(ReadRawAudio());
@@ -124,7 +154,6 @@ namespace Arteranos.Audio
             int readAbsPos = 0;
             int prevPos = 0;
 
-            AudioClip AudioClip = audiorecorder.clip;
 
             // was SampleRate / 10 -- the amount of 1/10th of a second,
             // and with the 20ms encoder delay, five packets amount to 100ms.
@@ -132,7 +161,9 @@ namespace Arteranos.Audio
 
             while(true)
             {
-                while(true)
+                AudioClip AudioClip = recorderClip;
+
+                while(AudioClip != null)
                 {
                     int currPos = Microphone.GetPosition(deviceName);
                     if(currPos < prevPos)
