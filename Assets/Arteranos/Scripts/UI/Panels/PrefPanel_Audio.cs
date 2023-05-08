@@ -35,16 +35,16 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            List<string> devices = new();
-            devices.Add("Default Device");
+            List<string> devices = new()
+            {
+                "Default Device"
+            };
 
             foreach(string device in Microphone.devices)
                 devices.Add(device);
 
             spn_InputDevice.Options = devices.ToArray();
-
-            int? did = VoiceManager.GetDeviceId();
-            spn_InputDevice.value = (did == null) ? 0 : (did.Value + 1);
+            spn_InputDevice.value = (VoiceManager.GetDeviceId() ?? -1) + 1;
 
             sld_MasterVolume.OnValueChanged += OnMasterVolumeChanged;
             sld_VoiceVolume.OnValueChanged += OnVoiceVolumeChanged;

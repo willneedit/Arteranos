@@ -1731,6 +1731,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1436321349865668454}
     m_Modifications:
+    - target: {fileID: 2832715246125263824, guid: de5e0a57164cb56478e36110bdfa5e74,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2832715246125263824, guid: de5e0a57164cb56478e36110bdfa5e74,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2832715246125263824, guid: de5e0a57164cb56478e36110bdfa5e74,
+        type: 3}
+      propertyPath: m_overflowMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2832715246125263824, guid: de5e0a57164cb56478e36110bdfa5e74,
+        type: 3}
+      propertyPath: m_characterSpacing
+      value: -8
+      objectReference: {fileID: 0}
     - target: {fileID: 2832715246127269005, guid: de5e0a57164cb56478e36110bdfa5e74,
         type: 3}
       propertyPath: m_Name
