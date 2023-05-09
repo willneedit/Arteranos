@@ -20,6 +20,7 @@ namespace Arteranos.Services
             GetComponent<XR.XRControl>().enabled = true;
             GetComponent<VoiceManager>().enabled = true;
             GetComponent<MetaDataService>().enabled = true;
+            GetComponent<NetworkStatus>().enabled = true;
 
             // And finish the startup.
             this.enabled = false;

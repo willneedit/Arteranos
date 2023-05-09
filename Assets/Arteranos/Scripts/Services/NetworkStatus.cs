@@ -14,12 +14,12 @@ using System;
 using System.Threading.Tasks;
 using Arteranos.Core;
 
-namespace Arteranos
+namespace Arteranos.Services
 {
     public class NetworkStatus : MonoBehaviour
     {
         private INatDevice device = null;
-        public System.Net.IPAddress ExternalAddress = null;
+        public System.Net.IPAddress ExternalAddress { get; internal set; } = null;
 
         public bool ServerPortPublic = false;
         public bool VoicePortPublic = false;
@@ -69,7 +69,7 @@ namespace Arteranos
 
             ExternalAddress = await device.GetExternalIPAsync();
 
-            Debug.Log($"Device found : {device}");
+            Debug.Log($"Device found : {device.NatProtocol}");
             Debug.Log($"  Type       : {device.GetType().Name}");
             Debug.Log($"  External IP: {ExternalAddress}");
 
