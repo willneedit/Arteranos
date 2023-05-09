@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6854810779913422246}
   - component: {fileID: 6769683431506730962}
   m_Layer: 5
-  m_Name: Text (TMP).01
+  m_Name: lbl_Status
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -166,6 +166,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1553940648773408403}
   - component: {fileID: 860398000196938607}
+  - component: {fileID: 8036305511588475189}
   m_Layer: 5
   m_Name: ClientStatusBar
   m_TagString: Untagged
@@ -222,6 +223,22 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &8036305511588475189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2507305698428700765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdd1adb9db85f3d4f88aa31a4ab21250, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lbl_Status: {fileID: 6854810779913422246}
+  btn_Offline: {fileID: 9054522236304129063}
+  btn_Server: {fileID: 2600016811387005628}
+  btn_Host: {fileID: 7722046912058222618}
 --- !u!1 &2644650363795574460
 GameObject:
   m_ObjectHideFlags: 0
@@ -521,7 +538,7 @@ GameObject:
   - component: {fileID: 3263546844806141069}
   - component: {fileID: 929864978369629086}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: lbl_Caption
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

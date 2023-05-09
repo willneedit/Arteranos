@@ -77,6 +77,20 @@ namespace Arteranos.Web
             manager.StartHost();
         }
 
+        public static async void StartServer()
+        {
+            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+
+            if(manager.isNetworkActive)
+            {
+                manager.StopHost();
+
+                await Task.Delay(1009);
+            }
+
+            manager.StartServer();
+        }
+
         /// <summary>
         /// Able to connect outgoing connections?
         /// </summary>
