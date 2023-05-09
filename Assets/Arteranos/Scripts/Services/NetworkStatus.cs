@@ -13,33 +13,77 @@ using Mono.Nat;
 using System;
 using System.Threading.Tasks;
 using Arteranos.Core;
+using Mirror;
+using System.ComponentModel;
 
 namespace Arteranos.Services
 {
     public class NetworkStatus : MonoBehaviour
     {
+        public enum ConnectivityLevel
+        {
+            [Description("Unconnected")]
+            Unconnected = 0,
+            [Description("Firewalled")]
+            Restricted,
+            [Description("Public")]
+            Unrestricted
+        }
+
+        public enum OnlineLevel
+        {
+            [Description("Offline")]
+            Offline = 0,
+            [Description("Client")]
+            Client,
+            [Description("Server")]
+            Server,
+            [Description("Host")]
+            Host
+        }
+
+
         private INatDevice device = null;
         public System.Net.IPAddress ExternalAddress { get; internal set; } = null;
+
+        public static event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 
         public bool ServerPortPublic = false;
         public bool VoicePortPublic = false;
         public bool MetadataPortPublic = false;
 
-        public bool? IsPublic()
+        private ConnectivityLevel CurrentConnectivityLevel = ConnectivityLevel.Unconnected;
+        private OnlineLevel CurrentOnlineLevel = OnlineLevel.Offline;
+
+        public static ConnectivityLevel GetConnectivityLevel()
         {
-            // Clear-cut case.
-            if(Application.internetReachability == NetworkReachability.NotReachable) return false;
+            NetworkStatus ns = FindObjectOfType<NetworkStatus>();
 
-            // It could be a network that has a firewall that cannot
-            // be talked to. Or, an airgapped network.
-            if(ExternalAddress == null) return null;
+            if(Application.internetReachability == NetworkReachability.NotReachable)
+                return ConnectivityLevel.Unconnected;
 
-            // NAT in place, all that counts is if the ports open.
-            return ServerPortPublic && VoicePortPublic && MetadataPortPublic;
+            return (ns.ServerPortPublic && ns.VoicePortPublic && ns.MetadataPortPublic)
+                ? ConnectivityLevel.Unrestricted
+                : ConnectivityLevel.Restricted;
         }
 
-        void Start()
+        public static OnlineLevel GetOnlineLevel()
         {
+            if(!NetworkClient.active && !NetworkServer.active)
+                return OnlineLevel.Offline;
+
+            if(NetworkClient.active && NetworkServer.active)
+                return OnlineLevel.Host;
+
+            return NetworkClient.active
+                ? OnlineLevel.Client
+                : OnlineLevel.Server;
+        }
+
+        void OnEnable()
+        {
+            Debug.Log("Setting up NAT gateway configuration");
+
             static IEnumerator RefreshDiscovery()
             {
                 while(true)
@@ -57,6 +101,29 @@ namespace Arteranos.Services
             NatUtility.StartDiscovery();
 
             StartCoroutine(RefreshDiscovery());
+        }
+
+        private void OnDisable()
+        {
+            Debug.Log("Shutting down NAT gateway configuration");
+
+            StopAllCoroutines();
+
+            ClosePortsAsync();
+
+            NatUtility.StopDiscovery();
+        }
+
+        private void Update()
+        {
+            ConnectivityLevel c1 = GetConnectivityLevel();
+            OnlineLevel c2 = GetOnlineLevel();
+
+            if(CurrentConnectivityLevel != c1 || CurrentOnlineLevel != c2)
+                OnNetworkStatusChanged?.Invoke(c1, c2);
+
+            CurrentConnectivityLevel = c1;
+            CurrentOnlineLevel = c2;
         }
 
         private async void DeviceFound(object sender, DeviceEventArgs e)
@@ -137,15 +204,6 @@ namespace Arteranos.Services
             
             if(MetadataPortPublic)
                 ClosePortAsync(ss.MetadataPort);
-        }
-
-        private void OnDestroy()
-        {
-            Debug.Log("Shutting down NAT gateway configuration");
-
-            ClosePortsAsync();
-
-            NatUtility.StopDiscovery();
         }
     }
 }
