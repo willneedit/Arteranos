@@ -39,10 +39,12 @@ namespace Arteranos.Services
                     networkManager.networkAddress = Server.ListenAddress;
                     networkManager.StartHost();
                     break;
-                case ConnectionMode.Client:
-                    networkManager.networkAddress = Client.ServerIP;
-                    networkManager.StartClient();
-                    break;
+
+                    // TODO Commandline startup
+                    //case ConnectionMode.Client:
+                    //    networkManager.networkAddress = Client.ServerIP;
+                    //    networkManager.StartClient();
+                    //    break;
             }
         }
     }

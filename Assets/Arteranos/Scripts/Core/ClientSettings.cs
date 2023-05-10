@@ -92,23 +92,17 @@ namespace Arteranos.Core
         // The bearer token bestowed during the last login. May use to verify unknown user's details
         public virtual string BearerToken { get; set; } = null;
 
-        // Server to connect to, ask if null
-        public virtual string ServerIP { get; set; } = null;
-
         // Avatar designator, valid only for the selected avatar provider
-        public virtual string AvatarURL { get; set; } = "https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb";
+        public virtual string AvatarURL { get; set; } = "6394c1e69ef842b3a5112221";
 
         // Avatar provider to get the user's avatar
         public virtual AvatarProvider AvatarProvider { get; set; } = AvatarProvider.RPM;
 
-        // VR mode, if available
-        public virtual bool VRMode { get; set; } = true;
-
-        // Microphone device if available, default if null
-        public virtual string MicDeviceName { get; set; } = null;
-
         // Guides the online and availability state
         public virtual Visibility Visibility { get; set; } = Visibility.Online;
+
+        // VR mode, if available
+        public virtual bool VRMode { get; set; } = true;
 
         // The user's audio settings
         public virtual ClientAudioSettingsJSON AudioSettings { get; set; } = new();

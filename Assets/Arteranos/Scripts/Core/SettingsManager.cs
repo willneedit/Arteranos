@@ -62,11 +62,12 @@ namespace Arteranos.Core
 
             m_Command.GetCommandlineArgs();
 
-            if(GetCmdArg("-client", out string clientip))
-            {
-                Client.ServerIP = clientip;
-                m_ConnectionMode = ConnectionMode.Client;
-            }
+            // TODO Commandline startup
+            //if(GetCmdArg("-client", out string clientip))
+            //{
+            //    Client.ServerIP = clientip;
+            //    m_ConnectionMode = ConnectionMode.Client;
+            //}
 
             if(GetCmdArg("-server", out string serverip))
             {
