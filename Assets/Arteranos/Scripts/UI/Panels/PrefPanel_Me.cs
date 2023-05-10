@@ -54,9 +54,11 @@ namespace Arteranos.UI
 
         }
 
-        protected override void Start()
+        // Using OnEnable() instead Start() because of the need to update the UserID from
+        // outside means, like the Login panel.
+        protected override void OnEnable()
         {
-            base.Start();
+            base.OnEnable();
 
             cs = SettingsManager.Client;
 
