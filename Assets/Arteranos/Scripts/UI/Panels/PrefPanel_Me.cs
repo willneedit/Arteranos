@@ -61,10 +61,10 @@ namespace Arteranos.UI
             cs = SettingsManager.Client;
 
             spn_OnlineStatus.value = Array.IndexOf(spn_OnlineStatus.Options, Utils.GetEnumDescription(cs.Visibility));
-            txt_Nickname.text = cs.Nickname;
+            txt_Nickname.text = cs.Me.Nickname;
             tro_UserID.text = cs.UserID;
             txt_AvatarURL.text = cs.AvatarURL;
-            tro_AvatarProvider.text = Utils.GetEnumDescription(cs.AvatarProvider);
+            tro_AvatarProvider.text = Utils.GetEnumDescription(cs.Me.AvatarProvider);
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
@@ -88,7 +88,7 @@ namespace Arteranos.UI
 
         private void OnNicknameChanged(string current)
         {
-            cs.Nickname = current;
+            cs.Me.Nickname = current;
             dirty = true;
         }
 

@@ -77,7 +77,7 @@ namespace Arteranos.Core
         public int AGCLevel = 0;
     }
 
-    public class ClientSettingsJSON
+    public class UserDataSettingsJSON
     {
         // The display name of the user. Generate if null
         public virtual string Nickname { get; set; } = null;
@@ -90,13 +90,19 @@ namespace Arteranos.Core
         public virtual string LoginProvider { get; set; } = null;
 
         // The bearer token bestowed during the last login. May use to verify unknown user's details
-        public virtual string BearerToken { get; set; } = null;
+        public virtual string LoginToken { get; set; } = null;
 
         // Avatar designator, valid only for the selected avatar provider
         public virtual string AvatarURL { get; set; } = "6394c1e69ef842b3a5112221";
 
         // Avatar provider to get the user's avatar
         public virtual AvatarProvider AvatarProvider { get; set; } = AvatarProvider.RPM;
+    }
+
+    public class ClientSettingsJSON
+    {
+        // More personal data
+        public virtual UserDataSettingsJSON Me { get; set; } = new();
 
         // Guides the online and availability state
         public virtual Visibility Visibility { get; set; } = Visibility.Online;
@@ -138,13 +144,14 @@ namespace Arteranos.Core
             }
         }
 
-        public override string AvatarURL
+        [JsonIgnore]
+        public string AvatarURL
         {
-            get => base.AvatarURL;
+            get => base.Me.AvatarURL;
             set {
-                string old = base.AvatarURL;
-                base.AvatarURL = value;
-                if(old != base.AvatarURL) OnAvatarChanged?.Invoke(base.AvatarURL);
+                string old = base.Me.AvatarURL;
+                base.Me.AvatarURL = value;
+                if(old != base.Me.AvatarURL) OnAvatarChanged?.Invoke(base.Me.AvatarURL);
             }
         }
 
@@ -159,15 +166,15 @@ namespace Arteranos.Core
         }
 #pragma warning disable IDE1006 // Benennungsstile
         [JsonIgnore]
-        public bool isGuest { get => LoginProvider == null; }
+        public bool isGuest { get => Me.LoginProvider == null; }
 
         [JsonIgnore]
-        public bool isCustomAvatar { get => AvatarProvider != AvatarProvider.RPM; }
+        public bool isCustomAvatar { get => Me.AvatarProvider != AvatarProvider.RPM; }
 #pragma warning restore IDE1006 // Benennungsstile
 
         private void ComputeUserHash()
         {
-            string source = $"{LoginProvider}_{Username}";
+            string source = $"{Me.LoginProvider}_{Me.Username}";
 
             byte[] bytes = Encoding.UTF8.GetBytes(source);
             SHA256Managed hash = new();
@@ -181,11 +188,11 @@ namespace Arteranos.Core
         {
             bool dirty = false;
 
-            if(LoginProvider == null)
+            if(Me.LoginProvider == null)
             {
                 int rnd = UnityEngine.Random.Range(100000000, 999999999);
-                Username = $"Guest{rnd}";
-                BearerToken = null;
+                Me.Username = $"Guest{rnd}";
+                Me.LoginToken = null;
                 dirty = true;
             }
 

@@ -270,7 +270,7 @@ namespace Arteranos.UI
         private (string, string, string) RetrieveLogin()
         {
             ClientSettings cs = SettingsManager.Client;
-            return (cs.LoginProvider, cs.BearerToken, cs.Username);
+            return (cs.Me.LoginProvider, cs.Me.LoginToken, cs.Me.Username);
         }
 
         private void SaveLogin(string lp, string token, string Username)
@@ -278,9 +278,9 @@ namespace Arteranos.UI
             ClientSettings cs = SettingsManager.Client;
 
             Debug.Log($"Saving lp={lp}, token={token}, Username={Username}");
-            cs.BearerToken = token;
-            cs.LoginProvider = lp;
-            cs.Username = Username;
+            cs.Me.LoginToken = token;
+            cs.Me.LoginProvider = lp;
+            cs.Me.Username = Username;
             cs.RefreshAuthentication();
 
             cs.SaveSettings();
