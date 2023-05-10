@@ -13,7 +13,6 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
-using Codice.ThemeImages;
 
 namespace Arteranos.ExtensionMethods
 {

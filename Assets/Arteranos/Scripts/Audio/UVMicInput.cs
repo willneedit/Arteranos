@@ -127,18 +127,29 @@ namespace Arteranos.Audio
 
             Debug.Log($"setup mic with {deviceName}, samplerate={SampleRate}");
 
-            if(renew)
-                Microphone.End(oldDeviceName);
+            ChannelCount = 1;
 
-            recorderClip = Microphone.Start(
-                deviceName,
-                true,
-                1,
-                SampleRate);
+            try
+            {
+                if(renew)
+                    Microphone.End(oldDeviceName);
 
-            ChannelCount = recorderClip.channels;
+                recorderClip = Microphone.Start(
+                    deviceName,
+                    true,
+                    1,
+                    SampleRate);
 
-            Debug.Log($"Clip samples={recorderClip.samples}, channels={ChannelCount}");
+                ChannelCount = recorderClip.channels;
+
+
+                Debug.Log($"Clip samples={recorderClip.samples}, channels={ChannelCount}");
+            }
+            catch
+            {
+                Debug.Log("No microphone present");
+            }
+
         }
 
         private void OnDestroy()
