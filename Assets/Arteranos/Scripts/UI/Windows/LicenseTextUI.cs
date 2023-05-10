@@ -19,18 +19,22 @@ namespace Arteranos.UI
 {
     public class LicenseTextUI : UIBehaviour
     {
+        public bool thirdparty = false;
         public TMP_Text lbl_LicenseText = null;
 
-        private const string LICENSEASSETNAME = "Third Party Notices";
-        public static LicenseTextUI New()
+        private const string THIRDPARTYASSETNAME = "Third Party Notices";
+        private const string LICENSEASSETNAME = "LICENSE";
+        public static LicenseTextUI New(bool thirdparty)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_LicenseText"));
-            return go.GetComponent<LicenseTextUI>();
+            LicenseTextUI licenseTextUI = go.GetComponent<LicenseTextUI>();
+            licenseTextUI.thirdparty = thirdparty;
+            return licenseTextUI;
         }
 
         private string LoadLicenseText()
         {
-            TextAsset ta = Resources.Load<TextAsset>(LICENSEASSETNAME);
+            TextAsset ta = Resources.Load<TextAsset>(thirdparty ? THIRDPARTYASSETNAME : LICENSEASSETNAME);
 
             if(ta == null)
                 throw new Exception("3rd Party Notices missing - UNLICENSED!");
@@ -66,9 +70,9 @@ namespace Arteranos.UI
             return string.Join("\n", newLines);
         }
 
-        protected override void Awake()
+        protected override void Start()
         {
-            base.Awake();
+            base.Start();
 
             lbl_LicenseText.text = LoadLicenseText();
         }

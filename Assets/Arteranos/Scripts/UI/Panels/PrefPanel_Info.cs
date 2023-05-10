@@ -26,9 +26,8 @@ namespace Arteranos.UI
         public TMP_Text lbl_GraphicsDevice = null;
         public TMP_Text lbl_GraphicsVersion = null;
         public TMP_Text lbl_ExternalIPAddr = null;
+        public Button btn_license = null;
         public Button btn_3rdParty = null;
-
-        private ClientSettings cs = null;
 
         protected override void Awake()
         {
@@ -45,23 +44,15 @@ namespace Arteranos.UI
 
             lbl_ExternalIPAddr.text = (extip != null) ? extip.ToString() : "Unknown";
 
-            btn_3rdParty.onClick.AddListener(On3rdPartyClicked);
+            btn_license.onClick.AddListener(() => OnLicenseClicked(false));
+            btn_3rdParty.onClick.AddListener(() => OnLicenseClicked(true));
         }
 
-        private void On3rdPartyClicked()
+        private void OnLicenseClicked(bool thirdparty)
         {
             SysMenuKind.CloseSystemMenus();
 
-            LicenseTextUI.New();
+            LicenseTextUI.New(thirdparty);
         }
-
-        protected override void Start()
-        {
-            base.Start();
-
-            cs = SettingsManager.Client;
-
-        }
-
     }
 }
