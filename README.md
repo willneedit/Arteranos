@@ -3,12 +3,16 @@
 ## Under heavy development
 __*Currently it's in alpha - so don't expect too much!*__
 
-This is intended to be a VR social app - To meet amd greet people in the metaverse, conduct or attend events, create worlds, and much more, built upon a decentralized architecture to host individual users in numerous small(er) servers in opposite to the singular "mega-servers" which are administered or switched off by a single person's royal whim.
+This is intended to be a VR social app - To meet amd greet people in the metaverse, conduct or attend events, create worlds, and much more, built upon a decentralized architecture to host individual users in numerous small(er) servers as an alternative to the singular "mega-servers" which are administered or switched off by a single person's royal whim.
 
 ### System requirements
- - Currently, any decent VR-capable Windows 10 x64 machine
- - Other architectures is in the planning stage
- - For building, **Unity 2021.15f1** with the installed modules for the desired target platform
+
+- Known to work: Windows 10, 64-Bit.
+  - It's designed to be architecture agnostic, so more recent versions of Windows should likely work.
+  - Other architectures (e.g. Linux) are in the planning stage
+- OpenXR-supported tethered headset.
+  - Known to work: Oculus Quest 2, linked (Oculus Link, or using Virtual Desktop)
+- For building, **Unity 2021.15f1** with the installed modules for the desired target platform
 
 ### Quick Building (Windows 64)
  1. Download the source using git: `git clone --depth=1 https://github.com/willneedit/Arteranos.git`
