@@ -26,7 +26,10 @@ namespace Arteranos
                 scenes = new[] { "Assets/Arteranos/Scenes/SampleScene.unity" },
                 locationPathName = $"build/Win64/{appName}.exe",
                 target = BuildTarget.StandaloneWindows64,
-                subtarget = (int) StandaloneBuildSubtarget.Player
+                subtarget = (int) StandaloneBuildSubtarget.Player,
+
+                extraScriptingDefines = new string[0],
+                options = BuildOptions.CleanBuildCache
             };
 
             CommenceBuild(bpo);
@@ -42,7 +45,8 @@ namespace Arteranos
                 target = BuildTarget.StandaloneWindows64,
                 subtarget = (int) StandaloneBuildSubtarget.Server,
 
-                extraScriptingDefines = new[] { "UNITY_SERVER" }
+                extraScriptingDefines = new[] { "UNITY_SERVER" },
+                options = BuildOptions.CleanBuildCache
             };
 
             CommenceBuild(bpo);
@@ -62,9 +66,13 @@ namespace Arteranos
                 Debug.LogError($"Build unsuccesful: {summary.result}");
             }
 
-            // Force-recompile the scripts to match the current Editor's config.
-            UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
-            EditorUtility.RequestScriptReload();
+            ForceRecompile();
+        }
+
+        private static void ForceRecompile()
+        {
+            // UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation(UnityEditor.Compilation.RequestScriptCompilationOptions.CleanBuildCache);
+            // EditorUtility.RequestScriptReload();
         }
     }
 }
