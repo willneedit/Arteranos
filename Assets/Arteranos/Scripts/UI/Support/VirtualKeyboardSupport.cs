@@ -1,3 +1,4 @@
+using Arteranos.Core;
 using System;
 using TMPro;
 using UnityEngine;
@@ -46,6 +47,9 @@ namespace Arteranos.UI
 
         private void HookVirtualKB(TMP_InputField field)
         {
+            // TODO Virtual Keyboard attachment configuration
+            if(!SettingsManager.Client.VRMode) return;
+
             AttachedKB = FindObjectOfType<KeyboardUI>(true);
 
             if(AttachedKB == null)
