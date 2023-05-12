@@ -9,6 +9,7 @@ using System;
 using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Management;
 
 namespace Arteranos.XR
@@ -153,5 +154,24 @@ namespace Arteranos.XR
 
         }
 
+        public static void FreezeControls(bool value)
+        {
+            XROrigin xro = CurrentVRRig;
+            if(xro == null) return;
+            
+            // TODO More movement schenes
+            ActionBasedSnapTurnProvider snapTurnProvider = 
+                xro.gameObject.GetComponent<ActionBasedSnapTurnProvider>();
+
+            ActionBasedContinuousMoveProvider continuousMoveProvider = 
+                xro.gameObject.GetComponent<ActionBasedContinuousMoveProvider>();
+
+            KMTrackedPoseDriver kMTrackedPoseDriver =
+                xro.gameObject.GetComponentInChildren<KMTrackedPoseDriver>();
+
+            if(snapTurnProvider != null) snapTurnProvider.enabled = !value;
+            if(continuousMoveProvider != null) continuousMoveProvider.enabled = !value;
+            if(kMTrackedPoseDriver != null) kMTrackedPoseDriver.enabled = !value;
+        }
     }
 }
