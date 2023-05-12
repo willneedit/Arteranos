@@ -110,8 +110,15 @@ namespace Arteranos.Audio
             // the encoder delay has some influence on the amout of data we need to send, but it's not a multiplication of it
             packetSize = encoder.FrameSizePerChannel * ChannelCount;
 
-            OnSampleReady += DeliverCompressedAudio;
-            StartCoroutine(ReadRawAudio());
+            if(recorderClip != null)
+            {
+                OnSampleReady += DeliverCompressedAudio;
+                StartCoroutine(ReadRawAudio());
+            }
+            else
+            {
+                Debug.Log("Microphone capture is idle, probably there is none.");
+            }
 
             return this;
         }

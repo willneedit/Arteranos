@@ -276,8 +276,8 @@ namespace Arteranos.Audio
 
             if(data == null)
                 uri = new($"tcp4://localhost:{SettingsManager.Server.VoicePort}");
-            else if(data is string)
-                uri = new($"tcp4://{(string) data}");
+            else if(data is string str)
+                uri = new($"tcp4://{str}");
 
             int port = (uri.Port < 0) ? SettingsManager.Server.VoicePort : uri.Port;
 
@@ -314,15 +314,18 @@ namespace Arteranos.Audio
             packet.WriteArray(peerIDs);
             packet.WriteArray(data.samples);
 
-            foreach(short peerID in peerIDs)
+            if(server.Active)
             {
-                if(server.Active)
+                foreach(short peerID in peerIDs)
                     server.Send(peerID, packet.ToArraySegment());
-                else if(client.Connected)
-                    client.Send(packet.ToArraySegment());
-
-                OnAudioSent?.Invoke(peerID, data);
             }
+            else if(client.Connected)
+            {
+                client.Send(packet.ToArraySegment());
+            }
+
+            foreach(short peerID in peerIDs)
+                OnAudioSent?.Invoke(peerID, data);
         }
     }
 

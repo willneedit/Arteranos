@@ -67,7 +67,9 @@ namespace Arteranos.Services
                 if(NetworkServer.active && !serverActive)
                 {
                     ChatroomAgent.Network.HostChatroom();
-                    // ChatroomAgent.MuteSelf = true;
+#if UNITY_SERVER
+                    ChatroomAgent.MuteSelf = true;
+#endif
                     serverActive = true;
                 }
                 // Transition Server or Host --> offline 
