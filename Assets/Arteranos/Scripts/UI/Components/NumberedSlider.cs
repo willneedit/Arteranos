@@ -20,6 +20,11 @@ namespace Arteranos.UI
 
         public event Action<float> OnValueChanged = null;
 
+        public float value {
+            get => sld_Slider.value;
+            set => sld_Slider.value = value;
+        }
+
         private Slider sld_Slider = null;
         private TextMeshProUGUI lbl_number = null;
 
