@@ -104,7 +104,7 @@ namespace Arteranos.NetworkIO
         void Awake()
         {
             syncDirection = SyncDirection.ServerToClient;
-            cran = VoiceManager.ChatroomAgent.Network;
+            cran = AudioManager.ChatroomAgent.Network;
         }
 
         public override void OnStartServer()

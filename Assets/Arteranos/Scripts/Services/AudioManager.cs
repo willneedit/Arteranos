@@ -16,7 +16,7 @@ using UnityEngine.Audio;
 
 namespace Arteranos.Services
 {
-    public class VoiceManager : MonoBehaviour
+    public class AudioManager : MonoBehaviour
     {
         public static ChatroomAgentV2 ChatroomAgent { get; private set; }
 

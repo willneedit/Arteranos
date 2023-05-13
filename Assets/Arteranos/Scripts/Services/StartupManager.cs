@@ -18,7 +18,7 @@ namespace Arteranos.Services
 
             // Startup of dependent services...
             GetComponent<XR.XRControl>().enabled = true;
-            GetComponent<VoiceManager>().enabled = true;
+            GetComponent<AudioManager>().enabled = true;
             GetComponent<MetaDataService>().enabled = true;
             GetComponent<NetworkStatus>().enabled = true;
 

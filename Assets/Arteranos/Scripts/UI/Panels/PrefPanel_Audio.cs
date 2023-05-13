@@ -45,7 +45,7 @@ namespace Arteranos.UI
                 devices.Add(device);
 
             spn_InputDevice.Options = devices.ToArray();
-            spn_InputDevice.value = (VoiceManager.GetDeviceId() ?? -1) + 1;
+            spn_InputDevice.value = (AudioManager.GetDeviceId() ?? -1) + 1;
 
             sld_MasterVolume.OnValueChanged += OnMasterVolumeChanged;
             sld_VoiceVolume.OnValueChanged += OnVoiceVolumeChanged;
@@ -63,9 +63,9 @@ namespace Arteranos.UI
 
             // Reset the state as it's the initial state, not the blank slate.
 
-            sld_MasterVolume.value = VoiceManager.VolumeMaster;
-            sld_VoiceVolume.value = VoiceManager.VolumeVoice;
-            sld_EnvVolume.value = VoiceManager.VolumeEnv;
+            sld_MasterVolume.value = AudioManager.VolumeMaster;
+            sld_VoiceVolume.value = AudioManager.VolumeVoice;
+            sld_EnvVolume.value = AudioManager.VolumeEnv;
 
             dirty = false;
         }
@@ -77,10 +77,10 @@ namespace Arteranos.UI
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty)
             {
-                VoiceManager.PushVolumeSettings();
+                AudioManager.PushVolumeSettings();
 
                 cs?.SaveSettings();
-                if(needsRenew) VoiceManager.RenewMic();
+                if(needsRenew) AudioManager.RenewMic();
             }
 
             dirty = false;
@@ -89,19 +89,19 @@ namespace Arteranos.UI
 
         private void OnMasterVolumeChanged(float val)
         {
-            VoiceManager.VolumeMaster = val;
+            AudioManager.VolumeMaster = val;
             dirty = true;
         }
 
         private void OnVoiceVolumeChanged(float val)
         {
-            VoiceManager.VolumeVoice = val;
+            AudioManager.VolumeVoice = val;
             dirty = true;
         }
 
         private void OnEnvVolumeChanged(float val)
         {
-            VoiceManager.VolumeEnv = val;
+            AudioManager.VolumeEnv = val;
             dirty = true;
         }
 
