@@ -177,6 +177,7 @@ namespace Arteranos.NetworkIO
 
         private const string MOUTH_OPEN_BLEND_SHAPE_NAME = "mouthOpen";
         private const int AMPLITUDE_MULTIPLIER = 50;
+        private const string AvatarAnimator = "AvatarAnim/BaseRPMAnimator";
 
         private SkinnedMeshRenderer headMesh;
         private SkinnedMeshRenderer beardMesh;
@@ -251,7 +252,7 @@ namespace Arteranos.NetworkIO
 
                 Animator anim = args.Avatar.GetComponent<Animator>();
                 anim.avatar = null;
-                anim.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("BaseRPMAnimator");
+                anim.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>(AvatarAnimator);
 
                 // Height of feet joints to the floor
                 FootElevation = (LeftFoot.position.y + RightFoot.position.y) / 2 - agot.position.y;
