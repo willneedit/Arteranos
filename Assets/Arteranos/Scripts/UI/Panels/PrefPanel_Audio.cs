@@ -15,6 +15,7 @@ using UnityEngine.UI;
 
 using Arteranos.Core;
 using Arteranos.Services;
+using UnityEngine.Audio;
 
 namespace Arteranos.UI
 {
@@ -61,6 +62,11 @@ namespace Arteranos.UI
             cs = SettingsManager.Client;
 
             // Reset the state as it's the initial state, not the blank slate.
+
+            sld_MasterVolume.value = VoiceManager.VolumeMaster;
+            sld_VoiceVolume.value = VoiceManager.VolumeVoice;
+            sld_EnvVolume.value = VoiceManager.VolumeEnv;
+
             dirty = false;
         }
 
@@ -71,26 +77,32 @@ namespace Arteranos.UI
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty)
             {
+                VoiceManager.PushVolumeSettings();
+
                 cs?.SaveSettings();
                 if(needsRenew) VoiceManager.RenewMic();
             }
 
             dirty = false;
+            needsRenew= false;
         }
 
         private void OnMasterVolumeChanged(float val)
         {
-            throw new NotImplementedException();
+            VoiceManager.VolumeMaster = val;
+            dirty = true;
         }
 
         private void OnVoiceVolumeChanged(float val)
         {
-            throw new NotImplementedException();
+            VoiceManager.VolumeVoice = val;
+            dirty = true;
         }
 
         private void OnEnvVolumeChanged(float val)
         {
-            throw new NotImplementedException();
+            VoiceManager.VolumeEnv = val;
+            dirty = true;
         }
 
         private void OnInputDeviceChanged(int item, bool up)

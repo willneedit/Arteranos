@@ -12,6 +12,7 @@ using System.Collections;
 using UnityEngine;
 using Arteranos.Core;
 using System;
+using UnityEngine.Audio;
 
 namespace Arteranos.Services
 {
@@ -19,12 +20,31 @@ namespace Arteranos.Services
     {
         public static ChatroomAgentV2 ChatroomAgent { get; private set; }
 
+        public static float VolumeMaster {
+            get => GetVolume("Master");
+            set => SetVolume("Master", value);
+        }
+        public static float VolumeVoice {
+            get => GetVolume("Voice");
+            set => SetVolume("Voice", value);
+        }
+        public static float VolumeEnv {
+            get => GetVolume("Env");
+            set => SetVolume("Env", value);
+        }
+
         private bool serverActive = false;
 
         private IEnumerator cs_cr = null;
 
+        private static AudioMixer mixer = null;
+
+        private void Awake() => mixer = Resources.Load<AudioMixer>("Audio/AudioMixer");
+
         private void Start()
         {
+            PullVolumeSettings();
+
             ChatroomAgent = new(
                 UVTelepathyNetwork.New(SettingsManager.Server.VoicePort),
                 UVMicInput.New(GetDeviceId(), 24000),
@@ -35,10 +55,13 @@ namespace Arteranos.Services
             StartCoroutine(cs_cr);
         }
 
-        public static void RenewMic()
+        private void OnDestroy()
         {
-            UVMicInput.Renew(GetDeviceId(), 24000);
+            if(cs_cr != null)
+                StopCoroutine(cs_cr);
         }
+
+        public static void RenewMic() => UVMicInput.Renew(GetDeviceId(), 24000);
 
         public static int? GetDeviceId()
         {
@@ -47,11 +70,28 @@ namespace Arteranos.Services
             deviceId = (deviceId < 0) ? null : deviceId;
             return deviceId;
         }
+        private static void SetVolume(string group, float volume) => mixer.SetFloat($"Vol{group}", volume - 80.0f);
 
-        private void OnDestroy()
+        private static float GetVolume(string group)
         {
-            if(cs_cr != null)
-                StopCoroutine(cs_cr);
+            mixer.GetFloat($"Vol{group}", out float val);
+            return val + 80.0f;
+        }
+
+        public static void PullVolumeSettings()
+        {
+            ClientAudioSettingsJSON audioSettings = SettingsManager.Client.AudioSettings;
+            VolumeEnv = audioSettings.EnvVolume;
+            VolumeMaster = audioSettings.MasterVolume;
+            VolumeVoice = audioSettings.VoiceVolume;
+        }
+
+        public static void PushVolumeSettings()
+        {
+            ClientAudioSettingsJSON audioSettings = SettingsManager.Client.AudioSettings;
+            audioSettings.MasterVolume = VolumeMaster;
+            audioSettings.VoiceVolume= VolumeVoice;
+            audioSettings.EnvVolume = VolumeEnv;
         }
 
         private IEnumerator ManageChatServer()
