@@ -13,7 +13,9 @@ using UnityEngine.SceneManagement;
 using System.IO;
 using System;
 
-namespace Arteranos.Core
+using Arteranos.Services;
+
+namespace Arteranos.Web
 {
     public class SceneLoader : MonoBehaviour
     {
@@ -112,6 +114,16 @@ namespace Arteranos.Core
                 StripScripts(transform.GetChild(i));
         }
 
+        public void RouteAudio(Transform transform)
+        {
+            // TODO More groups, like Ambient, BGM, and streaming music/video?
+            // Distinguish with Name/Tags?
+            foreach(AudioSource source in transform.GetComponents<AudioSource>())
+                source.outputAudioMixerGroup = AudioManager.MixerGroupEnv;
+
+            for(int i = 0, c = transform.childCount; i < c; ++i)
+                RouteAudio(transform.GetChild(i));
+        }
         public IEnumerator LoadScene(string name)
         {
             Name = null;
@@ -175,6 +187,8 @@ namespace Arteranos.Core
 
             GameObject go = Instantiate(environment);
             StripScripts(go.transform);
+
+            RouteAudio(go.transform);
 
             Debug.Log("Adding lighting data...");
 

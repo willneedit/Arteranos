@@ -7,6 +7,7 @@ using Arteranos.UniVoice;
 using POpusCodec;
 using POpusCodec.Enums;
 using Arteranos.Core;
+using UnityEngine.Audio;
 
 namespace Arteranos.Audio
 {
@@ -30,7 +31,7 @@ namespace Arteranos.Audio
         [System.Obsolete("Cannot use new keyword to create an instance. Use .New() method instead")]
         public UVAudioOutput() { }
 
-        public static UVAudioOutput New(int samplingRate, int channelCount)
+        public static UVAudioOutput New(int samplingRate, int channelCount, AudioMixerGroup mg)
         {
             GameObject go = new($"UniVoiceAudioSourceOutput");
             DontDestroyOnLoad(go);
@@ -38,8 +39,10 @@ namespace Arteranos.Audio
             go.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             UVAudioOutput ctd = go.AddComponent<UVAudioOutput>();
+            AudioSource source = go.AddComponent<AudioSource>();
+            source.outputAudioMixerGroup = mg;
 
-            return ctd.SetupDecoder(go.AddComponent<AudioSource>(), samplingRate, channelCount);
+            return ctd.SetupDecoder(source, samplingRate, channelCount);
         }
 
         private UVAudioOutput SetupDecoder(AudioSource source, int samplingRate, int channelCount)
@@ -143,9 +146,10 @@ namespace Arteranos.Audio
         /// </summary>
         public class Factory : IAudioOutputFactoryV2
         {
-            public Factory() { }
+            private readonly AudioMixerGroup mg;
+            public Factory(AudioMixerGroup _mg) { mg = _mg; }
 
-            public IAudioOutputV2 Create(int samplingRate, int channelCount) => New(samplingRate, channelCount);
+            public IAudioOutputV2 Create(int samplingRate, int channelCount) => New(samplingRate, channelCount, mg);
         }
     }
 }

@@ -39,6 +39,16 @@ namespace Arteranos.Services
 
         private static AudioMixer mixer = null;
 
+        public static AudioMixerGroup MixerGroupVoice 
+        {
+            get => mixer.FindMatchingGroups("Master/Voice")[0];
+        }
+
+        public static AudioMixerGroup MixerGroupEnv
+        {
+            get => mixer.FindMatchingGroups("Master/Environment")[0];
+        }
+
         private void Awake() => mixer = Resources.Load<AudioMixer>("Audio/AudioMixer");
 
         private void Start()
@@ -48,7 +58,7 @@ namespace Arteranos.Services
             ChatroomAgent = new(
                 UVTelepathyNetwork.New(SettingsManager.Server.VoicePort),
                 UVMicInput.New(GetDeviceId(), 24000),
-                new UVAudioOutput.Factory());
+                new UVAudioOutput.Factory(MixerGroupVoice));
 
             cs_cr = ManageChatServer();
 

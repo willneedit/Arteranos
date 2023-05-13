@@ -16,7 +16,6 @@ using UnityEngine.Networking;
 using Arteranos.Core;
 using System.Threading;
 using Unity.XR.CoreUtils;
-using Mirror;
 using Utils = Arteranos.Core.Utils;
 
 namespace Arteranos.Web
