@@ -138,6 +138,26 @@ namespace Arteranos.Core
             string hashed = $"{hashstr[0..2]}/{hashstr[2..]}";
             return hashed;
         }
+
+        /// <summary>
+        /// Simulate a RC circuit (a capacitor and resistor) to measure the capacitor's charge,
+        /// used in for example a VU meter. 
+        /// </summary>
+        /// <param name="value">Current input voltage</param>
+        /// <param name="charge">The resulting charge</param>
+        /// <param name="kCharge">The charging factor</param>
+        /// <param name="kDischarge">The discharging factor</param>
+        public static void CalcVU(float value, ref float charge, float kCharge = 0.1f, float kDischarge = 0.05f)
+        {
+            value = Mathf.Abs(value);
+
+            if(value > charge)
+                charge = (charge * (1 - kCharge)) + (value * kCharge);
+            else
+                charge *= (1 - kDischarge);
+        }
+
+
     }
 
     public class ServerPermissionsJSON

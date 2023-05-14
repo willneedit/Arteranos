@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-
 using UnityEngine;
 
 using Arteranos.UniVoice;
@@ -22,6 +19,8 @@ namespace Arteranos.Audio
         private int ChannelCount;
 
         private int FrameSize = -1;
+        private float charge = 0;
+
         public string ID
         {
             get => gameObject.name;
@@ -84,25 +83,12 @@ namespace Arteranos.Audio
             }
 
             foreach(float sample in samples)
-                AdvanceCharge(sample);
+            {
+                Utils.CalcVU(sample, ref charge, 0.1f, 0.02f);
+                vuBuffer.PushBack(charge);
+            }
 
             frameBuffer.PushBack(samples);
-        }
-
-        private float charge = 0;
-        private const float kCharge = 0.1f;
-        private const float kDischarge = 0.05f;
-
-        private void AdvanceCharge(float value)
-        {
-            value = Mathf.Abs(value);
-
-            if(value > charge)
-                charge = (charge * (1 - kCharge)) + (value * kCharge);
-            else
-                charge *= (1 - kDischarge);
-
-            vuBuffer.PushBack(value);
         }
 
         private int usingFrame = 0;
