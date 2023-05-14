@@ -16,11 +16,16 @@ namespace Arteranos.Audio
     public class UVMicInput : MonoBehaviour, IAudioInputV2
     {
         public event Action<int, byte[]> OnSegmentReady;
+        public event Action<float[]> OnSampleReady;
 
         public int SampleRate { get; private set; }
         public int ChannelCount { get; private set; }
 
         public string deviceName;
+
+        // In plain factor, to convert from dB use...
+        // Fout = 10^(Q/20) * Fin
+        public float Gain = 1.0f;
 
         private AudioSource audiorecorder = null;
         private readonly List<float> micBuffer = new();
@@ -32,8 +37,6 @@ namespace Arteranos.Audio
             get => audiorecorder.clip; 
             set => audiorecorder.clip = value;
         }
-
-        private event Action<float[]> OnSampleReady;
 
         [Obsolete("Cannot use new keyword to create an instance. Use .New() method instead")]
         public UVMicInput() { }
@@ -194,6 +197,13 @@ namespace Arteranos.Audio
                     if(nextReadAbsPos >= currAbsPos) break;
 
                     AudioClip.GetData(temp, readAbsPos % AudioClip.samples);
+
+                    // Amplifying/attenuating.
+                    for(int i = 0, c = temp.Length; i < c; ++i)
+                    {
+                        temp[i] *= Gain;
+                        temp[i] = Mathf.Clamp(temp[i], -1.0f, 1.0f);
+                    }
 
                     OnSampleReady?.Invoke(temp);
 

@@ -6,16 +6,13 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
 using Arteranos.Services;
-using UnityEngine.Audio;
 
 namespace Arteranos.UI
 {
@@ -27,6 +24,7 @@ namespace Arteranos.UI
         public Spinner spn_InputDevice = null;
         public NumberedSlider sld_MicInputGain = null;
         public Spinner spn_AGC = null;
+        public Image img_Microphone = null;
 
         private ClientSettings cs = null;
         private bool dirty = false;
@@ -53,7 +51,10 @@ namespace Arteranos.UI
             spn_InputDevice.OnChanged += OnInputDeviceChanged;
             sld_MicInputGain.OnValueChanged += OnMicInputGainChanged;
             spn_AGC.OnChanged += OnAGCChanged;
+
+            AudioManager.MicInput.OnSampleReady += TapMicrophoneInput;
         }
+
 
         protected override void Start()
         {
@@ -67,6 +68,8 @@ namespace Arteranos.UI
             sld_VoiceVolume.value = AudioManager.VolumeVoice;
             sld_EnvVolume.value = AudioManager.VolumeEnv;
 
+            sld_MicInputGain.value = cs.AudioSettings.MicInputGain;
+
             dirty = false;
         }
 
@@ -79,12 +82,36 @@ namespace Arteranos.UI
             {
                 AudioManager.PushVolumeSettings();
 
+                cs.AudioSettings.MicInputGain = sld_MicInputGain.value;
+
                 cs?.SaveSettings();
                 if(needsRenew) AudioManager.RenewMic();
             }
 
             dirty = false;
             needsRenew= false;
+        }
+
+        protected override void OnDestroy()
+        {
+            AudioManager.MicInput.OnSampleReady -= TapMicrophoneInput;
+
+            base.OnDestroy();
+        }
+
+        private void Update()
+        {
+            Color MicColor = Color.black;
+
+            float chargePercent = charge * 50.0f;
+            if(chargePercent < 0.8f)
+                // Black to Green from 0 to 80% amplitude
+                MicColor = Color.Lerp(Color.black, Color.green, chargePercent * (1.00f / 0.80f));
+            else
+                // Green to red from 80% to 100% amplitude
+                MicColor = Color.Lerp(Color.green, Color.red, (chargePercent - 0.80f) * (1.00f / 0.20f));
+
+            img_Microphone.color = MicColor;
         }
 
         private void OnMasterVolumeChanged(float val)
@@ -115,12 +142,22 @@ namespace Arteranos.UI
 
         private void OnMicInputGainChanged(float val)
         {
-            throw new NotImplementedException();
+            AudioManager.MicInput.Gain = Utils.LoudnessToFactor(val);
+            dirty = true;
         }
 
         private void OnAGCChanged(int item, bool up)
         {
             throw new NotImplementedException();
         }
+
+        private float charge = 0;
+        private void TapMicrophoneInput(float[] samples)
+        {
+            foreach(float sample in samples)
+                Utils.CalcVU(sample, ref charge, 0.1f, 0.001f);
+
+        }
+
     }
 }

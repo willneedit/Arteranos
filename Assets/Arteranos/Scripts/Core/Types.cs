@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 namespace Arteranos.ExtensionMethods
 {
@@ -157,7 +158,12 @@ namespace Arteranos.Core
                 charge *= (1 - kDischarge);
         }
 
-
+        /// <summary>
+        /// Fout = 10^(Q/20) * Fin
+        /// </summary>
+        /// <param name="dBvalue"></param>
+        /// <returns>Ife plain factor.</returns>
+        public static float LoudnessToFactor(float dBvalue) => MathF.Pow(10.0f, dBvalue / 20.0f);
     }
 
     public class ServerPermissionsJSON
