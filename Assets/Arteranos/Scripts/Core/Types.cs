@@ -163,7 +163,7 @@ namespace Arteranos.Core
         /// </summary>
         /// <param name="dBvalue"></param>
         /// <returns>Ife plain factor.</returns>
-        public static float LoudnessToFactor(float dBvalue) => MathF.Pow(10.0f, dBvalue / 20.0f);
+        public static float LoudnessToFactor(float dBvalue) => MathF.Pow(10.0f, dBvalue / 10.0f);
     }
 
     public class ServerPermissionsJSON

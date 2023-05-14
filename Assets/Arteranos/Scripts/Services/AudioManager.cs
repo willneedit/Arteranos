@@ -94,6 +94,7 @@ namespace Arteranos.Services
             VolumeVoice = audioSettings.VoiceVolume;
 
             MicInput.Gain = Core.Utils.LoudnessToFactor(audioSettings.MicInputGain);
+            MicInput.SetAGCLevel(audioSettings.AGCLevel);
         }
 
         public static void PushVolumeSettings()

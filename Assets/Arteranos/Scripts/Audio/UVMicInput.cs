@@ -15,6 +15,9 @@ namespace Arteranos.Audio
     /// </summary>
     public class UVMicInput : MonoBehaviour, IAudioInputV2
     {
+        public const float AGCDecayFactor = 1.0e-05f;
+        private const float AGCAttackFactor = 1.0f;
+
         public event Action<int, byte[]> OnSegmentReady;
         public event Action<float[]> OnSampleReady;
 
@@ -27,11 +30,15 @@ namespace Arteranos.Audio
         // Fout = 10^(Q/20) * Fin
         public float Gain = 1.0f;
 
+        // The maximun amplification level for the AGC in dB, when it's silent.
+        public float AGCGainLevel = 0.0f;
+
         private AudioSource audiorecorder = null;
         private readonly List<float> micBuffer = new();
         private OpusEncoder encoder;
         private int packetndex = 0;
         private int packetSize;
+
 
         private AudioClip recorderClip { 
             get => audiorecorder.clip; 
@@ -169,12 +176,24 @@ namespace Arteranos.Audio
             encoder.Dispose();
         }
 
+        public void SetAGCLevel(int level)
+        {
+            switch(level)
+            {
+                case 0: AGCGainLevel = 0.0f; break;
+                case 1: AGCGainLevel = 4.0f; break;
+                case 2: AGCGainLevel = 8.0f; break;
+                case 3: AGCGainLevel = 12.0f; break;
+            }
+        }
+
         IEnumerator ReadRawAudio()
         {
             int loops = 0;
             int readAbsPos = 0;
             int prevPos = 0;
 
+ 
 
             // was SampleRate / 10 -- the amount of 1/10th of a second,
             // and with the 20ms encoder delay, five packets amount to 100ms.
@@ -201,9 +220,21 @@ namespace Arteranos.Audio
                     // Amplifying/attenuating.
                     for(int i = 0, c = temp.Length; i < c; ++i)
                     {
-                        temp[i] *= Gain;
+                        // AGC: Instantly go up, go slooooowly down.
+                        Core.Utils.CalcVU(temp[i], ref AGCCharge, AGCAttackFactor, AGCDecayFactor);
+
+                        // AGC Gain slides from 0 dB to (AGCGainLevel) dB when it's silent.
+                        // ( = AGCCharge near 0)
+                        float ActualAGCFactor = Core.Utils.LoudnessToFactor(
+                            (1 - Mathf.Clamp01(AGCCharge * 25.0f)) * AGCGainLevel);
+
+                        //if((samplesCount++ % 24000) == 0)
+                        //    Debug.Log(ActualAGCFactor);
+
+                        temp[i] *= Gain * ActualAGCFactor;
                         temp[i] = Mathf.Clamp(temp[i], -1.0f, 1.0f);
                     }
+
 
                     OnSampleReady?.Invoke(temp);
 
@@ -212,6 +243,8 @@ namespace Arteranos.Audio
                 yield return null;
             }
         }
+
+        private float AGCCharge = 0.0f;
 
         private void DeliverCompressedAudio(float[] data)
         {

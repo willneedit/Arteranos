@@ -69,6 +69,7 @@ namespace Arteranos.UI
             sld_EnvVolume.value = AudioManager.VolumeEnv;
 
             sld_MicInputGain.value = cs.AudioSettings.MicInputGain;
+            spn_AGC.value = cs.AudioSettings.AGCLevel;
 
             dirty = false;
         }
@@ -83,6 +84,7 @@ namespace Arteranos.UI
                 AudioManager.PushVolumeSettings();
 
                 cs.AudioSettings.MicInputGain = sld_MicInputGain.value;
+                cs.AudioSettings.AGCLevel = spn_AGC.value;
 
                 cs?.SaveSettings();
                 if(needsRenew) AudioManager.RenewMic();
@@ -103,7 +105,7 @@ namespace Arteranos.UI
         {
             Color MicColor = Color.black;
 
-            float chargePercent = charge * 50.0f;
+            float chargePercent = charge * 20.0f;
             if(chargePercent < 0.8f)
                 // Black to Green from 0 to 80% amplitude
                 MicColor = Color.Lerp(Color.black, Color.green, chargePercent * (1.00f / 0.80f));
@@ -148,13 +150,15 @@ namespace Arteranos.UI
 
         private void OnAGCChanged(int item, bool up)
         {
-            throw new NotImplementedException();
+            AudioManager.MicInput.SetAGCLevel(spn_AGC.value);
+            dirty = true;
         }
 
         private float charge = 0;
         private void TapMicrophoneInput(float[] samples)
         {
             foreach(float sample in samples)
+                // Utils.CalcVU(sample, ref charge, 0.9f, 0.25e-05f);
                 Utils.CalcVU(sample, ref charge, 0.1f, 0.001f);
 
         }
