@@ -21,6 +21,10 @@ namespace Arteranos
         [MenuItem("Arteranos/Build Windows64", false, 101)]
         public static void BuildWin64()
         {
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+            EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
+            EditorUserBuildSettings.SetBuildLocation(BuildTarget.StandaloneWindows64, "build/Win64/");
+
             BuildPlayerOptions bpo = new()
             {
                 scenes = new[] { "Assets/Arteranos/Scenes/SampleScene.unity" },
@@ -38,6 +42,10 @@ namespace Arteranos
         [MenuItem("Arteranos/Build Windows Dedicated Server", false, 101)]
         public static void BuildWin64DedServ()
         {
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+            EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Server;
+            EditorUserBuildSettings.SetBuildLocation(BuildTarget.StandaloneWindows64, "build/Win64-Server/");
+
             BuildPlayerOptions bpo = new()
             {
                 scenes = new[] { "Assets/Arteranos/Scenes/SampleScene.unity" },

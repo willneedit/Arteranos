@@ -13,16 +13,6 @@ rmdir /s /q Library\BurstCache
 rmdir /s /q Library\ScriptAssemblies
 rmdir /s /q Library\BurstCache
 
-%unity% -quit -batchmode -projectpath %projectpath% -executeMethod Arteranos.BuildPlayers.BuildWin64DedServ -logFile build\build64DedServ.log
-
-rmdir /s /q Library\ScriptAssemblies
-rmdir /s /q Library\BurstCache
-
-%unity% -quit -batchmode -projectpath %projectpath% -executeMethod Arteranos.BuildPlayers.BuildWin64 -logFile build\build64.log
-
-rmdir /s /q Library\ScriptAssemblies
-rmdir /s /q Library\BurstCache
-
 %unity% -quit -batchmode -projectpath %projectpath% -executeMethod Arteranos.BuildPlayers.BuildWin64 -logFile build\build64.log
 
 rmdir /s /q Library\ScriptAssemblies
