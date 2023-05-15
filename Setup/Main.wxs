@@ -11,7 +11,7 @@
 
     <Package Id='*' Keywords='Installer' Description="$(var.manufacturer)'s $(var.product) Installer"
         Comments="$(var.manufacturer)'s $(var.product) installer" Manufacturer='$(var.manufacturer)'
-        InstallerVersion='100' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+        InstallerVersion='200' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
     
     <Media Id='1' Cabinet='$(var.product).cab' EmbedCab='yes' DiskPrompt='CD-ROM #1' />
     
@@ -22,6 +22,12 @@
     <UIRef Id="WixUI_InstallDir" />
     <UIRef Id="WixUI_ErrorProgressText" />
 
+    <WixVariable Id="WixUILicenseRtf" Value="..\Setup\SetupLicense.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="..\Setup\Banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="..\Setup\Dialog.bmp" />
+    
+    <!--<Icon Id="Arteranos.exe" SourceFile="..\Setup\Arteranos.ico" />-->
+    
     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id='ProgramFiles64Folder' Name='PFiles'>
         <Directory Id='$(var.manufacturer)' Name='$(var.manufacturer)'>

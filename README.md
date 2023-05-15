@@ -7,23 +7,25 @@ This is intended to be a VR social app - To meet amd greet people in the metaver
 
 ### System requirements
 
-- Known to work: Windows 10, 64-Bit.
+- Known to work: Windows 10 and newer, 64-Bit.
   - It's designed to be architecture agnostic, so more recent versions of Windows should likely work.
   - Other architectures (e.g. Linux) are in the planning stage
 - OpenXR-supported tethered headset.
   - Known to work: Oculus Quest 2, linked (Oculus Link, or using Virtual Desktop)
-- For building, **Unity 2021.15f1** with the installed modules for the desired target platform
+- For building you need:
+  - **Unity 2021.15f1** with the installed modules for the desired target platform
+  - [WiX Toolset 3.11.2](https://github.com/wixtoolset/wix3/releases/tag/wix3112rtm)
 
 ### Quick Building (Windows 64)
  1. Download the source using git: `git clone --depth=1 https://github.com/willneedit/Arteranos.git`
  2. `cd Arteranos`
  3. Edit the `build.bat` script to find the Unity Editor you've installed in your build machine
  4. `build.bat`
- 5. If all goes well, please find the newly created `build` folder including `Win64` and `Win64-Server`.
-    - You'll find the `Arteranos.exe` and `Arteranos-Server.exe`, respectively.
+ 5. If all goes well, please find the newly created `build` folder including the installation wizard, `Arteranos.msi`, amongst other files.
+    - Also, you'll find the `Arteranos.exe` and `Arteranos-Server.exe`, respectively.
 
 ### Installing
- - Not yet implemented :)
+ - Start the installation wizard, `Arteranos.msi`, and follow its steps.
 
 ### Now what _are_ these apps?
 `Arteranos.exe` is the full-fledged client. You can use it in the desktop mode or VR, as you like, both for connecting to a server, or to host your own server, with or without your presence in the world you set up.

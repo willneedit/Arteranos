@@ -2,6 +2,7 @@
 
 New features
 
+- Installation wizard
 - Audio system menu pane functional
   - Master/Voice/Environment volume sliders
   - Microphone device selection
