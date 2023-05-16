@@ -26,7 +26,7 @@
     <WixVariable Id="WixUIBannerBmp" Value="..\Setup\Banner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="..\Setup\Dialog.bmp" />
     
-    <Icon Id="DefaultAppIcon.ico" SourceFile="Arteranos.exe" />
+    <Icon Id="DefaultAppIcon.ico" SourceFile="..\Setup\Arteranos.ico" />
     
     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id='ProgramFiles64Folder' Name='PFiles'>
@@ -41,6 +41,15 @@
                             WorkingDirectory='INSTALLDIR' Icon="DefaultAppIcon.ico" IconIndex="0" Advertise="yes" />
                 </File>
               </Component>
+
+              <Component Id='ProtocolIntegration' Guid='CB5FFA88-1580-44B7-A422-664E52E94A46'>
+                <RegistryKey Root='HKCR' Key='arteranos'>
+                  <RegistryValue Type='string' Value='URL:arteranos protocol' KeyPath='yes' />
+                  <RegistryValue Name='URL Protocol' Type='string' Value='' />
+                  <RegistryValue Key='shell\open\command' Type='string' Value='"[AppDir]Arteranos.exe" "%1"' />
+                </RegistryKey>
+              </Component>
+
             </Directory>
             <Directory Id='ServerDir' Name='DedicatedServer'>
               
@@ -64,6 +73,7 @@
             <RemoveFolder Id='ProgramMenuDir' On='uninstall' />
             <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Type='string' Value='' KeyPath='yes' />
           </Component>
+
         </Directory>
       </Directory>
 
@@ -72,6 +82,7 @@
     <Feature Id='Complete' Level='1'>
       <ComponentRef Id='MainExecutable' />
       <ComponentRef Id='ProgramMenuDir' />
+      <ComponentRef Id='ProtocolIntegration' />
       <ComponentGroupRef Id="Pack_Win64_Server" />
       <ComponentGroupRef Id="Pack_Win64" />
       
