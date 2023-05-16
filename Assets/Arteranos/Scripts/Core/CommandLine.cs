@@ -12,13 +12,14 @@ namespace Arteranos.Core
 {
     public class CommandLine : ScriptableObject
     {
-        public Dictionary<string, string> m_Commands = new();
+        public Dictionary<string, string> Commands = new();
+        public List<string> PlainArgs { get; internal set; } = new();
 
         public Dictionary<string, string> GetCommandlineArgs()
         {
 #if UNITY_EDITOR
             // DEBUG: Commandline mocking in Editor
-            string[] args = {  };
+            string[] args = { "89.105.244.155:9998" };
 #else
             var args = System.Environment.GetCommandLineArgs();
 #endif
@@ -30,11 +31,16 @@ namespace Arteranos.Core
                 {
                     string value = i < args.Length - 1 ? args[i + 1].ToLower() : null;
                     value = (value?.StartsWith("-") ?? false) ? null : value;
+                    if(value != null) ++i;
 
-                    m_Commands.Add(arg, value);
+                    Commands.Add(arg, value);
+                }
+                else
+                {
+                    PlainArgs.Add(arg);
                 }
             }
-            return m_Commands;
+            return Commands;
         }
     }    
 }

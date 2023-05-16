@@ -59,7 +59,7 @@ namespace Arteranos.Web
         {
             DownloadHandlerBuffer dh = new();
             using UnityWebRequest uwr = new(
-                $"{url}/metadata.json",
+                $"{url}{ServerSettingsJSON.DefaultMetadataPath}",
                 UnityWebRequest.kHttpVerbGET,
                 dh,
                 null);

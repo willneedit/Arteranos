@@ -13,7 +13,7 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
-using System.IO;
+using Newtonsoft.Json;
 
 namespace Arteranos.ExtensionMethods
 {
@@ -164,6 +164,56 @@ namespace Arteranos.Core
         /// <param name="dBvalue"></param>
         /// <returns>Ife plain factor.</returns>
         public static float LoudnessToFactor(float dBvalue) => MathF.Pow(10.0f, dBvalue / 10.0f);
+
+        public class Processurl
+        {
+            public string scheme = null;
+            public string host = null;
+            public int? port = null;
+            public string path = null;
+            public string query = null;
+            public string fragment = null;
+        };
+
+        public static Uri ProcessUriString(string urilike, Processurl d)
+        {
+            urilike = urilike.Trim();
+
+            if(!urilike.Contains("://"))
+                urilike = "unknown://" + urilike;
+
+            Uri uri= new(urilike);
+
+
+            if(d.host == null && string.IsNullOrWhiteSpace(uri.Host))
+                throw new ArgumentNullException("No host");
+
+            if(uri.Port >= 0)
+                d.port = uri.Port;
+
+            if(d.port == null)
+                throw new ArgumentNullException("No port");
+
+            string sb;
+
+            sb = string.IsNullOrEmpty(uri.UserInfo)
+                ? $"{d.scheme ?? uri.Scheme}://{d.host ?? uri.Host}:{d.port}"
+                : $"{d.scheme ?? uri.Scheme}://{uri.UserInfo}@{d.host ?? uri.Host}:{d.port}";
+
+            sb += uri.AbsolutePath == "/"
+                ? d.path ?? "/"
+                : uri.AbsolutePath;
+
+            sb += string.IsNullOrEmpty(uri.Query)
+                ? d.query ?? string.Empty 
+                : uri.Query;
+
+            sb += string.IsNullOrEmpty(uri.Fragment)
+                ? d.fragment ?? string.Empty
+                : uri.Fragment;
+
+            return new(sb);
+        }
     }
 
     public class ServerPermissionsJSON
@@ -271,6 +321,12 @@ namespace Arteranos.Core
     /// </summary>
     public class ServerSettingsJSON
     {
+        [JsonIgnore]
+        public static int DefaultMetadataPort = 9779;
+
+        [JsonIgnore]
+        public static string DefaultMetadataPath = "/metadata.json";
+
         // The main server listen port.
         public int ServerPort = 9777;
 
@@ -278,7 +334,7 @@ namespace Arteranos.Core
         public int VoicePort = 9778;
 
         // The server metadata retrieval port.
-        public int MetadataPort = 9779;
+        public int MetadataPort = DefaultMetadataPort;
 
         // Server listen address. Empty means allowing connections from anywhere.
         public string ListenAddress = string.Empty;

@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,7 +22,7 @@ namespace Arteranos.Core
             Host
         }
 
-        private CommandLine m_Command;
+        private CommandLine Command;
 
         protected ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
 
@@ -42,7 +43,7 @@ namespace Arteranos.Core
         {
             bool GetCmdArg(string key, out string val)
             {
-                return m_Command.m_Commands.TryGetValue(key, out val);
+                return Command.Commands.TryGetValue(key, out val);
             }
 
             bool GetBoolArg(string key, bool def = false)
@@ -58,10 +59,29 @@ namespace Arteranos.Core
 
             Client = ClientSettings.LoadSettings();
             Server = ServerSettings.LoadSettings();
-            m_Command = ScriptableObject.CreateInstance<CommandLine>();
+            Command = ScriptableObject.CreateInstance<CommandLine>();
 
-            m_Command.GetCommandlineArgs();
+            Command.GetCommandlineArgs();
 
+            if(Command.PlainArgs.Count > 0)
+            {
+
+                Uri uri = Utils.ProcessUriString(Command.PlainArgs[0], new()
+                {
+                    scheme = "http",
+                    port = ServerSettingsJSON.DefaultMetadataPort,
+                    path = ServerSettingsJSON.DefaultMetadataPath
+                });
+
+                Command.PlainArgs.RemoveAt(0);
+
+                Debug.Log("Invoked with a URI");
+                Debug.Log($"Protocol: {uri.Scheme}");
+                Debug.Log($"Host: {uri.Host}");
+                Debug.Log($"Port: {uri.Port}");
+                Debug.Log($"Path: {uri.AbsolutePath}");
+                Debug.Log($"Reconstructed URI: {uri.AbsoluteUri}");
+            }
             // TODO Commandline startup
             //if(GetCmdArg("-client", out string clientip))
             //{
