@@ -26,22 +26,25 @@
     <WixVariable Id="WixUIBannerBmp" Value="..\Setup\Banner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="..\Setup\Dialog.bmp" />
     
-    <!--<Icon Id="Arteranos.exe" SourceFile="..\Setup\Arteranos.ico" />-->
+    <Icon Id="DefaultAppIcon.ico" SourceFile="Arteranos.exe" />
     
     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id='ProgramFiles64Folder' Name='PFiles'>
         <Directory Id='$(var.manufacturer)' Name='$(var.manufacturer)'>
           <Directory Id='INSTALLDIR' Name='$(var.product)'>
-            
-            <!--<Component Id='MainExecutable' Guid='D3F278DF-C1E3-44BE-90B9-93C47FBF6DC5'>
-              <File Id='FoobarEXE' Name='FoobarAppl10.exe' DiskId='1' Source='FoobarAppl10.exe' KeyPath='yes'>        
-                <Shortcut Id="startmenuFoobar10" Directory="ProgramMenuDir" Name="$(var.product)"
-                          WorkingDirectory='INSTALLDIR' Icon="#FoobarEXE" IconIndex="0" Advertise="yes" />
-                <Shortcut Id="desktopFoobar10" Directory="DesktopFolder" Name="$(var.product)"
-                          WorkingDirectory='INSTALLDIR' Icon="#FoobarEXE" IconIndex="0" Advertise="yes" />
-              </File>
-            </Component>-->
-
+            <Directory Id='AppDir' Name='DesktopApp'>
+              <Component Id='MainExecutable' Guid='D3F278DF-C1E3-44BE-90B9-93C47FBF6DC5'>
+                <File Id='ArteranosEXE' Name='Arteranos.exe' DiskId='1' Source="Arteranos.exe" KeyPath='yes'>
+                  <Shortcut Id="startmenuDefaultApp" Directory="ProgramMenuDir" Name="$(var.product)"
+                            WorkingDirectory='INSTALLDIR' Icon="DefaultAppIcon.ico" IconIndex="0" Advertise="yes" />
+                  <Shortcut Id="desktopDefaultApp" Directory="DesktopFolder" Name="$(var.product)"
+                            WorkingDirectory='INSTALLDIR' Icon="DefaultAppIcon.ico" IconIndex="0" Advertise="yes" />
+                </File>
+              </Component>
+            </Directory>
+            <Directory Id='ServerDir' Name='DedicatedServer'>
+              
+            </Directory>
             <!--<Component Id='HelperLibrary' Guid='YOURGUID-6BE3-460D-A14F-75658D16550B'>
               <File Id='HelperDLL' Name='Helper.dll' DiskId='1' Source='Helper.dll' KeyPath='yes' />
             </Component>
@@ -67,12 +70,12 @@
       <Directory Id="DesktopFolder" Name="Desktop" />
     </Directory>
     <Feature Id='Complete' Level='1'>
+      <ComponentRef Id='MainExecutable' />
       <ComponentRef Id='ProgramMenuDir' />
       <ComponentGroupRef Id="Pack_Win64_Server" />
       <ComponentGroupRef Id="Pack_Win64" />
       
-      <!--<ComponentRef Id='MainExecutable' />
-      <ComponentRef Id='HelperLibrary' />
+      <!--<ComponentRef Id='HelperLibrary' />
       <ComponentRef Id='Manual' />-->
 
     </Feature>
