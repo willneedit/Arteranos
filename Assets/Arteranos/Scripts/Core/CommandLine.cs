@@ -19,7 +19,7 @@ namespace Arteranos.Core
         {
 #if UNITY_EDITOR
             // DEBUG: Commandline mocking in Editor
-            string[] args = { "89.105.244.155:9998" };
+            string[] args = { "arteranos://localhost/https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip" };
 #else
             var args = System.Environment.GetCommandLineArgs();
 #endif

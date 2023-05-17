@@ -6,7 +6,7 @@
  */
 
 using Arteranos.Core;
-using Mirror;
+using System;
 
 namespace Arteranos.Services
 {
@@ -14,7 +14,7 @@ namespace Arteranos.Services
     {
         protected void Update()
         {
-            StartNetwork();
+            ConnectionManager = GetComponent<IConnectionManager>();
 
             // Startup of dependent services...
             GetComponent<XR.XRControl>().enabled = true;
@@ -24,28 +24,27 @@ namespace Arteranos.Services
 
             // And finish the startup.
             this.enabled = false;
+
+            StartNetwork();
         }
         protected void StartNetwork()
         {
-            NetworkManager networkManager = GetComponentInParent<NetworkManager>();
-
-            switch(m_ConnectionMode)
+            if(!string.IsNullOrEmpty(TargetedServerPort))
             {
-                case ConnectionMode.Server:
-                    networkManager.networkAddress = Server.ListenAddress;
-                    networkManager.StartServer();
-                    break;
-                case ConnectionMode.Host:
-                    networkManager.networkAddress = Server.ListenAddress;
-                    networkManager.StartHost();
-                    break;
+                Uri uri = Utils.ProcessUriString(TargetedServerPort,
+                    scheme: "http",
+                    port: ServerSettingsJSON.DefaultMetadataPort
+                );
 
-                    // TODO Commandline startup
-                    //case ConnectionMode.Client:
-                    //    networkManager.networkAddress = Client.ServerIP;
-                    //    networkManager.StartClient();
-                    //    break;
+                ConnectionManager.ConnectToServer(uri.ToString());
             }
+
+            // FIXME Too early.
+            // I need UI.WorldTransitionUI.InitiateTransition(worldURL), and the live connection.
+            //if(!string.IsNullOrEmpty(DesiredWorld))
+            //{
+            //    Server.WorldURL = DesiredWorld;
+            //}
         }
     }
 }

@@ -57,9 +57,15 @@ namespace Arteranos.Web
             string url,
             int timeout = 20)
         {
+            Uri uri = Utils.ProcessUriString(url,
+                scheme: "http",
+                port: ServerSettingsJSON.DefaultMetadataPort,
+                path: ServerSettingsJSON.DefaultMetadataPath
+                );
+
             DownloadHandlerBuffer dh = new();
             using UnityWebRequest uwr = new(
-                $"{url}{ServerSettingsJSON.DefaultMetadataPath}",
+                uri,
                 UnityWebRequest.kHttpVerbGET,
                 dh,
                 null);

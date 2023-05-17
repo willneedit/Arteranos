@@ -14,9 +14,12 @@ using Mirror;
 
 namespace Arteranos.Web
 {
-    public class ConnectionManager
+
+    public class ConnectionManager : MonoBehaviour, IConnectionManager
     {
-        public static async Task<bool> ConnectToServer(string serverURL)
+        public static IConnectionManager Instance { get => SettingsManager.ConnectionManager; }
+
+        public async Task<bool> ConnectToServer(string serverURL)
         {
             if(NetworkClient.active || NetworkServer.active)
             {
@@ -55,7 +58,7 @@ namespace Arteranos.Web
 
             NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
 
-            Debug.Log($"Attempting to connect to {connectionUri.ToString()}...");
+            Debug.Log($"Attempting to connect to {connectionUri}...");
 
             manager.StartClient(connectionUri);
 
@@ -63,21 +66,21 @@ namespace Arteranos.Web
             return true;
         }
 
-        public static void StopHost()
+        public void StopHost()
         {
             NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
 
             manager.StopHost();
         }
 
-        public static void StartHost()
+        public void StartHost()
         {
             NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
 
             manager.StartHost();
         }
 
-        public static async void StartServer()
+        public async void StartServer()
         {
             NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
 
@@ -96,11 +99,11 @@ namespace Arteranos.Web
         /// </summary>
         /// <param name="serverURL">The server you ant to connect to</param>
         /// <returns>true if the client is inactive</returns>
-        public static bool CanDoConnect() => (!NetworkClient.active && !NetworkServer.active);
+        public bool CanDoConnect() => (!NetworkClient.active && !NetworkServer.active);
 
         /// <summary>
         /// Ready to listen to incoming connections?
         /// </summary>
-        public static bool CanGetConnected() => NetworkServer.active;
+        public bool CanGetConnected() => NetworkServer.active;
     }
 }

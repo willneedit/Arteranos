@@ -146,7 +146,7 @@ namespace Arteranos.UI
             btn_Visit.interactable = false;
 
             if(!string.IsNullOrEmpty(serverURL))
-                await ConnectionManager.ConnectToServer(serverURL);
+                await ConnectionManager.Instance.ConnectToServer(serverURL);
 
             btn_Visit.interactable = true;
         }

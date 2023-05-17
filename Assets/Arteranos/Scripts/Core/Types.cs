@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace Arteranos.ExtensionMethods
 {
@@ -165,17 +166,14 @@ namespace Arteranos.Core
         /// <returns>Ife plain factor.</returns>
         public static float LoudnessToFactor(float dBvalue) => MathF.Pow(10.0f, dBvalue / 10.0f);
 
-        public class Processurl
-        {
-            public string scheme = null;
-            public string host = null;
-            public int? port = null;
-            public string path = null;
-            public string query = null;
-            public string fragment = null;
-        };
-
-        public static Uri ProcessUriString(string urilike, Processurl d)
+        public static Uri ProcessUriString(string urilike,
+                        string scheme = null,
+                        string host = null,
+                        int? port = null,
+                        string path = null,
+                        string query = null,
+                        string fragment = null
+)
         {
             urilike = urilike.Trim();
 
@@ -184,32 +182,31 @@ namespace Arteranos.Core
 
             Uri uri= new(urilike);
 
-
-            if(d.host == null && string.IsNullOrWhiteSpace(uri.Host))
-                throw new ArgumentNullException("No host");
-
             if(uri.Port >= 0)
-                d.port = uri.Port;
+                port = uri.Port;
 
-            if(d.port == null)
+            if(port == null)
                 throw new ArgumentNullException("No port");
 
             string sb;
 
-            sb = string.IsNullOrEmpty(uri.UserInfo)
-                ? $"{d.scheme ?? uri.Scheme}://{d.host ?? uri.Host}:{d.port}"
-                : $"{d.scheme ?? uri.Scheme}://{uri.UserInfo}@{d.host ?? uri.Host}:{d.port}";
+            if(string.IsNullOrEmpty(host ?? uri.Host))
+                sb = $"{scheme ?? uri.Scheme}://";
+            else
+                sb = string.IsNullOrEmpty(uri.UserInfo)
+                    ? $"{scheme ?? uri.Scheme}://{host ?? uri.Host}:{port}"
+                    : $"{scheme ?? uri.Scheme}://{uri.UserInfo}@{host ?? uri.Host}:{port}";
 
             sb += uri.AbsolutePath == "/"
-                ? d.path ?? "/"
+                ? path ?? "/"
                 : uri.AbsolutePath;
 
             sb += string.IsNullOrEmpty(uri.Query)
-                ? d.query ?? string.Empty 
+                ? query ?? string.Empty 
                 : uri.Query;
 
             sb += string.IsNullOrEmpty(uri.Fragment)
-                ? d.fragment ?? string.Empty
+                ? fragment ?? string.Empty
                 : uri.Fragment;
 
             return new(sb);
@@ -364,6 +361,16 @@ namespace Arteranos.Core
         public ServerSettingsJSON Settings = null;
         public string CurrentWorld = null;
         public List<string> CurrentUsers = new();
+    }
+
+    public interface IConnectionManager
+    {
+        bool CanDoConnect();
+        bool CanGetConnected();
+        Task<bool> ConnectToServer(string serverURL);
+        void StartHost();
+        void StartServer();
+        void StopHost();
     }
 
 }

@@ -26,6 +26,10 @@ namespace Arteranos.Core
 
         protected ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
 
+        protected string TargetedServerPort = null;
+        protected string DesiredWorld = null;
+
+        public static IConnectionManager ConnectionManager { get; protected set; }
         public static Transform Purgatory { get; private set; }
         public static ClientSettings Client { get; internal set; }
         public static ServerSettings Server { get; internal set; }
@@ -66,39 +70,21 @@ namespace Arteranos.Core
             if(Command.PlainArgs.Count > 0)
             {
 
-                Uri uri = Utils.ProcessUriString(Command.PlainArgs[0], new()
-                {
-                    scheme = "http",
-                    port = ServerSettingsJSON.DefaultMetadataPort,
-                    path = ServerSettingsJSON.DefaultMetadataPath
-                });
+                Uri uri = Utils.ProcessUriString(
+                    Command.PlainArgs[0],
+           
+                    scheme: "arteranos",
+                    port: ServerSettingsJSON.DefaultMetadataPort
+                );
 
                 Command.PlainArgs.RemoveAt(0);
 
-                Debug.Log("Invoked with a URI");
-                Debug.Log($"Protocol: {uri.Scheme}");
-                Debug.Log($"Host: {uri.Host}");
-                Debug.Log($"Port: {uri.Port}");
-                Debug.Log($"Path: {uri.AbsolutePath}");
-                Debug.Log($"Reconstructed URI: {uri.AbsoluteUri}");
-            }
-            // TODO Commandline startup
-            //if(GetCmdArg("-client", out string clientip))
-            //{
-            //    Client.ServerIP = clientip;
-            //    m_ConnectionMode = ConnectionMode.Client;
-            //}
+                if(!string.IsNullOrEmpty(uri.Host))
+                    TargetedServerPort = $"{uri.Host}:{uri.Port}";
 
-            if(GetCmdArg("-server", out string serverip))
-            {
-                Server.ListenAddress = serverip;
-                m_ConnectionMode = ConnectionMode.Server;
-            }
+                if(uri.AbsolutePath != "/")
+                    DesiredWorld = uri.AbsolutePath[1..];
 
-            if(GetCmdArg("-host", out string hostip))
-            {
-                Server.ListenAddress = hostip;
-                m_ConnectionMode = ConnectionMode.Host;
             }
 
             Client.VRMode = GetBoolArg("-vr", Client.VRMode);
