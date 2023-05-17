@@ -139,9 +139,20 @@ namespace Arteranos.NetworkIO
                 // done the full round trip from the server propagation.
                 RegisterUser(cs.UserID);
 
+                // Invoked by command line - only once
+                if(StartupManager.StartupTrigger)
+                {
+                    string world = StartupManager.ResetStartupTrigger();
+
+                    Debug.Log($"Invoking startup world '{world}'");
+                    if(!string.IsNullOrEmpty(world))
+                        UI.WorldTransitionUI.InitiateTransition(world);
+                }
+
                 // The server already uses a world, so download and transition into the targeted world immediately.
-                if(!string.IsNullOrEmpty(m_strings[AVStringKeys.CurrentWorld]))
+                else if(!string.IsNullOrEmpty(m_strings[AVStringKeys.CurrentWorld]))
                     UI.WorldTransitionUI.InitiateTransition(m_strings[AVStringKeys.CurrentWorld]);
+
             }
 
             InitializeVoice();
@@ -364,14 +375,15 @@ namespace Arteranos.NetworkIO
         [Command]
         private void PropagateWorldTransition(string worldURL)
         {
-            ReceiveWorldTransition(worldURL);
-
             // Pure server needs to be notified and transitioned, too.
             if(isServer && !isClient && !string.IsNullOrEmpty(worldURL))
             {
                 SettingsManager.Server.WorldURL = worldURL;
                 UI.WorldTransitionUI.InitiateTransition(worldURL);
             }
+            else
+                ReceiveWorldTransition(worldURL);
+
         }
 
         private void CommitWorldChanged(string worldURL)

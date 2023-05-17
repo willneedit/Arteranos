@@ -7,13 +7,27 @@
 
 using Arteranos.Core;
 using System;
+using System.Collections;
+using UnityEngine;
 
 namespace Arteranos.Services
 {
     public class StartupManager : SettingsManager
     {
-        protected void Update()
+        private bool initialized = false;
+
+        public static bool StartupTrigger { get; private set; } = true;
+
+        public static string ResetStartupTrigger()
         {
+            StartupTrigger = false;
+            return DesiredWorld;
+        }
+
+        IEnumerator StartupCoroutine()
+        {
+            yield return new WaitForEndOfFrame();
+
             ConnectionManager = GetComponent<IConnectionManager>();
 
             // Startup of dependent services...
@@ -22,13 +36,8 @@ namespace Arteranos.Services
             GetComponent<MetaDataService>().enabled = true;
             GetComponent<NetworkStatus>().enabled = true;
 
-            // And finish the startup.
-            this.enabled = false;
+            yield return new WaitForSeconds(5);
 
-            StartNetwork();
-        }
-        protected void StartNetwork()
-        {
             if(!string.IsNullOrEmpty(TargetedServerPort))
             {
                 Uri uri = Utils.ProcessUriString(TargetedServerPort,
@@ -38,6 +47,25 @@ namespace Arteranos.Services
 
                 ConnectionManager.ConnectToServer(uri.ToString());
             }
+            else if(!string.IsNullOrEmpty(DesiredWorld))
+            {
+                ConnectionManager.StartHost();
+            }
+
+            // And finish the startup.
+            enabled = false;
+        }
+
+        protected void Update()
+        {
+            if(initialized) return;
+
+            initialized = true;
+
+            StartCoroutine(StartupCoroutine());
+        }
+        protected void StartNetwork()
+        {
 
             // FIXME Too early.
             // I need UI.WorldTransitionUI.InitiateTransition(worldURL), and the live connection.

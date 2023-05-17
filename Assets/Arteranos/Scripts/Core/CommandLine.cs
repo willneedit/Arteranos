@@ -19,17 +19,23 @@ namespace Arteranos.Core
         {
 #if UNITY_EDITOR
             // DEBUG: Commandline mocking in Editor
-            string[] args = { "arteranos://localhost/https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip" };
+            string[] args = {  };
 #else
-            var args = System.Environment.GetCommandLineArgs();
+            var args = System.Environment.GetCommandLineArgs();            
 #endif
 
-            for (int i = 0; i < args.Length; ++i)
+            Debug.Log("Invocation arguments:");
+
+            foreach(string d_args in args)
+                Debug.Log(d_args);
+
+            // Skip the 0th argument, the program name itself
+            for (int i = 1; i < args.Length; ++i)
             {
-                string arg = args[i].ToLower();
+                string arg = args[i];
                 if (arg.StartsWith("-"))
                 {
-                    string value = i < args.Length - 1 ? args[i + 1].ToLower() : null;
+                    string value = i < args.Length - 1 ? args[i + 1] : null;
                     value = (value?.StartsWith("-") ?? false) ? null : value;
                     if(value != null) ++i;
 

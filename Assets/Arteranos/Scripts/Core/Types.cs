@@ -188,12 +188,9 @@ namespace Arteranos.Core
             if(port == null)
                 throw new ArgumentNullException("No port");
 
-            string sb;
-
-            if(string.IsNullOrEmpty(host ?? uri.Host))
-                sb = $"{scheme ?? uri.Scheme}://";
-            else
-                sb = string.IsNullOrEmpty(uri.UserInfo)
+            string sb = string.IsNullOrEmpty(host ?? uri.Host)
+                ? $"{scheme ?? uri.Scheme}://"
+                : string.IsNullOrEmpty(uri.UserInfo)
                     ? $"{scheme ?? uri.Scheme}://{host ?? uri.Host}:{port}"
                     : $"{scheme ?? uri.Scheme}://{uri.UserInfo}@{host ?? uri.Host}:{port}";
 

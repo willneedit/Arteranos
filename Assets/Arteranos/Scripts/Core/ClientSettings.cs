@@ -155,6 +155,9 @@ namespace Arteranos.Core
             }
         }
 
+#if UNITY_SERVER
+        public override bool VRMode => false;
+#else
         public override bool VRMode
         {
             get => base.VRMode;
@@ -164,6 +167,8 @@ namespace Arteranos.Core
                 if(old != base.VRMode) OnVRModeChanged?.Invoke(base.VRMode);
             }
         }
+#endif
+
 #pragma warning disable IDE1006 // Benennungsstile
         [JsonIgnore]
         public bool isGuest { get => Me.LoginProvider == null; }

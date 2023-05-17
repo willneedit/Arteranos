@@ -26,8 +26,8 @@ namespace Arteranos.Core
 
         protected ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
 
-        protected string TargetedServerPort = null;
-        protected string DesiredWorld = null;
+        protected static string TargetedServerPort = null;
+        protected static string DesiredWorld = null;
 
         public static IConnectionManager ConnectionManager { get; protected set; }
         public static Transform Purgatory { get; private set; }
