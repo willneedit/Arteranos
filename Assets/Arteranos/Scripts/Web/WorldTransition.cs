@@ -1,43 +1,18 @@
-﻿/*
+﻿using Arteranos.Core;
+using Arteranos.UI;
+using System;
+using UnityEngine;
+/*
  * Copyright (c) 2023, willneedit
  * 
  * Licensed by the Mozilla Public License 2.0,
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using UnityEngine;
-
-using Arteranos.Core;
-using Arteranos.Web;
-
-namespace Arteranos.UI
+namespace Arteranos.Web
 {
-    public class WorldTransitionUI
+    public static class WorldTransition
     {
-        public static void ShowWorldChangeDialog(string worldURL, Action<int> resposeCallback)
-        {
-
-            WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
-
-            string worldname = md?.WorldName ?? worldURL;
-
-            IDialogUI dialog = DialogUIFactory.New();
-
-            dialog.Text =
-                "This server is about to change the world to\n" +
-                $"{worldname}\n" +
-                "What to do?";
-
-            dialog.Buttons = new string[]
-            {
-                "Go offline",
-                "Stay",
-                "Follow"
-            };
-
-            dialog.OnDialogDone += resposeCallback;
-        }
 
         public static void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null)
         {
@@ -54,13 +29,6 @@ namespace Arteranos.UI
             pui.Faulted += (ex, context) => OnLoadWorldFaulted(ex, failureCallback);
         }
 
-        private static void OnLoadWorldFaulted(Exception ex, Action failureCallback)
-        {
-            Debug.LogWarning($"Error in loading world: {ex.Message}");
-
-            failureCallback?.Invoke();
-        }
-
         private static void OnLoadWorldComplete(string worldURL, Context _context, Action successCallback)
         {
             ServerSettings ss = SettingsManager.Server;
@@ -75,6 +43,13 @@ namespace Arteranos.UI
             ss.WorldURL = worldURL;
 
             successCallback?.Invoke();
+        }
+
+        private static void OnLoadWorldFaulted(Exception ex, Action failureCallback)
+        {
+            Debug.LogWarning($"Error in loading world: {ex.Message}");
+
+            failureCallback?.Invoke();
         }
     }
 }

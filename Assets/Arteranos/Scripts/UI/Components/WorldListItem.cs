@@ -122,7 +122,7 @@ namespace Arteranos.UI
         {
             if(!string.IsNullOrEmpty(worldURL))
             {
-                WorldTransitionUI.InitiateTransition(worldURL);
+                WorldTransition.InitiateTransition(worldURL);
 
                 WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
                 md.Updated = DateTime.Now;

@@ -9,6 +9,8 @@ using Arteranos.Services;
 using Arteranos.Core;
 using Arteranos.Audio;
 using System;
+using Arteranos.Web;
+using Arteranos.UI;
 
 namespace Arteranos.NetworkIO
 {
@@ -146,12 +148,12 @@ namespace Arteranos.NetworkIO
 
                     Debug.Log($"Invoking startup world '{world}'");
                     if(!string.IsNullOrEmpty(world))
-                        UI.WorldTransitionUI.InitiateTransition(world);
+                        WorldTransition.InitiateTransition(world);
                 }
 
                 // The server already uses a world, so download and transition into the targeted world immediately.
                 else if(!string.IsNullOrEmpty(m_strings[AVStringKeys.CurrentWorld]))
-                    UI.WorldTransitionUI.InitiateTransition(m_strings[AVStringKeys.CurrentWorld]);
+                    WorldTransition.InitiateTransition(m_strings[AVStringKeys.CurrentWorld]);
 
             }
 
@@ -350,10 +352,33 @@ namespace Arteranos.NetworkIO
             // Now that's the real deal.
             Debug.Log($"WORLD TRANSITION: From {ss.WorldURL} to {worldURL} - Choose now!");
 
-            UI.WorldTransitionUI.ShowWorldChangeDialog(worldURL, 
+            ShowWorldChangeDialog(worldURL, 
             (response) => OnWorldChangeAnswer(worldURL, response));
         }
 
+        private static void ShowWorldChangeDialog(string worldURL, Action<int> resposeCallback)
+        {
+
+            WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
+
+            string worldname = md?.WorldName ?? worldURL;
+
+            IDialogUI dialog = DialogUIFactory.New();
+
+            dialog.Text =
+                "This server is about to change the world to\n" +
+                $"{worldname}\n" +
+                "What to do?";
+
+            dialog.Buttons = new string[]
+            {
+                "Go offline",
+                "Stay",
+                "Follow"
+            };
+
+            dialog.OnDialogDone += resposeCallback;
+        }
         private void OnWorldChangeAnswer(string worldURL, int response)
         {
             // Disconnect, go offline
@@ -369,7 +394,7 @@ namespace Arteranos.NetworkIO
 
             // Here on now, remote triggered world change.
             if(response == 2)
-                UI.WorldTransitionUI.InitiateTransition(worldURL);
+                WorldTransition.InitiateTransition(worldURL);
         }
 
         [Command]
@@ -379,7 +404,7 @@ namespace Arteranos.NetworkIO
             if(isServer && !isClient && !string.IsNullOrEmpty(worldURL))
             {
                 SettingsManager.Server.WorldURL = worldURL;
-                UI.WorldTransitionUI.InitiateTransition(worldURL);
+                WorldTransition.InitiateTransition(worldURL);
             }
             else
                 ReceiveWorldTransition(worldURL);
