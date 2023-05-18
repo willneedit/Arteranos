@@ -20,30 +20,33 @@ namespace Arteranos.Services
     {
         public static ChatroomAgentV2 ChatroomAgent { get; private set; }
 
-        public static float VolumeMaster {
+        public static event Action<short> OnJoinedChatroom;
+        public static void JoinChatroom(object data = null) => ChatroomNetwork?.JoinChatroom(data);
+        public static void LeaveChatroom(object data = null) => ChatroomNetwork?.LeaveChatroom(data);
+        public static UVMicInput MicInput { get; private set; }
+        public static AudioMixerGroup MixerGroupVoice => mixer.FindMatchingGroups("Master/Voice")[0];
+        public static AudioMixerGroup MixerGroupEnv => mixer.FindMatchingGroups("Master/Environment")[0];
+
+        public static float VolumeMaster
+        {
             get => GetVolume("Master");
             set => SetVolume("Master", value);
         }
-        public static float VolumeVoice {
+        public static float VolumeVoice
+        {
             get => GetVolume("Voice");
             set => SetVolume("Voice", value);
         }
-        public static float VolumeEnv {
+        public static float VolumeEnv
+        {
             get => GetVolume("Env");
             set => SetVolume("Env", value);
         }
 
         private bool serverActive = false;
-
         private IEnumerator cs_cr = null;
-
         private static AudioMixer mixer = null;
-
-        public static UVMicInput MicInput { get; private set; }
-
-        public static AudioMixerGroup MixerGroupVoice => mixer.FindMatchingGroups("Master/Voice")[0];
-        public static AudioMixerGroup MixerGroupEnv => mixer.FindMatchingGroups("Master/Environment")[0];
-
+        private static IChatroomNetworkV2 ChatroomNetwork { get; set; }
 
         private void Awake() => mixer = Resources.Load<AudioMixer>("Audio/AudioMixer");
 
@@ -55,6 +58,10 @@ namespace Arteranos.Services
                 UVTelepathyNetwork.New(SettingsManager.Server.VoicePort),
                 MicInput,
                 new UVAudioOutput.Factory(MixerGroupVoice));
+
+            ChatroomNetwork = ChatroomAgent.Network;
+
+            ChatroomNetwork.OnJoinedChatroom += (x) => OnJoinedChatroom?.Invoke(x);
 
             PullVolumeSettings();
 

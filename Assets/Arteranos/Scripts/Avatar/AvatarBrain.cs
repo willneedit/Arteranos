@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Mirror;
-using Arteranos.UniVoice;
 
 using Arteranos.Services;
 using Arteranos.Core;
@@ -103,11 +102,7 @@ namespace Arteranos.NetworkIO
         private readonly SyncDictionary<AVStringKeys, string> m_strings = new();
         private readonly SyncDictionary<AVBlobKeys, byte[]> m_blobs = new();
 #endif
-        void Awake()
-        {
-            syncDirection = SyncDirection.ServerToClient;
-            cran = AudioManager.ChatroomAgent.Network;
-        }
+        void Awake() => syncDirection = SyncDirection.ServerToClient;
 
         public override void OnStartServer()
         {
@@ -249,7 +244,6 @@ namespace Arteranos.NetworkIO
         // ---------------------------------------------------------------
         #region Voice handling
 
-        private IChatroomNetworkV2 cran = null;
         private IEnumerator fdv_cr = null;
 
         IEnumerator FindDelayedVoice(int ChatOwnID)
@@ -303,12 +297,12 @@ namespace Arteranos.NetworkIO
             }
             else if(isOwned)
             {
-                cran.OnJoinedChatroom += (x) => ChatOwnID = x;
+                AudioManager.OnJoinedChatroom += (x) => ChatOwnID = x;
 
                 string ip = NetworkManager.singleton.networkAddress;
                 int port = m_ints[AVIntKeys.VoicePort];
 
-                cran.JoinChatroom($"{ip}:{port}");
+                AudioManager.JoinChatroom($"{ip}:{port}");
             }
         }
 
@@ -322,8 +316,8 @@ namespace Arteranos.NetworkIO
             }
             else if(isOwned)
             {
-                cran.LeaveChatroom();
-                cran.OnJoinedChatroom -= (x) => ChatOwnID = x;
+                AudioManager.LeaveChatroom();
+                AudioManager.OnJoinedChatroom -= (x) => ChatOwnID = x;
             }
         }
 
