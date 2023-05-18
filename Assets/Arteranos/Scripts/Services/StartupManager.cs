@@ -28,7 +28,7 @@ namespace Arteranos.Services
         {
             yield return new WaitForEndOfFrame();
 
-            ConnectionManager = GetComponent<IConnectionManager>();
+            ConnectionManager = GetComponent<Web.IConnectionManager>();
 
             // Startup of dependent services...
             GetComponent<XR.XRControl>().enabled = true;

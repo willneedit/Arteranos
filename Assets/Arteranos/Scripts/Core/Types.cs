@@ -180,7 +180,7 @@ namespace Arteranos.Core
             if(!urilike.Contains("://"))
                 urilike = "unknown://" + urilike;
 
-            Uri uri= new(urilike);
+            Uri uri = new(urilike);
 
             if(uri.Port >= 0)
                 port = uri.Port;
@@ -199,7 +199,7 @@ namespace Arteranos.Core
                 : uri.AbsolutePath;
 
             sb += string.IsNullOrEmpty(uri.Query)
-                ? query ?? string.Empty 
+                ? query ?? string.Empty
                 : uri.Query;
 
             sb += string.IsNullOrEmpty(uri.Fragment)
@@ -359,15 +359,4 @@ namespace Arteranos.Core
         public string CurrentWorld = null;
         public List<string> CurrentUsers = new();
     }
-
-    public interface IConnectionManager
-    {
-        bool CanDoConnect();
-        bool CanGetConnected();
-        Task<bool> ConnectToServer(string serverURL);
-        void StartHost();
-        void StartServer();
-        void StopHost();
-    }
-
 }

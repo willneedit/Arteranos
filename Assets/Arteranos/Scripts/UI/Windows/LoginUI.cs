@@ -227,7 +227,7 @@ namespace Arteranos.UI
             loginFinished.Release();
         }
 
-        private DialogUI m_DialogUI = null;
+        private IDialogUI m_DialogUI = null;
 
         private void ManageVRLoginFlow(bool inProgress)
         {
@@ -237,13 +237,13 @@ namespace Arteranos.UI
                 // Already in Desktop mode, nothing to do.
                 if(!cs.VRMode) return;
 
-                m_DialogUI = DialogUI.New();
-                m_DialogUI.text =
+                m_DialogUI = DialogUIFactory.New();
+                m_DialogUI.Text =
                     "Put down your VR headset,\n" +
                     "or switch into Desktop mode.\n" +
                     "Taking to the login window in a\n" +
                     "separate browser.";
-                m_DialogUI.buttons = null;
+                m_DialogUI.Buttons = null;
 
                 // Leave it in VR mode to be able to show the message.
             }
@@ -251,7 +251,7 @@ namespace Arteranos.UI
             {
                 if(m_DialogUI != null)
                 {
-                    Destroy(m_DialogUI.gameObject);
+                    m_DialogUI.Close();
                     cs.VRMode = true;
                 }
             }

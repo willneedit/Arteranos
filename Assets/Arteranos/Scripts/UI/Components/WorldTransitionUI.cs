@@ -22,14 +22,14 @@ namespace Arteranos.UI
 
             string worldname = md?.WorldName ?? worldURL;
 
-            DialogUI dialog = DialogUI.New();
+            IDialogUI dialog = DialogUIFactory.New();
 
-            dialog.text =
+            dialog.Text =
                 "This server is about to change the world to\n" +
                 $"{worldname}\n" +
                 "What to do?";
 
-            dialog.buttons = new string[]
+            dialog.Buttons = new string[]
             {
                 "Go offline",
                 "Stay",

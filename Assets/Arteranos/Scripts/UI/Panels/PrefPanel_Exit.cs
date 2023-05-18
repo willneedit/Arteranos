@@ -88,7 +88,7 @@ namespace Arteranos.UI
         private async void OnExitClick()
         {
             btn_Exit.interactable = false;
-            DialogUI go = DialogUI.New();
+            IDialogUI go = DialogUIFactory.New();
             int rc = await go.PerformDialogAsync(
                 "Do you really want to quit?",
                 new string[] {"OK", "Cancel"});

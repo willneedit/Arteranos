@@ -9,23 +9,20 @@ using UnityEngine.UI;
 
 namespace Arteranos.UI
 {
-    public class DialogUI : UIBehaviour
+    public class DialogUI : UIBehaviour, IDialogUI
     {
-        public string text = "Dialog text";
-        public string[] buttons = null;
+        private string text = "Dialog text";
+        private string[] buttons = null;
 
         public TMP_Text Caption = null;
         public GameObject ButtonPane = null;
 
         public event Action<int> OnDialogDone;
+        public string[] Buttons { get => buttons; set => buttons = value; }
+        public string Text { get => text; set => text = value; }
+
 
         private readonly SemaphoreSlim dialogFinished = new(0, 1);
-
-        public static DialogUI New()
-        {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_Dialog"));
-            return go.GetComponent<DialogUI>();
-        }
 
         protected override void Start()
         {
@@ -35,36 +32,37 @@ namespace Arteranos.UI
 
             base.Start();
 
-            Caption.text = text;
+            Caption.text = Text;
 
             // No buttons, only to close by outside means.
-            if(buttons == null)
+            if(Buttons == null)
             {
                 Destroy(sampleButton);
                 Destroy(sampleSpacer);
                 return;
             }
 
-            if(buttons.Length != 0)
+            if(Buttons.Length != 0)
             {
                 sampleButton.GetComponent<Button>().onClick.AddListener(makeButtonPressedAction(0));
-                sampleButton.GetComponentInChildren<TMP_Text>().text = buttons[0];
+                sampleButton.GetComponentInChildren<TMP_Text>().text = Buttons[0];
             }
             else
+            {
                 Destroy(sampleButton);
+            }
 
-
-            if(buttons.Length < 2)
+            if(Buttons.Length < 2)
                 Destroy(sampleSpacer);
 
-            for(int i = 1; i < buttons.Length; i++)
+            for(int i = 1; i < Buttons.Length; i++)
             {
                 if(i > 1)
                     Instantiate(sampleSpacer, ButtonPane.transform);
 
                 Button btn = Instantiate(sampleButton, ButtonPane.transform).GetComponent<Button>();
                 btn.onClick.AddListener(makeButtonPressedAction(i));
-                btn.GetComponentInChildren<TMP_Text>().text = buttons[i];
+                btn.GetComponentInChildren<TMP_Text>().text = Buttons[i];
             }
 
 
@@ -79,12 +77,17 @@ namespace Arteranos.UI
             Destroy(gameObject);
         }
 
+        public void Close()
+        {
+            Destroy(gameObject);
+        }
+
         // Purely convenient for write a process driven control flow rather than
         // a event driven one and reducing the boilerplate.
         public async Task<int> PerformDialogAsync(string text, string[] buttons)
         {
-            this.text = text;
-            this.buttons = buttons;
+            this.Text = text;
+            this.Buttons = buttons;
 
             int rc = -1;
 
