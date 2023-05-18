@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Arteranos.Web
 {
-    public class WorldGallery
+    public class WorldGalleryImpl : MonoBehaviour, IWorldGallery
     {
         private static string GetRootPath(string url, bool cached)
         {
@@ -20,7 +20,10 @@ namespace Arteranos.Web
                 : $"{Application.persistentDataPath}/WorldGallery/{Utils.GetURLHash(url)}";
         }
 
-        public static (string, string) RetrieveWorld(string url, bool cached = false)
+        private void Awake() => WorldGallery.Instance = this;
+        private void OnDestroy() => WorldGallery.Instance = null;
+
+        public (string, string) RetrieveWorld(string url, bool cached = false)
         {
             string rootPath = GetRootPath(url, cached);
 
@@ -41,7 +44,7 @@ namespace Arteranos.Web
             return (metadataFile, screenshotFile);
         }
 
-        public static WorldMetaData RetrieveWorldMetaData(string url)
+        public WorldMetaData RetrieveWorldMetaData(string url)
         {
             string metadatafile;
 
@@ -57,7 +60,7 @@ namespace Arteranos.Web
             return WorldMetaData.Deserialize(json);
         }
 
-        public static void StoreWorldMetaData(string url, WorldMetaData worldMetaData)
+        public void StoreWorldMetaData(string url, WorldMetaData worldMetaData)
         {
             string metadatafile;
 
@@ -73,7 +76,7 @@ namespace Arteranos.Web
             File.WriteAllText(metadatafile, json);
         }
 
-        public static bool StoreWorld(string url)
+        public bool StoreWorld(string url)
         {
             string metadataFile;
             string screenshotFile;
@@ -96,7 +99,7 @@ namespace Arteranos.Web
             return true;
         }
 
-        public static void DeleteWorld(string url)
+        public void DeleteWorld(string url)
         {
             string rootPath = GetRootPath(url, false);
 

@@ -11,10 +11,12 @@ using UnityEngine;
 
 namespace Arteranos.Web
 {
-    public static class WorldTransition
+    public class WorldTransitionImpl : MonoBehaviour, IWorldTransition
     {
+        private void Awake() => WorldTransition.Instance = this;
+        private void OnDestroy() => WorldTransition.Instance = null;
 
-        public static void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null)
+        public void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null)
         {
             IProgressUI pui = ProgressUIFactory.New();
 

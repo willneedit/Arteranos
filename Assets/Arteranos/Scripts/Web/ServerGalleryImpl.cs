@@ -18,11 +18,14 @@ using Utils = Arteranos.Core.Utils;
 
 namespace Arteranos.Web
 {
-    public class ServerGallery
+    public class ServerGalleryImpl : MonoBehaviour, IServerGallery
     {
+        private void Awake() => ServerGallery.Instance = this;
+        private void OnDestroy() => ServerGallery.Instance = null;
+
         private static string GetRootPath(string url) => $"{Application.persistentDataPath}/ServerGallery/{Utils.GetURLHash(url)}";
 
-        public static ServerSettingsJSON RetrieveServerSettings(string url)
+        public ServerSettingsJSON RetrieveServerSettings(string url)
         {
             string rootPath = GetRootPath(url);
 
@@ -34,7 +37,7 @@ namespace Arteranos.Web
             return JsonConvert.DeserializeObject<ServerSettingsJSON>(json);
         }
 
-        public static void StoreServerSettings(string url, ServerSettingsJSON serverSettings)
+        public void StoreServerSettings(string url, ServerSettingsJSON serverSettings)
         {
             string rootPath = GetRootPath(url);
 
@@ -46,14 +49,14 @@ namespace Arteranos.Web
             File.WriteAllText(metadataFile, json);
         }
 
-        public static void DeleteServerSettings(string url)
+        public void DeleteServerSettings(string url)
         {
             string rootPath = GetRootPath(url);
 
             if(Directory.Exists(rootPath)) Directory.Delete(rootPath, true);
         }
 
-        public static async Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(
+        public async Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(
             string url,
             int timeout = 20)
         {
@@ -84,7 +87,7 @@ namespace Arteranos.Web
             return (url, smdj);
         }
 
-        public static async void DownloadServerMetadataAsync(
+        public async void DownloadServerMetadataAsync(
             string url,
             Action<string, ServerMetadataJSON> callback,
             int timeout = 20)

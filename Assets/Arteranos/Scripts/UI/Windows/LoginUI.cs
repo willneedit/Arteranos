@@ -13,9 +13,9 @@ using System.Threading;
 using Cdm.Authentication.Browser;
 using Cdm.Authentication.OAuth2;
 
-using Arteranos.Auth;
+using Arteranos.Web.Auth;
 
-namespace Arteranos.Auth
+namespace Arteranos.Web.Auth
 {
 #if !ARTERANOS_KEYS
     public static class LoginPackageList

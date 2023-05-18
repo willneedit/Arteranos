@@ -9,7 +9,7 @@ using Cdm.Authentication.Clients;
 using Cdm.Authentication.OAuth2;
 using System.Threading.Tasks;
 
-namespace Arteranos.Auth
+namespace Arteranos.Web.Auth
 {
     public interface ILoginPackage
     {

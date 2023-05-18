@@ -24,6 +24,30 @@ namespace Arteranos.Web
         void StartServer();
         void StopHost();
     }
+
+    public interface IServerGallery
+    {
+        void DeleteServerSettings(string url);
+        Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(string url, int timeout = 20);
+        void DownloadServerMetadataAsync(string url, Action<string, ServerMetadataJSON> callback, int timeout = 20);
+        ServerSettingsJSON RetrieveServerSettings(string url);
+        void StoreServerSettings(string url, ServerSettingsJSON serverSettings);
+    }
+
+    public interface IWorldGallery
+    {
+        void DeleteWorld(string url);
+        (string, string) RetrieveWorld(string url, bool cached = false);
+        WorldMetaData RetrieveWorldMetaData(string url);
+        bool StoreWorld(string url);
+        void StoreWorldMetaData(string url, WorldMetaData worldMetaData);
+    }
+
+    public interface IWorldTransition
+    {
+        void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null);
+    }
+
     #endregion
     // -------------------------------------------------------------------
     #region Web helpers
@@ -35,6 +59,38 @@ namespace Arteranos.Web
         public static void StartServer() => Instance.StartServer();
         public static void StopHost() => Instance.StopHost();
     }
+
+    public static class ServerGallery
+    {
+        public static IServerGallery Instance { get; set; }
+        public static void DeleteServerSettings(string url) => Instance.DeleteServerSettings(url);
+        public static Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(string url, int timeout = 20)
+            => Instance.DownloadServerMetadataAsync(url, timeout);
+        public static void DownloadServerMetadataAsync(string url, Action<string, ServerMetadataJSON> callback, int timeout = 20)
+            => Instance.DownloadServerMetadataAsync(url, callback, timeout);
+        public static ServerSettingsJSON RetrieveServerSettings(string url) => Instance.RetrieveServerSettings(url);
+        public static void StoreServerSettings(string url, ServerSettingsJSON serverSettings) => Instance.StoreServerSettings(url, serverSettings);
+    }
+
+    public static class WorldGallery
+    {
+        public static IWorldGallery Instance { get; set; }
+
+        public static void DeleteWorld(string url) => Instance.DeleteWorld(url);
+        public static (string, string) RetrieveWorld(string url, bool cached = false) => Instance.RetrieveWorld(url, cached);
+        public static WorldMetaData RetrieveWorldMetaData(string url) => Instance.RetrieveWorldMetaData(url);
+        public static bool StoreWorld(string url) => Instance.StoreWorld(url);
+        public static void StoreWorldMetaData(string url, WorldMetaData worldMetaData) => Instance.StoreWorldMetaData(url, worldMetaData);
+    }
+
+    public static class WorldTransition
+    {
+        public static IWorldTransition Instance { get; set; }
+
+        public static void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null) 
+            => Instance.InitiateTransition(url, failureCallback, successCallback);
+    }
+
     #endregion
     // -------------------------------------------------------------------
 }
