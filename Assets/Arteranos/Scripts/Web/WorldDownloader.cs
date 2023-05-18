@@ -237,7 +237,7 @@ namespace Arteranos.Web
 
         private static void MoveToDownloadedWorld()
         {
-            XROrigin xro = XR.XRControl.CurrentVRRig;
+            XROrigin xro = XR.XRControl.Instance.CurrentVRRig;
             Vector3 startPosition = Vector3.zero;
             Quaternion startRotation = Quaternion.identity;
 

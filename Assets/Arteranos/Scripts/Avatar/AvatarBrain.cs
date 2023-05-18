@@ -11,7 +11,7 @@ using System;
 using Arteranos.Web;
 using Arteranos.UI;
 
-namespace Arteranos.NetworkIO
+namespace Arteranos.Avatar
 {
     public enum AVIntKeys : byte
     {

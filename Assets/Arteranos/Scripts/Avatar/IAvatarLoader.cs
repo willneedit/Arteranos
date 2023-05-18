@@ -8,7 +8,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Arteranos.NetworkIO
+namespace Arteranos.Avatar
 {
     public interface IAvatarLoader
     {

@@ -11,11 +11,11 @@ using Unity.XR.CoreUtils;
 using Mirror;
 
 using Arteranos.ExtensionMethods;
-using Arteranos.XR;
 using Arteranos.Audio;
-using System;
+using Arteranos.NetworkIO;
+using Arteranos.XR;
 
-namespace Arteranos.NetworkIO
+namespace Arteranos.Avatar
 {
 
     public class AvatarPoseDriver : NetworkBehaviour
@@ -39,8 +39,8 @@ namespace Arteranos.NetworkIO
 
             if(isOwned)
             {
-                XRControl.XRSwitchEvent += OnXRChanged;
-                OnXRChanged(XRControl.UsingXR);
+                XRControl.Instance.XRSwitchEvent += OnXRChanged;
+                OnXRChanged(XRControl.Instance.UsingXR);
             }
 
         }
@@ -48,7 +48,7 @@ namespace Arteranos.NetworkIO
         public override void OnStopClient()
         {
             if(isOwned)
-                XRControl.XRSwitchEvent -= OnXRChanged;
+                XRControl.Instance.XRSwitchEvent -= OnXRChanged;
 
             GetComponent<AvatarBrain>().OnVoiceOutputChanged -= UseThisVoice;
 
@@ -57,7 +57,7 @@ namespace Arteranos.NetworkIO
 
         private void OnXRChanged(bool useXR)
         {
-            Transform xrot = XRControl.CurrentVRRig.transform;
+            Transform xrot = XRControl.Instance.CurrentVRRig.transform;
 
             if(useXR)
             {
@@ -102,11 +102,11 @@ namespace Arteranos.NetworkIO
         public void UpdateOwnPose()
         {
             // VR: Hand and head tracking
-            if(XRControl.UsingXR)
+            if(XRControl.Instance.UsingXR)
             {
                 if(m_AvatarData.CenterEye == null) return;
 
-                Transform cam = XRControl.CurrentVRRig.Camera.transform;
+                Transform cam = XRControl.Instance.CurrentVRRig.Camera.transform;
 
                 Vector3 cEyeOffset = m_AvatarData.CenterEye.position -
                     cam.position;
@@ -130,7 +130,7 @@ namespace Arteranos.NetworkIO
             }
 
             // VR + 2D: Walking animation (only with loaded avatars)
-            XROrigin xro = XRControl.CurrentVRRig;
+            XROrigin xro = XRControl.Instance.CurrentVRRig;
             CharacterController cc = xro.GetComponent<CharacterController>();
             Animator anim = GetComponentInChildren<Animator>();
 
@@ -181,10 +181,10 @@ namespace Arteranos.NetworkIO
         {
             if(isOwned)
             {
-                XROrigin xro = XRControl.CurrentVRRig;
+                XROrigin xro = XRControl.Instance.CurrentVRRig;
                 Camera cam = xro.Camera;
 
-                Vector3 playSpace = cam.transform.localPosition - XRControl.CameraLocalOffset;
+                Vector3 playSpace = cam.transform.localPosition - XRControl.Instance.CameraLocalOffset;
 
                 // Own avatar get copied from the controller, alien avatars by NetworkTransform.
                 transform.SetPositionAndRotation(xro.transform.position + 

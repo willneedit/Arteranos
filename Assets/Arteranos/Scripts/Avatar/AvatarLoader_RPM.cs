@@ -15,8 +15,9 @@ using Arteranos.ExtensionMethods;
 
 using Mirror;
 using System.Collections.Generic;
+using Arteranos.XR;
 
-namespace Arteranos.NetworkIO
+namespace Arteranos.Avatar
 {
     [RequireComponent(typeof(AvatarPoseDriver))]
     [RequireComponent(typeof(NetworkIdentity))]
@@ -264,7 +265,7 @@ namespace Arteranos.NetworkIO
             ResetPose();
 
             // And reconfigure the XR Rig to match the avatar's dimensions.
-            XR.XRControl xrc = XR.XRControl.Instance;
+            IXRControl xrc = XRControl.Instance;
             Transform fullHeight = agot.FindRecursive("HeadTop_End");
 
             xrc.EyeHeight = cEyePos.y - transform.position.y;

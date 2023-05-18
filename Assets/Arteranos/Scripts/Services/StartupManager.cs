@@ -31,7 +31,7 @@ namespace Arteranos.Services
             ConnectionManager = GetComponent<Web.IConnectionManager>();
 
             // Startup of dependent services...
-            GetComponent<XR.XRControl>().enabled = true;
+            XR.XRControl.Instance.enabled = true;
             GetComponent<AudioManager>().enabled = true;
             GetComponent<MetaDataService>().enabled = true;
             GetComponent<NetworkStatus>().enabled = true;

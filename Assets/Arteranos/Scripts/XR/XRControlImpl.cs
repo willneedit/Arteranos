@@ -14,14 +14,13 @@ using UnityEngine.XR.Management;
 
 namespace Arteranos.XR
 {
-    public class XRControl : MonoBehaviour
+    public class XRControlImpl : MonoBehaviour, IXRControl
     {
-        public static XRControl Instance { get; private set; }
-        public static XROrigin CurrentVRRig { get; private set; }
+        public XROrigin CurrentVRRig { get; private set; }
 
-        public static event Action<bool> XRSwitchEvent;
-        public static bool UsingXR { get; private set; }
-        public static Vector3 CameraLocalOffset { get; private set; }
+        public event Action<bool> XRSwitchEvent;
+        public bool UsingXR { get; private set; }
+        public Vector3 CameraLocalOffset { get; private set; }
 
         public XROrigin VRRig;
         public XROrigin NoVRRig;
@@ -32,13 +31,24 @@ namespace Arteranos.XR
 
         private bool VRRunning = false;
 
+        public new bool enabled
+        {
+            get => base.enabled;
+            set => base.enabled = value;
+        }
+
+        public new GameObject gameObject
+        {
+            get => base.gameObject;
+        }
+
         public void Awake()
         {
-            Instance = this;
+            XRControl.Instance = this;
             CurrentVRRig = FindObjectOfType<XROrigin>();
         }
 
-        public void OnDestroy() => Instance = null;
+        public void OnDestroy() => XRControl.Instance = null;
 
         public IEnumerator StartXRCoroutine()
         {
@@ -154,7 +164,7 @@ namespace Arteranos.XR
 
         }
 
-        public static void FreezeControls(bool value)
+        public void FreezeControls(bool value)
         {
             XROrigin xro = CurrentVRRig;
             if(xro == null) return;

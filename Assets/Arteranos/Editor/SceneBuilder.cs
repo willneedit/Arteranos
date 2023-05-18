@@ -204,8 +204,8 @@ namespace Arteranos.Editor
             foreach(Camera camera in FindObjectsOfType<Camera>())
                 DestroyImmediate(camera.gameObject);
 
-            XRControl xrc;
-            while(xrc = FindObjectOfType<XRControl>())
+            IXRControl xrc;
+            if((xrc = XRControl.Instance) != null)
                 DestroyImmediate(xrc.gameObject);
 
             Persistence p;
