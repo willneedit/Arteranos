@@ -15,7 +15,6 @@ using UnityEngine.Networking;
 
 using Arteranos.Core;
 using System.Threading;
-using Unity.XR.CoreUtils;
 using Utils = Arteranos.Core.Utils;
 
 namespace Arteranos.Web
@@ -237,7 +236,6 @@ namespace Arteranos.Web
 
         private static void MoveToDownloadedWorld()
         {
-            XROrigin xro = XR.XRControl.Instance.CurrentVRRig;
             Vector3 startPosition = Vector3.zero;
             Quaternion startRotation = Quaternion.identity;
 
@@ -249,14 +247,11 @@ namespace Arteranos.Web
                 startRotation = spawn.rotation;
             }
 
-            Vector3 heightAdjustment = xro.Origin.transform.up * xro.CameraInOriginSpaceHeight;
+            startPosition += XR.XRControl.Instance.heightAdjustment;
 
-            startPosition += heightAdjustment;
-
-            xro.MatchOriginUpCameraForward(startRotation * Vector3.up, startRotation * Vector3.forward);
-            xro.MoveCameraToWorldLocation(startPosition);
-            Physics.SyncTransforms();
+            XR.XRControl.Instance.MoveRig(startPosition, startRotation);
         }
+
 
 
         //private void OnEnable()

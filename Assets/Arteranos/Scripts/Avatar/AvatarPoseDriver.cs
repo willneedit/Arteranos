@@ -6,7 +6,6 @@
  */
 
 using UnityEngine;
-using Unity.XR.CoreUtils;
 
 using Mirror;
 
@@ -57,7 +56,7 @@ namespace Arteranos.Avatar
 
         private void OnXRChanged(bool useXR)
         {
-            Transform xrot = XRControl.Instance.CurrentVRRig.transform;
+            Transform xrot = XRControl.Instance.rigTransform;
 
             if(useXR)
             {
@@ -106,7 +105,7 @@ namespace Arteranos.Avatar
             {
                 if(m_AvatarData.CenterEye == null) return;
 
-                Transform cam = XRControl.Instance.CurrentVRRig.Camera.transform;
+                Transform cam = XRControl.Instance.cameraTransform;
 
                 Vector3 cEyeOffset = m_AvatarData.CenterEye.position -
                     cam.position;
@@ -130,7 +129,7 @@ namespace Arteranos.Avatar
             }
 
             // VR + 2D: Walking animation (only with loaded avatars)
-            XROrigin xro = XRControl.Instance.CurrentVRRig;
+            GameObject xro = XRControl.Instance.rigTransform.gameObject;
             CharacterController cc = xro.GetComponent<CharacterController>();
             Animator anim = GetComponentInChildren<Animator>();
 
@@ -181,15 +180,16 @@ namespace Arteranos.Avatar
         {
             if(isOwned)
             {
-                XROrigin xro = XRControl.Instance.CurrentVRRig;
-                Camera cam = xro.Camera;
+                IXRControl instance = XRControl.Instance;
+                Transform xro = instance.rigTransform;
+                Transform cam = instance.cameraTransform;
 
-                Vector3 playSpace = cam.transform.localPosition - XRControl.Instance.CameraLocalOffset;
+                Vector3 playSpace = cam.localPosition - instance.CameraLocalOffset;
 
                 // Own avatar get copied from the controller, alien avatars by NetworkTransform.
-                transform.SetPositionAndRotation(xro.transform.position + 
-                    xro.transform.rotation * playSpace,
-                    xro.transform.rotation);
+                transform.SetPositionAndRotation(xro.position + 
+                    xro.rotation * playSpace,
+                    xro.rotation);
 
                 // Needs to update the pose AFTER the position and rotation because
                 // of a nasty flickering.

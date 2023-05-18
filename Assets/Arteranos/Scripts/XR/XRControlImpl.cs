@@ -26,8 +26,11 @@ namespace Arteranos.XR
         public XROrigin NoVRRig;
 
         public float EyeHeight { get; set; } = 1.75f;
-
         public float BodyHeight { get; set; } = 1.85f;
+
+
+        public Vector3 heightAdjustment => CurrentVRRig.Origin.transform.up * CurrentVRRig.CameraInOriginSpaceHeight;
+
 
         private bool VRRunning = false;
 
@@ -35,6 +38,16 @@ namespace Arteranos.XR
         {
             get => base.enabled;
             set => base.enabled = value;
+        }
+
+        public Transform rigTransform
+        {
+            get => CurrentVRRig.transform;
+        }
+
+        public Transform cameraTransform
+        {
+            get => CurrentVRRig.Camera.transform;
         }
 
         public new GameObject gameObject
@@ -183,5 +196,15 @@ namespace Arteranos.XR
             if(continuousMoveProvider != null) continuousMoveProvider.enabled = !value;
             if(kMTrackedPoseDriver != null) kMTrackedPoseDriver.enabled = !value;
         }
+
+        public void MoveRig(Vector3 startPosition, Quaternion startRotation)
+        {
+            XROrigin xro = CurrentVRRig;
+
+            xro.MatchOriginUpCameraForward(startRotation * Vector3.up, startRotation * Vector3.forward);
+            xro.MoveCameraToWorldLocation(startPosition);
+            Physics.SyncTransforms();
+        }
+
     }
 }

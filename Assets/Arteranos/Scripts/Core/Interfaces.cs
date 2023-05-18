@@ -10,7 +10,6 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Unity.XR.CoreUtils;
 
 namespace Arteranos.Web
 {
@@ -82,16 +81,20 @@ namespace Arteranos.XR
     #region XR interfaces
     public interface IXRControl
     {
-        XROrigin CurrentVRRig { get; }
+        // XROrigin CurrentVRRig { get; }
         Vector3 CameraLocalOffset { get; }
         bool UsingXR { get; }
         bool enabled { get; set; }
         public float EyeHeight { get; set; }
         public float BodyHeight { get; set; }
         GameObject gameObject { get; }
+        Transform rigTransform { get; }
+        Transform cameraTransform { get; }
+        Vector3 heightAdjustment { get; }
 
         public void ReconfigureXRRig();
         void FreezeControls(bool value);
+        void MoveRig(Vector3 startPosition, Quaternion startRotation);
 
         event Action<bool> XRSwitchEvent;
     }
