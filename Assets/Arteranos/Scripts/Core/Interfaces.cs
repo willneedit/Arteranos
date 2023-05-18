@@ -13,6 +13,8 @@ using UnityEngine.EventSystems;
 
 namespace Arteranos.Web
 {
+    // -------------------------------------------------------------------
+    #region Web interfaces
     public interface IConnectionManager
     {
         bool CanDoConnect();
@@ -22,6 +24,19 @@ namespace Arteranos.Web
         void StartServer();
         void StopHost();
     }
+    #endregion
+    // -------------------------------------------------------------------
+    #region Web helpers
+    public static class ConnectionManager
+    {
+        public static IConnectionManager Instance { get; set; }
+        public static Task<bool> ConnectToServer(string serverURL) => Instance.ConnectToServer(serverURL);
+        public static void StartHost() => Instance.StartHost();
+        public static void StartServer() => Instance.StartServer();
+        public static void StopHost() => Instance.StopHost();
+    }
+    #endregion
+    // -------------------------------------------------------------------
 }
 
 namespace Arteranos.UI
@@ -72,7 +87,6 @@ namespace Arteranos.UI
     }
     #endregion
     // -------------------------------------------------------------------
-
 }
 
 namespace Arteranos.XR

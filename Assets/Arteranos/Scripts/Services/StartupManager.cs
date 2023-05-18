@@ -28,8 +28,6 @@ namespace Arteranos.Services
         {
             yield return new WaitForEndOfFrame();
 
-            ConnectionManager = GetComponent<Web.IConnectionManager>();
-
             // Startup of dependent services...
             XR.XRControl.Instance.enabled = true;
             GetComponent<AudioManager>().enabled = true;
@@ -45,11 +43,11 @@ namespace Arteranos.Services
                     port: ServerSettingsJSON.DefaultMetadataPort
                 );
 
-                ConnectionManager.ConnectToServer(uri.ToString());
+                Web.ConnectionManager.ConnectToServer(uri.ToString());
             }
             else if(!string.IsNullOrEmpty(DesiredWorld))
             {
-                ConnectionManager.StartHost();
+                Web.ConnectionManager.StartHost();
             }
 
             // And finish the startup.

@@ -42,11 +42,11 @@ namespace Arteranos.UI
 
         protected override void OnDestroy() => NetworkStatus.OnNetworkStatusChanged -= OnNetworkStatusChanged;
 
-        private void OnOfflineClicked() => ConnectionManager.Instance.StopHost();
+        private void OnOfflineClicked() => ConnectionManager.StopHost();
 
-        private void OnServerClicked() => ConnectionManager.Instance.StartServer();
+        private void OnServerClicked() => ConnectionManager.StartServer();
 
-        private void OnHostClicked() => ConnectionManager.Instance.StartHost();
+        private void OnHostClicked() => ConnectionManager.StartHost();
 
 
         private void OnNetworkStatusChanged(NetworkStatus.ConnectivityLevel conn, 

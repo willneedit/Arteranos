@@ -25,7 +25,7 @@ namespace Arteranos.UI
             }
         }
 
-        protected override void OnDisable() => XR.XRControl.Instance.FreezeControls(false);
+        protected override void OnDisable() => XR.XRControl.Instance?.FreezeControls(false);
 
         private void FindHookableTextFields(GameObject go)
         {

@@ -29,7 +29,6 @@ namespace Arteranos.Core
         protected static string TargetedServerPort = null;
         protected static string DesiredWorld = null;
 
-        public static Web.IConnectionManager ConnectionManager { get; protected set; }
         public static Transform Purgatory { get; private set; }
         public static ClientSettings Client { get; internal set; }
         public static ServerSettings Server { get; internal set; }

@@ -15,9 +15,13 @@ using Mirror;
 namespace Arteranos.Web
 {
 
-    public class ConnectionManager : MonoBehaviour, IConnectionManager
+    public class ConnectionManagerImpl : MonoBehaviour, IConnectionManager
     {
-        public static IConnectionManager Instance { get => SettingsManager.ConnectionManager; }
+        public static IConnectionManager Instance { get; set; }
+
+        public void Awake() => ConnectionManager.Instance = this;
+
+        public void OnDestroy() => ConnectionManager.Instance = null;
 
         public async Task<bool> ConnectToServer(string serverURL)
         {
