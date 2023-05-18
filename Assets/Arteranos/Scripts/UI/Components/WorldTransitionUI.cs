@@ -41,7 +41,7 @@ namespace Arteranos.UI
 
         public static void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null)
         {
-            ProgressUI pui = ProgressUI.New();
+            IProgressUI pui = ProgressUIFactory.New();
 
             //pui.PatienceThreshold = 0f;
             //pui.AlmostFinishedThreshold = 0f;

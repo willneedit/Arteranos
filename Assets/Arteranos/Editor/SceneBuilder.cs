@@ -329,7 +329,7 @@ namespace Arteranos.Editor
 
                     if(!string.IsNullOrEmpty(testWorldZip))
                     {
-                        ProgressUI pui = ProgressUI.New();
+                        IProgressUI pui = ProgressUIFactory.New();
 
                         (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(testWorldZip, true);
 

@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -25,6 +26,8 @@ namespace Arteranos.Web
 
 namespace Arteranos.UI
 {
+    // -------------------------------------------------------------------
+    #region UI interfaces
     public interface IDialogUI
     {
         public string Text { get; set; }
@@ -35,6 +38,19 @@ namespace Arteranos.UI
 
         Task<int> PerformDialogAsync(string text, string[] buttons);
     }
+
+    public interface IProgressUI
+    {
+        bool AllowCancel { get; set; }
+        AsyncOperationExecutor<Context> Executor { get; set; }
+        Context Context { get; set; }
+
+        event Action<Context> Completed;
+        event Action<Exception, Context> Faulted;
+    }
+    #endregion
+    // -------------------------------------------------------------------
+    #region UI factories
     public class DialogUIFactory : UIBehaviour
     {
         public static IDialogUI New()
@@ -44,4 +60,17 @@ namespace Arteranos.UI
         }
 
     }
+
+    public class ProgressUIFactory : UIBehaviour
+    {
+
+        public static IProgressUI New()
+        {
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_Progress"));
+            return go.GetComponent<IProgressUI>();
+        }
+    }
+    #endregion
+    // -------------------------------------------------------------------
+
 }

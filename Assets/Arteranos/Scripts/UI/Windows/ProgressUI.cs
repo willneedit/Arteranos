@@ -17,7 +17,7 @@ using Arteranos.Core;
 
 namespace Arteranos.UI
 {
-    public class ProgressUI : UIBehaviour
+    public class ProgressUI : UIBehaviour, IProgressUI
     {
         public CanvasRenderer Panel = null;
 
@@ -31,13 +31,13 @@ namespace Arteranos.UI
         public string Tip = null;
 
         // Allow canceling the process.
-        public bool AllowCancel = false;
+        private bool allowCancel = false;
 
         public event Action<Context> Completed;
         public event Action<Exception, Context> Faulted;
 
-        public AsyncOperationExecutor<Context> Executor = null;
-        public Context Context = null;
+        private AsyncOperationExecutor<Context> executor = null;
+        private Context context = null;
 
         private DateTime startTime = DateTime.MinValue;
 
@@ -47,11 +47,9 @@ namespace Arteranos.UI
         private GameObject go_buttonArea = null;
         private Button btn_cancelButton = null;
 
-        public static ProgressUI New()
-        {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_Progress"));
-            return go.GetComponent<ProgressUI>();
-        }
+        public bool AllowCancel { get => allowCancel; set => allowCancel = value; }
+        public AsyncOperationExecutor<Context> Executor { get => executor; set => executor = value; }
+        public Context Context { get => context; set => context = value; }
 
         protected override void Awake()
         {
