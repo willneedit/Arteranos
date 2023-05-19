@@ -32,14 +32,14 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            NetworkStatus.Instance.OnNetworkStatusChanged += OnNetworkStatusChanged;
+            NetworkStatus.OnNetworkStatusChanged += OnNetworkStatusChanged;
 
             OnNetworkStatusChanged(
                 NetworkStatus.GetConnectivityLevel(), 
                 NetworkStatus.GetOnlineLevel());
         }
 
-        protected override void OnDestroy() => NetworkStatus.Instance.OnNetworkStatusChanged -= OnNetworkStatusChanged;
+        protected override void OnDestroy() => NetworkStatus.OnNetworkStatusChanged -= OnNetworkStatusChanged;
 
         private void OnOfflineClicked() => NetworkStatus.StopHost();
 

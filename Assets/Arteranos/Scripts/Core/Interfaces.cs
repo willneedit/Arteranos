@@ -91,6 +91,12 @@ namespace Arteranos.Services
             set => Instance.OpenPorts = value;
         }
 
+        public static event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged
+        {
+            add => Instance.OnNetworkStatusChanged += value;
+            remove { if(Instance != null) Instance.OnNetworkStatusChanged -= value; }
+        }
+
         public static ConnectivityLevel GetConnectivityLevel() => Instance.GetConnectivityLevel();
         public static OnlineLevel GetOnlineLevel() => Instance.GetOnlineLevel();
         public static void StartClient(Uri connectionUri) => Instance.StartClient(connectionUri);
@@ -140,7 +146,7 @@ namespace Arteranos.Services
         public static event Action<float[]> OnSampleReady
         {
             add => Instance.OnSampleReady += value;
-            remove => Instance.OnSampleReady -= value;
+            remove { if(Instance != null) Instance.OnSampleReady -= value; }
         }
 
         public static int? GetDeviceId() => Instance.GetDeviceId();
