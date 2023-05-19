@@ -7,9 +7,69 @@
 
 using Arteranos.Core;
 using System;
+using System.ComponentModel;
+using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
+
+namespace Arteranos.Services
+{
+    // -------------------------------------------------------------------
+    #region Services interfaces
+
+    public enum ConnectivityLevel
+    {
+        [Description("Unconnected")]
+        Unconnected = 0,
+        [Description("Firewalled")]
+        Restricted,
+        [Description("Public")]
+        Unrestricted
+    }
+    public enum OnlineLevel
+    {
+        [Description("Offline")]
+        Offline = 0,
+        [Description("Client")]
+        Client,
+        [Description("Server")]
+        Server,
+        [Description("Host")]
+        Host
+    }
+
+    public interface INetworkStatus
+    {
+        IPAddress ExternalAddress { get; }
+        bool OpenPorts { get; set; }
+        bool enabled { get; set; }
+
+        event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
+
+        ConnectivityLevel GetConnectivityLevel();
+        OnlineLevel GetOnlineLevel();
+    }
+    #endregion
+    // -------------------------------------------------------------------
+    #region Services helpers
+    public static class NetworkStatus
+    {
+        public static INetworkStatus Instance { get; set; }
+
+        public static IPAddress ExternalAddress { get => Instance.ExternalAddress; }
+        public static bool OpenPorts
+        {
+            get => Instance.OpenPorts;
+            set => Instance.OpenPorts = value;
+        }
+
+        public static ConnectivityLevel GetConnectivityLevel() => Instance.GetConnectivityLevel();
+        public static OnlineLevel GetOnlineLevel() => Instance.GetOnlineLevel();
+    }
+    #endregion
+    // -------------------------------------------------------------------
+}
 
 namespace Arteranos.Web
 {
@@ -17,8 +77,6 @@ namespace Arteranos.Web
     #region Web interfaces
     public interface IConnectionManager
     {
-        bool CanDoConnect();
-        bool CanGetConnected();
         Task<bool> ConnectToServer(string serverURL);
         void StartHost();
         void StartServer();

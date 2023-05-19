@@ -33,14 +33,14 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            NetworkStatus.OnNetworkStatusChanged += OnNetworkStatusChanged;
+            NetworkStatus.Instance.OnNetworkStatusChanged += OnNetworkStatusChanged;
 
             OnNetworkStatusChanged(
                 NetworkStatus.GetConnectivityLevel(), 
                 NetworkStatus.GetOnlineLevel());
         }
 
-        protected override void OnDestroy() => NetworkStatus.OnNetworkStatusChanged -= OnNetworkStatusChanged;
+        protected override void OnDestroy() => NetworkStatus.Instance.OnNetworkStatusChanged -= OnNetworkStatusChanged;
 
         private void OnOfflineClicked() => ConnectionManager.StopHost();
 
@@ -49,8 +49,8 @@ namespace Arteranos.UI
         private void OnHostClicked() => ConnectionManager.StartHost();
 
 
-        private void OnNetworkStatusChanged(NetworkStatus.ConnectivityLevel conn, 
-            NetworkStatus.OnlineLevel onl)
+        private void OnNetworkStatusChanged(ConnectivityLevel conn, 
+            OnlineLevel onl)
         {
             string connstr = Core.Utils.GetEnumDescription(conn);
             string onlstr = Core.Utils.GetEnumDescription(onl);
@@ -59,22 +59,22 @@ namespace Arteranos.UI
 
             switch(onl)
             {
-                case NetworkStatus.OnlineLevel.Offline:
+                case OnlineLevel.Offline:
                     btn_Offline.gameObject.SetActive(false);
                     btn_Server.gameObject.SetActive(true);
                     btn_Host.gameObject.SetActive(true);
                     break;
-                case NetworkStatus.OnlineLevel.Client:
+                case OnlineLevel.Client:
                     btn_Offline.gameObject.SetActive(true);
                     btn_Server.gameObject.SetActive(false);
                     btn_Host.gameObject.SetActive(true);
                     break;
-                case NetworkStatus.OnlineLevel.Server:
+                case OnlineLevel.Server:
                     btn_Offline.gameObject.SetActive(true);
                     btn_Server.gameObject.SetActive(false);
                     btn_Host.gameObject.SetActive(false);
                     break;
-                case NetworkStatus.OnlineLevel.Host:
+                case OnlineLevel.Host:
                     btn_Offline.gameObject.SetActive(true);
                     btn_Server.gameObject.SetActive(false);
                     btn_Host.gameObject.SetActive(false);

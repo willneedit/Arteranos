@@ -32,7 +32,7 @@ namespace Arteranos.Services
             XR.XRControl.Instance.enabled = true;
             GetComponent<AudioManager>().enabled = true;
             GetComponent<MetaDataService>().enabled = true;
-            GetComponent<NetworkStatus>().enabled = true;
+            NetworkStatus.Instance.enabled = true;
 
             yield return new WaitForSeconds(5);
 

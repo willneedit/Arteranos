@@ -14,39 +14,37 @@ using System;
 using System.Threading.Tasks;
 using Arteranos.Core;
 using Mirror;
-using System.ComponentModel;
+using System.Net;
 
 namespace Arteranos.Services
 {
-    public class NetworkStatus : MonoBehaviour
+    public partial class NetworkStatusImpl : MonoBehaviour, INetworkStatus
     {
-        public enum ConnectivityLevel
-        {
-            [Description("Unconnected")]
-            Unconnected = 0,
-            [Description("Firewalled")]
-            Restricted,
-            [Description("Public")]
-            Unrestricted
-        }
-
-        public enum OnlineLevel
-        {
-            [Description("Offline")]
-            Offline = 0,
-            [Description("Client")]
-            Client,
-            [Description("Server")]
-            Server,
-            [Description("Host")]
-            Host
-        }
-
-
         private INatDevice device = null;
-        public System.Net.IPAddress ExternalAddress { get; internal set; } = null;
+        public IPAddress ExternalAddress { get; internal set; } = null;
 
-        public static event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
+        public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
+
+        public new bool enabled
+        {
+            get => base.enabled;
+            set => base.enabled = value;
+        }
+
+        public bool OpenPorts
+        {
+            get => m_OpenPorts;
+            set
+            {
+                bool old = m_OpenPorts;
+                if(old != value)
+                {
+                    m_OpenPorts = value;
+                    if(m_OpenPorts) OpenPortsAsync();
+                    else ClosePortsAsync();
+                }
+            }
+        }
 
         public bool ServerPortPublic = false;
         public bool VoicePortPublic = false;
@@ -54,20 +52,23 @@ namespace Arteranos.Services
 
         private ConnectivityLevel CurrentConnectivityLevel = ConnectivityLevel.Unconnected;
         private OnlineLevel CurrentOnlineLevel = OnlineLevel.Offline;
+        private bool m_OpenPorts = false;
 
-        public static ConnectivityLevel GetConnectivityLevel()
+
+        private void Awake() => NetworkStatus.Instance = this;
+        private void OnDestroy() => NetworkStatus.Instance = null;
+
+        public ConnectivityLevel GetConnectivityLevel()
         {
-            NetworkStatus ns = FindObjectOfType<NetworkStatus>();
-
             if(Application.internetReachability == NetworkReachability.NotReachable)
                 return ConnectivityLevel.Unconnected;
 
-            return (ns.ServerPortPublic && ns.VoicePortPublic && ns.MetadataPortPublic)
+            return (ServerPortPublic && VoicePortPublic && MetadataPortPublic)
                 ? ConnectivityLevel.Unrestricted
                 : ConnectivityLevel.Restricted;
         }
 
-        public static OnlineLevel GetOnlineLevel()
+        public OnlineLevel GetOnlineLevel()
         {
             if(!NetworkClient.active && !NetworkServer.active)
                 return OnlineLevel.Offline;
@@ -153,7 +154,7 @@ namespace Arteranos.Services
                 await device.CreatePortMapAsync(mapping);
                 return true;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Debug.LogWarning($"Failed to create a port mapping for {port}");
                 Debug.LogException(ex);
@@ -170,17 +171,21 @@ namespace Arteranos.Services
             {
                 await device.DeletePortMapAsync(mapping);
             }
-            catch(Exception ex)
+            catch
             {
-                Debug.LogWarning($"Failed to delete a port mapping for {port}");
-                Debug.LogException(ex);
+                Debug.Log($"Failed to delete a port mapping for {port}... but it's okay.");
             }
         }
 
         public async void OpenPortsAsync()
         {
             // No NAT router at all? Lucky you! ;-)
-            if (ExternalAddress == null) return;
+            if(ExternalAddress == null) return;
+
+            // No point to open the ports if we're not supposed to.
+            if(!OpenPorts) return;
+
+            Debug.Log("Opening ports in the router");
 
             ServerSettings ss = SettingsManager.Server;
 
@@ -194,6 +199,8 @@ namespace Arteranos.Services
             // No NAT router at all? Lucky you! ;-)
             if(ExternalAddress == null) return;
 
+            Debug.Log("Closing ports in the router, if there's need to do.");
+
             ServerSettings ss = SettingsManager.Server;
 
             if(ServerPortPublic)
@@ -201,9 +208,13 @@ namespace Arteranos.Services
 
             if(VoicePortPublic)
                 ClosePortAsync(ss.VoicePort);
-            
+
             if(MetadataPortPublic)
                 ClosePortAsync(ss.MetadataPort);
+
+            ServerPortPublic = false;
+            VoicePortPublic = false;
+            MetadataPortPublic = false;
         }
     }
 }

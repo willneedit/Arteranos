@@ -5,15 +5,11 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-using Arteranos.Core;
 using Arteranos.Services;
 
 namespace Arteranos.UI
@@ -38,9 +34,8 @@ namespace Arteranos.UI
             lbl_DeviceType.text = SystemInfo.deviceType.ToString();
             lbl_GraphicsDevice.text = SystemInfo.graphicsDeviceName;
             lbl_GraphicsVersion.text = SystemInfo.graphicsDeviceVersion;
-            
-            NetworkStatus networkStatus = FindObjectOfType<NetworkStatus>();
-            System.Net.IPAddress extip = networkStatus.ExternalAddress;
+
+            System.Net.IPAddress extip = NetworkStatus.ExternalAddress;
 
             lbl_ExternalIPAddr.text = (extip != null) ? extip.ToString() : "Unknown";
 

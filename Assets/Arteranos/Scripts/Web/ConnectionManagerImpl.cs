@@ -72,12 +72,14 @@ namespace Arteranos.Web
             NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
 
             manager.StopHost();
+            Services.NetworkStatus.OpenPorts = false;
         }
 
         public void StartHost()
         {
             NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
 
+            Services.NetworkStatus.OpenPorts = true;
             manager.StartHost();
         }
 
@@ -92,19 +94,8 @@ namespace Arteranos.Web
                 await Task.Delay(1009);
             }
 
+            Services.NetworkStatus.OpenPorts = true;
             manager.StartServer();
         }
-
-        /// <summary>
-        /// Able to connect outgoing connections?
-        /// </summary>
-        /// <param name="serverURL">The server you ant to connect to</param>
-        /// <returns>true if the client is inactive</returns>
-        public bool CanDoConnect() => (!NetworkClient.active && !NetworkServer.active);
-
-        /// <summary>
-        /// Ready to listen to incoming connections?
-        /// </summary>
-        public bool CanGetConnected() => NetworkServer.active;
     }
 }
