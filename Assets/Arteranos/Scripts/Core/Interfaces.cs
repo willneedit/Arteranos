@@ -45,6 +45,7 @@ namespace Arteranos.Services
         IPAddress ExternalAddress { get; }
         bool OpenPorts { get; set; }
         bool enabled { get; set; }
+        Action<bool> OnClientConnectionResponse { get; set; }
 
         event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 
@@ -89,6 +90,11 @@ namespace Arteranos.Services
         {
             get => Instance.OpenPorts;
             set => Instance.OpenPorts = value;
+        }
+        public static Action<bool> OnClientConnectionResponse 
+        {
+            get => Instance?.OnClientConnectionResponse;
+            set => Instance.OnClientConnectionResponse = value;
         }
 
         public static event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged

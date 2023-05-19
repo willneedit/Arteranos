@@ -334,9 +334,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3840780144436917895}
-  - component: {fileID: 276582954756076773}
+  - component: {fileID: 7940587785708425646}
   - component: {fileID: -746876566335505752}
-  - component: {fileID: 6214853735780843845}
   - component: {fileID: 1851660504593070244}
   - component: {fileID: 3772151105963276859}
   - component: {fileID: 8579259303771053379}
@@ -369,7 +368,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &276582954756076773
+--- !u!114 &7940587785708425646
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -378,7 +377,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3840780144436917897}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8aab4c8111b7c411b9b92cf3dbc5bd4e, type: 3}
+  m_Script: {fileID: 11500000, guid: a33cce263d6b06541a889b8c98da2d70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
@@ -422,20 +421,6 @@ MonoBehaviour:
   clientMaxReceivesPerTick: 1000
   clientSendQueueLimit: 10000
   clientReceiveQueueLimit: 10000
---- !u!114 &6214853735780843845
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3840780144436917897}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6442dc8070ceb41f094e44de0bf87274, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  offsetX: 0
-  offsetY: 0
 --- !u!114 &1851660504593070244
 MonoBehaviour:
   m_ObjectHideFlags: 0

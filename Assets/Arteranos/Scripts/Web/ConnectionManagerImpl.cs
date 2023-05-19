@@ -45,6 +45,7 @@ namespace Arteranos.Web
                 if(ssj == null)
                 {
                     Debug.Log("Still no viable metadata, giving up.");
+                    ConnectionResponse(false);
                     return false;
                 }
 
@@ -57,11 +58,24 @@ namespace Arteranos.Web
             // FIXME Telepathy Transport specific.
             Uri connectionUri = new($"tcp4://{serverURI.Host}:{ssj.ServerPort}");
 
+            NetworkStatus.OnClientConnectionResponse = ConnectionResponse;
             NetworkStatus.StartClient(connectionUri);
 
             // Here goes nothing...
             return true;
         }
 
+        private void ConnectionResponse(bool success)
+        {
+            NetworkStatus.OnClientConnectionResponse = null;
+
+            if(success) return;
+
+            UI.IDialogUI dialog = UI.DialogUIFactory.New();
+            dialog.Buttons = new[] { "Okay" };
+            dialog.Text =
+                "Failed to connect to this server.\n" +
+                "Maybe it's offline.";
+        }
     }
 }
