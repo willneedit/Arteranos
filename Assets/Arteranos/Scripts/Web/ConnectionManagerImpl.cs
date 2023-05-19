@@ -10,7 +10,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-using Mirror;
+using Arteranos.Services;
 
 namespace Arteranos.Web
 {
@@ -22,16 +22,16 @@ namespace Arteranos.Web
 
         public async Task<bool> ConnectToServer(string serverURL)
         {
-            if(NetworkClient.active || NetworkServer.active)
+            if(NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
             {
                 // Anything but idle, cut off all connections before connecting to the desired server.
-                StopHost();
+                NetworkStatus.StopHost();
 
                 await Task.Delay(3000);
             }
 
             ServerSettingsJSON ssj = ServerGallery.RetrieveServerSettings(serverURL);
-            
+
             if(ssj == null)
             {
                 Debug.Log($"{serverURL} has no meta data, downloading...");
@@ -57,45 +57,11 @@ namespace Arteranos.Web
             // FIXME Telepathy Transport specific.
             Uri connectionUri = new($"tcp4://{serverURI.Host}:{ssj.ServerPort}");
 
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
-
-            Debug.Log($"Attempting to connect to {connectionUri}...");
-
-            manager.StartClient(connectionUri);
+            NetworkStatus.StartClient(connectionUri);
 
             // Here goes nothing...
             return true;
         }
 
-        public void StopHost()
-        {
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
-
-            manager.StopHost();
-            Services.NetworkStatus.OpenPorts = false;
-        }
-
-        public void StartHost()
-        {
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
-
-            Services.NetworkStatus.OpenPorts = true;
-            manager.StartHost();
-        }
-
-        public async void StartServer()
-        {
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
-
-            if(manager.isNetworkActive)
-            {
-                manager.StopHost();
-
-                await Task.Delay(1009);
-            }
-
-            Services.NetworkStatus.OpenPorts = true;
-            manager.StartServer();
-        }
     }
 }

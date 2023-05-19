@@ -49,6 +49,10 @@ namespace Arteranos.Services
 
         ConnectivityLevel GetConnectivityLevel();
         OnlineLevel GetOnlineLevel();
+        void StartClient(Uri connectionUri);
+        void StartHost();
+        void StartServer();
+        void StopHost();
     }
     #endregion
     // -------------------------------------------------------------------
@@ -66,6 +70,10 @@ namespace Arteranos.Services
 
         public static ConnectivityLevel GetConnectivityLevel() => Instance.GetConnectivityLevel();
         public static OnlineLevel GetOnlineLevel() => Instance.GetOnlineLevel();
+        public static void StartClient(Uri connectionUri) => Instance.StartClient(connectionUri);
+        public static void StartHost() => Instance.StartHost();
+        public static void StartServer() => Instance.StartServer();
+        public static void StopHost() => Instance.StopHost();
     }
     #endregion
     // -------------------------------------------------------------------
@@ -78,9 +86,6 @@ namespace Arteranos.Web
     public interface IConnectionManager
     {
         Task<bool> ConnectToServer(string serverURL);
-        void StartHost();
-        void StartServer();
-        void StopHost();
     }
 
     public interface IServerGallery
@@ -114,9 +119,6 @@ namespace Arteranos.Web
         public static IConnectionManager Instance { get; set; }
 
         public static Task<bool> ConnectToServer(string serverURL) => Instance.ConnectToServer(serverURL);
-        public static void StartHost() => Instance.StartHost();
-        public static void StartServer() => Instance.StartServer();
-        public static void StopHost() => Instance.StopHost();
     }
 
     public static class ServerGallery

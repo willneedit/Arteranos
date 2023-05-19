@@ -47,7 +47,7 @@ namespace Arteranos.Services
             }
             else if(!string.IsNullOrEmpty(DesiredWorld))
             {
-                Web.ConnectionManager.StartHost();
+                NetworkStatus.StartHost();
             }
 
             // And finish the startup.

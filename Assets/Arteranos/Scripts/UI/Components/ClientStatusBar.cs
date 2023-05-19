@@ -6,7 +6,6 @@
  */
 
 using Arteranos.Services;
-using Arteranos.Web;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -42,11 +41,11 @@ namespace Arteranos.UI
 
         protected override void OnDestroy() => NetworkStatus.Instance.OnNetworkStatusChanged -= OnNetworkStatusChanged;
 
-        private void OnOfflineClicked() => ConnectionManager.StopHost();
+        private void OnOfflineClicked() => NetworkStatus.StopHost();
 
-        private void OnServerClicked() => ConnectionManager.StartServer();
+        private void OnServerClicked() => NetworkStatus.StartServer();
 
-        private void OnHostClicked() => ConnectionManager.StartHost();
+        private void OnHostClicked() => NetworkStatus.StartHost();
 
 
         private void OnNetworkStatusChanged(ConnectivityLevel conn, 

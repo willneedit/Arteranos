@@ -58,6 +58,7 @@ namespace Arteranos.Services
         private void Awake() => NetworkStatus.Instance = this;
         private void OnDestroy() => NetworkStatus.Instance = null;
 
+        #region Connectivity and UPnP
         public ConnectivityLevel GetConnectivityLevel()
         {
             if(Application.internetReachability == NetworkReachability.NotReachable)
@@ -216,5 +217,48 @@ namespace Arteranos.Services
             VoicePortPublic = false;
             MetadataPortPublic = false;
         }
+        #endregion
+
+        #region Connections
+        public void StartClient(Uri connectionUri)
+        {
+            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+
+            Debug.Log($"Attempting to connect to {connectionUri}...");
+
+            manager.StartClient(connectionUri);
+        }
+
+        public void StopHost()
+        {
+            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+
+            manager.StopHost();
+            Services.NetworkStatus.OpenPorts = false;
+        }
+
+        public void StartHost()
+        {
+            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+
+            Services.NetworkStatus.OpenPorts = true;
+            manager.StartHost();
+        }
+
+        public async void StartServer()
+        {
+            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+
+            if(manager.isNetworkActive)
+            {
+                manager.StopHost();
+
+                await Task.Delay(1009);
+            }
+
+            Services.NetworkStatus.OpenPorts = true;
+            manager.StartServer();
+        }
+        #endregion
     }
 }
