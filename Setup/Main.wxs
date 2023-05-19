@@ -22,11 +22,13 @@
     <UIRef Id="WixUI_InstallDir" />
     <UIRef Id="WixUI_ErrorProgressText" />
 
+    <Icon Id="DefaultAppIcon.ico" SourceFile="..\Setup\Arteranos.ico" />
+
     <WixVariable Id="WixUILicenseRtf" Value="..\Setup\SetupLicense.rtf" />
     <WixVariable Id="WixUIBannerBmp" Value="..\Setup\Banner.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="..\Setup\Dialog.bmp" />
     
-    <Icon Id="DefaultAppIcon.ico" SourceFile="..\Setup\Arteranos.ico" />
+    <Property Id="ARPPRODUCTICON" Value="DefaultAppIcon.ico" />
     
     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id='ProgramFiles64Folder' Name='PFiles'>
