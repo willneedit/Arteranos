@@ -57,13 +57,17 @@ namespace Arteranos.Services
 
         private ConnectivityLevel CurrentConnectivityLevel = ConnectivityLevel.Unconnected;
         private OnlineLevel CurrentOnlineLevel = OnlineLevel.Offline;
+#if UNITY_SERVER
+        // NetworkManager sets up the server by default, so do that the ports, too.
+        private bool m_OpenPorts = true;
+#else
         private bool m_OpenPorts = false;
-
+#endif
 
         private void Awake() => NetworkStatus.Instance = this;
         private void OnDestroy() => NetworkStatus.Instance = null;
 
-        #region Connectivity and UPnP
+#region Connectivity and UPnP
         public ConnectivityLevel GetConnectivityLevel()
         {
             if(Application.internetReachability == NetworkReachability.NotReachable)
@@ -222,9 +226,9 @@ namespace Arteranos.Services
             VoicePortPublic = false;
             MetadataPortPublic = false;
         }
-        #endregion
+#endregion
 
-        #region Connections
+#region Connections
         public void StartClient(Uri connectionUri)
         {
             NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
@@ -264,6 +268,6 @@ namespace Arteranos.Services
             Services.NetworkStatus.OpenPorts = true;
             manager.StartServer();
         }
-        #endregion
+#endregion
     }
 }
