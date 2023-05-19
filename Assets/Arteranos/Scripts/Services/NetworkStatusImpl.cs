@@ -65,9 +65,13 @@ namespace Arteranos.Services
 #endif
 
         private void Awake() => NetworkStatus.Instance = this;
-        private void OnDestroy() => NetworkStatus.Instance = null;
+        private void OnDestroy()
+        {
+            ClosePortsAsync();
+            NetworkStatus.Instance = null;
+        }
 
-#region Connectivity and UPnP
+        #region Connectivity and UPnP
         public ConnectivityLevel GetConnectivityLevel()
         {
             if(Application.internetReachability == NetworkReachability.NotReachable)
