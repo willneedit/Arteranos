@@ -29,6 +29,14 @@ namespace Arteranos.Core
         protected static string TargetedServerPort = null;
         protected static string DesiredWorld = null;
 
+        public static bool StartupTrigger { get; private set; } = false;
+
+        public static string ResetStartupTrigger()
+        {
+            StartupTrigger = false;
+            return DesiredWorld;
+        }
+
         public static Transform Purgatory { get; private set; }
         public static ClientSettings Client { get; internal set; }
         public static ServerSettings Server { get; internal set; }
@@ -83,6 +91,8 @@ namespace Arteranos.Core
 
                 if(uri.AbsolutePath != "/")
                     DesiredWorld = uri.AbsolutePath[1..];
+
+                StartupTrigger = true;
 
             }
 

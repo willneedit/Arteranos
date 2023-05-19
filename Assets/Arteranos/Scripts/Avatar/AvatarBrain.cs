@@ -137,9 +137,9 @@ namespace Arteranos.Avatar
                 RegisterUser(cs.UserID);
 
                 // Invoked by command line - only once
-                if(StartupManager.StartupTrigger)
+                if(SettingsManager.StartupTrigger)
                 {
-                    string world = StartupManager.ResetStartupTrigger();
+                    string world = SettingsManager.ResetStartupTrigger();
 
                     Debug.Log($"Invoking startup world '{world}'");
                     if(!string.IsNullOrEmpty(world))

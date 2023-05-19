@@ -16,13 +16,6 @@ namespace Arteranos.Services
     {
         private bool initialized = false;
 
-        public static bool StartupTrigger { get; private set; } = true;
-
-        public static string ResetStartupTrigger()
-        {
-            StartupTrigger = false;
-            return DesiredWorld;
-        }
 
         IEnumerator StartupCoroutine()
         {
