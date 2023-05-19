@@ -82,6 +82,10 @@ namespace Arteranos.UI
 
         public void PopulateServerData()
         {
+            // Could be that the list item bas been deleted in th meantime.
+            // Or, the entire list.
+            if(btn_Add == null) return;
+
             btn_Add.gameObject.SetActive(false);
             btn_Visit.gameObject.SetActive(true);
             btn_Delete.gameObject.SetActive(false);
