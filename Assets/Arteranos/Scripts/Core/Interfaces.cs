@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 
 namespace Arteranos.Services
@@ -54,6 +55,28 @@ namespace Arteranos.Services
         void StartServer();
         void StopHost();
     }
+
+    public interface IAudioManager
+    {
+        AudioMixerGroup MixerGroupEnv { get; }
+        AudioMixerGroup MixerGroupVoice { get; }
+        float VolumeEnv { get; set; }
+        float VolumeMaster { get; set; }
+        float VolumeVoice { get; set; }
+        bool enabled { get; set; }
+        float MicGain { get; set; }
+        int MicAGCLevel { get; set; }
+
+        event Action<short> OnJoinedChatroom;
+        event Action<float[]> OnSampleReady;
+
+        int? GetDeviceId();
+        void JoinChatroom(object data = null);
+        void LeaveChatroom(object data = null);
+        void PushVolumeSettings();
+        void RenewMic();
+    }
+
     #endregion
     // -------------------------------------------------------------------
     #region Services helpers
@@ -74,6 +97,58 @@ namespace Arteranos.Services
         public static void StartHost() => Instance.StartHost();
         public static void StartServer() => Instance.StartServer();
         public static void StopHost() => Instance.StopHost();
+    }
+
+    public static class AudioManager
+    {
+        public static IAudioManager Instance { get; set; }
+
+        public static AudioMixerGroup MixerGroupEnv { get => Instance.MixerGroupEnv; }
+        public static AudioMixerGroup MixerGroupVoice { get => Instance.MixerGroupVoice; }
+        public static float VolumeEnv 
+        {
+            get => Instance.VolumeEnv;
+            set => Instance.VolumeEnv = value;
+        }
+        public static float VolumeMaster 
+        {
+            get => Instance.VolumeMaster;
+            set => Instance.VolumeMaster = value;
+        }
+        public static float VolumeVoice
+        {
+            get => Instance.VolumeVoice;
+            set => Instance.VolumeVoice = value;
+        }
+        public static float MicGain
+        {
+            get => Instance.MicGain;
+            set => Instance.MicGain = value;
+        }
+        public static int MicAGCLevel 
+        {
+            get => Instance.MicAGCLevel;
+            set => Instance.MicAGCLevel = value;
+        }
+
+
+        public static event Action<short> OnJoinedChatroom
+        { 
+            add => Instance.OnJoinedChatroom += value;
+            remove=> Instance.OnJoinedChatroom -= value;
+        }
+        public static event Action<float[]> OnSampleReady
+        {
+            add => Instance.OnSampleReady += value;
+            remove => Instance.OnSampleReady -= value;
+        }
+
+        public static int? GetDeviceId() => Instance.GetDeviceId();
+        public static void JoinChatroom(object data = null) => Instance.JoinChatroom(data);
+        public static void LeaveChatroom(object data = null) => Instance?.LeaveChatroom(data);
+        public static void PushVolumeSettings() => Instance.PushVolumeSettings();
+        public static void RenewMic() => Instance.RenewMic();
+
     }
     #endregion
     // -------------------------------------------------------------------

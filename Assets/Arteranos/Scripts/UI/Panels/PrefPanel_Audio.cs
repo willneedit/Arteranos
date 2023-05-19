@@ -52,7 +52,7 @@ namespace Arteranos.UI
             sld_MicInputGain.OnValueChanged += OnMicInputGainChanged;
             spn_AGC.OnChanged += OnAGCChanged;
 
-            AudioManager.MicInput.OnSampleReady += TapMicrophoneInput;
+            AudioManager.OnSampleReady += TapMicrophoneInput;
         }
 
 
@@ -96,7 +96,7 @@ namespace Arteranos.UI
 
         protected override void OnDestroy()
         {
-            AudioManager.MicInput.OnSampleReady -= TapMicrophoneInput;
+            AudioManager.OnSampleReady -= TapMicrophoneInput;
 
             base.OnDestroy();
         }
@@ -144,13 +144,13 @@ namespace Arteranos.UI
 
         private void OnMicInputGainChanged(float val)
         {
-            AudioManager.MicInput.Gain = Utils.LoudnessToFactor(val);
+            AudioManager.MicGain = Utils.LoudnessToFactor(val);
             dirty = true;
         }
 
         private void OnAGCChanged(int item, bool up)
         {
-            AudioManager.MicInput.SetAGCLevel(spn_AGC.value);
+            AudioManager.MicAGCLevel = spn_AGC.value;
             dirty = true;
         }
 

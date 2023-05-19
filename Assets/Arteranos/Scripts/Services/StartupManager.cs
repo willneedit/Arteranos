@@ -30,7 +30,7 @@ namespace Arteranos.Services
 
             // Startup of dependent services...
             XR.XRControl.Instance.enabled = true;
-            GetComponent<AudioManager>().enabled = true;
+            AudioManager.Instance.enabled = true;
             GetComponent<MetaDataService>().enabled = true;
             NetworkStatus.Instance.enabled = true;
 

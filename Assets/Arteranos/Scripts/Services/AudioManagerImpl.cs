@@ -16,39 +16,80 @@ using UnityEngine.Audio;
 
 namespace Arteranos.Services
 {
-    public class AudioManager : MonoBehaviour
+    public class AudioManagerImpl : MonoBehaviour, IAudioManager
     {
-        public static ChatroomAgentV2 ChatroomAgent { get; private set; }
+        public ChatroomAgentV2 ChatroomAgent { get; private set; }
 
-        public static event Action<short> OnJoinedChatroom;
-        public static void JoinChatroom(object data = null) => ChatroomNetwork?.JoinChatroom(data);
-        public static void LeaveChatroom(object data = null) => ChatroomNetwork?.LeaveChatroom(data);
-        public static UVMicInput MicInput { get; private set; }
-        public static AudioMixerGroup MixerGroupVoice => mixer.FindMatchingGroups("Master/Voice")[0];
-        public static AudioMixerGroup MixerGroupEnv => mixer.FindMatchingGroups("Master/Environment")[0];
+        public event Action<short> OnJoinedChatroom;
+        public void JoinChatroom(object data = null) => ChatroomNetwork?.JoinChatroom(data);
+        public void LeaveChatroom(object data = null) => ChatroomNetwork?.LeaveChatroom(data);
+        public UVMicInput MicInput { get; private set; }
+        public AudioMixerGroup MixerGroupVoice => mixer.FindMatchingGroups("Master/Voice")[0];
+        public AudioMixerGroup MixerGroupEnv => mixer.FindMatchingGroups("Master/Environment")[0];
 
-        public static float VolumeMaster
+        public event Action<float[]> OnSampleReady 
+        {
+            add => MicInput.OnSampleReady += value;
+            remove => MicInput.OnSampleReady -= value;
+        }
+
+        public float VolumeMaster
         {
             get => GetVolume("Master");
             set => SetVolume("Master", value);
         }
-        public static float VolumeVoice
+        public float VolumeVoice
         {
             get => GetVolume("Voice");
             set => SetVolume("Voice", value);
         }
-        public static float VolumeEnv
+        public float VolumeEnv
         {
             get => GetVolume("Env");
             set => SetVolume("Env", value);
         }
+
+        public new bool enabled
+        { 
+            get => base.enabled;
+            set => base.enabled = value; 
+        }
+
+        public float MicGain
+        {
+            get => MicInput.Gain;
+            set => MicInput.Gain = value;
+        }
+
+        public int MicAGCLevel
+        {
+            get => micAGCLevel;
+            set
+            {
+                micAGCLevel = value;
+                MicInput.SetAGCLevel(value);
+            }
+        }
+
+        private int micAGCLevel;
 
         private bool serverActive = false;
         private IEnumerator cs_cr = null;
         private static AudioMixer mixer = null;
         private static IChatroomNetworkV2 ChatroomNetwork { get; set; }
 
-        private void Awake() => mixer = Resources.Load<AudioMixer>("Audio/AudioMixer");
+        private void Awake()
+        {
+            AudioManager.Instance = this;
+            mixer = Resources.Load<AudioMixer>("Audio/AudioMixer");
+        }
+
+        private void OnDestroy()
+        {
+            if(cs_cr != null)
+                StopCoroutine(cs_cr);
+            AudioManager.Instance = null;
+        }
 
         private void Start()
         {
@@ -70,15 +111,9 @@ namespace Arteranos.Services
             StartCoroutine(cs_cr);
         }
 
-        private void OnDestroy()
-        {
-            if(cs_cr != null)
-                StopCoroutine(cs_cr);
-        }
+        public void RenewMic() => UVMicInput.Renew(GetDeviceId(), 24000);
 
-        public static void RenewMic() => UVMicInput.Renew(GetDeviceId(), 24000);
-
-        public static int? GetDeviceId()
+        public int? GetDeviceId()
         {
             string device = SettingsManager.Client.AudioSettings.InputDevice;
             int? deviceId = Array.IndexOf(Microphone.devices, device);
@@ -93,7 +128,7 @@ namespace Arteranos.Services
             return val + 80.0f;
         }
 
-        public static void PullVolumeSettings()
+        public void PullVolumeSettings()
         {
             ClientAudioSettingsJSON audioSettings = SettingsManager.Client.AudioSettings;
             VolumeEnv = audioSettings.EnvVolume;
@@ -104,7 +139,7 @@ namespace Arteranos.Services
             MicInput.SetAGCLevel(audioSettings.AGCLevel);
         }
 
-        public static void PushVolumeSettings()
+        public void PushVolumeSettings()
         {
             ClientAudioSettingsJSON audioSettings = SettingsManager.Client.AudioSettings;
             audioSettings.MasterVolume = VolumeMaster;
