@@ -54,6 +54,7 @@ namespace Arteranos.Web
     public static class ConnectionManager
     {
         public static IConnectionManager Instance { get; set; }
+
         public static Task<bool> ConnectToServer(string serverURL) => Instance.ConnectToServer(serverURL);
         public static void StartHost() => Instance.StartHost();
         public static void StartServer() => Instance.StartServer();
@@ -63,6 +64,7 @@ namespace Arteranos.Web
     public static class ServerGallery
     {
         public static IServerGallery Instance { get; set; }
+
         public static void DeleteServerSettings(string url) => Instance.DeleteServerSettings(url);
         public static Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(string url, int timeout = 20)
             => Instance.DownloadServerMetadataAsync(url, timeout);
