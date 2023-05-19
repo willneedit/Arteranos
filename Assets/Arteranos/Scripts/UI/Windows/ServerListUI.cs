@@ -74,8 +74,11 @@ namespace Arteranos.UI
 
             foreach(string server in ServerList.Keys)
             {
-                RemainingServerList.Enqueue(server);
-                ServerList[server].InvalidateServerData();
+                if(ServerList[server] != null)
+                {
+                    RemainingServerList.Enqueue(server);
+                    ServerList[server].InvalidateServerData();
+                }
             }
 
             Debug.Log($"Reload started, queued {RemainingServerList.Count} servers");

@@ -53,7 +53,11 @@ namespace Arteranos.Web
                 ServerGallery.StoreServerSettings(serverURL, ssj);
             }
 
-            Uri serverURI = new(serverURL);
+            Uri serverURI = Utils.ProcessUriString(serverURL,
+                scheme: "http",
+                port: ServerSettingsJSON.DefaultMetadataPort,
+                path: ServerSettingsJSON.DefaultMetadataPath
+                );
 
             // FIXME Telepathy Transport specific.
             Uri connectionUri = new($"tcp4://{serverURI.Host}:{ssj.ServerPort}");
