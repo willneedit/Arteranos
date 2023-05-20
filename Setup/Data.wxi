@@ -2,8 +2,9 @@
 
 <?define manufacturer = "willneedit" ?>
 <?define product = "Arteranos" ?>
-<?define version = "0.2.0" ?>
 <?define UpgradeCode = "21E0EC5A-A999-45DB-8886-7C297DE0BECC" ?>
+
+<?include ..\build\WiXVersion.wxi ?>
 
 <Include xmlns='http://schemas.microsoft.com/wix/2006/wi'>
   

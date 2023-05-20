@@ -65,7 +65,22 @@ namespace Arteranos
             if(!Directory.Exists("Assets/Generated/Resources"))
                 AssetDatabase.CreateFolder("Assets/Generated", "Resources");
 
-            AssetDatabase.CreateAsset(textAsset, "Assets/Generated/Resources/Version.asset");
+            textAsset = new();
+
+            string WiXFileText =
+@"<?xml version='1.0' encoding='utf-8' ?>
+
+<?define version = """+ version.MMPB + @""" ?>
+<?define fullversion = """+ version.Full + @""" ?>
+
+<Include xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+  
+</Include>
+";
+            if(!Directory.Exists("build"))
+                Directory.CreateDirectory("build");
+
+            File.WriteAllText("build/WiXVersion.wxi",WiXFileText);
         }
 
         // public static string appName = Application.productName;
