@@ -65,6 +65,8 @@ namespace Arteranos
             if(!Directory.Exists("Assets/Generated/Resources"))
                 AssetDatabase.CreateFolder("Assets/Generated", "Resources");
 
+            AssetDatabase.CreateAsset(textAsset, "Assets/Generated/Resources/Version.asset");
+
             textAsset = new();
 
             string WiXFileText =
