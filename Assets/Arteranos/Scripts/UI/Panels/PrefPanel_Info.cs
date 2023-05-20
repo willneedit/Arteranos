@@ -29,7 +29,9 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            lbl_Version.text = Application.version;
+            Core.Version v = Core.Version.Load();
+
+            lbl_Version.text = v.Full;
             lbl_DeviceName.text = SystemInfo.deviceName;
             lbl_DeviceType.text = SystemInfo.deviceType.ToString();
             lbl_GraphicsDevice.text = SystemInfo.graphicsDeviceName;

@@ -405,4 +405,21 @@ namespace Arteranos.Core
         public static WorldMetaData Deserialize(string json) => JsonConvert.DeserializeObject<WorldMetaData>(json);
     }
 
+    public class Version
+    {
+        public string MMP = "0.0.0";    // Major, minor, patch
+        public string MMPB = "0.0.0.0"; // Major, minor, patch, buld
+        public string B = "0";          // build
+        public string Hash = "0000000"; // Abbreviated commit hash
+        public string Tag = "";         // Optional tag
+        public string Full = "unknown"; // Full version string
+
+        public static Version Load()
+        {
+            TextAsset ta = Resources.Load<TextAsset>("Version");
+            if(ta == null)
+                return new();
+            return JsonConvert.DeserializeObject<Version>(ta.text);
+        }
+    }
 }
