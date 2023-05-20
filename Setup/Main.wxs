@@ -1,9 +1,6 @@
 <?xml version='1.0' encoding='utf-8' ?>
 
-<?define manufacturer = "willneedit" ?>
-<?define product = "Arteranos" ?>
-<?define version = "0.2.0" ?>
-<?define UpgradeCode = "21E0EC5A-A999-45DB-8886-7C297DE0BECC" ?>
+<?include ..\Setup\Data.wxi ?>
 
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
   <Product Name='$(var.product)' Manufacturer='$(var.manufacturer)'
