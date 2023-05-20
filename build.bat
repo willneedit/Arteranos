@@ -35,4 +35,9 @@ move Win64\Arteranos.exe .
 
 move Arteranos.exe Win64
 
+"%wix%"\bin\candle.exe -ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension ..\Setup\MainBurn.wxs
+
+"%wix%"\bin\light.exe -ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension MainBurn.wixobj -o Arteranos
+
+
 cd ..

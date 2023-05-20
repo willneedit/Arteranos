@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<?define manufacturer = "willneedit" ?>
+<?define product = "Arteranos" ?>
+<?define version = "0.2.0" ?>
+<?define UpgradeCode = "21E0EC5A-A999-45DB-8886-7C297DE0BECC" ?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:bal="http://schemas.microsoft.com/wix/BalExtension"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <Bundle Name="$(var.product)" Version="$(var.version)" Manufacturer="$(var.manufacturer)"
+          UpgradeCode="$(var.UpgradeCode)"
+          Copyright="Copyright © 2023 $(var.manufacturer)" IconSourceFile="..\Setup\Arteranos.ico">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLargeLicense">
+      <bal:WixStandardBootstrapperApplication
+        LicenseFile="..\Setup\Setuplicense.rtf"
+        ShowVersion="yes"
+        LogoFile="..\Setup\Arteranos-Logo.png"
+        />
+    </BootstrapperApplicationRef>
+
+    <Chain>
+      <MsiPackage Id="MainPackage" SourceFile="Arteranos.msi" DisplayInternalUI="no" Compressed="yes" Vital="yes" />
+    </Chain>
+  </Bundle>
+</Wix>
