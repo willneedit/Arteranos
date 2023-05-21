@@ -22,33 +22,30 @@
       "hash": "a7f502e4bba2416411c64b1160dc01d53da75fcd"
     },
     "com.readyplayerme.avatarloader": {
-      "version": "https://github.com/readyplayerme/Unity-Avatar-Loader.git#v1.0.0",
+      "version": "file:rpm-unity-sdk-avatar-loader",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
         "com.unity.ugui": "1.0.0",
         "com.unity.nuget.newtonsoft-json": "3.0.2"
-      },
-      "hash": "64b065ec8f8f9c0c3fca78f11342172d985be434"
+      }
     },
     "com.readyplayerme.core": {
-      "version": "https://github.com/readyplayerme/Unity-core.git",
+      "version": "file:rpm-unity-sdk-core",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2"
-      },
-      "hash": "4bccdb4898db9ffa2037bd34b6588f4222f56069"
+      }
     },
     "com.readyplayerme.webview": {
-      "version": "https://github.com/readyplayerme/Unity-WebView.git#v1.0.0",
+      "version": "file:rpm-unity-sdk-webview",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
         "com.unity.ugui": "1.0.0",
         "com.unity.nuget.newtonsoft-json": "3.0.2"
-      },
-      "hash": "3aeabe72aaa7de09f8525cda8d47e310a2b450fe"
+      }
     },
     "com.unity.2d.animation": {
       "version": "7.0.9",
@@ -135,13 +132,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.unity.assetbundlebrowser": {
-      "version": "https://github.com/Unity-Technologies/AssetBundles-Browser.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "ad2a81ec3068eafd48753df1825a8dd7201ce60c"
-    },
     "com.unity.burst": {
       "version": "1.7.3",
       "depth": 1,
@@ -169,7 +159,7 @@
     },
     "com.unity.ext.nunit": {
       "version": "1.0.6",
-      "depth": 1,
+      "depth": 2,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -302,7 +292,7 @@
     },
     "com.unity.test-framework": {
       "version": "1.1.31",
-      "depth": 0,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.ext.nunit": "1.0.6",

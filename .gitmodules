@@ -1,3 +1,12 @@
 [submodule "Assets/Arteranos-keys"]
 	path = Assets/Arteranos-keys
 	url = git@github.com:willneedit/Arteranos-keys.git
+[submodule "Packages/rpm-unity-sdk-avatar-loader"]
+	path = Packages/rpm-unity-sdk-avatar-loader
+	url = https://github.com/willneedit/rpm-unity-sdk-avatar-loader.git
+[submodule "Packages/rpm-unity-sdk-core"]
+	path = Packages/rpm-unity-sdk-core
+	url = https://github.com/willneedit/rpm-unity-sdk-core.git
+[submodule "Packages/rpm-unity-sdk-webview"]
+	path = Packages/rpm-unity-sdk-webview
+	url = https://github.com/willneedit/rpm-unity-sdk-webview.git
