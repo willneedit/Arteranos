@@ -28,7 +28,7 @@ namespace Arteranos.Avatar
         private bool loading = false;
 
         private GameObject m_AvatarGameObject = null;
-        private AvatarObjectLoader_mod m_AvatarLoader = null;
+        private AvatarObjectLoader m_AvatarLoader = null;
 
         public Transform LeftHand { get; private set; }
         public Transform RightHand { get; private set; }
@@ -52,7 +52,7 @@ namespace Arteranos.Avatar
 
             if(serverSettings.ShowAvatars || !isServer || isLocalPlayer)
             {
-                m_AvatarLoader = new AvatarObjectLoader_mod();
+                m_AvatarLoader = new AvatarObjectLoader();
                 // m_AvatarLoader.SaveInProjectFolder = true;
                 m_AvatarLoader.OnCompleted += AvatarLoadComplete;
                 m_AvatarLoader.OnFailed += AvatarLoadFailed;
