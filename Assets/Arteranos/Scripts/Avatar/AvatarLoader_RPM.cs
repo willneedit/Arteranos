@@ -24,7 +24,7 @@ namespace Arteranos.Avatar
     [RequireComponent(typeof(AvatarBrain))]
     public class AvatarLoader_RPM : NetworkBehaviour, IAvatarLoader
     {
-        public GameObject m_AvatarStandin = null;
+        private GameObject m_AvatarStandin = null;
         private bool loading = false;
 
         private GameObject m_AvatarGameObject = null;
@@ -41,6 +41,8 @@ namespace Arteranos.Avatar
         public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
 
+
+        private void Awake() => m_AvatarStandin = Resources.Load<GameObject>("Avatar/Avatar_StandIn");
 
         public override void OnStartClient()
         {
