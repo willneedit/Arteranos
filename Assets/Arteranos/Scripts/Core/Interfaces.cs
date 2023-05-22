@@ -300,7 +300,7 @@ namespace Arteranos.XR
     #region XR interfaces
     public interface IXRControl
     {
-        // XROrigin CurrentVRRig { get; }
+        GameObject Me { get; set; }
         Vector3 CameraLocalOffset { get; }
         bool UsingXR { get; }
         bool enabled { get; set; }
@@ -320,9 +320,15 @@ namespace Arteranos.XR
     #endregion
     // -------------------------------------------------------------------
     #region XR helpers
-    public class XRControl
+    public static class XRControl
     {
         public static IXRControl Instance { get; set; }
+
+        public static GameObject Me
+        {
+            get => Instance.Me;
+            set => Instance.Me = value;
+        }
     }
     #endregion
     // -------------------------------------------------------------------

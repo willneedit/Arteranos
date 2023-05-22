@@ -16,22 +16,19 @@ namespace Arteranos.XR
 {
     public class XRControlImpl : MonoBehaviour, IXRControl
     {
-        public XROrigin CurrentVRRig { get; private set; }
-
-        public event Action<bool> XRSwitchEvent;
-        public bool UsingXR { get; private set; }
-        public Vector3 CameraLocalOffset { get; private set; }
-
         public XROrigin VRRig;
         public XROrigin NoVRRig;
 
+        public GameObject Me { get; set; }
+        public bool UsingXR { get; private set; }
+        public Vector3 CameraLocalOffset { get; private set; }
         public float EyeHeight { get; set; } = 1.75f;
         public float BodyHeight { get; set; } = 1.85f;
-
+        public event Action<bool> XRSwitchEvent;
 
         public Vector3 heightAdjustment => CurrentVRRig.Origin.transform.up * CurrentVRRig.CameraInOriginSpaceHeight;
 
-
+        private XROrigin CurrentVRRig { get; set; }
         private bool VRRunning = false;
 
         public new bool enabled

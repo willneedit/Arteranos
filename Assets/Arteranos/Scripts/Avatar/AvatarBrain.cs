@@ -10,6 +10,7 @@ using Arteranos.Audio;
 using System;
 using Arteranos.Web;
 using Arteranos.UI;
+using Arteranos.XR;
 
 namespace Arteranos.Avatar
 {
@@ -132,6 +133,9 @@ namespace Arteranos.Avatar
 
             if(isOwned)
             {
+                // That's me, set aside from the unwashed crowd. :)
+                XRControl.Me = gameObject;
+
                 // Using directly from Client Settings, because the UserID derived from UserHash hasn't
                 // done the full round trip from the server propagation.
                 RegisterUser(cs.UserID);
@@ -157,6 +161,8 @@ namespace Arteranos.Avatar
 
         public override void OnStopClient()
         {
+            XRControl.Me = null;
+
             DeinitializeVoice();
 
             SettingsManager.Server.OnWorldURLChanged -= CommitWorldChanged;
