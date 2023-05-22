@@ -13,11 +13,19 @@ namespace ReadyPlayerMe
         private void OnEnable()
         {
             avatarCreatorStateMachine.AvatarSaved += OnAvatarSaved;
+            avatarCreatorStateMachine.AvatarCreatorBackedOut += OnAvatarCancelled;
         }
 
         private void OnDisable()
         {
             avatarCreatorStateMachine.AvatarSaved -= OnAvatarSaved;
+            avatarCreatorStateMachine.AvatarCreatorBackedOut -= OnAvatarCancelled;
+        }
+
+        private void OnAvatarCancelled()
+        {
+            avatarCreatorStateMachine.gameObject.SetActive(false);
+            Debug.Log("Avatar creation cancelled.");
         }
 
         private void OnAvatarSaved(string avatarId)

@@ -14,6 +14,8 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 
+#pragma warning disable IDE1006 // Because Unity's more relaxed naming convention
+
 namespace Arteranos.Services
 {
     // -------------------------------------------------------------------

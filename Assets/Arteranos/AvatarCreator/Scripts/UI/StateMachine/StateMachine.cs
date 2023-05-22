@@ -55,6 +55,14 @@ namespace ReadyPlayerMe
         {
             var previousState = currentState; 
             stateTypeMap[previousState].gameObject.SetActive(false);
+
+            // Backing out to before of the beginning.
+            if(previousStates.Count == 0)
+            {
+                StateChanged?.Invoke(StateType.None, currentState);
+                return;
+            }
+
             currentState = previousStates.Pop();
             if (currentState != StateType.None)
             {

@@ -17,6 +17,7 @@ namespace ReadyPlayerMe
         [SerializeField] private ProfileManager profileManager;
 
         public Action<string> AvatarSaved;
+        public Action AvatarCreatorBackedOut;
 
         private void Start()
         {
@@ -72,7 +73,12 @@ namespace ReadyPlayerMe
 
         private void OnStateChanged(StateType current, StateType previous)
         {
-            backButton.gameObject.SetActive(!CanShowBackButton(current));
+            backButton.gameObject.SetActive(CanShowBackButton(current));
+
+            if (current == StateType.None)
+            {
+                AvatarCreatorBackedOut?.Invoke();
+            }
 
             if (current == StateType.End)
             {
@@ -82,7 +88,8 @@ namespace ReadyPlayerMe
 
         private bool CanShowBackButton(StateType current)
         {
-            return current == StateType.BodyTypeSelection || current == StateType.GenderSelection;
+            return true;
+            // return current != StateType.BodyTypeSelection && current != StateType.GenderSelection;
         } 
     }
 }
