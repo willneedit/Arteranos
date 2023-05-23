@@ -18,6 +18,7 @@ namespace Arteranos.UI
         public TMP_Text tro_UserID = null;
         public TMP_InputField txt_AvatarURL = null;
         public TMP_Text tro_AvatarProvider = null;
+        public Button btn_CreateAvatar = null;
         public Button btn_AvatarGallery = null;
 
         private readonly Dictionary<string, Visibility> statusNames = new();
@@ -50,8 +51,13 @@ namespace Arteranos.UI
             txt_Nickname.onValueChanged.AddListener(OnNicknameChanged);
             txt_AvatarURL.onValueChanged.AddListener(OnAvatarURLChanged);
 
-            btn_AvatarGallery.GetComponentInChildren<TextMeshProUGUI>().text = "-->";
+            btn_CreateAvatar.onClick.AddListener(OnCreateAvatarClicked);
+        }
 
+        private void OnCreateAvatarClicked()
+        {
+            SysMenuKind.CloseSystemMenus();
+            CreateAvatarUIFactory.New();
         }
 
         // Using OnEnable() instead Start() because of the need to update the UserID from

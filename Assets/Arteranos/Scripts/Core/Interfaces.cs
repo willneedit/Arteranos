@@ -270,6 +270,11 @@ namespace Arteranos.UI
         event Action<Context> Completed;
         event Action<Exception, Context> Faulted;
     }
+
+    public interface ICreateAvatarUI
+    {
+
+    }
     #endregion
     // -------------------------------------------------------------------
     #region UI factories
@@ -285,11 +290,19 @@ namespace Arteranos.UI
 
     public class ProgressUIFactory : UIBehaviour
     {
-
         public static IProgressUI New()
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_Progress"));
             return go.GetComponent<IProgressUI>();
+        }
+    }
+
+    public class CreateAvatarUIFactory : UIBehaviour
+    {
+        public static ICreateAvatarUI New() 
+        {
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_CreateAvatar"));
+            return go.GetComponent<ICreateAvatarUI>();
         }
     }
     #endregion

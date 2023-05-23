@@ -4840,7 +4840,6 @@ MonoBehaviour:
   backButton: {fileID: 2718963718300713553}
   loadingManager: {fileID: 2718963718566458288}
   startingState: 4
-  avatarCreatorData: {fileID: 11400000, guid: b641399742edb414380c1d690dbd37df, type: 2}
   profileManager: {fileID: 2718963718461235622}
 --- !u!114 &2718963718461235622
 MonoBehaviour:
@@ -9662,6 +9661,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2718963719019625115}
   - component: {fileID: 2718963719019625114}
+  - component: {fileID: 3157867020096601397}
   m_Layer: 0
   m_Name: UI_CreateAvatar
   m_TagString: Untagged
@@ -9699,6 +9699,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: Avatar Creator
+--- !u!114 &3157867020096601397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2718963719019625112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1fddcaa38fac7645a51796639308be2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  avatarCreatorStateMachine: {fileID: 2718963718461235625}
 --- !u!1 &2718963719022637441
 GameObject:
   m_ObjectHideFlags: 0
@@ -10126,6 +10139,7 @@ GameObject:
   - component: {fileID: 2718963719047096298}
   - component: {fileID: 2718963719047096299}
   - component: {fileID: 2718963719047096296}
+  - component: {fileID: 1997855365042952305}
   m_Layer: 5
   m_Name: AvatarCreatorCanvas
   m_TagString: Untagged
@@ -10205,7 +10219,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2718963719047096297}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
   m_Name: 
@@ -10215,6 +10229,25 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &1997855365042952305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2718963719047096297}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7951c64acb0fa62458bf30a60089fe2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 0
+  m_CheckFor2DOcclusion: 0
+  m_CheckFor3DOcclusion: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RaycastTriggerInteraction: 1
 --- !u!1 &2718963719096349124
 GameObject:
   m_ObjectHideFlags: 0
@@ -16967,7 +17000,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2718963719887429269
 Transform:
   m_ObjectHideFlags: 0
