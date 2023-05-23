@@ -1,10 +1,8 @@
 ﻿using ReadyPlayerMe.AvatarCreator;
-using UnityEngine;
 
 namespace ReadyPlayerMe
 {
-    [CreateAssetMenu(fileName = "AvatarCreatorData", menuName = "Ready Player Me/Avatar Creator Data", order = 1)]
-    public class AvatarCreatorData : ScriptableObject
+    public class AvatarCreatorData
     {
         public AvatarProperties AvatarProperties;
         

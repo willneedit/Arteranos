@@ -13,7 +13,7 @@ namespace ReadyPlayerMe
         [SerializeField] private Button backButton;
         [SerializeField] private LoadingManager loadingManager;
         [SerializeField] private StateType startingState;
-        [SerializeField] public  AvatarCreatorData avatarCreatorData;
+                         private AvatarCreatorData avatarCreatorData = new();
         [SerializeField] private ProfileManager profileManager;
 
         public Action<string> AvatarSaved;
