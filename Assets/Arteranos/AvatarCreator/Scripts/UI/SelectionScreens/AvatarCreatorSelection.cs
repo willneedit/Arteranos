@@ -23,7 +23,8 @@ namespace ReadyPlayerMe
         private PartnerAssetsManager partnerAssetManager;
         private AvatarManager avatarManager;
         private GameObject currentAvatar;
-        private Quaternion lastRotation;
+        private Vector3 lastPosition = Vector3.zero;
+
         private CancellationTokenSource ctxSource;
 
         public override StateType StateType => StateType.Editor;
@@ -196,7 +197,7 @@ namespace ReadyPlayerMe
             };
 
             payload.Assets.Add(assetType, assetId);
-            lastRotation = currentAvatar.transform.rotation;
+            lastPosition = currentAvatar.transform.localPosition;
             LoadingManager.EnableLoading(UPDATING_YOUR_AVATAR_LOADING_TEXT, LoadingManager.LoadingType.Popup);
             var avatar = await avatarManager.UpdateAsset(assetType, assetId);
             if (avatar == null)
@@ -215,7 +216,10 @@ namespace ReadyPlayerMe
             avatar.GetComponent<Animator>().runtimeAnimatorController = animator;
             Transform rootTransform = FindObjectOfType<AvatarCreatorStateMachine>().transform;
             avatar.transform.SetParent(rootTransform, false);
-            avatar.transform.SetLocalPositionAndRotation(new Vector3(0, -0.3f, 0), Quaternion.Euler(0, 180, 0));
+            avatar.transform.SetLocalPositionAndRotation(lastPosition, Quaternion.Euler(0, 180, 0));
+
+            CreatedAvatarAnimator objectAnimator = FindObjectOfType<CreatedAvatarAnimator>();
+            objectAnimator.target = avatar.transform;
 
             //avatar.transform.rotation = lastRotation;
             //avatar.AddComponent<RotateAvatar>();

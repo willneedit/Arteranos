@@ -38,15 +38,17 @@ namespace ReadyPlayerMe
 
         private Dictionary<AssetType, AssetTypeButton> assetTypeButtonsMap;
         private AssetTypeButton selectedAssetTypeButton;
+        private CreatedAvatarAnimator AvatarAnimator;
 
         private void Awake()
         {
-
+            AvatarAnimator = FindObjectOfType<CreatedAvatarAnimator>();
         }
 
 
         public void CreateUI(IEnumerable<AssetType> assetTypes)
         {
+            AvatarAnimator.AnimateTo(0);
 
             assetTypeButtonsMap = new Dictionary<AssetType, AssetTypeButton>();
             PanelSwitcher.FaceTypePanel = faceAssetTypePanel;
@@ -86,8 +88,9 @@ namespace ReadyPlayerMe
         public void ResetUI()
         {
             PanelSwitcher.Clear();
+            AvatarAnimator.AnimateTo(0);
 
-            foreach (var assetTypeButton in assetTypeButtonsMap)
+            foreach(var assetTypeButton in assetTypeButtonsMap)
             {
                 Destroy(assetTypeButton.Value.gameObject);
             }
@@ -118,6 +121,7 @@ namespace ReadyPlayerMe
 
             assetTypeButton.AddListener(() =>
             {
+                SwitchZoomByAssetType(assetType);
                 assetTypeButton.SetSelect(true);
                 selectedAssetTypeButton.SetSelect(false);
                 faceAssetTypeButton.SetSelect(assetType.IsFaceAsset());
@@ -135,5 +139,12 @@ namespace ReadyPlayerMe
             selectedAssetTypeButton = assetTypeButtonsMap[AssetType.FaceShape];
         }
 
+        private void SwitchZoomByAssetType(AssetType assetType)
+        {
+                if(assetType == AssetType.Outfit)
+                    AvatarAnimator.AnimateTo(0); 
+                else
+                    AvatarAnimator.AnimateTo(1);
+        }
     }
 }

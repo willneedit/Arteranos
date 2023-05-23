@@ -16,6 +16,7 @@ using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.IO;
+using System.Threading;
 
 namespace Arteranos.ExtensionMethods
 {
@@ -109,6 +110,42 @@ namespace Arteranos.Core
             if(setting == null) return 1;
 
             return !setting != user ? 5 : 0;
+        }
+    }
+
+    public static class TransformExtensions
+    {
+        // public static CancellationTokenSource ctx = null;
+
+        public static async Task LerpTransform(this Transform transform,
+            Transform targetTransform, float duration, CancellationToken token)
+        {
+            // ctx?.Cancel();
+            // ctx = new CancellationTokenSource();
+
+            float time = 0f;
+            Vector3 startPosition = transform.localPosition;
+            Quaternion startRotation = transform.localRotation;
+            Vector3 startScale = transform.localScale;
+
+            while(time < duration && !token.IsCancellationRequested)
+            {
+                float t = time / duration;
+
+                t = 0.5f - (float) Mathf.Cos(t * Mathf.PI) * 0.5f;
+                transform.localPosition = Vector3.Lerp(startPosition, targetTransform.localPosition, t);
+                transform.localRotation = Quaternion.Lerp(startRotation, targetTransform.localRotation, t);
+                transform.localScale = Vector3.Lerp(startScale, targetTransform.localScale, t);
+                time += Time.deltaTime;
+                await Task.Yield();
+            }
+
+            if(!token.IsCancellationRequested)
+            {
+                transform.localPosition = targetTransform.localPosition;
+                transform.localRotation = targetTransform.localRotation;
+                transform.localScale = targetTransform.localScale;
+            }
         }
     }
 
