@@ -39,19 +39,14 @@ namespace ReadyPlayerMe
         private Dictionary<AssetType, AssetTypeButton> assetTypeButtonsMap;
         private AssetTypeButton selectedAssetTypeButton;
 
-        private CameraZoom cameraZoom;
-        private BodyType bodyType;
-
         private void Awake()
         {
-            cameraZoom = FindObjectOfType<CameraZoom>();
+
         }
 
 
-        public void CreateUI(BodyType bodyType, IEnumerable<AssetType> assetTypes)
+        public void CreateUI(IEnumerable<AssetType> assetTypes)
         {
-            this.bodyType = bodyType;
-            DefaultZoom();
 
             assetTypeButtonsMap = new Dictionary<AssetType, AssetTypeButton>();
             PanelSwitcher.FaceTypePanel = faceAssetTypePanel;
@@ -91,7 +86,6 @@ namespace ReadyPlayerMe
         public void ResetUI()
         {
             PanelSwitcher.Clear();
-            DefaultZoom();
 
             foreach (var assetTypeButton in assetTypeButtonsMap)
             {
@@ -124,7 +118,6 @@ namespace ReadyPlayerMe
 
             assetTypeButton.AddListener(() =>
             {
-                SwitchZoomByAssetType(assetType);
                 assetTypeButton.SetSelect(true);
                 selectedAssetTypeButton.SetSelect(false);
                 faceAssetTypeButton.SetSelect(assetType.IsFaceAsset());
@@ -142,31 +135,5 @@ namespace ReadyPlayerMe
             selectedAssetTypeButton = assetTypeButtonsMap[AssetType.FaceShape];
         }
 
-        private void DefaultZoom()
-        {
-            if (bodyType == BodyType.HalfBody)
-            {
-                cameraZoom.MoveToHalfBody();
-            }
-            else
-            {
-                cameraZoom.MoveToFar();
-            }
-        }
-
-        private void SwitchZoomByAssetType(AssetType assetType)
-        {
-            if (bodyType != BodyType.HalfBody)
-            {
-                if (assetType == AssetType.Outfit)
-                {
-                    cameraZoom.MoveToFar();
-                }
-                else
-                {
-                    cameraZoom.MoveToNear();
-                }
-            }
-        }
     }
 }

@@ -13,7 +13,7 @@ namespace ReadyPlayerMe
         [SerializeField] private Button backButton;
         [SerializeField] private LoadingManager loadingManager;
         [SerializeField] private StateType startingState;
-        [SerializeField] public AvatarCreatorData avatarCreatorData;
+        [SerializeField] public  AvatarCreatorData avatarCreatorData;
         [SerializeField] private ProfileManager profileManager;
 
         public Action<string> AvatarSaved;
@@ -21,6 +21,8 @@ namespace ReadyPlayerMe
 
         private void Start()
         {
+            avatarCreatorData.AvatarProperties.BodyType = AvatarLoader.BodyType.FullBody;
+            avatarCreatorData.AvatarProperties.Gender = AvatarLoader.OutfitGender.None;
             avatarCreatorData.AvatarProperties.Partner = CoreSettingsHandler.CoreSettings.Subdomain;
             Initialize();
             

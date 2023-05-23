@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ReadyPlayerMe.AvatarCreator;
@@ -150,17 +151,15 @@ namespace ReadyPlayerMe
                 Debug.Log(e);
             }
 
-            if (colors == null)
-            {
-                return;
-            }
+            if (colors == null) return;
+
             assetButtonCreator.CreateColorUI(colors, UpdateAvatar);
             DebugPanel.AddLogWithDuration("All colors loaded", Time.time - startTime);
         }
 
         private void CreateUI(BodyType bodyType, Dictionary<string, AssetType> assets)
         {
-            assetTypeUICreator.CreateUI(bodyType, AssetTypeHelper.GetAssetTypeList(bodyType));
+            assetTypeUICreator.CreateUI(AssetTypeHelper.GetAssetTypeList(bodyType));
             assetButtonCreator.CreateAssetButtons(assets, UpdateAvatar);
             assetButtonCreator.CreateClearButton(UpdateAvatar);
             saveButton.gameObject.SetActive(true);
@@ -213,12 +212,13 @@ namespace ReadyPlayerMe
 
         private void ProcessAvatar(GameObject avatar)
         {
-            if (AvatarCreatorData.AvatarProperties.BodyType == BodyType.FullBody)
-            {
-                avatar.GetComponent<Animator>().runtimeAnimatorController = animator;
-            }
-            avatar.transform.rotation = lastRotation;
-            avatar.AddComponent<RotateAvatar>();
+            avatar.GetComponent<Animator>().runtimeAnimatorController = animator;
+            Transform rootTransform = FindObjectOfType<AvatarCreatorStateMachine>().transform;
+            avatar.transform.SetParent(rootTransform, false);
+            avatar.transform.SetLocalPositionAndRotation(new Vector3(0, -0.3f, 0), Quaternion.Euler(0, 180, 0));
+
+            //avatar.transform.rotation = lastRotation;
+            //avatar.AddComponent<RotateAvatar>();
         }
 
         public void Dispose()

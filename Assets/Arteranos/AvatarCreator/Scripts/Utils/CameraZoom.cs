@@ -5,7 +5,6 @@ namespace ReadyPlayerMe
 {
     public class CameraZoom : MonoBehaviour
     {
-        [SerializeField] private Transform cameraTransform;
         [SerializeField] private Transform nearTransform;
         [SerializeField] private Transform halfBodyTransform;
         [SerializeField] private Transform farTransform;
@@ -22,19 +21,19 @@ namespace ReadyPlayerMe
         {
             ctx?.Cancel();
             ctx = new CancellationTokenSource();
-            _ = cameraTransform.LerpPosition(nearTransform.position, defaultDuration, ctx.Token);
+            _ = Camera.main.transform.LerpPosition(nearTransform.position, defaultDuration, ctx.Token);
         }
 
         public void MoveToFar()
         {
             ctx?.Cancel();
             ctx = new CancellationTokenSource();
-            _ = cameraTransform.LerpPosition(farTransform.position, defaultDuration, ctx.Token);
+            _ = Camera.main.transform.LerpPosition(farTransform.position, defaultDuration, ctx.Token);
         }
 
         public void MoveToHalfBody()
         {
-            cameraTransform.position = halfBodyTransform.transform.position;
+            Camera.main.transform.position = halfBodyTransform.transform.position;
         }
     }
 }

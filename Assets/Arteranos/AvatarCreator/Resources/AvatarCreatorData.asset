@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AvatarCreatorData
   m_EditorClassIdentifier: 
   AvatarProperties:
-    Id: 646b53cec12b1f5fef10c671
+    Id: 646c5f2f0597991143cdf636
     Partner: demo
     Gender: 1
     BodyType: 1
