@@ -9,12 +9,17 @@ namespace ReadyPlayerMe
 {
     public class AvatarCreatorStateMachine : StateMachine
     {
-        [SerializeField] private List<State> states;
-        [SerializeField] private Button backButton;
-        [SerializeField] private LoadingManager loadingManager;
-        [SerializeField] private StateType startingState;
-                         private AvatarCreatorData avatarCreatorData = new();
-        [SerializeField] private ProfileManager profileManager;
+        [SerializeField] 
+        private List<State> states;
+        [SerializeField] 
+        private Button backButton;
+        [SerializeField] 
+        private LoadingManager loadingManager;
+        [SerializeField] 
+        private StateType startingState;
+        private readonly AvatarCreatorData avatarCreatorData = new();
+        [SerializeField]
+        private ProfileManager profileManager;
 
         public Action<string> AvatarSaved;
         public Action AvatarCreatorBackedOut;
@@ -46,11 +51,8 @@ namespace ReadyPlayerMe
             AuthManager.OnSessionRefreshed -= OnSessionRefreshed;
             backButton.onClick.RemoveListener(Back);
         }
-        
-        private void OnSignedIn(UserSession userSession)
-        {
-            profileManager.SaveSession(userSession);
-        }
+
+        private void OnSignedIn(UserSession userSession) => profileManager.SaveSession(userSession);
 
         private void OnSignedOut()
         {
@@ -58,18 +60,14 @@ namespace ReadyPlayerMe
             SetState(StateType.LoginWithCodeFromEmail);
             ClearPreviousStates();
         }
-        
-        private void OnSessionRefreshed(UserSession userSession)
-        {
-            profileManager.SaveSession(userSession);
-        }
+
+        private void OnSessionRefreshed(UserSession userSession) => profileManager.SaveSession(userSession);
 
         private void Initialize()
         {
-            foreach (var state in states)
-            {
+            foreach (State state in states)
                 state.Initialize(this, avatarCreatorData, loadingManager);
-            }
+
             base.Initialize(states);
         }
 
@@ -78,20 +76,12 @@ namespace ReadyPlayerMe
             backButton.gameObject.SetActive(CanShowBackButton(current));
 
             if (current == StateType.None)
-            {
                 AvatarCreatorBackedOut?.Invoke();
-            }
 
             if (current == StateType.End)
-            {
                 AvatarSaved?.Invoke(avatarCreatorData.AvatarProperties.Id);
-            }
         }
 
-        private bool CanShowBackButton(StateType current)
-        {
-            return true;
-            // return current != StateType.BodyTypeSelection && current != StateType.GenderSelection;
-        } 
+        private bool CanShowBackButton(StateType current) => current != StateType.GenderSelection;
     }
 }
