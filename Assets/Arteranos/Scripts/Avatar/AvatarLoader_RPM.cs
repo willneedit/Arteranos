@@ -30,6 +30,9 @@ namespace Arteranos.Avatar
         // Non-null: manually load a puppet avatar on init
         public string GalleryModeURL = null;
 
+        // Animate the avatar in the gallery mode
+        public RuntimeAnimatorController animator = null;
+
         public Transform LeftHand { get; private set; }
         public Transform RightHand { get; private set; }
         public Transform LeftFoot { get; private set; }
@@ -281,6 +284,13 @@ namespace Arteranos.Avatar
 
             if(string.IsNullOrEmpty(GalleryModeURL))
                 SetupAvatar(args);
+            else if(animator != null)
+            {
+                args.Avatar.GetComponent<Animator>().runtimeAnimatorController = animator;
+
+                EyeAnimationHandler eah = args.Avatar.AddComponent<EyeAnimationHandler>();
+                eah.BlinkInterval = 6; // 3 seconds is a little bit too fast.
+            }
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)
