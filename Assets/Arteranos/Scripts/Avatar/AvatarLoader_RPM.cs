@@ -19,16 +19,16 @@ using Arteranos.XR;
 
 namespace Arteranos.Avatar
 {
-    [RequireComponent(typeof(AvatarPoseDriver))]
-    [RequireComponent(typeof(NetworkIdentity))]
-    [RequireComponent(typeof(AvatarBrain))]
-    public class AvatarLoader_RPM : NetworkBehaviour, IAvatarLoader
+    public class AvatarLoader_RPM : MonoBehaviour, IAvatarLoader
     {
         private GameObject m_AvatarStandin = null;
         private bool loading = false;
 
         private GameObject m_AvatarGameObject = null;
         private AvatarObjectLoader m_AvatarLoader = null;
+
+        // Non-null: manually load a puppet avatar on init
+        public string GalleryModeURL = null;
 
         public Transform LeftHand { get; private set; }
         public Transform RightHand { get; private set; }
@@ -41,43 +41,33 @@ namespace Arteranos.Avatar
         public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
 
+        private AvatarBrain avatarBrain = null;
 
         private void Awake() => m_AvatarStandin = Resources.Load<GameObject>("Avatar/Avatar_StandIn");
 
-        public override void OnStartClient()
+        public void OnEnable()
         {
-            base.OnStartClient();
+            m_AvatarLoader = new AvatarObjectLoader();
+            // m_AvatarLoader.SaveInProjectFolder = true;
+            m_AvatarLoader.OnCompleted += AvatarLoadComplete;
+            m_AvatarLoader.OnFailed += AvatarLoadFailed;
 
-            name += "_" + netIdentity.netId;
+            m_AvatarGameObject = Instantiate(m_AvatarStandin);
+            m_AvatarGameObject.transform.SetParent(transform, false);
 
-            Core.ServerSettings serverSettings = Core.SettingsManager.Server;
-
-            if(serverSettings.ShowAvatars || !isServer || isLocalPlayer)
+            if(!string.IsNullOrEmpty(GalleryModeURL))
+                RequestAvatarChange(GalleryModeURL);
+            else
             {
-                m_AvatarLoader = new AvatarObjectLoader();
-                // m_AvatarLoader.SaveInProjectFolder = true;
-                m_AvatarLoader.OnCompleted += AvatarLoadComplete;
-                m_AvatarLoader.OnFailed += AvatarLoadFailed;
-                GetComponent<AvatarBrain>().OnAvatarChanged += RequestAvatarChange;
-
-                // The late-joining client's companions, or the newly joined clients.
-                if(isOwned)
-                {
-                    string url = GetComponent<AvatarBrain>().AvatarURL;
-                    // FIXME: Burst mitigation
-                    RequestAvatarChange(url);
-                }
+                avatarBrain = GetComponent<AvatarBrain>();
+                avatarBrain.OnAvatarChanged += RequestAvatarChange;
             }
-
-            m_AvatarGameObject = Instantiate(m_AvatarStandin, transform.position, transform.rotation);
-            m_AvatarGameObject.transform.SetParent(transform);
-            m_AvatarGameObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
-        public override void OnStopClient()
+        public void OnDisable()
         {
-            GetComponent<AvatarBrain>().OnAvatarChanged -= RequestAvatarChange;
-            base.OnStopClient();
+            if(string.IsNullOrEmpty(GalleryModeURL))
+                avatarBrain.OnAvatarChanged -= RequestAvatarChange;
         }
 
         void RequestAvatarChange(string current)
@@ -85,16 +75,11 @@ namespace Arteranos.Avatar
             if(loading || current == null) return;
 
             loading = true;
-            StartCoroutine(ProcessLoader(current));
-        }
-
-        IEnumerator ProcessLoader(string current)
-        {
             Debug.Log("Starting avatar loading: " + current);
-            yield return null;
 
             m_AvatarLoader.LoadAvatar(current.ToString());
         }
+
 
         // --------------------------------------------------------------------
         #region Skeleton/Pose measurement
@@ -115,7 +100,7 @@ namespace Arteranos.Avatar
             avatar.SetActive(false);
 
             // Owner is setting up the IK and the puppet handles...
-            if(isOwned)
+            if(avatarBrain.isOwned)
             {
                 Transform pole = null;
 
@@ -229,9 +214,6 @@ namespace Arteranos.Avatar
             m_AvatarGameObject = args.Avatar;
             Transform agot = m_AvatarGameObject.transform;
 
-            m_AvatarGameObject.name += "_" + netIdentity.netId;
-            agot.SetParent(transform);
-            agot.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             List<string> jointnames = new();
 
@@ -247,7 +229,9 @@ namespace Arteranos.Avatar
             // FIXME Fixup for the VR device specific skew?
             Vector3 cEyePos = (lEye.position + rEye.position) / 2 + new Vector3(0, 0, 0.11f);
 
-            if(isOwned)
+            // Animation and pose data will be transmitted though the NetworkPose, so
+            // the animator will be owner-driven.
+            if(avatarBrain.isOwned)
             {
                 CenterEye = new GameObject("Target_centerEye").transform;
                 CenterEye.SetPositionAndRotation(cEyePos, rEye.rotation);
@@ -266,14 +250,17 @@ namespace Arteranos.Avatar
 
             ResetPose();
 
-            // And reconfigure the XR Rig to match the avatar's dimensions.
-            IXRControl xrc = XRControl.Instance;
-            Transform fullHeight = agot.FindRecursive("HeadTop_End");
+            if(avatarBrain.isOwned)
+            {
+                // And reconfigure the XR Rig to match the avatar's dimensions.
+                IXRControl xrc = XRControl.Instance;
+                Transform fullHeight = agot.FindRecursive("HeadTop_End");
 
-            xrc.EyeHeight = cEyePos.y - transform.position.y;
-            xrc.BodyHeight = fullHeight.transform.position.y - transform.position.y;
+                xrc.EyeHeight = cEyePos.y - transform.position.y;
+                xrc.BodyHeight = fullHeight.transform.position.y - transform.position.y;
 
-            xrc.ReconfigureXRRig();
+                xrc.ReconfigureXRRig();
+            }
 
             // Lastly, breathe some life into the avatar.
             EyeAnimationHandler eah = args.Avatar.AddComponent<EyeAnimationHandler>();
@@ -290,7 +277,10 @@ namespace Arteranos.Avatar
             if(m_AvatarGameObject != null)
                 Destroy(m_AvatarGameObject);
 
-            SetupAvatar(args);
+            args.Avatar.transform.SetParent(transform, false);
+
+            if(string.IsNullOrEmpty(GalleryModeURL))
+                SetupAvatar(args);
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)
