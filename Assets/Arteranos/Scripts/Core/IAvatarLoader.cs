@@ -25,6 +25,7 @@ namespace Arteranos.Avatar
         public Transform Head { get; }
 
         public float FootElevation { get; }
+        public string GalleryModeURL { get; set; }
 
         /// <summary>
         /// Reset the the avatar to an 'Attention' pose

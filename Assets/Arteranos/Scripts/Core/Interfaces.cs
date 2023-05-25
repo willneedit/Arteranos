@@ -6,6 +6,7 @@
  */
 
 using Arteranos.Core;
+using Arteranos.XR;
 using System;
 using System.ComponentModel;
 using System.Net;
@@ -275,6 +276,11 @@ namespace Arteranos.UI
     {
 
     }
+
+    public interface IAvatarGalleryUI
+    {
+
+    }
     #endregion
     // -------------------------------------------------------------------
     #region UI factories
@@ -303,6 +309,24 @@ namespace Arteranos.UI
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_CreateAvatar"));
             return go.GetComponent<ICreateAvatarUI>();
+        }
+    }
+
+    public class AvatarGalleryUIFactory : UIBehaviour
+    {
+        public static IAvatarGalleryUI New()
+        {
+            Transform t = XRControl.Instance.rigTransform;
+            Vector3 position = t.position;
+            Quaternion rotation= t.rotation;
+            position += rotation * Vector3.forward * 1.5f;
+
+            GameObject go = Instantiate(
+                Resources.Load<GameObject>("UI/InApp/AvatarGalleryPedestal"),
+                position,
+                rotation
+                );
+            return go.GetComponent<IAvatarGalleryUI>();
         }
     }
     #endregion

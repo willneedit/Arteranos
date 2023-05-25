@@ -52,6 +52,13 @@ namespace Arteranos.UI
             txt_AvatarURL.onValueChanged.AddListener(OnAvatarURLChanged);
 
             btn_CreateAvatar.onClick.AddListener(OnCreateAvatarClicked);
+            btn_AvatarGallery.onClick.AddListener(OnAvatarGalleryClicked);
+        }
+
+        private void OnAvatarGalleryClicked()
+        {
+            SysMenuKind.CloseSystemMenus();
+            AvatarGalleryUIFactory.New();
         }
 
         private void OnCreateAvatarClicked()

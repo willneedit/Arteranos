@@ -46,6 +46,8 @@ namespace Arteranos.Avatar
 
         private Transform Voice = null;
 
+        public uint NetID => netIdentity.netId;
+
         public int ChatOwnID
         {
             get => m_ints.ContainsKey(AVIntKeys.ChatOwnID) ? m_ints[AVIntKeys.ChatOwnID] : -1;

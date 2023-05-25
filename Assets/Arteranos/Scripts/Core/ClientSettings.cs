@@ -56,6 +56,22 @@ namespace Arteranos.Core
         Online          // Ready
     }
 
+    public struct AvatarDescriptionJSON : IEquatable<AvatarDescriptionJSON>
+    {
+        // Avatar designator, valid only for the selected avatar provider
+        public string AvatarURL { get; set; }
+
+        // Avatar provider to get the user's avatar
+        public AvatarProvider AvatarProvider { get; set; }
+
+        public override bool Equals(object obj) => obj is AvatarDescriptionJSON jSON && Equals(jSON);
+        public bool Equals(AvatarDescriptionJSON other) => AvatarURL == other.AvatarURL && AvatarProvider == other.AvatarProvider;
+        public override int GetHashCode() => HashCode.Combine(AvatarURL, AvatarProvider);
+
+        public static bool operator ==(AvatarDescriptionJSON left, AvatarDescriptionJSON right) => left.Equals(right);
+        public static bool operator !=(AvatarDescriptionJSON left, AvatarDescriptionJSON right) => !(left == right);
+    }
+
     public class ClientAudioSettingsJSON
     {
         // Master Volume, 0 to 100
@@ -97,6 +113,9 @@ namespace Arteranos.Core
 
         // Avatar provider to get the user's avatar
         public virtual AvatarProvider AvatarProvider { get; set; } = AvatarProvider.RPM;
+
+        // Avatar storage
+        public List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
     }
 
     public class ClientSettingsJSON

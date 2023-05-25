@@ -28,10 +28,12 @@ namespace Arteranos.Avatar
         private AvatarObjectLoader m_AvatarLoader = null;
 
         // Non-null: manually load a puppet avatar on init
-        public string GalleryModeURL = null;
+        public string GalleryModeURL { get => m_GalleryModeURL; set => m_GalleryModeURL = value; }
+
+        [SerializeField] private string m_GalleryModeURL = null;
 
         // Animate the avatar in the gallery mode
-        public RuntimeAnimatorController animator = null;
+        [SerializeField] private RuntimeAnimatorController animator = null;
 
         public Transform LeftHand { get; private set; }
         public Transform RightHand { get; private set; }
@@ -279,6 +281,11 @@ namespace Arteranos.Avatar
 
             if(m_AvatarGameObject != null)
                 Destroy(m_AvatarGameObject);
+
+            if(avatarBrain != null)
+                args.Avatar.name += $"_{avatarBrain.NetID}";
+            else
+                args.Avatar.name += "_puppet";
 
             args.Avatar.transform.SetParent(transform, false);
 
