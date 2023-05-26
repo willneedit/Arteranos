@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -89,23 +87,18 @@ namespace Arteranos.UI
         {
             base.OnDisable();
 
+            cs.AvatarURL = txt_AvatarURL.text;
+            cs.Me.Nickname = txt_Nickname.text;
+
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty) cs?.SaveSettings();
             dirty = false;
         }
 
 
-        private void OnAvatarURLChanged(string current)
-        {
-            cs.AvatarURL = current;
-            dirty = true;
-        }
+        private void OnAvatarURLChanged(string current) => dirty = true;
 
-        private void OnNicknameChanged(string current)
-        {
-            cs.Me.Nickname = current;
-            dirty = true;
-        }
+        private void OnNicknameChanged(string current) => dirty = true;
 
         private void OnVisibilityChanged(int old, bool current)
         {
