@@ -17,6 +17,34 @@ using UnityEngine.EventSystems;
 
 #pragma warning disable IDE1006 // Because Unity's more relaxed naming convention
 
+namespace Arteranos.Avatar
+{
+    // -------------------------------------------------------------------
+    #region Avatar interfaces
+
+    public interface IAvatarBrain
+    {
+        string AvatarURL { get; }
+        int ChatOwnID { get; }
+        uint NetID { get; }
+        byte[] UserHash { get; }
+        string Nickname { get; }
+
+        event Action<string> OnAvatarChanged;
+
+        void OnDestroy();
+        void OnStartClient();
+        void OnStartServer();
+        void OnStopClient();
+    }
+
+    #endregion
+    // -------------------------------------------------------------------
+    #region Avatar helpers
+    #endregion
+    // -------------------------------------------------------------------
+}
+
 namespace Arteranos.Services
 {
     // -------------------------------------------------------------------
