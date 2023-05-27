@@ -14,32 +14,18 @@ using Arteranos.XR;
 
 namespace Arteranos.Avatar
 {
-    public enum AVIntKeys : byte
+    internal enum AVKeys : byte
     {
         _Invalid = 0,
         ChatOwnID,
         VoicePort,
-    }
-
-    public enum AVFloatKeys : byte
-    {
-        _Invalid = 0,
-    }
-
-    public enum AVStringKeys : byte
-    {
-        _Invalid = 0,
         AvatarURL,
         CurrentWorld,
-    }
-
-    public enum AVBlobKeys : byte
-    {
-        _Invalid = 0,
+        Nickname,
         UserHash,
     }
 
-    public class AvatarBrain : NetworkBehaviour
+    public class AvatarBrain : NetworkBehaviour, IAvatarBrain
     {
         public event Action<IVoiceOutput> OnVoiceOutputChanged;
         public event Action<string> OnAvatarChanged;
@@ -50,30 +36,26 @@ namespace Arteranos.Avatar
 
         public int ChatOwnID
         {
-            get => m_ints.ContainsKey(AVIntKeys.ChatOwnID) ? m_ints[AVIntKeys.ChatOwnID] : -1;
-            set => PropagateInt(AVIntKeys.ChatOwnID, value);
+            get => m_ints.ContainsKey(AVKeys.ChatOwnID) ? m_ints[AVKeys.ChatOwnID] : -1;
+            set => PropagateInt(AVKeys.ChatOwnID, value);
         }
 
         public string AvatarURL
         {
-            get => m_strings.ContainsKey(AVStringKeys.AvatarURL) ? m_strings[AVStringKeys.AvatarURL] : null;
-            set => PropagateString(AVStringKeys.AvatarURL, value);
+            get => m_strings.ContainsKey(AVKeys.AvatarURL) ? m_strings[AVKeys.AvatarURL] : null;
+            set => PropagateString(AVKeys.AvatarURL, value);
         }
 
         public byte[] UserHash
         {
-            get => m_blobs.ContainsKey(AVBlobKeys.UserHash) ? m_blobs[AVBlobKeys.UserHash] : null;
-            private set => PropagateBlob(AVBlobKeys.UserHash, value); 
+            get => m_blobs.ContainsKey(AVKeys.UserHash) ? m_blobs[AVKeys.UserHash] : null;
+            private set => PropagateBlob(AVKeys.UserHash, value);
         }
 
-        public string UserID
+        public string Nickname
         {
-            get
-            {
-                string hashString = string.Empty;
-                foreach(byte x in UserHash) hashString += String.Format("{0:x2}", x);
-                return hashString;
-            }
+            get => m_strings.ContainsKey(AVKeys.Nickname) ? m_strings[AVKeys.Nickname] : null;
+            private set => PropagateString(AVKeys.Nickname, value);
         }
 
         /// <summary>
@@ -94,25 +76,19 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Networking
 
-#if UNITY_EDITOR
-        public readonly SyncDictionary<AVIntKeys, int> m_ints = new();
-        public readonly SyncDictionary<AVFloatKeys, float> m_floats = new();
-        public readonly SyncDictionary<AVStringKeys, string> m_strings = new();
-        public readonly SyncDictionary<AVBlobKeys, byte[]> m_blobs = new();
-#else
-        private readonly SyncDictionary<AVIntKeys, int> m_ints = new();
-        private readonly SyncDictionary<AVFloatKeys, float> m_floats = new();
-        private readonly SyncDictionary<AVStringKeys, string> m_strings = new();
-        private readonly SyncDictionary<AVBlobKeys, byte[]> m_blobs = new();
-#endif
+        private readonly SyncDictionary<AVKeys, int> m_ints = new();
+        private readonly SyncDictionary<AVKeys, float> m_floats = new();
+        private readonly SyncDictionary<AVKeys, string> m_strings = new();
+        private readonly SyncDictionary<AVKeys, byte[]> m_blobs = new();
+
         void Awake() => syncDirection = SyncDirection.ServerToClient;
 
         public override void OnStartServer()
         {
             base.OnStartServer();
 
-            m_strings[AVStringKeys.CurrentWorld] = SettingsManager.Server.WorldURL;
-            m_ints[AVIntKeys.VoicePort] = SettingsManager.Server.VoicePort;
+            m_strings[AVKeys.CurrentWorld] = SettingsManager.Server.WorldURL;
+            m_ints[AVKeys.VoicePort] = SettingsManager.Server.VoicePort;
         }
 
         public override void OnStartClient()
@@ -153,8 +129,8 @@ namespace Arteranos.Avatar
                 }
 
                 // The server already uses a world, so download and transition into the targeted world immediately.
-                else if(!string.IsNullOrEmpty(m_strings[AVStringKeys.CurrentWorld]))
-                    WorldTransition.InitiateTransition(m_strings[AVStringKeys.CurrentWorld]);
+                else if(!string.IsNullOrEmpty(m_strings[AVKeys.CurrentWorld]))
+                    WorldTransition.InitiateTransition(m_strings[AVKeys.CurrentWorld]);
 
             }
 
@@ -180,69 +156,71 @@ namespace Arteranos.Avatar
 
         public void OnDestroy()
         {
+            ClientSettings cs = SettingsManager.Client;
+
             if(isServer)
-                SettingsManager.UnregisterUser(UserID);
+                SettingsManager.UnregisterUser(cs.UserID);
         }
 
         private void ResyncInitialValues()
         {
-            foreach(KeyValuePair<AVIntKeys, int> kvpi in m_ints) 
-                OnMIntsChanged(SyncDictionary<AVIntKeys, int>.Operation.OP_ADD, kvpi.Key, kvpi.Value);
+            foreach(KeyValuePair<AVKeys, int> kvpi in m_ints)
+                OnMIntsChanged(SyncDictionary<AVKeys, int>.Operation.OP_ADD, kvpi.Key, kvpi.Value);
 
-            foreach(KeyValuePair<AVFloatKeys, float> kvpf in m_floats)
-                OnMFloatsChanged(SyncDictionary<AVFloatKeys, float>.Operation.OP_ADD, kvpf.Key, kvpf.Value);
+            foreach(KeyValuePair<AVKeys, float> kvpf in m_floats)
+                OnMFloatsChanged(SyncDictionary<AVKeys, float>.Operation.OP_ADD, kvpf.Key, kvpf.Value);
 
-            foreach(KeyValuePair<AVStringKeys, string> kvps in m_strings)
-                OnMStringsChanged(SyncDictionary<AVStringKeys, string>.Operation.OP_ADD, kvps.Key, kvps.Value);
+            foreach(KeyValuePair<AVKeys, string> kvps in m_strings)
+                OnMStringsChanged(SyncDictionary<AVKeys, string>.Operation.OP_ADD, kvps.Key, kvps.Value);
 
-            foreach(KeyValuePair<AVBlobKeys, byte[]> kvpb in m_blobs)
-                OnMBlobsChanged(SyncDictionary<AVBlobKeys, byte[]>.Operation.OP_ADD, kvpb.Key, kvpb.Value);
+            foreach(KeyValuePair<AVKeys, byte[]> kvpb in m_blobs)
+                OnMBlobsChanged(SyncDictionary<AVKeys, byte[]>.Operation.OP_ADD, kvpb.Key, kvpb.Value);
 
         }
 
-        private void OnMIntsChanged(SyncDictionary<AVIntKeys, int>.Operation op, AVIntKeys key, int value)
+        private void OnMIntsChanged(SyncDictionary<AVKeys, int>.Operation op, AVKeys key, int value)
         {
             // Give that avatar its corresponding voice - except its owner.
             switch(key)
             {
-                case AVIntKeys.ChatOwnID:
+                case AVKeys.ChatOwnID:
                     UpdateVoiceID(value); break;
             }
         }
 
-        private void OnMFloatsChanged(SyncIDictionary<AVFloatKeys, float>.Operation op, AVFloatKeys key, float value)
+        private void OnMFloatsChanged(SyncIDictionary<AVKeys, float>.Operation op, AVKeys key, float value)
         {
             // Reserved for future use
         }
 
-        private void OnMStringsChanged(SyncIDictionary<AVStringKeys, string>.Operation op, AVStringKeys key, string value)
+        private void OnMStringsChanged(SyncIDictionary<AVKeys, string>.Operation op, AVKeys key, string value)
         {
             switch(key)
             {
-                case AVStringKeys.AvatarURL:
+                case AVKeys.AvatarURL:
                     OnAvatarChanged?.Invoke(value); break;
             }
         }
 
-        private void OnMBlobsChanged(SyncIDictionary<AVBlobKeys, byte[]>.Operation op, AVBlobKeys key, byte[] value)
+        private void OnMBlobsChanged(SyncIDictionary<AVKeys, byte[]>.Operation op, AVKeys key, byte[] value)
         {
             // Reserved for future use
         }
 
 
         [Command]
-        private void PropagateInt(AVIntKeys key, int value) => m_ints[key] = value;
+        private void PropagateInt(AVKeys key, int value) => m_ints[key] = value;
 
 #pragma warning disable IDE0051 // Nicht verwendete private Member entfernen
         [Command]
-        private void PropagateFloat(AVFloatKeys key, float value) => m_floats[key] = value;
+        private void PropagateFloat(AVKeys key, float value) => m_floats[key] = value;
 #pragma warning restore IDE0051 // Nicht verwendete private Member entfernen
 
         [Command]
-        private void PropagateString(AVStringKeys key, string value) => m_strings[key] = value;
+        private void PropagateString(AVKeys key, string value) => m_strings[key] = value;
 
         [Command]
-        private void PropagateBlob(AVBlobKeys key, byte[] value) => m_blobs[key] = value;
+        private void PropagateBlob(AVKeys key, byte[] value) => m_blobs[key] = value;
 
 
         [Command]
@@ -308,7 +286,7 @@ namespace Arteranos.Avatar
                 AudioManager.OnJoinedChatroom += (x) => ChatOwnID = x;
 
                 string ip = NetworkManager.singleton.networkAddress;
-                int port = m_ints[AVIntKeys.VoicePort];
+                int port = m_ints[AVKeys.VoicePort];
 
                 AudioManager.JoinChatroom($"{ip}:{port}");
             }
@@ -354,7 +332,7 @@ namespace Arteranos.Avatar
             // Now that's the real deal.
             Debug.Log($"WORLD TRANSITION: From {ss.WorldURL} to {worldURL} - Choose now!");
 
-            ShowWorldChangeDialog(worldURL, 
+            ShowWorldChangeDialog(worldURL,
             (response) => OnWorldChangeAnswer(worldURL, response));
         }
 
