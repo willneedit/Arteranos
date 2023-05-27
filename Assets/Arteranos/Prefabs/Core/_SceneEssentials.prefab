@@ -335,6 +335,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3840780144436917895}
   - component: {fileID: 7940587785708425646}
+  - component: {fileID: 332929975885485241}
   - component: {fileID: -746876566335505752}
   - component: {fileID: 1851660504593070244}
   - component: {fileID: 3772151105963276859}
@@ -390,13 +391,31 @@ MonoBehaviour:
   transport: {fileID: -746876566335505752}
   networkAddress: localhost
   maxConnections: 100
-  authenticator: {fileID: 0}
+  authenticator: {fileID: 332929975885485241}
   playerPrefab: {fileID: 2697617456504013145, guid: b745e62fc4808b74baf190b21ef2b9e4,
     type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs: []
   timeInterpolationGui: 0
+--- !u!114 &332929975885485241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3840780144436917897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 577851abe1942d144a7d3689e8c822ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnServerAuthenticated:
+    m_PersistentCalls:
+      m_Calls: []
+  OnClientAuthenticated:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &-746876566335505752
 MonoBehaviour:
   m_ObjectHideFlags: 0
