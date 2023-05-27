@@ -2,8 +2,8 @@
 
 - Created with LibreOffice Draw
 - 25.60 cm x 25.60 cm
-- Exported as a 256x256 PNG
-- GIMP, to turn the backgound color to transparency
+- Exported as a SVG
+- GIMP, to convert fromSVG to PNG
   - Unprocessed PNG has some rims
 - As necessary, convert the main color to the desired one
 - Line art, black and white - use accent colors sparingly
