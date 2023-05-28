@@ -50,9 +50,31 @@ namespace Arteranos.Avatar
         void OnStopClient();
     }
 
+    public interface IHitBox
+    {
+        IAvatarBrain Brain { get; set; }
+
+        void OnTargeted(bool inSight);
+    }
+
+
+
     #endregion
     // -------------------------------------------------------------------
     #region Avatar helpers
+
+    public class AvatarHitBoxFactory : MonoBehaviour
+    {
+        public static IHitBox New(GameObject bearer)
+        {
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/InApp/AvatarHitBox"), bearer.transform);
+            IAvatarBrain avatarBrain= bearer.GetComponent<IAvatarBrain>();
+            IHitBox hitBox = go.GetComponent<IHitBox>();
+            hitBox.Brain = avatarBrain;
+
+            return hitBox;
+        }
+    }
     #endregion
     // -------------------------------------------------------------------
 }

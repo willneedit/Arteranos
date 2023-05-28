@@ -28,6 +28,7 @@ namespace Arteranos.Avatar
 
     public class AvatarBrain : NetworkBehaviour, IAvatarBrain
     {
+        #region Interface
         public event Action<IVoiceOutput> OnVoiceOutputChanged;
         public event Action<string> OnAvatarChanged;
         public event Action<int> OnNetMuteStatusChanged;
@@ -90,17 +91,9 @@ namespace Arteranos.Avatar
                 UserHash = cs.UserHash;
             }
         }
-
+        #endregion
         // ---------------------------------------------------------------
-        #region Networking
-
-        private readonly SyncDictionary<AVKeys, int> m_ints = new();
-        private readonly SyncDictionary<AVKeys, float> m_floats = new();
-        private readonly SyncDictionary<AVKeys, string> m_strings = new();
-        private readonly SyncDictionary<AVKeys, byte[]> m_blobs = new();
-
-        void Awake() => syncDirection = SyncDirection.ServerToClient;
-
+        #region Start & Stop
         public override void OnStartServer()
         {
             base.OnStartServer();
@@ -149,7 +142,11 @@ namespace Arteranos.Avatar
                 // The server already uses a world, so download and transition into the targeted world immediately.
                 else if(!string.IsNullOrEmpty(m_strings[AVKeys.CurrentWorld]))
                     WorldTransition.InitiateTransition(m_strings[AVKeys.CurrentWorld]);
-
+            }
+            else
+            {
+                // Alien avatars get the hit capsules to target them to call up the nameplates.
+                AvatarHitBoxFactory.New(gameObject);
             }
 
             InitializeVoice();
@@ -179,6 +176,17 @@ namespace Arteranos.Avatar
             if(isServer)
                 SettingsManager.UnregisterUser(cs.UserID);
         }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Networking
+
+        private readonly SyncDictionary<AVKeys, int> m_ints = new();
+        private readonly SyncDictionary<AVKeys, float> m_floats = new();
+        private readonly SyncDictionary<AVKeys, string> m_strings = new();
+        private readonly SyncDictionary<AVKeys, byte[]> m_blobs = new();
+
+        void Awake() => syncDirection = SyncDirection.ServerToClient;
 
         private void ResyncInitialValues()
         {
