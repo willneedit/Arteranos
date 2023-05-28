@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.XR;
 using System;
@@ -40,6 +41,7 @@ namespace Arteranos.Avatar
         bool IsOwned { get; }
         bool ClientMuted { get; set; }
         IAvatarLoader Body { get; }
+        GameObject gameObject { get; }
 
         event Action<string> OnAvatarChanged;
         event Action<int> OnNetMuteStatusChanged;
@@ -346,6 +348,14 @@ namespace Arteranos.UI
     {
 
     }
+
+    public interface INameplateUI
+    {
+        IAvatarBrain Bearer { get; set; }
+        GameObject gameObject { get; }
+    }
+
+
     #endregion
     // -------------------------------------------------------------------
     #region UI factories
@@ -392,6 +402,32 @@ namespace Arteranos.UI
                 rotation
                 );
             return go.GetComponent<IAvatarGalleryUI>();
+        }
+    }
+
+    public class NameplateUIFactory : UIBehaviour
+    {
+        public static INameplateUI New(GameObject bearer)
+        {
+            GameObject go;
+            INameplateUI nameplate;
+
+            nameplate = bearer.GetComponentInChildren<INameplateUI>(true);
+            go = nameplate?.gameObject;
+
+            if(nameplate == null)
+            {
+                go = Instantiate(
+                    Resources.Load<GameObject>("UI/InApp/Nameplate"),
+                    bearer.transform
+                    );
+                nameplate = go.GetComponent<INameplateUI>();
+            }
+
+            nameplate.Bearer = bearer.GetComponent<IAvatarBrain>();
+            go.SetActive(true);
+
+            return nameplate;
         }
     }
     #endregion

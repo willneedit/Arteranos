@@ -12,18 +12,21 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using Arteranos.Avatar;
 
-namespace Arteranos
+namespace Arteranos.UI
 {
-    public class NameplateUI : UIBehaviour
+    public class NameplateUI : UIBehaviour, INameplateUI
     {
-        public Avatar.IAvatarBrain Bearer { get; private set; } = null;
+        public IAvatarBrain Bearer { get; set; } = null;
 
         [SerializeField] private TextMeshProUGUI lbl_Name = null;
         [SerializeField] private Button btn_mute = null;
         [SerializeField] private Button btn_unmute = null;
         [SerializeField] private Button btn_friend_add = null;
         [SerializeField] private Button btn_block = null;
+
+        private readonly Vector3 aboutFace = new Vector3(0, 180, 0);
 
         protected override void Awake()
         {
@@ -40,6 +43,10 @@ namespace Arteranos
             lbl_Name.text = Bearer.Nickname;
 
             Bearer.OnNetMuteStatusChanged += OnNetMuteStatusChanged;
+            float fullHeight = Bearer.Body.FullHeight;
+            // TODO Up vector? LocalPosition respects the root rotation, but...
+            transform.localPosition = new Vector3(0, fullHeight + 0.2f, 0);
+            transform.localRotation = Quaternion.Euler(0, 180, 0);
             OnNetMuteStatusChanged(Bearer.NetMuteStatus);
         }
 
@@ -48,6 +55,14 @@ namespace Arteranos
             Bearer.OnNetMuteStatusChanged -= OnNetMuteStatusChanged;
 
             base.OnDisable();
+        }
+
+        private void Update()
+        {
+            // LookAt can take a second vector as the Up vector.
+            // Seems that we'd use _the client's_ Up vector, not the targeted avatar's.
+            transform.LookAt(XR.XRControl.Instance.cameraTransform);
+            transform.Rotate(aboutFace);
         }
 
         private void OnNetMuteStatusChanged(int status)
@@ -61,7 +76,7 @@ namespace Arteranos
             btn_unmute.gameObject.SetActive(false);
 
             current.gameObject.SetActive(true);
-            
+
             current.interactable = (status == 0);
         }
 

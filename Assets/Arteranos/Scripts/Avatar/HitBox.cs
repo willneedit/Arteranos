@@ -11,7 +11,7 @@ using UnityEngine;
 
 using Arteranos.Avatar;
 
-namespace Arteranos
+namespace Arteranos.UI
 {
     public class HitBox : MonoBehaviour, IHitBox
     {
@@ -38,6 +38,8 @@ namespace Arteranos
 
         public void OnTargeted(bool inSight)
         {
+            if(inSight)
+                NameplateUIFactory.New(Brain.gameObject);
             Debug.Log($"Ping? {inSight}");
         }
     }
