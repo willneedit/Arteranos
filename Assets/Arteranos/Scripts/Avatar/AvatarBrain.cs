@@ -23,16 +23,20 @@ namespace Arteranos.Avatar
         CurrentWorld,
         Nickname,
         UserHash,
+        AudioStatus,
     }
 
     public class AvatarBrain : NetworkBehaviour, IAvatarBrain
     {
         public event Action<IVoiceOutput> OnVoiceOutputChanged;
         public event Action<string> OnAvatarChanged;
+        public event Action<int> OnAudioStatusChanged;
 
         private Transform Voice = null;
 
         public uint NetID => netIdentity.netId;
+
+        public bool IsOwned => isOwned;
 
         public int ChatOwnID
         {
@@ -56,6 +60,12 @@ namespace Arteranos.Avatar
         {
             get => m_strings.ContainsKey(AVKeys.Nickname) ? m_strings[AVKeys.Nickname] : null;
             private set => PropagateString(AVKeys.Nickname, value);
+        }
+
+        public int AudioStatus
+        {
+            get => m_ints.ContainsKey(AVKeys.AudioStatus) ? m_ints[AVKeys.AudioStatus] : Avatar.AudioStatus.OK;
+            set => PropagateInt(AVKeys.AudioStatus, value);
         }
 
         /// <summary>
@@ -180,11 +190,14 @@ namespace Arteranos.Avatar
 
         private void OnMIntsChanged(SyncDictionary<AVKeys, int>.Operation op, AVKeys key, int value)
         {
-            // Give that avatar its corresponding voice - except its owner.
             switch(key)
             {
                 case AVKeys.ChatOwnID:
+                    // Give that avatar its corresponding voice - except its owner.
                     UpdateVoiceID(value); break;
+                case AVKeys.AudioStatus:
+                    // Either been self-muted or by other means, the announcement comes down from the server.
+                    UpdateAudioStatus(value); break;
             }
         }
 
@@ -305,6 +318,14 @@ namespace Arteranos.Avatar
                 AudioManager.LeaveChatroom();
                 AudioManager.OnJoinedChatroom -= (x) => ChatOwnID = x;
             }
+        }
+
+        private void UpdateAudioStatus(int value)
+        {
+            // Update the own voice status, and for alien avatar it's only informational value,
+            // like the status update on the nameplate.
+            if(isOwned)
+                AudioManager.Instance.MuteSelf = (value != 0);
         }
 
 

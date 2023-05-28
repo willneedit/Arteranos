@@ -22,6 +22,13 @@ namespace Arteranos.Avatar
     // -------------------------------------------------------------------
     #region Avatar interfaces
 
+    public static class AudioStatus
+    {
+        public const int OK = 0;
+        public const int SelfMuted = (1 << 0); // Muted by the client himself
+        public const int Gagged = (1 << 1); // Muted by the administrator/event host/...
+    }
+
     public interface IAvatarBrain
     {
         string AvatarURL { get; }
@@ -29,8 +36,11 @@ namespace Arteranos.Avatar
         uint NetID { get; }
         byte[] UserHash { get; }
         string Nickname { get; }
+        int AudioStatus { get; set; }
+        bool IsOwned { get; }
 
         event Action<string> OnAvatarChanged;
+        event Action<int> OnAudioStatusChanged;
 
         void OnDestroy();
         void OnStartClient();
@@ -98,6 +108,7 @@ namespace Arteranos.Services
         bool enabled { get; set; }
         float MicGain { get; set; }
         int MicAGCLevel { get; set; }
+        bool MuteSelf { get; set; }
 
         event Action<short> OnJoinedChatroom;
         event Action<float[]> OnSampleReady;

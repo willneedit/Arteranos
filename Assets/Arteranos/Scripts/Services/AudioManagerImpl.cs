@@ -71,6 +71,12 @@ namespace Arteranos.Services
             }
         }
 
+        public bool MuteSelf
+        {
+            get => ChatroomAgent.MuteSelf;
+            set => ChatroomAgent.MuteSelf = value;
+        }
+
         private int micAGCLevel;
 
         private bool serverActive = false;
