@@ -157,7 +157,7 @@ namespace Arteranos.Services
                 UI.IDialogUI dialog = UI.DialogUIFactory.New();
 
                 dialog.Buttons = new string[] { "OK" };
-                dialog.Text = $"{msg.message}";
+                dialog.Text = $"Cannot connect.\n\nServer says: {msg.message}";
 
                 // Just only some formality, the server will disconnect anyway.
                 ClientReject();
