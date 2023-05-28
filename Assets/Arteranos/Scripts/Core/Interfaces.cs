@@ -38,6 +38,7 @@ namespace Arteranos.Avatar
         string Nickname { get; }
         int AudioStatus { get; set; }
         bool IsOwned { get; }
+        bool ClientMuted { get; set; }
 
         event Action<string> OnAvatarChanged;
         event Action<int> OnAudioStatusChanged;
@@ -116,6 +117,8 @@ namespace Arteranos.Services
         int? GetDeviceId();
         void JoinChatroom(object data = null);
         void LeaveChatroom(object data = null);
+        void MuteOther(short peerID, bool muted);
+        bool MuteOther(short peerID);
         void PushVolumeSettings();
         void RenewMic();
     }

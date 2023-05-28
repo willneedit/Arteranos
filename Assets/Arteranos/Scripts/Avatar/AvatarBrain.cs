@@ -68,6 +68,12 @@ namespace Arteranos.Avatar
             set => PropagateInt(AVKeys.AudioStatus, value);
         }
 
+        public bool ClientMuted
+        {
+            get => AudioManager.Instance.MuteOther((short) ChatOwnID);
+            set => AudioManager.Instance.MuteOther((short) (ChatOwnID), value);
+        }
+
         /// <summary>
         /// Download the user's client settings to his avatar's brain, and announce
         /// the data to the server to spread it to the clones.

@@ -19,11 +19,11 @@ namespace Arteranos.Services
     public class AudioManagerImpl : MonoBehaviour, IAudioManager
     {
         public ChatroomAgentV2 ChatroomAgent { get; private set; }
+        public UVMicInput MicInput { get; private set; }
 
         public event Action<short> OnJoinedChatroom;
         public void JoinChatroom(object data = null) => ChatroomNetwork?.JoinChatroom(data);
         public void LeaveChatroom(object data = null) => ChatroomNetwork?.LeaveChatroom(data);
-        public UVMicInput MicInput { get; private set; }
         public AudioMixerGroup MixerGroupVoice => mixer.FindMatchingGroups("Master/Voice")[0];
         public AudioMixerGroup MixerGroupEnv => mixer.FindMatchingGroups("Master/Environment")[0];
 
@@ -76,6 +76,9 @@ namespace Arteranos.Services
             get => ChatroomAgent.MuteSelf;
             set => ChatroomAgent.MuteSelf = value;
         }
+
+        public void MuteOther(short peerID, bool muted) => ChatroomAgent.PeerSettings[peerID].muteThem = muted;
+        public bool MuteOther(short peerID) => ChatroomAgent.PeerSettings[peerID].muteThem;
 
         private int micAGCLevel;
 
