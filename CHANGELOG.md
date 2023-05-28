@@ -1,3 +1,20 @@
+# Version 0.3.0
+
+ **Breaking change - not backwards compatible prior to this version**
+
+## New features
+
+- Embedded avatar creation
+- Avatar gallery to store and retrieve your avatars
+- Nameplates
+  - Button for muting/unmuting
+  - Button for blocking
+
+## Fixes
+
+- Added Network Authenticator for access control and version check
+
+
 # Version 0.2.0
 
 ## New features
