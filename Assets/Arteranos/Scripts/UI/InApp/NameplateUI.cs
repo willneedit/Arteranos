@@ -39,18 +39,18 @@ namespace Arteranos
 
             lbl_Name.text = Bearer.Nickname;
 
-            Bearer.OnAudioStatusChanged += OnAudioStatusChanged;
-            OnAudioStatusChanged(Bearer.AudioStatus);
+            Bearer.OnNetMuteStatusChanged += OnNetMuteStatusChanged;
+            OnNetMuteStatusChanged(Bearer.NetMuteStatus);
         }
 
         protected override void OnDisable()
         {
-            Bearer.OnAudioStatusChanged -= OnAudioStatusChanged;
+            Bearer.OnNetMuteStatusChanged -= OnNetMuteStatusChanged;
 
             base.OnDisable();
         }
 
-        private void OnAudioStatusChanged(int status)
+        private void OnNetMuteStatusChanged(int status)
         {
             //       Design: Speaker on if the audio status okay and not individually muted
             //               Speaker off it it's anything else

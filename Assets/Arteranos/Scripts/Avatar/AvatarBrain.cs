@@ -30,7 +30,7 @@ namespace Arteranos.Avatar
     {
         public event Action<IVoiceOutput> OnVoiceOutputChanged;
         public event Action<string> OnAvatarChanged;
-        public event Action<int> OnAudioStatusChanged;
+        public event Action<int> OnNetMuteStatusChanged;
 
         private Transform Voice = null;
 
@@ -62,9 +62,9 @@ namespace Arteranos.Avatar
             private set => PropagateString(AVKeys.Nickname, value);
         }
 
-        public int AudioStatus
+        public int NetMuteStatus
         {
-            get => m_ints.ContainsKey(AVKeys.AudioStatus) ? m_ints[AVKeys.AudioStatus] : Avatar.AudioStatus.OK;
+            get => m_ints.ContainsKey(AVKeys.AudioStatus) ? m_ints[AVKeys.AudioStatus] : Avatar.NetMuteStatus.OK;
             set => PropagateInt(AVKeys.AudioStatus, value);
         }
 
@@ -73,6 +73,8 @@ namespace Arteranos.Avatar
             get => AudioManager.Instance.MuteOther((short) ChatOwnID);
             set => AudioManager.Instance.MuteOther((short) (ChatOwnID), value);
         }
+
+        public IAvatarLoader Body => GetComponent<IAvatarLoader>();
 
         /// <summary>
         /// Download the user's client settings to his avatar's brain, and announce
