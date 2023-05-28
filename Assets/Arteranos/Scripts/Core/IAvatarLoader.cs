@@ -12,30 +12,32 @@ namespace Arteranos.Avatar
 {
     public interface IAvatarLoader
     {
-        public Transform LeftHand { get; }
-        public Transform RightHand { get; }
-        public Transform LeftFoot { get; }
-        public Transform RightFoot { get; }
+        Transform LeftHand { get; }
+        Transform RightHand { get; }
+        Transform LeftFoot { get; }
+        Transform RightFoot { get; }
 
-        public Quaternion LhrOffset { get; }
-        public Quaternion RhrOffset { get; }
+        Quaternion LhrOffset { get; }
+        Quaternion RhrOffset { get; }
 
 
-        public Transform CenterEye { get; }
-        public Transform Head { get; }
+        Transform CenterEye { get; }
+        Transform Head { get; }
 
-        public float FootElevation { get; }
-        public string GalleryModeURL { get; set; }
+        float FootElevation { get; }
+        string GalleryModeURL { get; set; }
+        float EyeHeight { get; }
+        float FullHeight { get; }
 
         /// <summary>
         /// Reset the the avatar to an 'Attention' pose
         /// </summary>
-        public abstract void ResetPose();
+        public void ResetPose();
 
         /// <summary>
         /// Update the mouth open/closed state
         /// </summary>
         /// <param name="amount">Normalized state, with 1 being fully open</param>
-        public abstract void UpdateOpenMouth(float amount);
+        public void UpdateOpenMouth(float amount);
     }
 }

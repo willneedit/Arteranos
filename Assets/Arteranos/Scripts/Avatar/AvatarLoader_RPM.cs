@@ -42,6 +42,9 @@ namespace Arteranos.Avatar
         public Transform CenterEye { get; private set; }
         public Transform Head { get; private set; }
         public float FootElevation { get; private set; }
+        public float EyeHeight { get; private set; }
+        public float FullHeight { get; private set; }
+
 
         public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
@@ -216,6 +219,7 @@ namespace Arteranos.Avatar
 
         private void SetupAvatar(CompletionEventArgs args)
         {
+            // TODO Non-standard 'up' vector considerations!
             m_AvatarGameObject = args.Avatar;
             Transform agot = m_AvatarGameObject.transform;
 
@@ -255,14 +259,18 @@ namespace Arteranos.Avatar
 
             ResetPose();
 
+            Transform fullHeight = agot.FindRecursive("HeadTop_End");
+
+            EyeHeight = cEyePos.y - transform.position.y;
+            FullHeight = fullHeight.transform.position.y - transform.position.y;
+
             if(avatarBrain.isOwned)
             {
                 // And reconfigure the XR Rig to match the avatar's dimensions.
                 IXRControl xrc = XRControl.Instance;
-                Transform fullHeight = agot.FindRecursive("HeadTop_End");
 
-                xrc.EyeHeight = cEyePos.y - transform.position.y;
-                xrc.BodyHeight = fullHeight.transform.position.y - transform.position.y;
+                xrc.EyeHeight = EyeHeight;
+                xrc.BodyHeight = FullHeight;
 
                 xrc.ReconfigureXRRig();
             }
