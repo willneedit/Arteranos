@@ -213,7 +213,7 @@ namespace Arteranos.Avatar
                     UpdateVoiceID(value); break;
                 case AVKeys.AudioStatus:
                     // Either been self-muted or by other means, the announcement comes down from the server.
-                    UpdateAudioStatus(value); break;
+                    UpdateNetMuteStatus(value); break;
             }
         }
 
@@ -336,12 +336,14 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void UpdateAudioStatus(int value)
+        private void UpdateNetMuteStatus(int value)
         {
             // Update the own voice status, and for alien avatar it's only informational value,
             // like the status update on the nameplate.
             if(isOwned)
                 AudioManager.Instance.MuteSelf = (value != 0);
+
+            OnNetMuteStatusChanged?.Invoke(value);
         }
 
 

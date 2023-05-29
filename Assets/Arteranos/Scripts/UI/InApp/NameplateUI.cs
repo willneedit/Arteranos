@@ -26,7 +26,7 @@ namespace Arteranos.UI
         [SerializeField] private Button btn_friend_add = null;
         [SerializeField] private Button btn_block = null;
 
-        private readonly Vector3 aboutFace = new Vector3(0, 180, 0);
+        private readonly Vector3 aboutFace = new(0, 180, 0);
 
         protected override void Awake()
         {
@@ -72,10 +72,8 @@ namespace Arteranos.UI
             // Interactable: Only if it's not self-muted and not gagged
             Button current = (status == 0 && !Bearer.ClientMuted) ? btn_mute : btn_unmute;
 
-            btn_mute.gameObject.SetActive(false);
-            btn_unmute.gameObject.SetActive(false);
-
-            current.gameObject.SetActive(true);
+            btn_mute.gameObject.SetActive(current == btn_mute);
+            btn_unmute.gameObject.SetActive(current == btn_unmute);
 
             current.interactable = (status == 0);
         }
@@ -89,6 +87,9 @@ namespace Arteranos.UI
             // TODO User privileges management
             // TODO Client HUD UI - self-muting
             // Bearer.AudioStatus ^= Avatar.AudioStatus.Gagged;
+
+            // Update the visible state
+            OnNetMuteStatusChanged(Bearer.NetMuteStatus);
         }
 
     }

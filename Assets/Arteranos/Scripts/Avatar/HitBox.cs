@@ -16,20 +16,43 @@ namespace Arteranos.UI
     public class HitBox : MonoBehaviour, IHitBox
     {
         public IAvatarBrain Brain { get; set; } = null;
-        private IAvatarLoader Body = null;
 
-        float fullHeight = -1;
-        private void Start() => Body = Brain.Body;
+        private float fullHeight = -1;
+        private bool lastInSight = false;
+        private float stableDuration = 0;
+        private bool triggered = false;
+        private INameplateUI np = null;
+
+        // TODO Popup and Popout durations
+        private const float k_PopupTime = 0.5f;
+        private const float k_PopoutTime = 5.0f;
 
         private void Update()
         {
-            if(fullHeight != Body.FullHeight)
+            if(fullHeight != Brain.Body.FullHeight)
                 UpdateAvatarHeight();
+
+            stableDuration += Time.deltaTime;
+
+            if(!triggered)
+            {
+                if(lastInSight && stableDuration > k_PopupTime)
+                {
+                    triggered = true;
+                    np = NameplateUIFactory.New(Brain.gameObject);
+                }
+
+                if(!lastInSight && stableDuration > k_PopoutTime)
+                {
+                    triggered = true;
+                    np?.gameObject.SetActive(false);
+                }
+            }
         }
 
         private void UpdateAvatarHeight()
         {
-            fullHeight = Body.FullHeight;
+            fullHeight = Brain.Body.FullHeight;
 
             CapsuleCollider cc = GetComponent<CapsuleCollider>();
             cc.height = fullHeight;
@@ -38,9 +61,12 @@ namespace Arteranos.UI
 
         public void OnTargeted(bool inSight)
         {
-            if(inSight)
-                NameplateUIFactory.New(Brain.gameObject);
-            Debug.Log($"Ping? {inSight}");
+            if(lastInSight != inSight)
+            {
+                lastInSight = inSight;
+                stableDuration = 0;
+                triggered = false;
+            }
         }
     }
 }

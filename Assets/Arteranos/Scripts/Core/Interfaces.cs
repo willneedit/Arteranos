@@ -353,6 +353,7 @@ namespace Arteranos.UI
     {
         IAvatarBrain Bearer { get; set; }
         GameObject gameObject { get; }
+        bool enabled { get; set; }
     }
 
 
