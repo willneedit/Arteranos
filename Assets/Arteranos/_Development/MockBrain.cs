@@ -26,7 +26,14 @@ namespace Arteranos.Avatar
 
         public string Nickname => "TI-99 4a";
 
-        public int NetMuteStatus { get => 0; set { } }
+        public int NetMuteStatus { 
+            get => m_NetMuteStatus;
+            set 
+            {
+                m_NetMuteStatus= value;
+                OnNetMuteStatusChanged?.Invoke(m_NetMuteStatus);
+            } 
+        }
 
         public bool IsOwned => false;
 
@@ -37,13 +44,8 @@ namespace Arteranos.Avatar
         public event Action<string> OnAvatarChanged;
         public event Action<int> OnNetMuteStatusChanged;
 
-        public void OnDestroy() { }
-        public void OnStartClient() { }
-        public void OnStartServer() { }
-        public void OnStopClient() { }
-
-
-        private bool m_ClientMuted = false;
+        [SerializeField] private int m_NetMuteStatus = 0;
+        [SerializeField] private bool m_ClientMuted = false;
 
         private void Start()
         {

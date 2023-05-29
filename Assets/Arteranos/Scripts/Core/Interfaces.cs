@@ -45,11 +45,6 @@ namespace Arteranos.Avatar
 
         event Action<string> OnAvatarChanged;
         event Action<int> OnNetMuteStatusChanged;
-
-        void OnDestroy();
-        void OnStartClient();
-        void OnStartServer();
-        void OnStopClient();
     }
 
     public interface IHitBox
