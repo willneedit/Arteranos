@@ -800,6 +800,7 @@ GameObject:
   - component: {fileID: 7130032338797606156}
   - component: {fileID: 6202188805232102066}
   - component: {fileID: 2325389100729951300}
+  - component: {fileID: 2210375446304534996}
   m_Layer: 5
   m_Name: UI_LicenseText
   m_TagString: Untagged
@@ -871,7 +872,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &7130032338797606155
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -920,6 +921,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c474c731b3e7b34d8d568be7f3ad8e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  thirdparty: 0
   lbl_LicenseText: {fileID: 8613069781801790652}
 --- !u!114 &2325389100729951300
 MonoBehaviour:
@@ -934,6 +936,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: LicenseText
+--- !u!114 &2210375446304534996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7130032338797606157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d61ee9cfd392d9340ada687ac4daaa2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Delay: 2
+  m_Duration: 5
+  m_Tolerance: 1
+  m_offset: {x: 0, y: 0, z: 1}
 --- !u!1 &7461272051861912330
 GameObject:
   m_ObjectHideFlags: 0
