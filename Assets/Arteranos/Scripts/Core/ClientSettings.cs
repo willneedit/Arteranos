@@ -56,13 +56,35 @@ namespace Arteranos.Core
         Online          // Ready
     }
 
-    public struct AvatarDescriptionJSON : IEquatable<AvatarDescriptionJSON>
+    public class LoginDataJSON : IEquatable<LoginDataJSON>
+    {
+        // The login provider the user logs in to
+        public virtual string LoginProvider { get; set; } = null;
+
+        // The bearer token bestowed during the last login. May use to verify unknown user's details
+        public virtual string LoginToken { get; set; } = null;
+
+        [JsonIgnore]
+        public bool IsGuest => string.IsNullOrEmpty(LoginProvider);
+
+        public override bool Equals(object obj) => Equals(obj as LoginDataJSON);
+        public bool Equals(LoginDataJSON other) => other is not null && LoginProvider == other.LoginProvider && LoginToken == other.LoginToken;
+        public override int GetHashCode() => HashCode.Combine(LoginProvider, LoginToken);
+
+        public static bool operator ==(LoginDataJSON left, LoginDataJSON right) => EqualityComparer<LoginDataJSON>.Default.Equals(left, right);
+        public static bool operator !=(LoginDataJSON left, LoginDataJSON right) => !(left == right);
+    }
+
+    public class AvatarDescriptionJSON : IEquatable<AvatarDescriptionJSON>
     {
         // Avatar designator, valid only for the selected avatar provider
         public string AvatarURL { get; set; }
 
         // Avatar provider to get the user's avatar
         public AvatarProvider AvatarProvider { get; set; }
+
+        [JsonIgnore]
+        public bool IsCustom => AvatarProvider == AvatarProvider.Raw || AvatarProvider == AvatarProvider.Invalid;
 
         public override bool Equals(object obj) => obj is AvatarDescriptionJSON jSON && Equals(jSON);
         public bool Equals(AvatarDescriptionJSON other) => AvatarURL == other.AvatarURL && AvatarProvider == other.AvatarProvider;
@@ -102,17 +124,15 @@ namespace Arteranos.Core
         // Has a random name if it's a guest.
         public virtual string Username { get; set; } = null;
 
-        // The login provider the user logs in to
-        public virtual string LoginProvider { get; set; } = null;
+        // The user's login data
+        public virtual LoginDataJSON Login { get; set; } = new();
 
-        // The bearer token bestowed during the last login. May use to verify unknown user's details
-        public virtual string LoginToken { get; set; } = null;
-
-        // Avatar designator, valid only for the selected avatar provider
-        public virtual string AvatarURL { get; set; } = "6394c1e69ef842b3a5112221";
-
-        // Avatar provider to get the user's avatar
-        public virtual AvatarProvider AvatarProvider { get; set; } = AvatarProvider.RPM;
+        // Current avatar
+        public virtual AvatarDescriptionJSON CurrentAvatar { get; set; } = new() 
+        {
+            AvatarProvider = AvatarProvider.RPM,
+            AvatarURL = "6394c1e69ef842b3a5112221" 
+        };
 
         // Avatar storage
         public List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
@@ -166,11 +186,11 @@ namespace Arteranos.Core
         [JsonIgnore]
         public string AvatarURL
         {
-            get => base.Me.AvatarURL;
+            get => Me.CurrentAvatar.AvatarURL;
             set {
-                string old = base.Me.AvatarURL;
-                base.Me.AvatarURL = value;
-                if(old != base.Me.AvatarURL) OnAvatarChanged?.Invoke(base.Me.AvatarURL);
+                string old = Me.CurrentAvatar.AvatarURL;
+                Me.CurrentAvatar.AvatarURL = value;
+                if(old != Me.CurrentAvatar.AvatarURL) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarURL);
             }
         }
 
@@ -188,17 +208,9 @@ namespace Arteranos.Core
         }
 #endif
 
-#pragma warning disable IDE1006 // Benennungsstile
-        [JsonIgnore]
-        public bool isGuest { get => Me.LoginProvider == null; }
-
-        [JsonIgnore]
-        public bool isCustomAvatar { get => Me.AvatarProvider != AvatarProvider.RPM; }
-#pragma warning restore IDE1006 // Benennungsstile
-
         private void ComputeUserHash()
         {
-            string source = $"{Me.LoginProvider}_{Me.Username}";
+            string source = $"{Me.Login.LoginProvider}_{Me.Username}";
 
             byte[] bytes = Encoding.UTF8.GetBytes(source);
             SHA256Managed hash = new();
@@ -212,11 +224,11 @@ namespace Arteranos.Core
         {
             bool dirty = false;
 
-            if(Me.LoginProvider == null)
+            if(Me.Login.LoginProvider == null)
             {
                 int rnd = UnityEngine.Random.Range(100000000, 999999999);
                 Me.Username = $"Guest{rnd}";
-                Me.LoginToken = null;
+                Me.Login.LoginToken = null;
                 dirty = true;
             }
 

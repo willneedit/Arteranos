@@ -75,14 +75,7 @@ namespace Arteranos.UI
             currentAvatar.SetActive(true);
         }
 
-        private AvatarDescriptionJSON GetMeAvatar()
-        {
-            return new AvatarDescriptionJSON()
-            {
-                AvatarProvider = Me.AvatarProvider,
-                AvatarURL = Me.AvatarURL,
-            };
-        }
+        private AvatarDescriptionJSON GetMeAvatar() => Me.CurrentAvatar;
 
         public bool IsMeInGallery() => Me.AvatarGallery.Contains(GetMeAvatar());
 
@@ -105,7 +98,7 @@ namespace Arteranos.UI
 
             AvatarDescriptionJSON puppet = Me.AvatarGallery[index];
             SettingsManager.Client.AvatarURL = puppet.AvatarURL;
-            Me.AvatarProvider = puppet.AvatarProvider;
+            Me.CurrentAvatar.AvatarProvider = puppet.AvatarProvider;
 
             LightOn(btn_commit, false);
             dirty = true;

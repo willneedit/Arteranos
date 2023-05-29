@@ -24,9 +24,7 @@ namespace Arteranos.Core
         public static Version Load()
         {
             TextAsset ta = Resources.Load<TextAsset>("Version");
-            if(ta == null)
-                return new();
-            return JsonConvert.DeserializeObject<Version>(ta.text);
+            return (ta != null) ? JsonConvert.DeserializeObject<Version>(ta.text) : null;
         }
 
         /// <summary>

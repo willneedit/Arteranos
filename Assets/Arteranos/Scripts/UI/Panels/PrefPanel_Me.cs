@@ -77,7 +77,7 @@ namespace Arteranos.UI
             txt_Nickname.text = cs.Me.Nickname;
             tro_UserID.text = cs.UserID;
             txt_AvatarURL.text = cs.AvatarURL;
-            tro_AvatarProvider.text = Utils.GetEnumDescription(cs.Me.AvatarProvider);
+            tro_AvatarProvider.text = Utils.GetEnumDescription(cs.Me.CurrentAvatar.AvatarProvider);
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;

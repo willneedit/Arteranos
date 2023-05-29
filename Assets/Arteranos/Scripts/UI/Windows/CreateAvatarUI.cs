@@ -5,13 +5,8 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 using Arteranos.Core;
 
@@ -58,7 +53,7 @@ namespace Arteranos.UI
             SysMenuKind.CloseSystemMenus();
 
             cs.AvatarURL = avatarId;
-            cs.Me.AvatarProvider = AvatarProvider.RPM;
+            cs.Me.CurrentAvatar.AvatarProvider = AvatarProvider.RPM;
         }
     }
 }
