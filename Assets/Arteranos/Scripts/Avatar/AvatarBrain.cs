@@ -18,7 +18,6 @@ namespace Arteranos.Avatar
     {
         _Invalid = 0,
         ChatOwnID,
-        VoicePort,
         AvatarURL,
         CurrentWorld,
         Nickname,
@@ -99,7 +98,6 @@ namespace Arteranos.Avatar
             base.OnStartServer();
 
             m_strings[AVKeys.CurrentWorld] = SettingsManager.Server.WorldURL;
-            m_ints[AVKeys.VoicePort] = SettingsManager.Server.VoicePort;
         }
 
         public override void OnStartClient()
@@ -315,7 +313,7 @@ namespace Arteranos.Avatar
                 AudioManager.OnJoinedChatroom += (x) => ChatOwnID = x;
 
                 string ip = NetworkManager.singleton.networkAddress;
-                int port = m_ints[AVKeys.VoicePort];
+                int port = SettingsManager.CurrentServer.VoicePort;
 
                 AudioManager.JoinChatroom($"{ip}:{port}");
             }

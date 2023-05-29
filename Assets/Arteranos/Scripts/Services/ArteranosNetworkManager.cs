@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
 using Arteranos.Services;
+using Arteranos.Core;
 
 /*
 	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -194,6 +195,8 @@ public class ArteranosNetworkManager : NetworkManager
     public override void OnClientDisconnect()
     {
         NetworkStatus.OnClientConnectionResponse?.Invoke(false);
+
+        SettingsManager.CurrentServer = null;
     }
 
     /// <summary>

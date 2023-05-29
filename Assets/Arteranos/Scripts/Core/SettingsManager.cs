@@ -13,18 +13,7 @@ namespace Arteranos.Core
 {
     public class SettingsManager : MonoBehaviour
     {
-
-        protected enum ConnectionMode
-        {
-            Disconnected = 0,
-            Client,
-            Server,
-            Host
-        }
-
         private CommandLine Command;
-
-        protected ConnectionMode m_ConnectionMode = ConnectionMode.Disconnected;
 
         protected static string TargetedServerPort = null;
         protected static string DesiredWorld = null;
@@ -36,6 +25,8 @@ namespace Arteranos.Core
             StartupTrigger = false;
             return DesiredWorld;
         }
+
+        public static ServerSettingsJSON CurrentServer { get; set; } = null;
 
         public static Transform Purgatory { get; private set; }
         public static ClientSettings Client { get; internal set; }
