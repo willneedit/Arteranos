@@ -10,7 +10,13 @@ namespace Arteranos.Audio
 {
     public class UVAudioOutput : MonoBehaviour, IAudioOutputV2, IVoiceOutput
     {
-        public AudioSource AudioSource { get; private set; }
+        public bool mute
+        {
+            get => AudioSource.mute;
+            set => AudioSource.mute = value;
+        }
+
+        private AudioSource AudioSource { get; set; }
 
         private OpusDecoder decoder;
         private RingBuffer<float[]> frameBuffer = null;
@@ -125,7 +131,10 @@ namespace Arteranos.Audio
         }
 
 
-        public float MeasureAmplitude() => vuBuffer.Front();
+        public float MeasureAmplitude()
+        {
+            return mute ? 0.0f : vuBuffer.Front();
+        }
 
         /// <summary>
         /// Creates <see cref="UVAudioOutput"/> instances

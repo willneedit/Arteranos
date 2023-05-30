@@ -15,6 +15,8 @@ namespace Arteranos.UniVoice {
         /// </summary>
         string ID { get; set; }
 
+        bool mute { get; set; }
+
         /// <summary>
         /// Feeds the data to the output implementation 
         /// </summary>

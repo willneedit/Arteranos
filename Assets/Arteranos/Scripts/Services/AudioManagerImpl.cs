@@ -77,7 +77,12 @@ namespace Arteranos.Services
             set => ChatroomAgent.MuteSelf = value;
         }
 
-        public void MuteOther(short peerID, bool muted) => ChatroomAgent.PeerSettings[peerID].muteThem = muted;
+        public void MuteOther(short peerID, bool muted)
+        {
+            ChatroomAgent.PeerSettings[peerID].muteThem = muted;
+            ChatroomAgent.PeerOutputs[peerID].mute = muted;
+        }
+
         public bool MuteOther(short peerID) => ChatroomAgent.PeerSettings[peerID].muteThem;
 
         private int micAGCLevel;

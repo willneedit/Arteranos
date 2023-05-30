@@ -2,6 +2,8 @@
 {
     public interface IVoiceOutput
     {
+        bool mute { get; set; }
+
         /// <summary>
         /// Measures the amplitude of the upcoming audio data
         /// </summary>
