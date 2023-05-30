@@ -228,8 +228,12 @@ namespace Arteranos.Core
             {
                 int rnd = UnityEngine.Random.Range(100000000, 999999999);
                 Me.Username = $"Guest{rnd}";
-                Me.Login.LoginToken = null;
-                dirty = true;
+
+                if(Me.Login.LoginToken != null)
+                {
+                    Me.Login.LoginToken = null;
+                    dirty = true;
+                }
             }
 
             ComputeUserHash();
