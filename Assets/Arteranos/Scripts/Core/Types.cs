@@ -385,6 +385,23 @@ namespace Arteranos.Core
 
         // The server's permissions
         public ServerPermissionsJSON Permissions = new();
+
+        public ServerSettingsJSON Strip()
+        {
+            ServerSettingsJSON newSS = new()
+            {
+                ServerPort = ServerPort,
+                VoicePort = VoicePort,
+                MetadataPort = MetadataPort,
+                ListenAddress = ListenAddress,
+                ShowAvatars = ShowAvatars,
+                Name = Name,
+                Description = Description,
+                Icon = new byte[0],         // Remove the icon to reduce the packet size
+                Permissions = Permissions
+            };
+            return newSS;
+        }
     }
 
 
