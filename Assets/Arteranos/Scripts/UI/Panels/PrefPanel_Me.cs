@@ -73,9 +73,14 @@ namespace Arteranos.UI
 
             cs = SettingsManager.Client;
 
+            // Show the original hash when offline, the derived by the server name's hash when online.
+            UserID current = (SettingsManager.CurrentServer == null)
+                ? cs.UserID
+                : cs.UserID.Derive(SettingsManager.CurrentServer.Name);
+
             spn_OnlineStatus.value = Array.IndexOf(spn_OnlineStatus.Options, Utils.GetEnumDescription(cs.Visibility));
             txt_Nickname.text = cs.Me.Nickname;
-            tro_UserID.text = cs.UserID;
+            tro_UserID.text = current.ToString();
             txt_AvatarURL.text = cs.AvatarURL;
             tro_AvatarProvider.text = Utils.GetEnumDescription(cs.Me.CurrentAvatar.AvatarProvider);
 

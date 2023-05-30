@@ -18,7 +18,6 @@ namespace Arteranos.Services
         {
             public Version ClientVersion;
             public string Nickname;
-            public byte[] ClientUserHash;
             public bool isGuest;
             public bool isCustom;
         }
@@ -163,7 +162,6 @@ namespace Arteranos.Services
                 Nickname = cs.Me.Nickname,
                 isGuest = cs.Me.Login.IsGuest,
                 isCustom = cs.Me.CurrentAvatar.IsCustom,
-                ClientUserHash = cs.UserHash // TODO Derive the server user hash
             };
 
             NetworkClient.Send(authRequestMessage);

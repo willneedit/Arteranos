@@ -269,21 +269,21 @@ namespace Arteranos.UI
 
         private (string, string, string) RetrieveLogin()
         {
-            ClientSettings cs = SettingsManager.Client;
-            return (cs.Me.Login.LoginProvider, cs.Me.Login.LoginToken, cs.Me.Username);
+            LoginDataJSON Login = SettingsManager.Client.Me.Login;
+
+            return (Login.LoginProvider, Login.LoginToken, Login.Username);
         }
 
         private void SaveLogin(string lp, string token, string Username)
         {
-            ClientSettings cs = SettingsManager.Client;
+            LoginDataJSON Login = SettingsManager.Client.Me.Login;
 
             Debug.Log($"Saving lp={lp}, token={token}, Username={Username}");
-            cs.Me.Login.LoginToken = token;
-            cs.Me.Login.LoginProvider = lp;
-            cs.Me.Username = Username;
-            cs.RefreshAuthentication();
-
-            cs.SaveSettings();
+            Login.LoginToken = token;
+            Login.LoginProvider = lp;
+            Login.Username = Username;
+            SettingsManager.Client.RefreshAuthentication();
+            SettingsManager.Client.SaveSettings();
             Debug.Log("Saving succeeded");
             OnRefreshLoginUI?.Invoke(lp);
         }

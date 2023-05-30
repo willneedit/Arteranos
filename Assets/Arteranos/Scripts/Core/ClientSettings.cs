@@ -64,12 +64,19 @@ namespace Arteranos.Core
         // The bearer token bestowed during the last login. May use to verify unknown user's details
         public virtual string LoginToken { get; set; } = null;
 
+        // The user name of the user, valid only for the selected login provider
+        // Has a random name if it's a guest.
+        public virtual string Username { get; set; } = null;
+
         [JsonIgnore]
         public bool IsGuest => string.IsNullOrEmpty(LoginProvider);
 
         public override bool Equals(object obj) => Equals(obj as LoginDataJSON);
-        public bool Equals(LoginDataJSON other) => other is not null && LoginProvider == other.LoginProvider && LoginToken == other.LoginToken;
-        public override int GetHashCode() => HashCode.Combine(LoginProvider, LoginToken);
+        public bool Equals(LoginDataJSON other) => other is not null 
+            && LoginProvider == other.LoginProvider 
+            && LoginToken == other.LoginToken 
+            && Username == other.Username;
+        public override int GetHashCode() => HashCode.Combine(LoginProvider, LoginToken, Username);
 
         public static bool operator ==(LoginDataJSON left, LoginDataJSON right) => EqualityComparer<LoginDataJSON>.Default.Equals(left, right);
         public static bool operator !=(LoginDataJSON left, LoginDataJSON right) => !(left == right);
@@ -120,10 +127,6 @@ namespace Arteranos.Core
         // The display name of the user. Generate if null
         public virtual string Nickname { get; set; } = null;
 
-        // The user name of the user, valid only for the selected login provider
-        // Has a random name if it's a guest.
-        public virtual string Username { get; set; } = null;
-
         // The user's login data
         public virtual LoginDataJSON Login { get; set; } = new();
 
@@ -170,18 +173,8 @@ namespace Arteranos.Core
         public event Action<bool> OnVRModeChanged;
 
         [JsonIgnore]
-        public byte[] UserHash { get; internal set; } = null;
+        public UserID UserID { get; private set; } = null;
 
-        [JsonIgnore]
-        public string UserID
-        {
-            get
-            {
-                string hashString = string.Empty;
-                foreach(byte x in UserHash) hashString += String.Format("{0:x2}", x);
-                return hashString;
-            }
-        }
 
         [JsonIgnore]
         public string AvatarURL
@@ -208,35 +201,25 @@ namespace Arteranos.Core
         }
 #endif
 
-        private void ComputeUserHash()
-        {
-            string source = $"{Me.Login.LoginProvider}_{Me.Username}";
-
-            byte[] bytes = Encoding.UTF8.GetBytes(source);
-            SHA256Managed hash = new();
-            byte[] hashBytes = hash.ComputeHash(bytes);
-            //string hashString = string.Empty;
-            //foreach(byte x in hashBytes) { hashString += String.Format("{0:x2}", x);  }
-            UserHash = hashBytes;
-        }
-
         public bool RefreshAuthentication()
         {
             bool dirty = false;
 
-            if(Me.Login.LoginProvider == null)
+            LoginDataJSON l = Me.Login;
+
+            if(l.LoginProvider == null)
             {
                 int rnd = UnityEngine.Random.Range(100000000, 999999999);
-                Me.Username = $"Guest{rnd}";
+                l.Username = $"Guest{rnd}";
 
-                if(Me.Login.LoginToken != null)
+                if(l.LoginToken != null)
                 {
-                    Me.Login.LoginToken = null;
+                    l.LoginToken = null;
                     dirty = true;
                 }
             }
 
-            ComputeUserHash();
+            UserID = new(l.LoginProvider, l.Username);
 
             return dirty;
         }

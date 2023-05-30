@@ -87,7 +87,11 @@ namespace Arteranos.Avatar
             if(isOwned)
             {
                 AvatarURL = cs.AvatarURL;
-                UserHash = cs.UserHash;
+
+                // Distribute the with the server's name derived hash to the server's user
+                // list, _not_ the original hash.
+                // Underived hashes are for close friends only.
+                UserHash = cs.UserID.Derive(SettingsManager.CurrentServer.Name).Hash;
             }
         }
         #endregion
@@ -122,10 +126,6 @@ namespace Arteranos.Avatar
             {
                 // That's me, set aside from the unwashed crowd. :)
                 XRControl.Me = gameObject;
-
-                // Using directly from Client Settings, because the UserID derived from UserHash hasn't
-                // done the full round trip from the server propagation.
-                RegisterUser(cs.UserID);
 
                 // Invoked by command line - only once
                 if(SettingsManager.StartupTrigger)
@@ -169,10 +169,8 @@ namespace Arteranos.Avatar
 
         public void OnDestroy()
         {
-            ClientSettings cs = SettingsManager.Client;
-
             if(isServer)
-                SettingsManager.UnregisterUser(cs.UserID);
+                SettingsManager.UnregisterUser(UserHash);
         }
 
         #endregion
@@ -247,11 +245,18 @@ namespace Arteranos.Avatar
         private void PropagateString(AVKeys key, string value) => m_strings[key] = value;
 
         [Command]
-        private void PropagateBlob(AVKeys key, byte[] value) => m_blobs[key] = value;
+        private void PropagateBlob(AVKeys key, byte[] value)
+        {
+            m_blobs[key] = value;
 
+            switch(key)
+            {
+                case AVKeys.UserHash:
+                    SettingsManager.RegisterUser(value);
+                    break;
+            }
+        }
 
-        [Command]
-        private void RegisterUser(string UserHash) => SettingsManager.RegisterUser(UserHash);
 
         #endregion
         // ---------------------------------------------------------------

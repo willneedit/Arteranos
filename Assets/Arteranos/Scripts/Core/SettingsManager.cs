@@ -97,14 +97,24 @@ namespace Arteranos.Core
             DontDestroyOnLoad(Purgatory.gameObject);
         }
 
-        public static void RegisterUser(string userHash)
+        private static  string GetHexStr(byte[] hashBytes)
         {
+            string hashString = string.Empty;
+            foreach(byte x in hashBytes) { hashString += String.Format("{0:x2}", x);  }
+            return hashString;
+        }
+        public static void RegisterUser(byte[] userHashBytes)
+        {
+            string userHash = GetHexStr(userHashBytes);
+
             if(!Users.Contains(userHash))
                 Users.Add(userHash);
         }
 
-        public static void UnregisterUser(string userHash)
+        public static void UnregisterUser(byte[] userHashBytes)
         {
+            string userHash = GetHexStr(userHashBytes);
+
             if(Users.Contains(userHash))
                 Users.Remove(userHash);
         }
