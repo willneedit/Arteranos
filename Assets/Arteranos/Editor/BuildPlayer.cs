@@ -22,8 +22,12 @@ using Newtonsoft.Json;
 
 namespace Arteranos
 {
+
     public class BuildPlayers : MonoBehaviour
     {
+        // public static string appName = Application.productName;
+        public static readonly string appName = "Arteranos";
+
         public static void GetProjectGitVersion()
         {
             ProcessStartInfo psi = new()
@@ -84,11 +88,16 @@ namespace Arteranos
 
             File.WriteAllText("build/WiXVersion.wxi",WiXFileText);
         }
+        [MenuItem("Arteranos/Update Project Version", false, 101)]
+        public static void SetVersion()
+        {
+            GetProjectGitVersion();
 
-        // public static string appName = Application.productName;
-        public static string appName = "Arteranos";
+            Core.Version v = Core.Version.Load();
+            Debug.Log($"Version detected: {v.Full}");
+        }
 
-        [MenuItem("Arteranos/Build Windows64", false, 101)]
+        [MenuItem("Arteranos/Build Windows64", false, 110)]
         public static void BuildWin64()
         {
             GetProjectGitVersion();
@@ -111,7 +120,7 @@ namespace Arteranos
             CommenceBuild(bpo);
         }
 
-        [MenuItem("Arteranos/Build Windows Dedicated Server", false, 101)]
+        [MenuItem("Arteranos/Build Windows Dedicated Server", false, 120)]
         public static void BuildWin64DedServ()
         {
             GetProjectGitVersion();
