@@ -87,6 +87,7 @@ namespace Arteranos.Avatar
             if(isOwned)
             {
                 AvatarURL = cs.AvatarURL;
+                Nickname = cs.Me.Nickname;
 
                 // Distribute the with the server's name derived hash to the server's user
                 // list, _not_ the original hash.
