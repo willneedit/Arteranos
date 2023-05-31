@@ -5,13 +5,9 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-using Arteranos.Avatar;
-
-namespace Arteranos.UI
+namespace Arteranos.Avatar
 {
     public class HitBox : MonoBehaviour, IHitBox
     {
@@ -21,7 +17,7 @@ namespace Arteranos.UI
         private bool lastInSight = false;
         private float stableDuration = 0;
         private bool triggered = false;
-        private INameplateUI np = null;
+        private UI.INameplateUI np = null;
 
         // TODO Popup and Popout durations
         private const float k_PopupTime = 0.5f;
@@ -39,7 +35,7 @@ namespace Arteranos.UI
                 if(lastInSight && stableDuration > k_PopupTime)
                 {
                     triggered = true;
-                    np = NameplateUIFactory.New(Brain.gameObject);
+                    np = UI.NameplateUIFactory.New(Brain.gameObject);
                 }
 
                 if(!lastInSight && stableDuration > k_PopoutTime)

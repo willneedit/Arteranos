@@ -11,7 +11,6 @@ using System;
 using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 
 namespace Arteranos.Avatar
 {
@@ -117,6 +116,23 @@ namespace Arteranos.Avatar
                 UserHash = cs.UserID.Derive(SettingsManager.CurrentServer.Name).Hash;
             }
         }
+
+        public void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered)
+        {
+            // TODO People management
+            bool haveFriends = true;
+
+            // Not for the desired sphere of influence
+            if(isFriend != haveFriends) return;
+
+            if(entered)
+                touchy.AppearanceStatus |= Avatar.AppearanceStatus.Bubbled;
+            else
+                touchy.AppearanceStatus &= ~Avatar.AppearanceStatus.Bubbled;
+        }
+
+
+
         #endregion
         // ---------------------------------------------------------------
         #region Start & Stop
@@ -165,11 +181,13 @@ namespace Arteranos.Avatar
                 {
                     WorldTransition.InitiateTransition(m_strings[AVKeys.CurrentWorld]);
                 }
+
+                _ = BubbleCoordinatorFactory.New(this);
             }
             else
             {
                 // Alien avatars get the hit capsules to target them to call up the nameplates.
-                HitBox = AvatarHitBoxFactory.New(gameObject);
+                HitBox = AvatarHitBoxFactory.New(this);
             }
 
             InitializeVoice();

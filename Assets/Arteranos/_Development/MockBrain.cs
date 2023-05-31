@@ -35,6 +35,20 @@ namespace Arteranos.Avatar
             } 
         }
 
+        public void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered)
+        {
+            // TODO People management
+            bool haveFriends = true;
+
+            // Not for the desired sphere of influence
+            if(isFriend != haveFriends) return;
+
+            if(entered)
+                touchy.AppearanceStatus |= Avatar.AppearanceStatus.Bubbled;
+            else
+                touchy.AppearanceStatus &= ~Avatar.AppearanceStatus.Bubbled;
+        }
+
         public bool IsOwned => false;
 
         public IAvatarLoader Body => GetComponent<IAvatarLoader>();
@@ -47,7 +61,7 @@ namespace Arteranos.Avatar
         private void Start()
         {
             if(!IsOwned)
-                AvatarHitBoxFactory.New(gameObject);
+                AvatarHitBoxFactory.New(this);
         }
 
     }

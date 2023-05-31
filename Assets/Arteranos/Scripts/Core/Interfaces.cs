@@ -8,6 +8,7 @@
 using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.XR;
+using Mirror;
 using System;
 using System.ComponentModel;
 using System.Net;
@@ -82,6 +83,8 @@ namespace Arteranos.Avatar
 
         event Action<string> OnAvatarChanged;
         event Action<int> OnAppearanceStatusChanged;
+
+        void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
     }
 
     public interface IHitBox
@@ -92,6 +95,14 @@ namespace Arteranos.Avatar
         void OnTargeted(bool inSight);
     }
 
+    public interface IBubbleCoordinator
+    {
+        IAvatarBrain Brain { get; set; }
+
+        void ChangeBubbleSize(float diameter, bool isFriend);
+        void NotifyTrigger(IAvatarBrain touchy, bool isFriend, bool entered);
+    }
+
 
 
     #endregion
@@ -100,14 +111,26 @@ namespace Arteranos.Avatar
 
     public class AvatarHitBoxFactory : MonoBehaviour
     {
-        public static IHitBox New(GameObject bearer)
+        public static IHitBox New(IAvatarBrain brain)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/InApp/AvatarHitBox"), bearer.transform);
-            IAvatarBrain avatarBrain= bearer.GetComponent<IAvatarBrain>();
+            GameObject go = Instantiate(
+                Resources.Load<GameObject>("UI/InApp/AvatarHitBox"), brain.gameObject.transform);
             IHitBox hitBox = go.GetComponent<IHitBox>();
-            hitBox.Brain = avatarBrain;
+            hitBox.Brain = brain;
 
             return hitBox;
+        }
+    }
+
+    public class BubbleCoordinatorFactory : MonoBehaviour
+    {
+        public static IBubbleCoordinator New(IAvatarBrain brain)
+        {
+            GameObject go = Instantiate(
+                Resources.Load<GameObject>("UI/InApp/PrivacyBubble"), brain.gameObject.transform);
+            IBubbleCoordinator bc = go.GetComponent<IBubbleCoordinator>();
+            bc.Brain = brain;
+            return bc;
         }
     }
     #endregion
