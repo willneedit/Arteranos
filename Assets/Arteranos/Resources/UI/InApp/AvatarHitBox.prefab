@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1851507823170403639}
   - component: {fileID: 1851507823170403635}
   - component: {fileID: 1851507823170403628}
-  m_Layer: 14
+  m_Layer: 16
   m_Name: AvatarHitBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -214,4 +214,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9d5682452192254b9c29795441bd8d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  go: {fileID: 0}
