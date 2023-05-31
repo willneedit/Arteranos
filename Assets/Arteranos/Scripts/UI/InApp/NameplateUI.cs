@@ -42,17 +42,17 @@ namespace Arteranos.UI
 
             lbl_Name.text = Bearer.Nickname;
 
-            Bearer.OnNetMuteStatusChanged += OnNetMuteStatusChanged;
+            Bearer.OnAppearanceStatusChanged += OnAppearanceStatusChanged;
             float fullHeight = Bearer.Body.FullHeight;
             // TODO Up vector? LocalPosition respects the root rotation, but...
             transform.localPosition = new Vector3(0, fullHeight + 0.2f, 0);
             transform.localRotation = Quaternion.Euler(0, 180, 0);
-            OnNetMuteStatusChanged(Bearer.NetMuteStatus);
+            OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 
         protected override void OnDisable()
         {
-            Bearer.OnNetMuteStatusChanged -= OnNetMuteStatusChanged;
+            Bearer.OnAppearanceStatusChanged -= OnAppearanceStatusChanged;
 
             base.OnDisable();
         }
@@ -65,23 +65,24 @@ namespace Arteranos.UI
             transform.Rotate(aboutFace);
         }
 
-        private void OnNetMuteStatusChanged(int status)
+        private void OnAppearanceStatusChanged(int status)
         {
             //       Design: Speaker on if the audio status okay and not individually muted
             //               Speaker off it it's anything else
             // Interactable: Only if it's not self-muted and not gagged
-            Button current = (status == 0 && !Bearer.ClientMuted) ? btn_mute : btn_unmute;
+            Button current = (!AppearanceStatus.IsSilent(status)) ? btn_mute : btn_unmute;
 
             btn_mute.gameObject.SetActive(current == btn_mute);
             btn_unmute.gameObject.SetActive(current == btn_unmute);
 
-            current.interactable = (status == 0);
+            // Only interactable if there's no other reason for it.
+            current.interactable = (status & ~AppearanceStatus.Muted) == AppearanceStatus.OK;
         }
 
         private void OnMuteButtonClicked()
         {
             // Regular users can mute other users
-            Bearer.ClientMuted = !Bearer.ClientMuted;
+            Bearer.AppearanceStatus ^= AppearanceStatus.Muted;
 
             // Elevated users can gag other users.
             // TODO User privileges management
@@ -89,7 +90,7 @@ namespace Arteranos.UI
             // Bearer.AudioStatus ^= Avatar.AudioStatus.Gagged;
 
             // Update the visible state
-            OnNetMuteStatusChanged(Bearer.NetMuteStatus);
+            OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 
     }

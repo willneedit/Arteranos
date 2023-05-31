@@ -26,26 +26,23 @@ namespace Arteranos.Avatar
 
         public string Nickname => "TI-99 4a";
 
-        public int NetMuteStatus { 
+        public int AppearanceStatus { 
             get => m_NetMuteStatus;
             set 
             {
                 m_NetMuteStatus= value;
-                OnNetMuteStatusChanged?.Invoke(m_NetMuteStatus);
+                OnAppearanceStatusChanged?.Invoke(m_NetMuteStatus);
             } 
         }
 
         public bool IsOwned => false;
 
-        public bool ClientMuted { get => m_ClientMuted; set => m_ClientMuted = value; }
-
         public IAvatarLoader Body => GetComponent<IAvatarLoader>();
 
         public event Action<string> OnAvatarChanged;
-        public event Action<int> OnNetMuteStatusChanged;
+        public event Action<int> OnAppearanceStatusChanged;
 
         [SerializeField] private int m_NetMuteStatus = 0;
-        [SerializeField] private bool m_ClientMuted = false;
 
         private void Start()
         {

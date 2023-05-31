@@ -28,6 +28,7 @@ namespace Arteranos.Avatar
         string GalleryModeURL { get; set; }
         float EyeHeight { get; }
         float FullHeight { get; }
+        bool invisible { get; set; }
 
         /// <summary>
         /// Reset the the avatar to an 'Attention' pose

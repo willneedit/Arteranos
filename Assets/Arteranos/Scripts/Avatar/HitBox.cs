@@ -50,6 +50,18 @@ namespace Arteranos.UI
             }
         }
 
+        private void OnEnable()
+        {
+            lastInSight = false;
+            stableDuration= 0;
+            triggered= false;
+        }
+
+        private void OnDisable()
+        {
+            np?.gameObject.SetActive(false);
+        }
+
         private void UpdateAvatarHeight()
         {
             fullHeight = Brain.Body.FullHeight;

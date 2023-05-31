@@ -49,9 +49,25 @@ namespace Arteranos.Avatar
         public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
 
+
+        public bool invisible
+        {
+            get => m_invisible;
+            set
+            {
+                m_invisible = value;
+                if(m_AvatarGameObject!= null)
+                {
+                    Renderer renderer = m_AvatarGameObject.GetComponent<Renderer>();
+                    renderer.enabled = !invisible;
+                }
+            }
+        }
+
         private AvatarBrain avatarBrain = null;
 
         private void Awake() => m_AvatarStandin = Resources.Load<GameObject>("Avatar/Avatar_StandIn");
+        private bool m_invisible = false;
 
         public void OnEnable()
         {
@@ -64,7 +80,9 @@ namespace Arteranos.Avatar
             m_AvatarGameObject.transform.SetParent(transform, false);
 
             if(!string.IsNullOrEmpty(GalleryModeURL))
+            {
                 RequestAvatarChange(GalleryModeURL);
+            }
             else
             {
                 avatarBrain = GetComponent<AvatarBrain>();
@@ -97,7 +115,7 @@ namespace Arteranos.Avatar
             Vector3? poleOffset = null, int bones = 2)
         {
             Transform handle = null;
-    
+
             Transform limbT = avatar.transform.FindRecursive(limb);
             if(limbT == null)
             {
@@ -133,7 +151,7 @@ namespace Arteranos.Avatar
 
             // Owned and alien avatars have to set up the Skeleton IK data record.
             Transform boneT = limbT;
-            for(int i=0; i<=bones; i++)
+            for(int i = 0; i <= bones; i++)
             {
                 jointnames.Add(boneT.name);
                 boneT = boneT.parent;
@@ -150,14 +168,14 @@ namespace Arteranos.Avatar
         /// </summary>
         public void ResetPose()
         {
-            if (LeftHand != null)
+            if(LeftHand != null)
             {
                 Vector3 idle_lh = new(-0.4f, 0, 0);
                 Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
                 LeftHand.SetLocalPositionAndRotation(idle_lh, idle_rlh);
             }
 
-            if (RightHand != null)
+            if(RightHand != null)
             {
                 Vector3 idle_rh = new(0.4f, 0, 0);
                 Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
@@ -298,7 +316,9 @@ namespace Arteranos.Avatar
             args.Avatar.transform.SetParent(transform, false);
 
             if(string.IsNullOrEmpty(GalleryModeURL))
+            {
                 SetupAvatar(args);
+            }
             else if(animator != null)
             {
                 args.Avatar.GetComponent<Animator>().runtimeAnimatorController = animator;
@@ -306,6 +326,9 @@ namespace Arteranos.Avatar
                 EyeAnimationHandler eah = args.Avatar.AddComponent<EyeAnimationHandler>();
                 eah.BlinkInterval = 6; // 3 seconds is a little bit too fast.
             }
+
+            // Refresh the visibility state for the new avatar
+            invisible = m_invisible;
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)

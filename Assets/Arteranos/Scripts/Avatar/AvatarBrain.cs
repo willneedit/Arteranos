@@ -11,6 +11,7 @@ using System;
 using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 
 namespace Arteranos.Avatar
 {
@@ -22,7 +23,7 @@ namespace Arteranos.Avatar
         CurrentWorld,
         Nickname,
         UserHash,
-        AudioStatus,
+        NetAppearanceStatus,
     }
 
     public class AvatarBrain : NetworkBehaviour, IAvatarBrain
@@ -30,9 +31,13 @@ namespace Arteranos.Avatar
         #region Interface
         public event Action<IVoiceOutput> OnVoiceOutputChanged;
         public event Action<string> OnAvatarChanged;
-        public event Action<int> OnNetMuteStatusChanged;
+        public event Action<int> OnAppearanceStatusChanged;
+
+        private int LocalAppearanceStatus = 0;
 
         private Transform Voice = null;
+
+        private IHitBox HitBox = null;
 
         public uint NetID => netIdentity.netId;
 
@@ -62,16 +67,33 @@ namespace Arteranos.Avatar
             private set => PropagateString(AVKeys.Nickname, value);
         }
 
-        public int NetMuteStatus
+        public int AppearanceStatus
         {
-            get => m_ints.ContainsKey(AVKeys.AudioStatus) ? m_ints[AVKeys.AudioStatus] : Avatar.NetMuteStatus.OK;
-            set => PropagateInt(AVKeys.AudioStatus, value);
-        }
+            get
+            {
+                // Join the local and the net-wide status
+                int status = m_ints.ContainsKey(AVKeys.NetAppearanceStatus) 
+                    ? m_ints[AVKeys.NetAppearanceStatus] 
+                    : Avatar.AppearanceStatus.OK;
 
-        public bool ClientMuted
-        {
-            get => AudioManager.Instance.MuteOther((short) ChatOwnID);
-            set => AudioManager.Instance.MuteOther((short) (ChatOwnID), value);
+                return status | LocalAppearanceStatus;
+            }
+
+            set
+            {
+                // Split the local and the net-wide status
+                LocalAppearanceStatus = value & Avatar.AppearanceStatus.MASK_LOCAL;
+
+                int oldNetAS = m_ints[AVKeys.NetAppearanceStatus];
+                int newNetAS = value & ~Avatar.AppearanceStatus.MASK_LOCAL;
+
+                if(oldNetAS != newNetAS)
+                    // Spread the word...
+                    PropagateInt(AVKeys.NetAppearanceStatus, newNetAS);
+                else
+                    // Or, follow through.
+                    UpdateNetAppearanceStatus(value);
+            }
         }
 
         public IAvatarLoader Body => GetComponent<IAvatarLoader>();
@@ -140,12 +162,14 @@ namespace Arteranos.Avatar
 
                 // The server already uses a world, so download and transition into the targeted world immediately.
                 else if(!string.IsNullOrEmpty(m_strings[AVKeys.CurrentWorld]))
+                {
                     WorldTransition.InitiateTransition(m_strings[AVKeys.CurrentWorld]);
+                }
             }
             else
             {
                 // Alien avatars get the hit capsules to target them to call up the nameplates.
-                AvatarHitBoxFactory.New(gameObject);
+                HitBox = AvatarHitBoxFactory.New(gameObject);
             }
 
             InitializeVoice();
@@ -208,9 +232,9 @@ namespace Arteranos.Avatar
                 case AVKeys.ChatOwnID:
                     // Give that avatar its corresponding voice - except its owner.
                     UpdateVoiceID(value); break;
-                case AVKeys.AudioStatus:
+                case AVKeys.NetAppearanceStatus:
                     // Either been self-muted or by other means, the announcement comes down from the server.
-                    UpdateNetMuteStatus(value); break;
+                    UpdateNetAppearanceStatus(value); break;
             }
         }
 
@@ -340,14 +364,20 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void UpdateNetMuteStatus(int value)
+        private void UpdateNetAppearanceStatus(int _)
         {
             // Update the own voice status, and for alien avatar it's only informational value,
             // like the status update on the nameplate.
             if(isOwned)
-                AudioManager.Instance.MuteSelf = (value != 0);
+                AudioManager.Instance.MuteSelf = Avatar.AppearanceStatus.IsSilent(AppearanceStatus);
+            else
+                AudioManager.Instance.MuteOther((short) ChatOwnID, Avatar.AppearanceStatus.IsSilent(AppearanceStatus));
 
-            OnNetMuteStatusChanged?.Invoke(value);
+            HitBox?.gameObject.SetActive(Avatar.AppearanceStatus.IsInvisible(AppearanceStatus));
+
+            Body.invisible = Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
+
+            OnAppearanceStatusChanged?.Invoke(AppearanceStatus);
         }
 
 
@@ -430,8 +460,9 @@ namespace Arteranos.Avatar
                 WorldTransition.InitiateTransition(worldURL);
             }
             else
+            {
                 ReceiveWorldTransition(worldURL);
-
+            }
         }
 
         private void CommitWorldChanged(string worldURL)
