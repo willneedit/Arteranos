@@ -6,9 +6,6 @@
  */
 
 using Arteranos.Avatar;
-using Codice.Client.Common;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Arteranos.UI
