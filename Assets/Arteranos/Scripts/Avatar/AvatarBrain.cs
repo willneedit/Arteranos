@@ -536,16 +536,16 @@ namespace Arteranos.Avatar
         [TargetRpc]
         private void TargetTellTargetedSocialState(
             NetworkConnectionToClient _,
-            GameObject originator,
-            int state)
+            GameObject orig,
+            int origstate)
         {
-            IAvatarBrain origbrain = originator.GetComponent<IAvatarBrain>();
 
-            Debug.Log($"[{Nickname}] from {origbrain.Nickname}: Social status is {state}");
+            IAvatarBrain origbrain = orig.GetComponent<IAvatarBrain>();
+            Debug.Log($"[{Nickname}] from {origbrain.Nickname}: Social status is {origstate}");
 
 
             // Blocked! Me? Turnabout is a fair play.
-            bool blocked = (state & SocialState.Blocked) != 0;
+            bool blocked = (origstate & SocialState.Blocked) != 0;
 
             if(blocked)
             {
@@ -554,6 +554,11 @@ namespace Arteranos.Avatar
             else
             {
                 origbrain.AppearanceStatus &= ~Avatar.AppearanceStatus.Blocking;
+            }
+
+            if(SocialState.IsFriend(origstate, OwnSocialState[origbrain.UserID]))
+            {
+                Debug.Log($"[{Nickname}] you offered, {origbrain.Nickname} offered, now let's make it official.");
             }
         }
         #endregion
