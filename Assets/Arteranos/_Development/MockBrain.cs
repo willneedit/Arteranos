@@ -53,7 +53,7 @@ namespace Arteranos.Avatar
                 touchy.AppearanceStatus &= ~Avatar.AppearanceStatus.Bubbled;
         }
 
-        public bool IsOwned => false;
+        public bool isOwned => false;
 
         public IAvatarLoader Body => GetComponent<IAvatarLoader>();
 
@@ -66,7 +66,7 @@ namespace Arteranos.Avatar
 
         private void Start()
         {
-            if(!IsOwned)
+            if(!isOwned)
                 AvatarHitBoxFactory.New(this);
         }
 

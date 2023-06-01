@@ -98,12 +98,6 @@ namespace Arteranos.Core
             DontDestroyOnLoad(Purgatory.gameObject);
         }
 
-        private static  string GetHexStr(byte[] hashBytes)
-        {
-            string hashString = string.Empty;
-            foreach(byte x in hashBytes) { hashString += String.Format("{0:x2}", x);  }
-            return hashString;
-        }
         public static void RegisterUser(IAvatarBrain brain)
         {
             Users.Add(brain);

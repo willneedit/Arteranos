@@ -79,7 +79,7 @@ namespace Arteranos.Avatar
         byte[] UserHash { get; }
         string Nickname { get; }
         int AppearanceStatus { get; set; }
-        bool IsOwned { get; }
+        bool isOwned { get; }
         IAvatarLoader Body { get; }
         GameObject gameObject { get; }
         UserID UserID { get; }

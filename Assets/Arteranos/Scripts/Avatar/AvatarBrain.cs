@@ -11,6 +11,8 @@ using System;
 using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
+using Arteranos.Social;
+using System.Linq;
 
 namespace Arteranos.Avatar
 {
@@ -39,8 +41,6 @@ namespace Arteranos.Avatar
         private IHitBox HitBox = null;
 
         public uint NetID => netIdentity.netId;
-
-        public bool IsOwned => isOwned;
 
         public int ChatOwnID
         {
@@ -186,6 +186,10 @@ namespace Arteranos.Avatar
                 }
 
                 _ = BubbleCoordinatorFactory.New(this);
+
+                // Do the customary greetings with its variance, being close friends or
+                // could be the beings you'd hate their guts.
+                AnnounceSocialStates();
             }
             else
             {
@@ -496,30 +500,62 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Social state negotiation
 
-        private int SocialState { get; set; } = Social.SocialState.None;
+        private readonly Dictionary<UserID, int> OwnSocialState = new();
 
-        public (int, int) GetSocialState()
+        /// <summary>
+        /// Notify now how the owner thinks about the the world's users
+        /// </summary>
+        public void AnnounceSocialStates()
         {
-            // It takes two of them. We're NOT going down the rabbit hole of
-            // self-gratification and the like...
-            if(IsOwned)
-                throw new Exception("GetRemoteSocialState needs to be the alien avatar");
+            var q = from state in OwnSocialState
+                    join user in SettingsManager.Users
+                        on state.Key.Derive(SettingsManager.CurrentServer.Name) equals user.UserID
+                    select new { 
+                        User = user,
+                        State = state.Value 
+                    };
 
-            AvatarBrain you = XRControl.Me.GetComponent<AvatarBrain>();
+            foreach(var item in q)
+            {
+                // Should never happen, but....
+                if(item.User.isOwned) continue;
 
-            Debug.Log($"Your ID: {you.UserID}, My ID: {UserID}");
-
-            Debug.Log($"You think of me: {you.SocialState}");
-
-            Debug.Log($"What I think of you: {SocialState}");
-
-            return (
-                you.SocialState,    // Client user (you) towards to the remote user
-                SocialState     // Remote user towards to you
-                );
+                CmdTellTargetedSocialState(item.User.gameObject, item.State);
+            }
         }
 
-        #endregion
+        [Command]
+        private void CmdTellTargetedSocialState(GameObject target, int state)
+        {
+            if(!isOwned) return;
 
+            NetworkIdentity nid = target.GetComponent<NetworkIdentity>();
+            TargetTellTargetedSocialState(nid.connectionToClient, gameObject, state);
+        }
+
+        [TargetRpc]
+        private void TargetTellTargetedSocialState(
+            NetworkConnectionToClient _,
+            GameObject originator,
+            int state)
+        {
+            IAvatarBrain origbrain = originator.GetComponent<IAvatarBrain>();
+
+            Debug.Log($"[{Nickname}] from {origbrain.Nickname}: Social status is {state}");
+
+
+            // Blocked! Me? Turnabout is a fair play.
+            bool blocked = (state & SocialState.Blocked) != 0;
+
+            if(blocked)
+            {
+                origbrain.AppearanceStatus |= Avatar.AppearanceStatus.Blocking;
+            }
+            else
+            {
+                origbrain.AppearanceStatus &= ~Avatar.AppearanceStatus.Blocking;
+            }
+        }
+        #endregion
     }
 }

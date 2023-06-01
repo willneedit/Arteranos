@@ -80,7 +80,7 @@ namespace Arteranos.Core
         public UserID Derive(string ServerName)
         {
             if(this.ServerName != null && this.ServerName != ServerName)
-                throw new ArgumentException("Cannot derive a UserID on already derived one.");
+                return null;
 
             if(this.ServerName == ServerName) return this;
 
