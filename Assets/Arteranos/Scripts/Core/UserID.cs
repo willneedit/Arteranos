@@ -24,6 +24,11 @@ namespace Arteranos.Core
         public string ServerName = null;
         public byte[] Hash = null;
 
+        public UserID()
+        {
+
+        }
+
         public UserID(string LoginProvider, string LoginUsername, string ServerName = null)
         {
             this.ServerName = null;
@@ -35,7 +40,7 @@ namespace Arteranos.Core
             this.ServerName = ServerName;
         }
 
-        private UserID(byte[] Hash, string ServerName)
+        public UserID(byte[] Hash, string ServerName)
         {
             this.Hash = Hash;
             this.ServerName = null;

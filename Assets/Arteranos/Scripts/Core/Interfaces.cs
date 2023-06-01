@@ -8,7 +8,6 @@
 using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.XR;
-using Mirror;
 using System;
 using System.ComponentModel;
 using System.Net;
@@ -22,20 +21,20 @@ using UnityEngine.EventSystems;
 namespace Arteranos.Avatar
 {
     // -------------------------------------------------------------------
-    #region Avatar interfaces
+    #region Avatar constants
 
     public static class AppearanceStatus
     {
-        public const int OK         = 0;
+        public const int OK = 0;
 
         // Muted by the user himself
-        public const int Muting     = (1 <<  0);
+        public const int Muting = (1 << 0);
 
         // (Local only) Muted by you
-        public const int Muted      = (1 <<  1);
+        public const int Muted = (1 << 1);
 
         // Muted by the administrator/event host/...
-        public const int Gagged     = (1 <<  2);
+        public const int Gagged = (1 << 2);
 
 
         // Reasons for a user is silent
@@ -43,16 +42,16 @@ namespace Arteranos.Avatar
 
 
         // (Local Only) Invisible because of being too close
-        public const int Bubbled    = (1 << 16);
+        public const int Bubbled = (1 << 16);
 
         // (Local Only) User is blocked by you
-        public const int Blocked    = (1 << 17);
+        public const int Blocked = (1 << 17);
 
         // (Local Only) User is blocking you, therefore he's invisible to you too.
-        public const int Blocking   = (1 << 18);
+        public const int Blocking = (1 << 18);
 
         // Made invisible by the administrator/event host/...
-        public const int Ghosted    = (1 << 19);
+        public const int Ghosted = (1 << 19);
 
 
         // Reasons fot a user is invisible
@@ -60,7 +59,7 @@ namespace Arteranos.Avatar
 
 
         // Reasons which are individual causes, not net-wide ones
-        public const int MASK_LOCAL = (Muted | Bubbled | Blocked | Blocking); 
+        public const int MASK_LOCAL = (Muted | Bubbled | Blocked | Blocking);
 
         public static bool IsSilent(int status) => (status != OK); // Being invisible implies being silent, too.
 
@@ -69,6 +68,9 @@ namespace Arteranos.Avatar
         public static bool IsLocal(int status) => ((status & MASK_LOCAL) != OK);
     }
 
+    #endregion
+    // -------------------------------------------------------------------
+    #region Avatar interfaces
     public interface IAvatarBrain
     {
         string AvatarURL { get; }
@@ -80,6 +82,7 @@ namespace Arteranos.Avatar
         bool IsOwned { get; }
         IAvatarLoader Body { get; }
         GameObject gameObject { get; }
+        UserID UserID { get; }
 
         event Action<string> OnAvatarChanged;
         event Action<int> OnAppearanceStatusChanged;
@@ -529,4 +532,28 @@ namespace Arteranos.XR
     }
     #endregion
     // -------------------------------------------------------------------
+}
+
+namespace Arteranos.Social
+{
+    // -------------------------------------------------------------------
+    #region Social constants
+    public static class SocialState
+    {
+        public const int None = 0;
+
+        // You offered your friendship to the targeted user.
+        public const int Friend_offered     = (1 << 0);
+
+        // You blocked the targeted user.
+        public const int Blocked            = (1 << 8);
+
+        public static bool IsFriend(int you, int him) 
+            => (you == Friend_offered) && (him == Friend_offered);
+
+
+    }
+    #endregion
+    // -------------------------------------------------------------------
+
 }

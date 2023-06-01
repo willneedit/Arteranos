@@ -9,6 +9,7 @@ using Arteranos.Core;
 using Mirror;
 using Newtonsoft.Json;
 using System.Collections;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -125,7 +126,7 @@ namespace Arteranos.Services
             {
                 Settings = SettingsManager.Server,
                 CurrentWorld = SettingsManager.Server.WorldURL,
-                CurrentUsers = SettingsManager.Users
+                CurrentUsers = SettingsManager.Users.Select(x => x.UserID.ToString()).ToList(),
             };
 
             string json = JsonConvert.SerializeObject(mdj);

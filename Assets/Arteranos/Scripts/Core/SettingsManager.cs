@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Avatar;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -32,7 +33,7 @@ namespace Arteranos.Core
         public static ClientSettings Client { get; internal set; }
         public static ServerSettings Server { get; internal set; }
 
-        public static List<string> Users { get; internal set; } = new();
+        public static List<IAvatarBrain> Users { get; internal set; } = new();
 
         private void Awake()
         {
@@ -103,20 +104,15 @@ namespace Arteranos.Core
             foreach(byte x in hashBytes) { hashString += String.Format("{0:x2}", x);  }
             return hashString;
         }
-        public static void RegisterUser(byte[] userHashBytes)
+        public static void RegisterUser(IAvatarBrain brain)
         {
-            string userHash = GetHexStr(userHashBytes);
-
-            if(!Users.Contains(userHash))
-                Users.Add(userHash);
+            Users.Add(brain);
         }
 
-        public static void UnregisterUser(byte[] userHashBytes)
+        public static void UnregisterUser(IAvatarBrain brain)
         {
-            string userHash = GetHexStr(userHashBytes);
-
-            if(Users.Contains(userHash))
-                Users.Remove(userHash);
+            if(Users.Contains(brain))
+                Users.Remove(brain);
         }
     }
 }

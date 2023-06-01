@@ -60,6 +60,8 @@ namespace Arteranos.Avatar
             private set => PropagateBlob(AVKeys.UserHash, value);
         }
 
+        public UserID UserID { get; private set; } = null;
+
         public string Nickname
         {
             get => m_strings.ContainsKey(AVKeys.Nickname) ? m_strings[AVKeys.Nickname] : null;
@@ -113,7 +115,8 @@ namespace Arteranos.Avatar
                 // Distribute the with the server's name derived hash to the server's user
                 // list, _not_ the original hash.
                 // Underived hashes are for close friends only.
-                UserHash = cs.UserID.Derive(SettingsManager.CurrentServer.Name).Hash;
+                UserID = new(cs.UserID.Hash, SettingsManager.CurrentServer.Name);
+                UserHash = UserID.Hash;
             }
         }
 
@@ -213,7 +216,7 @@ namespace Arteranos.Avatar
         public void OnDestroy()
         {
             if(isServer)
-                SettingsManager.UnregisterUser(UserHash);
+                SettingsManager.UnregisterUser(this);
         }
 
         #endregion
@@ -240,7 +243,6 @@ namespace Arteranos.Avatar
 
             foreach(KeyValuePair<AVKeys, byte[]> kvpb in m_blobs)
                 OnMBlobsChanged(SyncDictionary<AVKeys, byte[]>.Operation.OP_ADD, kvpb.Key, kvpb.Value);
-
         }
 
         private void OnMIntsChanged(SyncDictionary<AVKeys, int>.Operation op, AVKeys key, int value)
@@ -295,11 +297,10 @@ namespace Arteranos.Avatar
             switch(key)
             {
                 case AVKeys.UserHash:
-                    SettingsManager.RegisterUser(value);
+                    SettingsManager.RegisterUser(this);
                     break;
             }
         }
-
 
         #endregion
         // ---------------------------------------------------------------
@@ -489,6 +490,33 @@ namespace Arteranos.Avatar
             // and we have to wake up, and for us it is just to find ourselves.
             if(isOwned)
                 PropagateWorldTransition(worldURL);
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Social state negotiation
+
+        private int SocialState { get; set; } = Social.SocialState.None;
+
+        public (int, int) GetSocialState()
+        {
+            // It takes two of them. We're NOT going down the rabbit hole of
+            // self-gratification and the like...
+            if(IsOwned)
+                throw new Exception("GetRemoteSocialState needs to be the alien avatar");
+
+            AvatarBrain you = XRControl.Me.GetComponent<AvatarBrain>();
+
+            Debug.Log($"Your ID: {you.UserID}, My ID: {UserID}");
+
+            Debug.Log($"You think of me: {you.SocialState}");
+
+            Debug.Log($"What I think of you: {SocialState}");
+
+            return (
+                you.SocialState,    // Client user (you) towards to the remote user
+                SocialState     // Remote user towards to you
+                );
         }
 
         #endregion
