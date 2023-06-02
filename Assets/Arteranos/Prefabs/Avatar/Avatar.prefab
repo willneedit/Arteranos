@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3802344986434043942}
   - component: {fileID: 6554906922202367433}
   - component: {fileID: 6317469326733580242}
+  - component: {fileID: 649865117523041093}
   m_Layer: 0
   m_Name: Avatar
   m_TagString: Untagged
@@ -65,11 +66,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3d04faf237846a428aa61df13cce2f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0.1
-  m_AvatarStandin: {fileID: 3985354216906982376, guid: 67b69500f6853f9409549929b49e4dc2,
-    type: 3}
+  m_GalleryModeURL: 
+  animator: {fileID: 0}
 --- !u!114 &2032202113796676651
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,3 +162,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 504c971a29732eb4eb888fcb0f455b49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &649865117523041093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2697617456504013145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 706df1d2237f5ee479139ba7f4e26007, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 1
+  syncInterval: 0.1

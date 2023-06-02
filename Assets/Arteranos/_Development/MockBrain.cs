@@ -57,7 +57,7 @@ namespace Arteranos.Avatar
 
         public IAvatarLoader Body => GetComponent<IAvatarLoader>();
 
-        public UserID UserID => new UserID(UserHash, null);
+        public UserID UserID => new(UserHash, null);
 
         public event Action<string> OnAvatarChanged;
         public event Action<int> OnAppearanceStatusChanged;
@@ -70,6 +70,7 @@ namespace Arteranos.Avatar
                 AvatarHitBoxFactory.New(this);
         }
 
+        public int AskRelationsToMe(IAvatarBrain asked) => throw new NotImplementedException();
     }
 }
 

@@ -12,7 +12,6 @@ using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
 using Arteranos.Social;
-using System.Linq;
 
 namespace Arteranos.Avatar
 {
@@ -39,6 +38,8 @@ namespace Arteranos.Avatar
         private Transform Voice = null;
 
         private IHitBox HitBox = null;
+
+        private AvatarSubconscious Subconscious { get; set; } = null;
 
         public uint NetID => netIdentity.netId;
 
@@ -186,10 +187,6 @@ namespace Arteranos.Avatar
                 }
 
                 _ = BubbleCoordinatorFactory.New(this);
-
-                // Do the customary greetings with its variance, being close friends or
-                // could be the beings you'd hate their guts.
-                AnnounceSocialStates();
             }
             else
             {
@@ -232,7 +229,14 @@ namespace Arteranos.Avatar
         private readonly SyncDictionary<AVKeys, string> m_strings = new();
         private readonly SyncDictionary<AVKeys, byte[]> m_blobs = new();
 
-        void Awake() => syncDirection = SyncDirection.ServerToClient;
+
+
+        void Awake()
+        {
+            Subconscious = GetComponent<AvatarSubconscious>();
+
+            syncDirection = SyncDirection.ServerToClient;
+        }
 
         private void ResyncInitialValues()
         {
@@ -248,6 +252,7 @@ namespace Arteranos.Avatar
             foreach(KeyValuePair<AVKeys, byte[]> kvpb in m_blobs)
                 OnMBlobsChanged(SyncDictionary<AVKeys, byte[]>.Operation.OP_ADD, kvpb.Key, kvpb.Value);
         }
+
 
         private void OnMIntsChanged(SyncDictionary<AVKeys, int>.Operation op, AVKeys key, int value)
         {
@@ -279,6 +284,12 @@ namespace Arteranos.Avatar
         private void OnMBlobsChanged(SyncIDictionary<AVKeys, byte[]>.Operation op, AVKeys key, byte[] value)
         {
             // Reserved for future use
+        }
+
+        private void OnOwnSocialStateChanged(SyncIDictionary<UserID, int>.Operation op, UserID key, int value)
+        {
+            // Reserved for future use
+            // For example, the retaliatory blocking by the other user.
         }
 
 
@@ -500,67 +511,20 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Social state negotiation
 
-        private readonly Dictionary<UserID, int> OwnSocialState = new();
-
         /// <summary>
-        /// Notify now how the owner thinks about the the world's users
+        /// Don't ask, don't tell. Asks around what you feel about the asked user.
         /// </summary>
-        public void AnnounceSocialStates()
+        /// <param name="asked">The asked user</param>
+        /// <returns></returns>
+        public int AskRelationsToMe(IAvatarBrain asked)
         {
-            var q = from state in OwnSocialState
-                    join user in SettingsManager.Users
-                        on state.Key.Derive(SettingsManager.CurrentServer.Name) equals user.UserID
-                    select new { 
-                        User = user,
-                        State = state.Value 
-                    };
+            // Server poses as the arbiter
+            if(!isServer)
+                return SocialState.None;
 
-            foreach(var item in q)
-            {
-                // Should never happen, but....
-                if(item.User.isOwned) continue;
-
-                CmdTellTargetedSocialState(item.User.gameObject, item.State);
-            }
+            return Subconscious.AskRelationsToMe(asked);
         }
 
-        [Command]
-        private void CmdTellTargetedSocialState(GameObject target, int state)
-        {
-            if(!isOwned) return;
-
-            NetworkIdentity nid = target.GetComponent<NetworkIdentity>();
-            TargetTellTargetedSocialState(nid.connectionToClient, gameObject, state);
-        }
-
-        [TargetRpc]
-        private void TargetTellTargetedSocialState(
-            NetworkConnectionToClient _,
-            GameObject orig,
-            int origstate)
-        {
-
-            IAvatarBrain origbrain = orig.GetComponent<IAvatarBrain>();
-            Debug.Log($"[{Nickname}] from {origbrain.Nickname}: Social status is {origstate}");
-
-
-            // Blocked! Me? Turnabout is a fair play.
-            bool blocked = (origstate & SocialState.Blocked) != 0;
-
-            if(blocked)
-            {
-                origbrain.AppearanceStatus |= Avatar.AppearanceStatus.Blocking;
-            }
-            else
-            {
-                origbrain.AppearanceStatus &= ~Avatar.AppearanceStatus.Blocking;
-            }
-
-            if(SocialState.IsFriend(origstate, OwnSocialState[origbrain.UserID]))
-            {
-                Debug.Log($"[{Nickname}] you offered, {origbrain.Nickname} offered, now let's make it official.");
-            }
-        }
         #endregion
     }
 }

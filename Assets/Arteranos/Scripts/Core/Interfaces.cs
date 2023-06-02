@@ -9,6 +9,7 @@ using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.XR;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
 using System.Threading.Tasks;
@@ -71,6 +72,13 @@ namespace Arteranos.Avatar
     #endregion
     // -------------------------------------------------------------------
     #region Avatar interfaces
+
+    public struct ShitListEntry
+    {
+        public UserID userID;
+        public int state;
+    }
+
     public interface IAvatarBrain
     {
         string AvatarURL { get; }
@@ -87,6 +95,7 @@ namespace Arteranos.Avatar
         event Action<string> OnAvatarChanged;
         event Action<int> OnAppearanceStatusChanged;
 
+        int AskRelationsToMe(IAvatarBrain asked);
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
     }
 
