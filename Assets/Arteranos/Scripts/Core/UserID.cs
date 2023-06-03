@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Arteranos.Core
 {
@@ -90,7 +91,7 @@ namespace Arteranos.Core
         public override bool Equals(object obj) => Equals(obj as UserID);
         public bool Equals(UserID other)
         {
-            if(other != null) return false;
+            if(other == null) return false;
 
             // If neccessary, derive the hash with the counterpart's Server name.
             byte[] thisHash = (this.ServerName == null) 
@@ -102,12 +103,12 @@ namespace Arteranos.Core
                 : other.Hash;
 
             // And, compare.
-            return EqualityComparer<byte[]>.Default.Equals(thisHash, otherHash);
+            return Enumerable.SequenceEqual(thisHash, otherHash);
         }
 
         public override int GetHashCode() => HashCode.Combine(ServerName, Hash);
 
-        public static bool operator ==(UserID left, UserID right) => EqualityComparer<UserID>.Default.Equals(left, right);
+        public static bool operator ==(UserID left, UserID right) => Equals(left, right);
         public static bool operator !=(UserID left, UserID right) => !(left == right);
 
         public override string ToString()
