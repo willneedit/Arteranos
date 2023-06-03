@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Avatar;
 using System;
 using System.Collections;
 using Unity.XR.CoreUtils;
@@ -19,7 +20,7 @@ namespace Arteranos.XR
         public XROrigin VRRig;
         public XROrigin NoVRRig;
 
-        public GameObject Me { get; set; }
+        public IAvatarBrain Me { get; set; }
         public bool UsingXR { get; private set; }
         public Vector3 CameraLocalOffset { get; private set; }
         public float EyeHeight { get; set; } = 1.75f;
