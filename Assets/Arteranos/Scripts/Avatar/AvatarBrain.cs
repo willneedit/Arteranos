@@ -86,7 +86,9 @@ namespace Arteranos.Avatar
                 // Split the local and the net-wide status
                 LocalAppearanceStatus = value & Avatar.AppearanceStatus.MASK_LOCAL;
 
-                int oldNetAS = m_ints[AVKeys.NetAppearanceStatus];
+                int oldNetAS = m_ints.ContainsKey(AVKeys.NetAppearanceStatus)
+                    ? m_ints[AVKeys.NetAppearanceStatus]
+                    : Avatar.AppearanceStatus.OK;
                 int newNetAS = value & ~Avatar.AppearanceStatus.MASK_LOCAL;
 
                 if(oldNetAS != newNetAS)
@@ -404,7 +406,7 @@ namespace Arteranos.Avatar
             // like the status update on the nameplate.
             if(isOwned)
                 AudioManager.Instance.MuteSelf = Avatar.AppearanceStatus.IsSilent(AppearanceStatus);
-            else
+            else if(ChatOwnID > -1)
                 AudioManager.Instance.MuteOther((short) ChatOwnID, Avatar.AppearanceStatus.IsSilent(AppearanceStatus));
 
             HitBox?.gameObject.SetActive(Avatar.AppearanceStatus.IsInvisible(AppearanceStatus));
