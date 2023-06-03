@@ -406,7 +406,7 @@ namespace Arteranos.Avatar
             // like the status update on the nameplate.
             if(isOwned)
                 AudioManager.Instance.MuteSelf = Avatar.AppearanceStatus.IsSilent(AppearanceStatus);
-            else if(ChatOwnID > -1)
+            else
                 AudioManager.Instance.MuteOther((short) ChatOwnID, Avatar.AppearanceStatus.IsSilent(AppearanceStatus));
 
             Body.invisible = Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);

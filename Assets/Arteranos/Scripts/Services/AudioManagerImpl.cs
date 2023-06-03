@@ -79,6 +79,8 @@ namespace Arteranos.Services
 
         public void MuteOther(short peerID, bool muted)
         {
+            if(!ChatroomAgent.PeerSettings.ContainsKey(peerID)) return;
+
             ChatroomAgent.PeerSettings[peerID].muteThem = muted;
             ChatroomAgent.PeerOutputs[peerID].mute = muted;
         }
