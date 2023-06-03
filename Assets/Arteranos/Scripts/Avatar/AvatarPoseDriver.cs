@@ -90,8 +90,12 @@ namespace Arteranos.Avatar
 
         private void AdjustFootIK(Transform foot)
         {
+            // Everything except Layers 17 and 18 (BubbleFriend and BubbleStranger)
+            int layerMask = ~((1 << 17) | (1 << 18));
+
             Ray ray = new(foot.position + Vector3.up * 0.5f, Vector3.down);
-            if(Physics.SphereCast(ray, m_AvatarData.FootElevation, out RaycastHit hitInfo, 0.50f))
+
+            if(Physics.SphereCast(ray, m_AvatarData.FootElevation, out RaycastHit hitInfo, 0.50f, layerMask))
             {
                 foot.SetPositionAndRotation(hitInfo.point + Vector3.up * m_AvatarData.FootElevation,
                     Quaternion.FromToRotation(Vector3.up, hitInfo.normal) * foot.rotation);
