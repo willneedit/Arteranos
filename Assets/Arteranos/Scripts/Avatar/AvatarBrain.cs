@@ -22,7 +22,6 @@ namespace Arteranos.Avatar
         AvatarURL,
         CurrentWorld,
         Nickname,
-        UserHash,
         NetAppearanceStatus,
     }
 
@@ -55,13 +54,11 @@ namespace Arteranos.Avatar
             set => PropagateString(AVKeys.AvatarURL, value);
         }
 
-        public byte[] UserHash
+        public UserID UserID
         {
-            get => m_blobs.ContainsKey(AVKeys.UserHash) ? m_blobs[AVKeys.UserHash] : null;
-            private set => PropagateBlob(AVKeys.UserHash, value);
+            get => m_userID; 
+            private set => PropagateUserID(value);
         }
-
-        public UserID UserID { get; private set; } = null;
 
         public string Nickname
         {
@@ -74,8 +71,8 @@ namespace Arteranos.Avatar
             get
             {
                 // Join the local and the net-wide status
-                int status = m_ints.ContainsKey(AVKeys.NetAppearanceStatus) 
-                    ? m_ints[AVKeys.NetAppearanceStatus] 
+                int status = m_ints.ContainsKey(AVKeys.NetAppearanceStatus)
+                    ? m_ints[AVKeys.NetAppearanceStatus]
                     : Avatar.AppearanceStatus.OK;
 
                 return status | LocalAppearanceStatus;
@@ -119,7 +116,6 @@ namespace Arteranos.Avatar
                 // list, _not_ the original hash.
                 // Underived hashes are for close friends only.
                 UserID = new(cs.UserID.Hash, SettingsManager.CurrentServer.Name);
-                UserHash = UserID.Hash;
             }
         }
 
@@ -173,7 +169,7 @@ namespace Arteranos.Avatar
             if(isOwned)
             {
                 // That's me, set aside from the unwashed crowd. :)
-                XRControl.Me = gameObject;
+                XRControl.Me = this;
 
                 // Invoked by command line - only once
                 if(SettingsManager.StartupTrigger)
@@ -237,6 +233,8 @@ namespace Arteranos.Avatar
         private readonly SyncDictionary<AVKeys, string> m_strings = new();
         private readonly SyncDictionary<AVKeys, byte[]> m_blobs = new();
 
+        [SyncVar]
+        private UserID m_userID = null;
 
 
         void Awake()
@@ -294,12 +292,6 @@ namespace Arteranos.Avatar
             // Reserved for future use
         }
 
-        private void OnOwnSocialStateChanged(SyncIDictionary<UserID, int>.Operation op, UserID key, int value)
-        {
-            // Reserved for future use
-            // For example, the retaliatory blocking by the other user.
-        }
-
 
         [Command]
         private void PropagateInt(AVKeys key, int value) => m_ints[key] = value;
@@ -313,17 +305,15 @@ namespace Arteranos.Avatar
         private void PropagateString(AVKeys key, string value) => m_strings[key] = value;
 
         [Command]
-        private void PropagateBlob(AVKeys key, byte[] value)
-        {
-            m_blobs[key] = value;
+        private void PropagateBlob(AVKeys key, byte[] value) => m_blobs[key] = value;
 
-            switch(key)
-            {
-                case AVKeys.UserHash:
-                    SettingsManager.RegisterUser(this);
-                    break;
-            }
+        [Command]
+        private void PropagateUserID(UserID userID)
+        {
+            m_userID = userID;
+            SettingsManager.RegisterUser(this);
         }
+
 
         #endregion
         // ---------------------------------------------------------------
@@ -519,6 +509,11 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Social state negotiation
 
+        public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
+            => Subconscious.OfferFriendship(receiver, offering);
+
+        public void BlockUser(IAvatarBrain receiver, bool blocking = true)
+            => Subconscious.BlockUser(receiver, blocking);
 
         #endregion
     }

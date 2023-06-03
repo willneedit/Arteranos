@@ -84,7 +84,6 @@ namespace Arteranos.Avatar
         string AvatarURL { get; }
         int ChatOwnID { get; }
         uint NetID { get; }
-        byte[] UserHash { get; }
         string Nickname { get; }
         int AppearanceStatus { get; set; }
         bool isOwned { get; }
@@ -95,7 +94,9 @@ namespace Arteranos.Avatar
         event Action<string> OnAvatarChanged;
         event Action<int> OnAppearanceStatusChanged;
 
+        void BlockUser(IAvatarBrain receiver, bool blocking = true);
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
+        void OfferFriendship(IAvatarBrain receiver, bool offering = true);
     }
 
     public interface IHitBox
@@ -510,7 +511,7 @@ namespace Arteranos.XR
     #region XR interfaces
     public interface IXRControl
     {
-        GameObject Me { get; set; }
+        IAvatarBrain Me { get; set; }
         Vector3 CameraLocalOffset { get; }
         bool UsingXR { get; }
         bool enabled { get; set; }
@@ -534,7 +535,7 @@ namespace Arteranos.XR
     {
         public static IXRControl Instance { get; set; }
 
-        public static GameObject Me
+        public static IAvatarBrain Me
         {
             get => Instance.Me;
             set => Instance.Me = value;
