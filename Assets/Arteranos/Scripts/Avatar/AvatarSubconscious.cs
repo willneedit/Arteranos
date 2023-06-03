@@ -19,6 +19,9 @@ namespace Arteranos.Avatar
 {
     public class AvatarSubconscious : NetworkBehaviour
     {
+        // ---------------------------------------------------------------
+        #region Network
+
         // The own idea about the other users
         private readonly SyncDictionary<UserID, int> OwnSocialState = new();
 
@@ -58,12 +61,9 @@ namespace Arteranos.Avatar
         private readonly Dictionary<UserID, int> SavedSocialStates = new();
 
 
-        [Command]
-        private void CmdUploadSocialState(UserID userID, int state)
+        private void UpdateReflectiveSocialState(UserID userID, int state)
         {
-            OwnSocialState[userID] = state;
-
-            IEnumerable<IAvatarBrain> q = 
+            IEnumerable<IAvatarBrain> q =
                 from user in SettingsManager.Users
                 where user.UserID == userID
                 select user;
@@ -76,7 +76,28 @@ namespace Arteranos.Avatar
                 mirroredBrain.gameObject.GetComponent<AvatarSubconscious>()
                     .ReflectiveSocialState[Brain.UserID] = state;
             }
+        }
 
+        [Command]
+        private void CmdUploadSocialState(UserID userID, int state)
+        {
+            OwnSocialState[userID] = state;
+
+            UpdateReflectiveSocialState(userID, state);
+        }
+
+
+        [Command]
+        private void CmdUpdateSocialState(UserID userID, int state, bool set)
+        {
+            if(!OwnSocialState.ContainsKey(userID)) OwnSocialState[userID] = SocialState.None;
+
+            if(set)
+                OwnSocialState[userID] |= state;
+            else
+                OwnSocialState[userID] &= ~state;
+
+            UpdateReflectiveSocialState(userID, OwnSocialState[userID]);
         }
 
         public void InitializeSocialStates()
@@ -103,5 +124,26 @@ namespace Arteranos.Avatar
         {
             Debug.Log($"[{Brain.Nickname}] {key} feels about me: {item}");
         }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Interface
+
+
+        public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
+        {
+            CmdUpdateSocialState(receiver.UserID, SocialState.Friend_offered, offering);
+        }
+
+
+        public void BlockUser(IAvatarBrain receiver, bool blocking = true)
+        {
+            if(blocking)
+                CmdUpdateSocialState(receiver.UserID, SocialState.Friend_offered, false);
+            CmdUpdateSocialState(receiver.UserID, SocialState.Blocked, blocking);
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
     }
 }
