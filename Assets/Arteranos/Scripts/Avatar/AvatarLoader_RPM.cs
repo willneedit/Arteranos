@@ -16,6 +16,7 @@ using Arteranos.ExtensionMethods;
 using Mirror;
 using System.Collections.Generic;
 using Arteranos.XR;
+using UnityEngine.Experimental.Rendering;
 
 namespace Arteranos.Avatar
 {
@@ -97,9 +98,13 @@ namespace Arteranos.Avatar
                 avatarBrain.OnAvatarChanged -= RequestAvatarChange;
         }
 
+        private string last = null;
+        private string present = null;
+
         void RequestAvatarChange(string current)
         {
-            if(loading || current == null) return;
+            if(loading || current == null || last == current) return;
+            present= current;
 
             loading = true;
             Debug.Log("Starting avatar loading: " + current);
@@ -274,7 +279,7 @@ namespace Arteranos.Avatar
             }
 
             // Now upload the skeleton joint data to the Avatar Pose driver.
-            GetComponent<AvatarPoseDriver>().UploadJointNames(jointnames.ToArray());
+            GetComponent<AvatarPoseDriver>().UploadJointNames(agot, jointnames.ToArray());
 
             ResetPose();
 
@@ -303,9 +308,6 @@ namespace Arteranos.Avatar
 
         void AvatarLoadComplete(object _, CompletionEventArgs args)
         {
-            Debug.Log("Successfully loaded avatar");
-            loading = false;
-
             if(m_AvatarGameObject != null)
                 Destroy(m_AvatarGameObject);
 
@@ -330,6 +332,10 @@ namespace Arteranos.Avatar
 
             // Refresh the visibility state for the new avatar
             invisible = m_invisible;
+
+            Debug.Log("Successfully loaded avatar");
+            last = present;
+            loading = false;
         }
 
         void AvatarLoadFailed(object sender, FailureEventArgs args)

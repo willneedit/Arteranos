@@ -27,7 +27,7 @@ namespace Arteranos.NetworkIO
             jointTransforms = new Transform[PoseSnapshot.MAX_SIZE];
         }
 
-        public virtual void UploadJointNames(string[] names)
+        public virtual void UploadJointNames(Transform rootTransform, string[] names)
         {
             Debug.Assert(names.Length <= PoseSnapshot.MAX_SIZE);
 
@@ -37,7 +37,7 @@ namespace Arteranos.NetworkIO
             for(int i = 0; i < names.Length; i++)
             {
                 jointNames[i] = names[i];
-                jointTransforms[i] = transform.FindRecursive(names[i]);
+                jointTransforms[i] = rootTransform.FindRecursive(names[i]);
                 Debug.Assert(jointTransforms[i] != null);
             }
         }

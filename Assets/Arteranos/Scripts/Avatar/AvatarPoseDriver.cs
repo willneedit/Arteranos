@@ -80,8 +80,9 @@ namespace Arteranos.Avatar
         /// Uploads the full set of the joint names. Both owner and alien avatars are
         /// synced by Replacer, so need not to sync here, too.
         /// </summary>
+        /// <param name="rootTransform"></param>
         /// <param name="names">Array of the joint (aka bone) names</param>
-        public void UploadJointNames(string[] names) => m_Poser.UploadJointNames(names);
+        public void UploadJointNames(Transform rootTransform, string[] names) => m_Poser.UploadJointNames(rootTransform, names);
 
         private void UseThisVoice(IVoiceOutput voice) => m_IVoiceOutput = voice;
 
