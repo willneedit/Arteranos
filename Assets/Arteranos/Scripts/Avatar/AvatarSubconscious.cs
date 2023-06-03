@@ -13,12 +13,19 @@ using Mirror;
 using Arteranos.Core;
 using System.Linq;
 using Arteranos.Social;
+using System;
 
 namespace Arteranos.Avatar
 {
     public class AvatarSubconscious : NetworkBehaviour
     {
+        // The own idea about the other users
         private readonly SyncDictionary<UserID, int> OwnSocialState = new();
+
+        // The other user's ideas about you
+        public readonly SyncDictionary<UserID, int> ReflectiveSocialState = new();
+
+        private IAvatarBrain Brain = null;
 
         private void Reset()
         {
@@ -26,16 +33,25 @@ namespace Arteranos.Avatar
             syncMode = SyncMode.Owner;
         }
 
+        private void Awake() => Brain = GetComponent<AvatarBrain>();
+
         public override void OnStartClient()
         {
             base.OnStartClient();
+
+            ReflectiveSocialState.Callback += OnReflectiveStateUpdated;
 
             // Initialize (and upload to the server) the filtered friend (and shit) list
             if(isOwned)
                 InitializeSocialStates();
         }
 
-        public override void OnStopClient() => base.OnStopClient();
+        public override void OnStopClient()
+        {
+            ReflectiveSocialState.Callback -= OnReflectiveStateUpdated;
+
+            base.OnStopClient();
+        }
 
 
         // TODO Mock, for the saved dictionary
@@ -43,8 +59,25 @@ namespace Arteranos.Avatar
 
 
         [Command]
-        private void CmdUploadSocialState(UserID userID, int state) => OwnSocialState[userID] = state;
+        private void CmdUploadSocialState(UserID userID, int state)
+        {
+            OwnSocialState[userID] = state;
 
+            IEnumerable<IAvatarBrain> q = 
+                from user in SettingsManager.Users
+                where user.UserID == userID
+                select user;
+
+            if(q.Count() > 0)
+            {
+                // And, update the reflected state in the target user.
+                IAvatarBrain mirroredBrain = q.First();
+
+                mirroredBrain.gameObject.GetComponent<AvatarSubconscious>()
+                    .ReflectiveSocialState[Brain.UserID] = state;
+            }
+
+        }
 
         public void InitializeSocialStates()
         {
@@ -66,51 +99,9 @@ namespace Arteranos.Avatar
                 CmdUploadSocialState(item.User, item.State);
         }
 
-        public int AskRelationsToMe(IAvatarBrain asked)
+        private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item)
         {
-            if(OwnSocialState.ContainsKey(asked.UserID))
-                return OwnSocialState[asked.UserID];
-
-            return SocialState.None;
+            Debug.Log($"[{Brain.Nickname}] {key} feels about me: {item}");
         }
-
-        /// <summary>
-        /// Get the relations of the asking user to all the others around the server to him
-        /// </summary>
-        /// <param name="asker">The asking user</param>
-        [Command]
-        private void CmdAskRelationsToMe(GameObject askerGO)
-        {
-            IAvatarBrain asker = askerGO.GetComponent<IAvatarBrain>();
-            NetworkIdentity nid = askerGO.GetComponent<NetworkIdentity>();
-
-            foreach(var user in SettingsManager.Users)
-                TargetTellRelationsToMe(nid.connectionToClient, user.gameObject, user.AskRelationsToMe(asker));
-        }
-
-        [TargetRpc]
-        private void TargetTellRelationsToMe(
-            NetworkConnectionToClient ncc, GameObject user, int state)
-        {
-            gameObject.GetComponent<AvatarSubconscious>().OnTellRelationsToMe(user, state);
-        }
-
-        /// <summary>
-        /// The faint voice in your head telling you that the whole world is set out for you... :)
-        /// </summary>
-        /// <param name="user">The user who hates you or loves you</param>
-        /// <param name="state">How he's really think of you</param>
-        public void OnTellRelationsToMe(GameObject userGO, int state)
-        {
-            IAvatarBrain userBrain = userGO.GetComponent<IAvatarBrain>();
-            IAvatarBrain brain = gameObject.GetComponent<IAvatarBrain>();
-
-            Debug.Log($"[{brain.Nickname}] Got an updated relations entry for me - it's {state}.");
-
-            // TODO retaliatory blocking
-            // TODO distribute the markers on the alien avatars
-        }
-
-
     }
 }

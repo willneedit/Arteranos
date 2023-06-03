@@ -511,19 +511,6 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Social state negotiation
 
-        /// <summary>
-        /// Don't ask, don't tell. Asks around what you feel about the asked user.
-        /// </summary>
-        /// <param name="asked">The asked user</param>
-        /// <returns></returns>
-        public int AskRelationsToMe(IAvatarBrain asked)
-        {
-            // Server poses as the arbiter
-            if(!isServer)
-                return SocialState.None;
-
-            return Subconscious.AskRelationsToMe(asked);
-        }
 
         #endregion
     }

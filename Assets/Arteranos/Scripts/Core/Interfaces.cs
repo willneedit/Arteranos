@@ -95,7 +95,6 @@ namespace Arteranos.Avatar
         event Action<string> OnAvatarChanged;
         event Action<int> OnAppearanceStatusChanged;
 
-        int AskRelationsToMe(IAvatarBrain asked);
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
     }
 
