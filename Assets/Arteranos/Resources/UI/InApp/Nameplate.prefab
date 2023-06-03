@@ -938,8 +938,8 @@ MonoBehaviour:
   lbl_Name: {fileID: 1527640920642288326}
   btn_mute: {fileID: 1527640919637708786}
   btn_unmute: {fileID: 1527640920347265511}
-  btn_friend_add: {fileID: 0}
-  btn_block: {fileID: 0}
+  btn_friend_add: {fileID: 1527640921197188509}
+  btn_block: {fileID: 1527640919696063572}
 --- !u!1 &1527640921197188511
 GameObject:
   m_ObjectHideFlags: 0

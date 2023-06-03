@@ -13,6 +13,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using Arteranos.Avatar;
+using Arteranos.XR;
 
 namespace Arteranos.UI
 {
@@ -34,6 +35,7 @@ namespace Arteranos.UI
 
             btn_mute.onClick.AddListener(OnMuteButtonClicked);
             btn_unmute.onClick.AddListener(OnMuteButtonClicked);
+            btn_block.onClick.AddListener(OnBlockButtonClicked);
         }
 
         protected override void OnEnable()
@@ -93,5 +95,9 @@ namespace Arteranos.UI
             OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 
+        private void OnBlockButtonClicked() 
+        {
+            XRControl.Me.BlockUser(Bearer);
+        }
     }
 }
