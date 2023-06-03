@@ -58,8 +58,9 @@ namespace Arteranos.Avatar
                 m_invisible = value;
                 if(m_AvatarGameObject!= null)
                 {
-                    Renderer renderer = m_AvatarGameObject.GetComponentInChildren<Renderer>();
-                    renderer.enabled = !invisible;
+                    Renderer[] renderers = m_AvatarGameObject.GetComponentsInChildren<Renderer>();
+                    foreach(Renderer renderer in renderers)
+                        renderer.enabled = !invisible;
                 }
             }
         }
