@@ -7,11 +7,18 @@
 
 using UnityEngine;
 
+using UnityEngine.XR.Interaction.Toolkit;
+
 namespace Arteranos.Avatar
 {
     public class HitBox : MonoBehaviour, IHitBox
     {
         public IAvatarBrain Brain { get; set; } = null;
+        public bool interactable 
+        {
+            get => GetComponent<XRSimpleInteractable>().enabled;
+            set => GetComponent<XRSimpleInteractable>().enabled = value;
+        }
 
         private float fullHeight = -1;
         private bool lastInSight = false;

@@ -415,6 +415,7 @@ namespace Arteranos.Avatar
             else
                 AudioManager.Instance.MuteOther((short) ChatOwnID, Avatar.AppearanceStatus.IsSilent(AppearanceStatus));
 
+            HitBox.interactable = !Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
             Body.invisible = Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
 
             OnAppearanceStatusChanged?.Invoke(AppearanceStatus);

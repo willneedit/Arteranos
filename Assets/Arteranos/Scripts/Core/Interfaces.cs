@@ -103,6 +103,8 @@ namespace Arteranos.Avatar
         GameObject gameObject { get; }
         IAvatarBrain Brain { get; set; }
 
+        bool interactable { get; set; }
+
         void OnTargeted(bool inSight);
     }
 
