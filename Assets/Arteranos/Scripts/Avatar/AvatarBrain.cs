@@ -160,7 +160,10 @@ namespace Arteranos.Avatar
             m_strings.Callback += OnMStringsChanged;
             m_blobs.Callback += OnMBlobsChanged;
 
-            SettingsManager.Client.OnAvatarChanged += (x) => AvatarURL = x;
+            SettingsManager.Client.OnAvatarChanged += (x) =>
+            {
+                if(isOwned) AvatarURL = x;
+            };
             SettingsManager.Server.OnWorldURLChanged += CommitWorldChanged;
 
             ResyncInitialValues();
@@ -206,7 +209,10 @@ namespace Arteranos.Avatar
             DeinitializeVoice();
 
             SettingsManager.Server.OnWorldURLChanged -= CommitWorldChanged;
-            SettingsManager.Client.OnAvatarChanged -= (x) => AvatarURL = x;
+            SettingsManager.Client.OnAvatarChanged -= (x) =>
+            {
+                if(isOwned) AvatarURL = x;
+            };
 
             m_ints.Callback -= OnMIntsChanged;
             m_floats.Callback -= OnMFloatsChanged;
