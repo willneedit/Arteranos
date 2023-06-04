@@ -134,6 +134,22 @@ namespace Arteranos.Avatar
         }
 
 
+        private string PrefixMessage(object message)
+        {
+            string modestr = string.Empty;
+            if(isServer) modestr += "[Server]";
+            if(isClient) modestr += "[Client]";
+            if(isOwned) modestr += "[Owned]";
+
+            string objmsg = (message is string) ? message as string: message.ToString();
+            return $"[{Nickname}]{modestr} {objmsg}";
+        }
+
+        public void LogDebug(object message) => Debug.unityLogger.Log(LogType.Log, PrefixMessage(message));
+
+        public void LogWarning(object message) => Debug.unityLogger.Log(LogType.Warning, PrefixMessage(message));
+
+        public void LogError(object message) => Debug.unityLogger.Log(LogType.Error, PrefixMessage(message));
 
         #endregion
         // ---------------------------------------------------------------
@@ -293,13 +309,12 @@ namespace Arteranos.Avatar
         }
 
 
+#pragma warning disable IDE0051 // Nicht verwendete private Member entfernen
         [Command]
         private void PropagateInt(AVKeys key, int value) => m_ints[key] = value;
 
-#pragma warning disable IDE0051 // Nicht verwendete private Member entfernen
         [Command]
         private void PropagateFloat(AVKeys key, float value) => m_floats[key] = value;
-#pragma warning restore IDE0051 // Nicht verwendete private Member entfernen
 
         [Command]
         private void PropagateString(AVKeys key, string value) => m_strings[key] = value;
@@ -313,6 +328,7 @@ namespace Arteranos.Avatar
             m_userID = userID;
             SettingsManager.RegisterUser(this);
         }
+#pragma warning restore IDE0051 // Nicht verwendete private Member entfernen
 
 
         #endregion

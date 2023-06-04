@@ -73,6 +73,9 @@ namespace Arteranos.Avatar
         public int AskRelationsToMe(IAvatarBrain asked) => throw new NotImplementedException();
         public void BlockUser(IAvatarBrain receiver, bool blocking = true) => throw new NotImplementedException();
         public void OfferFriendship(IAvatarBrain receiver, bool offering = true) => throw new NotImplementedException();
+        public void LogDebug(object message) => throw new NotImplementedException();
+        public void LogError(object message) => throw new NotImplementedException();
+        public void LogWarning(object message) => throw new NotImplementedException();
     }
 }
 
