@@ -34,7 +34,7 @@ namespace Arteranos.UI
 
         public void NotifyTriggering(GameObject go, bool hit)
         {
-            IHitBox hb = go.GetComponent<IHitBox>();
+            IHitBox hb = go.GetComponentInParent<IHitBox>();
             
             if(hb == null) return;
 

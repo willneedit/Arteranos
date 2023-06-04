@@ -35,7 +35,7 @@ namespace Arteranos.Avatar
 
         public void NotifyTrigger(IAvatarBrain touchy, bool isFriend, bool entered)
         {
-            //Debug.Log($"Hit? {entered}, Who: {touchy.Nickname}, Friendzone? {isFriend}");
+            // Brain.LogDebug($"Hit? {entered}, Who: {touchy.Nickname}, Friendzone? {isFriend}");
 
             Brain.NotifyBubbleBreached(touchy, isFriend, entered);
         }
