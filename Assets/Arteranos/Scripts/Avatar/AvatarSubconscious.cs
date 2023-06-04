@@ -41,8 +41,8 @@ namespace Arteranos.Avatar
         public override void OnStartClient()
         {
             base.OnStartClient();
-
-            ReflectiveSocialState.Callback += OnReflectiveStateUpdated;
+            if(isOwned)
+                ReflectiveSocialState.Callback += OnReflectiveStateUpdated;
 
             // Initialize (and upload to the server) the filtered friend (and shit) list
             if(isOwned)
@@ -122,7 +122,7 @@ namespace Arteranos.Avatar
 
         private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item)
         {
-            Debug.Log($"[{Brain.Nickname}] {key} feels about me: {item}");
+            Brain.LogDebug($"{key} feels about me: {item}");
         }
 
         #endregion
