@@ -23,7 +23,7 @@ namespace Arteranos.Avatar
         #region Network
 
         // The own idea about the other users
-        private readonly SyncDictionary<UserID, int> OwnSocialState = new();
+        private readonly Dictionary<UserID, int> OwnSocialState = new();
 
         // The other user's ideas about you
         public readonly SyncDictionary<UserID, int> ReflectiveSocialState = new();
@@ -60,7 +60,7 @@ namespace Arteranos.Avatar
         // TODO Mock, for the saved dictionary
         private readonly Dictionary<UserID, int> SavedSocialStates = new();
 
-
+        [Command]
         private void UpdateReflectiveSocialState(UserID userID, int state)
         {
             IEnumerable<IAvatarBrain> q =
@@ -78,7 +78,6 @@ namespace Arteranos.Avatar
             }
         }
 
-        [Command]
         private void CmdUploadSocialState(UserID userID, int state)
         {
             OwnSocialState[userID] = state;
@@ -87,7 +86,6 @@ namespace Arteranos.Avatar
         }
 
 
-        [Command]
         private void CmdUpdateSocialState(UserID userID, int state, bool set)
         {
             if(!OwnSocialState.ContainsKey(userID)) OwnSocialState[userID] = SocialState.None;

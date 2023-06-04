@@ -13,24 +13,15 @@ namespace Arteranos.UI
 
     public class TriggerBubble : MonoBehaviour
     {
-        [SerializeField] private BubbleCoordinator coord = null;
         [SerializeField] private bool IsFriend = false;
 
-        private void OnEnable()
-        {
-            coord = GetComponentInParent<BubbleCoordinator>();
-        }
+        private BubbleCoordinator coord = null;
 
+        private void OnEnable() => coord = GetComponentInParent<BubbleCoordinator>();
 
-        private void OnTriggerEnter(Collider other)
-        {
-            NotifyTriggering(other.gameObject, true);
-        }
+        private void OnTriggerEnter(Collider other) => NotifyTriggering(other.gameObject, true);
 
-        private void OnTriggerExit(Collider other)
-        {
-            NotifyTriggering(other.gameObject, false);
-        }
+        private void OnTriggerExit(Collider other) => NotifyTriggering(other.gameObject, false);
 
         public void NotifyTriggering(GameObject go, bool hit)
         {

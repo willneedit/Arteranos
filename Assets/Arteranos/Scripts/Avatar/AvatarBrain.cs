@@ -97,27 +97,15 @@ namespace Arteranos.Avatar
             }
         }
 
-        public IAvatarLoader Body => GetComponent<IAvatarLoader>();
-
-        /// <summary>
-        /// Download the user's client settings to his avatar's brain, and announce
-        /// the data to the server to spread it to the clones.
-        /// </summary>
-        private void DownloadClientSettings()
+        public void SetAppearanceStatusBit(int ASBit, bool set)
         {
-            ClientSettings cs = SettingsManager.Client;
-
-            if(isOwned)
-            {
-                AvatarURL = cs.AvatarURL;
-                Nickname = cs.Me.Nickname;
-
-                // Distribute the with the server's name derived hash to the server's user
-                // list, _not_ the original hash.
-                // Underived hashes are for close friends only.
-                UserID = new(cs.UserID.Hash, SettingsManager.CurrentServer.Name);
-            }
+            if(set)
+                AppearanceStatus |= ASBit;
+            else
+                AppearanceStatus &= ~ASBit;
         }
+
+        public IAvatarLoader Body => GetComponent<IAvatarLoader>();
 
         public void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered)
         {
@@ -127,22 +115,23 @@ namespace Arteranos.Avatar
             // Not for the desired sphere of influence
             if(isFriend != haveFriends) return;
 
-            if(entered)
-                touchy.AppearanceStatus |= Avatar.AppearanceStatus.Bubbled;
-            else
-                touchy.AppearanceStatus &= ~Avatar.AppearanceStatus.Bubbled;
+            touchy.SetAppearanceStatusBit(Avatar.AppearanceStatus.Bubbled, entered);
         }
 
 
         private string PrefixMessage(object message)
         {
             string modestr = string.Empty;
-            if(isServer) modestr += "[Server]";
-            if(isClient) modestr += "[Client]";
-            if(isOwned) modestr += "[Owned]";
 
-            string objmsg = (message is string) ? message as string: message.ToString();
-            return $"[{Nickname}]{modestr} {objmsg}";
+            if(isServer && isClient) modestr += "Host";
+            else if(isServer) modestr += "Server";
+            else if(isClient) modestr += "Client";
+            else modestr += "?";
+
+            if(isOwned) modestr += ", Owned";
+
+            string objmsg = (message is string msgstr) ? msgstr : message.ToString();
+            return $"[{Nickname}][{modestr}] {objmsg}";
         }
 
         public void LogDebug(object message) => Debug.unityLogger.Log(LogType.Log, PrefixMessage(message));
@@ -172,10 +161,7 @@ namespace Arteranos.Avatar
             m_strings.Callback += OnMStringsChanged;
             m_blobs.Callback += OnMBlobsChanged;
 
-            SettingsManager.Client.OnAvatarChanged += (x) =>
-            {
-                if(isOwned) AvatarURL = x;
-            };
+            SettingsManager.Client.OnAvatarChanged += (x) => { if(isOwned) AvatarURL = x; };
             SettingsManager.Server.OnWorldURLChanged += CommitWorldChanged;
 
             ResyncInitialValues();
@@ -238,6 +224,26 @@ namespace Arteranos.Avatar
         {
             if(isServer)
                 SettingsManager.UnregisterUser(this);
+        }
+
+        /// <summary>
+        /// Download the user's client settings to his avatar's brain, and announce
+        /// the data to the server to spread it to the clones.
+        /// </summary>
+        private void DownloadClientSettings()
+        {
+            ClientSettings cs = SettingsManager.Client;
+
+            if(isOwned)
+            {
+                AvatarURL = cs.AvatarURL;
+                Nickname = cs.Me.Nickname;
+
+                // Distribute the with the server's name derived hash to the server's user
+                // list, _not_ the original hash.
+                // Underived hashes are for close friends only.
+                UserID = new(cs.UserID.Hash, SettingsManager.CurrentServer.Name);
+            }
         }
 
         #endregion

@@ -71,10 +71,7 @@ namespace Arteranos.Avatar
             triggered= false;
         }
 
-        private void OnDisable()
-        {
-            np?.gameObject.SetActive(false);
-        }
+        private void OnDisable() => np?.gameObject.SetActive(false);
 
         private void UpdateAvatarHeight()
         {

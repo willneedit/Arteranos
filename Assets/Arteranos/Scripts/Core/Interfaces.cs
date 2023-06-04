@@ -100,6 +100,7 @@ namespace Arteranos.Avatar
         void LogWarning(object message);
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
         void OfferFriendship(IAvatarBrain receiver, bool offering = true);
+        void SetAppearanceStatusBit(int ASBit, bool set);
     }
 
     public interface IHitBox

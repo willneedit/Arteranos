@@ -47,10 +47,7 @@ namespace Arteranos.Avatar
             // Not for the desired sphere of influence
             if(isFriend != haveFriends) return;
 
-            if(entered)
-                touchy.AppearanceStatus |= Avatar.AppearanceStatus.Bubbled;
-            else
-                touchy.AppearanceStatus &= ~Avatar.AppearanceStatus.Bubbled;
+            touchy.SetAppearanceStatusBit(Avatar.AppearanceStatus.Bubbled, entered);
         }
 
         public bool isOwned => false;
@@ -66,8 +63,7 @@ namespace Arteranos.Avatar
 
         private void Start()
         {
-            if(!isOwned)
-                AvatarHitBoxFactory.New(this);
+            if(!isOwned) AvatarHitBoxFactory.New(this);
         }
 
         public int AskRelationsToMe(IAvatarBrain asked) => throw new NotImplementedException();
@@ -76,6 +72,13 @@ namespace Arteranos.Avatar
         public void LogDebug(object message) => throw new NotImplementedException();
         public void LogError(object message) => throw new NotImplementedException();
         public void LogWarning(object message) => throw new NotImplementedException();
+        public void SetAppearanceStatusBit(int ASBit, bool set)
+        {
+            if(set)
+                AppearanceStatus |= ASBit;
+            else
+                AppearanceStatus &= ~ASBit;
+        }
     }
 }
 
