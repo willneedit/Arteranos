@@ -79,6 +79,16 @@ namespace Arteranos.Avatar
             else
                 AppearanceStatus &= ~ASBit;
         }
+
+        public void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state)
+        {
+
+        }
+
+        public void UpdateSSEffects(IAvatarBrain receiver, int state)
+        {
+
+        }
     }
 }
 

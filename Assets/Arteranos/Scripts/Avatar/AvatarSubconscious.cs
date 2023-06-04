@@ -5,15 +5,14 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 using Mirror;
 using Arteranos.Core;
 using System.Linq;
 using Arteranos.Social;
-using System;
+using System.Runtime.CompilerServices;
+using UnityEngine;
 
 namespace Arteranos.Avatar
 {
@@ -60,34 +59,52 @@ namespace Arteranos.Avatar
         // TODO Mock, for the saved dictionary
         private readonly Dictionary<UserID, int> SavedSocialStates = new();
 
-        [Command]
-        private void UpdateReflectiveSocialState(UserID userID, int state)
-        {
-            IEnumerable<IAvatarBrain> q =
-                from user in SettingsManager.Users
-                where user.UserID == userID
-                select user;
 
-            if(q.Count() > 0)
+        private IAvatarBrain ClientSearchUser(UserID userID)
+        {
+            foreach(AvatarBrain brain in FindObjectsOfType<AvatarBrain>())
+                if(brain.UserID == userID) return brain;
+
+            return null;
+        }
+
+        // Maybe obsolete?
+        private IAvatarBrain ServerSearchUser(UserID userID)
+        {
+            var q = from user in SettingsManager.Users
+                    where user.UserID == userID
+                    select user;
+
+            return q.Count() > 0 ? q.First() : null;
+        }
+
+        [Command]
+        private void CmdUpdateReflectiveSocialState(UserID userID, int state)
+        {
+            IAvatarBrain mirrored = ClientSearchUser(userID);
+
+            if(mirrored != null)
             {
                 // And, update the reflected state in the target user.
-                IAvatarBrain mirroredBrain = q.First();
-
-                mirroredBrain.gameObject.GetComponent<AvatarSubconscious>()
+                mirrored.gameObject.GetComponent<AvatarSubconscious>()
                     .ReflectiveSocialState[Brain.UserID] = state;
             }
         }
 
-        private void CmdUploadSocialState(UserID userID, int state)
+        private void UploadSocialState(UserID userID, int state)
         {
             OwnSocialState[userID] = state;
 
-            UpdateReflectiveSocialState(userID, state);
+            CmdUpdateReflectiveSocialState(userID, state);
+
+            Brain.UpdateSSEffects(ClientSearchUser(userID), state);
         }
 
 
-        private void CmdUpdateSocialState(UserID userID, int state, bool set)
+        private void UpdateSocialState(IAvatarBrain receiver, int state, bool set)
         {
+            UserID userID = receiver.UserID;
+
             if(!OwnSocialState.ContainsKey(userID)) OwnSocialState[userID] = SocialState.None;
 
             if(set)
@@ -95,7 +112,9 @@ namespace Arteranos.Avatar
             else
                 OwnSocialState[userID] &= ~state;
 
-            UpdateReflectiveSocialState(userID, OwnSocialState[userID]);
+            CmdUpdateReflectiveSocialState(userID, OwnSocialState[userID]);
+
+            Brain.UpdateSSEffects(receiver, OwnSocialState[userID]);
         }
 
         public void InitializeSocialStates()
@@ -115,12 +134,12 @@ namespace Arteranos.Avatar
 
             // But, derive the global UserIDs to the scoped UserIDs.
             foreach(var item in q)
-                CmdUploadSocialState(item.User, item.State);
+                UploadSocialState(item.User, item.State);
         }
 
         private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item)
         {
-            Brain.LogDebug($"{key} feels about me: {item}");
+            Brain.UpdateReflectiveSSEffects(ClientSearchUser(key), item);
         }
 
         #endregion
@@ -130,15 +149,15 @@ namespace Arteranos.Avatar
 
         public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
         {
-            CmdUpdateSocialState(receiver.UserID, SocialState.Friend_offered, offering);
+            UpdateSocialState(receiver, SocialState.Friend_offered, offering);
         }
 
 
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
         {
             if(blocking)
-                CmdUpdateSocialState(receiver.UserID, SocialState.Friend_offered, false);
-            CmdUpdateSocialState(receiver.UserID, SocialState.Blocked, blocking);
+                UpdateSocialState(receiver, SocialState.Friend_offered, false);
+            UpdateSocialState(receiver, SocialState.Blocked, blocking);
         }
 
         #endregion

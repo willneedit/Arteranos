@@ -537,6 +537,31 @@ namespace Arteranos.Avatar
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
             => Subconscious.BlockUser(receiver, blocking);
 
+
+        public void UpdateSSEffects(IAvatarBrain receiver, int state)
+        {
+            LogDebug($"I feel about {receiver.Nickname}: {state}");
+
+            // You blocked him.
+            bool blocked = (state & SocialState.Blocked) != 0;
+            receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocked, blocked);
+        }
+
+        public void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state)
+        {
+            if(receiver == null)
+            {
+                // Drat! Gone...
+                LogDebug($"Someone changed his relation to me, but he logged out. Maybe next time.");
+                return;
+            }
+
+            LogDebug($"{receiver.Nickname} feels about me: {state}");
+
+            // Retaliatory blocking.
+            bool blocked = (state & SocialState.Blocked) != 0;
+            receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocking, blocked);
+        }
         #endregion
     }
 }
