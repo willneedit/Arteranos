@@ -12,6 +12,7 @@ using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
 using Arteranos.Social;
+using System.Linq;
 
 namespace Arteranos.Avatar
 {
@@ -156,8 +157,13 @@ namespace Arteranos.Avatar
 
             base.OnStartClient();
 
-            int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
-            name = $"Avatar [???][connId={connId}, netId={netId}]";
+            if(isServer)
+            {
+                int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
+                name = $"Avatar [???][connId={connId}, netId={netId}]";
+            }
+            else
+                name = $"Avatar [???][netId={netId}]";
 
             m_ints.Callback += OnMIntsChanged;
             m_floats.Callback += OnMFloatsChanged;
@@ -205,7 +211,8 @@ namespace Arteranos.Avatar
 
         public override void OnStopClient()
         {
-            XRControl.Me = null;
+            // Maybe it isn't owned anymore, but it would be worse the other way round.
+            if(isOwned) XRControl.Me = null;
 
             DeinitializeVoice();
 
@@ -310,8 +317,14 @@ namespace Arteranos.Avatar
                 case AVKeys.AvatarURL:
                     OnAvatarChanged?.Invoke(value); break;
                 case AVKeys.Nickname:
-                    int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
-                    name = $"Avatar [{value}][connId={connId}, netId={netId}]"; break;
+                    if(isServer)
+                    {
+                        int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
+                        name = $"Avatar [{value}][connId={connId}, netId={netId}]";
+                    }
+                    else
+                        name = $"Avatar [{value}][netId={netId}]";
+                    break;
             }
         }
 
@@ -546,11 +559,39 @@ namespace Arteranos.Avatar
 
         public void UpdateSSEffects(IAvatarBrain receiver, int state)
         {
+            if(receiver== null)
+            {
+                LogDebug($"I feel {state} about an offline user.");
+                return;
+            }
+
             LogDebug($"I feel about {receiver.Nickname}: {state}");
 
             // You blocked him.
             bool blocked = (state & SocialState.Blocked) != 0;
             receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocked, blocked);
+            if(blocked) return;
+        }
+
+        public void SaveSocialStates(IAvatarBrain receiver, int state)
+        {
+            UserDataSettingsJSON Me = SettingsManager.Client.Me;
+
+            // It _should_ be zero or exactly one entries to update
+            SocialListEntryJSON[] q = (from entry in Me.SocialList
+                                       where entry.UserID == receiver.UserID
+                                       select entry).ToArray();
+
+            for(int i = 0; i < q.Length; ++i) Me.SocialList.Remove(q[i]);
+
+            if(state != SocialState.None) Me.SocialList.Add(new()
+                {
+                    Nickname = receiver.Nickname,
+                    UserID = receiver.UserID,
+                    state = state
+                });
+
+            SettingsManager.Client.SaveSettings();
         }
 
         public void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state)
@@ -567,6 +608,7 @@ namespace Arteranos.Avatar
             // Retaliatory blocking.
             bool blocked = (state & SocialState.Blocked) != 0;
             receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocking, blocked);
+            if(blocked) return;
         }
         #endregion
     }

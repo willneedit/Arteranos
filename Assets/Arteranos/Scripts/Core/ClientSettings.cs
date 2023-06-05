@@ -56,7 +56,7 @@ namespace Arteranos.Core
         Online          // Ready
     }
 
-    public class LoginDataJSON : IEquatable<LoginDataJSON>
+    public class LoginDataJSON
     {
         // The login provider the user logs in to
         public virtual string LoginProvider { get; set; } = null;
@@ -70,16 +70,6 @@ namespace Arteranos.Core
 
         [JsonIgnore]
         public bool IsGuest => string.IsNullOrEmpty(LoginProvider);
-
-        public override bool Equals(object obj) => Equals(obj as LoginDataJSON);
-        public bool Equals(LoginDataJSON other) => other is not null 
-            && LoginProvider == other.LoginProvider 
-            && LoginToken == other.LoginToken 
-            && Username == other.Username;
-        public override int GetHashCode() => HashCode.Combine(LoginProvider, LoginToken, Username);
-
-        public static bool operator ==(LoginDataJSON left, LoginDataJSON right) => EqualityComparer<LoginDataJSON>.Default.Equals(left, right);
-        public static bool operator !=(LoginDataJSON left, LoginDataJSON right) => !(left == right);
     }
 
     public class AvatarDescriptionJSON : IEquatable<AvatarDescriptionJSON>
@@ -122,6 +112,19 @@ namespace Arteranos.Core
         public int AGCLevel = 0;
     }
 
+    public class SocialListEntryJSON
+    {
+        // The user's nickname, at the time of entry or update
+        public string Nickname = null;
+
+        // The user's ID, global for friends, scoped otherwise
+        public UserID UserID = null;
+
+        // ORed bits from Social.SocialState
+        public int state = Social.SocialState.None;
+    }
+
+
     public class UserDataSettingsJSON
     {
         // The display name of the user. Generate if null
@@ -139,6 +142,9 @@ namespace Arteranos.Core
 
         // Avatar storage
         public List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
+
+        // The user's social state to others
+        public virtual List<SocialListEntryJSON> SocialList { get; set; } = new();
     }
 
     public class ClientSettingsJSON

@@ -100,6 +100,7 @@ namespace Arteranos.Avatar
         void LogWarning(object message);
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
         void OfferFriendship(IAvatarBrain receiver, bool offering = true);
+        void SaveSocialStates(IAvatarBrain receiver, int state);
         void SetAppearanceStatusBit(int ASBit, bool set);
         void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state);
         void UpdateSSEffects(IAvatarBrain receiver, int state);
@@ -565,7 +566,7 @@ namespace Arteranos.Social
         // You blocked the targeted user.
         public const int Blocked            = (1 << 8);
 
-        public static bool IsFriend(int you, int him) 
+        public static bool IsFriends(int you, int him) 
             => (you == Friend_offered) && (him == Friend_offered);
 
 

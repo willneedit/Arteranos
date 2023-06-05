@@ -89,6 +89,8 @@ namespace Arteranos.Avatar
         {
 
         }
+
+        public void SaveSocialStates(IAvatarBrain receiver, int state) => throw new NotImplementedException();
     }
 }
 

@@ -81,7 +81,7 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void UploadSocialState(UserID userID, int state)
+        private void ReloadSocialState(UserID userID, int state)
         {
             OwnSocialState[userID] = state;
 
@@ -102,9 +102,12 @@ namespace Arteranos.Avatar
             else
                 OwnSocialState[userID] &= ~state;
 
-            CmdUpdateReflectiveSocialState(userID, OwnSocialState[userID]);
+            int newState = OwnSocialState[userID];
+            CmdUpdateReflectiveSocialState(userID, newState);
 
-            Brain.UpdateSSEffects(receiver, OwnSocialState[userID]);
+            Brain.UpdateSSEffects(receiver, newState);
+
+            Brain.SaveSocialStates(receiver, newState);
         }
 
         public void InitializeSocialStates()
@@ -112,19 +115,22 @@ namespace Arteranos.Avatar
             // Clean slate
             OwnSocialState.Clear();
 
+            UserDataSettingsJSON Me = SettingsManager.Client.Me;
+
             // Copy users with the global UserIDs and the scoped UserIDs matching this server
-            var q = from state in SavedSocialStates
-                    where state.Key.ServerName == null
-                        || state.Key.ServerName == SettingsManager.CurrentServer.Name
+            // Note, both current and logged-out users!
+            var q = from state in Me.SocialList
+                    where state.UserID.ServerName == null
+                        || state.UserID.ServerName == SettingsManager.CurrentServer.Name
                     select new
                     {
-                        User = state.Key.Derive(SettingsManager.CurrentServer.Name),
-                        State = state.Value
+                        User = state.UserID.Derive(SettingsManager.CurrentServer.Name),
+                        State = state.state
                     };
 
             // But, derive the global UserIDs to the scoped UserIDs.
             foreach(var item in q)
-                UploadSocialState(item.User, item.State);
+                ReloadSocialState(item.User, item.State);
         }
 
         private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item)

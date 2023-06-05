@@ -25,6 +25,7 @@ namespace Arteranos.Core
         public string ServerName = null;
         public byte[] Hash = null;
 
+        // Has to be there, for serialization.
         public UserID()
         {
 
