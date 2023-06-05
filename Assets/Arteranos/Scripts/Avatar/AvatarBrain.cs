@@ -156,6 +156,9 @@ namespace Arteranos.Avatar
 
             base.OnStartClient();
 
+            int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
+            name = $"Avatar [???][connId={connId}, netId={netId}]";
+
             m_ints.Callback += OnMIntsChanged;
             m_floats.Callback += OnMFloatsChanged;
             m_strings.Callback += OnMStringsChanged;
@@ -306,6 +309,9 @@ namespace Arteranos.Avatar
             {
                 case AVKeys.AvatarURL:
                     OnAvatarChanged?.Invoke(value); break;
+                case AVKeys.Nickname:
+                    int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
+                    name = $"Avatar [{value}][connId={connId}, netId={netId}]"; break;
             }
         }
 

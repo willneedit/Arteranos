@@ -68,16 +68,6 @@ namespace Arteranos.Avatar
             return null;
         }
 
-        // Maybe obsolete?
-        private IAvatarBrain ServerSearchUser(UserID userID)
-        {
-            var q = from user in SettingsManager.Users
-                    where user.UserID == userID
-                    select user;
-
-            return q.Count() > 0 ? q.First() : null;
-        }
-
         [Command]
         private void CmdUpdateReflectiveSocialState(UserID userID, int state)
         {
