@@ -265,7 +265,7 @@ namespace Arteranos.Avatar
         private readonly SyncDictionary<AVKeys, string> m_strings = new();
         private readonly SyncDictionary<AVKeys, byte[]> m_blobs = new();
 
-        [SyncVar]
+        [SyncVar(hook = nameof(OnUserIDChanged))]
         private UserID m_userID = null;
 
 
@@ -331,6 +331,17 @@ namespace Arteranos.Avatar
         private void OnMBlobsChanged(SyncIDictionary<AVKeys, byte[]>.Operation op, AVKeys key, byte[] value)
         {
             // Reserved for future use
+        }
+
+        private void OnUserIDChanged(UserID oldvalue, UserID newvalue)
+        {
+            // It could be that you're logged in and the alien avatars show up first,
+            // before your own from the server....
+            if(isOwned || XRControl.Me == null)
+                return;
+
+            XRControl.Me.gameObject.GetComponent<AvatarSubconscious>().
+                                AnnounceArrival(newvalue);
         }
 
 
@@ -559,11 +570,7 @@ namespace Arteranos.Avatar
 
         public void UpdateSSEffects(IAvatarBrain receiver, int state)
         {
-            if(receiver== null)
-            {
-                LogDebug($"I feel {state} about an offline user.");
-                return;
-            }
+            if(receiver == null) return;
 
             LogDebug($"I feel about {receiver.Nickname}: {state}");
 

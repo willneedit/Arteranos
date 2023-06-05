@@ -11,8 +11,6 @@ using Mirror;
 using Arteranos.Core;
 using System.Linq;
 using Arteranos.Social;
-using System.Runtime.CompilerServices;
-using UnityEngine;
 
 namespace Arteranos.Avatar
 {
@@ -131,6 +129,14 @@ namespace Arteranos.Avatar
             // But, derive the global UserIDs to the scoped UserIDs.
             foreach(var item in q)
                 ReloadSocialState(item.User, item.State);
+        }
+
+        public void AnnounceArrival(UserID userID)
+        {
+            userID = userID.Derive(SettingsManager.CurrentServer.Name);
+            int state = OwnSocialState.TryGetValue(userID, out int v) ? v : SocialState.None;
+
+            ReloadSocialState(userID, state);
         }
 
         private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item)
