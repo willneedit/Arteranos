@@ -89,28 +89,22 @@ namespace Arteranos.Core
             return new UserID(Hash, ServerName);
         }
 
-        public override bool Equals(object obj) => Equals(obj as UserID);
         public bool Equals(UserID other)
         {
             if(other == null) return false;
 
             // If neccessary, derive the hash with the counterpart's Server name.
-            byte[] thisHash = (this.ServerName == null) 
+            byte[] thisHash = (this.ServerName == null)
                 ? DeriveScopedUserHash(this.Hash, other.ServerName)
                 : this.Hash;
 
-            byte[] otherHash = (other.ServerName == null) 
+            byte[] otherHash = (other.ServerName == null)
                 ? DeriveScopedUserHash(other.Hash, this.ServerName)
                 : other.Hash;
 
             // And, compare.
-            return Enumerable.SequenceEqual(thisHash, otherHash);
+            return thisHash.SequenceEqual(otherHash);
         }
-
-        public override int GetHashCode() => HashCode.Combine(ServerName, Hash);
-
-        public static bool operator ==(UserID left, UserID right) => Equals(left, right);
-        public static bool operator !=(UserID left, UserID right) => !(left == right);
 
         public override string ToString()
         {
@@ -120,5 +114,17 @@ namespace Arteranos.Core
             foreach(byte x in Hash) hashString += String.Format("{0:x2}", x);
             return hashString;
         }
+
+        public override bool Equals(object obj) => Equals(obj as UserID);
+        public override int GetHashCode()
+        {
+            HashCode hc = new();
+            if(ServerName != null) foreach(char c in ServerName) hc.Add(c);
+            foreach(byte b in Hash) hc.Add(b);
+            return hc.ToHashCode();
+        }
+
+        public static bool operator ==(UserID left, UserID right) => EqualityComparer<UserID>.Default.Equals(left, right);
+        public static bool operator !=(UserID left, UserID right) => !(left == right);
     }
 }
