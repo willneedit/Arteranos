@@ -185,13 +185,13 @@ PrefabInstance:
         type: 3}
       propertyPath: ChoiceEntries.Array.data[0].UI
       value: 
-      objectReference: {fileID: 3454404130621911998, guid: d8ab140950bbf884abf9b36c384fd81a,
+      objectReference: {fileID: 44679276287551507, guid: cd3fc2ecfa333fb44900e0f18eb5321d,
         type: 3}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[1].UI
       value: 
-      objectReference: {fileID: 44679276287551507, guid: cd3fc2ecfa333fb44900e0f18eb5321d,
+      objectReference: {fileID: 3454404130621911998, guid: d8ab140950bbf884abf9b36c384fd81a,
         type: 3}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
@@ -244,12 +244,12 @@ PrefabInstance:
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[0].name
-      value: Me
+      value: Travel
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[1].name
-      value: Travel
+      value: Me
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
