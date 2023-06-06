@@ -91,6 +91,7 @@ namespace Arteranos.Avatar
         }
 
         public void SaveSocialStates(IAvatarBrain receiver, int state) => throw new NotImplementedException();
+        public void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID) => throw new NotImplementedException();
     }
 }
 

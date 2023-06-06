@@ -7,10 +7,14 @@
 
 using System.Collections.Generic;
 
+using UnityEngine;
+
 using Mirror;
 using Arteranos.Core;
 using System.Linq;
 using Arteranos.Social;
+using System;
+using Arteranos.XR;
 
 namespace Arteranos.Avatar
 {
@@ -53,23 +57,10 @@ namespace Arteranos.Avatar
             base.OnStopClient();
         }
 
-
-        // TODO Mock, for the saved dictionary
-        private readonly Dictionary<UserID, int> SavedSocialStates = new();
-
-
-        private IAvatarBrain ClientSearchUser(UserID userID)
-        {
-            foreach(AvatarBrain brain in FindObjectsOfType<AvatarBrain>())
-                if(brain.UserID == userID) return brain;
-
-            return null;
-        }
-
         [Command]
         private void CmdUpdateReflectiveSocialState(UserID userID, int state)
         {
-            IAvatarBrain mirrored = ClientSearchUser(userID);
+            IAvatarBrain mirrored = SearchUser(userID);
 
             if(mirrored != null)
             {
@@ -79,15 +70,47 @@ namespace Arteranos.Avatar
             }
         }
 
+        [Command]
+        private void CmdTransmitGlobalUserID(GameObject receiverGO, UserID globalUserID)
+        {
+            if(globalUserID.ServerName != null) throw new ArgumentException("Not a global userID");
+
+            Brain.LogDebug($"Attempting to send {gameObject.GetComponent<IAvatarBrain>().Nickname}'s global UserID {globalUserID} to {receiverGO.gameObject.GetComponent<IAvatarBrain>().Nickname}");
+            NetworkIdentity nid = receiverGO.GetComponent<NetworkIdentity>();
+            TargetReceiveGlobalUserID(
+                nid.connectionToClient,
+                gameObject,
+                globalUserID);
+        }
+
+        [TargetRpc]
+        private void TargetReceiveGlobalUserID(NetworkConnectionToClient _, GameObject receiverGO, UserID globalUserID) 
+        {
+            IAvatarBrain receiver = receiverGO.GetComponent<AvatarBrain>();
+
+            UserID supposedUserID = globalUserID.Derive(SettingsManager.CurrentServer.Name);
+
+            if(receiver.UserID != supposedUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
+
+            XRControl.Me.UpdateToGlobalUserID(receiver, globalUserID);
+        }
+
+        private IAvatarBrain SearchUser(UserID userID)
+        {
+            foreach(AvatarBrain brain in FindObjectsOfType<AvatarBrain>())
+                if(brain.UserID == userID) return brain;
+
+            return null;
+        }
+
         private void ReloadSocialState(UserID userID, int state)
         {
             OwnSocialState[userID] = state;
 
             CmdUpdateReflectiveSocialState(userID, state);
 
-            Brain.UpdateSSEffects(ClientSearchUser(userID), state);
+            Brain.UpdateSSEffects(SearchUser(userID), state);
         }
-
 
         private void UpdateSocialState(IAvatarBrain receiver, int state, bool set)
         {
@@ -131,6 +154,13 @@ namespace Arteranos.Avatar
                 ReloadSocialState(item.User, item.State);
         }
 
+        private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item) 
+            => Brain.UpdateReflectiveSSEffects(SearchUser(key), item);
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Interface
+
         public void AnnounceArrival(UserID userID)
         {
             userID = userID.Derive(SettingsManager.CurrentServer.Name);
@@ -139,27 +169,31 @@ namespace Arteranos.Avatar
             ReloadSocialState(userID, state);
         }
 
-        private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item)
-        {
-            Brain.UpdateReflectiveSSEffects(ClientSearchUser(key), item);
-        }
-
-        #endregion
-        // ---------------------------------------------------------------
-        #region Interface
-
-
-        public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
-        {
-            UpdateSocialState(receiver, SocialState.Friend_offered, offering);
-        }
-
+        public void OfferFriendship(IAvatarBrain receiver, bool offering = true) 
+            => UpdateSocialState(receiver, SocialState.Friend_offered, offering);
 
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
         {
             if(blocking)
                 UpdateSocialState(receiver, SocialState.Friend_offered, false);
             UpdateSocialState(receiver, SocialState.Blocked, blocking);
+        }
+
+        public void AttemptFriendNegotiation(IAvatarBrain receiver)
+        {
+            // "I love you, you love me, let us..." -- nope. Nope! NOPE!!
+            // Not that imbecile pink dinosaur !
+            int you = OwnSocialState.TryGetValue(receiver.UserID, out int v1) ? v1 : SocialState.None;
+            int him = ReflectiveSocialState.TryGetValue(receiver.UserID, out int v2) ? v2 : SocialState.None;
+
+            bool result = SocialState.IsFriends(you, him);
+            Brain.LogDebug($"Possible friendship? you={you}, him={him} - result: {result}");
+
+            if(!result) return;
+
+            // But, I have to take the first step....
+            CmdTransmitGlobalUserID(receiver.gameObject,
+                SettingsManager.Client.UserID);
         }
 
         #endregion

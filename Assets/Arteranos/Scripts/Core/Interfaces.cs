@@ -104,6 +104,7 @@ namespace Arteranos.Avatar
         void SetAppearanceStatusBit(int ASBit, bool set);
         void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state);
         void UpdateSSEffects(IAvatarBrain receiver, int state);
+        void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID);
     }
 
     public interface IHitBox

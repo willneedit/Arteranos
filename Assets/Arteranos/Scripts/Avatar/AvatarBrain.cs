@@ -567,6 +567,70 @@ namespace Arteranos.Avatar
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
             => Subconscious.BlockUser(receiver, blocking);
 
+        public void SaveSocialStates(IAvatarBrain receiver, int state)
+        {
+            if(!isOwned) throw new Exception("Not owner");
+
+            UserDataSettingsJSON Me = SettingsManager.Client.Me;
+
+            // It _should_ be zero or exactly one entries to update
+            SocialListEntryJSON[] q = (from entry in Me.SocialList
+                                       where entry.UserID == receiver.UserID
+                                       select entry).ToArray();
+
+            // The list entries could be the global userIDs, save them.
+            UserID enteredUserID = (q.Count() > 0) ? q[0].UserID : receiver.UserID;
+
+            for(int i = 0; i < q.Length; ++i) Me.SocialList.Remove(q[i]);
+
+            if(state != SocialState.None) Me.SocialList.Add(new()
+            {
+                Nickname = receiver.Nickname,
+                UserID = enteredUserID,
+                state = state
+            });
+
+            SettingsManager.Client.SaveSettings();
+        }
+
+        public void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID)
+        {
+            LogDebug($"{receiver.Nickname}'s UserID was updated to global UserID {globalUserID}");
+
+            if(!isOwned) throw new Exception("Not owner");
+
+            if(receiver.UserID != globalUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
+
+            UserDataSettingsJSON Me = SettingsManager.Client.Me;
+
+            SocialListEntryJSON[] q = (from entry in Me.SocialList
+                                       where entry.UserID == receiver.UserID
+                                       select entry).ToArray();
+
+            if(q.Count() > 0 && q[0].UserID.ServerName == null)
+            {
+                LogDebug($"{receiver.Nickname} already has a global UserID");
+                return;
+            }
+
+            // TODO Conflicting social states about the same user throughout different servers?
+            int aggregated = SocialState.None;
+            for(int i = 0; i < q.Length; ++i)
+            {
+                Me.SocialList.Remove(q[i]);
+                aggregated |= q[i].state;
+            }
+
+            Me.SocialList.Add(new()
+            {
+                Nickname = receiver.Nickname,
+                UserID = globalUserID,
+                state = aggregated
+            });
+
+            SettingsManager.Client.SaveSettings();
+
+        }
 
         public void UpdateSSEffects(IAvatarBrain receiver, int state)
         {
@@ -578,27 +642,8 @@ namespace Arteranos.Avatar
             bool blocked = (state & SocialState.Blocked) != 0;
             receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocked, blocked);
             if(blocked) return;
-        }
 
-        public void SaveSocialStates(IAvatarBrain receiver, int state)
-        {
-            UserDataSettingsJSON Me = SettingsManager.Client.Me;
-
-            // It _should_ be zero or exactly one entries to update
-            SocialListEntryJSON[] q = (from entry in Me.SocialList
-                                       where entry.UserID == receiver.UserID
-                                       select entry).ToArray();
-
-            for(int i = 0; i < q.Length; ++i) Me.SocialList.Remove(q[i]);
-
-            if(state != SocialState.None) Me.SocialList.Add(new()
-                {
-                    Nickname = receiver.Nickname,
-                    UserID = receiver.UserID,
-                    state = state
-                });
-
-            SettingsManager.Client.SaveSettings();
+            Subconscious.AttemptFriendNegotiation(receiver);
         }
 
         public void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state)
@@ -616,6 +661,8 @@ namespace Arteranos.Avatar
             bool blocked = (state & SocialState.Blocked) != 0;
             receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocking, blocked);
             if(blocked) return;
+
+            Subconscious.AttemptFriendNegotiation(receiver);
         }
         #endregion
     }

@@ -35,6 +35,7 @@ namespace Arteranos.UI
 
             btn_mute.onClick.AddListener(OnMuteButtonClicked);
             btn_unmute.onClick.AddListener(OnMuteButtonClicked);
+            btn_friend_add.onClick.AddListener(OnFriendAddButtonClicked);
             btn_block.onClick.AddListener(OnBlockButtonClicked);
         }
 
@@ -95,9 +96,8 @@ namespace Arteranos.UI
             OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 
-        private void OnBlockButtonClicked() 
-        {
-            XRControl.Me.BlockUser(Bearer);
-        }
+        private void OnBlockButtonClicked() => XRControl.Me.BlockUser(Bearer);
+
+        private void OnFriendAddButtonClicked() => XRControl.Me.OfferFriendship(Bearer);
     }
 }
