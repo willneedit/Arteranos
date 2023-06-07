@@ -17,11 +17,14 @@ namespace Arteranos.UI
 {
     public class ServerListItem : ListItemBase
     {
-        public HoverButton btn_Info = null;
-
         public string serverURL = null;
         public Image img_Icon = null;
         public TMP_Text lbl_Caption = null;
+
+        private HoverButton btn_Add = null;
+        private HoverButton btn_Info = null;
+        private HoverButton btn_Visit = null;
+        private HoverButton btn_Delete = null;
 
         public event Action<ServerListItem> OnUpdateFinished;
 
@@ -42,14 +45,15 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            btn_Info.onHover += OnShowChildControls;
+            btn_Add = btns_ItemButton[0];
+            btn_Info = btns_ItemButton[1];
+            btn_Visit = btns_ItemButton[2];
+            btn_Delete = btns_ItemButton[3];
 
             btn_Add.onClick.AddListener(OnAddClicked);
             btn_Info.onClick.AddListener(OnInfoClicked);
             btn_Visit.onClick.AddListener(OnVisitClicked);
             btn_Delete.onClick.AddListener(OnDeleteClicked);
-
-            go_Overlay.SetActive(false);
         }
 
         private void OnInfoClicked() => throw new NotImplementedException();

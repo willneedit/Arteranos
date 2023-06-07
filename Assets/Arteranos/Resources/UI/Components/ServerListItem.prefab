@@ -820,12 +820,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b7c916ef7d760742a3830cf69284068, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  btn_Add: {fileID: 4053952363285469761}
   btn_Background: {fileID: 135358708319891507}
-  btn_Delete: {fileID: 8360029489124503346}
-  btn_Visit: {fileID: 8573551087314495096}
   go_Overlay: {fileID: 7778222521296471245}
-  btn_Info: {fileID: 7752645259770427791}
+  btns_ItemButton:
+  - {fileID: 4053952363285469761}
+  - {fileID: 7752645259770427791}
+  - {fileID: 8573551087314495096}
+  - {fileID: 8360029489124503346}
   serverURL: 
   img_Icon: {fileID: 7778222521864700034}
   lbl_Caption: {fileID: 7778222522103766469}

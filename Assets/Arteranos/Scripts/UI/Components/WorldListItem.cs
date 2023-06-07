@@ -20,6 +20,10 @@ namespace Arteranos.UI
 {
     public class WorldListItem : ListItemBase
     {
+        private HoverButton btn_Add = null;
+        private HoverButton btn_Visit = null;
+        private HoverButton btn_Delete = null;
+
         public string worldURL = null;
         public Image img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
@@ -37,11 +41,13 @@ namespace Arteranos.UI
         {
             base.Awake();
 
+            btn_Add = btns_ItemButton[0];
+            btn_Visit= btns_ItemButton[1];
+            btn_Delete= btns_ItemButton[2];
+
             btn_Add.onClick.AddListener(OnAddClicked);
             btn_Visit.onClick.AddListener(OnVisitClicked);
             btn_Delete.onClick.AddListener(OnDeleteClicked);
-
-            go_Overlay.SetActive(false);
         }
 
         protected override void Start()

@@ -13,12 +13,10 @@ namespace Arteranos.UI
 {
     public class ListItemBase : UIBehaviour
     {
-        public HoverButton btn_Add = null;
-
         public HoverButton btn_Background = null;
-        public HoverButton btn_Delete = null;
-        public HoverButton btn_Visit = null;
         public GameObject go_Overlay = null;
+
+        public HoverButton[] btns_ItemButton = new HoverButton[0];
 
         private bool ChildControlEntered = false;
 
@@ -31,16 +29,17 @@ namespace Arteranos.UI
             btn_Background.onHover += OnShowControls;
             btn_Background.interactable = false;
 
-            btn_Add.onHover += OnShowChildControls;
-            btn_Visit.onHover += OnShowChildControls;
-            btn_Delete.onHover += OnShowChildControls;
+            foreach(HoverButton button in btns_ItemButton)
+                button.onHover += OnShowChildControls;
+
+            go_Overlay.SetActive(false);
         }
 
         private IEnumerator DelayShowOverlay(bool entered)
         {
             delayco = null;
 
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(0.5f);
 
             if(ChildControlEntered || entered)
                 entered = true;
