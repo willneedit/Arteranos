@@ -571,26 +571,7 @@ namespace Arteranos.Avatar
         {
             if(!isOwned) throw new Exception("Not owner");
 
-            UserDataSettingsJSON Me = SettingsManager.Client.Me;
-
-            // It _should_ be zero or exactly one entries to update
-            SocialListEntryJSON[] q = (from entry in Me.SocialList
-                                       where entry.UserID == receiver.UserID
-                                       select entry).ToArray();
-
-            // The list entries could be the global userIDs, save them.
-            UserID enteredUserID = (q.Count() > 0) ? q[0].UserID : receiver.UserID;
-
-            for(int i = 0; i < q.Length; ++i) Me.SocialList.Remove(q[i]);
-
-            if(state != SocialState.None) Me.SocialList.Add(new()
-            {
-                Nickname = receiver.Nickname,
-                UserID = enteredUserID,
-                state = state
-            });
-
-            SettingsManager.Client.SaveSettings();
+            SettingsManager.Client.SaveSocialStates(receiver.UserID, receiver.Nickname, state);
         }
 
         public void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID)
@@ -601,35 +582,7 @@ namespace Arteranos.Avatar
 
             if(receiver.UserID != globalUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
 
-            UserDataSettingsJSON Me = SettingsManager.Client.Me;
-
-            SocialListEntryJSON[] q = (from entry in Me.SocialList
-                                       where entry.UserID == receiver.UserID
-                                       select entry).ToArray();
-
-            if(q.Count() > 0 && q[0].UserID.ServerName == null)
-            {
-                LogDebug($"{receiver.Nickname} already has a global UserID");
-                return;
-            }
-
-            // TODO Conflicting social states about the same user throughout different servers?
-            int aggregated = SocialState.None;
-            for(int i = 0; i < q.Length; ++i)
-            {
-                Me.SocialList.Remove(q[i]);
-                aggregated |= q[i].state;
-            }
-
-            Me.SocialList.Add(new()
-            {
-                Nickname = receiver.Nickname,
-                UserID = globalUserID,
-                state = aggregated
-            });
-
-            SettingsManager.Client.SaveSettings();
-
+            SettingsManager.Client.UpdateToGlobalUserID(globalUserID);
         }
 
         public void UpdateSSEffects(IAvatarBrain receiver, int state)

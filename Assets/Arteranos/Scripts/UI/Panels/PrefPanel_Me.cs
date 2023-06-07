@@ -74,9 +74,7 @@ namespace Arteranos.UI
             cs = SettingsManager.Client;
 
             // Show the original hash when offline, the derived by the server name's hash when online.
-            UserID current = (SettingsManager.CurrentServer == null)
-                ? cs.UserID
-                : cs.UserID.Derive(SettingsManager.CurrentServer.Name);
+            UserID current = cs.UserID.Derive(SettingsManager.CurrentServer?.Name);
 
             spn_OnlineStatus.value = Array.IndexOf(spn_OnlineStatus.Options, Utils.GetEnumDescription(cs.Visibility));
             txt_Nickname.text = cs.Me.Nickname;

@@ -89,6 +89,14 @@ namespace Arteranos.Core
             return new UserID(Hash, ServerName);
         }
 
+        public UserID Derive()
+        {
+            if(SettingsManager.CurrentServer?.Name == null)
+                throw new InvalidOperationException("Derive() without current server name (e.g. offline");
+
+            return Derive(SettingsManager.CurrentServer.Name);
+        }
+
         public bool Equals(UserID other)
         {
             if(other == null) return false;

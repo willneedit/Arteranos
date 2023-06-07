@@ -88,7 +88,7 @@ namespace Arteranos.Avatar
         {
             IAvatarBrain receiver = receiverGO.GetComponent<AvatarBrain>();
 
-            UserID supposedUserID = globalUserID.Derive(SettingsManager.CurrentServer.Name);
+            UserID supposedUserID = globalUserID.Derive();
 
             if(receiver.UserID != supposedUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
 
@@ -136,22 +136,13 @@ namespace Arteranos.Avatar
             // Clean slate
             OwnSocialState.Clear();
 
-            UserDataSettingsJSON Me = SettingsManager.Client.Me;
-
             // Copy users with the global UserIDs and the scoped UserIDs matching this server
             // Note, both current and logged-out users!
-            var q = from state in Me.SocialList
-                    where state.UserID.ServerName == null
-                        || state.UserID.ServerName == SettingsManager.CurrentServer.Name
-                    select new
-                    {
-                        User = state.UserID.Derive(SettingsManager.CurrentServer.Name),
-                        State = state.state
-                    };
+            IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetFilteredSocialList(null);
 
             // But, derive the global UserIDs to the scoped UserIDs.
             foreach(var item in q)
-                ReloadSocialState(item.User, item.State);
+                ReloadSocialState(item.UserID.Derive(), item.state);
         }
 
         private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item) 
@@ -163,7 +154,7 @@ namespace Arteranos.Avatar
 
         public void AnnounceArrival(UserID userID)
         {
-            userID = userID.Derive(SettingsManager.CurrentServer.Name);
+            userID = userID.Derive();
             int state = OwnSocialState.TryGetValue(userID, out int v) ? v : SocialState.None;
 
             ReloadSocialState(userID, state);

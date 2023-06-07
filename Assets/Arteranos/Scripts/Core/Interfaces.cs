@@ -568,7 +568,7 @@ namespace Arteranos.Social
         public const int Blocked            = (1 << 8);
 
         public static bool IsFriends(int you, int him) 
-            => (you == Friend_offered) && (him == Friend_offered);
+            => ((you & Friend_offered) == Friend_offered) && ((him & Friend_offered) == Friend_offered);
 
 
     }

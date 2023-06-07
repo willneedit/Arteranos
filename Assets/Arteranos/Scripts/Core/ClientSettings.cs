@@ -10,10 +10,10 @@ using UnityEngine;
 
 using Newtonsoft.Json;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 using System.ComponentModel;
 using System.Collections.Generic;
+using Arteranos.Social;
+using System.Linq;
 
 namespace Arteranos.Core
 {
@@ -228,6 +228,95 @@ namespace Arteranos.Core
             UserID = new(l.LoginProvider, l.Username);
 
             return dirty;
+        }
+
+        public void SaveSocialStates(UserID userID, string nickname, int state)
+        {
+            // It _should_ be zero or exactly one entries to update
+            SocialListEntryJSON[] q = GetSocialList(userID).ToArray();
+
+            // If there's a global UserID lurking around, find it.
+            SocialListEntryJSON[] globalq = (from entry in q
+                                             where entry.UserID.ServerName == null
+                                             select entry).ToArray();
+
+            // Despite passing around a scoped UserID, keep the equivalent global UserID.
+            UserID enteredUserID = (globalq.Count() > 0) ? globalq[0].UserID : userID;
+
+            for(int i = 0; i < q.Length; ++i) Me.SocialList.Remove(q[i]);
+
+            if(state != SocialState.None)
+            {
+                Me.SocialList.Add(new()
+                {
+                    Nickname = nickname,
+                    UserID = enteredUserID,
+                    state = state
+                });
+            }
+
+            SaveSettings();
+        }
+
+        public void UpdateToGlobalUserID(UserID globalUserID)
+        {
+            // The global UserID is considered equal to all of the scoped UserIDs, too.
+            SocialListEntryJSON[] q = GetSocialList(globalUserID).ToArray();
+
+            if(q.Count() > 0 && q[0].UserID.ServerName == null)
+            {
+                // No point proceeding.
+                Debug.Log($"There already is a global UserID");
+                return;
+            }
+
+            // That would mean that we have a shiny new global User ID? HOW?
+            string nickname = "<unknown>";
+            int aggregated = SocialState.None;
+
+            for(int i = 0; i < q.Length; ++i)
+            {
+                Me.SocialList.Remove(q[i]);
+                aggregated |= q[i].state;
+                nickname = q[i].Nickname;
+            }
+
+            Me.SocialList.Add(new()
+            {
+                Nickname = nickname,
+                UserID = globalUserID,
+                state = aggregated
+            });
+
+            SaveSettings();
+        }
+
+        /// <summary>
+        /// Get the social relations list
+        /// </summary>
+        /// <param name="userID">the targeted user, null if everyone</param>
+        /// <param name="p">Additional search limitations</param>
+        /// <returns>The matching entries with the equivalent UserIDs</returns>
+        public IEnumerable<SocialListEntryJSON> GetSocialList(
+            UserID userID = null, Func<SocialListEntryJSON, bool> p = null)
+        {
+            p ??= (x) => true;
+
+            return from entry in Me.SocialList
+                   where (userID == null || entry.UserID == userID) && p(entry)
+                   select entry;
+        }
+
+        /// <summary>
+        /// Get the filtered relations list, resticted to the current server, or the global UserIDs
+        /// </summary>
+        /// <param name="userID">The userID</param>
+        /// <returns>The scoped or even the global UserID's entry</returns>
+        public IEnumerable<SocialListEntryJSON> GetFilteredSocialList(UserID userID = null)
+        {
+            return GetSocialList(userID, (x) => 
+                x.UserID.ServerName == null
+                || x.UserID.ServerName == SettingsManager.CurrentServer.Name);
         }
 
         public void SaveSettings()
