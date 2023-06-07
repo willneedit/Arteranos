@@ -252,7 +252,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.2509804, g: 0.2509804, b: 0.2509804, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -540,14 +540,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0293067e7c507446a1de167c87549f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldURL: 
+  btn_Add: {fileID: 4053952363285469761}
   btn_Background: {fileID: 135358708319891507}
+  btn_Delete: {fileID: 8360029489124503346}
+  btn_Visit: {fileID: 8573551087314495096}
+  go_Overlay: {fileID: 7778222521296471245}
+  worldURL: 
   img_Screenshot: {fileID: 7778222521864700034}
   lbl_Caption: {fileID: 7778222522103766469}
-  go_Overlay: {fileID: 7778222521296471245}
-  btn_Add: {fileID: 4053952363285469761}
-  btn_Visit: {fileID: 8573551087314495096}
-  btn_Delete: {fileID: 8360029489124503346}
 --- !u!114 &3020844609690722426
 MonoBehaviour:
   m_ObjectHideFlags: 0
