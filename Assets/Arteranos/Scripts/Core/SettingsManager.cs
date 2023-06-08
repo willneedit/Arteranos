@@ -9,6 +9,7 @@ using Arteranos.Avatar;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Arteranos.Core
 {
@@ -98,15 +99,21 @@ namespace Arteranos.Core
             DontDestroyOnLoad(Purgatory.gameObject);
         }
 
-        public static void RegisterUser(IAvatarBrain brain)
-        {
-            Users.Add(brain);
-        }
+        public static void RegisterUser(IAvatarBrain brain) => Users.Add(brain);
 
         public static void UnregisterUser(IAvatarBrain brain)
         {
             if(Users.Contains(brain))
                 Users.Remove(brain);
+        }
+
+        public static IAvatarBrain GetOnlineUser(UserID userID)
+        {
+            IEnumerable<IAvatarBrain> q = from entry in Users
+                    where entry.UserID == userID
+                    select entry;
+
+            return q.Count() > 0 ? q.First() : null;
         }
     }
 }

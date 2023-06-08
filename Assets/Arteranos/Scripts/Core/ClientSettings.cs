@@ -307,6 +307,26 @@ namespace Arteranos.Core
                    select entry;
         }
 
+        public void UpdateSocialListEntry(UserID userID, int statusBit, bool set, string Nickname = null)
+        {
+            var q = GetFilteredSocialList(userID);
+            int state = SocialState.None;
+            if(q.Count() > 1)
+            {
+                state = q.First().state;
+                Nickname ??= q.First().Nickname;
+            }
+            else
+                Nickname ??= "(unknown)";
+
+            if(set)
+                state |= statusBit;
+            else
+                state &= ~statusBit;
+
+            SaveSocialStates(userID, Nickname, state);
+        }
+
         /// <summary>
         /// Get the filtered relations list, resticted to the current server, or the global UserIDs
         /// </summary>

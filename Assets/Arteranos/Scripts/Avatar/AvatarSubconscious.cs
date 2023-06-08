@@ -75,7 +75,6 @@ namespace Arteranos.Avatar
         {
             if(globalUserID.ServerName != null) throw new ArgumentException("Not a global userID");
 
-            Brain.LogDebug($"Attempting to send {gameObject.GetComponent<IAvatarBrain>().Nickname}'s global UserID {globalUserID} to {receiverGO.gameObject.GetComponent<IAvatarBrain>().Nickname}");
             NetworkIdentity nid = receiverGO.GetComponent<NetworkIdentity>();
             TargetReceiveGlobalUserID(
                 nid.connectionToClient,
@@ -141,7 +140,7 @@ namespace Arteranos.Avatar
             IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetFilteredSocialList(null);
 
             // But, derive the global UserIDs to the scoped UserIDs.
-            foreach(var item in q)
+            foreach(SocialListEntryJSON item in q)
                 ReloadSocialState(item.UserID.Derive(), item.state);
         }
 
@@ -172,19 +171,39 @@ namespace Arteranos.Avatar
 
         public void AttemptFriendNegotiation(IAvatarBrain receiver)
         {
-            // "I love you, you love me, let us..." -- nope. Nope! NOPE!!
-            // Not that imbecile pink dinosaur !
-            int you = OwnSocialState.TryGetValue(receiver.UserID, out int v1) ? v1 : SocialState.None;
-            int him = ReflectiveSocialState.TryGetValue(receiver.UserID, out int v2) ? v2 : SocialState.None;
-
-            bool result = SocialState.IsFriends(you, him);
-            Brain.LogDebug($"Possible friendship? you={you}, him={him} - result: {result}");
+            bool result = IsMutualFriends(receiver);
 
             if(!result) return;
 
             // But, I have to take the first step....
             CmdTransmitGlobalUserID(receiver.gameObject,
                 SettingsManager.Client.UserID);
+        }
+
+        public bool IsMutualFriends(IAvatarBrain receiver)
+        {
+            // "I love you, you love me, let us..." -- nope. Nope! NOPE!!
+            // Not that imbecile pink dinosaur !
+            int you = OwnSocialState.TryGetValue(receiver.UserID, out int v1) ? v1 : SocialState.None;
+            int him = ReflectiveSocialState.TryGetValue(receiver.UserID, out int v2) ? v2 : SocialState.None;
+
+            bool result = SocialState.IsFriends(you, him);
+            bool wasMutual = (you & SocialState.Friend_bonded) != 0;
+
+            Brain.LogDebug($"Possible friendship? you={you}, him={him} - result: {result}");
+
+            if(wasMutual != result)
+            {
+                if(result)
+                    you |= SocialState.Friend_bonded;
+                else
+                    you &= ~SocialState.Friend_bonded;
+
+                Brain.LogDebug($"{receiver.Nickname}'s status is updated to {you}");
+                Brain.SaveSocialStates(receiver, you);
+            }
+
+            return result;
         }
 
         #endregion

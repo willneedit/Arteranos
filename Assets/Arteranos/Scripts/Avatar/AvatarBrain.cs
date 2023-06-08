@@ -617,6 +617,10 @@ namespace Arteranos.Avatar
 
             Subconscious.AttemptFriendNegotiation(receiver);
         }
+
+        public bool IsMutualFriends(IAvatarBrain receiver)
+            => Subconscious.IsMutualFriends(receiver);
+
         #endregion
     }
 }

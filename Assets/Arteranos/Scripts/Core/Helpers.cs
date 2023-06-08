@@ -343,6 +343,9 @@ namespace Arteranos.Social
         // You offered your friendship to the targeted user.
         public const int Friend_offered     = (1 << 0);
 
+        // Last I'd seen, your frienship is mutual.
+        public const int Friend_bonded      = (1 << 1);
+
         // You blocked the targeted user.
         public const int Blocked            = (1 << 8);
 
