@@ -17,8 +17,6 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 
-#pragma warning disable IDE1006 // Because Unity's more relaxed naming convention
-
 namespace Arteranos.Avatar
 {
     // -------------------------------------------------------------------
@@ -71,64 +69,6 @@ namespace Arteranos.Avatar
 
     #endregion
     // -------------------------------------------------------------------
-    #region Avatar interfaces
-
-    public struct ShitListEntry
-    {
-        public UserID userID;
-        public int state;
-    }
-
-    public interface IAvatarBrain
-    {
-        string AvatarURL { get; }
-        int ChatOwnID { get; }
-        uint NetID { get; }
-        string Nickname { get; }
-        int AppearanceStatus { get; set; }
-        bool isOwned { get; }
-        IAvatarLoader Body { get; }
-        GameObject gameObject { get; }
-        UserID UserID { get; }
-
-        event Action<string> OnAvatarChanged;
-        event Action<int> OnAppearanceStatusChanged;
-
-        void BlockUser(IAvatarBrain receiver, bool blocking = true);
-        void LogDebug(object message);
-        void LogError(object message);
-        void LogWarning(object message);
-        void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
-        void OfferFriendship(IAvatarBrain receiver, bool offering = true);
-        void SaveSocialStates(IAvatarBrain receiver, int state);
-        void SetAppearanceStatusBit(int ASBit, bool set);
-        void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state);
-        void UpdateSSEffects(IAvatarBrain receiver, int state);
-        void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID);
-    }
-
-    public interface IHitBox
-    {
-        GameObject gameObject { get; }
-        IAvatarBrain Brain { get; set; }
-
-        bool interactable { get; set; }
-
-        void OnTargeted(bool inSight);
-    }
-
-    public interface IBubbleCoordinator
-    {
-        IAvatarBrain Brain { get; set; }
-
-        void ChangeBubbleSize(float diameter, bool isFriend);
-        void NotifyTrigger(IAvatarBrain touchy, bool isFriend, bool entered);
-    }
-
-
-
-    #endregion
-    // -------------------------------------------------------------------
     #region Avatar helpers
 
     public class AvatarHitBoxFactory : MonoBehaviour
@@ -161,72 +101,6 @@ namespace Arteranos.Avatar
 
 namespace Arteranos.Services
 {
-    // -------------------------------------------------------------------
-    #region Services interfaces
-
-    public enum ConnectivityLevel
-    {
-        [Description("Unconnected")]
-        Unconnected = 0,
-        [Description("Firewalled")]
-        Restricted,
-        [Description("Public")]
-        Unrestricted
-    }
-    public enum OnlineLevel
-    {
-        [Description("Offline")]
-        Offline = 0,
-        [Description("Client")]
-        Client,
-        [Description("Server")]
-        Server,
-        [Description("Host")]
-        Host
-    }
-
-    public interface INetworkStatus
-    {
-        IPAddress ExternalAddress { get; }
-        bool OpenPorts { get; set; }
-        bool enabled { get; set; }
-        Action<bool> OnClientConnectionResponse { get; set; }
-
-        event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
-
-        ConnectivityLevel GetConnectivityLevel();
-        OnlineLevel GetOnlineLevel();
-        void StartClient(Uri connectionUri);
-        void StartHost();
-        void StartServer();
-        void StopHost();
-    }
-
-    public interface IAudioManager
-    {
-        AudioMixerGroup MixerGroupEnv { get; }
-        AudioMixerGroup MixerGroupVoice { get; }
-        float VolumeEnv { get; set; }
-        float VolumeMaster { get; set; }
-        float VolumeVoice { get; set; }
-        bool enabled { get; set; }
-        float MicGain { get; set; }
-        int MicAGCLevel { get; set; }
-        bool MuteSelf { get; set; }
-
-        event Action<short> OnJoinedChatroom;
-        event Action<float[]> OnSampleReady;
-
-        int? GetDeviceId();
-        void JoinChatroom(object data = null);
-        void LeaveChatroom(object data = null);
-        void MuteOther(short peerID, bool muted);
-        bool MuteOther(short peerID);
-        void PushVolumeSettings();
-        void RenewMic();
-    }
-
-    #endregion
     // -------------------------------------------------------------------
     #region Services helpers
     public static class NetworkStatus
@@ -317,37 +191,6 @@ namespace Arteranos.Services
 namespace Arteranos.Web
 {
     // -------------------------------------------------------------------
-    #region Web interfaces
-    public interface IConnectionManager
-    {
-        Task<bool> ConnectToServer(string serverURL);
-    }
-
-    public interface IServerGallery
-    {
-        void DeleteServerSettings(string url);
-        Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(string url, int timeout = 20);
-        void DownloadServerMetadataAsync(string url, Action<string, ServerMetadataJSON> callback, int timeout = 20);
-        ServerSettingsJSON RetrieveServerSettings(string url);
-        void StoreServerSettings(string url, ServerSettingsJSON serverSettings);
-    }
-
-    public interface IWorldGallery
-    {
-        void DeleteWorld(string url);
-        (string, string) RetrieveWorld(string url, bool cached = false);
-        WorldMetaData RetrieveWorldMetaData(string url);
-        bool StoreWorld(string url);
-        void StoreWorldMetaData(string url, WorldMetaData worldMetaData);
-    }
-
-    public interface IWorldTransition
-    {
-        void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null);
-    }
-
-    #endregion
-    // -------------------------------------------------------------------
     #region Web helpers
     public static class ConnectionManager
     {
@@ -394,48 +237,6 @@ namespace Arteranos.Web
 
 namespace Arteranos.UI
 {
-    // -------------------------------------------------------------------
-    #region UI interfaces
-    public interface IDialogUI
-    {
-        public string Text { get; set; }
-        public string[] Buttons { get; set; }
-        public void Close();
-
-        event Action<int> OnDialogDone;
-
-        Task<int> PerformDialogAsync(string text, string[] buttons);
-    }
-
-    public interface IProgressUI
-    {
-        bool AllowCancel { get; set; }
-        AsyncOperationExecutor<Context> Executor { get; set; }
-        Context Context { get; set; }
-
-        event Action<Context> Completed;
-        event Action<Exception, Context> Faulted;
-    }
-
-    public interface ICreateAvatarUI
-    {
-
-    }
-
-    public interface IAvatarGalleryUI
-    {
-
-    }
-
-    public interface INameplateUI
-    {
-        IAvatarBrain Bearer { get; set; }
-        GameObject gameObject { get; }
-        bool enabled { get; set; }
-    }
-
-
-    #endregion
     // -------------------------------------------------------------------
     #region UI factories
     public class DialogUIFactory : UIBehaviour
@@ -516,28 +317,6 @@ namespace Arteranos.UI
 namespace Arteranos.XR
 {
     // -------------------------------------------------------------------
-    #region XR interfaces
-    public interface IXRControl
-    {
-        IAvatarBrain Me { get; set; }
-        Vector3 CameraLocalOffset { get; }
-        bool UsingXR { get; }
-        bool enabled { get; set; }
-        public float EyeHeight { get; set; }
-        public float BodyHeight { get; set; }
-        GameObject gameObject { get; }
-        Transform rigTransform { get; }
-        Transform cameraTransform { get; }
-        Vector3 heightAdjustment { get; }
-
-        public void ReconfigureXRRig();
-        void FreezeControls(bool value);
-        void MoveRig(Vector3 startPosition, Quaternion startRotation);
-
-        event Action<bool> XRSwitchEvent;
-    }
-    #endregion
-    // -------------------------------------------------------------------
     #region XR helpers
     public static class XRControl
     {
@@ -569,6 +348,9 @@ namespace Arteranos.Social
 
         public static bool IsFriends(int you, int him) 
             => ((you & Friend_offered) == Friend_offered) && ((him & Friend_offered) == Friend_offered);
+
+        public static bool IsState(int you, int stateBit)
+            => ((you & stateBit) == stateBit);
 
 
     }
