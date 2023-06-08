@@ -30,9 +30,7 @@ namespace Arteranos.UI
             base.Awake();
 
             RectTransform vp = GetComponent<ScrollRect>().viewport;
-            Debug.Log(vp.transform.name);
             ContentBox = vp.GetChild(0).GetComponent<RectTransform>();
-            Debug.Log(ContentBox.transform.name);
 
             VerticalScrollbar = GetComponent<ScrollRect>().verticalScrollbar;
         }

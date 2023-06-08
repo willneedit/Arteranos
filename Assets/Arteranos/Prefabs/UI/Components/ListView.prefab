@@ -159,8 +159,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b2a456331c592e4cbef56482d28e46c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ContentBox: {fileID: 1054943576046784930}
-  VerticalScrollbar: {fileID: 1054943575592786897}
 --- !u!1 &1054943575586530200
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,8 +438,8 @@ MonoBehaviour:
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
+  m_ChildScaleWidth: 1
+  m_ChildScaleHeight: 1
   m_ReverseArrangement: 0
 --- !u!114 &1054943576046784929
 MonoBehaviour:

@@ -15,11 +15,14 @@ using Arteranos.XR;
 using Arteranos.Core;
 using System.Linq;
 using Arteranos.Social;
+using TMPro;
 
 namespace Arteranos.UI
 {
     public class UserListItem : ListItemBase
     {
+        [SerializeField] private TMP_Text lbl_caption = null;
+
         private HoverButton btn_AddFriend = null; // Offering Friend or accepting the request
         private HoverButton btn_DelFriend = null; // Revoking Friend offer or unfriend
         private HoverButton btn_Block = null; // Block user
@@ -57,6 +60,13 @@ namespace Arteranos.UI
 
             Me = XRControl.Me;
             cs = SettingsManager.Client;
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+
+            lbl_caption.text = Nickname;
         }
 
         private void Update()

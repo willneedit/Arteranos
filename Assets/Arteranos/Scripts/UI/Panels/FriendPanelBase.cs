@@ -23,16 +23,6 @@ namespace Arteranos.UI
 
         protected ClientSettings cs = null;
 
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-        }
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -41,14 +31,19 @@ namespace Arteranos.UI
 
             if(cs == null) return;
 
-            foreach(var entry in GetSocialListTab())
+            foreach(SocialListEntryJSON entry in GetSocialListTab())
                 UserListItem.New(lvc_UserList.transform, entry.UserID, entry.Nickname);
         }
 
         protected override void OnDisable()
         {
-            while(lvc_UserList.transform.childCount > 0)
-                Destroy(lvc_UserList.transform.GetChild(0).gameObject);
+            List<GameObject> list = new();
+
+            for(int i = 0, c = lvc_UserList.transform.childCount;i < c; ++i)
+                list.Add(lvc_UserList.transform.GetChild(i).gameObject);
+
+            foreach(GameObject item in list)
+                Destroy(item);
 
             base.OnDisable();
         }
