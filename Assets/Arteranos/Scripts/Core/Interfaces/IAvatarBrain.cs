@@ -29,6 +29,7 @@ namespace Arteranos.Avatar
         event Action<int> OnAppearanceStatusChanged;
 
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
+        int GetReflectiveState(IAvatarBrain receiver);
         bool IsMutualFriends(IAvatarBrain receiver);
         void LogDebug(object message);
         void LogError(object message);

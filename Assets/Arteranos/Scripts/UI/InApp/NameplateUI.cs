@@ -14,6 +14,7 @@ using TMPro;
 using System;
 using Arteranos.Avatar;
 using Arteranos.XR;
+using Arteranos.Social;
 
 namespace Arteranos.UI
 {
@@ -43,7 +44,7 @@ namespace Arteranos.UI
         {
             base.OnEnable();
 
-            lbl_Name.text = Bearer.Nickname;
+            lbl_Name.text = GetLabelText();
 
             Bearer.OnAppearanceStatusChanged += OnAppearanceStatusChanged;
             float fullHeight = Bearer.Body.FullHeight;
@@ -66,6 +67,24 @@ namespace Arteranos.UI
             // Seems that we'd use _the client's_ Up vector, not the targeted avatar's.
             transform.LookAt(XR.XRControl.Instance.cameraTransform);
             transform.Rotate(aboutFace);
+        }
+
+        private string GetLabelText()
+        {
+            string tagstr = null;
+
+            int state = XRControl.Me.GetReflectiveState(Bearer);
+
+            if((state & SocialState.Friend_bonded) == SocialState.Friend_bonded)
+                tagstr = "Friend";
+
+            // _Exactly_ the offering state.
+            else if((state & SocialState.Friend_offered) == SocialState.Friend_offered) 
+                tagstr = "Wants to be your friend";
+
+            return tagstr == null
+                ? Bearer.Nickname
+                : $"{Bearer.Nickname}\n{tagstr}";
         }
 
         private void OnAppearanceStatusChanged(int status)

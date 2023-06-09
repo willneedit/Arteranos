@@ -621,6 +621,9 @@ namespace Arteranos.Avatar
         public bool IsMutualFriends(IAvatarBrain receiver)
             => Subconscious.IsMutualFriends(receiver);
 
+        public int GetReflectiveState(IAvatarBrain receiver)
+            => Subconscious.GetReflectiveState(receiver);
+
         #endregion
     }
 }

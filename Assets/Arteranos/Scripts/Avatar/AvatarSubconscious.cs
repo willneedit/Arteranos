@@ -185,9 +185,16 @@ namespace Arteranos.Avatar
             // "I love you, you love me, let us..." -- nope. Nope! NOPE!!
             // Not that imbecile pink dinosaur !
             int you = OwnSocialState.TryGetValue(receiver.UserID, out int v1) ? v1 : SocialState.None;
-            int him = ReflectiveSocialState.TryGetValue(receiver.UserID, out int v2) ? v2 : SocialState.None;
+            int? him = ReflectiveSocialState.TryGetValue(receiver.UserID, out int v2) ? v2 : null;
 
-            bool result = SocialState.IsFriends(you, him);
+            if(!him.HasValue)
+            {
+                // Maybe he's not completely logged in. Hold off with the updating of the states.
+                Brain.LogDebug($"Possible friendship? you={you}, him, I don't know yet.");
+                return false;
+            }
+
+            bool result = SocialState.IsFriends(you, him ?? SocialState.None);
             bool wasMutual = (you & SocialState.Friend_bonded) != 0;
 
             Brain.LogDebug($"Possible friendship? you={you}, him={him} - result: {result}");
@@ -205,6 +212,9 @@ namespace Arteranos.Avatar
 
             return result;
         }
+
+        public int GetReflectiveState(IAvatarBrain receiver)
+            => ReflectiveSocialState.TryGetValue(receiver.UserID, out int v) ? v : SocialState.None;
 
         #endregion
         // ---------------------------------------------------------------
