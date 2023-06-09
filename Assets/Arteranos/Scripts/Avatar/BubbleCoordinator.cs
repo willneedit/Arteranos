@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using UnityEngine;
 
 namespace Arteranos.Avatar
@@ -13,14 +14,34 @@ namespace Arteranos.Avatar
     {
         public IAvatarBrain Brain { get; set; } = null;
 
-        public SphereCollider Friend = null;
-        public SphereCollider Stranger = null;
+        private SphereCollider Friend = null;
+        private SphereCollider Stranger = null;
 
+        private ClientSettings cs = SettingsManager.Client;
+
+        private void OnEnable()
+        {
+            cs.OnPrivacyBubbleChanged += OnPrivacyBubbleChanged;
+        }
+
+        private void OnDisable()
+        {
+            SettingsManager.Client.OnPrivacyBubbleChanged -= OnPrivacyBubbleChanged;
+        }
+
+        private void OnPrivacyBubbleChanged(float friend, float stranger)
+        {
+            ChangeBubbleSize(friend, true);
+            ChangeBubbleSize(stranger, false);
+        }
 
         void Start()
         {
             Friend = transform.GetChild(0).GetComponent<SphereCollider>();
             Stranger = transform.GetChild(1).GetComponent<SphereCollider>();
+
+            ChangeBubbleSize(cs.SizeBubbleFriends, true);
+            ChangeBubbleSize(cs.SizeBubbleStrangers, false);
 
             // TODO Update for avatar reconfiguring
             transform.localPosition += transform.rotation * Vector3.up * Brain.Body.FullHeight / 2;

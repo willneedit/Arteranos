@@ -158,6 +158,12 @@ namespace Arteranos.Core
         // VR mode, if available
         public virtual bool VRMode { get; set; } = true;
 
+        // Friends bubble size
+        public virtual float SizeBubbleFriends { get; set; } = 1.0f;
+
+        // Strangers bubble size
+        public virtual float SizeBubbleStrangers { get; set; } = 1.0f;
+
         // The user's audio settings
         public virtual ClientAudioSettingsJSON AudioSettings { get; set; } = new();
 
@@ -177,6 +183,7 @@ namespace Arteranos.Core
 
         public event Action<string> OnAvatarChanged;
         public event Action<bool> OnVRModeChanged;
+        public event Action<float, float> OnPrivacyBubbleChanged;
 
         [JsonIgnore]
         public UserID UserID { get; private set; } = null;
@@ -206,6 +213,25 @@ namespace Arteranos.Core
             }
         }
 #endif
+        public override float SizeBubbleFriends
+        {
+            get => base.SizeBubbleFriends;
+            set
+            {
+                base.SizeBubbleFriends = value;
+                OnPrivacyBubbleChanged?.Invoke(SizeBubbleFriends, SizeBubbleStrangers);
+            }
+        }
+
+        public override float SizeBubbleStrangers
+        {
+            get => base.SizeBubbleStrangers;
+            set
+            {
+                base.SizeBubbleStrangers = value;
+                OnPrivacyBubbleChanged?.Invoke(SizeBubbleFriends, SizeBubbleStrangers);
+            }
+        }
 
         public bool RefreshAuthentication()
         {
