@@ -122,12 +122,11 @@ namespace Arteranos.Avatar
             else
                 OwnSocialState[userID] &= ~state;
 
-            int newState = OwnSocialState[userID];
-            CmdUpdateReflectiveSocialState(userID, newState);
+            Brain.UpdateSSEffects(receiver, OwnSocialState[userID]);
 
-            Brain.UpdateSSEffects(receiver, newState);
+            CmdUpdateReflectiveSocialState(userID, OwnSocialState[userID]);
 
-            Brain.SaveSocialStates(receiver, newState);
+            Brain.SaveSocialStates(receiver, OwnSocialState[userID]);
         }
 
         public void InitializeSocialStates()
@@ -207,11 +206,16 @@ namespace Arteranos.Avatar
                     you &= ~SocialState.Friend_bonded;
 
                 Brain.LogDebug($"{receiver.Nickname}'s status is updated to {you}");
+
+                OwnSocialState[receiver.UserID] = you;
                 Brain.SaveSocialStates(receiver, you);
             }
 
             return result;
         }
+
+        public int GetOwnState(IAvatarBrain receiver)
+            => OwnSocialState.TryGetValue(receiver.UserID, out int v) ? v : SocialState.None;
 
         public int GetReflectiveState(IAvatarBrain receiver)
             => ReflectiveSocialState.TryGetValue(receiver.UserID, out int v) ? v : SocialState.None;

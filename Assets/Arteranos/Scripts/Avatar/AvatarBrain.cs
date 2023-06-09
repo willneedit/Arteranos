@@ -624,6 +624,8 @@ namespace Arteranos.Avatar
         public int GetReflectiveState(IAvatarBrain receiver)
             => Subconscious.GetReflectiveState(receiver);
 
+        public int GetOwnState(IAvatarBrain receiver)
+            => Subconscious.GetOwnState(receiver);
         #endregion
     }
 }

@@ -73,13 +73,14 @@ namespace Arteranos.UI
         {
             string tagstr = null;
 
-            int state = XRControl.Me.GetReflectiveState(Bearer);
+            int yourstate = XRControl.Me.GetOwnState(Bearer);
+            int hisstate = XRControl.Me.GetReflectiveState(Bearer);
 
-            if((state & SocialState.Friend_bonded) == SocialState.Friend_bonded)
+            if((yourstate & SocialState.Friend_bonded) == SocialState.Friend_bonded)
                 tagstr = "Friend";
 
             // _Exactly_ the offering state.
-            else if((state & SocialState.Friend_offered) == SocialState.Friend_offered) 
+            else if((hisstate & SocialState.Friend_offered) == SocialState.Friend_offered) 
                 tagstr = "Wants to be your friend";
 
             return tagstr == null
