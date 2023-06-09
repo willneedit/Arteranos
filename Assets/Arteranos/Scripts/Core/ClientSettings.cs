@@ -336,7 +336,7 @@ namespace Arteranos.Core
         {
             return GetSocialList(userID, (x) => 
                 x.UserID.ServerName == null
-                || x.UserID.ServerName == SettingsManager.CurrentServer.Name);
+                || x.UserID.ServerName == SettingsManager.CurrentServer?.Name);
         }
 
         public void SaveSettings()
