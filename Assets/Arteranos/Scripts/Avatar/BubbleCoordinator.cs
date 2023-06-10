@@ -17,17 +17,11 @@ namespace Arteranos.Avatar
         private SphereCollider Friend = null;
         private SphereCollider Stranger = null;
 
-        private ClientSettings cs = SettingsManager.Client;
+        private readonly ClientSettings cs = SettingsManager.Client;
 
-        private void OnEnable()
-        {
-            cs.OnPrivacyBubbleChanged += OnPrivacyBubbleChanged;
-        }
+        private void OnEnable() => cs.OnPrivacyBubbleChanged += OnPrivacyBubbleChanged;
 
-        private void OnDisable()
-        {
-            SettingsManager.Client.OnPrivacyBubbleChanged -= OnPrivacyBubbleChanged;
-        }
+        private void OnDisable() => SettingsManager.Client.OnPrivacyBubbleChanged -= OnPrivacyBubbleChanged;
 
         private void OnPrivacyBubbleChanged(float friend, float stranger)
         {
@@ -55,10 +49,6 @@ namespace Arteranos.Avatar
         }
 
         public void NotifyTrigger(IAvatarBrain touchy, bool isFriend, bool entered)
-        {
-            // Brain.LogDebug($"Hit? {entered}, Who: {touchy.Nickname}, Friendzone? {isFriend}");
-
-            Brain.NotifyBubbleBreached(touchy, isFriend, entered);
-        }
+            => Brain.NotifyBubbleBreached(touchy, isFriend, entered);
     }
 }

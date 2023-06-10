@@ -5,19 +5,16 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
-using System;
 using Arteranos.Avatar;
 using Arteranos.XR;
 using Arteranos.Social;
 using Arteranos.Core;
 using System.Linq;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 
 namespace Arteranos.UI
 {
