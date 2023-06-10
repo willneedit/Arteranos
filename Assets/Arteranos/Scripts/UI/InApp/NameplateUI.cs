@@ -15,6 +15,9 @@ using System;
 using Arteranos.Avatar;
 using Arteranos.XR;
 using Arteranos.Social;
+using Arteranos.Core;
+using System.Linq;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 
 namespace Arteranos.UI
 {
@@ -65,7 +68,7 @@ namespace Arteranos.UI
         {
             // LookAt can take a second vector as the Up vector.
             // Seems that we'd use _the client's_ Up vector, not the targeted avatar's.
-            transform.LookAt(XR.XRControl.Instance.cameraTransform);
+            transform.LookAt(XRControl.Instance.cameraTransform);
             transform.Rotate(aboutFace);
         }
 
@@ -90,6 +93,14 @@ namespace Arteranos.UI
 
         private void OnAppearanceStatusChanged(int status)
         {
+            // Adding friends is visible if it's not already in progress
+            IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetSocialList(Bearer.UserID);
+            int currentState = (q.Count() > 0) ? q.First().state : SocialState.None;
+            bool friends = SocialState.IsState(currentState, SocialState.Friend_offered);
+
+            // No point of dealing with the blocked status - it isn't visible if it is blocked.
+            btn_friend_add.gameObject.SetActive(!friends);
+
             //       Design: Speaker on if the audio status okay and not individually muted
             //               Speaker off it it's anything else
             // Interactable: Only if it's not self-muted and not gagged
@@ -116,8 +127,16 @@ namespace Arteranos.UI
             OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 
-        private void OnBlockButtonClicked() => XRControl.Me.BlockUser(Bearer);
+        private void OnBlockButtonClicked()
+        {
+            XRControl.Me.BlockUser(Bearer);
+            OnAppearanceStatusChanged(Bearer.AppearanceStatus);
+        }
 
-        private void OnFriendAddButtonClicked() => XRControl.Me.OfferFriendship(Bearer);
+        private void OnFriendAddButtonClicked()
+        {
+            XRControl.Me.OfferFriendship(Bearer);
+            OnAppearanceStatusChanged(Bearer.AppearanceStatus);
+        }
     }
 }

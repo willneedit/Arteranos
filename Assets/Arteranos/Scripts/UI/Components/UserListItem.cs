@@ -82,11 +82,11 @@ namespace Arteranos.UI
 
                 bool blocked = SocialState.IsState(currentState, SocialState.Blocked);
 
-                btn_AddFriend.interactable = !friends && !blocked;
-                btn_DelFriend.interactable = friends && !blocked;
+                btn_AddFriend.gameObject.SetActive(!friends && !blocked);
+                btn_DelFriend.gameObject.SetActive(friends && !blocked);
 
-                btn_Block.interactable = !blocked && !friends;
-                btn_Unblock.interactable = blocked && !friends;
+                btn_Block.gameObject.SetActive(!blocked && !friends);
+                btn_Unblock.gameObject.SetActive(blocked && !friends);
             }
         }
 
