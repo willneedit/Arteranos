@@ -17,7 +17,7 @@ This is intended to be a VR social app - To meet amd greet people in the metaver
   - [WiX Toolset 3.11.2](https://github.com/wixtoolset/wix3/releases/tag/wix3112rtm)
 
 ### Quick Building (Windows 64)
- 1. Download the source using git: `git clone --depth=1 https://github.com/willneedit/Arteranos.git`
+ 1. Download the source using git: `git clone --recurse-submodules --depth=1 https://github.com/willneedit/Arteranos.git`
  2. `cd Arteranos`
  3. Edit the `build.bat` script to find the Unity Editor you've installed in your build machine
  4. `build.bat`
