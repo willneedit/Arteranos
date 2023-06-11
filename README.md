@@ -13,7 +13,7 @@ This is intended to be a VR social app - To meet amd greet people in the metaver
 - OpenXR-supported tethered headset.
   - Known to work: Oculus Quest 2, linked (Oculus Link, or using Virtual Desktop)
 - For building you need:
-  - **Unity 2021.15f1** with the installed modules for the desired target platform
+  - **Unity 2021.3.15f1** with the installed modules for the desired target platform
   - [WiX Toolset 3.11.2](https://github.com/wixtoolset/wix3/releases/tag/wix3112rtm)
 
 ### Quick Building (Windows 64)
