@@ -93,9 +93,11 @@ namespace Arteranos.UI
             // Adding friends is visible if it's not already in progress
             int yourstate = XRControl.Me.GetOwnState(Bearer);
             bool friends = SocialState.IsState(yourstate, SocialState.Friend_offered);
+            bool blocked = SocialState.IsState(yourstate, SocialState.Blocked);
 
             // No point of dealing with the blocked status - it isn't visible if it is blocked.
-            btn_friend_add.gameObject.SetActive(!friends);
+            btn_friend_add.gameObject.SetActive(!friends && !blocked);
+            btn_block.gameObject.SetActive(!friends);
 
             //       Design: Speaker on if the audio status okay and not individually muted
             //               Speaker off it it's anything else
