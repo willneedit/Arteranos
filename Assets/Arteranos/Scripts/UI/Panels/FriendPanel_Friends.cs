@@ -27,13 +27,13 @@ namespace Arteranos.UI
 
         private bool IsFriends(SocialListEntryJSON arg)
         {
-            if((arg.state & SocialState.Friend_offered) != SocialState.Friend_offered) return false;
+            if(SocialState.IsState(arg.state, SocialState.Friend_offered)) return false;
 
             IAvatarBrain targetUser = SettingsManager.GetOnlineUser(arg.UserID);
 
             if(targetUser == null)
                 // Last I've seen....
-                return (arg.state & SocialState.Friend_bonded) == SocialState.Friend_bonded;
+                return (SocialState.IsState(arg.state, SocialState.Friend_bonded));
             else
                 // Or, just in case, update the status
                 return XRControl.Me.IsMutualFriends(targetUser);

@@ -109,12 +109,10 @@ namespace Arteranos.Core
 
         public static IAvatarBrain GetOnlineUser(UserID userID)
         {
-            IEnumerable<IAvatarBrain> q0 = from entry in GameObject.FindGameObjectsWithTag("Player")
-                    select entry.GetComponent<IAvatarBrain>();
-
-            IEnumerable<IAvatarBrain> q = from entry in q0
-                                             where entry.UserID == userID
-                                             select entry;
+            IEnumerable<IAvatarBrain> q = 
+                from entry in GameObject.FindGameObjectsWithTag("Player")                            
+                where entry.GetComponent<IAvatarBrain>().UserID == userID 
+                select entry.GetComponent<IAvatarBrain>();
 
             return q.Count() > 0 ? q.First() : null;
         }
