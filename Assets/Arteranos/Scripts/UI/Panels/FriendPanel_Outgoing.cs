@@ -21,22 +21,14 @@ namespace Arteranos.UI
         public override IEnumerable<SocialListEntryJSON> GetSocialListTab()
         {
             // FIXME Collection was modified
-            IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriendRequested);
+            IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriendOffered);
             foreach(SocialListEntryJSON entry in list) yield return entry;
         }
 
-        private bool IsFriendRequested(SocialListEntryJSON arg)
+        private bool IsFriendOffered(SocialListEntryJSON arg)
         {
-            if((arg.state & SocialState.Friend_offered) != SocialState.Friend_offered) return false;
-
-            IAvatarBrain targetUser = SettingsManager.GetOnlineUser(arg.UserID);
-
-            if(targetUser == null)
-                // Last I've seen....
-                return (arg.state & SocialState.Friend_bonded) == SocialState.Friend_bonded;
-            else
-                // Or, just in case, update the status
-                return XRControl.Me.IsMutualFriends(targetUser);
+            return !SocialState.IsState(arg.state, SocialState.Friend_bonded) 
+                && SocialState.IsState(arg.state, SocialState.Friend_offered);
         }
     }
 }

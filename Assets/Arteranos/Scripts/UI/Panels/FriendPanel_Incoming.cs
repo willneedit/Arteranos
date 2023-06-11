@@ -20,23 +20,30 @@ namespace Arteranos.UI
     {
         public override IEnumerable<SocialListEntryJSON> GetSocialListTab()
         {
-            // FIXME Collection was modified
-            IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriendRequested);
-            foreach(SocialListEntryJSON entry in list) yield return entry;
-        }
+            Dictionary<UserID, SocialListEntryJSON> list = new();
 
-        private bool IsFriendRequested(SocialListEntryJSON arg)
-        {
-            if((arg.state & SocialState.Friend_offered) != SocialState.Friend_offered) return false;
+            // Get the currently logged-in users with the default state....
+            foreach(IAvatarBrain user in SettingsManager.GetOnlineUsers())
+            {
+                if(user.UserID == XRControl.Me.UserID) continue;
 
-            IAvatarBrain targetUser = SettingsManager.GetOnlineUser(arg.UserID);
+                list[user.UserID] = new SocialListEntryJSON()
+                {
+                    UserID = user.UserID,
+                    Nickname = user.Nickname,
+                    state = (XRControl.Me.GetReflectiveState(user) << 16) 
+                        + XRControl.Me.GetOwnState(user),
+                };
+            }
 
-            if(targetUser == null)
-                // Last I've seen....
-                return (arg.state & SocialState.Friend_bonded) == SocialState.Friend_bonded;
-            else
-                // Or, just in case, update the status
-                return XRControl.Me.IsMutualFriends(targetUser);
+            foreach(KeyValuePair<UserID, SocialListEntryJSON> entry in list)
+            {
+                if(SocialState.IsState(entry.Value.state, SocialState.Friend_offered)) continue;
+
+                if(!SocialState.IsState(entry.Value.state, SocialState.Friend_offered << 16)) continue;
+
+                yield return entry.Value;
+            }
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Arteranos.UI
 
         private bool IsFriends(SocialListEntryJSON arg)
         {
-            if(SocialState.IsState(arg.state, SocialState.Friend_offered)) return false;
+            if(!SocialState.IsState(arg.state, SocialState.Friend_offered)) return false;
 
             IAvatarBrain targetUser = SettingsManager.GetOnlineUser(arg.UserID);
 
