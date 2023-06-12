@@ -17,6 +17,8 @@
 # Script Templates must reside in the Assets root folder.
 !/[Aa]ssets/ScriptTemplates*
 
+# The OAuth2 secret keys are in a separate repository, ref. README.md
+/[Aa]ssets/Arteranos-keys
 
 /[Ll]ibrary/
 /[Tt]emp/

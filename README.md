@@ -19,9 +19,12 @@ This is intended to be a VR social app - To meet amd greet people in the metaver
 ### Quick Building (Windows 64)
  1. Download the source using git: `git clone --recurse-submodules --depth=1 https://github.com/willneedit/Arteranos.git`
  2. `cd Arteranos`
- 3. Edit the `build.bat` script to find the Unity Editor you've installed in your build machine
- 4. `build.bat`
- 5. If all goes well, please find the newly created `build` folder including the installation wizard, `Arteranos.msi`, amongst other files.
+ 3. **OPTIONAL** - Only if the OAuth2 keys are accessible:
+    1. cd Assets
+    2. git clone \[**REDACTED**\]
+ 4. Edit the `build.bat` script to find the Unity Editor you've installed in your build machine
+ 5. `build.bat`
+ 6. If all goes well, please find the newly created `build` folder including the installation wizard, `Arteranos.msi`, amongst other files.
     - Also, you'll find the `Arteranos.exe` and `Arteranos-Server.exe`, respectively.
 
 ### Installing
