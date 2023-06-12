@@ -75,13 +75,15 @@ namespace Arteranos.UI
 
             int yourstate = XRControl.Me.GetOwnState(Bearer);
 
-            if(SocialState.IsState(yourstate, 
-                SocialState.Own_Friend_offered|SocialState.Them_Friend_offered))
+            if(SocialState.IsState(yourstate,
+                SocialState.Own_Friend_offered | SocialState.Them_Friend_offered))
                 tagstr = "Friend";
 
-            // _Exactly_ the offering state.
             else if(SocialState.IsState(yourstate, SocialState.Them_Friend_offered))
                 tagstr = "Wants to be your friend";
+
+            //else if(SocialState.IsState(yourstate, SocialState.Own_Friend_offered))
+            //    tagstr = "Is still indecisive";
 
             return tagstr == null
                 ? Bearer.Nickname

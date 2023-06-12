@@ -155,7 +155,7 @@ namespace Arteranos.Avatar
             // Already gone....
             if(receiver == null) return;
 
-            Brain.UpdateSSEffects(SearchUser(key), item);
+            Brain.UpdateSSEffects(SearchUser(key), OwnSocialState[key]);
         }
 
         #endregion

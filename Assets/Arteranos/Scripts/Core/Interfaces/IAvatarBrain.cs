@@ -30,7 +30,6 @@ namespace Arteranos.Avatar
 
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
         int GetOwnState(IAvatarBrain receiver);
-        bool IsMutualFriends(IAvatarBrain receiver);
         void LogDebug(object message);
         void LogError(object message);
         void LogWarning(object message);

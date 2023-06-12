@@ -31,12 +31,8 @@ namespace Arteranos.UI
 
             IAvatarBrain targetUser = SettingsManager.GetOnlineUser(arg.UserID);
 
-            if(targetUser == null)
-                // Last I've seen....
-                return (SocialState.IsState(arg.state, SocialState.Own_Friend_bonded));
-            else
-                // Or, just in case, update the status
-                return XRControl.Me.IsMutualFriends(targetUser);
+            return (SocialState.IsState(arg.state, 
+                SocialState.Own_Friend_offered | SocialState.Them_Friend_offered));
         }
     }
 }
