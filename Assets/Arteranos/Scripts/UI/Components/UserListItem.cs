@@ -78,9 +78,9 @@ namespace Arteranos.UI
 
                 int currentState = (q.Count() > 0) ? q.First().state : SocialState.None;
 
-                bool friends = SocialState.IsState(currentState, SocialState.Friend_offered);
+                bool friends = SocialState.IsState(currentState, SocialState.Own_Friend_offered);
 
-                bool blocked = SocialState.IsState(currentState, SocialState.Blocked);
+                bool blocked = SocialState.IsState(currentState, SocialState.Own_Blocked);
 
                 btn_AddFriend.gameObject.SetActive(!friends && !blocked);
                 btn_DelFriend.gameObject.SetActive(friends && !blocked);
@@ -99,7 +99,7 @@ namespace Arteranos.UI
                 return;
             }
 
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Friend_offered, true, Nickname);
+            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Friend_offered, true, Nickname);
         }
 
         private void OnDelFriendButtonClicked()
@@ -111,7 +111,7 @@ namespace Arteranos.UI
                 return;
             }
 
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Friend_offered, false, Nickname);
+            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Friend_offered, false, Nickname);
         }
 
         private void OnBlockButtonClicked()
@@ -123,7 +123,7 @@ namespace Arteranos.UI
                 return;
             }
 
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Blocked, true, Nickname);
+            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Blocked, true, Nickname);
         }
 
         private void OnUnblockButtonClicked()
@@ -134,7 +134,7 @@ namespace Arteranos.UI
                 Me.BlockUser(targetUser, false);
                 return;
             }
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Blocked, false, Nickname);
+            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Blocked, false, Nickname);
         }
     }
 }

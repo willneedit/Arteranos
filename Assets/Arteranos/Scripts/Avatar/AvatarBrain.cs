@@ -569,6 +569,8 @@ namespace Arteranos.Avatar
 
         public void SaveSocialStates(IAvatarBrain receiver, int state)
         {
+            if(receiver == null) return;
+
             if(!isOwned) throw new Exception("Not owner");
 
             SettingsManager.Client.SaveSocialStates(receiver.UserID, receiver.Nickname, state);
@@ -592,37 +594,20 @@ namespace Arteranos.Avatar
             LogDebug($"I feel about {receiver.Nickname}: {state}");
 
             // You blocked him.
-            bool blocked = (state & SocialState.Blocked) != 0;
-            receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocked, blocked);
-            if(blocked) return;
-
-            Subconscious.AttemptFriendNegotiation(receiver);
-        }
-
-        public void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state)
-        {
-            if(receiver == null)
-            {
-                // Drat! Gone...
-                LogDebug($"Someone changed his relation to me, but he logged out. Maybe next time.");
-                return;
-            }
-
-            LogDebug($"{receiver.Nickname} feels about me: {state}");
+            bool own_blocked = (state & SocialState.Own_Blocked) != 0;
+            receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocked, own_blocked);
+            if(own_blocked) return;
 
             // Retaliatory blocking.
-            bool blocked = (state & SocialState.Blocked) != 0;
-            receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocking, blocked);
-            if(blocked) return;
+            bool them_blocked = (state & SocialState.Them_Blocked) != 0;
+            receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocking, them_blocked);
+            if(them_blocked) return;
 
             Subconscious.AttemptFriendNegotiation(receiver);
         }
 
         public bool IsMutualFriends(IAvatarBrain receiver)
             => Subconscious.IsMutualFriends(receiver);
-
-        public int GetReflectiveState(IAvatarBrain receiver)
-            => Subconscious.GetReflectiveState(receiver);
 
         public int GetOwnState(IAvatarBrain receiver)
             => Subconscious.GetOwnState(receiver);

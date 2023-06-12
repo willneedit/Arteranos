@@ -11,7 +11,6 @@ using UnityEngine;
 
 using Mirror;
 using Arteranos.Core;
-using System.Linq;
 using Arteranos.Social;
 using System;
 using Arteranos.XR;
@@ -143,8 +142,21 @@ namespace Arteranos.Avatar
                 ReloadSocialState(item.UserID.Derive(), item.state);
         }
 
-        private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item) 
-            => Brain.UpdateReflectiveSSEffects(SearchUser(key), item);
+        private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item)
+        {
+            item = (item & SocialState.OWN_MASK) << SocialState.THEM_SHIFT;
+
+            int old = OwnSocialState.TryGetValue(key, out int v) ? v : SocialState.None;
+
+            OwnSocialState[key] = (old & SocialState.OWN_MASK) | item;
+
+            IAvatarBrain receiver = SearchUser(key);
+
+            // Already gone....
+            if(receiver == null) return;
+
+            Brain.UpdateSSEffects(SearchUser(key), item);
+        }
 
         #endregion
         // ---------------------------------------------------------------
@@ -158,14 +170,15 @@ namespace Arteranos.Avatar
             ReloadSocialState(userID, state);
         }
 
-        public void OfferFriendship(IAvatarBrain receiver, bool offering = true) 
-            => UpdateSocialState(receiver, SocialState.Friend_offered, offering);
+        public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
+            => UpdateSocialState(receiver, SocialState.Own_Friend_offered, offering);
 
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
         {
             if(blocking)
-                UpdateSocialState(receiver, SocialState.Friend_offered, false);
-            UpdateSocialState(receiver, SocialState.Blocked, blocking);
+                UpdateSocialState(receiver, SocialState.Own_Friend_offered, false);
+
+            UpdateSocialState(receiver, SocialState.Own_Blocked, blocking);
         }
 
         public void AttemptFriendNegotiation(IAvatarBrain receiver)
@@ -175,8 +188,7 @@ namespace Arteranos.Avatar
             if(!result) return;
 
             // But, I have to take the first step....
-            CmdTransmitGlobalUserID(receiver.gameObject,
-                SettingsManager.Client.UserID);
+            CmdTransmitGlobalUserID(receiver.gameObject, SettingsManager.Client.UserID);
         }
 
         public bool IsMutualFriends(IAvatarBrain receiver)
@@ -184,33 +196,10 @@ namespace Arteranos.Avatar
             // "I love you, you love me, let us..." -- nope. Nope! NOPE!!
             // Not that imbecile pink dinosaur !
             int you = OwnSocialState.TryGetValue(receiver.UserID, out int v1) ? v1 : SocialState.None;
-            int? him = ReflectiveSocialState.TryGetValue(receiver.UserID, out int v2) ? v2 : null;
 
-            if(!him.HasValue)
-            {
-                // Maybe he's not completely logged in. Hold off with the updating of the states.
-                Brain.LogDebug($"Possible friendship? you={you}, him, I don't know yet.");
-                return false;
-            }
-
-            bool result = SocialState.IsFriends(you, him ?? SocialState.None);
-            bool wasMutual = (you & SocialState.Friend_bonded) != 0;
-
-            Brain.LogDebug($"Possible friendship? you={you}, him={him} - result: {result}");
-
-            if(wasMutual != result)
-            {
-                if(result)
-                    you |= SocialState.Friend_bonded;
-                else
-                    you &= ~SocialState.Friend_bonded;
-
-                Brain.LogDebug($"{receiver.Nickname}'s status is updated to {you}");
-
-                OwnSocialState[receiver.UserID] = you;
-                Brain.SaveSocialStates(receiver, you);
-            }
-
+            bool result = SocialState.IsState(
+                you, SocialState.Own_Friend_offered | SocialState.Them_Friend_offered);
+            
             return result;
         }
 

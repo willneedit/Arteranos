@@ -31,16 +31,15 @@ namespace Arteranos.UI
                 {
                     UserID = user.UserID,
                     Nickname = user.Nickname,
-                    state = (XRControl.Me.GetReflectiveState(user) << 16) 
-                        + XRControl.Me.GetOwnState(user),
+                    state = XRControl.Me.GetOwnState(user),
                 };
             }
 
             foreach(KeyValuePair<UserID, SocialListEntryJSON> entry in list)
             {
-                if(SocialState.IsState(entry.Value.state, SocialState.Friend_offered)) continue;
+                if(SocialState.IsState(entry.Value.state, SocialState.Own_Friend_offered)) continue;
 
-                if(!SocialState.IsState(entry.Value.state, SocialState.Friend_offered << 16)) continue;
+                if(!SocialState.IsState(entry.Value.state, SocialState.Them_Friend_offered)) continue;
 
                 yield return entry.Value;
             }

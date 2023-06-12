@@ -9,8 +9,6 @@ using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.XR;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -341,21 +339,23 @@ namespace Arteranos.Social
         public const int None = 0;
 
         // You offered your friendship to the targeted user.
-        public const int Friend_offered     = (1 << 0);
-
-        // Last I'd seen, your frienship is mutual.
-        public const int Friend_bonded      = (1 << 1);
+        public const int Own_Friend_offered     = (1 << 0);
 
         // You blocked the targeted user.
-        public const int Blocked            = (1 << 8);
+        public const int Own_Blocked            = (1 << 4);
 
-        public static bool IsFriends(int you, int him) 
-            => ((you & Friend_offered) == Friend_offered) && ((him & Friend_offered) == Friend_offered);
+        public const int THEM_SHIFT             = 16;
+
+        public const int OWN_MASK               = (1 << THEM_SHIFT) - 1;
+
+        // The targeted user offered his frienship to you.
+        public const int Them_Friend_offered    = Own_Friend_offered << THEM_SHIFT;
+
+        // The targeted user blocked you.
+        public const int Them_Blocked           = Own_Blocked << THEM_SHIFT;
 
         public static bool IsState(int you, int stateBit)
             => ((you & stateBit) == stateBit);
-
-
     }
     #endregion
     // -------------------------------------------------------------------

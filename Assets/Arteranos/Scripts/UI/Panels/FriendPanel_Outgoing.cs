@@ -27,8 +27,8 @@ namespace Arteranos.UI
 
         private bool IsFriendOffered(SocialListEntryJSON arg)
         {
-            return !SocialState.IsState(arg.state, SocialState.Friend_bonded) 
-                && SocialState.IsState(arg.state, SocialState.Friend_offered);
+            return !SocialState.IsState(arg.state, SocialState.Own_Friend_bonded) 
+                && SocialState.IsState(arg.state, SocialState.Own_Friend_offered);
         }
     }
 }

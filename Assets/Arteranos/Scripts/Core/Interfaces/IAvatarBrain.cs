@@ -30,7 +30,6 @@ namespace Arteranos.Avatar
 
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
         int GetOwnState(IAvatarBrain receiver);
-        int GetReflectiveState(IAvatarBrain receiver);
         bool IsMutualFriends(IAvatarBrain receiver);
         void LogDebug(object message);
         void LogError(object message);
@@ -39,7 +38,6 @@ namespace Arteranos.Avatar
         void OfferFriendship(IAvatarBrain receiver, bool offering = true);
         void SaveSocialStates(IAvatarBrain receiver, int state);
         void SetAppearanceStatusBit(int ASBit, bool set);
-        void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state);
         void UpdateSSEffects(IAvatarBrain receiver, int state);
         void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID);
     }
