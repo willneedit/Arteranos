@@ -17,6 +17,18 @@ using Arteranos.XR;
 
 namespace Arteranos.Avatar
 {
+    internal struct MsgTextMessage
+    {
+        public GameObject sender;
+        public string text;
+    }
+
+    internal struct MsgUpdateSocialState
+    {
+        public GameObject sender;
+        public int OwnState;
+    }
+
     public class AvatarSubconscious : NetworkBehaviour
     {
         // ---------------------------------------------------------------
@@ -70,27 +82,25 @@ namespace Arteranos.Avatar
         }
 
         [Command]
-        private void CmdTransmitGlobalUserID(GameObject receiverGO, UserID globalUserID)
+        private void CmdTransmitGlobalUserID(GameObject receiverGO)
         {
+            UserID globalUserID = SettingsManager.Client.UserID;
+
             if(globalUserID.ServerName != null) throw new ArgumentException("Not a global userID");
 
-            NetworkIdentity nid = receiverGO.GetComponent<NetworkIdentity>();
-            TargetReceiveGlobalUserID(
-                nid.connectionToClient,
-                gameObject,
-                globalUserID);
+            receiverGO.GetComponent<AvatarSubconscious>().TargetReceiveGlobalUserID(gameObject, globalUserID);
         }
 
         [TargetRpc]
-        private void TargetReceiveGlobalUserID(NetworkConnectionToClient _, GameObject receiverGO, UserID globalUserID) 
+        private void TargetReceiveGlobalUserID(GameObject senderGO, UserID globalUserID)
         {
-            IAvatarBrain receiver = receiverGO.GetComponent<AvatarBrain>();
+            IAvatarBrain sender = senderGO.GetComponent<AvatarBrain>();
 
             UserID supposedUserID = globalUserID.Derive();
 
-            if(receiver.UserID != supposedUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
+            if(sender.UserID != supposedUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
 
-            XRControl.Me.UpdateToGlobalUserID(receiver, globalUserID);
+            XRControl.Me.UpdateToGlobalUserID(sender, globalUserID);
         }
 
         private IAvatarBrain SearchUser(UserID userID)
@@ -100,6 +110,10 @@ namespace Arteranos.Avatar
 
             return null;
         }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Social States
 
         private void SaveSocialState(IAvatarBrain receiver, UserID userID)
         {
@@ -134,7 +148,7 @@ namespace Arteranos.Avatar
 
             SaveSocialState(receiver, userID);
         }
-        public void InitializeSocialStates()
+        private void InitializeSocialStates()
         {
             // Clean slate
             OwnSocialState.Clear();
@@ -195,7 +209,7 @@ namespace Arteranos.Avatar
             if(!result) return;
 
             // But, I have to take the first step....
-            CmdTransmitGlobalUserID(receiver.gameObject, SettingsManager.Client.UserID);
+            CmdTransmitGlobalUserID(receiver.gameObject);
         }
 
         public bool IsMutualFriends(IAvatarBrain receiver)
