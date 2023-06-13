@@ -13,7 +13,6 @@ using Mirror;
 using Arteranos.Core;
 using Arteranos.Social;
 using System;
-using Arteranos.XR;
 
 namespace Arteranos.Avatar
 {
@@ -74,23 +73,27 @@ namespace Arteranos.Avatar
         {
             if(globalUserID.ServerName != null) throw new ArgumentException("Not a global userID");
 
-            NetworkIdentity nid = receiverGO.GetComponent<NetworkIdentity>();
-            TargetReceiveGlobalUserID(
-                nid.connectionToClient,
+            receiverGO.GetComponent<AvatarSubconscious>().TargetReceiveGlobalUserID(
                 gameObject,
                 globalUserID);
         }
 
         [TargetRpc]
-        private void TargetReceiveGlobalUserID(NetworkConnectionToClient _, GameObject receiverGO, UserID globalUserID) 
+        private void TargetReceiveGlobalUserID(GameObject senderGO, UserID globalUserID)
         {
-            IAvatarBrain receiver = receiverGO.GetComponent<AvatarBrain>();
+            if(!isOwned) throw new Exception("Not owner");
+
+            IAvatarBrain sender = senderGO.GetComponent<AvatarBrain>();
 
             UserID supposedUserID = globalUserID.Derive();
 
-            if(receiver.UserID != supposedUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
+            if(sender.UserID != supposedUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
 
-            XRControl.Me.UpdateToGlobalUserID(receiver, globalUserID);
+            Brain.LogDebug($"{sender.Nickname}'s UserID was updated to global UserID {globalUserID}");
+
+            if(sender.UserID != globalUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
+
+            SettingsManager.Client.UpdateToGlobalUserID(globalUserID);
         }
 
         private IAvatarBrain SearchUser(UserID userID)

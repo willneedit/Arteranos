@@ -567,17 +567,6 @@ namespace Arteranos.Avatar
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
             => Subconscious.BlockUser(receiver, blocking);
 
-        public void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID)
-        {
-            LogDebug($"{receiver.Nickname}'s UserID was updated to global UserID {globalUserID}");
-
-            if(!isOwned) throw new Exception("Not owner");
-
-            if(receiver.UserID != globalUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
-
-            SettingsManager.Client.UpdateToGlobalUserID(globalUserID);
-        }
-
         public void UpdateSSEffects(IAvatarBrain receiver, int state)
         {
             if(receiver == null) return;
