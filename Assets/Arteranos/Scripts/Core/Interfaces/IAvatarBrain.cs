@@ -35,7 +35,6 @@ namespace Arteranos.Avatar
         void LogWarning(object message);
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
         void OfferFriendship(IAvatarBrain receiver, bool offering = true);
-        void SaveSocialStates(IAvatarBrain receiver, int state);
         void SetAppearanceStatusBit(int ASBit, bool set);
         void UpdateSSEffects(IAvatarBrain receiver, int state);
         void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID);

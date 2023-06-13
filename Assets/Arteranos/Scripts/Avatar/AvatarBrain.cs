@@ -567,15 +567,6 @@ namespace Arteranos.Avatar
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
             => Subconscious.BlockUser(receiver, blocking);
 
-        public void SaveSocialStates(IAvatarBrain receiver, int state)
-        {
-            if(receiver == null) return;
-
-            if(!isOwned) throw new Exception("Not owner");
-
-            SettingsManager.Client.SaveSocialStates(receiver.UserID, receiver.Nickname, state);
-        }
-
         public void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID)
         {
             LogDebug($"{receiver.Nickname}'s UserID was updated to global UserID {globalUserID}");

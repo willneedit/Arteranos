@@ -101,6 +101,13 @@ namespace Arteranos.Avatar
             return null;
         }
 
+        private void SaveSocialState(IAvatarBrain receiver, UserID userID)
+        {
+            SettingsManager.Client.SaveSocialStates(userID,
+                receiver?.Nickname ?? "<unknown>",
+                OwnSocialState[userID]);
+        }
+
         private void ReloadSocialState(UserID userID, int state)
         {
             OwnSocialState[userID] = state;
@@ -125,9 +132,8 @@ namespace Arteranos.Avatar
 
             CmdUpdateReflectiveSocialState(userID, OwnSocialState[userID]);
 
-            Brain.SaveSocialStates(receiver, OwnSocialState[userID]);
+            SaveSocialState(receiver, userID);
         }
-
         public void InitializeSocialStates()
         {
             // Clean slate
@@ -152,10 +158,11 @@ namespace Arteranos.Avatar
 
             IAvatarBrain receiver = SearchUser(key);
 
-            // Already gone....
-            if(receiver == null) return;
+            // Maybe already gone?
+            if(receiver != null) 
+                Brain.UpdateSSEffects(receiver, OwnSocialState[key]);
 
-            Brain.UpdateSSEffects(SearchUser(key), OwnSocialState[key]);
+            SaveSocialState(receiver, key);
         }
 
         #endregion
@@ -205,9 +212,6 @@ namespace Arteranos.Avatar
 
         public int GetOwnState(IAvatarBrain receiver)
             => OwnSocialState.TryGetValue(receiver.UserID, out int v) ? v : SocialState.None;
-
-        public int GetReflectiveState(IAvatarBrain receiver)
-            => ReflectiveSocialState.TryGetValue(receiver.UserID, out int v) ? v : SocialState.None;
 
         #endregion
         // ---------------------------------------------------------------
