@@ -22,10 +22,7 @@ namespace Arteranos.Avatar
         #region Network
 
         // The own idea about the other users
-        private readonly Dictionary<UserID, int> OwnSocialState = new();
-
-        // The other user's ideas about you
-        public readonly SyncDictionary<UserID, int> ReflectiveSocialState = new();
+        private readonly Dictionary<UserID, int> SocialMemory = new();
 
         private IAvatarBrain Brain = null;
 
@@ -35,37 +32,51 @@ namespace Arteranos.Avatar
             syncMode = SyncMode.Owner;
         }
 
-        private void Awake() => Brain = GetComponent<AvatarBrain>();
+        private void Awake() => Brain = GetComponent<IAvatarBrain>();
 
         public override void OnStartClient()
         {
             base.OnStartClient();
-            if(isOwned)
-                ReflectiveSocialState.Callback += OnReflectiveStateUpdated;
 
             // Initialize (and upload to the server) the filtered friend (and shit) list
             if(isOwned)
                 InitializeSocialStates();
         }
 
-        public override void OnStopClient()
-        {
-            ReflectiveSocialState.Callback -= OnReflectiveStateUpdated;
+        public override void OnStopClient() => base.OnStopClient();
 
-            base.OnStopClient();
-        }
+        private static AvatarSubconscious GetSC(GameObject GO)
+            => GO.GetComponent<AvatarSubconscious>();
+
 
         [Command]
         private void CmdUpdateReflectiveSocialState(UserID userID, int state)
         {
-            IAvatarBrain mirrored = SearchUser(userID);
+            GameObject mirrored = SearchUser(userID)?.gameObject;
 
+            // And, update the reflected state in the target user.
             if(mirrored != null)
-            {
-                // And, update the reflected state in the target user.
-                mirrored.gameObject.GetComponent<AvatarSubconscious>()
-                    .ReflectiveSocialState[Brain.UserID] = state;
-            }
+                GetSC(mirrored).TargetReceiveReflectiveSocialState(gameObject, state);
+        }
+
+        [TargetRpc]
+        private void TargetReceiveReflectiveSocialState(GameObject senderGO, int state)
+        {
+            if(!isOwned) throw new Exception("Not owner");
+
+            IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
+
+            UserID key = sender.UserID;
+
+            state = (state & SocialState.OWN_MASK) << SocialState.THEM_SHIFT;
+            int old = SocialMemory.TryGetValue(key, out int v) ? v : SocialState.None;
+
+            SocialMemory[key] = (old & SocialState.OWN_MASK) | state;
+            
+            Brain.UpdateSSEffects(sender, SocialMemory[key]);
+
+            SaveSocialState(sender, key);
+
         }
 
         [Command]
@@ -73,7 +84,7 @@ namespace Arteranos.Avatar
         {
             if(globalUserID.ServerName != null) throw new ArgumentException("Not a global userID");
 
-            receiverGO.GetComponent<AvatarSubconscious>().TargetReceiveGlobalUserID(
+            GetSC(receiverGO).TargetReceiveGlobalUserID(
                 gameObject,
                 globalUserID);
         }
@@ -83,7 +94,7 @@ namespace Arteranos.Avatar
         {
             if(!isOwned) throw new Exception("Not owner");
 
-            IAvatarBrain sender = senderGO.GetComponent<AvatarBrain>();
+            IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
 
             UserID supposedUserID = globalUserID.Derive();
 
@@ -108,12 +119,12 @@ namespace Arteranos.Avatar
         {
             SettingsManager.Client.SaveSocialStates(userID,
                 receiver?.Nickname ?? "<unknown>",
-                OwnSocialState[userID]);
+                SocialMemory[userID]);
         }
 
         private void ReloadSocialState(UserID userID, int state)
         {
-            OwnSocialState[userID] = state;
+            SocialMemory[userID] = state;
 
             CmdUpdateReflectiveSocialState(userID, state);
 
@@ -124,23 +135,23 @@ namespace Arteranos.Avatar
         {
             UserID userID = receiver.UserID;
 
-            if(!OwnSocialState.ContainsKey(userID)) OwnSocialState[userID] = SocialState.None;
+            if(!SocialMemory.ContainsKey(userID)) SocialMemory[userID] = SocialState.None;
 
             if(set)
-                OwnSocialState[userID] |= state;
+                SocialMemory[userID] |= state;
             else
-                OwnSocialState[userID] &= ~state;
+                SocialMemory[userID] &= ~state;
 
-            Brain.UpdateSSEffects(receiver, OwnSocialState[userID]);
+            Brain.UpdateSSEffects(receiver, SocialMemory[userID]);
 
-            CmdUpdateReflectiveSocialState(userID, OwnSocialState[userID]);
+            CmdUpdateReflectiveSocialState(userID, SocialMemory[userID]);
 
             SaveSocialState(receiver, userID);
         }
         public void InitializeSocialStates()
         {
             // Clean slate
-            OwnSocialState.Clear();
+            SocialMemory.Clear();
 
             // Copy users with the global UserIDs and the scoped UserIDs matching this server
             // Note, both current and logged-out users!
@@ -151,23 +162,6 @@ namespace Arteranos.Avatar
                 ReloadSocialState(item.UserID.Derive(), item.state);
         }
 
-        private void OnReflectiveStateUpdated(SyncIDictionary<UserID, int>.Operation op, UserID key, int item)
-        {
-            item = (item & SocialState.OWN_MASK) << SocialState.THEM_SHIFT;
-
-            int old = OwnSocialState.TryGetValue(key, out int v) ? v : SocialState.None;
-
-            OwnSocialState[key] = (old & SocialState.OWN_MASK) | item;
-
-            IAvatarBrain receiver = SearchUser(key);
-
-            // Maybe already gone?
-            if(receiver != null) 
-                Brain.UpdateSSEffects(receiver, OwnSocialState[key]);
-
-            SaveSocialState(receiver, key);
-        }
-
         #endregion
         // ---------------------------------------------------------------
         #region Interface
@@ -175,7 +169,7 @@ namespace Arteranos.Avatar
         public void AnnounceArrival(UserID userID)
         {
             userID = userID.Derive();
-            int state = OwnSocialState.TryGetValue(userID, out int v) ? v : SocialState.None;
+            int state = SocialMemory.TryGetValue(userID, out int v) ? v : SocialState.None;
 
             ReloadSocialState(userID, state);
         }
@@ -205,7 +199,7 @@ namespace Arteranos.Avatar
         {
             // "I love you, you love me, let us..." -- nope. Nope! NOPE!!
             // Not that imbecile pink dinosaur !
-            int you = OwnSocialState.TryGetValue(receiver.UserID, out int v1) ? v1 : SocialState.None;
+            int you = SocialMemory.TryGetValue(receiver.UserID, out int v1) ? v1 : SocialState.None;
 
             bool result = SocialState.IsState(
                 you, SocialState.Own_Friend_offered | SocialState.Them_Friend_offered);
@@ -214,7 +208,7 @@ namespace Arteranos.Avatar
         }
 
         public int GetOwnState(IAvatarBrain receiver)
-            => OwnSocialState.TryGetValue(receiver.UserID, out int v) ? v : SocialState.None;
+            => SocialMemory.TryGetValue(receiver.UserID, out int v) ? v : SocialState.None;
 
         #endregion
         // ---------------------------------------------------------------
