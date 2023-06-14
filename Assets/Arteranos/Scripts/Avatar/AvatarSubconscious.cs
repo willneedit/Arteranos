@@ -13,13 +13,17 @@ using Mirror;
 using Arteranos.Core;
 using Arteranos.Social;
 using System;
+using System.Text;
+using System.IO;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Arteranos.Avatar
 {
     public class AvatarSubconscious : NetworkBehaviour
     {
         // ---------------------------------------------------------------
-        #region Network
+        #region Start & Stop
 
         // The own idea about the other users
         private readonly Dictionary<UserID, int> SocialMemory = new();
@@ -45,18 +49,117 @@ namespace Arteranos.Avatar
 
         public override void OnStopClient() => base.OnStopClient();
 
+        #endregion
+        // ---------------------------------------------------------------
+        #region Network
+
+        private static IAvatarBrain SearchUser(UserID userID)
+        {
+            foreach(AvatarBrain brain in FindObjectsOfType<AvatarBrain>())
+                if(brain.UserID == userID) return brain;
+
+            return null;
+        }
+
         private static AvatarSubconscious GetSC(GameObject GO)
             => GO.GetComponent<AvatarSubconscious>();
 
 
+        // TODO Surely I need the full-fledged DH key exchange here, because a
+        // server administrator could be listening into the messages with the receiver's
+        // global UserID.
+        private byte[] Encode(string text, UserID userID)
+        {
+            byte[] encoded = null;
+
+            using(MemoryStream memoryStream = new())
+            {
+                using(Aes aes = Aes.Create())
+                {
+                    aes.Key = userID.Hash;
+                    byte[] iv = aes.IV;
+                    memoryStream.Write(iv, 0, iv.Length);
+
+                    using CryptoStream cryptoStream = new(
+                        memoryStream, aes.CreateEncryptor(), CryptoStreamMode.Write);
+                    using StreamWriter writer = new(cryptoStream);
+                    writer.WriteLine(text);
+                }
+
+                encoded = new byte[memoryStream.Length];
+                memoryStream.Read(encoded, 0, (int) memoryStream.Length);
+            }
+
+            return encoded;
+        }
+
+        private async Task<string> Decode(byte[] encoded, UserID userID)
+        {
+            string text = null;
+
+            try
+            {
+                using MemoryStream memoryStream = new(encoded);
+
+                using Aes aes = Aes.Create();
+
+                byte[] iv = new byte[aes.IV.Length];
+                if(encoded.Length < iv.Length)
+                    throw new InvalidOperationException("Truncated ciphertext");
+
+                memoryStream.Read(iv, 0, iv.Length);
+
+                using CryptoStream cryptoStream = new(
+                    memoryStream, aes.CreateDecryptor(userID.Hash, iv), CryptoStreamMode.Read);
+                using StreamReader reader = new(cryptoStream);
+                text = await reader.ReadToEndAsync();
+            }
+            catch(Exception e)
+            {
+                Brain.LogError(e.Message);
+                text = string.Empty;
+            }
+
+            return text;
+        }
+
+
+        [Command]
+        private void CmdSendTextMessage(UserID userID, string text)
+        {
+            GameObject receiverGO = SearchUser(userID)?.gameObject;
+
+            if(receiverGO != null)
+                GetSC(receiverGO).TargetReceiveTextMessage(gameObject, Encode(text, userID));
+        }
+
+        [TargetRpc]
+        private void TargetReceiveTextMessage(GameObject senderGO, byte[] encoded)
+        {
+            if(!isOwned) throw new Exception("Not owner");
+
+            IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
+
+            ReceiveTextMessage(sender, encoded);
+
+        }
+
+        private async void ReceiveTextMessage(IAvatarBrain sender, byte[] encoded)
+        {
+            // Use the global UserID. It's only shared with the sender if they're friends.
+            string text = await Decode(encoded, SettingsManager.Client.UserID);
+
+            // TODO pass on to the higher level of consciousness.
+        }
+
         [Command]
         private void CmdUpdateReflectiveSocialState(UserID userID, int state)
         {
-            GameObject mirrored = SearchUser(userID)?.gameObject;
+            GameObject receiverGO = SearchUser(userID)?.gameObject;
 
             // And, update the reflected state in the target user.
-            if(mirrored != null)
-                GetSC(mirrored).TargetReceiveReflectiveSocialState(gameObject, state);
+            if(receiverGO != null)
+                GetSC(receiverGO).TargetReceiveReflectiveSocialState(gameObject, state);
         }
 
         [TargetRpc]
@@ -105,14 +208,6 @@ namespace Arteranos.Avatar
             if(sender.UserID != globalUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
 
             SettingsManager.Client.UpdateToGlobalUserID(globalUserID);
-        }
-
-        private IAvatarBrain SearchUser(UserID userID)
-        {
-            foreach(AvatarBrain brain in FindObjectsOfType<AvatarBrain>())
-                if(brain.UserID == userID) return brain;
-
-            return null;
         }
 
         private void SaveSocialState(IAvatarBrain receiver, UserID userID)
