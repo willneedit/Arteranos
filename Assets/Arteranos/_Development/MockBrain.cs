@@ -56,6 +56,8 @@ namespace Arteranos.Avatar
 
         public UserID UserID => new(UserHash, null);
 
+        public byte[] PublicKey { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public event Action<string> OnAvatarChanged;
         public event Action<int> OnAppearanceStatusChanged;
 

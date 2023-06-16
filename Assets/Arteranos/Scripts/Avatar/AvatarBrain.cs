@@ -24,6 +24,7 @@ namespace Arteranos.Avatar
         CurrentWorld,
         Nickname,
         NetAppearanceStatus,
+        PublicKey
     }
 
     public class AvatarBrain : NetworkBehaviour, IAvatarBrain
@@ -57,8 +58,14 @@ namespace Arteranos.Avatar
 
         public UserID UserID
         {
-            get => m_userID; 
+            get => m_userID;
             private set => PropagateUserID(value);
+        }
+
+        public byte[] PublicKey
+        {
+            get => m_blobs[AVKeys.PublicKey];
+            set => PropagateBlob(AVKeys.PublicKey, value);
         }
 
         public string Nickname
@@ -330,18 +337,17 @@ namespace Arteranos.Avatar
 
         private void OnMBlobsChanged(SyncIDictionary<AVKeys, byte[]>.Operation op, AVKeys key, byte[] value)
         {
-            // Reserved for future use
+            switch(key)
+            {
+                case AVKeys.PublicKey:
+                    Subconscious.ReadyState = AvatarSubconscious.READY_CRYPTO;
+                    break;
+            }
         }
 
         private void OnUserIDChanged(UserID oldvalue, UserID newvalue)
         {
-            // It could be that you're logged in and the alien avatars show up first,
-            // before your own from the server....
-            if(isOwned || XRControl.Me == null)
-                return;
-
-            XRControl.Me.gameObject.GetComponent<AvatarSubconscious>().
-                                AnnounceArrival(newvalue);
+            Subconscious.ReadyState = AvatarSubconscious.READY_USERID;
         }
 
 

@@ -5,13 +5,21 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Arteranos.Core.Crypto
+namespace Arteranos.Core
 {
+    public struct CryptPacket
+    {
+        public byte[] iv;
+        public byte[] encryptedSessionKey;
+        public byte[] encryptedMessage;
+    }
+
     public class Crypto : IDisposable
     {
         public byte[] PublicKey => this.publicKey;
@@ -27,53 +35,65 @@ namespace Arteranos.Core.Crypto
 
         }
 
-        public void Encrypt(byte[] payload, byte[] otherPublicKey, out byte[] iv, out byte[] encryptedSessionKey, out byte[] encryptedMessage)
+        public void Encrypt(byte[] payload, byte[] otherPublicKey, out CryptPacket p)
         {
             using Aes aes = new AesCryptoServiceProvider();
-            iv = aes.IV;
+            p.iv = aes.IV;
 
             using RSACryptoServiceProvider otherKey = new();
             otherKey.ImportCspBlob(otherPublicKey);
             RSAPKCS1KeyExchangeFormatter keyFormatter = new(otherKey);
-            encryptedSessionKey = keyFormatter.CreateKeyExchange(aes.Key, typeof(Aes));
+            p.encryptedSessionKey = keyFormatter.CreateKeyExchange(aes.Key, typeof(Aes));
 
             using MemoryStream ciphertext = new();
             using CryptoStream cs = new(ciphertext, aes.CreateEncryptor(), CryptoStreamMode.Write);
             cs.Write(payload, 0, payload.Length);
             cs.Close();
 
-            encryptedMessage = ciphertext.ToArray();
+            p.encryptedMessage = ciphertext.ToArray();
         }
 
-        public void Decrypt(byte[] iv, byte[] encryptedSessionKey, byte[] encryptedMessage, out byte[] payload)
+        public void Decrypt(CryptPacket p, out byte[] payload)
         {
 
             using Aes aes = new AesCryptoServiceProvider();
-            aes.IV = iv;
+            aes.IV = p.iv;
 
             // Decrypt the session key
             RSAPKCS1KeyExchangeDeformatter keyDeformatter = new(rsaKey);
-            aes.Key = keyDeformatter.DecryptKeyExchange(encryptedSessionKey);
+            aes.Key = keyDeformatter.DecryptKeyExchange(p.encryptedSessionKey);
 
             // Decrypt the message
             using MemoryStream plaintext = new();
             using CryptoStream cs = new(plaintext, aes.CreateDecryptor(), CryptoStreamMode.Write);
-            cs.Write(encryptedMessage, 0, encryptedMessage.Length);
+            cs.Write(p.encryptedMessage, 0, p.encryptedMessage.Length);
             cs.Close();
 
             payload = plaintext.ToArray();
         }
 
-        public void Encrypt(string message, byte[] otherPublicKey, out byte[] iv, out byte[] encryptedSessionKey, out byte[] encryptedMessage)
+        public void Encrypt(string message, byte[] otherPublicKey, out CryptPacket p)
         {
             byte[] payload = Encoding.UTF8.GetBytes(message);
-            Encrypt(payload, otherPublicKey, out iv, out encryptedSessionKey, out encryptedMessage);
+            Encrypt(payload, otherPublicKey, out p);
         }
 
-        public void Decrypt(byte[] iv, byte[] encryptedSessionKey, byte[] encryptedMessage, out string message)
+        public void Decrypt(CryptPacket p, out string message)
         {
-            Decrypt(iv, encryptedSessionKey, encryptedMessage, out byte[] payload);
+            Decrypt(p, out byte[] payload);
             message = Encoding.UTF8.GetString(payload);
+        }
+
+        public void Encrypt<T>(T payload, byte[] otherPublicKey, out CryptPacket p)
+        {
+            string json = JsonConvert.SerializeObject(payload);
+            Encrypt(json, otherPublicKey, out p);
+        }
+
+        public void Decrypt<T>(CryptPacket p, out T payload)
+        {
+            Decrypt(p, out string json);
+            payload = JsonConvert.DeserializeObject<T>(json);
         }
 
         public void Dispose() => rsaKey.Dispose();

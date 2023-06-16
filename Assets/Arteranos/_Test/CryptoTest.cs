@@ -5,12 +5,9 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-using Arteranos.Core.Crypto;
-using System.Linq;
+using Arteranos.Core;
 
 namespace Arteranos
 {
@@ -37,19 +34,37 @@ namespace Arteranos
 
             EncryptTest("This is the first message");
 
+            UserID testuser = new("Google", "6785874", null);
+
+            EncryptStructTest(testuser);
+
             EncryptTest("This is the second message");
+
         }
 
         private void EncryptTest(string msg)
         {
-            alice.Encrypt(msg, bob.PublicKey, out byte[] iv, out byte[] encryptedSessionKey, out byte[] encryptedMessage);
+            alice.Encrypt(msg, bob.PublicKey, out CryptPacket p);
 
-            Debug.Log($"Ciphertext: {Hex(encryptedMessage)}");
+            Debug.Log($"Ciphertext: {Hex(p.encryptedMessage)}");
 
-            bob.Decrypt(iv, encryptedSessionKey, encryptedMessage, out string decryptedMessage);
+            bob.Decrypt(p, out string decryptedMessage);
 
             if(decryptedMessage != msg)
                 Debug.LogError($"FAILED: Decrypted message is garbled - supposed: {msg}");
+        }
+
+        private void EncryptStructTest(UserID userID)
+        {
+            alice.Encrypt(userID, bob.PublicKey, out CryptPacket p);
+
+            Debug.Log($"Ciphertext: {Hex(p.encryptedMessage)}");
+
+            bob.Decrypt(p, out UserID userID1);
+
+            if(userID != userID1)
+                Debug.LogError($"FAILED: Decrypted message is garbled - supposed: {userID1}");
+
         }
     }
 }

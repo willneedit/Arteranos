@@ -13,27 +13,45 @@ using Mirror;
 using Arteranos.Core;
 using Arteranos.Social;
 using System;
-using System.Text;
-using System.IO;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
+using System.Linq;
+using Arteranos.XR;
 
 namespace Arteranos.Avatar
 {
     public class AvatarSubconscious : NetworkBehaviour
     {
+        public const int READY_USERID   = (1 << 0);
+        public const int READY_CRYPTO   = (1 << 1);
+        public const int READY_ME       = (1 << 2);
+
         // ---------------------------------------------------------------
         #region Start & Stop
 
-        // The own idea about the other users
+        public int ReadyState 
+        {
+            get => m_ReadyState;
+            set
+            {
+                int old = m_ReadyState;
+                m_ReadyState |= value; // NOTE: Intentional. Only for latches.
+                if (old != m_ReadyState) ReadyStateChanged?.Invoke(old, m_ReadyState);
+            }
+        }
+
+        public event Action<int, int> ReadyStateChanged;
+
+        // The own ideas about the other users, and vice versa
         private readonly Dictionary<UserID, int> SocialMemory = new();
 
         private IAvatarBrain Brain = null;
+        private Crypto crypto = null;
+
+        private int m_ReadyState = 0;
 
         private void Reset()
         {
             syncDirection = SyncDirection.ServerToClient;
-            syncMode = SyncMode.Owner;
+            syncMode = SyncMode.Observers;
         }
 
         private void Awake() => Brain = GetComponent<IAvatarBrain>();
@@ -42,12 +60,45 @@ namespace Arteranos.Avatar
         {
             base.OnStartClient();
 
-            // Initialize (and upload to the server) the filtered friend (and shit) list
+            ReadyStateChanged += OnReadyStateChanged;
+
+            // Initialize the crypto module and distribute the public key
+            crypto = new();
+
+            Brain.PublicKey = crypto.PublicKey;
+
+            // Initialize the filtered friend (and shit) list
             if(isOwned)
                 InitializeSocialStates();
         }
 
-        public override void OnStopClient() => base.OnStopClient();
+        public override void OnStopClient()
+        {
+            ReadyStateChanged -= OnReadyStateChanged;
+
+            base.OnStopClient();
+        }
+
+        private void Update()
+        {
+            if((ReadyState & READY_ME) == 0 && XRControl.Me != null)
+                ReadyState = READY_ME;
+        }
+
+
+        private void OnReadyStateChanged(int oldval, int newval)
+        {
+            Brain.LogDebug($"Ready state changed from {oldval} to {newval}");
+
+            int r1 = READY_CRYPTO|READY_USERID|READY_ME;
+
+            if((newval & r1) == r1 && !isOwned)
+            {
+                XRControl.Me.gameObject.GetComponent<AvatarSubconscious>().
+                    AnnounceArrival(Brain.UserID);
+            }
+        }
+
 
         #endregion
         // ---------------------------------------------------------------
@@ -65,89 +116,25 @@ namespace Arteranos.Avatar
             => GO.GetComponent<AvatarSubconscious>();
 
 
-        // TODO Surely I need the full-fledged DH key exchange here, because a
-        // server administrator could be listening into the messages with the receiver's
-        // global UserID.
-        private byte[] Encode(string text, UserID userID)
-        {
-            byte[] encoded = null;
-
-            using(MemoryStream memoryStream = new())
-            {
-                using(Aes aes = Aes.Create())
-                {
-                    aes.Key = userID.Hash;
-                    byte[] iv = aes.IV;
-                    memoryStream.Write(iv, 0, iv.Length);
-
-                    using CryptoStream cryptoStream = new(
-                        memoryStream, aes.CreateEncryptor(), CryptoStreamMode.Write);
-                    using StreamWriter writer = new(cryptoStream);
-                    writer.WriteLine(text);
-                }
-
-                encoded = new byte[memoryStream.Length];
-                memoryStream.Read(encoded, 0, (int) memoryStream.Length);
-            }
-
-            return encoded;
-        }
-
-        private async Task<string> Decode(byte[] encoded, UserID userID)
-        {
-            string text = null;
-
-            try
-            {
-                using MemoryStream memoryStream = new(encoded);
-
-                using Aes aes = Aes.Create();
-
-                byte[] iv = new byte[aes.IV.Length];
-                if(encoded.Length < iv.Length)
-                    throw new InvalidOperationException("Truncated ciphertext");
-
-                memoryStream.Read(iv, 0, iv.Length);
-
-                using CryptoStream cryptoStream = new(
-                    memoryStream, aes.CreateDecryptor(userID.Hash, iv), CryptoStreamMode.Read);
-                using StreamReader reader = new(cryptoStream);
-                text = await reader.ReadToEndAsync();
-            }
-            catch(Exception e)
-            {
-                Brain.LogError(e.Message);
-                text = string.Empty;
-            }
-
-            return text;
-        }
-
-
         [Command]
-        private void CmdSendTextMessage(UserID userID, string text)
+        private void CmdSendTextMessage(GameObject receiverGO, string text)
         {
-            GameObject receiverGO = SearchUser(userID)?.gameObject;
-
-            if(receiverGO != null)
-                GetSC(receiverGO).TargetReceiveTextMessage(gameObject, Encode(text, userID));
+            GetSC(receiverGO).TargetReceiveTextMessage(gameObject, text);
         }
 
         [TargetRpc]
-        private void TargetReceiveTextMessage(GameObject senderGO, byte[] encoded)
+        private void TargetReceiveTextMessage(GameObject senderGO, string text)
         {
             if(!isOwned) throw new Exception("Not owner");
 
             IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
 
-            ReceiveTextMessage(sender, encoded);
+            ReceiveTextMessage(sender, text);
 
         }
 
-        private async void ReceiveTextMessage(IAvatarBrain sender, byte[] encoded)
+        private void ReceiveTextMessage(IAvatarBrain sender, string text)
         {
-            // Use the global UserID. It's only shared with the sender if they're friends.
-            string text = await Decode(encoded, SettingsManager.Client.UserID);
 
             // TODO pass on to the higher level of consciousness.
         }
@@ -182,33 +169,41 @@ namespace Arteranos.Avatar
 
         }
 
-        [Command]
-        private void CmdTransmitGlobalUserID(GameObject receiverGO, UserID globalUserID)
+        // ---------------------------------------------------------------
+
+        private void TransmitGlobalUserID(GameObject receiverGO, UserID globalUserID)
         {
             if(globalUserID.ServerName != null) throw new ArgumentException("Not a global userID");
-
-            GetSC(receiverGO).TargetReceiveGlobalUserID(
-                gameObject,
-                globalUserID);
+            crypto.Encrypt(globalUserID,
+                receiverGO.GetComponent<IAvatarBrain>().PublicKey,
+                out CryptPacket p);
+            CmdTransmitGlobalUserID(receiverGO, p);
         }
 
+        [Command]
+        private void CmdTransmitGlobalUserID(GameObject receiverGO, CryptPacket p) 
+            => GetSC(receiverGO).TargetReceiveGlobalUserID(gameObject, p);
+
         [TargetRpc]
-        private void TargetReceiveGlobalUserID(GameObject senderGO, UserID globalUserID)
+        private void TargetReceiveGlobalUserID(GameObject senderGO, CryptPacket p)
+        {
+            crypto.Decrypt(p, out UserID globalUserID);
+            ReceiveGlobalUserID(senderGO, globalUserID);
+        }
+
+        private void ReceiveGlobalUserID(GameObject senderGO, UserID globalUserID)
         {
             if(!isOwned) throw new Exception("Not owner");
 
             IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
-
             UserID supposedUserID = globalUserID.Derive();
-
             if(sender.UserID != supposedUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
-
             Brain.LogDebug($"{sender.Nickname}'s UserID was updated to global UserID {globalUserID}");
-
             if(sender.UserID != globalUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
-
             SettingsManager.Client.UpdateToGlobalUserID(globalUserID);
         }
+
+        // ---------------------------------------------------------------
 
         private void SaveSocialState(IAvatarBrain receiver, UserID userID)
         {
@@ -287,7 +282,7 @@ namespace Arteranos.Avatar
             if(!result) return;
 
             // But, I have to take the first step....
-            CmdTransmitGlobalUserID(receiver.gameObject, SettingsManager.Client.UserID);
+            TransmitGlobalUserID(receiver.gameObject, SettingsManager.Client.UserID);
         }
 
         public bool IsMutualFriends(IAvatarBrain receiver)
