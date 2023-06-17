@@ -5,14 +5,11 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
 
 using Arteranos.Core;
 using Arteranos.Avatar;
 using Arteranos.Social;
-using Arteranos.XR;
 
 namespace Arteranos.UI
 {
@@ -20,7 +17,6 @@ namespace Arteranos.UI
     {
         public override IEnumerable<SocialListEntryJSON> GetSocialListTab()
         {
-            // FIXME Collection was modified
             IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriends);
             foreach(SocialListEntryJSON entry in list) yield return entry;
         }

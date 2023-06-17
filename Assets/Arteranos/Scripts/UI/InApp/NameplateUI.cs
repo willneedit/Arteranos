@@ -73,7 +73,7 @@ namespace Arteranos.UI
         {
             string tagstr = null;
 
-            int yourstate = XRControl.Me.GetOwnState(Bearer);
+            int yourstate = XRControl.Me?.GetOwnState(Bearer) ?? SocialState.None;
 
             if(SocialState.IsState(yourstate,
                 SocialState.Own_Friend_offered | SocialState.Them_Friend_offered))
@@ -93,7 +93,8 @@ namespace Arteranos.UI
         private void OnAppearanceStatusChanged(int status)
         {
             // Adding friends is visible if it's not already in progress
-            int yourstate = XRControl.Me.GetOwnState(Bearer);
+            int yourstate = XRControl.Me?.GetOwnState(Bearer) ?? SocialState.None;
+
             bool friends = SocialState.IsState(yourstate, SocialState.Own_Friend_offered);
             bool blocked = SocialState.IsState(yourstate, SocialState.Own_Blocked);
 

@@ -68,12 +68,26 @@ namespace Arteranos.Avatar
             if(!isOwned) AvatarHitBoxFactory.New(this);
         }
 
-        public int AskRelationsToMe(IAvatarBrain asked) => throw new NotImplementedException();
-        public void BlockUser(IAvatarBrain receiver, bool blocking = true) => throw new NotImplementedException();
-        public void OfferFriendship(IAvatarBrain receiver, bool offering = true) => throw new NotImplementedException();
-        public void LogDebug(object message) => throw new NotImplementedException();
-        public void LogError(object message) => throw new NotImplementedException();
-        public void LogWarning(object message) => throw new NotImplementedException();
+        public void BlockUser(IAvatarBrain receiver, bool blocking = true)
+        {
+
+        }
+        public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
+        {
+
+        }
+        public void LogDebug(object message)
+        {
+
+        }
+        public void LogError(object message)
+        {
+
+        }
+        public void LogWarning(object message)
+        {
+
+        }
         public void SetAppearanceStatusBit(int ASBit, bool set)
         {
             if(set)
@@ -82,21 +96,15 @@ namespace Arteranos.Avatar
                 AppearanceStatus &= ~ASBit;
         }
 
-        public void UpdateReflectiveSSEffects(IAvatarBrain receiver, int state)
-        {
-
-        }
-
         public void UpdateSSEffects(IAvatarBrain receiver, int state)
         {
 
         }
 
-        public void SaveSocialStates(IAvatarBrain receiver, int state) => throw new NotImplementedException();
-        public void UpdateToGlobalUserID(IAvatarBrain receiver, UserID globalUserID) => throw new NotImplementedException();
-        public bool IsMutualFriends(IAvatarBrain receiver) => throw new NotImplementedException();
-        public int GetReflectiveState(IAvatarBrain receiver) => throw new NotImplementedException();
-        public int GetOwnState(IAvatarBrain receiver) => throw new NotImplementedException();
+        public int GetOwnState(IAvatarBrain receiver)
+        {
+            return 0;
+        }
     }
 }
 

@@ -463,7 +463,6 @@ namespace Arteranos.Avatar
             else
                 AudioManager.Instance.MuteOther((short) ChatOwnID, Avatar.AppearanceStatus.IsSilent(AppearanceStatus));
 
-            // FIXME Maybe a second collider just for the bubble collision, and the mask for xrorigin's interactor.
             HitBox.interactable = !Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
             Body.invisible = Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
 
