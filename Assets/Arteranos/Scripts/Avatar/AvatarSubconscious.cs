@@ -74,6 +74,8 @@ namespace Arteranos.Avatar
 
         public override void OnStopClient()
         {
+            crypto.Dispose();
+
             ReadyStateChanged -= OnReadyStateChanged;
 
             base.OnStopClient();
@@ -88,10 +90,11 @@ namespace Arteranos.Avatar
 
         private void OnReadyStateChanged(int oldval, int newval)
         {
-            Brain.LogDebug($"Ready state changed from {oldval} to {newval}");
+            // Brain.LogDebug($"Ready state changed from {oldval} to {newval}");
 
+            // Newly online user, do the neccessary handshake, once the userID and the public key
+            // is available.
             int r1 = READY_CRYPTO|READY_USERID|READY_ME;
-
             if((newval & r1) == r1 && !isOwned)
             {
                 XRControl.Me.gameObject.GetComponent<AvatarSubconscious>().
@@ -115,29 +118,38 @@ namespace Arteranos.Avatar
         private static AvatarSubconscious GetSC(GameObject GO)
             => GO.GetComponent<AvatarSubconscious>();
 
+        // ---------------------------------------------------------------
+        #region Text message transmission
 
-        [Command]
-        private void CmdSendTextMessage(GameObject receiverGO, string text)
+        private void TransmitTextMessage(GameObject receiverGO, string text)
         {
-            GetSC(receiverGO).TargetReceiveTextMessage(gameObject, text);
+            crypto.Encrypt(text, receiverGO.GetComponent<IAvatarBrain>().PublicKey, out CryptPacket p);
+            CmdTransmitTextMessage(receiverGO, p);
         }
 
+        [Command]
+        private void CmdTransmitTextMessage(GameObject receiverGO, CryptPacket p) 
+            => GetSC(receiverGO).TargetReceiveTextMessage(gameObject, p);
+
         [TargetRpc]
-        private void TargetReceiveTextMessage(GameObject senderGO, string text)
+        private void TargetReceiveTextMessage(GameObject senderGO, CryptPacket p)
+        {
+            crypto.Decrypt(p, out string text);
+            ReceiveTextMessage(senderGO, text);
+        }
+
+        private void ReceiveTextMessage(GameObject senderGO, string text)
         {
             if(!isOwned) throw new Exception("Not owner");
 
             IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
 
-            ReceiveTextMessage(sender, text);
-
-        }
-
-        private void ReceiveTextMessage(IAvatarBrain sender, string text)
-        {
-
             // TODO pass on to the higher level of consciousness.
         }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Reflectice Social State distribution
 
         [Command]
         private void CmdUpdateReflectiveSocialState(UserID userID, int state)
@@ -168,9 +180,9 @@ namespace Arteranos.Avatar
             SaveSocialState(sender, key);
 
         }
-
+        #endregion
         // ---------------------------------------------------------------
-
+        #region Global UserID transmission
         private void TransmitGlobalUserID(GameObject receiverGO, UserID globalUserID)
         {
             if(globalUserID.ServerName != null) throw new ArgumentException("Not a global userID");
@@ -196,15 +208,15 @@ namespace Arteranos.Avatar
             if(!isOwned) throw new Exception("Not owner");
 
             IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
-            UserID supposedUserID = globalUserID.Derive();
-            if(sender.UserID != supposedUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
+            if(sender.UserID != globalUserID.Derive()) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
             Brain.LogDebug($"{sender.Nickname}'s UserID was updated to global UserID {globalUserID}");
-            if(sender.UserID != globalUserID) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
             SettingsManager.Client.UpdateToGlobalUserID(globalUserID);
         }
-
+        #endregion
         // ---------------------------------------------------------------
-
+        #endregion
+        // ---------------------------------------------------------------
+        #region Social State handling
         private void SaveSocialState(IAvatarBrain receiver, UserID userID)
         {
             SettingsManager.Client.SaveSocialStates(userID,
