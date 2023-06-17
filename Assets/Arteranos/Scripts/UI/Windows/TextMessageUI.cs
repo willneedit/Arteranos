@@ -5,9 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -15,6 +12,7 @@ using UnityEngine.UI;
 
 using Arteranos.Core;
 using UnityEngine.Events;
+using Arteranos.Avatar;
 
 namespace Arteranos.UI
 {
@@ -25,17 +23,11 @@ namespace Arteranos.UI
         public Button btn_AddPreset = null;
         public Button btn_DelPreset = null;
 
+        public IAvatarBrain Receiver = null;
+
         private ClientSettings cs = null;
         private bool dirty = false;
 
-        private readonly List<string> presetStrings = new()
-        {
-            "Hi!",
-            "Hello",
-            "Bye",
-            "You're muted",
-            "You have noises"
-        };
 
         protected override void Awake()
         {
@@ -55,8 +47,17 @@ namespace Arteranos.UI
 
             cs = SettingsManager.Client;
 
+            if(cs.PresetStrings.Count == 0)
+                cs.PresetStrings = new()
+                {
+                    "Hi!",
+                    "Hello",
+                    "Bye",
+                    "You're muted",
+                    "You have noises"
+                };
 
-            foreach(string preset in presetStrings)
+            foreach(string preset in cs.PresetStrings)
                 AddPresetButtonLL(preset);
 
             // Reset the state as it's the initial state, not the blank slate.
@@ -85,24 +86,30 @@ namespace Arteranos.UI
 
         private void AddPresetButton(string preset)
         {
-            int index = presetStrings.IndexOf(preset);
+            if(string.IsNullOrEmpty(preset)) return;
+
+            int index = cs.PresetStrings.IndexOf(preset);
             if(index >= 0) return;
 
-            presetStrings.Add(preset);
+            cs.PresetStrings.Add(preset);
            
             AddPresetButtonLL(preset);
+            dirty = true;
         }
 
         private void DelPresetButton(string preset)
         {
-            int index = presetStrings.IndexOf(preset);
+            if(string.IsNullOrEmpty(preset)) return;
+
+            int index = cs.PresetStrings.IndexOf(preset);
             if(index < 0) return;
 
-            presetStrings.Remove(preset);
+            cs.PresetStrings.Remove(preset);
 
             Transform transform1 = btn_Preset_Sample.transform.parent;
 
             Destroy(transform1.GetChild(index + 1).gameObject);
+            dirty = true;
         }
 
         private void OnPresetButtonClicked(string preset) => txt_Message.text = preset;
@@ -111,7 +118,10 @@ namespace Arteranos.UI
 
         private void OnDelPresetClicked() => DelPresetButton(txt_Message.text);
 
-        private void OnSubmit(string arg0) => throw new NotImplementedException();
+        private void OnSubmit(string text)
+        {
+
+        }
 
     }
 }

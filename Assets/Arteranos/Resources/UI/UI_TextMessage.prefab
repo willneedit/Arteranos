@@ -596,6 +596,7 @@ GameObject:
   - component: {fileID: 8612010853267645050}
   - component: {fileID: 2712862418738728202}
   - component: {fileID: 531649820525662566}
+  - component: {fileID: 5233861304033580477}
   m_Layer: 5
   m_Name: UI_TextMessage
   m_TagString: Untagged
@@ -752,6 +753,19 @@ MonoBehaviour:
   btn_Preset_Sample: {fileID: 2932291001908888196}
   btn_AddPreset: {fileID: 8692186847862560260}
   btn_DelPreset: {fileID: 5733012944763778922}
+--- !u!114 &5233861304033580477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2837209915542619872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 335f52dc3b98f97488484f170db81e99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Name: Text Message
 --- !u!1 &3376811173784001483
 GameObject:
   m_ObjectHideFlags: 0

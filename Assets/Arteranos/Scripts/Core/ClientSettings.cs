@@ -141,7 +141,7 @@ namespace Arteranos.Core
         };
 
         // Avatar storage
-        public List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
+        public virtual List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
 
         // The user's social state to others
         public virtual List<SocialListEntryJSON> SocialList { get; set; } = new();
@@ -175,6 +175,9 @@ namespace Arteranos.Core
 
         // The user's server collection
         public virtual List<string> ServerList { get; set; } = new();
+
+        // The user's text message templates
+        public virtual List<string> PresetStrings { get; set; } = new();
     }
 
     public class ClientSettings : ClientSettingsJSON
