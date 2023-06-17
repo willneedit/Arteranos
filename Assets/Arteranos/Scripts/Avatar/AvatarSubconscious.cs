@@ -144,6 +144,8 @@ namespace Arteranos.Avatar
 
             IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
 
+            Brain.LogDebug($"Message from {sender.Nickname}: {text}");
+
             // TODO pass on to the higher level of consciousness.
         }
 
