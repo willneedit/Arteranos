@@ -308,6 +308,19 @@ namespace Arteranos.UI
             return nameplate;
         }
     }
+
+    public class TextMessageUIFactory : UIBehaviour
+    {
+        public static ITextMessageUI New(IAvatarBrain receiver)
+        {
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_TextMessage"));
+            ITextMessageUI textMessageUI = go.GetComponent<ITextMessageUI>();
+            textMessageUI.Receiver = receiver;
+            return textMessageUI;
+        }
+    }
+
+
     #endregion
     // -------------------------------------------------------------------
 }

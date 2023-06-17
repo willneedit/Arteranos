@@ -16,14 +16,15 @@ using Arteranos.Avatar;
 
 namespace Arteranos.UI
 {
-    public class TextMessageUI : UIBehaviour
+
+    public class TextMessageUI : UIBehaviour, ITextMessageUI
     {
         public TMP_InputField txt_Message = null;
         public Button btn_Preset_Sample = null;
         public Button btn_AddPreset = null;
         public Button btn_DelPreset = null;
 
-        public IAvatarBrain Receiver = null;
+        public IAvatarBrain Receiver { get; set; } = null;
 
         private ClientSettings cs = null;
         private bool dirty = false;

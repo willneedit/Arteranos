@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -13,8 +12,6 @@ using TMPro;
 using Arteranos.Avatar;
 using Arteranos.XR;
 using Arteranos.Social;
-using Arteranos.Core;
-using System.Linq;
 
 namespace Arteranos.UI
 {
@@ -27,6 +24,7 @@ namespace Arteranos.UI
         [SerializeField] private Button btn_unmute = null;
         [SerializeField] private Button btn_friend_add = null;
         [SerializeField] private Button btn_block = null;
+        [SerializeField] private Button btn_send_text = null;
 
         private readonly Vector3 aboutFace = new(0, 180, 0);
 
@@ -38,6 +36,7 @@ namespace Arteranos.UI
             btn_unmute.onClick.AddListener(OnMuteButtonClicked);
             btn_friend_add.onClick.AddListener(OnFriendAddButtonClicked);
             btn_block.onClick.AddListener(OnBlockButtonClicked);
+            btn_send_text.onClick.AddListener(OnSendTextButtonClicked);
         }
 
         protected override void OnEnable()
@@ -139,5 +138,12 @@ namespace Arteranos.UI
             XRControl.Me.OfferFriendship(Bearer);
             OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
+
+        private void OnSendTextButtonClicked()
+        {
+            SysMenuKind.CloseSystemMenus();
+            TextMessageUIFactory.New(Bearer);
+        }
+
     }
 }
