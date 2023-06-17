@@ -8,7 +8,6 @@
 using System.Collections.Generic;
 
 using Arteranos.Core;
-using Arteranos.Avatar;
 using Arteranos.Social;
 
 namespace Arteranos.UI
@@ -24,8 +23,6 @@ namespace Arteranos.UI
         private bool IsFriends(SocialListEntryJSON arg)
         {
             if(!SocialState.IsState(arg.state, SocialState.Own_Friend_offered)) return false;
-
-            IAvatarBrain targetUser = SettingsManager.GetOnlineUser(arg.UserID);
 
             return (SocialState.IsState(arg.state, 
                 SocialState.Own_Friend_offered | SocialState.Them_Friend_offered));
