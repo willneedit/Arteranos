@@ -13,16 +13,20 @@ using UnityEngine.UI;
 using Arteranos.Core;
 using UnityEngine.Events;
 using Arteranos.Avatar;
+using Arteranos.XR;
+using System;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Arteranos.UI
 {
 
     public class TextMessageUI : UIBehaviour, ITextMessageUI
     {
-        public TMP_InputField txt_Message = null;
-        public Button btn_Preset_Sample = null;
-        public Button btn_AddPreset = null;
-        public Button btn_DelPreset = null;
+        [SerializeField] private TMP_InputField txt_Message = null;
+        [SerializeField] private Button btn_Preset_Sample = null;
+        [SerializeField] private Button btn_AddPreset = null;
+        [SerializeField] private Button btn_DelPreset = null;
+        [SerializeField] private Button btn_Send = null;
 
         public IAvatarBrain Receiver { get; set; } = null;
 
@@ -38,6 +42,7 @@ namespace Arteranos.UI
 
             btn_AddPreset.onClick.AddListener(OnAddPresetClicked);
             btn_DelPreset.onClick.AddListener(OnDelPresetClicked);
+            btn_Send.onClick.AddListener(OnSendButtonClicked);
 
             txt_Message.onSubmit.AddListener(OnSubmit);
         }
@@ -49,6 +54,7 @@ namespace Arteranos.UI
             cs = SettingsManager.Client;
 
             if(cs.PresetStrings.Count == 0)
+            {
                 cs.PresetStrings = new()
                 {
                     "Hi!",
@@ -57,6 +63,7 @@ namespace Arteranos.UI
                     "You're muted",
                     "You have noises"
                 };
+            }
 
             foreach(string preset in cs.PresetStrings)
                 AddPresetButtonLL(preset);
@@ -74,13 +81,13 @@ namespace Arteranos.UI
             dirty = false;
         }
 
-        private UnityAction makePresetButtonClicked(string preset)
+        private UnityAction MakePresetButtonClicked(string preset)
             => () => OnPresetButtonClicked(preset);
 
         private void AddPresetButtonLL(string preset)
         {
             Button newbtn = Instantiate(btn_Preset_Sample, btn_Preset_Sample.transform.parent);
-            newbtn.onClick.AddListener(makePresetButtonClicked(preset));
+            newbtn.onClick.AddListener(MakePresetButtonClicked(preset));
             newbtn.GetComponentInChildren<TMP_Text>().text = preset;
             newbtn.gameObject.SetActive(true);
         }
@@ -119,10 +126,26 @@ namespace Arteranos.UI
 
         private void OnDelPresetClicked() => DelPresetButton(txt_Message.text);
 
+        // For some reason, I got a Submit event from the text input field twice.
+        // WTH, maybe I have to include a spam protection in any case...
+        private bool already = false;
+
         private void OnSubmit(string text)
         {
+            if(already) return;
+            already = true;
 
+            SysMenuKind.CloseSystemMenus();
+            XRControl.Me.SendTextMessage(Receiver, text);
         }
 
+        private void OnSendButtonClicked()
+        {
+            if(already) return;
+            already = true;
+
+            SysMenuKind.CloseSystemMenus();
+            XRControl.Me.SendTextMessage(Receiver, txt_Message.text);
+        }
     }
 }

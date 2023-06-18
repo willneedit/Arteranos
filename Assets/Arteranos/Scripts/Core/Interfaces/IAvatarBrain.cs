@@ -36,6 +36,7 @@ namespace Arteranos.Avatar
         void LogWarning(object message);
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
         void OfferFriendship(IAvatarBrain receiver, bool offering = true);
+        void SendTextMessage(IAvatarBrain receiver, string text);
         void SetAppearanceStatusBit(int ASBit, bool set);
         void UpdateSSEffects(IAvatarBrain receiver, int state);
     }

@@ -101,10 +101,10 @@ namespace Arteranos.Avatar
 
         }
 
-        public int GetOwnState(IAvatarBrain receiver)
-        {
-            return 0;
-        }
+        public int GetOwnState(IAvatarBrain receiver) => 0;
+
+        public void SendTextMessage(IAvatarBrain receiver, string text)
+            => LogDebug($"To {receiver.Nickname}: {text}");
     }
 }
 

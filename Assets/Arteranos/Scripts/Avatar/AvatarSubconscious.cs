@@ -289,6 +289,9 @@ namespace Arteranos.Avatar
             UpdateSocialState(receiver, SocialState.Own_Blocked, blocking);
         }
 
+        public void SendTextMessage(IAvatarBrain receiver, string text)
+            => TransmitTextMessage(receiver.gameObject, text);
+
         public void AttemptFriendNegotiation(IAvatarBrain receiver)
         {
             bool result = IsMutualFriends(receiver);

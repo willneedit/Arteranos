@@ -170,7 +170,9 @@ namespace Arteranos.Avatar
                 name = $"Avatar [???][connId={connId}, netId={netId}]";
             }
             else
+            {
                 name = $"Avatar [???][netId={netId}]";
+            }
 
             m_ints.Callback += OnMIntsChanged;
             m_floats.Callback += OnMFloatsChanged;
@@ -330,7 +332,10 @@ namespace Arteranos.Avatar
                         name = $"Avatar [{value}][connId={connId}, netId={netId}]";
                     }
                     else
+                    {
                         name = $"Avatar [{value}][netId={netId}]";
+                    }
+
                     break;
             }
         }
@@ -345,13 +350,10 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void OnUserIDChanged(UserID oldvalue, UserID newvalue)
-        {
-            Subconscious.ReadyState = AvatarSubconscious.READY_USERID;
-        }
+        private void OnUserIDChanged(UserID _1, UserID _2)
+            => Subconscious.ReadyState = AvatarSubconscious.READY_USERID;
 
 
-#pragma warning disable IDE0051 // Nicht verwendete private Member entfernen
         [Command]
         private void PropagateInt(AVKeys key, int value) => m_ints[key] = value;
 
@@ -370,7 +372,6 @@ namespace Arteranos.Avatar
             m_userID = userID;
             SettingsManager.RegisterUser(this);
         }
-#pragma warning restore IDE0051 // Nicht verwendete private Member entfernen
 
 
         #endregion
@@ -590,6 +591,9 @@ namespace Arteranos.Avatar
 
             Subconscious.AttemptFriendNegotiation(receiver);
         }
+
+        public void SendTextMessage(IAvatarBrain receiver, string text)
+            => Subconscious.SendTextMessage(receiver, text);
 
         public int GetOwnState(IAvatarBrain receiver)
             => Subconscious.GetOwnState(receiver);
