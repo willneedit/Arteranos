@@ -150,11 +150,10 @@ namespace Arteranos.Avatar
             Brain.LogDebug($"Message from {sender.Nickname}: {text}");
 
             // "Well... Errr... You've blocked that user." -- Discord, paraphrased
-            if((GetOwnState(sender) & SocialState.Own_Blocked | SocialState.Them_Blocked) != 0)
+            if((GetOwnState(sender) & (SocialState.Own_Blocked | SocialState.Them_Blocked)) != 0)
                 return;
 
-
-            // TODO pass on to the higher level of consciousness.
+            Brain.ReceiveTextMessage(sender, text);
         }
 
         #endregion

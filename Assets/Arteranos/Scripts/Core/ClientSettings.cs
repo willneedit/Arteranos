@@ -133,6 +133,7 @@ namespace Arteranos.Core
 
     public class MessageQueuesJSON
     {
+        // FIXME UaerIDs as Dictionary Keys aren't serializable !
         // Newly added or shown to the user, but not saved to disk yet.
         public bool dirty = false;
         public Dictionary<UserID, List<MessageQueueEntryJSON>> msgs = new();

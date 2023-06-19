@@ -595,13 +595,67 @@ namespace Arteranos.Avatar
         public void SendTextMessage(IAvatarBrain receiver, string text)
         {
             // Maybe the intended receiver logged off while you tried to send a goodbye message.
-            if(receiver != null) return;
+            if(receiver == null) return;
 
             Subconscious.SendTextMessage(receiver, text);
         }
 
         public int GetOwnState(IAvatarBrain receiver)
             => Subconscious.GetOwnState(receiver);
+        #endregion
+        // ---------------------------------------------------------------
+        #region Text message reception
+
+        private IDialogUI m_txtMessageBox = null;
+
+        public void ReceiveTextMessage(IAvatarBrain sender, string text)
+        {
+            bool busy = false;
+
+            // "I'm swamped with the messages."
+            busy |= m_txtMessageBox != null;
+
+            // "Dammit! Not right now!"
+            busy |= SettingsManager.Client.Visibility != Core.Visibility.Online;
+
+            if(busy)
+            {
+                ClientSettings cs = SettingsManager.Client;
+
+                // Look for your friend list if the sender is a friend - use the global UserID
+                IEnumerable<SocialListEntryJSON> q = cs.GetSocialList(sender.UserID);
+
+                //                                         feund possible GUID  ... or not.
+                UserID maybeGlobalUserID = (q.Count() > 0) ? q.First().UserID : sender.UserID;
+
+                cs.EnqueueMessage(maybeGlobalUserID, text);
+
+                // No matter, put the message on to the pile...
+                cs.SaveSettings();
+
+                return;
+            }
+
+            ShowTextMessage(sender, sender.Nickname, text);
+        }
+
+        public async void ShowTextMessage(IAvatarBrain sender, string Nickname, string text)
+        {
+            string[] replyText = { "OK", "Reply" };
+            string[] okText = { "OK" };
+
+            m_txtMessageBox = DialogUIFactory.New();
+
+            int rc = await m_txtMessageBox.PerformDialogAsync(
+                $"Message from {Nickname}:\n\n" +
+                text,
+                (sender == null) ? okText : replyText);
+
+            m_txtMessageBox = null;
+
+            if (rc != 0)
+                TextMessageUIFactory.New(sender);
+        }
         #endregion
     }
 }

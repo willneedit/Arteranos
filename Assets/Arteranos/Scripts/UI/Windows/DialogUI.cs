@@ -77,10 +77,7 @@ namespace Arteranos.UI
             Destroy(gameObject);
         }
 
-        public void Close()
-        {
-            Destroy(gameObject);
-        }
+        public void Close() => Destroy(gameObject);
 
         // Purely convenient for write a process driven control flow rather than
         // a event driven one and reducing the boilerplate.
