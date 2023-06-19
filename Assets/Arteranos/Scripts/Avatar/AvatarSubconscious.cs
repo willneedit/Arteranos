@@ -142,9 +142,17 @@ namespace Arteranos.Avatar
         {
             if(!isOwned) throw new Exception("Not owner");
 
+            // Where did they go...?
+            if(senderGO == null) return;
+
             IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
 
             Brain.LogDebug($"Message from {sender.Nickname}: {text}");
+
+            // "Well... Errr... You've blocked that user." -- Discord, paraphrased
+            if((GetOwnState(sender) & SocialState.Own_Blocked | SocialState.Them_Blocked) != 0)
+                return;
+
 
             // TODO pass on to the higher level of consciousness.
         }

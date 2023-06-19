@@ -593,7 +593,12 @@ namespace Arteranos.Avatar
         }
 
         public void SendTextMessage(IAvatarBrain receiver, string text)
-            => Subconscious.SendTextMessage(receiver, text);
+        {
+            // Maybe the intended receiver logged off while you tried to send a goodbye message.
+            if(receiver != null) return;
+
+            Subconscious.SendTextMessage(receiver, text);
+        }
 
         public int GetOwnState(IAvatarBrain receiver)
             => Subconscious.GetOwnState(receiver);
