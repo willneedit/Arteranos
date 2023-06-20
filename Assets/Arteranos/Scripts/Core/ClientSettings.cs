@@ -124,22 +124,6 @@ namespace Arteranos.Core
         public int state = SocialState.None;
     }
 
-    public class MessageQueueEntryJSON
-    {
-        // Entries are sorted in the dictionary under the sender.
-        public DateTime receivedBy = DateTime.MinValue;
-        public string Message = string.Empty;
-    }
-
-    public class MessageQueuesJSON
-    {
-        // FIXME UaerIDs as Dictionary Keys aren't serializable !
-        // Newly added or shown to the user, but not saved to disk yet.
-        public bool dirty = false;
-        public Dictionary<UserID, List<MessageQueueEntryJSON>> msgs = new();
-    }
-
-
     public class UserDataSettingsJSON
     {
         // The display name of the user. Generate if null
@@ -193,9 +177,6 @@ namespace Arteranos.Core
 
         // The user's text message templates
         public virtual List<string> PresetStrings { get; set; } = new();
-
-        // The user's receiving message queues, over all of the waiting senders
-        public virtual MessageQueuesJSON Messages { get; set; } = new();
     }
 
     public class ClientSettings : ClientSettingsJSON
@@ -361,69 +342,6 @@ namespace Arteranos.Core
 
         #endregion
         // ---------------------------------------------------------------
-        #region Message queues
-
-        public void EnqueueMessage(UserID userID, string message)
-        {
-            if(!Messages.msgs.ContainsKey(userID))
-                Messages.msgs[userID] = new();
-
-            Messages.msgs[userID].Add(new()
-            {
-                Message = message,
-                receivedBy = DateTime.Now,
-            });
-
-            Messages.dirty = true;
-        }
-
-        public bool DequeueMessage(UserID userID, out MessageQueueEntryJSON message)
-        {
-            message = null;
-
-            if(!Messages.msgs.ContainsKey(userID)) return false;
-
-            List<MessageQueueEntryJSON> queue = Messages.msgs[userID];
-
-            message = queue.First();
-            queue.RemoveAt(0);
-
-            Messages.dirty = true;
-
-            if(queue.Count() == 0)
-                Messages.msgs.Remove(userID);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Checks if any user sent messages to you, and how many.
-        /// </summary>
-        /// <param name="userID">The first user with messages</param>
-        /// <returns>Number of messages from the returned user</returns>
-        public int PeekMessages(out UserID userID)
-        {
-            Dictionary<UserID, List<MessageQueueEntryJSON>>.KeyCollection keys = Messages.msgs.Keys;
-
-            userID = keys.Count == 0 ? null : keys.First();
-
-            return keys.Count;
-        }
-
-        /// <summary>
-        /// Discards the entire message queue for this user
-        /// </summary>
-        /// <param name="userID">The spammer, pardon my French.</param>
-        public void DiscardMessageQueue(UserID userID)
-        {
-            if(!Messages.msgs.ContainsKey(userID)) return;
-
-            Messages.msgs.Remove(userID);
-            Messages.dirty = true;
-        }
-
-        #endregion
-        // ---------------------------------------------------------------
         #region Save & Load
 
         public bool RefreshAuthentication()
@@ -465,9 +383,6 @@ namespace Arteranos.Core
         {
             try
             {
-                // Reset all the dirty flags
-                Messages.dirty = false;
-
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
                 File.WriteAllText($"{Application.persistentDataPath}/{PATH_CLIENT_SETTINGS}", json);
             }

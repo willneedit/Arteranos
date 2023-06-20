@@ -620,19 +620,9 @@ namespace Arteranos.Avatar
 
             if(busy)
             {
-                ClientSettings cs = SettingsManager.Client;
-
-                // Look for your friend list if the sender is a friend - use the global UserID
-                IEnumerable<SocialListEntryJSON> q = cs.GetSocialList(sender.UserID);
-
-                //                                         feund possible GUID  ... or not.
-                UserID maybeGlobalUserID = (q.Count() > 0) ? q.First().UserID : sender.UserID;
-
-                cs.EnqueueMessage(maybeGlobalUserID, text);
-
-                // No matter, put the message on to the pile...
-                cs.SaveSettings();
-
+                // Put the message onto the pile... together with the dozens others...
+                PostOffice.EnqueueIncoming(sender.UserID, sender.Nickname, text);
+                PostOffice.Save();
                 return;
             }
 
@@ -653,7 +643,8 @@ namespace Arteranos.Avatar
 
             m_txtMessageBox = null;
 
-            if (rc != 0)
+            // "Goodbye!" -- "Bye!" -- "Rest we...." Drat, logged off....
+            if (rc != 0 && sender != null)
                 TextMessageUIFactory.New(sender);
         }
         #endregion
