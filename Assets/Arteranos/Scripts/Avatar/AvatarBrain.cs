@@ -208,6 +208,8 @@ namespace Arteranos.Avatar
                 }
 
                 _ = BubbleCoordinatorFactory.New(this);
+
+                PostOffice.Load();
             }
             else
             {
@@ -216,6 +218,9 @@ namespace Arteranos.Avatar
             }
 
             InitializeVoice();
+
+            // Avatar startup complete, all systems go.
+            Subconscious.ReadyState = AvatarSubconscious.READY_COMPLETE;
         }
 
         public override void OnStopClient()
@@ -263,6 +268,19 @@ namespace Arteranos.Avatar
                 // Underived hashes are for close friends only.
                 UserID = new(cs.UserID.Hash, SettingsManager.CurrentServer.Name);
             }
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Running
+        private void Update()
+        {
+            if((Subconscious.ReadyState & AvatarSubconscious.READY_COMPLETE) == 0)
+                return;
+
+            // The text message reception loop
+            if(isOwned)
+                DoTextMessageLoop();
         }
 
         #endregion
@@ -606,19 +624,11 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Text message reception
 
-        private IDialogUI m_txtMessageBox = null;
+        private volatile IDialogUI m_txtMessageBox = null;
 
         public void ReceiveTextMessage(IAvatarBrain sender, string text)
         {
-            bool busy = false;
-
-            // "I'm swamped with the messages."
-            busy |= m_txtMessageBox != null;
-
-            // "Dammit! Not right now!"
-            busy |= SettingsManager.Client.Visibility != Core.Visibility.Online;
-
-            if(busy)
+            if(IsTextMessageOccupied())
             {
                 // Put the message onto the pile... together with the dozens others...
                 PostOffice.EnqueueIncoming(sender.UserID, sender.Nickname, text);
@@ -627,6 +637,33 @@ namespace Arteranos.Avatar
             }
 
             ShowTextMessage(sender, sender.Nickname, text);
+        }
+
+        private bool IsTextMessageOccupied()
+        {
+            bool busy = false;
+
+            // "I'm swamped with the messages."
+            busy |= m_txtMessageBox != null;
+
+            // "Dammit! Not right now!"
+            busy |= SettingsManager.Client.Visibility != Core.Visibility.Online;
+            return busy;
+        }
+
+        private void DoTextMessageLoop()
+        {
+            if(IsTextMessageOccupied()) return;
+
+            int n = PostOffice.DequeueIncoming(null, out MessageEntryJSON message);
+
+            if(message == null) return;
+
+            PostOffice.Save();
+
+            IAvatarBrain sender = SettingsManager.GetOnlineUser(message.UserID);
+
+            ShowTextMessage(sender, message.Nickname, message.Text);
         }
 
         public async void ShowTextMessage(IAvatarBrain sender, string Nickname, string text)

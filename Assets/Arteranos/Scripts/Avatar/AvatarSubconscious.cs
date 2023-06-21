@@ -20,9 +20,11 @@ namespace Arteranos.Avatar
 {
     public class AvatarSubconscious : NetworkBehaviour
     {
-        public const int READY_USERID   = (1 << 0);
-        public const int READY_CRYPTO   = (1 << 1);
-        public const int READY_ME       = (1 << 2);
+        public const int READY_USERID   = (1 <<  0);
+        public const int READY_CRYPTO   = (1 <<  1);
+        public const int READY_ME       = (1 <<  2);
+        public const int READY_ANNOUNCE = (1 << 24);
+        public const int READY_COMPLETE = (1 << 30);
 
         // ---------------------------------------------------------------
         #region Start & Stop
@@ -90,15 +92,16 @@ namespace Arteranos.Avatar
 
         private void OnReadyStateChanged(int oldval, int newval)
         {
-            // Brain.LogDebug($"Ready state changed from {oldval} to {newval}");
+            Brain.LogDebug($"Ready state changed from {oldval} to {newval}");
 
             // Newly online user, do the neccessary handshake, once the userID and the public key
             // is available.
             int r1 = READY_CRYPTO|READY_USERID|READY_ME;
-            if((newval & r1) == r1 && !isOwned)
+            if((newval & (r1|READY_ANNOUNCE)) == r1 && !isOwned)
             {
-                XRControl.Me.gameObject.GetComponent<AvatarSubconscious>().
-                    AnnounceArrival(Brain.UserID);
+                ReadyState = READY_ANNOUNCE;
+                XRControl.Me.gameObject.
+                    GetComponent<AvatarSubconscious>().AnnounceArrival(Brain.UserID);
             }
         }
 
