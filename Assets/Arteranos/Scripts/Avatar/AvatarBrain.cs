@@ -626,6 +626,8 @@ namespace Arteranos.Avatar
 
         private volatile IDialogUI m_txtMessageBox = null;
 
+        private volatile IAvatarBrain replyTo = null;
+
         public void ReceiveTextMessage(IAvatarBrain sender, string text)
         {
             if(IsTextMessageOccupied())
@@ -653,6 +655,13 @@ namespace Arteranos.Avatar
 
         private void DoTextMessageLoop()
         {
+            if(replyTo != null)
+            {
+                TextMessageUIFactory.New(replyTo);
+                replyTo= null;
+                return;
+            }
+
             if(IsTextMessageOccupied()) return;
 
             int n = PostOffice.DequeueIncoming(null, out MessageEntryJSON message);
@@ -682,7 +691,7 @@ namespace Arteranos.Avatar
 
             // "Goodbye!" -- "Bye!" -- "Rest we...." Drat, logged off....
             if (rc != 0 && sender != null)
-                TextMessageUIFactory.New(sender);
+                replyTo = sender;
         }
         #endregion
     }
