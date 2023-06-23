@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using UnityEngine;
 
 namespace Arteranos.Avatar
@@ -29,8 +30,8 @@ namespace Arteranos.Avatar
         private UI.INameplateUI np = null;
 
         // TODO Popup and Popout durations
-        private const float k_PopupTime = 0.5f;
-        private const float k_PopoutTime = 5.0f;
+        private float m_PopupTime = 0.5f;
+        private float m_PopoutTime = 5.0f;
 
         private GameObject VisibleCollider= null;
         private GameObject InvisibleCollider = null;
@@ -40,9 +41,15 @@ namespace Arteranos.Avatar
             VisibleCollider = transform.GetChild(0).gameObject;
             InvisibleCollider= transform.GetChild(1).gameObject;
         }
-
+        
         private void Update()
         {
+            if(SettingsManager.Client != null)
+            {
+                m_PopupTime = SettingsManager.Client.Controls.NameplateIn;
+                m_PopoutTime = SettingsManager.Client.Controls.NameplateOut;
+            }
+
             if(fullHeight != Brain.Body.FullHeight)
                 UpdateAvatarHeight();
 
@@ -50,13 +57,13 @@ namespace Arteranos.Avatar
 
             if(!triggered)
             {
-                if(lastInSight && stableDuration > k_PopupTime)
+                if(lastInSight && stableDuration > m_PopupTime)
                 {
                     triggered = true;
                     np = UI.NameplateUIFactory.New(Brain.gameObject);
                 }
 
-                if(!lastInSight && stableDuration > k_PopoutTime)
+                if(!lastInSight && stableDuration > m_PopoutTime)
                 {
                     triggered = true;
                     np?.gameObject.SetActive(false);

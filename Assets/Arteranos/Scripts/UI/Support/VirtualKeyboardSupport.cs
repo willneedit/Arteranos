@@ -60,8 +60,11 @@ namespace Arteranos.UI
 
         private void HookVirtualKB(TMP_InputField field)
         {
-            // TODO Virtual Keyboard attachment configuration
-            if(!SettingsManager.Client.VRMode) return;
+            ClientSettings cs = SettingsManager.Client;
+
+            if(cs.Controls.VK_Usage == VKUsage.Never) return;
+
+            if(cs.Controls.VK_Usage == VKUsage.VROnly && !cs.VRMode) return;
 
             AttachedKB = FindObjectOfType<KeyboardUI>(true);
 

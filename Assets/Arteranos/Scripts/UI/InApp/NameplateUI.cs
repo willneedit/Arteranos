@@ -76,10 +76,13 @@ namespace Arteranos.UI
 
             if(SocialState.IsState(yourstate,
                 SocialState.Own_Friend_offered | SocialState.Them_Friend_offered))
+            {
                 tagstr = "Friend";
-
+            }
             else if(SocialState.IsState(yourstate, SocialState.Them_Friend_offered))
+            {
                 tagstr = "Wants to be your friend";
+            }
 
             //else if(SocialState.IsState(yourstate, SocialState.Own_Friend_offered))
             //    tagstr = "Is still indecisive";

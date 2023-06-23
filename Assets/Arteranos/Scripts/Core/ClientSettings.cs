@@ -240,6 +240,7 @@ namespace Arteranos.Core
         public event Action<string> OnAvatarChanged;
         public event Action<bool> OnVRModeChanged;
         public event Action<float, float> OnPrivacyBubbleChanged;
+        public event Action OnXRControllerChanged;
 
         [JsonIgnore]
         public UserID UserID { get; private set; } = null;
@@ -288,6 +289,8 @@ namespace Arteranos.Core
                 OnPrivacyBubbleChanged?.Invoke(SizeBubbleFriends, SizeBubbleStrangers);
             }
         }
+
+        public void PingXRControllersChanged() => OnXRControllerChanged?.Invoke();
 
         #endregion
         // ---------------------------------------------------------------

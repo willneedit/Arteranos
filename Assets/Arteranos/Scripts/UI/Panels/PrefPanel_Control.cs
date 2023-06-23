@@ -49,7 +49,17 @@ namespace Arteranos.UI
         {
             base.Awake();
 
+            chk_ctrl_left.onValueChanged.AddListener(OnControllersChanged);
+            chk_ctrl_right.onValueChanged.AddListener(OnControllersChanged);
+            chk_active_left.onValueChanged.AddListener(OnControllersChanged);
+            chk_active_right.onValueChanged.AddListener(OnControllersChanged);
+
+            spn_type_left.OnChanged += OnControllerChanged2;
+            spn_type_right.OnChanged += OnControllerChanged2;
         }
+
+        private void OnControllersChanged(bool arg0) => cs.PingXRControllersChanged();
+        private void OnControllerChanged2(int arg1, bool arg2) => cs.PingXRControllersChanged();
 
         protected override void Start()
         {
