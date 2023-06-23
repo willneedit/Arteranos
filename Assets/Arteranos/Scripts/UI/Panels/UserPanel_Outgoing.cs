@@ -5,26 +5,25 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
 
 using Arteranos.Core;
-using Arteranos.Avatar;
 using Arteranos.Social;
-using Arteranos.XR;
 
 namespace Arteranos.UI
 {
-    public class FriendPanel_Blocked : FriendPanelBase
+    public class UserPanel_Outgoing : UserPanelBase
     {
         public override IEnumerable<SocialListEntryJSON> GetSocialListTab()
         {
-            IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriends);
+            IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriendOffered);
             foreach(SocialListEntryJSON entry in list) yield return entry;
         }
 
-        private bool IsFriends(SocialListEntryJSON arg)
-            => (arg.state & SocialState.Own_Blocked) == SocialState.Own_Blocked;
+        private bool IsFriendOffered(SocialListEntryJSON arg)
+        {
+            return !SocialState.IsState(arg.state, SocialState.Them_Friend_offered) 
+                && SocialState.IsState(arg.state, SocialState.Own_Friend_offered);
+        }
     }
 }

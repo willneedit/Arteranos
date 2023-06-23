@@ -12,20 +12,18 @@ using Arteranos.Social;
 
 namespace Arteranos.UI
 {
-    public class FriendPanel_Friends : FriendPanelBase
+    public class UserPanel_Incoming : UserPanelBase
     {
         public override IEnumerable<SocialListEntryJSON> GetSocialListTab()
         {
-            IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriends);
+            IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriendReceived);
             foreach(SocialListEntryJSON entry in list) yield return entry;
         }
 
-        private bool IsFriends(SocialListEntryJSON arg)
+        private bool IsFriendReceived(SocialListEntryJSON arg)
         {
-            if(!SocialState.IsState(arg.state, SocialState.Own_Friend_offered)) return false;
-
-            return (SocialState.IsState(arg.state, 
-                SocialState.Own_Friend_offered | SocialState.Them_Friend_offered));
+            return SocialState.IsState(arg.state, SocialState.Them_Friend_offered)
+                && !SocialState.IsState(arg.state, SocialState.Own_Friend_offered);
         }
     }
 }

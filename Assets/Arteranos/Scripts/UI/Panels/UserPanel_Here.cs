@@ -16,7 +16,7 @@ using Arteranos.XR;
 
 namespace Arteranos.UI
 {
-    public class FriendPanel_Here : FriendPanelBase
+    public class UserPanel_Here : UserPanelBase
     {
         public override IEnumerable<SocialListEntryJSON> GetSocialListTab()
         {

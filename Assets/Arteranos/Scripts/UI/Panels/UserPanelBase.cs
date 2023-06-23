@@ -17,7 +17,7 @@ using Arteranos.Core;
 
 namespace Arteranos.UI
 {
-    public abstract class FriendPanelBase : UIBehaviour
+    public abstract class UserPanelBase : UIBehaviour
     {
         public RectTransform lvc_UserList;
 
