@@ -87,7 +87,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &4193041269047191914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,7 +215,7 @@ PrefabInstance:
         type: 3}
       propertyPath: ChoiceEntries.Array.data[5].UI
       value: 
-      objectReference: {fileID: 2071027444668359036, guid: 98cf5c799cd879e41bee0fc8758403b5,
+      objectReference: {fileID: 8891204037404472843, guid: 45097e4324780674180fe36f7b7f135d,
         type: 3}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}

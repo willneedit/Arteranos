@@ -56,6 +56,32 @@ namespace Arteranos.Core
         Online          // Ready
     }
 
+    public enum VKUsage
+    {
+        [Description("never")]
+        Never = 0,
+        [Description("VR only")]
+        VROnly,
+        [Description("always")]
+        Always
+    }
+
+    public enum VKLayout
+    {
+        [Description("DE (full)")]
+        de_full = 0
+    }
+
+    public enum RayType
+    {
+        [Description("straight line")]
+        Straight = 0,
+        [Description("low arc")]
+        LowArc,
+        [Description("high arc")]
+        HighArc
+    }
+
     public class LoginDataJSON
     {
         // The login provider the user logs in to
@@ -124,6 +150,29 @@ namespace Arteranos.Core
         public int state = SocialState.None;
     }
 
+    public class ControlSettingsJSON
+    {
+        public VKUsage VK_Usage = VKUsage.VROnly;
+
+        public VKLayout VK_Layout = VKLayout.de_full;
+
+        public float NameplateIn = 0.5f;
+
+        public float NameplateOut = 4.0f;
+
+        public bool controller_left = true;
+
+        public bool controller_right = true;
+
+        public bool controller_active_left = true;
+
+        public bool controller_active_right = true;
+
+        public RayType controller_Type_left = RayType.Straight;
+
+        public RayType controller_Type_right = RayType.Straight;
+    }
+
     public class UserDataSettingsJSON
     {
         // The display name of the user. Generate if null
@@ -168,6 +217,9 @@ namespace Arteranos.Core
 
         // The user's content filter preferences for sorting the servers
         public virtual ServerPermissionsJSON ContentFilterPreferences { get; set; } = new();
+
+        // The user's controls settings
+        public virtual ControlSettingsJSON Controls { get; set; } = new();
 
         // The user's world collection
         public virtual List<string> WorldList { get; set; } = new();
