@@ -51,8 +51,8 @@ namespace Arteranos.XR
 
             if(LeftInteractor != null)
             {
-                LeftInteractor.gameObject.SetActive(ccs.controller_left);
-                LeftLineVisual.gameObject.SetActive(ccs.controller_left);
+                LeftInteractor.enabled = ccs.controller_left;
+                LeftLineVisual.enabled = ccs.controller_left;
 
                 LeftLineVisual.invalidColorGradient = ccs.controller_active_left
                     ? alwaysVisibleRay 
@@ -69,8 +69,8 @@ namespace Arteranos.XR
 
             if(RightInteractor != null)
             {
-                RightInteractor.gameObject.SetActive(ccs.controller_right);
-                RightLineVisual.gameObject.SetActive(ccs.controller_right);
+                RightInteractor.enabled = ccs.controller_right;
+                RightLineVisual.enabled = ccs.controller_right;
 
                 RightLineVisual.invalidColorGradient = ccs.controller_active_right
                     ? alwaysVisibleRay
@@ -80,7 +80,7 @@ namespace Arteranos.XR
                     ? XRRayInteractor.LineType.StraightLine
                     : XRRayInteractor.LineType.ProjectileCurve;
 
-                RightInteractor.acceleration = ccs.controller_Type_left == RayType.HighArc
+                RightInteractor.acceleration = ccs.controller_Type_right == RayType.HighArc
                     ? 5.0f
                     : 9.8f;
             }

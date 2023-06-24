@@ -42,7 +42,7 @@ namespace Arteranos.UI
                     select Utils.GetEnumDescription(entry);
 
             target.Options = q.ToArray();
-            target.value = (target.Options.Length <= defValue) ? defValue : 0;
+            target.value = (target.Options.Length > defValue) ? defValue : 0;
         }
 
         protected override void Awake()
@@ -58,8 +58,17 @@ namespace Arteranos.UI
             spn_type_right.OnChanged += OnControllerChanged2;
         }
 
-        private void OnControllersChanged(bool arg0) => cs.PingXRControllersChanged();
-        private void OnControllerChanged2(int arg1, bool arg2) => cs.PingXRControllersChanged();
+        private void OnControllersChanged(bool arg0)
+        {
+            UploadSettings();
+            cs.PingXRControllersChanged();
+        }
+
+        private void OnControllerChanged2(int arg1, bool arg2)
+        {
+            UploadSettings();
+            cs.PingXRControllersChanged();
+        }
 
         protected override void Start()
         {
@@ -75,6 +84,12 @@ namespace Arteranos.UI
             sldn_NameplateIn.value = controls.NameplateIn;
             sldn_NameplateOut.value = controls.NameplateOut;
 
+            bool both = cs.VRMode;
+
+            chk_ctrl_left.interactable = both;
+            chk_active_left.interactable = both;
+            spn_type_left.enabled= both;
+
             chk_ctrl_left.isOn = controls.controller_left;
             chk_ctrl_right.isOn = controls.controller_right;
 
@@ -89,27 +104,36 @@ namespace Arteranos.UI
         {
             base.OnDisable();
 
-            ControlSettingsJSON controls = cs?.Controls;
-
-            if(controls == null) return;
-
-            controls.VK_Usage = (VKUsage) spn_vk_active.value;
-            controls.VK_Layout = (VKLayout) spn_vk_layout.value;
-
-            controls.NameplateIn = sldn_NameplateIn.value;
-            controls.NameplateOut = sldn_NameplateOut.value;
-
-            controls.controller_left = chk_ctrl_left.isOn;
-            controls.controller_right= chk_ctrl_right.isOn;
-
-            controls.controller_active_left = chk_active_left.isOn;
-            controls.controller_active_right= chk_active_right.isOn;
-
-            controls.controller_Type_left = (RayType) spn_type_left.value;
-            controls.controller_Type_right = (RayType) spn_type_right.value;
+            UploadSettings();
 
             // Might be to disabled before it's really started, so cs may be null yet.
             cs?.SaveSettings();
+        }
+
+        private void UploadSettings()
+        {
+            ControlSettingsJSON controls = cs?.Controls;
+
+            if(controls != null)
+            {
+                if((!chk_ctrl_left.isOn || !cs.VRMode) && !chk_ctrl_right.isOn)
+                    chk_ctrl_right.isOn = true;
+
+                controls.VK_Usage = (VKUsage) spn_vk_active.value;
+                controls.VK_Layout = (VKLayout) spn_vk_layout.value;
+
+                controls.NameplateIn = sldn_NameplateIn.value;
+                controls.NameplateOut = sldn_NameplateOut.value;
+
+                controls.controller_left = chk_ctrl_left.isOn;
+                controls.controller_right = chk_ctrl_right.isOn;
+
+                controls.controller_active_left = chk_active_left.isOn;
+                controls.controller_active_right = chk_active_right.isOn;
+
+                controls.controller_Type_left = (RayType) spn_type_left.value;
+                controls.controller_Type_right = (RayType) spn_type_right.value;
+            }
         }
     }
 }

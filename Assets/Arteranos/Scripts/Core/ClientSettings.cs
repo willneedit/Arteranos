@@ -74,7 +74,7 @@ namespace Arteranos.Core
 
     public enum RayType
     {
-        [Description("straight line")]
+        [Description("line")]
         Straight = 0,
         [Description("low arc")]
         LowArc,
