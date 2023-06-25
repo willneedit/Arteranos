@@ -17,23 +17,6 @@ using System.Linq;
 
 namespace Arteranos.Core
 {
-
-    //public enum LoginProvider
-    //{
-    //    [Description("Guest")]
-    //    Guest = 0,      // Invalid, is guest
-    //    [Description("Arteranos shard")]
-    //    Native,         // Native. uses user@ser.ver
-    //    [Description("Google")]
-    //    Google,         // Google, uses user@gmail.com
-    //    [Description("Github")]
-    //    Github,         // Github. uses the login name (eg. 'willneedit')
-    //    [Description("Discord")]
-    //    Discord,        // Discord. uses the user handle (eg. 'iwontsay#0000')
-    //    [Description("Mastodon")]
-    //    Mastodon        // Mastodon. uses the user handle (eg. user@mas.to.don)
-    //}
-
     public enum AvatarProvider
     {
         Invalid = 0,    // Invalid, use fallback avatar
@@ -80,6 +63,40 @@ namespace Arteranos.Core
         LowArc,
         [Description("high arc")]
         HighArc
+    }
+
+    public enum TurnType
+    {
+        [Description("Smooth")]
+        Smooth = 0,
+        [Description("Snap 90°")]
+        Snap90,
+        [Description("Snap 45°")]
+        Snap45,
+        [Description("Snap 30°")]
+        Snap30,
+        [Description("Snap 22.5°")]
+        Snap225
+    }
+
+    public enum TeleportType
+    {
+        [Description("Instant")]
+        Instant = 0,
+        [Description("Zipline")]
+        Zipline
+    }
+
+    public enum ComfortBlindersType
+    {
+        [Description("Off")]
+        Off = 0,
+        [Description("Low")]
+        Low,
+        [Description("Medium")]
+        Medium,
+        [Description("High")]
+        High,
     }
 
     public class LoginDataJSON
@@ -173,6 +190,17 @@ namespace Arteranos.Core
         public RayType controller_Type_right = RayType.Straight;
     }
 
+    public class MovementSettingsJSON
+    {
+        public bool Flying = false;
+
+        public TurnType Turn = TurnType.Snap45;
+
+        public TeleportType Teleport = TeleportType.Instant;
+
+        public ComfortBlindersType ComfortBlinders = ComfortBlindersType.Off;
+    }
+
     public class UserDataSettingsJSON
     {
         // The display name of the user. Generate if null
@@ -220,6 +248,9 @@ namespace Arteranos.Core
 
         // The user's controls settings
         public virtual ControlSettingsJSON Controls { get; set; } = new();
+
+        // The user's movement settings
+        public virtual MovementSettingsJSON Movement { get; set; } = new();
 
         // The user's world collection
         public virtual List<string> WorldList { get; set; } = new();

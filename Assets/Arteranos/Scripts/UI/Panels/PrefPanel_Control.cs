@@ -36,14 +36,6 @@ namespace Arteranos.UI
         private ClientSettings cs = null;
 
 
-        private void FillSpinnerValues<T>(Spinner target, int defValue) where T : Enum
-        {
-            IEnumerable<string> q = from T entry in Enum.GetValues(typeof(T))
-                    select Utils.GetEnumDescription(entry);
-
-            target.Options = q.ToArray();
-            target.value = (target.Options.Length > defValue) ? defValue : 0;
-        }
 
         protected override void Awake()
         {
@@ -78,8 +70,8 @@ namespace Arteranos.UI
 
             ControlSettingsJSON controls = cs.Controls;
 
-            FillSpinnerValues<VKUsage>(spn_vk_active, (int) controls.VK_Usage);
-            FillSpinnerValues<VKLayout>(spn_vk_layout, (int) controls.VK_Layout);
+            UIUtils.FillSpinnerValues<VKUsage>(spn_vk_active, (int) controls.VK_Usage);
+            UIUtils.FillSpinnerValues<VKLayout>(spn_vk_layout, (int) controls.VK_Layout);
 
             sldn_NameplateIn.value = controls.NameplateIn;
             sldn_NameplateOut.value = controls.NameplateOut;
@@ -96,8 +88,8 @@ namespace Arteranos.UI
             chk_active_left.isOn = controls.controller_active_left;
             chk_active_right.isOn = controls.controller_active_right;
 
-            FillSpinnerValues<RayType>(spn_type_left, (int) controls.controller_Type_left);
-            FillSpinnerValues<RayType>(spn_type_right, (int) controls.controller_Type_right);
+            UIUtils.FillSpinnerValues<RayType>(spn_type_left, (int) controls.controller_Type_left);
+            UIUtils.FillSpinnerValues<RayType>(spn_type_right, (int) controls.controller_Type_right);
         }
 
         protected override void OnDisable()
