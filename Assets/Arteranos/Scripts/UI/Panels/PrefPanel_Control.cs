@@ -5,16 +5,13 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using System.Linq;
 
 using Arteranos.Core;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Arteranos.UI
 {
@@ -35,6 +32,9 @@ namespace Arteranos.UI
 
         private ClientSettings cs = null;
 
+        private Dictionary<string, VKUsage> spne_VKUsage;
+        private Dictionary<string, VKLayout> spne_VKLayout;
+        private Dictionary<string, RayType> spne_raytype;
 
 
         protected override void Awake()
@@ -70,8 +70,8 @@ namespace Arteranos.UI
 
             ControlSettingsJSON controls = cs.Controls;
 
-            UIUtils.FillSpinnerValues<VKUsage>(spn_vk_active, (int) controls.VK_Usage);
-            UIUtils.FillSpinnerValues<VKLayout>(spn_vk_layout, (int) controls.VK_Layout);
+            spn_vk_active.FillSpinnerEnum(out spne_VKUsage, controls.VK_Usage);
+            spn_vk_layout.FillSpinnerEnum(out spne_VKLayout, controls.VK_Layout);
 
             sldn_NameplateIn.value = controls.NameplateIn;
             sldn_NameplateOut.value = controls.NameplateOut;
@@ -88,8 +88,11 @@ namespace Arteranos.UI
             chk_active_left.isOn = controls.controller_active_left;
             chk_active_right.isOn = controls.controller_active_right;
 
-            UIUtils.FillSpinnerValues<RayType>(spn_type_left, (int) controls.controller_Type_left);
-            UIUtils.FillSpinnerValues<RayType>(spn_type_right, (int) controls.controller_Type_right);
+            UIUtils.CreateEnumValues(out spne_raytype);
+            spn_type_left.Options = spne_raytype.Keys.ToArray();
+            spn_type_right.Options = spne_raytype.Keys.ToArray();
+            spn_type_left.SetEnumValue(controls.controller_Type_left);
+            spn_type_right.SetEnumValue(controls.controller_Type_right);
         }
 
         protected override void OnDisable()
@@ -111,8 +114,8 @@ namespace Arteranos.UI
                 if((!chk_ctrl_left.isOn || !cs.VRMode) && !chk_ctrl_right.isOn)
                     chk_ctrl_right.isOn = true;
 
-                controls.VK_Usage = (VKUsage) spn_vk_active.value;
-                controls.VK_Layout = (VKLayout) spn_vk_layout.value;
+                controls.VK_Usage = spn_vk_active.GetEnumValue(spne_VKUsage);
+                controls.VK_Layout = spn_vk_layout.GetEnumValue(spne_VKLayout);
 
                 controls.NameplateIn = sldn_NameplateIn.value;
                 controls.NameplateOut = sldn_NameplateOut.value;
@@ -123,8 +126,8 @@ namespace Arteranos.UI
                 controls.controller_active_left = chk_active_left.isOn;
                 controls.controller_active_right = chk_active_right.isOn;
 
-                controls.controller_Type_left = (RayType) spn_type_left.value;
-                controls.controller_Type_right = (RayType) spn_type_right.value;
+                controls.controller_Type_left = spn_type_left.GetEnumValue(spne_raytype);
+                controls.controller_Type_right = spn_type_right.GetEnumValue(spne_raytype);
             }
         }
     }
