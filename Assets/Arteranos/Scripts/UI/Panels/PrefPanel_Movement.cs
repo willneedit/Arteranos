@@ -25,6 +25,7 @@ namespace Arteranos.UI
         [SerializeField] private Spinner spn_Blinders = null;
 
         private ClientSettings cs = null;
+        private bool dirty = false;
 
         private Dictionary<string, TurnType> spne_turn;
         private Dictionary<string, TeleportType> spne_teleport;
@@ -33,6 +34,40 @@ namespace Arteranos.UI
         protected override void Awake()
         {
             base.Awake();
+
+            chk_Flying.onValueChanged.AddListener(OnFlyingChanged);
+
+            spn_Turning.OnChanged += OnTurningChanged;
+            spn_Teleporting.OnChanged += OnTeleportingChanged;
+            spn_Blinders.OnChanged += OnBlindersChanged;
+        }
+
+        private void OnFlyingChanged(bool arg0)
+        {
+            cs.Movement.Flying = arg0;
+            cs.PingXRControllersChanged();
+            dirty = true;
+        }
+
+        private void OnTurningChanged(int arg1, bool arg2)
+        {
+            cs.Movement.Turn = spn_Turning.GetEnumValue(spne_turn);
+            cs.PingXRControllersChanged();
+            dirty = true;
+        }
+
+        private void OnTeleportingChanged(int arg1, bool arg2)
+        {
+            cs.Movement.Teleport = spn_Teleporting.GetEnumValue(spne_teleport);
+            cs.PingXRControllersChanged();
+            dirty = true;
+        }
+
+        private void OnBlindersChanged(int arg1, bool arg2)
+        {
+            cs.Movement.ComfortBlinders = spn_Blinders.GetEnumValue(spne_comfortblinders);
+            cs.PingXRControllersChanged();
+            dirty = true;
         }
 
         protected override void Start()
@@ -48,23 +83,15 @@ namespace Arteranos.UI
             spn_Teleporting.FillSpinnerEnum(out spne_teleport, movement.Teleport);
             spn_Blinders.FillSpinnerEnum(out spne_comfortblinders, movement.ComfortBlinders);
 
+            dirty = false;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
 
-            MovementSettingsJSON movement = cs?.Movement;
-
-            if(movement == null) return;
-
-            movement.Flying = chk_Flying.isOn;
-            movement.Turn = spn_Turning.GetEnumValue(spne_turn);
-            movement.Teleport = spn_Teleporting.GetEnumValue(spne_teleport);
-            movement.ComfortBlinders = spn_Blinders.GetEnumValue(spne_comfortblinders);
-
             // Might be to disabled before it's really started, so cs may be null yet.
-            cs?.SaveSettings();
+            if(dirty) cs?.SaveSettings();
         }
     }
 }

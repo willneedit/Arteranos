@@ -36,7 +36,8 @@ namespace Arteranos.UI
         private Dictionary<string, VKLayout> spne_VKLayout;
         private Dictionary<string, RayType> spne_raytype;
 
-
+        // FIXME / HACK: Adapt analogous to PrefPanel_Movement because of
+        // potential side effects to changed settings.
         protected override void Awake()
         {
             base.Awake();

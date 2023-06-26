@@ -790,6 +790,7 @@ GameObject:
   - component: {fileID: 7141498048079031363}
   - component: {fileID: 7141498048079031362}
   - component: {fileID: 7141498048079031375}
+  - component: {fileID: 4133316668455145817}
   - component: {fileID: 7141498048079031368}
   - component: {fileID: 7141498048079031374}
   - component: {fileID: 7141498048079031370}
@@ -894,6 +895,45 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f,
       type: 3}
+--- !u!114 &4133316668455145817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7141498048079031361}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 919e39492806b334982b6b84c90dd927, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_System: {fileID: 0}
+  m_TurnSpeed: 60
+  m_LeftHandTurnAction:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Left Hand Turn
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 61833edc-cb0a-4bbd-915c-67449c1f81b7
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 1010738217276881514, guid: 2fa17d14f9fd10d4cb243ab38776f236,
+      type: 3}
+  m_RightHandTurnAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Hand Turn
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: abfc8554-424e-4957-a8f5-8fffaf0f5be8
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
 --- !u!114 &7141498048079031368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1037,6 +1077,10 @@ MonoBehaviour:
   LeftLineVisual: {fileID: 0}
   RightInteractor: {fileID: 7141498047530980216}
   RightLineVisual: {fileID: 7141498047530980222}
+  SnapTurnProvider: {fileID: 7141498048079031375}
+  ContTurnProvider: {fileID: 4133316668455145817}
+  MoveProvider: {fileID: 7141498048079031368}
+  CTeleProvider: {fileID: 7141498048079031370}
 --- !u!1 &7141498049288442062
 GameObject:
   m_ObjectHideFlags: 0

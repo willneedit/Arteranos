@@ -753,6 +753,7 @@ GameObject:
   - component: {fileID: 6826848587015489432}
   - component: {fileID: 6826848587015489433}
   - component: {fileID: 6826848587015489428}
+  - component: {fileID: 2131407614293044574}
   - component: {fileID: 6826848587015489427}
   - component: {fileID: 6826848587015489429}
   - component: {fileID: 6826848587015489425}
@@ -851,6 +852,46 @@ MonoBehaviour:
       m_Type: 0
       m_ExpectedControlType: 
       m_Id: a7b54797-6974-4f75-81d0-42b9c15ef1e0
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f,
+      type: 3}
+--- !u!114 &2131407614293044574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6826848587015489434}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 919e39492806b334982b6b84c90dd927, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_System: {fileID: 0}
+  m_TurnSpeed: 60
+  m_LeftHandTurnAction:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Left Hand Turn
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: f97600b6-817d-4e45-9826-0bd949ff31c1
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 1010738217276881514, guid: c348712bda248c246b8c49b3db54643f,
+      type: 3}
+  m_RightHandTurnAction:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Right Hand Turn
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: d802319d-420f-45a4-80ca-5e40dc900404
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -1000,6 +1041,10 @@ MonoBehaviour:
   LeftLineVisual: {fileID: 6826848586482858149}
   RightInteractor: {fileID: 6826848588470939982}
   RightLineVisual: {fileID: 6826848588470939952}
+  SnapTurnProvider: {fileID: 6826848587015489428}
+  ContTurnProvider: {fileID: 2131407614293044574}
+  MoveProvider: {fileID: 6826848587015489427}
+  CTeleProvider: {fileID: 6826848587015489425}
 --- !u!1 &6826848588470939954
 GameObject:
   m_ObjectHideFlags: 0

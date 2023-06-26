@@ -22,6 +22,11 @@ namespace Arteranos.XR
         [SerializeField] private XRRayInteractor RightInteractor = null;
         [SerializeField] private XRInteractorLineVisual RightLineVisual = null;
 
+        private ActionBasedSnapTurnProvider SnapTurnProvider = null;
+        private ActionBasedContinuousTurnProvider ContTurnProvider = null;
+        private ActionBasedContinuousMoveProvider MoveProvider = null;
+        private CTeleProvider CTeleProvider = null;
+
         private readonly Gradient onlyValidVisibleRay = new()
         {
             colorKeys = new[] { new GradientColorKey(Color.red, 0f), new GradientColorKey(Color.red, 1f) },
@@ -33,6 +38,14 @@ namespace Arteranos.XR
             colorKeys = new[] { new GradientColorKey(Color.red, 0f), new GradientColorKey(Color.red, 1f) },
             alphaKeys = new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) },
         };
+
+        private void Awake()
+        {
+            SnapTurnProvider = GetComponent<ActionBasedSnapTurnProvider>();
+            ContTurnProvider = GetComponent<ActionBasedContinuousTurnProvider>();
+            MoveProvider     = GetComponent<ActionBasedContinuousMoveProvider>();
+            CTeleProvider    = GetComponent<CTeleProvider>();
+        }
 
         private void Start()
         {
@@ -46,6 +59,7 @@ namespace Arteranos.XR
         private void DownloadControlSettings()
         {
             ControlSettingsJSON ccs = SettingsManager.Client?.Controls;
+            MovementSettingsJSON mcs = SettingsManager.Client?.Movement;
 
             if(ccs == null) return;
 
@@ -84,6 +98,33 @@ namespace Arteranos.XR
                     ? 5.0f
                     : 9.8f;
             }
+
+            // TODO - user privilege management and server restrictions
+            // TODO - movement vector direction needs the y component when flying is enabled
+            MoveProvider.useGravity = !mcs.Flying;
+
+            SnapTurnProvider.enabled = mcs.Turn != TurnType.Smooth;
+            ContTurnProvider.enabled = mcs.Turn == TurnType.Smooth;
+
+            switch(mcs.Turn)
+            {
+                case TurnType.Snap90:
+                    SnapTurnProvider.turnAmount = 90;
+                    break;
+                case TurnType.Snap45:
+                    SnapTurnProvider.turnAmount = 45;
+                    break;
+                case TurnType.Snap30:
+                    SnapTurnProvider.turnAmount = 30;
+                    break;
+                case TurnType.Snap225:
+                    SnapTurnProvider.turnAmount = 22.5f;
+                    break;
+            }
+
+            // TODO - continuous turn speed
+
+            // TODO - extend the teleport provider
         }
     }
 }
