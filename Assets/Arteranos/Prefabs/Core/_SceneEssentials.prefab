@@ -567,7 +567,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c4e98886e2fe1d4fb7f78a081f2dd37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  d: 0
+  VelocityMax: 1
+  TweenSpeed: 4
 --- !u!1 &7448129529993753624
 GameObject:
   m_ObjectHideFlags: 0
@@ -615,5 +616,5 @@ MonoBehaviour:
   m_IsGlobal: 1
   priority: 0
   blendDistance: 0
-  weight: 1
+  weight: 0
   sharedProfile: {fileID: 11400000, guid: a6560a915ef98420e9faacc1c7438823, type: 2}
