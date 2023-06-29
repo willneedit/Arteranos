@@ -124,7 +124,9 @@ namespace Arteranos.XR
 
             // TODO - continuous turn speed
 
-            // TODO - extend the teleport provider
+            CTeleProvider.TravelDuration = mcs.Teleport == TeleportType.Instant
+                ? 0.0f
+                : mcs.ZipLineDuration;
         }
     }
 }

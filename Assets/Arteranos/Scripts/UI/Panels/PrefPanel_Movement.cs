@@ -22,6 +22,7 @@ namespace Arteranos.UI
         [SerializeField] private Toggle chk_Flying = null;
         [SerializeField] private Spinner spn_Turning= null;
         [SerializeField] private Spinner spn_Teleporting= null;
+        [SerializeField] private NumberedSlider sldn_ZiplineDuration = null;
         [SerializeField] private Spinner spn_Blinders = null;
 
         private ClientSettings cs = null;
@@ -40,6 +41,7 @@ namespace Arteranos.UI
             spn_Turning.OnChanged += OnTurningChanged;
             spn_Teleporting.OnChanged += OnTeleportingChanged;
             spn_Blinders.OnChanged += OnBlindersChanged;
+            sldn_ZiplineDuration.OnValueChanged += OnZipLineDurationChanged;
         }
 
         private void OnFlyingChanged(bool arg0)
@@ -59,6 +61,7 @@ namespace Arteranos.UI
         private void OnTeleportingChanged(int arg1, bool arg2)
         {
             cs.Movement.Teleport = spn_Teleporting.GetEnumValue(spne_teleport);
+            sldn_ZiplineDuration.interactable = cs.Movement.Teleport == TeleportType.Zipline;
             cs.PingXRControllersChanged();
             dirty = true;
         }
@@ -66,6 +69,13 @@ namespace Arteranos.UI
         private void OnBlindersChanged(int arg1, bool arg2)
         {
             cs.Movement.ComfortBlinders = spn_Blinders.GetEnumValue(spne_comfortblinders);
+            cs.PingXRControllersChanged();
+            dirty = true;
+        }
+
+        private void OnZipLineDurationChanged(float obj)
+        {
+            cs.Movement.ZipLineDuration = sldn_ZiplineDuration.value;
             cs.PingXRControllersChanged();
             dirty = true;
         }
@@ -82,6 +92,10 @@ namespace Arteranos.UI
             spn_Turning.FillSpinnerEnum(out spne_turn, movement.Turn);
             spn_Teleporting.FillSpinnerEnum(out spne_teleport, movement.Teleport);
             spn_Blinders.FillSpinnerEnum(out spne_comfortblinders, movement.ComfortBlinders);
+
+            sldn_ZiplineDuration.value = movement.ZipLineDuration;
+            sldn_ZiplineDuration.interactable = movement.Teleport == TeleportType.Zipline;
+
 
             dirty = false;
         }

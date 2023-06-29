@@ -198,6 +198,8 @@ namespace Arteranos.Core
 
         public TeleportType Teleport = TeleportType.Instant;
 
+        public float ZipLineDuration = 1.0f;
+
         public ComfortBlindersType ComfortBlinders = ComfortBlindersType.Off;
     }
 
