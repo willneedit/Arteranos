@@ -1,3 +1,31 @@
+# Version 0.4.0
+
+ **Breaking change - not backwards compatible prior to this version**
+
+## New features
+
+- People Panel: Incoming and outgoing friend requests - keep track of your outstanding friend requests
+- Text messaging - send messages to online users.
+  - Full end-to-end encryption, no snooping!
+  - Online status setting - if you don't like to be disturbed, the messages will put on hold when you change your mind.
+- Virtual Keyboard support
+  - Always, VR only, never (if you can blind type with wearing a VR headset...)
+  - Additional keyboard layouts? More to be added soon
+- Control configuration
+  - Separately left/right (in VR) configuration
+  - Completely switching off the individual controller
+  - Ray type: Straight line, Arc
+  - Ray visibility: Always (red/white), only valid (white)
+- Movement configuration
+  - Snap turn / Smooth turn (slow, fast, as you like)
+  - Instant teleport / Sliding "Zipline" teleport (the same...)
+
+**Finally, the system menu panels are filled, no more "Reserved for future use"  placeholders!**
+
+## Fixes
+
+- People Panel: Hide buttons, not just disable them.
+
 # Version 0.3.0
 
  **Breaking change - not backwards compatible prior to this version**
