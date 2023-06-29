@@ -187,10 +187,19 @@ namespace Arteranos.XR
             ActionBasedContinuousMoveProvider continuousMoveProvider = 
                 xro.gameObject.GetComponent<ActionBasedContinuousMoveProvider>();
 
+            ActionBasedContinuousTurnProvider ContTurnProvider =
+                xro.gameObject.GetComponent<ActionBasedContinuousTurnProvider>();
+
+
             KMTrackedPoseDriver kMTrackedPoseDriver =
                 xro.gameObject.GetComponentInChildren<KMTrackedPoseDriver>();
 
-            if(snapTurnProvider != null) snapTurnProvider.enabled = !value;
+            Core.MovementSettingsJSON mcs = Core.SettingsManager.Client.Movement;
+
+            bool smooth = mcs.Turn == Core.TurnType.Smooth;
+            if(snapTurnProvider != null) snapTurnProvider.enabled = !value && !smooth;
+            if(ContTurnProvider != null) ContTurnProvider.enabled = !value && smooth;
+
             if(continuousMoveProvider != null) continuousMoveProvider.enabled = !value;
             if(kMTrackedPoseDriver != null) kMTrackedPoseDriver.enabled = !value;
         }
