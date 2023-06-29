@@ -1,3 +1,5 @@
+using System.Collections;
+using Unity.XR.CoreUtils;
 using UnityEngine.Assertions;
 
 namespace UnityEngine.XR.Interaction.Toolkit
@@ -9,6 +11,45 @@ namespace UnityEngine.XR.Interaction.Toolkit
     [AddComponentMenu("XR/Locomotion/Crtled Tele Provider", 11)]
     public class CTeleProvider : TeleportationProvider
     {
+        private ActionBasedContinuousMoveProvider MoveProvider = null;
+
+        public float TravelDuration = 0.0f;
+
+        private IEnumerator MoveToDestination(Vector3 src, Vector3 dest)
+        {
+            float progress = 0.0f;
+
+            // Suspend the gravity for the teleport travel duration
+            bool hadGravity = MoveProvider.useGravity;
+            MoveProvider.useGravity = false;
+
+            while(true)
+            {
+                yield return null;
+
+                progress += Time.deltaTime;
+
+                float t = progress / TravelDuration;
+                Vector3 actual = Vector3.Lerp(src, dest, t);
+
+                system.xrOrigin.MoveCameraToWorldLocation(actual);
+                Physics.SyncTransforms();
+
+                if(t >= 1.0f) break;
+            }
+
+            MoveProvider.useGravity = hadGravity;
+            EndLocomotion();
+        }
+
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            MoveProvider = GetComponent<ActionBasedContinuousMoveProvider>();
+        }
+
         /// <summary>
         /// See <see cref="MonoBehaviour"/>.
         /// </summary>
@@ -17,7 +58,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
             if (!validRequest || !BeginLocomotion())
                 return;
 
-            var xrOrigin = system.xrOrigin;
+            XROrigin xrOrigin = system.xrOrigin;
             if (xrOrigin != null)
             {
                 switch (currentRequest.matchOrientation)
@@ -39,15 +80,24 @@ namespace UnityEngine.XR.Interaction.Toolkit
                         break;
                 }
 
-                var heightAdjustment = xrOrigin.Origin.transform.up * xrOrigin.CameraInOriginSpaceHeight;
+                Vector3 heightAdjustment = xrOrigin.Origin.transform.up * xrOrigin.CameraInOriginSpaceHeight;
 
-                var cameraDestination = currentRequest.destinationPosition + heightAdjustment;
+                Vector3 cameraDestination = currentRequest.destinationPosition + heightAdjustment;
 
-                xrOrigin.MoveCameraToWorldLocation(cameraDestination);
-                Physics.SyncTransforms();
+                if(TravelDuration == 0.0f)
+                {
+                    xrOrigin.MoveCameraToWorldLocation(cameraDestination);
+                    Physics.SyncTransforms();
+                    EndLocomotion();
+                }
+                else
+                {
+                    StartCoroutine(MoveToDestination(
+                        xrOrigin.Origin.transform.position + heightAdjustment,
+                        cameraDestination));
+                }
             }
 
-            EndLocomotion();
             validRequest = false;
         }
     }
