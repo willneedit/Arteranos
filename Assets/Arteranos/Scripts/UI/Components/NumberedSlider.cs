@@ -25,6 +25,12 @@ namespace Arteranos.UI
             set => sld_Slider.value = value;
         }
 
+        public bool interactable 
+        {
+            get => sld_Slider.interactable;
+            set => sld_Slider.interactable = value;
+        }
+
         private Slider sld_Slider = null;
         private TextMeshProUGUI lbl_number = null;
 
