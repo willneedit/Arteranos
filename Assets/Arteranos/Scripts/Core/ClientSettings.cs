@@ -196,6 +196,8 @@ namespace Arteranos.Core
 
         public TurnType Turn = TurnType.Snap45;
 
+        public float SmoothTurnSpeed = 60.0f;
+
         public TeleportType Teleport = TeleportType.Instant;
 
         public float ZipLineDuration = 1.0f;

@@ -21,6 +21,7 @@ namespace Arteranos.UI
     {
         [SerializeField] private Toggle chk_Flying = null;
         [SerializeField] private Spinner spn_Turning= null;
+        [SerializeField] private NumberedSlider sldn_SmoothTurnSpeed = null;
         [SerializeField] private Spinner spn_Teleporting= null;
         [SerializeField] private NumberedSlider sldn_ZiplineDuration = null;
         [SerializeField] private Spinner spn_Blinders = null;
@@ -41,6 +42,7 @@ namespace Arteranos.UI
             spn_Turning.OnChanged += OnTurningChanged;
             spn_Teleporting.OnChanged += OnTeleportingChanged;
             spn_Blinders.OnChanged += OnBlindersChanged;
+            sldn_SmoothTurnSpeed.OnValueChanged += OnSmoothTurnSpeedChanged;
             sldn_ZiplineDuration.OnValueChanged += OnZipLineDurationChanged;
         }
 
@@ -54,6 +56,7 @@ namespace Arteranos.UI
         private void OnTurningChanged(int arg1, bool arg2)
         {
             cs.Movement.Turn = spn_Turning.GetEnumValue(spne_turn);
+            sldn_SmoothTurnSpeed.interactable = cs.Movement.Turn == TurnType.Smooth;
             cs.PingXRControllersChanged();
             dirty = true;
         }
@@ -69,6 +72,13 @@ namespace Arteranos.UI
         private void OnBlindersChanged(int arg1, bool arg2)
         {
             cs.Movement.ComfortBlinders = spn_Blinders.GetEnumValue(spne_comfortblinders);
+            cs.PingXRControllersChanged();
+            dirty = true;
+        }
+
+        private void OnSmoothTurnSpeedChanged(float obj)
+        {
+            cs.Movement.SmoothTurnSpeed = sldn_SmoothTurnSpeed.value;
             cs.PingXRControllersChanged();
             dirty = true;
         }
@@ -96,6 +106,8 @@ namespace Arteranos.UI
             sldn_ZiplineDuration.value = movement.ZipLineDuration;
             sldn_ZiplineDuration.interactable = movement.Teleport == TeleportType.Zipline;
 
+            sldn_SmoothTurnSpeed.value = movement.SmoothTurnSpeed;
+            sldn_SmoothTurnSpeed.interactable = movement.Turn == TurnType.Smooth;
 
             dirty = false;
         }

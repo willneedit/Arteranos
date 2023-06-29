@@ -122,7 +122,7 @@ namespace Arteranos.XR
                     break;
             }
 
-            // TODO - continuous turn speed
+            ContTurnProvider.turnSpeed = mcs.SmoothTurnSpeed;
 
             CTeleProvider.TravelDuration = mcs.Teleport == TeleportType.Instant
                 ? 0.0f
