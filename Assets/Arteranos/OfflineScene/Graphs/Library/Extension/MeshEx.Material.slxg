@@ -1,0 +1,494 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="abd58159-da1a-4ae4-81a9-da8a4bc5d7f7" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters>
+		<Parameter MaxSize="1" Expanded="True" Label="Operation" Type="Sceelix.Core.Parameters.Infos.SelectListParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="The UV mapping operation/shape to apply." Section="">
+			<ParameterModels>
+				<ParameterModel Expanded="True" ArrangeInSingleLine="False" Label="Box UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on a surrounding box shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</ParameterModel>
+				<ParameterModel Expanded="True" ArrangeInSingleLine="False" Label="Cylinder UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on a surrounding cylinder shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</ParameterModel>
+				<ParameterModel Expanded="True" ArrangeInSingleLine="False" Label="Face UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on each face's surrounding plane scope shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</ParameterModel>
+				<ParameterModel Expanded="True" ArrangeInSingleLine="False" Label="Flip UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Flips the current UV mapping coordinates in the U or V axis." Section="">
+					<Fields>
+						<Field Label="Flip U" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the U coordinate should be flipped." Section="" FixedValue="True" />
+						<Field Label="Flip V" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the V coordinate should be flipped." Section="" FixedValue="True" />
+					</Fields>
+				</ParameterModel>
+				<ParameterModel Expanded="True" ArrangeInSingleLine="False" Label="Scale UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale the UV coordinates." Section="">
+					<Fields>
+						<Field Label="Amount" Type="Sceelix.Mathematics.Parameters.Infos.Vector2DParameterInfo, Sceelix.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="The value to multiply with the UV coordinates." Section="" FixedValue="1,1" />
+					</Fields>
+				</ParameterModel>
+				<ParameterModel Expanded="True" ArrangeInSingleLine="False" Label="Scope UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on the surrounding scope shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</ParameterModel>
+				<ParameterModel Expanded="True" ArrangeInSingleLine="False" Label="Sphere UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on a surrounding sphere shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</ParameterModel>
+			</ParameterModels>
+			<Items>
+				<Item Expanded="True" ArrangeInSingleLine="False" Label="Sphere UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on a surrounding sphere shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</Item>
+				<Item Expanded="True" ArrangeInSingleLine="False" Label="Scope UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on the surrounding scope shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</Item>
+				<Item Expanded="True" ArrangeInSingleLine="False" Label="Face UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on each face's surrounding plane scope shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</Item>
+				<Item Expanded="True" ArrangeInSingleLine="False" Label="Cylinder UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on a surrounding cylinder shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</Item>
+				<Item Expanded="True" ArrangeInSingleLine="False" Label="Box UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Applies UV mapping coordinates based on a surrounding box shape." Section="">
+					<Fields>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="U" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+						<Field Expanded="True" ArrangeInSingleLine="False" Label="V" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Defines the coordinate sizing for the given coordinate." Section="">
+							<Fields>
+								<Field Increment="0.1" Label="Size" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale of the coordinate mapping." Section="" FixedValue="1" />
+								<Field Label="Absolute" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the defined size is an absolute value (in world space), or relative to the chosen surrounding shape's size." Section="" FixedValue="True" />
+							</Fields>
+						</Field>
+					</Fields>
+				</Item>
+				<Item Expanded="True" ArrangeInSingleLine="False" Label="Scale UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Scale the UV coordinates." Section="">
+					<Fields>
+						<Field Label="Amount" Type="Sceelix.Mathematics.Parameters.Infos.Vector2DParameterInfo, Sceelix.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="The value to multiply with the UV coordinates." Section="" FixedValue="1,1" />
+					</Fields>
+				</Item>
+				<Item Expanded="True" ArrangeInSingleLine="False" Label="Flip UV" Type="Sceelix.Core.Parameters.Infos.CompoundParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Flips the current UV mapping coordinates in the U or V axis." Section="">
+					<Fields>
+						<Field Label="Flip U" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the U coordinate should be flipped." Section="" FixedValue="True" />
+						<Field Label="Flip V" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if the V coordinate should be flipped." Section="" FixedValue="True" />
+					</Fields>
+				</Item>
+			</Items>
+		</Parameter>
+		<Parameter FileOperation="Load" Label="Diffuse Texture" Type="Sceelix.Core.Parameters.Infos.FileParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="">
+			<Extensions />
+		</Parameter>
+		<Parameter Label="Diffuse Color" Type="Sceelix.Mathematics.Parameters.Infos.ColorParameterInfo, Sceelix.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="255,255,255,255" />
+		<Parameter FileOperation="Load" Label="Normal Map" Type="Sceelix.Core.Parameters.Infos.FileParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="">
+			<Extensions />
+		</Parameter>
+		<Parameter MinValue="0" MaxValue="1" Increment="0.1" Label="Metallic" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="0" />
+		<Parameter MinValue="0" MaxValue="1" Increment="0.1" Label="Smoothness" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="0.5" />
+		<Parameter Label="Emissive" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="False" />
+		<Parameter Label="Emission Color" Type="Sceelix.Mathematics.Parameters.Infos.ColorParameterInfo, Sceelix.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="255,255,255,255" />
+	</Parameters>
+	<Nodes>
+		<Node Guid="ba41f311-bdaf-4c02-a60f-d2f6a347aec6" NodeType="SystemNode" NodeTypeGUID="9470e48f-5ee8-4d84-a371-949f27786f0f" Position="364 177" DisableInSubgraphs="True" ProcedureType="MeshUVMapProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Operation" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+					<Items>
+						<Item Expanded="True" Label="Sphere UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="U" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Uabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="V" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Vabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Scope UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="U" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Uabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="V" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Vabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Face UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="U" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Uabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="V" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Vabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cylinder UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="U" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Uabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="V" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Vabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Box UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="U" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Uabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="V" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+										<Field FixedValue="True" Label="Absolute" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="Vabsolute" Type="ParameterExpressionNode" />
+											</ParsedExpression>
+										</Field>
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Scale UV">
+							<Fields>
+								<Field FixedValue="1,1" Label="Amount" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Flip UV">
+							<Fields>
+								<Field FixedValue="True" Label="Flip U" />
+								<Field FixedValue="True" Label="Flip V" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Input" />
+			</InputPorts>
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="53dbc169-3389-422b-9ed8-39d8ece6e127" NodeType="SystemNode" NodeTypeGUID="ab33c263-352e-4917-a7ec-0686aebc078b" Position="372.1431 325.4381" DisableInSubgraphs="True" ProcedureType="MeshMaterialProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Material">
+					<Items>
+						<Item Expanded="True" Label="Custom">
+							<Fields>
+								<Field FixedValue="Universal Render Pipeline/Lit" Label="Shader Name" />
+								<Field Expanded="True" Label="Properties">
+									<Items>
+										<Item Expanded="True" Label="Float">
+											<Fields>
+												<Field FixedValue="_Metallic" Label="Name" />
+												<Field FixedValue="1" Label="Value" IsExpression="True">
+													<ParsedExpression>
+														<ExprNode Name="Metallic" Type="ParameterExpressionNode" />
+													</ParsedExpression>
+												</Field>
+											</Fields>
+										</Item>
+										<Item Expanded="True" Label="Color">
+											<Fields>
+												<Field FixedValue="_BaseColor" Label="Name" />
+												<Field FixedValue="255,255,255,255" Label="Value" IsExpression="True">
+													<ParsedExpression>
+														<ExprNode Name="DiffuseColor" Type="ParameterExpressionNode" />
+													</ParsedExpression>
+												</Field>
+											</Fields>
+										</Item>
+										<Item Expanded="True" Label="Float">
+											<Fields>
+												<Field FixedValue="_Smoothness" Label="Name" />
+												<Field FixedValue="1" Label="Value" IsExpression="True">
+													<ParsedExpression>
+														<ExprNode Name="Smoothness" Type="ParameterExpressionNode" />
+													</ParsedExpression>
+												</Field>
+											</Fields>
+										</Item>
+										<Item Expanded="True" Label="Texture">
+											<Fields>
+												<Field FixedValue="_BaseMap" Label="Name" />
+												<Field FixedValue="Textures/Granite.jpg" Guid="27e33607-455c-4d75-9cf1-096bacea3469" Label="Path" IsExpression="True">
+													<ParsedExpression>
+														<ExprNode Name="DiffuseTexture" Type="ParameterExpressionNode" />
+													</ParsedExpression>
+												</Field>
+												<Field FixedValue="Diffuse" Label="Type" />
+											</Fields>
+										</Item>
+										<Item Expanded="True" Label="Color">
+											<Fields>
+												<Field FixedValue="_EmissionColor" Label="Name" />
+												<Field FixedValue="0,255,0,255" Label="Value" IsExpression="True">
+													<ParsedExpression>
+														<ExprNode Name="EmissionColor" Type="ParameterExpressionNode" />
+													</ParsedExpression>
+												</Field>
+											</Fields>
+										</Item>
+										<Item Expanded="True" Label="Bool">
+											<Fields>
+												<Field FixedValue="_EMISSION" Label="Name" />
+												<Field FixedValue="True" Label="Value" IsExpression="True">
+													<ParsedExpression>
+														<ExprNode Name="Emissive" Type="ParameterExpressionNode" />
+													</ParsedExpression>
+												</Field>
+											</Fields>
+										</Item>
+										<Item Expanded="True" Label="Texture">
+											<Fields>
+												<Field FixedValue="_BumpMap" Label="Name" />
+												<Field FixedValue="" Label="Path" IsExpression="True">
+													<ParsedExpression>
+														<ExprNode Name="NormalMap" Type="ParameterExpressionNode" />
+													</ParsedExpression>
+												</Field>
+												<Field FixedValue="Normal" Label="Type" />
+											</Fields>
+										</Item>
+									</Items>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Color">
+							<Fields>
+								<Field FixedValue="255,0,0,255" Label="Color" />
+								<Field FixedValue="1" Label="Specular Power" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Output" />
+			</OutputPorts>
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="0#O#0" ToPort="1#I#0" FromNode="0" ToNode="1" FromLabel="Output" ToLabel="Input" />
+	</Edges>
+</Graph>

@@ -1,0 +1,182 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="3956ffd4-b54d-4664-aea8-9756b1dffe43" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters>
+		<Parameter MinValue="0" Increment="0.1" Label="Width" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Width (size in X) of the box." Section="" FixedValue="2" />
+		<Parameter MinValue="0" Increment="0.1" Label="Length" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Length (size in Y) of the box." Section="" FixedValue="1" />
+		<Parameter MinValue="0" Increment="0.1" Label="Height" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Height (size in Z) of the box." Section="" FixedValue="1" />
+	</Parameters>
+	<Nodes>
+		<Node Guid="a52bc5a2-136b-491e-82a6-0b936545e858" NodeType="SystemNode" NodeTypeGUID="75cdfc0b-7cdd-485a-85d2-8a781b3a79bc" Position="436.5334 1328.764" DisableInSubgraphs="True" ProcedureType="MeshModifyProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Extrude">
+							<Fields>
+								<Field FixedValue="0.02" Label="Amount" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="Double" Type="DoubleExpressionNode">0.01</ExprNode>
+									</ParsedExpression>
+								</Field>
+								<Field Expanded="True" Label="Method">
+									<Items>
+										<Item Expanded="True" Label="Normal">
+											<Fields>
+												<Field FixedValue="-0.02" Label="Offset" IsExpression="True">
+													<ParsedExpression>
+														<ExprNode Name="*" Type="BinaryExpressionNode">
+															<ExprNode Name="-" Type="UnaryExpressionNode">
+																<ExprNode Name="Double" Type="DoubleExpressionNode">0.005</ExprNode>
+															</ExprNode>
+															<ExprNode Name="index" Type="AttributeExpressionNode" AllowNull="False" />
+														</ExprNode>
+													</ParsedExpression>
+												</Field>
+											</Fields>
+										</Item>
+									</Items>
+								</Field>
+								<Field FixedValue="False" Label="Cap" />
+								<Field FixedValue="s" Label="Section" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Pyramidize">
+							<Fields>
+								<Field FixedValue="0.2" Label="Height" />
+								<Field FixedValue="True" Label="Cap" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="606a2eda-0984-41ce-87bd-05f1bd9f0a6f" NodeType="SystemNode" NodeTypeGUID="b7594853-ebae-4cc5-a7d0-bb4390e49877" Position="612.2383 1630.793" DisableInSubgraphs="True" ProcedureType="ForCycleProcedure">
+			<Arguments>
+				<Argument FixedValue="1" Label="Start" />
+				<Argument FixedValue="4" Label="End" />
+				<Argument FixedValue="1" Label="Increment" />
+				<Argument FixedValue="index" Label="Index" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="2" />
+		</Node>
+		<Node Guid="b07262c7-c5af-4f71-adfe-98f91652169a" NodeType="SystemNode" NodeTypeGUID="827e1ac6-ff43-4c26-b6d0-4e64b0c26d46" Position="802.4865 1494.242" DisableInSubgraphs="True" ProcedureType="MeshSubselectProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Mesh Selection">
+					<Items>
+						<Item Expanded="True" Label="Custom">
+							<Fields>
+								<Field FixedValue="True" Label="Condition" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="==" Type="BinaryExpressionNode">
+											<ExprNode Name="s" Type="InternalAttributeExpressionNode" AllowNull="False" />
+											<ExprNode Name="String" Type="StringExpressionNode">Top</ExprNode>
+										</ExprNode>
+									</ParsedExpression>
+								</Field>
+								<Field Expanded="True" Label="Separate">
+									<Items />
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Custom">
+							<Fields>
+								<Field FixedValue="True" Label="Condition" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="!=" Type="BinaryExpressionNode">
+											<ExprNode Name="s" Type="InternalAttributeExpressionNode" AllowNull="False" />
+											<ExprNode Name="String" Type="StringExpressionNode">Top</ExprNode>
+										</ExprNode>
+									</ParsedExpression>
+								</Field>
+								<Field Expanded="True" Label="Separate">
+									<Items />
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="2" />
+		</Node>
+		<Node Guid="fe324b76-a836-46a1-acba-6d07cdc90fcd" NodeType="SystemNode" NodeTypeGUID="266f147e-064f-44dc-8a38-5c9b7dacca74" Position="711.6333 1778.685" DisableInSubgraphs="True" ProcedureType="MeshMergeProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Input">
+					<Items>
+						<Item Expanded="True" Label="Collective">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+				<Argument Expanded="True" Label="Criteria">
+					<Items />
+				</Argument>
+				<Argument FixedValue="First" Label="Scope Selection" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="81ca3e15-746e-4f66-ba91-d2b8a4e0a42b" NodeType="SystemNode" NodeTypeGUID="a66e6c1f-3448-4813-a959-6c4fb3d01ea7" Position="711.1394 1913.885" DisableInSubgraphs="True" ProcedureType="MeshUnifyProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operations">
+					<Items>
+						<Item Expanded="True" Label="Unify Vertices">
+							<Fields>
+								<Field FixedValue="0" Label="Tolerance" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Output" />
+			</OutputPorts>
+		</Node>
+		<Node Guid="71f00b0e-2b46-4fdd-85d0-f0614453b304" NodeType="SystemNode" NodeTypeGUID="74716153-9685-4a42-8409-a9c79de5f8c4" Position="592.5897 1093.2" ProcedureType="MeshCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Primitive">
+					<Items>
+						<Item Expanded="True" Label="Box">
+							<Fields>
+								<Field FixedValue="2" Label="Width" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="Width" Type="ParameterExpressionNode" />
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="1" Label="Length" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="Length" Type="ParameterExpressionNode" />
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="1" Label="Height" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="Height" Type="ParameterExpressionNode" />
+									</ParsedExpression>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cube">
+							<Fields>
+								<Field FixedValue="1" Label="Size" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="1#O#0" ToPort="0#I#0" FromNode="1" ToNode="0" FromLabel="Loop" ToLabel="Input" />
+		<Edge FromPort="0#O#0" ToPort="2#I#0" FromNode="0" ToNode="2" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="2#O#0" ToPort="1#I#0" FromNode="2" ToNode="1" FromLabel="Mesh Selection[0].Custom.Output" ToLabel="Input" />
+		<Edge FromPort="2#O#1" ToPort="3#I#0" FromNode="2" ToNode="3" FromLabel="Mesh Selection[1].Custom.Output" ToLabel="Input[0].Collective.Collective" />
+		<Edge FromPort="1#O#1" ToPort="3#I#0" FromNode="1" ToNode="3" FromLabel="Loop Exit" ToLabel="Input[0].Collective.Collective" />
+		<Edge FromPort="3#O#0" ToPort="4#I#0" FromNode="3" ToNode="4" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="5#O#0" ToPort="1#I#0" FromNode="5" ToNode="1" FromLabel="Output" ToLabel="Input" />
+	</Edges>
+</Graph>

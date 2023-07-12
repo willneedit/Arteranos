@@ -1,0 +1,314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="b280cb0c-f492-4a4b-9a30-12a7eb11999a" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters />
+	<Nodes>
+		<Node Guid="31a5461b-8812-4792-b944-5edc0b5fc028" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="-653.1069 1289.822" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="40,5,0" Label="Amount" />
+								<Field FixedValue="World" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="67c9b58e-1090-4694-b85f-78138f6affda" NodeType="SystemNode" NodeTypeGUID="8906cb79-297a-40a5-8e36-b5f12ddbb847" Position="-618.4385 1454.045" DisableInSubgraphs="True" ProcedureType="ActorRotateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Rotate">
+							<Fields>
+								<Field FixedValue="90" Label="Angle" />
+								<Field Expanded="True" Label="Axis">
+									<Fields>
+										<Field FixedValue="0,0,1" Label="Direction" />
+										<Field FixedValue="World" Label="Relative To" />
+									</Fields>
+								</Field>
+								<Field Expanded="False" Label="Pivot">
+									<Fields>
+										<Field FixedValue="0.5,0.5,0.5" Label="Position" />
+										<Field FixedValue="Relative" Label="Offset" />
+										<Field FixedValue="Scope" Label="Relative To" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="ccfdb0ac-b76d-4341-9cad-ab0ea81b7f20" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="-838.4755 2213.469" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="-49,-59,0" Label="Amount" />
+								<Field FixedValue="World" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="7a277090-dd3c-407b-966e-86718c0092f3" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="-234.3828 2160.89" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="-10,-10,0.1" Label="Amount" />
+								<Field FixedValue="Scope" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="e63dc785-ed34-4f14-bc3c-fa56710f6d80" NodeType="SystemNode" NodeTypeGUID="0DABC5F2-C6EE-40E6-9576-14F9D48BAA84" Position="-774.1993 2565.637" DisableInSubgraphs="True" ProcedureType="UnityEntityGroupCreateProcedure">
+			<Arguments>
+				<Argument FixedValue="Ground" Label="Name" />
+				<Argument FixedValue="True" Label="Enabled" />
+				<Argument FixedValue="True" Label="Static" />
+				<Argument FixedValue="" Label="Layer" />
+				<Argument FixedValue="" Label="Prefab" />
+				<Argument FixedValue="Minimum" Label="Positioning" />
+				<Argument FixedValue="Stretch To Fill" Label="Scale Mode" />
+				<Argument FixedValue="" Label="Tag" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="3e97fdd9-7fbc-4845-8501-988bdc366760" NodeType="ComponentNode" NodeTypeGUID="e79d2ade-3ab5-4ec2-a1e3-97472fe2f634" Position="358.7505 1110.672" DisableInSubgraphs="True" RelativePath="Graphs/Library/Ruins/Ruins.Plaque.slxg">
+			<Arguments />
+			<InputPorts Count="0" />
+			<OutputPorts Count="2" />
+		</Node>
+		<Node Guid="e0a6ae07-bf49-4af8-9f20-182b0b2f9111" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="188.4257 1322.078" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="5,20,-0.3" Label="Amount" />
+								<Field FixedValue="Scope" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="e86f61eb-76fa-4bd5-b7b3-1529cd0fff66" NodeType="SystemNode" NodeTypeGUID="8906cb79-297a-40a5-8e36-b5f12ddbb847" Position="159.0858 1472.565" DisableInSubgraphs="True" ProcedureType="ActorRotateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Rotate">
+							<Fields>
+								<Field FixedValue="40" Label="Angle" />
+								<Field Expanded="True" Label="Axis">
+									<Fields>
+										<Field FixedValue="1,1,1" Label="Direction" />
+										<Field FixedValue="Scope" Label="Relative To" />
+									</Fields>
+								</Field>
+								<Field Expanded="False" Label="Pivot">
+									<Fields>
+										<Field FixedValue="0.5,0.5,0.5" Label="Position" />
+										<Field FixedValue="Relative" Label="Offset" />
+										<Field FixedValue="Scope" Label="Relative To" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="6f792642-c875-44e5-8a5c-f75b379a1545" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="580.1479 1366.785" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="4,21,-0.4" Label="Amount" />
+								<Field FixedValue="Scope" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="4d0ab6fc-e554-4fd0-a9fd-dd708c2ef67e" NodeType="SystemNode" NodeTypeGUID="8906cb79-297a-40a5-8e36-b5f12ddbb847" Position="550.8085 1517.273" DisableInSubgraphs="True" ProcedureType="ActorRotateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Rotate">
+							<Fields>
+								<Field FixedValue="-40" Label="Angle" />
+								<Field Expanded="True" Label="Axis">
+									<Fields>
+										<Field FixedValue="1,1,1" Label="Direction" />
+										<Field FixedValue="Scope" Label="Relative To" />
+									</Fields>
+								</Field>
+								<Field Expanded="False" Label="Pivot">
+									<Fields>
+										<Field FixedValue="0.5,0.5,0.5" Label="Position" />
+										<Field FixedValue="Relative" Label="Offset" />
+										<Field FixedValue="Scope" Label="Relative To" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="7ca591ab-efe9-4486-9d2a-43244fec1451" NodeType="ComponentNode" NodeTypeGUID="6327afb5-ad83-4a98-a7ce-c37126c7e355" Position="-652.9982 1136.68" RelativePath="Graphs/Scene.Guardian.slxg">
+			<Arguments />
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="d1dcbfee-0d2a-40e0-8651-b782e680a71d" NodeType="ComponentNode" NodeTypeGUID="38d9f616-b6b5-4e8b-ba5d-8e492cf2ecc8" Position="-273.4946 1147.555" RelativePath="Graphs/Scene.Colonnade.slxg">
+			<Arguments />
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="2d8805cf-b120-4a2b-9650-d24cbf17ed96" NodeType="ComponentNode" NodeTypeGUID="91b8cca6-6dad-4c52-9fd2-9257f9fdc810" Position="-606.9448 1940.905" RelativePath="Graphs/Scene.Ground.slxg">
+			<Arguments />
+			<InputPorts Count="0" />
+			<OutputPorts Count="2" />
+		</Node>
+		<Node Guid="bea1980a-976c-49c4-9650-9de6455c2c90" NodeType="ComponentNode" NodeTypeGUID="1a937551-6a6f-4edf-909c-04c40682d162" Position="-177.4598 1962.006" RelativePath="Graphs/Scene.Blockhouse.slxg">
+			<Arguments>
+				<Argument FixedValue="10" Label="Width" />
+				<Argument FixedValue="0.25" Label="Offset" />
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="26fbf8d0-b704-4078-8110-2b6b647f3454" NodeType="ComponentNode" NodeTypeGUID="038c1dbf-34da-415c-80e3-fb302fd75a44" Position="-639.1169 1608.423" DisableInSubgraphs="True" RelativePath="Graphs/Library/Extension/UnityEx.Group.slxg">
+			<Arguments>
+				<Argument FixedValue="Guardian Of Eternity" Label="Name" />
+				<Argument FixedValue="Mesh" Label="Type" />
+				<Argument FixedValue="True" Label="Enabled" />
+				<Argument FixedValue="True" Label="Static" />
+				<Argument FixedValue="True" Label="Is Convex" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="9327a406-66ee-421c-9d10-7333068316e1" NodeType="ComponentNode" NodeTypeGUID="038c1dbf-34da-415c-80e3-fb302fd75a44" Position="-264.4771 1621.612" DisableInSubgraphs="True" RelativePath="Graphs/Library/Extension/UnityEx.Group.slxg">
+			<Arguments>
+				<Argument FixedValue="Colonnade" Label="Name" />
+				<Argument FixedValue="Mesh Instance" Label="Type" />
+				<Argument FixedValue="True" Label="Enabled" />
+				<Argument FixedValue="True" Label="Static" />
+				<Argument FixedValue="True" Label="Is Convex" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="305c1858-8225-4d7a-b0dd-07ddfdf97503" NodeType="ComponentNode" NodeTypeGUID="038c1dbf-34da-415c-80e3-fb302fd75a44" Position="320.9837 1759.831" DisableInSubgraphs="True" RelativePath="Graphs/Library/Extension/UnityEx.Group.slxg">
+			<Arguments>
+				<Argument FixedValue="Gravestone" Label="Name" />
+				<Argument FixedValue="Mesh" Label="Type" />
+				<Argument FixedValue="True" Label="Enabled" />
+				<Argument FixedValue="True" Label="Static" />
+				<Argument FixedValue="True" Label="Is Convex" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="cd6b4dd3-936b-49a7-b0ee-6cbfc4555256" NodeType="ComponentNode" NodeTypeGUID="038c1dbf-34da-415c-80e3-fb302fd75a44" Position="-167.7656 2375.802" DisableInSubgraphs="True" RelativePath="Graphs/Library/Extension/UnityEx.Group.slxg">
+			<Arguments>
+				<Argument FixedValue="Blockhouse" Label="Name" />
+				<Argument FixedValue="Mesh" Label="Type" />
+				<Argument FixedValue="True" Label="Enabled" />
+				<Argument FixedValue="True" Label="Static" />
+				<Argument FixedValue="False" Label="Is Convex" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="19a506b7-8604-4928-9416-7245a1885b4b" NodeType="ComponentNode" NodeTypeGUID="038c1dbf-34da-415c-80e3-fb302fd75a44" Position="-835.7067 2392.09" DisableInSubgraphs="True" RelativePath="Graphs/Library/Extension/UnityEx.Group.slxg">
+			<Arguments>
+				<Argument FixedValue="Surface" Label="Name" />
+				<Argument FixedValue="Surface" Label="Type" />
+				<Argument FixedValue="True" Label="Enabled" />
+				<Argument FixedValue="True" Label="Static" />
+				<Argument FixedValue="True" Label="Is Convex" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="4d4afbf7-2d35-4079-938a-6c2193bcda76" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="-546.3328 2224.424" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="-49,-59,0" Label="Amount" />
+								<Field FixedValue="World" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="d85b68f4-3248-44ef-8d20-75c7f55f7fc4" NodeType="ComponentNode" NodeTypeGUID="038c1dbf-34da-415c-80e3-fb302fd75a44" Position="-543.564 2403.045" DisableInSubgraphs="True" RelativePath="Graphs/Library/Extension/UnityEx.Group.slxg">
+			<Arguments>
+				<Argument FixedValue="Rocks" Label="Name" />
+				<Argument FixedValue="Mesh Instance" Label="Type" />
+				<Argument FixedValue="True" Label="Enabled" />
+				<Argument FixedValue="True" Label="Static" />
+				<Argument FixedValue="True" Label="Is Convex" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="0#O#0" ToPort="1#I#0" FromNode="0" ToNode="1" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="5#O#0" ToPort="6#I#0" FromNode="5" ToNode="6" FromLabel="Right fragment" ToLabel="Input" />
+		<Edge FromPort="6#O#0" ToPort="7#I#0" FromNode="6" ToNode="7" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="8#O#0" ToPort="9#I#0" FromNode="8" ToNode="9" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="5#O#1" ToPort="8#I#0" FromNode="5" ToNode="8" FromLabel="Left fragment" ToLabel="Input" />
+		<Edge FromPort="10#O#0" ToPort="0#I#0" FromNode="10" ToNode="0" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="12#O#0" ToPort="2#I#0" FromNode="12" ToNode="2" FromLabel="Surface" ToLabel="Input" />
+		<Edge FromPort="13#O#0" ToPort="3#I#0" FromNode="13" ToNode="3" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="1#O#0" ToPort="14#I#0" FromNode="1" ToNode="14" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="11#O#0" ToPort="15#I#0" FromNode="11" ToNode="15" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="7#O#0" ToPort="16#I#0" FromNode="7" ToNode="16" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="9#O#0" ToPort="16#I#0" FromNode="9" ToNode="16" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="3#O#0" ToPort="17#I#0" FromNode="3" ToNode="17" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="2#O#0" ToPort="18#I#0" FromNode="2" ToNode="18" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="19#O#0" ToPort="20#I#0" FromNode="19" ToNode="20" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="12#O#1" ToPort="19#I#0" FromNode="12" ToNode="19" FromLabel="Rocks" ToLabel="Input" />
+		<Edge FromPort="20#O#0" ToPort="4#I#0" FromNode="20" ToNode="4" FromLabel="Unity Entity Group" ToLabel="Actors" />
+		<Edge FromPort="18#O#0" ToPort="4#I#0" FromNode="18" ToNode="4" FromLabel="Unity Entity Group" ToLabel="Actors" />
+	</Edges>
+</Graph>

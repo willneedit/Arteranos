@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-16"?>
+<Project>
+  <Author>carsten</Author>
+  <Company>Private</Company>
+  <Version>1.0.0.0</Version>
+  <Items>
+    <Item Path="Graphs" Nature="Folder" Guid="9b29c860-2dae-4594-b664-14d96fa239e3" Expanded="True">
+      <Item Path="Library" Nature="Folder" Guid="0fe9a047-68cf-4b90-ab60-312c9a20d385" Expanded="True">
+        <Item Path="Construction" Nature="Folder" Guid="9945c0f8-7c16-4baf-8a06-45b674c12818" Expanded="False">
+          <Item Path="WoodBoleWall.slxg" Nature="File" Guid="e98bc6ab-0e78-4e81-ac30-92d53f4b9263" />
+        </Item>
+        <Item Path="Extension" Nature="Folder" Guid="c65198a5-b74f-4938-b387-64b97ae570ed" Expanded="True">
+          <Item Path="MeshEx.Material.slxg" Nature="File" Guid="abd58159-da1a-4ae4-81a9-da8a4bc5d7f7" />
+          <Item Path="UnityEx.Group.slxg" Nature="File" Guid="038c1dbf-34da-415c-80e3-fb302fd75a44" />
+        </Item>
+        <Item Path="Nature" Nature="Folder" Guid="128d5e69-bc0f-48cb-917a-be8232dbd460" Expanded="True">
+          <Item Path="Nature.AddRocks.slxg" Nature="File" Guid="3923693a-55a7-4616-ad56-1d67e7920aa3" />
+          <Item Path="Nature.Rock.slxg" Nature="File" Guid="0046f824-e509-4d05-830a-ad03592bb6f0" />
+          <Item Path="Nature.RockCollection.slxg" Nature="File" Guid="9086a2bd-1570-4185-85dd-c6e63e8bd1ef" />
+        </Item>
+        <Item Path="Ruins" Nature="Folder" Guid="c14d47a9-08f0-4fe8-a3ba-683f596ce18a" Expanded="True">
+          <Item Path="Ruins.Colonnade.slxg" Nature="File" Guid="f8e0b13d-254a-4564-95bd-717ca9a38fbf" />
+          <Item Path="Ruins.Column.slxg" Nature="File" Guid="a1b97466-6693-49d4-a3fd-2d9f94953af0" />
+          <Item Path="Ruins.ColumnBlock.slxg" Nature="File" Guid="1377be5e-ef7b-4765-8478-911a26090997" />
+          <Item Path="Ruins.ColumnBlocks.slxg" Nature="File" Guid="59e234da-b68a-4f75-8951-696809007235" />
+          <Item Path="Ruins.ColumnChip.slxg" Nature="File" Guid="ebd47442-dcbb-46ff-8b6e-0eedb0d39193" />
+          <Item Path="Ruins.Plaque.slxg" Nature="File" Guid="e79d2ade-3ab5-4ec2-a1e3-97472fe2f634" />
+          <Item Path="Ruins.Plaque_1.slxg" Nature="File" Guid="84da6217-679d-4936-909c-cca8a1d263fa" />
+          <Item Path="Ruins.WallBlock.slxg" Nature="File" Guid="3956ffd4-b54d-4664-aea8-9756b1dffe43" />
+        </Item>
+      </Item>
+      <Item Path="Main.slxg" Nature="File" Guid="1a937551-6a6f-4edf-909c-04c40682d162" />
+      <Item Path="Scene.Blockhouse.slxg" Nature="File" Guid="1a937551-6a6f-4edf-909c-04c40682d162" />
+      <Item Path="Scene.Colonnade.slxg" Nature="File" Guid="38d9f616-b6b5-4e8b-ba5d-8e492cf2ecc8" />
+      <Item Path="Scene.Ground.slxg" Nature="File" Guid="91b8cca6-6dad-4c52-9fd2-9257f9fdc810" />
+      <Item Path="Scene.Guardian.slxg" Nature="File" Guid="6327afb5-ad83-4a98-a7ce-c37126c7e355" />
+      <Item Path="Scene.slxg" Nature="File" Guid="b280cb0c-f492-4a4b-9a30-12a7eb11999a" />
+      <Item Path="Tessellation.slxg" Nature="File" Guid="da73a5c5-68a7-4cdd-91d6-7f5afbbdf6cb" />
+    </Item>
+    <Item Path="Textures" Nature="Folder" Guid="b29300a2-afc2-4c07-9e44-45562e528b11" Expanded="False">
+      <Item Path="Black_Marble.jpg" Nature="File" Guid="7cd684cf-40ab-4733-be5e-cf527e542d4c" />
+      <Item Path="Dirt01.jpg" Nature="File" Guid="3ff5a4d6-ef19-4cf1-b913-7fc59f5f6b0c" />
+      <Item Path="Granite.jpg" Nature="File" Guid="27e33607-455c-4d75-9cf1-096bacea3469" />
+      <Item Path="Grass01.jpg" Nature="File" Guid="e4f14007-69c0-4dcc-9f1b-3d8f7f69e191" />
+      <Item Path="Sand01.jpg" Nature="File" Guid="29f2efcb-cb3d-485d-9263-ed0825b5319b" />
+      <Item Path="WoodSlats.jpg" Nature="File" Guid="5e708000-90cf-4c21-b032-c79f135bed87" />
+    </Item>
+  </Items>
+</Project>

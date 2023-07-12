@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="0046f824-e509-4d05-830a-ad03592bb6f0" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters>
+		<Parameter Label="Scale" Type="Sceelix.Mathematics.Parameters.Infos.Vector3DParameterInfo, Sceelix.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="The amount on each axis to scale." Section="" FixedValue="1,1,1" />
+		<Parameter Label="Jaggedness" Type="Sceelix.Mathematics.Parameters.Infos.Vector3DParameterInfo, Sceelix.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="The direction (and amount) of the distortion" Section="" FixedValue="0.05,0.05,0.05" />
+		<Parameter Increment="1" Label="Seed" Type="Sceelix.Core.Parameters.Infos.IntParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="The random seed" Section="" FixedValue="1028" />
+	</Parameters>
+	<Nodes>
+		<Node Guid="acf46a1a-c26b-4c4d-a6bc-95dc052e0872" NodeType="SystemNode" NodeTypeGUID="8034DF9C-9104-453D-B249-B06D9073AC32" Position="1842 587.2207" DisableInSubgraphs="True" ProcedureType="MeshTessellate">
+			<Arguments>
+				<Argument FixedValue="Tessellate" Label="Operation" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="20c484d2-0d5e-487e-9f55-9d6872788c29" NodeType="SystemNode" NodeTypeGUID="8034DF9C-9104-453D-B249-B06D9073AC33" Position="1903.464 1268.452" DisableInSubgraphs="True" ProcedureType="MeshDistort">
+			<Arguments>
+				<Argument FixedValue="0.05,0.05,0.05" Label="Direction" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Jaggedness" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="1028" Label="Seed" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Seed" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="Normals" Label="Relative To" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Output" />
+			</OutputPorts>
+		</Node>
+		<Node Guid="742a6c76-32a7-4d63-b5d1-4eca19968cae" NodeType="SystemNode" NodeTypeGUID="74716153-9685-4a42-8409-a9c79de5f8c4" Position="1851.309 443.2507" HasImpulsePort="True" ProcedureType="MeshCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Primitive">
+					<Items>
+						<Item Expanded="True" Label="Dodecahedron">
+							<Fields>
+								<Field FixedValue="0.75" Label="Size" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Icosahedron">
+							<Fields>
+								<Field FixedValue="1" Label="Size" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Octahedron">
+							<Fields>
+								<Field FixedValue="1" Label="Radius" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cube">
+							<Fields>
+								<Field FixedValue="1" Label="Size" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Impulse Port 1" />
+			</InputPorts>
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="bc2d147b-6fdf-4f5a-a2a5-74fc83cd2165" NodeType="SystemNode" NodeTypeGUID="bda91758-2aea-4aad-a607-cc4e76adbeae" Position="1904.511 765.4672" DisableInSubgraphs="True" ProcedureType="ActorScaleProcedure">
+			<Arguments>
+				<Argument FixedValue="1,1,1" Label="Amount" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Scale" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="Relative" Label="Mode" />
+				<Argument FixedValue="Scope" Label="Relative To" />
+				<Argument Expanded="True" Label="Pivot">
+					<Fields>
+						<Field FixedValue="0.5,0.5,0.5" Label="Position" />
+						<Field FixedValue="Relative" Label="Offset" />
+						<Field FixedValue="Scope" Label="Relative To" />
+					</Fields>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="851f8110-efc2-451f-af1d-b52d2ab3d5e6" NodeType="SystemNode" NodeTypeGUID="2ef7c2e5-c59f-464b-8557-c1e4e38216a9" Position="1934.319 286.7827" DisableInSubgraphs="True" ProcedureType="EntityCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Method">
+					<Items>
+						<Item Expanded="True" Label="Standard">
+							<Fields>
+								<Field FixedValue="1" Label="Count" />
+								<Field FixedValue="" Label="Index" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="f3c73b42-c406-429b-8a5c-24c0dccdae50" NodeType="SystemNode" NodeTypeGUID="75cdfc0b-7cdd-485a-85d2-8a781b3a79bc" Position="1890.42 885.5273" DisableInSubgraphs="True" ProcedureType="MeshModifyProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Manipulate Normals">
+							<Fields>
+								<Field FixedValue="Smooth" Label="Type" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Extrude">
+							<Fields>
+								<Field FixedValue="1" Label="Amount" />
+								<Field Expanded="True" Label="Method">
+									<Items>
+										<Item Expanded="True" Label="Normal">
+											<Fields>
+												<Field FixedValue="0" Label="Offset" />
+											</Fields>
+										</Item>
+									</Items>
+								</Field>
+								<Field FixedValue="False" Label="Cap" />
+								<Field FixedValue="" Label="Section" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="66071df8-0ab8-4ace-ab3b-3b240f586c83" NodeType="ComponentNode" NodeTypeGUID="abd58159-da1a-4ae4-81a9-da8a4bc5d7f7" Position="1869.977 1065.313" DisableInSubgraphs="True" RelativePath="Graphs/Library/Extension/MeshEx.Material.slxg">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Box UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="0.5" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="0.5" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Sphere UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Scope UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Face UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cylinder UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Scale UV">
+							<Fields>
+								<Field FixedValue="1,1" Label="Amount" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Flip UV">
+							<Fields>
+								<Field FixedValue="True" Label="Flip U" />
+								<Field FixedValue="True" Label="Flip V" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+				<Argument FixedValue="Textures/Granite.jpg" Guid="27e33607-455c-4d75-9cf1-096bacea3469" Label="Diffuse Texture" />
+				<Argument FixedValue="255,255,255,255" Label="Diffuse Color" />
+				<Argument FixedValue="" Label="Normal Map" />
+				<Argument FixedValue="0" Label="Metallic" />
+				<Argument FixedValue="0.1" Label="Smoothness" />
+				<Argument FixedValue="False" Label="Emissive" />
+				<Argument FixedValue="255,255,255,255" Label="Emission Color" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="0#O#0" ToPort="3#I#0" FromNode="0" ToNode="3" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="2#O#0" ToPort="0#I#0" FromNode="2" ToNode="0" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="3#O#0" ToPort="5#I#0" FromNode="3" ToNode="5" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="4#O#0" ToPort="2#I#0" FromNode="4" ToNode="2" FromLabel="Entities" ToLabel="Impulse Port 1" />
+		<Edge FromPort="5#O#0" ToPort="6#I#0" FromNode="5" ToNode="6" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="6#O#0" ToPort="1#I#0" FromNode="6" ToNode="1" FromLabel="Output" ToLabel="Input" />
+	</Edges>
+</Graph>

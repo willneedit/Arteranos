@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="038c1dbf-34da-415c-80e3-fb302fd75a44" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters>
+		<Parameter Label="Name" Type="Sceelix.Core.Parameters.Infos.StringParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Name of the Game Object, as it appears in the &quot;Hierarchy&quot; panel." Section="" FixedValue="Group" />
+		<Parameter Label="Type" Type="Sceelix.Core.Parameters.Infos.ChoiceParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="Mesh">
+			<Choices>
+				<Choice>Mesh</Choice>
+				<Choice>Mesh Instance</Choice>
+				<Choice>Surface</Choice>
+			</Choices>
+		</Parameter>
+		<Parameter Label="Enabled" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Enabled flag that allows gameobject state to be toggled." Section="" FixedValue="True" />
+		<Parameter Label="Static" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="IsStatic flag that allows gameobject drawing to be optimized." Section="" FixedValue="True" />
+		<Parameter Label="Is Convex" Type="Sceelix.Core.Parameters.Infos.BoolParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Indicates if a convex collider from the mesh sould be used." Section="" FixedValue="True" />
+	</Parameters>
+	<Nodes>
+		<Node Guid="a053c0de-f723-4ed0-a0f3-86b7a7d34ed2" NodeType="SystemNode" NodeTypeGUID="f4ddf1f0-64b2-4846-84fd-b919b480c492" Position="985.6503 2044.563" DisableInSubgraphs="True" ProcedureType="UnityEntityComponentProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Components">
+					<Items>
+						<Item Expanded="True" Label="Mesh Collider">
+							<Fields>
+								<Field FixedValue="True" Label="Is Convex" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="IsConvex" Type="ParameterExpressionNode" />
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="False" Label="Is Trigger" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="7ce2e980-9f3c-4bf2-8671-5b8deded5d0a" NodeType="SystemNode" NodeTypeGUID="eba3dca6-953c-4e64-9e1d-cbc934eea38c" Position="404.3144 1861.325" DisableInSubgraphs="True" ProcedureType="UnityEntityCreateProcedure">
+			<Arguments>
+				<Argument FixedValue="Sceelix Game Object (Mesh)" Label="Name" />
+				<Argument FixedValue="True" Label="Enabled" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Enabled" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="True" Label="Static" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Static" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="" Label="Layer" />
+				<Argument FixedValue="" Label="Prefab" />
+				<Argument FixedValue="Minimum" Label="Positioning" />
+				<Argument FixedValue="Stretch To Fill" Label="Scale Mode" />
+				<Argument FixedValue="" Label="Tag" />
+				<Argument Expanded="True" Label="Options">
+					<Items>
+						<Item Expanded="True" Label="From Mesh">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="From Mesh Instance">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="From Actor">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="Simple">
+							<Fields>
+								<Field FixedValue="0,0,0" Label="Translation" />
+								<Field FixedValue="0,0,0" Label="Rotation" />
+								<Field FixedValue="1,1,1" Label="Scale" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="d5fef37a-f2bf-4fd5-9940-4bb26875243b" NodeType="SystemNode" NodeTypeGUID="c1722ebb-8bc2-45a1-a146-b3767d611cd1" Position="733.8965 1566.17" DisableInSubgraphs="True" ProcedureType="ActorGroupProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Ungroup">
+							<Fields>
+								<Field FixedValue="Parent and Actor" Label="Attributes" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Group">
+							<Fields>
+								<Field FixedValue="True" Label="Merge Attributes" />
+								<Field Expanded="True" Label="Criteria">
+									<Items />
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Input" />
+			</InputPorts>
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="553dd696-fe13-4965-be8e-6eb9f7897562" NodeType="SystemNode" NodeTypeGUID="0DABC5F2-C6EE-40E6-9576-14F9D48BAA84" Position="682.3427 2192.481" DisableInSubgraphs="True" ProcedureType="UnityEntityGroupCreateProcedure">
+			<Arguments>
+				<Argument FixedValue="Group" Label="Name" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Name" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="True" Label="Enabled" />
+				<Argument FixedValue="True" Label="Static" />
+				<Argument FixedValue="" Label="Layer" />
+				<Argument FixedValue="" Label="Prefab" />
+				<Argument FixedValue="Minimum" Label="Positioning" />
+				<Argument FixedValue="Stretch To Fill" Label="Scale Mode" />
+				<Argument FixedValue="" Label="Tag" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Unity Entity Group" />
+			</OutputPorts>
+		</Node>
+		<Node Guid="40844292-d250-4696-9a3c-e597c2934841" NodeType="SystemNode" NodeTypeGUID="8c5f1758-7567-41ef-9089-2e033169567d" Position="741.4426 1687.57" DisableInSubgraphs="True" ProcedureType="ConditionalProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Check">
+					<Items>
+						<Item Expanded="True" Label="If...Else">
+							<Fields>
+								<Field Expanded="True" Label="Conditions">
+									<Items>
+										<Item FixedValue="False" Label="If" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="==" Type="BinaryExpressionNode">
+													<ExprNode Name="Type" Type="ParameterExpressionNode" />
+													<ExprNode Name="String" Type="StringExpressionNode">Mesh</ExprNode>
+												</ExprNode>
+											</ParsedExpression>
+										</Item>
+										<Item FixedValue="False" Label="If" IsExpression="True">
+											<ParsedExpression>
+												<ExprNode Name="==" Type="BinaryExpressionNode">
+													<ExprNode Name="Type" Type="ParameterExpressionNode" />
+													<ExprNode Name="String" Type="StringExpressionNode">Surface</ExprNode>
+												</ExprNode>
+											</ParsedExpression>
+										</Item>
+									</Items>
+								</Field>
+								<Field Expanded="True" Label="Else">
+									<Fields />
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="3" />
+		</Node>
+		<Node Guid="e4b497a6-7187-4028-854a-e8112670d5a9" NodeType="SystemNode" NodeTypeGUID="eba3dca6-953c-4e64-9e1d-cbc934eea38c" Position="1010.566 1869.785" DisableInSubgraphs="True" ProcedureType="UnityEntityCreateProcedure">
+			<Arguments>
+				<Argument FixedValue="Sceelix Game Object (Mesh Instance)" Label="Name" />
+				<Argument FixedValue="True" Label="Enabled" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Enabled" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="True" Label="Static" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Static" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="" Label="Layer" />
+				<Argument FixedValue="" Label="Prefab" />
+				<Argument FixedValue="Minimum" Label="Positioning" />
+				<Argument FixedValue="Stretch To Fill" Label="Scale Mode" />
+				<Argument FixedValue="" Label="Tag" />
+				<Argument Expanded="True" Label="Options">
+					<Items>
+						<Item Expanded="True" Label="From Mesh Instance">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="From Mesh">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="From Actor">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="Simple">
+							<Fields>
+								<Field FixedValue="0,0,0" Label="Translation" />
+								<Field FixedValue="0,0,0" Label="Rotation" />
+								<Field FixedValue="1,1,1" Label="Scale" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="1f26f847-862d-48b0-8090-bd3bbb35dea2" NodeType="SystemNode" NodeTypeGUID="eba3dca6-953c-4e64-9e1d-cbc934eea38c" Position="707.0085 1871.808" DisableInSubgraphs="True" ProcedureType="UnityEntityCreateProcedure">
+			<Arguments>
+				<Argument FixedValue="Sceelix Game Object (Surface)" Label="Name" />
+				<Argument FixedValue="True" Label="Enabled" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Enabled" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="True" Label="Static" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Static" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="" Label="Layer" />
+				<Argument FixedValue="" Label="Prefab" />
+				<Argument FixedValue="Minimum" Label="Positioning" />
+				<Argument FixedValue="Stretch To Fill" Label="Scale Mode" />
+				<Argument FixedValue="" Label="Tag" />
+				<Argument Expanded="True" Label="Options">
+					<Items>
+						<Item Expanded="True" Label="From Surface">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="From Mesh Instance">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="From Mesh">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="From Actor">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="Simple">
+							<Fields>
+								<Field FixedValue="0,0,0" Label="Translation" />
+								<Field FixedValue="0,0,0" Label="Rotation" />
+								<Field FixedValue="1,1,1" Label="Scale" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="1#O#0" ToPort="0#I#0" FromNode="1" ToNode="0" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="0#O#0" ToPort="3#I#0" FromNode="0" ToNode="3" FromLabel="Output" ToLabel="Actors" />
+		<Edge FromPort="4#O#0" ToPort="1#I#0" FromNode="4" ToNode="1" FromLabel="Check[0].If...Else.Conditions[0].If.If" ToLabel="Options[0].From Mesh.Input" />
+		<Edge FromPort="2#O#0" ToPort="4#I#0" FromNode="2" ToNode="4" FromLabel="Operation[0].Ungroup.Output" ToLabel="Input" />
+		<Edge FromPort="5#O#0" ToPort="0#I#0" FromNode="5" ToNode="0" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="4#O#2" ToPort="5#I#0" FromNode="4" ToNode="5" FromLabel="Check[0].If...Else.Else.Else" ToLabel="Options[0].From Mesh Instance.Input" />
+		<Edge FromPort="4#O#1" ToPort="6#I#0" FromNode="4" ToNode="6" FromLabel="Check[0].If...Else.Conditions[1].If.If" ToLabel="Options[0].From Surface.Input" />
+		<Edge FromPort="6#O#0" ToPort="3#I#0" FromNode="6" ToNode="3" FromLabel="Output" ToLabel="Actors" />
+	</Edges>
+</Graph>

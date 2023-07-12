@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="a1b97466-6693-49d4-a3fd-2d9f94953af0" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters>
+		<Parameter Increment="0.1" Label="Height" Type="Sceelix.Core.Parameters.Infos.FloatParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="10" />
+		<Parameter MinValue="1" MaxValue="10" Increment="1" Label="Blocks" Type="Sceelix.Core.Parameters.Infos.IntParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="5" />
+		<Parameter Label="Displacement" Type="Sceelix.Mathematics.Parameters.Infos.Vector3DParameterInfo, Sceelix.Mathematics, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="0.05,0.05,0" />
+		<Parameter Increment="1" Label="Seed" Type="Sceelix.Core.Parameters.Infos.IntParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="1000" />
+	</Parameters>
+	<Nodes>
+		<Node Guid="6fa41276-3139-4f9c-be85-5d9ce7954680" NodeType="SystemNode" NodeTypeGUID="9924b6f2-761d-4cfd-b06e-6ba5b7cf2072" Position="1403.155 1583.373" DisableInSubgraphs="True" ProcedureType="MeshInstanceCreateProcedure">
+			<Arguments />
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="c78788af-76c0-47af-b17f-f50ba7eb6c4d" NodeType="SystemNode" NodeTypeGUID="50c9a7c0-6f52-470d-8bb7-2c8b663c94b8" Position="1480.98 1745.152" DisableInSubgraphs="True" ProcedureType="CopyProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Standard">
+							<Fields>
+								<Field FixedValue="5" Label="Number of Copies" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="Blocks" Type="ParameterExpressionNode" />
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="Clone" Label="Method" />
+								<Field FixedValue="i" Label="Index" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="96ba277f-4288-4a8c-b6b5-448f71a898cc" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="1494.311 2066.158" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="0,0,0" Label="Amount" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="+" Type="BinaryExpressionNode">
+											<ExprNode Name="displacement" Type="AttributeExpressionNode" AllowNull="False" />
+											<ExprNode Name="Vector3" Type="DirectFunctionExpressionNode">
+												<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+												<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+												<ExprNode Name="*" Type="BinaryExpressionNode">
+													<ExprNode Name="i" Type="AttributeExpressionNode" AllowNull="False" />
+													<ExprNode Name="()" Type="ParenthesisExpressionNode">
+														<ExprNode Name="/" Type="BinaryExpressionNode">
+															<ExprNode Name="Height" Type="ParameterExpressionNode" />
+															<ExprNode Name="Blocks" Type="ParameterExpressionNode" />
+														</ExprNode>
+													</ExprNode>
+												</ExprNode>
+											</ExprNode>
+										</ExprNode>
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="Scope" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="88012c69-e1a1-4883-b162-c2af8f275c1b" NodeType="SystemNode" NodeTypeGUID="92d65cb9-ef76-40fa-ad69-32707b893e36" Position="1508.392 1901.994" DisableInSubgraphs="True" ProcedureType="RandomProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Inputs">
+					<Items>
+						<Item Expanded="True" Label="Collective">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="Single">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+				<Argument Expanded="True" Label="Attributes">
+					<Items>
+						<Item Expanded="True" Label="Vector3D">
+							<Fields>
+								<Field FixedValue="-0.05,-0.05,0" Label="Minimum" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="-" Type="UnaryExpressionNode">
+											<ExprNode Name="Displacement" Type="ParameterExpressionNode" />
+										</ExprNode>
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="0.05,0.05,0" Label="Maximum" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="Displacement" Type="ParameterExpressionNode" />
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="displacement" Label="Value" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Float">
+							<Fields>
+								<Field FixedValue="0" Label="Minimum" />
+								<Field FixedValue="360" Label="Maximum" />
+								<Field FixedValue="rotation" Label="Value" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+				<Argument FixedValue="1000" Label="Seed" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Seed" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="a2460fa7-c1a1-4ba4-b7c7-25ab3bd8dc3b" NodeType="SystemNode" NodeTypeGUID="8906cb79-297a-40a5-8e36-b5f12ddbb847" Position="1505.144 2263.662" DisableInSubgraphs="True" ProcedureType="ActorRotateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Rotate">
+							<Fields>
+								<Field FixedValue="0" Label="Angle" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="rotation" Type="AttributeExpressionNode" AllowNull="False" />
+									</ParsedExpression>
+								</Field>
+								<Field Expanded="True" Label="Axis">
+									<Fields>
+										<Field FixedValue="0,0,1" Label="Direction" />
+										<Field FixedValue="Scope" Label="Relative To" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="Pivot">
+									<Fields>
+										<Field FixedValue="0.5,0.5,0.5" Label="Position" />
+										<Field FixedValue="Relative" Label="Offset" />
+										<Field FixedValue="Scope" Label="Relative To" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="6523bb0a-556a-47d7-bda3-40cf8c53225e" NodeType="SystemNode" NodeTypeGUID="74716153-9685-4a42-8409-a9c79de5f8c4" Position="1266.344 1369.735" HasImpulsePort="True" ProcedureType="MeshCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Primitive">
+					<Items>
+						<Item Expanded="True" Label="Cube">
+							<Fields>
+								<Field FixedValue="1" Label="Size" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Impulse Port 1" />
+			</InputPorts>
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="875d2b44-d4b1-40c4-92f5-518964049e02" NodeType="SystemNode" NodeTypeGUID="b3ee6334-f7cb-435c-ab3b-3802fc835e0a" Position="1317.296 2553.527" DisableInSubgraphs="True" ProcedureType="AttributeProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operations">
+					<Items>
+						<Item Expanded="True" Label="Copy All">
+							<Fields>
+								<Field Expanded="True" Label="Origin">
+									<Items>
+										<Item Expanded="True" Label="Entity">
+											<Fields>
+												<Field Expanded="True" Label="Destination">
+													<Items>
+														<Item Expanded="True" Label="Other">
+															<Fields>
+																<Field FixedValue="Complement" Label="Mode" />
+															</Fields>
+														</Item>
+														<Item Expanded="True" Label="Others">
+															<Fields>
+																<Field FixedValue="Complement" Label="Mode" />
+															</Fields>
+														</Item>
+													</Items>
+												</Field>
+											</Fields>
+										</Item>
+									</Items>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Set">
+							<Fields>
+								<Field Expanded="True" Label="Origin">
+									<Items>
+										<Item Expanded="True" Label="Entity">
+											<Fields>
+												<Field FixedValue="System.Object" Label="Value" IsExpression="True">
+													<ParsedExpression>
+														<ExprNode Name="String" Type="ConstantExpressionNode"></ExprNode>
+													</ParsedExpression>
+												</Field>
+												<Field Expanded="True" Label="Destination">
+													<Items>
+														<Item Expanded="True" Label="Self">
+															<Fields>
+																<Field FixedValue="" Label="Attribute" />
+															</Fields>
+														</Item>
+													</Items>
+												</Field>
+											</Fields>
+										</Item>
+									</Items>
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="2" />
+			<OutputPorts Count="2">
+				<Port id="0" state="Blocked" />
+				<Port id="1" state="Gate" GateLabel="Output" />
+			</OutputPorts>
+		</Node>
+		<Node Guid="e546b8ff-b5d4-4cf6-a060-a65eab297a0b" NodeType="SystemNode" NodeTypeGUID="c1722ebb-8bc2-45a1-a146-b3767d611cd1" Position="1461.449 2421" DisableInSubgraphs="True" ProcedureType="ActorGroupProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Group">
+							<Fields>
+								<Field FixedValue="True" Label="Merge Attributes" />
+								<Field Expanded="True" Label="Criteria">
+									<Items />
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="0#O#0" ToPort="1#I#0" FromNode="0" ToNode="1" FromLabel="Output" ToLabel="Operation[0].Standard.Input" />
+		<Edge FromPort="1#O#0" ToPort="3#I#0" FromNode="1" ToNode="3" FromLabel="Operation[0].Standard.Output" ToLabel="Inputs[0].Collective.Collective" />
+		<Edge FromPort="3#O#0" ToPort="2#I#0" FromNode="3" ToNode="2" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="2#O#0" ToPort="4#I#0" FromNode="2" ToNode="4" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="5#O#0" ToPort="0#I#0" FromNode="5" ToNode="0" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="5#O#0" ToPort="6#I#0" FromNode="5" ToNode="6" FromLabel="Output" ToLabel="Operations[0].Copy All.Origin[0].Entity.Input" />
+		<Edge FromPort="4#O#0" ToPort="7#I#0" FromNode="4" ToNode="7" FromLabel="Output" ToLabel="Operation[0].Group.Input" />
+		<Edge FromPort="7#O#0" ToPort="6#I#1" FromNode="7" ToNode="6" FromLabel="Operation[0].Group.Output" ToLabel="Operations[0].Copy All.Origin[0].Entity.Destination[0].Other.Input" />
+	</Edges>
+</Graph>

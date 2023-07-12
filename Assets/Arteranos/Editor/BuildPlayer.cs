@@ -97,6 +97,14 @@ namespace Arteranos
             Debug.Log($"Version detected: {v.Full}");
         }
 
+        public static string[] GetSceneNames()
+        {
+            return new[] { 
+//                "Assets/Arteranos/Scenes/SampleScene.unity"
+                "Assets/Arteranos/Scenes/OfflineScene.unity"
+            };
+        }
+
         [MenuItem("Arteranos/Build Windows64", false, 110)]
         public static void BuildWin64()
         {
@@ -108,7 +116,7 @@ namespace Arteranos
 
             BuildPlayerOptions bpo = new()
             {
-                scenes = new[] { "Assets/Arteranos/Scenes/SampleScene.unity" },
+                scenes = GetSceneNames(),
                 locationPathName = $"build/Win64/{appName}.exe",
                 target = BuildTarget.StandaloneWindows64,
                 subtarget = (int) StandaloneBuildSubtarget.Player,
@@ -131,7 +139,7 @@ namespace Arteranos
 
             BuildPlayerOptions bpo = new()
             {
-                scenes = new[] { "Assets/Arteranos/Scenes/SampleScene.unity" },
+                scenes = GetSceneNames(),
                 locationPathName = $"build/Win64-Server/{appName}-Server.exe",
                 target = BuildTarget.StandaloneWindows64,
                 subtarget = (int) StandaloneBuildSubtarget.Server,

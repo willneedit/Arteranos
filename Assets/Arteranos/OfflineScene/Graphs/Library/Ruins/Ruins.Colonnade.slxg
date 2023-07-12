@@ -1,0 +1,283 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="f8e0b13d-254a-4564-95bd-717ca9a38fbf" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters>
+		<Parameter Increment="1" Label="Seed" Type="Sceelix.Core.Parameters.Infos.IntParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="0" />
+	</Parameters>
+	<Nodes>
+		<Node Guid="5abef1e5-d5d7-46e6-b4a2-39c9e0e66da3" NodeType="ComponentNode" NodeTypeGUID="a1b97466-6693-49d4-a3fd-2d9f94953af0" Position="1644.642 802.9854" DisableInSubgraphs="True" RelativePath="Graphs/Library/Ruins/Ruins.Column.slxg">
+			<Arguments>
+				<Argument FixedValue="2" Label="Height" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="*" Type="BinaryExpressionNode">
+							<ExprNode Name="Double" Type="DoubleExpressionNode">1.5</ExprNode>
+							<ExprNode Name="Blocks" Type="AttributeExpressionNode" AllowNull="False" />
+						</ExprNode>
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="0" Label="Blocks" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Blocks" Type="AttributeExpressionNode" AllowNull="False" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="0.05,0.05,0" Label="Displacement" />
+				<Argument FixedValue="1000" Label="Seed" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="+" Type="BinaryExpressionNode">
+							<ExprNode Name="Seed" Type="ParameterExpressionNode" />
+							<ExprNode Name="*" Type="BinaryExpressionNode">
+								<ExprNode Name="()" Type="ParenthesisExpressionNode">
+									<ExprNode Name="+" Type="BinaryExpressionNode">
+										<ExprNode Name="n" Type="AttributeExpressionNode" AllowNull="False" />
+										<ExprNode Name="Int32" Type="ConstantExpressionNode">1</ExprNode>
+									</ExprNode>
+								</ExprNode>
+								<ExprNode Name="Int32" Type="ConstantExpressionNode">2</ExprNode>
+							</ExprNode>
+						</ExprNode>
+					</ParsedExpression>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="e4461f5c-fb29-4e25-b2c1-126085ec1c0c" NodeType="SystemNode" NodeTypeGUID="2ef7c2e5-c59f-464b-8557-c1e4e38216a9" Position="1676.509 530.184" ProcedureType="EntityCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Method">
+					<Items>
+						<Item Expanded="True" Label="Standard">
+							<Fields>
+								<Field FixedValue="7" Label="Count" />
+								<Field FixedValue="n" Label="Index" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="018b408a-fce6-40f2-8afb-8b7ad41722f0" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="1672.281 1017.328" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="5,0,0" Label="Amount" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="[]" Type="ArrayExpressionNode">
+											<ExprNode Name="*" Type="BinaryExpressionNode">
+												<ExprNode Name="Int32" Type="ConstantExpressionNode">5</ExprNode>
+												<ExprNode Name="n" Type="AttributeExpressionNode" AllowNull="False" />
+											</ExprNode>
+											<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+											<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+										</ExprNode>
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="World" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="62d4326e-8559-4381-af9c-f79420f84472" NodeType="SystemNode" NodeTypeGUID="92d65cb9-ef76-40fa-ad69-32707b893e36" Position="1694.063 663.5272" DisableInSubgraphs="True" ProcedureType="RandomProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Inputs">
+					<Items>
+						<Item Expanded="True" Label="Collective">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+				<Argument Expanded="True" Label="Attributes">
+					<Items>
+						<Item Expanded="True" Label="Integer">
+							<Fields>
+								<Field FixedValue="1" Label="Minimum" />
+								<Field FixedValue="7" Label="Maximum" />
+								<Field FixedValue="Blocks" Label="Value" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+				<Argument FixedValue="10124" Label="Seed" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Seed" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="4a08f260-7bb3-4260-a0e9-8a6b578f8964" NodeType="SystemNode" NodeTypeGUID="4c7a38df-e3a0-4a77-abb0-599f275d414c" Position="1624.021 1425.683" DisableInSubgraphs="True" ProcedureType="ActorInsertProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Inputs">
+					<Items>
+						<Item Expanded="True" Label="Many to Many">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="One to Many">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="One to One">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+				<Argument Expanded="True" Label="Alignment on X-Axis">
+					<Items>
+						<Item Expanded="True" Label="Center">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="Stretch">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="None">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+				<Argument Expanded="True" Label="Alignment on Y-Axis">
+					<Items>
+						<Item Expanded="True" Label="Center">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="Stretch">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="None">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+				<Argument Expanded="True" Label="Alignment on Z-Axis">
+					<Items>
+						<Item Expanded="True" Label="Center">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="Stretch">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="Minimum">
+							<Fields />
+						</Item>
+						<Item Expanded="True" Label="None">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="2" />
+			<OutputPorts Count="2">
+				<Port id="0" state="Gate" GateLabel="Source" />
+				<Port id="1" state="Blocked" />
+			</OutputPorts>
+		</Node>
+		<Node Guid="d0ff3ba3-be08-48d2-ae46-05e68648c10e" NodeType="SystemNode" NodeTypeGUID="c1722ebb-8bc2-45a1-a146-b3767d611cd1" Position="1663.476 1148.634" DisableInSubgraphs="True" ProcedureType="ActorGroupProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Ungroup">
+							<Fields>
+								<Field FixedValue="Parent and Actor" Label="Attributes" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Group">
+							<Fields>
+								<Field FixedValue="True" Label="Merge Attributes" />
+								<Field Expanded="True" Label="Criteria">
+									<Items />
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="e99a38cd-0b92-47af-8be9-fba32689b148" NodeType="SystemNode" NodeTypeGUID="3f477acc-ff16-4ceb-9f54-0b1404dc149b" Position="1350.328 1229.575" DisableInSubgraphs="True" ProcedureType="CollectionProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Shuffle">
+							<Fields>
+								<Field FixedValue="0" Label="Seed" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="*" Type="BinaryExpressionNode">
+											<ExprNode Name="Seed" Type="ParameterExpressionNode" />
+											<ExprNode Name="Int32" Type="ConstantExpressionNode">2</ExprNode>
+										</ExprNode>
+									</ParsedExpression>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Count">
+							<Fields>
+								<Field FixedValue="" Label="Index" />
+								<Field FixedValue="" Label="Count" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="3d0700f5-e491-4b42-bdfc-3bab99aa2c20" NodeType="SystemNode" NodeTypeGUID="50c9a7c0-6f52-470d-8bb7-2c8b663c94b8" Position="1391.761 1058.429" DisableInSubgraphs="True" ProcedureType="CopyProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Standard">
+							<Fields>
+								<Field FixedValue="100" Label="Number of Copies" />
+								<Field FixedValue="Clone" Label="Method" />
+								<Field FixedValue="" Label="Index" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="86d244a0-68fa-4d0b-b8fd-4c38579f3668" NodeType="SystemNode" NodeTypeGUID="c1722ebb-8bc2-45a1-a146-b3767d611cd1" Position="1429 910" DisableInSubgraphs="True" ProcedureType="ActorGroupProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Ungroup">
+							<Fields>
+								<Field FixedValue="Parent and Actor" Label="Attributes" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Group">
+							<Fields>
+								<Field FixedValue="True" Label="Merge Attributes" />
+								<Field Expanded="True" Label="Criteria">
+									<Items />
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Input" />
+			</InputPorts>
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="1#O#0" ToPort="3#I#0" FromNode="1" ToNode="3" FromLabel="Entities" ToLabel="Inputs[0].Collective.Collective" />
+		<Edge FromPort="0#O#0" ToPort="2#I#0" FromNode="0" ToNode="2" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="3#O#0" ToPort="0#I#0" FromNode="3" ToNode="0" FromLabel="Output" ToLabel="Impulse Port 1" />
+		<Edge FromPort="2#O#0" ToPort="5#I#0" FromNode="2" ToNode="5" FromLabel="Output" ToLabel="Operation[0].Ungroup.Input" />
+		<Edge FromPort="5#O#0" ToPort="4#I#1" FromNode="5" ToNode="4" FromLabel="Operation[0].Ungroup.Output" ToLabel="Inputs[0].Many to Many.Targets" />
+		<Edge FromPort="6#O#0" ToPort="4#I#0" FromNode="6" ToNode="4" FromLabel="Output" ToLabel="Inputs[0].Many to Many.Sources" />
+		<Edge FromPort="7#O#0" ToPort="6#I#0" FromNode="7" ToNode="6" FromLabel="Operation[0].Standard.Output" ToLabel="Input" />
+		<Edge FromPort="8#O#0" ToPort="7#I#0" FromNode="8" ToNode="7" FromLabel="Operation[0].Ungroup.Output" ToLabel="Operation[0].Standard.Input" />
+	</Edges>
+</Graph>

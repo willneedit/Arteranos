@@ -1,0 +1,19 @@
+
+<Texture Size="512,512" Id="7" >
+	<Normalmap Id="5" Input="3,0" IsReverse="false" IsAbs="false" Wrap="Clamp" HeightScale="0.164063" KernelRadius="3" IsPacked="true" />
+	<Bumpmap Id="6" Input="5,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Rgba="255,255,255,255" Position="0.000000,0.000000" Attenuation="0.000000,0.000000" SpecPower="0" IsTileable="true" />
+	<Noise Id="3" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" IterCount="1" Seed="1" SumAmpl="0.000000" Bias="1.000000" Scale="0.718750,0.625000" />
+	<Combine Id="7" Input="6,4" IsReverse="false" IsAbs="false" Wrap="Clamp" Mode="Mul,Mul,Mul,Add" />
+	<Combine Id="4" Input="3,2" IsReverse="false" IsAbs="false" Wrap="Clamp" Mode="Sub,Sub,Sub,Add" />
+	<RandomPixels Id="1" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Seed="1" FillRate="0.398438" Brightness="0.000000,1.000000" />
+	<Blur Id="2" Input="1,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Radius="3" PassCount="4" Amplify="0.164063" Type="xy" />
+</Texture>
+<TexgenTool >
+	<Node Id="5" RectX="20" RectY="120" RectW="120" RectH="20" />
+	<Node Id="6" RectX="20" RectY="140" RectW="120" RectH="20" />
+	<Node Id="3" RectX="80" RectY="100" RectW="120" RectH="20" />
+	<Node Id="7" RectX="80" RectY="160" RectW="120" RectH="20" />
+	<Node Id="4" RectX="160" RectY="120" RectW="120" RectH="40" />
+	<Node Id="1" RectX="200" RectY="80" RectW="120" RectH="20" />
+	<Node Id="2" RectX="200" RectY="100" RectW="120" RectH="20" />
+</TexgenTool>

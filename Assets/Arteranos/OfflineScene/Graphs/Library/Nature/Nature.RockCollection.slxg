@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="9086a2bd-1570-4185-85dd-c6e63e8bd1ef" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters>
+		<Parameter Increment="1" Label="Seed" Type="Sceelix.Core.Parameters.Infos.IntParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Section="" FixedValue="1011" />
+		<Parameter Increment="1" Label="Amount" Type="Sceelix.Core.Parameters.Infos.IntParameterInfo, Sceelix.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Description="Number of entities to create." Section="" FixedValue="5" />
+	</Parameters>
+	<Nodes>
+		<Node Guid="f5cd482a-874f-4d9c-b4df-c9c1bff53216" NodeType="ComponentNode" NodeTypeGUID="0046f824-e509-4d05-830a-ad03592bb6f0" Position="1735.375 767.6489" DisableInSubgraphs="True" RelativePath="Graphs/Library/Nature/Nature.Rock.slxg">
+			<Arguments>
+				<Argument FixedValue="1,1,1" Label="Scale" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Size" Type="AttributeExpressionNode" AllowNull="False" />
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="0.05,0.05,0.05" Label="Jaggedness" />
+				<Argument FixedValue="1028" Label="Seed" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="SecondSeed" Type="AttributeExpressionNode" AllowNull="False" />
+					</ParsedExpression>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="33447d86-ea93-4b71-add3-49e249ec2100" NodeType="SystemNode" NodeTypeGUID="2ef7c2e5-c59f-464b-8557-c1e4e38216a9" Position="1730.366 452.3961" ProcedureType="EntityCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Method">
+					<Items>
+						<Item Expanded="True" Label="Standard">
+							<Fields>
+								<Field FixedValue="5" Label="Count" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="Amount" Type="ParameterExpressionNode" />
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="i" Label="Index" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="779f1acc-b2cf-4ee9-a053-f5d47ca369d0" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="1725.699 940.8333" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="0,0,0" Label="Amount" IsExpression="True">
+									<ParsedExpression>
+										<ExprNode Name="[]" Type="ArrayExpressionNode">
+											<ExprNode Name="*" Type="BinaryExpressionNode">
+												<ExprNode Name="i" Type="AttributeExpressionNode" AllowNull="False" />
+												<ExprNode Name="Int32" Type="ConstantExpressionNode">3</ExprNode>
+											</ExprNode>
+											<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+											<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+										</ExprNode>
+									</ParsedExpression>
+								</Field>
+								<Field FixedValue="World" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Output" />
+			</OutputPorts>
+		</Node>
+		<Node Guid="4cd06da9-c7dc-4a97-94d7-aaeacee4a90a" NodeType="SystemNode" NodeTypeGUID="92d65cb9-ef76-40fa-ad69-32707b893e36" Position="1739.952 591.061" DisableInSubgraphs="True" ProcedureType="RandomProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Inputs">
+					<Items>
+						<Item Expanded="True" Label="Collective">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+				<Argument Expanded="True" Label="Attributes">
+					<Items>
+						<Item Expanded="True" Label="Vector3D">
+							<Fields>
+								<Field FixedValue="0.5,0.5,0.5" Label="Minimum" />
+								<Field FixedValue="2,2,2" Label="Maximum" />
+								<Field FixedValue="Size" Label="Value" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Integer">
+							<Fields>
+								<Field FixedValue="0" Label="Minimum" />
+								<Field FixedValue="65536" Label="Maximum" />
+								<Field FixedValue="SecondSeed" Label="Value" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+				<Argument FixedValue="1006" Label="Seed" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="Seed" Type="ParameterExpressionNode" />
+					</ParsedExpression>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="1#O#0" ToPort="3#I#0" FromNode="1" ToNode="3" FromLabel="Entities" ToLabel="Inputs[0].Collective.Collective" />
+		<Edge FromPort="3#O#0" ToPort="0#I#0" FromNode="3" ToNode="0" FromLabel="Output" ToLabel="Impulse Port 1" />
+		<Edge FromPort="0#O#0" ToPort="2#I#0" FromNode="0" ToNode="2" FromLabel="Output" ToLabel="Input" />
+	</Edges>
+</Graph>

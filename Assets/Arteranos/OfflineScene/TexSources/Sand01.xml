@@ -1,0 +1,11 @@
+
+<Texture Size="512,512" Id="2" >
+	<Noise Id="1" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" IterCount="6" Seed="4" SumAmpl="0.042969" Bias="1.000000" Scale="0.109375,0.117188" />
+	<Palette Id="2" Input="3,0" IsReverse="false" IsAbs="false" Wrap="Clamp" MinRgb="200,171,131,255" MaxRgb="231,204,165,255" />
+	<ColorSpace Id="3" Input="1,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Hue="0.000000" Saturation="0.500000" Value="0.667969" Contrast="0.250000" Gamma="0.500000" />
+</Texture>
+<TexgenTool >
+	<Node Id="1" RectX="140" RectY="80" RectW="120" RectH="20" />
+	<Node Id="2" RectX="140" RectY="120" RectW="120" RectH="20" />
+	<Node Id="3" RectX="140" RectY="100" RectW="120" RectH="20" />
+</TexgenTool>

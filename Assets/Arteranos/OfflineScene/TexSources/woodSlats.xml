@@ -1,0 +1,25 @@
+
+<Texture Size="512,512" Id="10" >
+	<Noise Id="1" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Repeat" IterCount="3" Seed="7" SumAmpl="1.000000" Bias="1.000000" Scale="0.000000,0.335938" />
+	<Combine Id="2" Input="3,7" IsReverse="false" IsAbs="false" Wrap="Clamp" Mode="Mul,Mul,Mul,Mul" />
+	<Blur Id="3" Input="1,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Radius="6" PassCount="4" Amplify="0.000000" Type="x" />
+	<Palette Id="4" Input="2,0" IsReverse="false" IsAbs="false" Wrap="Clamp" MinRgb="72,43,5,0" MaxRgb="94,40,17,255" />
+	<Combine Id="5" Input="4,6" IsReverse="false" IsAbs="false" Wrap="None" Mode="Add,Add,Add,SetOne" />
+	<Bumpmap Id="6" Input="8,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Rgba="128,128,128,255" Position="0.109375,0.843750" Attenuation="0.000000,0.000000" SpecPower="1" IsTileable="true" />
+	<Noise Id="7" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" IterCount="5" Seed="14" SumAmpl="0.000000" Bias="1.000000" Scale="0.128906,0.828125" />
+	<Normalmap Id="8" Input="2,0" IsReverse="false" IsAbs="false" Wrap="Clamp" HeightScale="0.000000" KernelRadius="2" IsPacked="true" />
+	<Combine Id="10" Input="5,9" IsReverse="false" IsAbs="false" Wrap="Clamp" Mode="Mul,Mul,Mul,Mul" />
+	<Ramp Id="9" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Repeat" Period="1,0" Shift="0,0" Power="0.120000,2.000000" IsMirror="1,0" />
+</Texture>
+<TexgenTool >
+	<Node Id="1" RectX="200" RectY="160" RectW="120" RectH="20" />
+	<Node Id="2" RectX="200" RectY="200" RectW="260" RectH="20" />
+	<Node Id="3" RectX="200" RectY="180" RectW="120" RectH="20" />
+	<Node Id="4" RectX="200" RectY="220" RectW="120" RectH="80" />
+	<Node Id="5" RectX="280" RectY="300" RectW="120" RectH="20" />
+	<Node Id="6" RectX="340" RectY="240" RectW="120" RectH="60" />
+	<Node Id="7" RectX="340" RectY="180" RectW="120" RectH="20" />
+	<Node Id="8" RectX="340" RectY="220" RectW="120" RectH="20" />
+	<Node Id="10" RectX="340" RectY="320" RectW="120" RectH="20" />
+	<Node Id="9" RectX="400" RectY="300" RectW="120" RectH="20" />
+</TexgenTool>

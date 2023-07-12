@@ -1,0 +1,21 @@
+
+<Texture Size="512,512" Id="6" >
+	<Noise Id="14" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" IterCount="1" Seed="0" SumAmpl="0.386719" Bias="1.000000" Scale="0.265625,0.347656" />
+	<Combine Id="13" Input="14,12" IsReverse="false" IsAbs="false" Wrap="Clamp" Mode="Mul,Mul,Mul,Add" />
+	<Palette Id="12" Input="7,0" IsReverse="false" IsAbs="false" Wrap="Clamp" MinRgb="255,255,255,0" MaxRgb="0,0,0,255" />
+	<ColorSpace Id="7" Input="4,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Hue="0.000000" Saturation="1.000000" Value="1.000000" Contrast="0.433594" Gamma="0.500000" />
+	<Cell Id="1" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Type="1" PointCount="3" Seed="206" Power="0.000000" />
+	<ColorSpace Id="4" Input="1,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Hue="0.000000" Saturation="0.500000" Value="1.000000" Contrast="0.253906" Gamma="0.500000" />
+	<Distort Id="6" Input="13,5" IsReverse="false" IsAbs="false" Wrap="Clamp" Channel="0,0" Amplify="0.558594,0.605469" />
+	<Noise Id="5" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" IterCount="1" Seed="0" SumAmpl="0.000000" Bias="1.000000" Scale="0.398438,0.226563" />
+</Texture>
+<TexgenTool >
+	<Node Id="14" RectX="40" RectY="120" RectW="120" RectH="20" />
+	<Node Id="13" RectX="80" RectY="140" RectW="200" RectH="20" />
+	<Node Id="12" RectX="160" RectY="120" RectW="120" RectH="20" />
+	<Node Id="7" RectX="160" RectY="100" RectW="120" RectH="20" />
+	<Node Id="1" RectX="160" RectY="60" RectW="120" RectH="20" />
+	<Node Id="4" RectX="160" RectY="80" RectW="120" RectH="20" />
+	<Node Id="6" RectX="220" RectY="160" RectW="160" RectH="20" />
+	<Node Id="5" RectX="280" RectY="140" RectW="120" RectH="20" />
+</TexgenTool>

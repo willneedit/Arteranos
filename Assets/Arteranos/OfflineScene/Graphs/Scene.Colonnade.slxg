@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="38d9f616-b6b5-4e8b-ba5d-8e492cf2ecc8" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters />
+	<Nodes>
+		<Node Guid="aa4e4771-484f-4bf3-bb33-2dedfddcb4c1" NodeType="ComponentNode" NodeTypeGUID="f8e0b13d-254a-4564-95bd-717ca9a38fbf" Position="96.07703 1084.332" DisableInSubgraphs="True" RelativePath="Graphs/Library/Ruins/Ruins.Colonnade.slxg">
+			<Arguments>
+				<Argument FixedValue="3" Label="Seed" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="7011edc3-f614-466c-9770-c8df04ccd494" NodeType="ComponentNode" NodeTypeGUID="f8e0b13d-254a-4564-95bd-717ca9a38fbf" Position="392.4341 1101.541" DisableInSubgraphs="True" RelativePath="Graphs/Library/Ruins/Ruins.Colonnade.slxg">
+			<Arguments>
+				<Argument FixedValue="4" Label="Seed" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="014b3d61-8828-4a9b-a06c-fe3ec1165f2a" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="429.7542 1303.162" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="0,10,0" Label="Amount" />
+								<Field FixedValue="World" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="8f09dd8f-bc0e-41fa-ad2e-87061b289403" NodeType="ComponentNode" NodeTypeGUID="59e234da-b68a-4f75-8951-696809007235" Position="258.7909 793.9296" RelativePath="Graphs/Library/Ruins/Ruins.ColumnBlocks.slxg">
+			<Arguments />
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="64cc1e89-019c-4fe3-98b1-70ee42c14634" NodeType="SystemNode" NodeTypeGUID="c1722ebb-8bc2-45a1-a146-b3767d611cd1" Position="247.0271 1496.847" DisableInSubgraphs="True" ProcedureType="ActorGroupProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Group">
+							<Fields>
+								<Field FixedValue="True" Label="Merge Attributes" />
+								<Field Expanded="True" Label="Criteria">
+									<Items />
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Output" />
+			</OutputPorts>
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="1#O#0" ToPort="2#I#0" FromNode="1" ToNode="2" FromLabel="Source" ToLabel="Input" />
+		<Edge FromPort="3#O#0" ToPort="0#I#0" FromNode="3" ToNode="0" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="3#O#0" ToPort="1#I#0" FromNode="3" ToNode="1" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="0#O#0" ToPort="4#I#0" FromNode="0" ToNode="4" FromLabel="Source" ToLabel="Operation[0].Group.Input" />
+		<Edge FromPort="2#O#0" ToPort="4#I#0" FromNode="2" ToNode="4" FromLabel="Output" ToLabel="Operation[0].Group.Input" />
+	</Edges>
+</Graph>

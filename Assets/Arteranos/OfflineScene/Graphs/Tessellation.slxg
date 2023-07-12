@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="da73a5c5-68a7-4cdd-91d6-7f5afbbdf6cb" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters />
+	<Nodes>
+		<Node Guid="aebb5026-3256-439f-aff3-3bbf77d618ca" NodeType="SystemNode" NodeTypeGUID="8034DF9C-9104-453D-B249-B06D9073AC32" Position="1033.472 568.9636" DisableInSubgraphs="True" ProcedureType="MeshTessellate">
+			<Arguments>
+				<Argument FixedValue="Tessellate" Label="Operation" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="aac1bc9e-897e-4bf0-9b30-18b42646b74e" NodeType="SystemNode" NodeTypeGUID="b7594853-ebae-4cc5-a7d0-bb4390e49877" Position="1401.256 785.167" DisableInSubgraphs="True" ProcedureType="ForCycleProcedure">
+			<Arguments>
+				<Argument FixedValue="1" Label="Start" />
+				<Argument FixedValue="7" Label="End" />
+				<Argument FixedValue="1" Label="Increment" />
+				<Argument FixedValue="index" Label="Index" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="2" />
+		</Node>
+		<Node Guid="0b26cc73-1909-48c9-9dbd-5d631eef91e5" NodeType="SystemNode" NodeTypeGUID="74716153-9685-4a42-8409-a9c79de5f8c4" Position="1399.936 463.6248" DisableInSubgraphs="True" ProcedureType="MeshCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Primitive">
+					<Items>
+						<Item Expanded="True" Label="Face">
+							<Fields>
+								<Field Expanded="True" Label="Boundary">
+									<Items>
+										<Item FixedValue="-5,0,0" Label="Point" />
+										<Item FixedValue="0,10,0" Label="Point" />
+										<Item FixedValue="5,0,0" Label="Point" />
+									</Items>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cube">
+							<Fields>
+								<Field FixedValue="1" Label="Size" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="f44266ee-a5bd-4e77-afc5-13279530a531" NodeType="SystemNode" NodeTypeGUID="8034DF9C-9104-453D-B249-B06D9073AC33" Position="1016.962 905.5351" DisableInSubgraphs="True" ProcedureType="MeshDistort">
+			<Arguments>
+				<Argument FixedValue="0,0,1" Label="Direction" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="[]" Type="ArrayExpressionNode">
+							<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+							<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+							<ExprNode Name="/" Type="BinaryExpressionNode">
+								<ExprNode Name="Int32" Type="ConstantExpressionNode">4</ExprNode>
+								<ExprNode Name="Pow" Type="DirectFunctionExpressionNode">
+									<ExprNode Name="Int32" Type="ConstantExpressionNode">2</ExprNode>
+									<ExprNode Name="index" Type="AttributeExpressionNode" AllowNull="False" />
+								</ExprNode>
+							</ExprNode>
+						</ExprNode>
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="1000" Label="Seed" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="+" Type="BinaryExpressionNode">
+							<ExprNode Name="Int32" Type="ConstantExpressionNode">1000</ExprNode>
+							<ExprNode Name="index" Type="AttributeExpressionNode" AllowNull="False" />
+						</ExprNode>
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="World" Label="Relative To" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="7c20f754-c4bd-4b1c-b5d2-364e91143ffc" NodeType="SystemNode" NodeTypeGUID="74716153-9685-4a42-8409-a9c79de5f8c4" Position="2124.302 603.7665" DisableInSubgraphs="True" ProcedureType="MeshCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Primitive">
+					<Items>
+						<Item Expanded="True" Label="Sphere">
+							<Fields>
+								<Field FixedValue="10" Label="Horizontal Segments" />
+								<Field FixedValue="1" Label="Radius" />
+								<Field FixedValue="10" Label="Vertical Segments" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cube">
+							<Fields>
+								<Field FixedValue="1" Label="Size" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="743a6172-44b3-49c1-9105-c43ca70a60b1" NodeType="SystemNode" NodeTypeGUID="b7594853-ebae-4cc5-a7d0-bb4390e49877" Position="2136.993 791.5184" DisableInSubgraphs="True" ProcedureType="ForCycleProcedure">
+			<Arguments>
+				<Argument FixedValue="1" Label="Start" />
+				<Argument FixedValue="3" Label="End" />
+				<Argument FixedValue="1" Label="Increment" />
+				<Argument FixedValue="index" Label="Index" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="2" />
+		</Node>
+		<Node Guid="9cd9e095-f196-456c-87b1-191b3fa77ae1" NodeType="SystemNode" NodeTypeGUID="8034DF9C-9104-453D-B249-B06D9073AC32" Position="1804.523 647.9318" DisableInSubgraphs="True" ProcedureType="MeshTessellate">
+			<Arguments>
+				<Argument FixedValue="Tessellate" Label="Operation" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="ba548ce3-9273-4065-8a52-497853e1bf27" NodeType="SystemNode" NodeTypeGUID="8034DF9C-9104-453D-B249-B06D9073AC33" Position="1833.918 983.5601" DisableInSubgraphs="True" ProcedureType="MeshDistort">
+			<Arguments>
+				<Argument FixedValue="0,0,1" Label="Direction" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="[]" Type="ArrayExpressionNode">
+							<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+							<ExprNode Name="Int32" Type="ConstantExpressionNode">0</ExprNode>
+							<ExprNode Name="/" Type="BinaryExpressionNode">
+								<ExprNode Name="Int32" Type="ConstantExpressionNode">1</ExprNode>
+								<ExprNode Name="Pow" Type="DirectFunctionExpressionNode">
+									<ExprNode Name="Int32" Type="ConstantExpressionNode">5</ExprNode>
+									<ExprNode Name="index" Type="AttributeExpressionNode" AllowNull="False" />
+								</ExprNode>
+							</ExprNode>
+						</ExprNode>
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="1000" Label="Seed" IsExpression="True">
+					<ParsedExpression>
+						<ExprNode Name="+" Type="BinaryExpressionNode">
+							<ExprNode Name="Int32" Type="ConstantExpressionNode">4000</ExprNode>
+							<ExprNode Name="*" Type="BinaryExpressionNode">
+								<ExprNode Name="index" Type="AttributeExpressionNode" AllowNull="False" />
+								<ExprNode Name="Int32" Type="ConstantExpressionNode">2</ExprNode>
+							</ExprNode>
+						</ExprNode>
+					</ParsedExpression>
+				</Argument>
+				<Argument FixedValue="Normals" Label="Relative To" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="3e1b4de4-9d21-4755-b0f3-547c240476c5" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="1477 992" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="0,0,4" Label="Amount" />
+								<Field FixedValue="World" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="1#O#0" ToPort="0#I#0" FromNode="1" ToNode="0" FromLabel="Loop" ToLabel="Input" />
+		<Edge FromPort="2#O#0" ToPort="1#I#0" FromNode="2" ToNode="1" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="3#O#0" ToPort="1#I#0" FromNode="3" ToNode="1" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="4#O#0" ToPort="5#I#0" FromNode="4" ToNode="5" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="5#O#0" ToPort="6#I#0" FromNode="5" ToNode="6" FromLabel="Loop" ToLabel="Input" />
+		<Edge FromPort="7#O#0" ToPort="5#I#0" FromNode="7" ToNode="5" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="1#O#1" ToPort="8#I#0" FromNode="1" ToNode="8" FromLabel="Loop Exit" ToLabel="Input" />
+		<Edge FromPort="0#O#0" ToPort="3#I#0" FromNode="0" ToNode="3" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="6#O#0" ToPort="7#I#0" FromNode="6" ToNode="7" FromLabel="Output" ToLabel="Input" />
+	</Edges>
+</Graph>

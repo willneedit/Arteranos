@@ -1,0 +1,29 @@
+
+<Texture Size="512,512" Id="7" >
+	<Cell Id="1" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Type="0" PointCount="61" Seed="219" Power="0.000000" />
+	<Normalmap Id="2" Input="1,0" IsReverse="false" IsAbs="false" Wrap="Clamp" HeightScale="0.484375" KernelRadius="2" IsPacked="true" />
+	<Blur Id="4" Input="3,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Radius="3" PassCount="6" Amplify="0.000000" Type="xy" />
+	<Bumpmap Id="3" Input="2,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Rgba="255,255,255,255" Position="0.609375,0.000000" Attenuation="0.000000,0.000000" SpecPower="0" IsTileable="true" />
+	<Palette Id="5" Input="4,0" IsReverse="false" IsAbs="false" Wrap="Clamp" MinRgb="132,99,61,0" MaxRgb="221,186,140,255" />
+	<Combine Id="7" Input="5,11" IsReverse="false" IsAbs="false" Wrap="Clamp" Mode="Mul,Mul,Mul,SetOne" />
+	<Noise Id="6" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" IterCount="2" Seed="2" SumAmpl="0.000000" Bias="1.000000" Scale="1.000000,1.000000" />
+	<GeomTransform Id="12" Input="6,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Scale="0.304688,0.292969" Rotate="0.000000" Position="0.000000,0.000000" DoScale="true" DoRotate="false" DoTranslate="false" />
+	<Combine Id="10" Input="12,9" IsReverse="false" IsAbs="false" Wrap="Clamp" Mode="Mul,Mul,Mul,Add" />
+	<ColorSpace Id="11" Input="10,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Hue="0.000000" Saturation="0.000000" Value="0.859375" Contrast="0.136719" Gamma="0.238281" />
+	<Noise Id="8" Input="0,0" IsReverse="false" IsAbs="false" Wrap="Clamp" IterCount="2" Seed="2" SumAmpl="0.000000" Bias="1.000000" Scale="1.000000,1.000000" />
+	<GeomTransform Id="9" Input="8,0" IsReverse="false" IsAbs="false" Wrap="Clamp" Scale="0.472656,0.468750" Rotate="0.000000" Position="0.000000,0.000000" DoScale="true" DoRotate="false" DoTranslate="false" />
+</Texture>
+<TexgenTool >
+	<Node Id="1" RectX="200" RectY="40" RectW="120" RectH="20" />
+	<Node Id="2" RectX="200" RectY="60" RectW="120" RectH="20" />
+	<Node Id="4" RectX="200" RectY="100" RectW="120" RectH="20" />
+	<Node Id="3" RectX="200" RectY="80" RectW="120" RectH="20" />
+	<Node Id="5" RectX="200" RectY="120" RectW="120" RectH="20" />
+	<Node Id="7" RectX="220" RectY="140" RectW="280" RectH="20" />
+	<Node Id="6" RectX="340" RectY="60" RectW="120" RectH="20" />
+	<Node Id="12" RectX="340" RectY="80" RectW="120" RectH="20" />
+	<Node Id="10" RectX="380" RectY="100" RectW="120" RectH="20" />
+	<Node Id="11" RectX="380" RectY="120" RectW="120" RectH="20" />
+	<Node Id="8" RectX="460" RectY="60" RectW="120" RectH="20" />
+	<Node Id="9" RectX="460" RectY="80" RectW="120" RectH="20" />
+</TexgenTool>

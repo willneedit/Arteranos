@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="59e234da-b68a-4f75-8951-696809007235" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters />
+	<Nodes>
+		<Node Guid="4c86efda-a1ca-4bc0-9496-bc456ba32f75" NodeType="ComponentNode" NodeTypeGUID="1377be5e-ef7b-4765-8478-911a26090997" Position="1246.17 461.367" RelativePath="Graphs/Library/Ruins/Ruins.ColumnBlock.slxg">
+			<Arguments>
+				<Argument FixedValue="1.5" Label="Height" />
+				<Argument FixedValue="1" Label="Diameter" />
+				<Argument FixedValue="3" Label="Bevel Iterations" />
+				<Argument FixedValue="0.02" Label="Bevel Seam Width" />
+				<Argument FixedValue="0.005" Label="Bevel Seam Depth" />
+				<Argument FixedValue="16" Label="Segments" />
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="ee280fbc-13df-4675-b722-dabfdda97ea5" NodeType="ComponentNode" NodeTypeGUID="ebd47442-dcbb-46ff-8b6e-0eedb0d39193" Position="898.7719 565.707" DisableInSubgraphs="True" RelativePath="Graphs/Library/Ruins/Ruins.ColumnChip.slxg">
+			<Arguments>
+				<Argument FixedValue="0.45,0,0.9" Label="Location" />
+				<Argument FixedValue="1,1,0.25" Label="Rotation Axis" />
+				<Argument FixedValue="45" Label="Rotation" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="1b2fe36f-5575-49cc-b5af-b7aa3440ce43" NodeType="ComponentNode" NodeTypeGUID="ebd47442-dcbb-46ff-8b6e-0eedb0d39193" Position="908.3803 719.7413" DisableInSubgraphs="True" RelativePath="Graphs/Library/Ruins/Ruins.ColumnChip.slxg">
+			<Arguments>
+				<Argument FixedValue="0.1,0.45,0.2" Label="Location" />
+				<Argument FixedValue="1,1,0.7" Label="Rotation Axis" />
+				<Argument FixedValue="45" Label="Rotation" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="31e504cf-3442-4939-b9c9-a7ac04c73a2f" NodeType="ComponentNode" NodeTypeGUID="ebd47442-dcbb-46ff-8b6e-0eedb0d39193" Position="1428.335 668.0958" DisableInSubgraphs="True" RelativePath="Graphs/Library/Ruins/Ruins.ColumnChip.slxg">
+			<Arguments>
+				<Argument FixedValue="0.45,0,1" Label="Location" />
+				<Argument FixedValue="1,1,0.25" Label="Rotation Axis" />
+				<Argument FixedValue="45" Label="Rotation" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="cd2ba00b-95ba-49a9-a800-c1d53f10bc13" NodeType="SystemNode" NodeTypeGUID="9924b6f2-761d-4cfd-b06e-6ba5b7cf2072" Position="1194.569 1204.09" DisableInSubgraphs="True" ProcedureType="MeshInstanceCreateProcedure">
+			<Arguments />
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="a8cf677f-9766-45c3-9b29-e1b0c1dd5ae4" NodeType="SystemNode" NodeTypeGUID="c1722ebb-8bc2-45a1-a146-b3767d611cd1" Position="1264.127 1378.332" DisableInSubgraphs="True" ProcedureType="ActorGroupProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Group">
+							<Fields>
+								<Field FixedValue="True" Label="Merge Attributes" />
+								<Field Expanded="True" Label="Criteria">
+									<Items />
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1">
+				<Port id="0" state="Gate" GateLabel="Output" />
+			</OutputPorts>
+		</Node>
+		<Node Guid="14d252dd-ded3-42b0-912e-ce2f26289791" NodeType="ComponentNode" NodeTypeGUID="abd58159-da1a-4ae4-81a9-da8a4bc5d7f7" Position="1258 1051" DisableInSubgraphs="True" RelativePath="Graphs/Library/Extension/MeshEx.Material.slxg">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Box UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="0.5" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="0.5" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Sphere UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Scope UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Face UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cylinder UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Scale UV">
+							<Fields>
+								<Field FixedValue="1,1" Label="Amount" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Flip UV">
+							<Fields>
+								<Field FixedValue="True" Label="Flip U" />
+								<Field FixedValue="True" Label="Flip V" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+				<Argument FixedValue="Textures/Granite.jpg" Guid="27e33607-455c-4d75-9cf1-096bacea3469" Label="Diffuse Texture" />
+				<Argument FixedValue="255,255,255,255" Label="Diffuse Color" />
+				<Argument FixedValue="" Label="Normal Map" />
+				<Argument FixedValue="0" Label="Metallic" />
+				<Argument FixedValue="0.35" Label="Smoothness" />
+				<Argument FixedValue="False" Label="Emissive" />
+				<Argument FixedValue="255,255,255,255" Label="Emission Color" />
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="0#O#0" ToPort="1#I#0" FromNode="0" ToNode="1" FromLabel="Output" ToLabel="Input A" />
+		<Edge FromPort="1#O#0" ToPort="2#I#0" FromNode="1" ToNode="2" FromLabel="Output" ToLabel="Input A" />
+		<Edge FromPort="0#O#0" ToPort="3#I#0" FromNode="0" ToNode="3" FromLabel="Output" ToLabel="Input A" />
+		<Edge FromPort="4#O#0" ToPort="5#I#0" FromNode="4" ToNode="5" FromLabel="Output" ToLabel="Operation[0].Group.Input" />
+		<Edge FromPort="6#O#0" ToPort="4#I#0" FromNode="6" ToNode="4" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="2#O#0" ToPort="6#I#0" FromNode="2" ToNode="6" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="0#O#0" ToPort="6#I#0" FromNode="0" ToNode="6" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="3#O#0" ToPort="6#I#0" FromNode="3" ToNode="6" FromLabel="Output" ToLabel="Input" />
+	</Edges>
+</Graph>
