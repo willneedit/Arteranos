@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 namespace Arteranos.Avatar
 {
@@ -227,6 +228,34 @@ namespace Arteranos.Web
 
         public static void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null) 
             => Instance.InitiateTransition(url, failureCallback, successCallback);
+    }
+
+    public static class WorldDownloaderLow
+    {
+        public static void EnterEmbeddedWorld(string path)
+        {
+            SceneManager.LoadScene(path);
+            MoveToDownloadedWorld();
+        }
+
+        public static void MoveToDownloadedWorld()
+        {
+            Vector3 startPosition = Vector3.zero;
+            Quaternion startRotation = Quaternion.identity;
+
+            Transform spawn = User.SpawnManager.GetStartPosition();
+
+            if(spawn != null)
+            {
+                startPosition = spawn.position;
+                startRotation = spawn.rotation;
+            }
+
+            startPosition += XR.XRControl.Instance.heightAdjustment;
+
+            XR.XRControl.Instance.MoveRig(startPosition, startRotation);
+        }
+
     }
 
     #endregion

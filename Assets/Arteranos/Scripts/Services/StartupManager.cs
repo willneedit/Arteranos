@@ -6,9 +6,11 @@
  */
 
 using Arteranos.Core;
+using Arteranos.Web;
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Arteranos.Services
 {
@@ -19,15 +21,17 @@ namespace Arteranos.Services
 
         IEnumerator StartupCoroutine()
         {
-            yield return new WaitForEndOfFrame();
+            AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
+
+            if(!ao.isDone)
+                yield return new WaitForEndOfFrame();
 
             // Startup of dependent services...
-            XR.XRControl.Instance.enabled = true;
             AudioManager.Instance.enabled = true;
             GetComponent<MetaDataService>().enabled = true;
             NetworkStatus.Instance.enabled = true;
 
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(1);
 
             if(!string.IsNullOrEmpty(TargetedServerPort))
             {
@@ -43,7 +47,15 @@ namespace Arteranos.Services
                 NetworkStatus.StartHost();
             }
 
-            // And finish the startup.
+            XR.XRControl.Instance.enabled = true;
+
+            yield return new WaitForEndOfFrame();
+
+            // Enter the initial world, if we're not starting up with a startup trigger
+            if(!StartupTrigger)
+                WorldDownloaderLow.MoveToDownloadedWorld();
+
+            // Finish the startup...
             enabled = false;
         }
 

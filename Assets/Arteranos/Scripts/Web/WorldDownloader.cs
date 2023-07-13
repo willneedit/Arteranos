@@ -16,6 +16,7 @@ using UnityEngine.Networking;
 using Arteranos.Core;
 using System.Threading;
 using Utils = Arteranos.Core.Utils;
+using UnityEngine.SceneManagement;
 
 namespace Arteranos.Web
 {
@@ -193,7 +194,7 @@ namespace Arteranos.Web
 
     }
     
-    public class WorldDownloader
+    public static class WorldDownloader
     {
         public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(string url, bool reload = false, int timeout = 600)
         {
@@ -230,26 +231,8 @@ namespace Arteranos.Web
             GameObject go = new("_SceneLoader");
             go.AddComponent<Persistence>();
             SceneLoader sl = go.AddComponent<SceneLoader>();
-            sl.OnFinishingSceneChange += MoveToDownloadedWorld;
+            sl.OnFinishingSceneChange += WorldDownloaderLow.MoveToDownloadedWorld;
             sl.Name = worldABF;
-        }
-
-        private static void MoveToDownloadedWorld()
-        {
-            Vector3 startPosition = Vector3.zero;
-            Quaternion startRotation = Quaternion.identity;
-
-            Transform spawn = User.SpawnManager.GetStartPosition();
-
-            if(spawn != null)
-            {
-                startPosition = spawn.position;
-                startRotation = spawn.rotation;
-            }
-
-            startPosition += XR.XRControl.Instance.heightAdjustment;
-
-            XR.XRControl.Instance.MoveRig(startPosition, startRotation);
         }
 
 

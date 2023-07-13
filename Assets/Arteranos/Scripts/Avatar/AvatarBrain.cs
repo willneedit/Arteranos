@@ -664,7 +664,7 @@ namespace Arteranos.Avatar
 
             if(IsTextMessageOccupied()) return;
 
-            int n = PostOffice.DequeueIncoming(null, out MessageEntryJSON message);
+            PostOffice.DequeueIncoming(null, out MessageEntryJSON message);
 
             if(message == null) return;
 
