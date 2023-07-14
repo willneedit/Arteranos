@@ -25,7 +25,7 @@ namespace Arteranos.Web
             if(NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
             {
                 // Anything but idle, cut off all connections before connecting to the desired server.
-                NetworkStatus.StopHost();
+                NetworkStatus.StopHost(false);
 
                 await Task.Delay(3000);
             }

@@ -129,7 +129,7 @@ namespace Arteranos.Services
         public static void StartClient(Uri connectionUri) => Instance.StartClient(connectionUri);
         public static void StartHost() => Instance.StartHost();
         public static void StartServer() => Instance.StartServer();
-        public static void StopHost() => Instance.StopHost();
+        public static void StopHost(bool loadOfflineScene) => Instance.StopHost(loadOfflineScene);
     }
 
     public static class AudioManager

@@ -21,10 +21,13 @@ namespace Arteranos.Services
 
         IEnumerator StartupCoroutine()
         {
-            AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
+            if(!StartupTrigger)
+            {
+                AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
 
-            if(!ao.isDone)
-                yield return new WaitForEndOfFrame();
+                if(!ao.isDone)
+                    yield return new WaitForEndOfFrame();
+            }
 
             // Startup of dependent services...
             AudioManager.Instance.enabled = true;

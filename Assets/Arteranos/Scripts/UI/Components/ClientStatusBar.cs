@@ -41,7 +41,7 @@ namespace Arteranos.UI
 
         protected override void OnDestroy() => NetworkStatus.OnNetworkStatusChanged -= OnNetworkStatusChanged;
 
-        private void OnOfflineClicked() => NetworkStatus.StopHost();
+        private void OnOfflineClicked() => NetworkStatus.StopHost(true);
 
         private void OnServerClicked() => NetworkStatus.StartServer();
 

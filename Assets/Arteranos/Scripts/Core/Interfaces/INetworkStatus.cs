@@ -47,6 +47,6 @@ namespace Arteranos.Services
         void StartClient(Uri connectionUri);
         void StartHost();
         void StartServer();
-        void StopHost();
+        void StopHost(bool loadOfflineScene);
     }
 }

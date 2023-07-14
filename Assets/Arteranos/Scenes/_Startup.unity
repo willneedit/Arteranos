@@ -328,7 +328,7 @@ PrefabInstance:
     - target: {fileID: 7940587785708425646, guid: 0c924ef8e01e2974ba2fde7066698900,
         type: 3}
       propertyPath: offlineScene
-      value: Assets/Arteranos/Scenes/OfflineScene.unity
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0c924ef8e01e2974ba2fde7066698900, type: 3}

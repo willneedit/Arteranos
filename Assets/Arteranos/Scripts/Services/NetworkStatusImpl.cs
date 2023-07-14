@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using Arteranos.Core;
 using Mirror;
 using System.Net;
+using Arteranos.Web;
+using UnityEngine.SceneManagement;
 
 namespace Arteranos.Services
 {
@@ -242,12 +244,29 @@ namespace Arteranos.Services
             manager.StartClient(connectionUri);
         }
 
-        public void StopHost()
+        private IEnumerator StopHostCoroutine(bool loadOfflineScene)
         {
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+            if(loadOfflineScene)
+            {
+                AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
 
+                if(!ao.isDone)
+                    yield return new WaitForEndOfFrame();
+            }
+
+            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
             manager.StopHost();
             Services.NetworkStatus.OpenPorts = false;
+
+            yield return new WaitForSeconds(1);
+
+            if(loadOfflineScene)
+                WorldDownloaderLow.MoveToDownloadedWorld();
+        }
+
+        public void StopHost(bool loadOfflineScene)
+        {
+            StartCoroutine(StopHostCoroutine(loadOfflineScene));
         }
 
         public void StartHost()
