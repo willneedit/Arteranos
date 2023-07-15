@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
 using System;
+using Arteranos.Core;
 
 namespace Arteranos.UI
 {
@@ -72,6 +73,8 @@ namespace Arteranos.UI
         {
             base.Awake();
 
+            layout = GetKeyboardLayout();
+
             TextAsset json = Resources.Load<TextAsset>(PATH_KEYBOARDLAYOUTS + layout);
             current_map = JsonConvert.DeserializeObject<Keymap[]>(json.text);
 
@@ -98,6 +101,22 @@ namespace Arteranos.UI
             ShowModeChange(0);
             current_modeIndex= 0;
             current_modeLock= false;
+        }
+
+        public string GetKeyboardLayout()
+        {
+            ClientSettings cs = SettingsManager.Client;
+
+            switch(cs.Controls.VK_Layout)
+            {
+                case VKLayout.de_DE_full:
+                    return "de";
+                case VKLayout.en_US_full:
+                    return "en";
+                default:
+                    Debug.LogError($"Unknown layout enum {cs.Controls.VK_Layout}, reverting to en");
+                    return "en";
+            }
         }
 
         public void SanityCheck()

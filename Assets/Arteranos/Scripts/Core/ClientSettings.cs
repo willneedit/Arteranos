@@ -51,8 +51,10 @@ namespace Arteranos.Core
 
     public enum VKLayout
     {
-        [Description("DE (full)")]
-        de_full = 0
+        [Description("de-DE (full)")]
+        de_DE_full = 0,
+        [Description("en-US (full)")]
+        en_US_full
     }
 
     public enum RayType
@@ -171,7 +173,7 @@ namespace Arteranos.Core
     {
         public VKUsage VK_Usage = VKUsage.VROnly;
 
-        public VKLayout VK_Layout = VKLayout.de_full;
+        public VKLayout VK_Layout = VKLayout.de_DE_full;
 
         public float NameplateIn = 0.5f;
 
