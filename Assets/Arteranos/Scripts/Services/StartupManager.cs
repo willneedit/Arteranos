@@ -34,7 +34,12 @@ namespace Arteranos.Services
             GetComponent<MetaDataService>().enabled = true;
             NetworkStatus.Instance.enabled = true;
 
-            yield return new WaitForSeconds(1);
+            // Looks like Physics need additional frames for the new scene to settle....
+            yield return new WaitForEndOfFrame();
+
+            yield return new WaitForEndOfFrame();
+
+            yield return new WaitForEndOfFrame();
 
             if(!string.IsNullOrEmpty(TargetedServerPort))
             {
