@@ -139,6 +139,9 @@ namespace Arteranos.Services
             if(CurrentConnectivityLevel != c1 || CurrentOnlineLevel != c2)
                 OnNetworkStatusChanged?.Invoke(c1, c2);
 
+            if(CurrentOnlineLevel == OnlineLevel.Client && c2 == OnlineLevel.Offline)
+                OnRemoteDisconnected();
+
             CurrentConnectivityLevel = c1;
             CurrentOnlineLevel = c2;
         }
@@ -295,6 +298,12 @@ namespace Arteranos.Services
 
             Services.NetworkStatus.OpenPorts = true;
             manager.StartServer();
+        }
+
+        public void OnRemoteDisconnected()
+        {
+            // Client to offline.
+            StopHost(true);
         }
 #endregion
     }
