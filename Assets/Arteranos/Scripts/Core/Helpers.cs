@@ -232,29 +232,7 @@ namespace Arteranos.Web
 
     public static class WorldDownloaderLow
     {
-        public static void EnterEmbeddedWorld(string path)
-        {
-            SceneManager.LoadScene(path);
-            MoveToDownloadedWorld();
-        }
-
-        public static void MoveToDownloadedWorld()
-        {
-            Vector3 startPosition = Vector3.zero;
-            Quaternion startRotation = Quaternion.identity;
-
-            Transform spawn = User.SpawnManager.GetStartPosition();
-
-            if(spawn != null)
-            {
-                startPosition = spawn.position;
-                startRotation = spawn.rotation;
-            }
-
-            startPosition += XR.XRControl.Instance.heightAdjustment;
-
-            XR.XRControl.Instance.MoveRig(startPosition, startRotation);
-        }
+        public static void MoveToStartPosition() => XRControl.Instance.MoveToStartPosition();
 
     }
 

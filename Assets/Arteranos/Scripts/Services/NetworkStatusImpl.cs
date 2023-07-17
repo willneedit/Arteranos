@@ -262,7 +262,7 @@ namespace Arteranos.Services
             Services.NetworkStatus.OpenPorts = false;
 
             if(loadOfflineScene)
-                WorldDownloaderLow.MoveToDownloadedWorld();
+                WorldDownloaderLow.MoveToStartPosition();
         }
 
         public void StopHost(bool loadOfflineScene)

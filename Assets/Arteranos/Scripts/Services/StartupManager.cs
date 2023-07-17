@@ -54,7 +54,7 @@ namespace Arteranos.Services
 
             // Enter the initial world, if we're not starting up with a startup trigger
             if(!StartupTrigger)
-                WorldDownloaderLow.MoveToDownloadedWorld();
+                WorldDownloaderLow.MoveToStartPosition();
 
             // Finish the startup...
             enabled = false;

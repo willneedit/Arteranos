@@ -28,7 +28,7 @@ namespace Arteranos.XR
 
         public void ReconfigureXRRig();
         void FreezeControls(bool value);
-        void MoveRig(Vector3 startPosition, Quaternion startRotation);
+        void MoveToStartPosition();
 
         event Action<bool> XRSwitchEvent;
     }

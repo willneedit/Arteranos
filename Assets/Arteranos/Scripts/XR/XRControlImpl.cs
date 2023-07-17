@@ -204,13 +204,37 @@ namespace Arteranos.XR
             if(kMTrackedPoseDriver != null) kMTrackedPoseDriver.enabled = !value;
         }
 
-        public void MoveRig(Vector3 startPosition, Quaternion startRotation)
+        private IEnumerator MoveRigCoroutine()
         {
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            Vector3 startPosition = Vector3.zero;
+            Quaternion startRotation = Quaternion.identity;
+
+            Transform spawn = User.SpawnManager.GetStartPosition();
+
+            if(spawn != null)
+            {
+                startPosition = spawn.position;
+                startRotation = spawn.rotation;
+            }
+
+            startPosition += XRControl.Instance.heightAdjustment;
+
             XROrigin xro = CurrentVRRig;
 
             xro.MatchOriginUpCameraForward(startRotation * Vector3.up, startRotation * Vector3.forward);
             xro.MoveCameraToWorldLocation(startPosition);
             Physics.SyncTransforms();
+
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+        }
+
+        public void MoveToStartPosition()
+        {
+            StartCoroutine(MoveRigCoroutine());
         }
 
     }
