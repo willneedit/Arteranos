@@ -54,10 +54,13 @@ namespace Arteranos.Services
 
             // Enter the initial world, if we're not starting up with a startup trigger
             if(!StartupTrigger)
-                WorldDownloaderLow.MoveToStartPosition();
+                WorldDownloaderLow.MoveToDownloadedWorld();
 
             // Finish the startup...
             enabled = false;
+
+            // ... and raise the curtains.
+            ScreenFader.StartFading(0.0f, 1.0f);
         }
 
         protected void Update()

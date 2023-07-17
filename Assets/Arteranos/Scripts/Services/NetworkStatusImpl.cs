@@ -251,6 +251,9 @@ namespace Arteranos.Services
         {
             if(loadOfflineScene)
             {
+                ScreenFader.StartFading(1.0f);
+
+                yield return new WaitForSeconds(0.5f);
                 AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
 
                 if(!ao.isDone)
@@ -262,7 +265,7 @@ namespace Arteranos.Services
             Services.NetworkStatus.OpenPorts = false;
 
             if(loadOfflineScene)
-                WorldDownloaderLow.MoveToStartPosition();
+                WorldDownloaderLow.MoveToDownloadedWorld();
         }
 
         public void StopHost(bool loadOfflineScene)

@@ -130,6 +130,10 @@ namespace Arteranos.Web
 
             yield return null;
 
+            // Fade to black...
+            ScreenFader.StartFading(1.0f);
+            yield return new WaitForSeconds(0.5f);
+
             AssetBundle loadedAB = AssetBundle.LoadFromFile(name);
             if(loadedAB == null)
             {
@@ -213,6 +217,10 @@ namespace Arteranos.Web
             // Give the chance to move the own avatar BEFORE to unload the old scene
             // to prevent to pull the rug away fom under your feet.
             OnFinishingSceneChange?.Invoke();
+
+            // We could have a MoveToDownloadedWorld() in the event listener,
+            // but just to be sure in the case if we could be stuck in the black.
+            ScreenFader.StartFading(0.0f);
 
             SceneManager.UnloadSceneAsync(prev);
 

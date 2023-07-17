@@ -230,7 +230,7 @@ namespace Arteranos.Web
             GameObject go = new("_SceneLoader");
             go.AddComponent<Persistence>();
             SceneLoader sl = go.AddComponent<SceneLoader>();
-            sl.OnFinishingSceneChange += WorldDownloaderLow.MoveToStartPosition;
+            sl.OnFinishingSceneChange += WorldDownloaderLow.MoveToDownloadedWorld;
             sl.Name = worldABF;
         }
 

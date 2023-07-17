@@ -232,7 +232,16 @@ namespace Arteranos.Web
 
     public static class WorldDownloaderLow
     {
-        public static void MoveToStartPosition() => XRControl.Instance.MoveToStartPosition();
+        public static void EnterEmbeddedWorld(string path)
+        {
+            SceneManager.LoadScene(path);
+            MoveToDownloadedWorld();
+        }
+
+        public static void MoveToDownloadedWorld()
+        {
+            XR.XRControl.Instance.MoveRig();
+        }
 
     }
 
