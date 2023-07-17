@@ -16,7 +16,6 @@ using UnityEngine.Networking;
 using Arteranos.Core;
 using System.Threading;
 using Utils = Arteranos.Core.Utils;
-using UnityEngine.SceneManagement;
 
 namespace Arteranos.Web
 {

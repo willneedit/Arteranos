@@ -261,13 +261,6 @@ namespace Arteranos.Services
             manager.StopHost();
             Services.NetworkStatus.OpenPorts = false;
 
-            // Looks like Physics need additional frames for the new scene to settle....
-            yield return new WaitForEndOfFrame();
-
-            yield return new WaitForEndOfFrame();
-
-            yield return new WaitForEndOfFrame();
-
             if(loadOfflineScene)
                 WorldDownloaderLow.MoveToDownloadedWorld();
         }
