@@ -1,3 +1,16 @@
+# Version 0.5.0
+
+## New Features
+
+- **Offline scene - dedicated scene to stretch your (metaphorical) legs and to make yourself comfortable.**
+  - You _can_ switch to the host mode for a quick meeting, though. :)
+- Additional virtual keyboard layout: en_US (full)
+- New teleport mode: Blink - Fade out, move, Fade in.
+
+## Fixes
+
+- Fixes a bug where the avatar occasionally has misplaced to (0,0,0), not the designated spawn point(s).
+
 # Version 0.4.0
 
  **Breaking change - not backwards compatible prior to this version**
