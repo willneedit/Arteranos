@@ -127,6 +127,8 @@ namespace Arteranos.XR
             CTeleProvider.TravelDuration = mcs.Teleport == TeleportType.Instant
                 ? 0.0f
                 : mcs.ZipLineDuration;
+
+            CTeleProvider.TeleportType = mcs.Teleport;
         }
     }
 }

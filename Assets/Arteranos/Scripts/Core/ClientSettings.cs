@@ -85,6 +85,8 @@ namespace Arteranos.Core
     {
         [Description("Instant")]
         Instant = 0,
+        [Description("Blink")]
+        Blink,
         [Description("Zipline")]
         Zipline
     }

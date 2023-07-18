@@ -1,3 +1,5 @@
+using Arteranos;
+using Arteranos.Core;
 using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine.Assertions;
@@ -13,6 +15,7 @@ namespace UnityEngine.XR.Interaction.Toolkit
     {
         private ActionBasedContinuousMoveProvider MoveProvider = null;
 
+        public TeleportType TeleportType = TeleportType.Instant;
         public float TravelDuration = 0.0f;
 
         private IEnumerator MoveToDestination(Vector3 src, Vector3 dest)
@@ -39,6 +42,20 @@ namespace UnityEngine.XR.Interaction.Toolkit
             }
 
             MoveProvider.useGravity = hadGravity;
+            EndLocomotion();
+        }
+
+        private IEnumerator BlinkToDestination(Vector3 dest)
+        {
+            ScreenFader.StartFading(1.0f, 0.25f);
+            yield return new WaitForSeconds(0.25f);
+
+            system.xrOrigin.MoveCameraToWorldLocation(dest);
+            Physics.SyncTransforms();
+
+            ScreenFader.StartFading(0.0f, 0.25f);
+            yield return new WaitForSeconds(0.25f);
+
             EndLocomotion();
         }
 
@@ -84,13 +101,17 @@ namespace UnityEngine.XR.Interaction.Toolkit
 
                 Vector3 cameraDestination = currentRequest.destinationPosition + heightAdjustment;
 
-                if(TravelDuration == 0.0f)
+                if(TeleportType == TeleportType.Instant)
                 {
                     xrOrigin.MoveCameraToWorldLocation(cameraDestination);
                     Physics.SyncTransforms();
                     EndLocomotion();
                 }
-                else
+                else if(TeleportType == TeleportType.Blink)
+                {
+                    StartCoroutine(BlinkToDestination(cameraDestination));
+                }
+                else if(TeleportType == TeleportType.Zipline)
                 {
                     StartCoroutine(MoveToDestination(
                         xrOrigin.Origin.transform.position + heightAdjustment,
