@@ -436,6 +436,12 @@
       },
       "hash": "94c4878d39114a5757577efef894dd1d8482e148"
     },
+    "mirror": {
+      "version": "file:Mirror",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,

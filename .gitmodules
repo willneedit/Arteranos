@@ -7,3 +7,6 @@
 [submodule "Packages/rpm-unity-sdk-avatar-creator"]
 	path = Packages/rpm-unity-sdk-avatar-creator
 	url = https://github.com/willneedit/rpm-unity-sdk-avatar-creator.git
+[submodule "Packages/Mirror"]
+	path = Packages/Mirror
+	url = https://github.com/willneedit/Mirror.git
