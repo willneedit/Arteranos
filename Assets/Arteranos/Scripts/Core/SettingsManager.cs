@@ -34,8 +34,6 @@ namespace Arteranos.Core
         public static ClientSettings Client { get; internal set; }
         public static ServerSettings Server { get; internal set; }
 
-        public static List<IAvatarBrain> Users { get; internal set; } = new();
-
         private void Awake()
         {
             SetupPurgatory();
@@ -97,14 +95,6 @@ namespace Arteranos.Core
             Purgatory = new GameObject("_Purgatory").transform;
             Purgatory.position = new Vector3(0, -9000, 0);
             DontDestroyOnLoad(Purgatory.gameObject);
-        }
-
-        public static void RegisterUser(IAvatarBrain brain) => Users.Add(brain);
-
-        public static void UnregisterUser(IAvatarBrain brain)
-        {
-            if(Users.Contains(brain))
-                Users.Remove(brain);
         }
 
         public static IAvatarBrain GetOnlineUser(UserID userID)

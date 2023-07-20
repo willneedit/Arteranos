@@ -244,12 +244,6 @@ namespace Arteranos.Avatar
             base.OnStopClient();
         }
 
-        public void OnDestroy()
-        {
-            if(isServer)
-                SettingsManager.UnregisterUser(this);
-        }
-
         /// <summary>
         /// Download the user's client settings to his avatar's brain, and announce
         /// the data to the server to spread it to the clones.
@@ -385,11 +379,7 @@ namespace Arteranos.Avatar
         private void PropagateBlob(AVKeys key, byte[] value) => m_blobs[key] = value;
 
         [Command]
-        private void PropagateUserID(UserID userID)
-        {
-            m_userID = userID;
-            SettingsManager.RegisterUser(this);
-        }
+        private void PropagateUserID(UserID userID) => m_userID = userID;
 
 
         #endregion

@@ -126,7 +126,7 @@ namespace Arteranos.Services
             {
                 Settings = SettingsManager.Server,
                 CurrentWorld = SettingsManager.Server.WorldURL,
-                CurrentUsers = SettingsManager.Users.Select(x => x.UserID.ToString()).ToList(),
+                CurrentUsers = SettingsManager.GetOnlineUsers().Select(x => x.UserID.ToString()).ToList(),
             };
 
             string json = JsonConvert.SerializeObject(mdj);
