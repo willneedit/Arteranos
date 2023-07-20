@@ -9,6 +9,8 @@ using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.XR;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -130,6 +132,33 @@ namespace Arteranos.Services
         public static void StartHost() => Instance.StartHost();
         public static void StartServer() => Instance.StartServer();
         public static void StopHost(bool loadOfflineScene) => Instance.StopHost(loadOfflineScene);
+
+        public static IAvatarBrain GetOnlineUser(UserID userID)
+        {
+            IEnumerable<IAvatarBrain> q =
+                from entry in GameObject.FindGameObjectsWithTag("Player")
+                where entry.GetComponent<IAvatarBrain>().UserID == userID
+                select entry.GetComponent<IAvatarBrain>();
+
+            return q.Count() > 0 ? q.First() : null;
+        }
+
+        public static IAvatarBrain GetOnlineUser(uint netId)
+        {
+            IEnumerable<IAvatarBrain> q =
+                from entry in GameObject.FindGameObjectsWithTag("Player")
+                where entry.GetComponent<IAvatarBrain>().NetID == netId
+                select entry.GetComponent<IAvatarBrain>();
+
+            return q.Count() > 0 ? q.First() : null;
+        }
+
+        public static IEnumerable<IAvatarBrain> GetOnlineUsers()
+        {
+            return from entry in GameObject.FindGameObjectsWithTag("Player")
+                   select entry.GetComponent<IAvatarBrain>();
+
+        }
     }
 
     public static class AudioManager
@@ -238,10 +267,7 @@ namespace Arteranos.Web
             MoveToDownloadedWorld();
         }
 
-        public static void MoveToDownloadedWorld()
-        {
-            XR.XRControl.Instance.MoveRig();
-        }
+        public static void MoveToDownloadedWorld() => XRControl.Instance.MoveRig();
 
     }
 

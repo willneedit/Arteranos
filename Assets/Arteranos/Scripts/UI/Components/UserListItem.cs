@@ -16,6 +16,7 @@ using Arteranos.Core;
 using System.Linq;
 using Arteranos.Social;
 using TMPro;
+using Arteranos.Services;
 
 namespace Arteranos.UI
 {
@@ -92,7 +93,7 @@ namespace Arteranos.UI
 
         private void OnAddFriendButtonClicked()
         {
-            IAvatarBrain targetUser = SettingsManager.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
             if(targetUser != null)
             {
                 Me.OfferFriendship(targetUser, true);
@@ -104,7 +105,7 @@ namespace Arteranos.UI
 
         private void OnDelFriendButtonClicked()
         {
-            IAvatarBrain targetUser = SettingsManager.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
             if(targetUser != null)
             {
                 Me.OfferFriendship(targetUser, false);
@@ -116,7 +117,7 @@ namespace Arteranos.UI
 
         private void OnBlockButtonClicked()
         {
-            IAvatarBrain targetUser = SettingsManager.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
             if(targetUser != null)
             {
                 Me.BlockUser(targetUser, true);
@@ -128,7 +129,7 @@ namespace Arteranos.UI
 
         private void OnUnblockButtonClicked()
         {
-            IAvatarBrain targetUser = SettingsManager.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
             if(targetUser != null)
             {
                 Me.BlockUser(targetUser, false);

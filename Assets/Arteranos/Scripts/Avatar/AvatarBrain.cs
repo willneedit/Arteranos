@@ -660,7 +660,7 @@ namespace Arteranos.Avatar
 
             PostOffice.Save();
 
-            IAvatarBrain sender = SettingsManager.GetOnlineUser(message.UserID);
+            IAvatarBrain sender = NetworkStatus.GetOnlineUser(message.UserID);
 
             ShowTextMessage(sender, message.Nickname, message.Text);
         }

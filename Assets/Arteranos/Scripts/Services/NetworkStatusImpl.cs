@@ -73,6 +73,7 @@ namespace Arteranos.Services
             NetworkStatus.Instance = null;
         }
 
+        // -------------------------------------------------------------------
         #region Connectivity and UPnP
         public ConnectivityLevel GetConnectivityLevel()
         {
@@ -235,9 +236,9 @@ namespace Arteranos.Services
             VoicePortPublic = false;
             MetadataPortPublic = false;
         }
-#endregion
-
-#region Connections
+        #endregion
+        // -------------------------------------------------------------------
+        #region Connections
         public void StartClient(Uri connectionUri)
         {
             NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
@@ -301,6 +302,7 @@ namespace Arteranos.Services
             // Client to offline.
             StopHost(true);
         }
-#endregion
+        #endregion
+        // -------------------------------------------------------------------
     }
 }

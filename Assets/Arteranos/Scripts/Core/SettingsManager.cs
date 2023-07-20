@@ -96,22 +96,5 @@ namespace Arteranos.Core
             Purgatory.position = new Vector3(0, -9000, 0);
             DontDestroyOnLoad(Purgatory.gameObject);
         }
-
-        public static IAvatarBrain GetOnlineUser(UserID userID)
-        {
-            IEnumerable<IAvatarBrain> q = 
-                from entry in GameObject.FindGameObjectsWithTag("Player")                            
-                where entry.GetComponent<IAvatarBrain>().UserID == userID 
-                select entry.GetComponent<IAvatarBrain>();
-
-            return q.Count() > 0 ? q.First() : null;
-        }
-
-        public static IEnumerable<IAvatarBrain> GetOnlineUsers()
-        {
-            return from entry in GameObject.FindGameObjectsWithTag("Player")
-                   select entry.GetComponent<IAvatarBrain>();
-
-        }
     }
 }

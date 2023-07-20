@@ -13,6 +13,7 @@ using Arteranos.Core;
 using Arteranos.Avatar;
 using Arteranos.Social;
 using Arteranos.XR;
+using Arteranos.Services;
 
 namespace Arteranos.UI
 {
@@ -23,7 +24,7 @@ namespace Arteranos.UI
             Dictionary<UserID, SocialListEntryJSON> list = new();
 
             // Get the currently logged-in users with the default state....
-            foreach(IAvatarBrain user in SettingsManager.GetOnlineUsers())
+            foreach(IAvatarBrain user in NetworkStatus.GetOnlineUsers())
             {
                 if(user.UserID == XRControl.Me.UserID) continue;
 
