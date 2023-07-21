@@ -10,5 +10,13 @@
         /// <param name="integralDuration">Time in seconds to measure</param>
         /// <returns>Height of amplitude, ranged [0...1]</returns>
         float MeasureAmplitude();
+
+        /// <summary>
+        /// Feeds the data to the output implementation 
+        /// </summary>
+        /// <param name="audioSamples">
+        /// The audio samples/segment being fed
+        /// </param>
+        void Feed(byte[] audioSamples);
     }
 }

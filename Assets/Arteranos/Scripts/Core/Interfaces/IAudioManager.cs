@@ -23,6 +23,7 @@ namespace Arteranos.Services
         float MicGain { get; set; }
         int MicAGCLevel { get; set; }
         bool MuteSelf { get; set; }
+        Audio.IVoiceInput MicInput { get; }
 
         event Action<short> OnJoinedChatroom;
         event Action<float[]> OnSampleReady;

@@ -13,7 +13,7 @@ namespace Arteranos.Audio
     /// An <see cref="IAudioInput"/> implementation based on UniMic.
     /// For more on UniMic, visit https://www.github.com/adrenak/unimic
     /// </summary>
-    public class UVMicInput : MonoBehaviour, IAudioInputV2
+    public class UVMicInput : MonoBehaviour, IAudioInputV2, IVoiceInput
     {
         public const float AGCDecayFactor = 1.0e-05f;
         private const float AGCAttackFactor = 1.0f;
@@ -28,7 +28,7 @@ namespace Arteranos.Audio
 
         // In plain factor, to convert from dB use...
         // Fout = 10^(Q/20) * Fin
-        public float Gain = 1.0f;
+        public float Gain { get; set; } = 1.0f;
 
         // The maximun amplification level for the AGC in dB, when it's silent.
         public float AGCGainLevel = 0.0f;
@@ -40,8 +40,9 @@ namespace Arteranos.Audio
         private int packetSize;
 
 
-        private AudioClip recorderClip { 
-            get => audiorecorder.clip; 
+        private AudioClip recorderClip
+        {
+            get => audiorecorder.clip;
             set => audiorecorder.clip = value;
         }
 
@@ -193,7 +194,7 @@ namespace Arteranos.Audio
             int readAbsPos = 0;
             int prevPos = 0;
 
- 
+
 
             // was SampleRate / 10 -- the amount of 1/10th of a second,
             // and with the 20ms encoder delay, five packets amount to 100ms.

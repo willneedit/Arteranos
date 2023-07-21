@@ -19,7 +19,7 @@ namespace Arteranos.Services
     public class AudioManagerImpl : MonoBehaviour, IAudioManager
     {
         public ChatroomAgentV2 ChatroomAgent { get; private set; }
-        public UVMicInput MicInput { get; private set; }
+        public IVoiceInput MicInput { get; private set; }
 
         public event Action<short> OnJoinedChatroom;
         public void JoinChatroom(object data = null) => ChatroomNetwork?.JoinChatroom(data);
@@ -113,7 +113,7 @@ namespace Arteranos.Services
 
             ChatroomAgent = new(
                 UVTelepathyNetwork.New(SettingsManager.Server.VoicePort),
-                MicInput,
+                null, //MicInput,
                 new UVAudioOutput.Factory(MixerGroupVoice));
 
             ChatroomNetwork = ChatroomAgent.Network;
