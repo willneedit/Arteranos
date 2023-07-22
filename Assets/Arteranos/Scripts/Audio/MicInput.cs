@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Arteranos.UniVoice;
 
 using POpusCodec;
 using POpusCodec.Enums;
@@ -13,7 +12,7 @@ namespace Arteranos.Audio
     /// An <see cref="IAudioInput"/> implementation based on UniMic.
     /// For more on UniMic, visit https://www.github.com/adrenak/unimic
     /// </summary>
-    public class UVMicInput : MonoBehaviour, IAudioInputV2, IVoiceInput
+    public class MicInput : MonoBehaviour, IVoiceInput
     {
         public const float AGCDecayFactor = 1.0e-05f;
         private const float AGCAttackFactor = 1.0f;
@@ -47,7 +46,7 @@ namespace Arteranos.Audio
         }
 
         [Obsolete("Cannot use new keyword to create an instance. Use .New() method instead")]
-        public UVMicInput() { }
+        public MicInput() { }
 
         private int ValidateSampleRate(int sampleRate)
         {
@@ -72,29 +71,29 @@ namespace Arteranos.Audio
             return sampleRate;
         }
 
-        public static UVMicInput New(int? micDeviceId = 0, int? desiredRate = null)
+        public static MicInput New(int? micDeviceId = 0, int? desiredRate = null)
         {
             GameObject go = new("_Microphone");
             DontDestroyOnLoad(go);
             go.transform.SetParent(Core.SettingsManager.Purgatory);
             go.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            return go.AddComponent<UVMicInput>().New_(micDeviceId, desiredRate);
+            return go.AddComponent<MicInput>().New_(micDeviceId, desiredRate);
         }
 
-        public static UVMicInput Renew(int? micDeviceId = 0, int? desiredRate = null)
+        public static MicInput Renew(int? micDeviceId = 0, int? desiredRate = null)
         {
-            UVMicInput uvmi = FindObjectOfType<UVMicInput>();
+            MicInput uvmi = FindObjectOfType<MicInput>();
             return uvmi.Renew_(micDeviceId, desiredRate);
         }
 
-        private UVMicInput Renew_(int? micDeviceId, int? desiredRate)
+        private MicInput Renew_(int? micDeviceId, int? desiredRate)
         {
             SetupMic(micDeviceId, desiredRate, true);
 
             return this;
         }
 
-        private UVMicInput New_(int? micDeviceId, int? desiredRate)
+        private MicInput New_(int? micDeviceId, int? desiredRate)
         {
             audiorecorder = gameObject.AddComponent<AudioSource>();
             audiorecorder.loop = true;

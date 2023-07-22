@@ -88,12 +88,12 @@ namespace Arteranos.Services
 
         private void Start()
         {
-            MicInput = UVMicInput.New(GetDeviceId(), 24000);
+            MicInput = Audio.MicInput.New(GetDeviceId(), 24000);
 
             PullVolumeSettings();
         }
 
-        public void RenewMic() => UVMicInput.Renew(GetDeviceId(), 24000);
+        public void RenewMic() => Audio.MicInput.Renew(GetDeviceId(), 24000);
 
         public int? GetDeviceId()
         {
@@ -130,7 +130,7 @@ namespace Arteranos.Services
         }
 
         public IVoiceOutput GetVoiceOutput(int SampleRate, int ChannelCount) 
-            => UVAudioOutput.New(SampleRate, ChannelCount, MixerGroupVoice);
+            => AudioOutput.New(SampleRate, ChannelCount, MixerGroupVoice);
     }
 }
 

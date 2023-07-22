@@ -1,6 +1,5 @@
 using UnityEngine;
 
-using Arteranos.UniVoice;
 using POpusCodec;
 using POpusCodec.Enums;
 using Arteranos.Core;
@@ -8,7 +7,7 @@ using UnityEngine.Audio;
 
 namespace Arteranos.Audio
 {
-    public class UVAudioOutput : MonoBehaviour, IAudioOutputV2, IVoiceOutput
+    public class AudioOutput : MonoBehaviour, IVoiceOutput
     {
         public bool mute
         {
@@ -27,30 +26,21 @@ namespace Arteranos.Audio
         private int FrameSize = -1;
         private float charge = 0;
 
-        public string ID
+        public static AudioOutput New(int samplingRate, int channelCount, AudioMixerGroup mg)
         {
-            get => gameObject.name;
-            set => gameObject.name = $"UniVoice Peer #{value}";
-        }
-
-        [System.Obsolete("Cannot use new keyword to create an instance. Use .New() method instead")]
-        public UVAudioOutput() { }
-
-        public static UVAudioOutput New(int samplingRate, int channelCount, AudioMixerGroup mg)
-        {
-            GameObject go = new($"UniVoiceAudioSourceOutput");
+            GameObject go = new($"AudioSourceOutput");
             DontDestroyOnLoad(go);
             go.transform.SetParent(Core.SettingsManager.Purgatory);
             go.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
-            UVAudioOutput ctd = go.AddComponent<UVAudioOutput>();
+            AudioOutput ctd = go.AddComponent<AudioOutput>();
             AudioSource source = go.AddComponent<AudioSource>();
             source.outputAudioMixerGroup = mg;
 
             return ctd.SetupDecoder(source, samplingRate, channelCount);
         }
 
-        private UVAudioOutput SetupDecoder(AudioSource source, int samplingRate, int channelCount)
+        private AudioOutput SetupDecoder(AudioSource source, int samplingRate, int channelCount)
         {
             SamplingRate = samplingRate;
             ChannelCount = channelCount;
@@ -120,31 +110,6 @@ namespace Arteranos.Audio
             }
         }
 
-        /// <summary>
-        /// Disposes the instance by deleting the GameObject of the component.
-        /// </summary>
-        public void Dispose()
-        {
-            AudioSource.Stop();
-            decoder.Dispose();
-            Destroy(gameObject);
-        }
-
-
-        public float MeasureAmplitude()
-        {
-            return mute ? 0.0f : vuBuffer.Front();
-        }
-
-        /// <summary>
-        /// Creates <see cref="UVAudioOutput"/> instances
-        /// </summary>
-        public class Factory : IAudioOutputFactoryV2
-        {
-            private readonly AudioMixerGroup mg;
-            public Factory(AudioMixerGroup _mg) { mg = _mg; }
-
-            public IAudioOutputV2 Create(int samplingRate, int channelCount) => New(samplingRate, channelCount, mg);
-        }
+        public float MeasureAmplitude() => mute ? 0.0f : vuBuffer.Front();
     }
 }
