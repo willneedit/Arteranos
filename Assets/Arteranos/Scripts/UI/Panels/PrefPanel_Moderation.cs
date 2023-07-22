@@ -21,7 +21,6 @@ namespace Arteranos.UI
     {
         public TMP_InputField txt_ServerName = null;
         public TMP_InputField txt_ServerPort = null;
-        public TMP_InputField txt_VoicePort = null;
         public TMP_InputField txt_MetdadataPort = null;
 
         public TMP_InputField txt_Description = null;
@@ -49,9 +48,6 @@ namespace Arteranos.UI
 
             txt_ServerPort.onValueChanged.AddListener(SetDirty);
             //txt_ServerPort.onValidateInput += OnValidatePort;
-
-            txt_VoicePort.onValueChanged.AddListener(SetDirty);
-            //txt_VoicePort.onValidateInput += OnValidatePort;
 
             txt_MetdadataPort.onValueChanged.AddListener(SetDirty);
             //txt_MetdadataPort.onValidateInput += OnValidatePort;
@@ -83,7 +79,6 @@ namespace Arteranos.UI
             ss = SettingsManager.Server;
 
             txt_ServerPort.text = ss.ServerPort.ToString();
-            txt_VoicePort.text = ss.VoicePort.ToString();
             txt_MetdadataPort.text = ss.MetadataPort.ToString();
 
             txt_ServerName.text = ss.Name;
@@ -110,7 +105,6 @@ namespace Arteranos.UI
                 // ss.WorldURL = txt_WorldURL.text;
 
                 ss.ServerPort = int.Parse(txt_ServerPort.text);
-                ss.VoicePort = int.Parse(txt_VoicePort.text);
                 ss.MetadataPort = int.Parse(txt_MetdadataPort.text);
 
                 ss.Name = txt_ServerName.text;

@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Audio;
 using Arteranos.Services;
 using Mirror;
 using System;
@@ -13,6 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Arteranos.Audio;
 
 namespace Arteranos.Avatar
 {
@@ -34,12 +34,11 @@ namespace Arteranos.Avatar
     public class AvatarVoice : NetworkBehaviour
     {
         private IAvatarBrain Brain => gameObject.GetComponent<AvatarBrain>();
-        private IVoiceInput Mic => AudioManager.Instance.MicInput;
         private bool IsSelfMuted => AppearanceStatus.IsSilent(Brain.AppearanceStatus);
         private bool IsMuted(uint netID) => IsMuted(NetworkStatus.GetOnlineUser(netID));
         private bool IsMuted(IAvatarBrain other) => 
             (other != null) && AppearanceStatus.IsSilent(other.AppearanceStatus);
-        private UVAudioOutput AudioOutput { get; set; } = null;
+        private IVoiceOutput AudioOutput { get; set; } = null;
 
 
 
@@ -52,7 +51,7 @@ namespace Arteranos.Avatar
 
             if(isOwned)
             {
-                Mic.OnSegmentReady += ReceivedMicInput;
+                AudioManager.OnSegmentReady += ReceivedMicInput;
             }
             else
             {
@@ -64,7 +63,7 @@ namespace Arteranos.Avatar
         {
             if(isOwned)
             {
-                Mic.OnSegmentReady -= ReceivedMicInput;
+                AudioManager.OnSegmentReady -= ReceivedMicInput;
             }
             else
             {
@@ -85,8 +84,8 @@ namespace Arteranos.Avatar
                 receiverNetID = null, // Everyone available
                 data = new VoiceSegment()
                 {
-                    channelCount = Mic.ChannelCount,
-                    sampleRate = Mic.SampleRate,
+                    channelCount = AudioManager.Instance.ChannelCount,
+                    sampleRate = AudioManager.Instance.SampleRate,
                     index = index,
                     samples = samples
                 }
@@ -100,10 +99,8 @@ namespace Arteranos.Avatar
             if(AudioOutput == null)
             {
                 // FIXME what with channel count and sample rate mismatch?
-                AudioOutput = UVAudioOutput.New(
-                    voicePacket.data.sampleRate,
-                    voicePacket.data.channelCount,
-                    AudioManager.MixerGroupVoice);
+                AudioOutput = AudioManager.Instance.GetVoiceOutput(
+                    voicePacket.data.sampleRate, voicePacket.data.channelCount);
 
                 AudioOutput.transform.SetParent(transform, false);
             }
@@ -114,7 +111,7 @@ namespace Arteranos.Avatar
         [Command]
         private void CmdReceivedMicInput(VoicePacket voicePacket)
         {
-            var q = from user in NetworkStatus.GetOnlineUsers()
+            IEnumerable<IAvatarBrain> q = from user in NetworkStatus.GetOnlineUsers()
                     where (user.NetID != voicePacket.senderNetID) 
                        && (voicePacket.receiverNetID == null 
                         || voicePacket.receiverNetID.Contains(user.NetID))
@@ -122,9 +119,17 @@ namespace Arteranos.Avatar
             
             // Send to whom is concerned
             // TODO mute-others culling - needs mappings
-            foreach(var user in q) 
+            foreach(IAvatarBrain user in q) 
             {
-                // TODO traffic culling by distance (server knows the positions)
+                // No sense if the speaker is too far away, skip it.
+                // FIXME hardcoded 40 meters
+                if(Vector3.SqrMagnitude(transform.position
+                    - user.gameObject.transform.position)
+                    > 1600.0f)
+                {
+                    continue;
+                }
+
                 user.gameObject.GetComponent<AvatarVoice>()
                                .TargetReceivedVoicePacket(voicePacket);
             }

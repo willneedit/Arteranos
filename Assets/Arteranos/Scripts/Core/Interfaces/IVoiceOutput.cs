@@ -1,8 +1,14 @@
-﻿namespace Arteranos.Audio
+﻿using UnityEngine;
+
+namespace Arteranos.Audio
 {
     public interface IVoiceOutput
     {
         bool mute { get; set; }
+
+        public GameObject gameObject { get; }
+
+        public Transform transform { get; }
 
         /// <summary>
         /// Measures the amplitude of the upcoming audio data

@@ -439,12 +439,7 @@ namespace Arteranos.Avatar
             }
             else if(isOwned)
             {
-                AudioManager.OnJoinedChatroom += (x) => ChatOwnID = x;
 
-                string ip = NetworkManager.singleton.networkAddress;
-                int port = SettingsManager.CurrentServer.VoicePort;
-
-                AudioManager.JoinChatroom($"{ip}:{port}");
             }
         }
 
@@ -458,20 +453,12 @@ namespace Arteranos.Avatar
             }
             else if(isOwned)
             {
-                AudioManager.LeaveChatroom();
-                AudioManager.OnJoinedChatroom -= (x) => ChatOwnID = x;
+
             }
         }
 
         private void UpdateNetAppearanceStatus(int _)
         {
-            // Update the own voice status, and for alien avatar it's only informational value,
-            // like the status update on the nameplate.
-            if(isOwned)
-                AudioManager.Instance.MuteSelf = Avatar.AppearanceStatus.IsSilent(AppearanceStatus);
-            else
-                AudioManager.Instance.MuteOther((short) ChatOwnID, Avatar.AppearanceStatus.IsSilent(AppearanceStatus));
-
             HitBox.interactable = !Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
             Body.invisible = Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
 

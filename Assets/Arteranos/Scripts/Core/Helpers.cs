@@ -193,21 +193,20 @@ namespace Arteranos.Services
             set => Instance.MicAGCLevel = value;
         }
 
-
-        public static event Action<short> OnJoinedChatroom
-        { 
-            add => Instance.OnJoinedChatroom += value;
-            remove=> Instance.OnJoinedChatroom -= value;
-        }
         public static event Action<float[]> OnSampleReady
         {
             add => Instance.OnSampleReady += value;
             remove { if(Instance != null) Instance.OnSampleReady -= value; }
         }
 
+        public static event Action<int, byte[]> OnSegmentReady
+        {
+            add => Instance.OnSegmentReady += value;
+            remove { if(Instance != null) Instance.OnSegmentReady -= value; }
+        }
+
+
         public static int? GetDeviceId() => Instance.GetDeviceId();
-        public static void JoinChatroom(object data = null) => Instance.JoinChatroom(data);
-        public static void LeaveChatroom(object data = null) => Instance?.LeaveChatroom(data);
         public static void PushVolumeSettings() => Instance.PushVolumeSettings();
         public static void RenewMic() => Instance.RenewMic();
 

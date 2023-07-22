@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Audio;
 using System;
 using UnityEngine.Audio;
 
@@ -22,17 +23,15 @@ namespace Arteranos.Services
         bool enabled { get; set; }
         float MicGain { get; set; }
         int MicAGCLevel { get; set; }
-        bool MuteSelf { get; set; }
         Audio.IVoiceInput MicInput { get; }
+        int ChannelCount { get; }
+        int SampleRate { get; }
 
-        event Action<short> OnJoinedChatroom;
         event Action<float[]> OnSampleReady;
+        event Action<int, byte[]> OnSegmentReady;
 
         int? GetDeviceId();
-        void JoinChatroom(object data = null);
-        void LeaveChatroom(object data = null);
-        void MuteOther(short peerID, bool muted);
-        bool MuteOther(short peerID);
+        IVoiceOutput GetVoiceOutput(int SampleRate, int ChannelCount);
         void PushVolumeSettings();
         void RenewMic();
     }

@@ -5,10 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.UniVoice;
 using Arteranos.Audio;
-using Mirror;
-using System.Collections;
 using UnityEngine;
 using Arteranos.Core;
 using System;
@@ -18,20 +15,22 @@ namespace Arteranos.Services
 {
     public class AudioManagerImpl : MonoBehaviour, IAudioManager
     {
-        public ChatroomAgentV2 ChatroomAgent { get; private set; }
         public IVoiceInput MicInput { get; private set; }
 
-        public event Action<short> OnJoinedChatroom;
-        public void JoinChatroom(object data = null) => ChatroomNetwork?.JoinChatroom(data);
-        public void LeaveChatroom(object data = null) => ChatroomNetwork?.LeaveChatroom(data);
-        public AudioMixerGroup MixerGroupVoice => mixer.FindMatchingGroups("Master/Voice")[0];
-        public AudioMixerGroup MixerGroupEnv => mixer.FindMatchingGroups("Master/Environment")[0];
+        public event Action<int, byte[]> OnSegmentReady
+        {
+            add => MicInput.OnSegmentReady += value;
+            remove => MicInput.OnSegmentReady -= value;
+        }
 
-        public event Action<float[]> OnSampleReady 
+        public event Action<float[]> OnSampleReady
         {
             add => MicInput.OnSampleReady += value;
             remove => MicInput.OnSampleReady -= value;
         }
+
+        public AudioMixerGroup MixerGroupVoice => mixer.FindMatchingGroups("Master/Voice")[0];
+        public AudioMixerGroup MixerGroupEnv => mixer.FindMatchingGroups("Master/Environment")[0];
 
         public float VolumeMaster
         {
@@ -71,28 +70,13 @@ namespace Arteranos.Services
             }
         }
 
-        public bool MuteSelf
-        {
-            get => ChatroomAgent.MuteSelf;
-            set => ChatroomAgent.MuteSelf = value;
-        }
+        public int ChannelCount => MicInput.ChannelCount;
 
-        public void MuteOther(short peerID, bool muted)
-        {
-            if(!ChatroomAgent.PeerSettings.ContainsKey(peerID)) return;
-
-            ChatroomAgent.PeerSettings[peerID].muteThem = muted;
-            ChatroomAgent.PeerOutputs[peerID].mute = muted;
-        }
-
-        public bool MuteOther(short peerID) => ChatroomAgent.PeerSettings[peerID].muteThem;
+        public int SampleRate => MicInput.SampleRate;
 
         private int micAGCLevel;
 
-        private bool serverActive = false;
-        private IEnumerator cs_cr = null;
         private static AudioMixer mixer = null;
-        private static IChatroomNetworkV2 ChatroomNetwork { get; set; }
 
         private void Awake()
         {
@@ -100,31 +84,13 @@ namespace Arteranos.Services
             mixer = Resources.Load<AudioMixer>("Audio/AudioMixer");
         }
 
-        private void OnDestroy()
-        {
-            if(cs_cr != null)
-                StopCoroutine(cs_cr);
-            AudioManager.Instance = null;
-        }
+        private void OnDestroy() => AudioManager.Instance = null;
 
         private void Start()
         {
             MicInput = UVMicInput.New(GetDeviceId(), 24000);
 
-            ChatroomAgent = new(
-                UVTelepathyNetwork.New(SettingsManager.Server.VoicePort),
-                null, //MicInput,
-                new UVAudioOutput.Factory(MixerGroupVoice));
-
-            ChatroomNetwork = ChatroomAgent.Network;
-
-            ChatroomNetwork.OnJoinedChatroom += (x) => OnJoinedChatroom?.Invoke(x);
-
             PullVolumeSettings();
-
-            cs_cr = ManageChatServer();
-
-            StartCoroutine(cs_cr);
         }
 
         public void RenewMic() => UVMicInput.Renew(GetDeviceId(), 24000);
@@ -163,33 +129,8 @@ namespace Arteranos.Services
             audioSettings.EnvVolume = VolumeEnv;
         }
 
-        private IEnumerator ManageChatServer()
-        {
-            while(true)
-            {
-                yield return new WaitForSeconds(2);
-
-                // Follow the voice server setup (or connection) state through the
-                // world server's (or connection's) state.
-
-                // Transition offline --> Server or Host
-                if(NetworkServer.active && !serverActive)
-                {
-                    ChatroomAgent.Network.HostChatroom();
-#if UNITY_SERVER
-                    ChatroomAgent.MuteSelf = true;
-#endif
-                    serverActive = true;
-                }
-                // Transition Server or Host --> offline 
-                else if(!NetworkServer.active && serverActive)
-                {
-                    ChatroomAgent.Network.CloseChatroom();
-                    serverActive = false;
-                }
-
-            }
-        }
+        public IVoiceOutput GetVoiceOutput(int SampleRate, int ChannelCount) 
+            => UVAudioOutput.New(SampleRate, ChannelCount, MixerGroupVoice);
     }
 }
 

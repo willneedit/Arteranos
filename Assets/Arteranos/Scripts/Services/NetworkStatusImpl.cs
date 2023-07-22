@@ -6,7 +6,6 @@
  */
 
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 using Mono.Nat;
@@ -54,7 +53,6 @@ namespace Arteranos.Services
         private Action<bool> m_OnClientConnectionResponse = null;
 
         public bool ServerPortPublic = false;
-        public bool VoicePortPublic = false;
         public bool MetadataPortPublic = false;
 
         private ConnectivityLevel CurrentConnectivityLevel = ConnectivityLevel.Unconnected;
@@ -80,7 +78,7 @@ namespace Arteranos.Services
             if(Application.internetReachability == NetworkReachability.NotReachable)
                 return ConnectivityLevel.Unconnected;
 
-            return (ServerPortPublic && VoicePortPublic && MetadataPortPublic)
+            return (ServerPortPublic && MetadataPortPublic)
                 ? ConnectivityLevel.Unrestricted
                 : ConnectivityLevel.Restricted;
         }
@@ -210,7 +208,6 @@ namespace Arteranos.Services
             ServerSettings ss = SettingsManager.Server;
 
             ServerPortPublic = await OpenPortAsync(ss.ServerPort);
-            VoicePortPublic = await OpenPortAsync(ss.VoicePort);
             MetadataPortPublic = await OpenPortAsync(ss.MetadataPort);
         }
 
@@ -226,14 +223,10 @@ namespace Arteranos.Services
             if(ServerPortPublic)
                 ClosePortAsync(ss.ServerPort);
 
-            if(VoicePortPublic)
-                ClosePortAsync(ss.VoicePort);
-
             if(MetadataPortPublic)
                 ClosePortAsync(ss.MetadataPort);
 
             ServerPortPublic = false;
-            VoicePortPublic = false;
             MetadataPortPublic = false;
         }
         #endregion
