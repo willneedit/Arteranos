@@ -16,7 +16,6 @@ namespace Arteranos.Avatar
     public interface IAvatarBrain
     {
         string AvatarURL { get; }
-        int ChatOwnID { get; }
         uint NetID { get; }
         string Nickname { get; }
         int AppearanceStatus { get; set; }

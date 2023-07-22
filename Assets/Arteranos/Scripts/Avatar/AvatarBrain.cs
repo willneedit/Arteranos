@@ -19,7 +19,7 @@ namespace Arteranos.Avatar
     internal enum AVKeys : byte
     {
         _Invalid = 0,
-        ChatOwnID,
+        _ChatOwnID,
         AvatarURL,
         CurrentWorld,
         Nickname,
@@ -30,7 +30,6 @@ namespace Arteranos.Avatar
     public class AvatarBrain : NetworkBehaviour, IAvatarBrain
     {
         #region Interface
-        public event Action<IVoiceOutput> OnVoiceOutputChanged;
         public event Action<string> OnAvatarChanged;
         public event Action<int> OnAppearanceStatusChanged;
 
@@ -43,12 +42,6 @@ namespace Arteranos.Avatar
         private AvatarSubconscious Subconscious { get; set; } = null;
 
         public uint NetID => netIdentity.netId;
-
-        public int ChatOwnID
-        {
-            get => m_ints.ContainsKey(AVKeys.ChatOwnID) ? m_ints[AVKeys.ChatOwnID] : -1;
-            set => PropagateInt(AVKeys.ChatOwnID, value);
-        }
 
         public string AvatarURL
         {
@@ -217,8 +210,6 @@ namespace Arteranos.Avatar
                 HitBox = AvatarHitBoxFactory.New(this);
             }
 
-            InitializeVoice();
-
             // Avatar startup complete, all systems go.
             Subconscious.ReadyState = AvatarSubconscious.READY_COMPLETE;
         }
@@ -227,8 +218,6 @@ namespace Arteranos.Avatar
         {
             // Maybe it isn't owned anymore, but it would be worse the other way round.
             if(isOwned) XRControl.Me = null;
-
-            DeinitializeVoice();
 
             SettingsManager.Server.OnWorldURLChanged -= CommitWorldChanged;
             SettingsManager.Client.OnAvatarChanged -= (x) =>
@@ -317,9 +306,6 @@ namespace Arteranos.Avatar
         {
             switch(key)
             {
-                case AVKeys.ChatOwnID:
-                    // Give that avatar its corresponding voice - except its owner.
-                    UpdateVoiceID(value); break;
                 case AVKeys.NetAppearanceStatus:
                     // Either been self-muted or by other means, the announcement comes down from the server.
                     UpdateNetAppearanceStatus(value); break;
@@ -384,78 +370,7 @@ namespace Arteranos.Avatar
 
         #endregion
         // ---------------------------------------------------------------
-        #region Voice handling
-
-        private IEnumerator fdv_cr = null;
-
-        IEnumerator FindDelayedVoice(int ChatOwnID)
-        {
-            while(Voice == null)
-            {
-                yield return new WaitForSeconds(1);
-
-                Voice = SettingsManager.Purgatory.Find("UniVoice Peer #" + ChatOwnID);
-            }
-
-            Voice.SetParent(transform);
-            Voice.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            OnVoiceOutputChanged?.Invoke(Voice.GetComponent<IVoiceOutput>());
-
-            fdv_cr = null;
-        }
-
-        private void UpdateVoiceID(int value)
-        {
-            if(!isOwned)
-            {
-                if(fdv_cr != null)
-                    StopCoroutine(fdv_cr);
-
-                fdv_cr = FindDelayedVoice(value);
-
-                StartCoroutine(fdv_cr);
-            }
-        }
-
-        private void LoseVoice()
-        {
-            if(fdv_cr != null) StopCoroutine(fdv_cr);
-
-            if(Voice != null)
-            {
-                OnVoiceOutputChanged?.Invoke(null);
-                Voice.SetParent(SettingsManager.Purgatory);
-                Voice.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-                Voice = null;
-            }
-        }
-
-        private void InitializeVoice()
-        {
-            if(isServer && isOwned)
-            {
-                // Host mode, this is the host user. Voice chat is always implied.
-                ChatOwnID = 0;
-            }
-            else if(isOwned)
-            {
-
-            }
-        }
-
-        private void DeinitializeVoice()
-        {
-            LoseVoice();
-
-            if(isServer && isOwned)
-            {
-
-            }
-            else if(isOwned)
-            {
-
-            }
-        }
+        #region Appearance Status
 
         private void UpdateNetAppearanceStatus(int _)
         {

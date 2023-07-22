@@ -24,15 +24,12 @@ namespace Arteranos.Avatar
         private IAvatarLoader m_AvatarData = null;
         private NetworkPose m_Poser = null;
 
-        private IVoiceOutput m_IVoiceOutput = null;
-
         public void Awake() => syncDirection = SyncDirection.ServerToClient;
 
         public override void OnStartClient()
         {
             base.OnStartClient();
 
-            GetComponent<AvatarBrain>().OnVoiceOutputChanged += UseThisVoice;
             m_AvatarData = GetComponent<IAvatarLoader>();
             m_Poser = GetComponent<NetworkPose>();
 
@@ -48,8 +45,6 @@ namespace Arteranos.Avatar
         {
             if(isOwned)
                 XRControl.Instance.XRSwitchEvent -= OnXRChanged;
-
-            GetComponent<AvatarBrain>().OnVoiceOutputChanged -= UseThisVoice;
 
             base.OnStopClient();
         }
@@ -83,8 +78,6 @@ namespace Arteranos.Avatar
         /// <param name="rootTransform"></param>
         /// <param name="names">Array of the joint (aka bone) names</param>
         public void UploadJointNames(Transform rootTransform, string[] names) => m_Poser.UploadJointNames(rootTransform, names);
-
-        private void UseThisVoice(IVoiceOutput voice) => m_IVoiceOutput = voice;
 
         // --------------------------------------------------------------------
         #region Pose updating
@@ -172,9 +165,7 @@ namespace Arteranos.Avatar
 
         private void RouteVoice()
         {
-            if(m_IVoiceOutput == null) return;
-
-            float amount = m_IVoiceOutput.MeasureAmplitude();
+            float amount = GetComponent<AvatarVoice>().MeasureAmplitude();
 
             m_AvatarData.UpdateOpenMouth(amount);
         }

@@ -34,49 +34,40 @@ namespace Arteranos.Avatar
     public class AvatarVoice : NetworkBehaviour
     {
         private IAvatarBrain Brain => gameObject.GetComponent<AvatarBrain>();
-        private bool IsSelfMuted => AppearanceStatus.IsSilent(Brain.AppearanceStatus);
-        private bool IsMuted(uint netID) => IsMuted(NetworkStatus.GetOnlineUser(netID));
-        private bool IsMuted(IAvatarBrain other) => 
+        private bool IsMuted => AppearanceStatus.IsSilent(Brain.AppearanceStatus);
+        private bool IsMutedBy(uint netID) => IsMutedBy(NetworkStatus.GetOnlineUser(netID));
+        private bool IsMutedBy(IAvatarBrain other) => 
             (other != null) && AppearanceStatus.IsSilent(other.AppearanceStatus);
         private IVoiceOutput AudioOutput { get; set; } = null;
 
 
 
-        // TODO Migrate use of UVMicInput from AudioManager
-        // TODO migrate use of UVAudioOutput from AudioManager
-        // or, fire ChatroomAgent :)
         public override void OnStartClient()
         {
             base.OnStartClient();
 
             if(isOwned)
-            {
                 AudioManager.OnSegmentReady += ReceivedMicInput;
-            }
-            else
-            {
-
-            }
         }
 
         public override void OnStopClient()
         {
             if(isOwned)
-            {
                 AudioManager.OnSegmentReady -= ReceivedMicInput;
-            }
-            else
-            {
-
-            }
 
             base.OnStopClient();
+        }
+
+        private void Update()
+        {
+            if(AudioOutput != null)
+                AudioOutput.mute = IsMuted;
         }
 
         private void ReceivedMicInput(int index, byte[] samples)
         {
             // No point to emit the audio data if the user is self-muted.
-            if(IsSelfMuted) return;
+            if(IsMuted) return;
 
             VoicePacket packet = new()
             {
@@ -107,6 +98,8 @@ namespace Arteranos.Avatar
 
             AudioOutput.Feed(voicePacket.data.samples);
         }
+
+        public float MeasureAmplitude() => AudioOutput?.MeasureAmplitude() ?? 0;
 
         [Command]
         private void CmdReceivedMicInput(VoicePacket voicePacket)
@@ -139,7 +132,7 @@ namespace Arteranos.Avatar
         private void TargetReceivedVoicePacket(VoicePacket voicePacket)
         {
             // Sender is muted by you
-            if(IsMuted(voicePacket.senderNetID)) return;
+            if(IsMutedBy(voicePacket.senderNetID)) return;
 
             ReceivedNetworkInput(voicePacket);
         }
