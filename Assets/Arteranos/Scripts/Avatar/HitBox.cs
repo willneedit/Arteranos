@@ -29,7 +29,6 @@ namespace Arteranos.Avatar
         private bool triggered = false;
         private UI.INameplateUI np = null;
 
-        // TODO Popup and Popout durations
         private float m_PopupTime = 0.5f;
         private float m_PopoutTime = 5.0f;
 

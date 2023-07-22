@@ -116,7 +116,6 @@ namespace Arteranos.Services
             {
 
                 // Accept the successful authentication
-                // TODO move the registering of the server user hash from the AvatarBrain
                 ServerAccept(conn);
             }
             else
