@@ -110,11 +110,8 @@ namespace Arteranos.Avatar
 
         public void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered)
         {
-            // TODO People management
-            bool haveFriends = true;
-
             // Not for the desired sphere of influence
-            if(isFriend != haveFriends) return;
+            if(isFriend != Subconscious.IsMutualFriends(touchy)) return;
 
             touchy.SetAppearanceStatusBit(Avatar.AppearanceStatus.Bubbled, entered);
         }
