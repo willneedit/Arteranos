@@ -180,7 +180,6 @@ namespace Arteranos.XR
             XROrigin xro = CurrentVRRig;
             if(xro == null) return;
             
-            // TODO More movement schenes
             ActionBasedSnapTurnProvider snapTurnProvider = 
                 xro.gameObject.GetComponent<ActionBasedSnapTurnProvider>();
 

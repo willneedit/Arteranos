@@ -66,7 +66,6 @@ namespace Arteranos.Audio
         //     sampling rate. To synchronize, we have to use a sliding window.
         public void Feed(byte[] encodedData)
         {
-            // FIXME Concurrency?
             // Tack on the decoded data to the receive buffer.
             float[] samples = decoder.DecodePacketFloat(encodedData);
             

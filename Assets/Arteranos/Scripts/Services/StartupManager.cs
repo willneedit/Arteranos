@@ -71,16 +71,6 @@ namespace Arteranos.Services
 
             StartCoroutine(StartupCoroutine());
         }
-        protected void StartNetwork()
-        {
-
-            // FIXME Too early.
-            // I need UI.WorldTransitionUI.InitiateTransition(worldURL), and the live connection.
-            //if(!string.IsNullOrEmpty(DesiredWorld))
-            //{
-            //    Server.WorldURL = DesiredWorld;
-            //}
-        }
     }
 }
 
