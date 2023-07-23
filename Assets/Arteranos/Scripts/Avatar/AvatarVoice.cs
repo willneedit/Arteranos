@@ -93,7 +93,9 @@ namespace Arteranos.Avatar
                 AudioOutput = AudioManager.Instance.GetVoiceOutput(
                     voicePacket.data.sampleRate, voicePacket.data.channelCount);
 
-                AudioOutput.transform.SetParent(transform, false);
+                IAvatarBrain sender = NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
+
+                AudioOutput.transform.SetParent(sender.gameObject.transform, false);
             }
 
             AudioOutput.Feed(voicePacket.data.samples);
