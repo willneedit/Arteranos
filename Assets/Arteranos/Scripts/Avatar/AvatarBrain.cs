@@ -35,8 +35,6 @@ namespace Arteranos.Avatar
 
         private int LocalAppearanceStatus = 0;
 
-        private Transform Voice = null;
-
         private IHitBox HitBox = null;
 
         private AvatarSubconscious Subconscious { get; set; } = null;

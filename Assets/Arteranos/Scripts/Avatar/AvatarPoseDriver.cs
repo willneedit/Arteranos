@@ -167,7 +167,7 @@ namespace Arteranos.Avatar
         {
             float amount = GetComponent<AvatarVoice>().MeasureAmplitude();
 
-            m_AvatarData.UpdateOpenMouth(amount);
+            m_AvatarData?.UpdateOpenMouth(amount);
         }
 
         #endregion

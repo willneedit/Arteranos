@@ -35,8 +35,8 @@ namespace Arteranos.Avatar
     {
         private IAvatarBrain Brain => gameObject.GetComponent<AvatarBrain>();
         private bool IsMuted => AppearanceStatus.IsSilent(Brain.AppearanceStatus);
-        private bool IsMutedBy(uint netID) => IsMutedBy(NetworkStatus.GetOnlineUser(netID));
-        private bool IsMutedBy(IAvatarBrain other) => 
+        private bool IsMutedTo(uint netID) => IsMutedTo(NetworkStatus.GetOnlineUser(netID));
+        private bool IsMutedTo(IAvatarBrain other) => 
             (other != null) && AppearanceStatus.IsSilent(other.AppearanceStatus);
         private IVoiceOutput AudioOutput { get; set; } = null;
 
@@ -56,12 +56,6 @@ namespace Arteranos.Avatar
                 AudioManager.OnSegmentReady -= ReceivedMicInput;
 
             base.OnStopClient();
-        }
-
-        private void Update()
-        {
-            if(AudioOutput != null)
-                AudioOutput.mute = IsMuted;
         }
 
         private void ReceivedMicInput(int index, byte[] samples)
@@ -85,7 +79,7 @@ namespace Arteranos.Avatar
             CmdReceivedMicInput(packet);
         }
 
-        private void ReceivedNetworkInput(VoicePacket voicePacket)
+        private void ReceivedNetworkInput(VoicePacket voicePacket, bool muted)
         {
             if(AudioOutput == null)
             {
@@ -95,8 +89,12 @@ namespace Arteranos.Avatar
 
                 IAvatarBrain sender = NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
 
-                AudioOutput.transform.SetParent(sender.gameObject.transform, false);
+                AudioOutput.transform.SetParent(transform, false);
             }
+
+            AudioOutput.mute = muted;
+
+            if(muted) return;
 
             AudioOutput.Feed(voicePacket.data.samples);
         }
@@ -133,10 +131,11 @@ namespace Arteranos.Avatar
         [TargetRpc]
         private void TargetReceivedVoicePacket(VoicePacket voicePacket)
         {
-            // Sender is muted by you
-            if(IsMutedBy(voicePacket.senderNetID)) return;
+            IAvatarBrain emitter = NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
 
-            ReceivedNetworkInput(voicePacket);
+            // While the sound is heard by you, it has to be located at the sound source.
+            emitter.gameObject.GetComponent<AvatarVoice>()
+                              .ReceivedNetworkInput(voicePacket, IsMutedTo(emitter));
         }
     }
 }
