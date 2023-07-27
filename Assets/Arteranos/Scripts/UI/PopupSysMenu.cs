@@ -5,13 +5,12 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Arteranos
+namespace Arteranos.UI
 {
 
     public class PopupSysMenu : MonoBehaviour
@@ -24,7 +23,9 @@ namespace Arteranos
 
         public void OnDisable() => SystemMenu.UnbindAction();
 
-        private void OnPerformSysMenu(InputAction.CallbackContext obj)
+        private void OnPerformSysMenu(InputAction.CallbackContext obj) => OpenSysMenu();
+
+        public static void OpenSysMenu()
         {
             if(FindObjectOfType<SysMenuKind>() != null)
             {
