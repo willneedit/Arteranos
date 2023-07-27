@@ -796,6 +796,16 @@ PrefabInstance:
       propertyPath: weight
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3248231206936911695, guid: 0c924ef8e01e2974ba2fde7066698900,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3772151105963276859, guid: 0c924ef8e01e2974ba2fde7066698900,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3840780144436917895, guid: 0c924ef8e01e2974ba2fde7066698900,
         type: 3}
       propertyPath: m_RootOrder
