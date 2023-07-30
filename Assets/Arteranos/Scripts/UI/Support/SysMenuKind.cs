@@ -12,5 +12,15 @@ namespace Arteranos.UI
     public class SysMenuKind : MonoBehaviour
     {
         public string Name;
+
+        // Anything resembling the system menu hides the User HUD.
+        private void Awake() => SysMenu.ShowUserHUD(false);
+
+        // And if the last window is gone, we let the HUD reappear.
+        private void OnDestroy()
+        {
+            SysMenuKind[] obs = FindObjectsOfType<SysMenuKind>();
+            if(obs.Length == 0) SysMenu.ShowUserHUD(true);
+        }
     }
 }

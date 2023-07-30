@@ -5,8 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,21 +13,19 @@ namespace Arteranos.UI
 
     public class SysMenu : MonoBehaviour
     {
-        public InputActionHandler SystemMenu;
+        [SerializeField] private InputActionHandler SystemMenu;
 
-        public void Awake() => SystemMenu.PerformCallback = OnPerformSysMenu;
+        public void Awake() => SystemMenu.PerformCallback = (InputAction.CallbackContext obj) => OpenSysMenu();
 
         public void OnEnable() => SystemMenu.BindAction();
 
         public void OnDisable() => SystemMenu.UnbindAction();
 
-        private void OnPerformSysMenu(InputAction.CallbackContext obj) => OpenSysMenu();
-
         public static void OpenSysMenu()
         {
             if(FindObjectOfType<SysMenuKind>() != null)
             {
-                SysMenu.CloseSysMenus();
+                CloseSysMenus();
                 return;
             }
 
@@ -40,6 +36,12 @@ namespace Arteranos.UI
         {
             foreach(SysMenuKind menu in FindObjectsOfType<SysMenuKind>())
                 Destroy(menu.gameObject);
+        }
+
+        public static void ShowUserHUD(bool show = true)
+        {
+            UserHUDUI hud = FindObjectOfType<UserHUDUI>(true);
+            if(hud != null) hud.gameObject.SetActive(show);
         }
     }
 }

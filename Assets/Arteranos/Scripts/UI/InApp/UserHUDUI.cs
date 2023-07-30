@@ -73,20 +73,19 @@ namespace Arteranos.UI
                 HudButton.Button.onClick.AddListener(Actions[i]);
             }
 
-            UpdateHUD();
-        }
+            NetworkStatus.OnNetworkStatusChanged += (_1, _2) => UpdateHUD();
 
-        protected void Update()
-        {
+            UpdateHUD();
         }
 
         private void UpdateHUD()
         {
             bool avatarOn = XRControl.Me != null;
             bool muted = AppearanceStatus.IsSilent(XRControl.Me?.AppearanceStatus ?? AppearanceStatus.OK);
-            
+
             // Safety measure, to accidentally shut down a hosted session.
-            bool online = NetworkStatus.GetOnlineLevel() == OnlineLevel.Client;
+//            bool online = NetworkStatus.GetOnlineLevel() == OnlineLevel.Client;
+            bool online = NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline;
 
             HUDButtons[btn_mute].Button.gameObject.SetActive(avatarOn && !muted);
             HUDButtons[btn_unmute].Button.gameObject.SetActive(avatarOn && muted);
