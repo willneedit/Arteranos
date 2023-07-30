@@ -22,7 +22,7 @@ public class CameraUITracker : MonoBehaviour
     private bool initial = true;
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         m_camera = Camera.main != null ? Camera.main.gameObject : null;
         if(m_camera == null) return;

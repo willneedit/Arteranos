@@ -144,7 +144,7 @@ namespace Arteranos.UI
 
         private void OnSendTextButtonClicked()
         {
-            SysMenuKind.CloseSystemMenus();
+            SysMenu.CloseSysMenus();
             TextMessageUIFactory.New(Bearer);
         }
 

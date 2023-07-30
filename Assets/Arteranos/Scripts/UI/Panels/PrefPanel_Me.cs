@@ -55,13 +55,13 @@ namespace Arteranos.UI
 
         private void OnAvatarGalleryClicked()
         {
-            SysMenuKind.CloseSystemMenus();
+            SysMenu.CloseSysMenus();
             AvatarGalleryUIFactory.New();
         }
 
         private void OnCreateAvatarClicked()
         {
-            SysMenuKind.CloseSystemMenus();
+            SysMenu.CloseSysMenus();
             CreateAvatarUIFactory.New();
         }
 

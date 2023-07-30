@@ -122,14 +122,14 @@ namespace Arteranos.UI
 
         private void OnWorldGalleryClicked()
         {
-            SysMenuKind.CloseSystemMenus();
+            SysMenu.CloseSysMenus();
 
             WorldListUI.New();
         }
 
         private void OnContentPermissionsClicked()
         {
-            SysMenuKind.CloseSystemMenus();
+            SysMenu.CloseSysMenus();
 
             ContentFilterUI cui = ContentFilterUI.New();
 

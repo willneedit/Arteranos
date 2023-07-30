@@ -94,7 +94,7 @@ namespace Arteranos.UI
             HUDButtons[btn_disconnect].Button.gameObject.SetActive(online);
         }
 
-        private void OnSysMenuClicked() => PopupSysMenu.OpenSysMenu();
+        private void OnSysMenuClicked() => SysMenu.OpenSysMenu();
 
         private void OnMuteClicked()
         {

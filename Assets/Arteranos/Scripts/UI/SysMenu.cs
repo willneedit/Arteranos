@@ -13,7 +13,7 @@ using UnityEngine.InputSystem;
 namespace Arteranos.UI
 {
 
-    public class PopupSysMenu : MonoBehaviour
+    public class SysMenu : MonoBehaviour
     {
         public InputActionHandler SystemMenu;
 
@@ -29,11 +29,17 @@ namespace Arteranos.UI
         {
             if(FindObjectOfType<SysMenuKind>() != null)
             {
-                SysMenuKind.CloseSystemMenus();
+                SysMenu.CloseSysMenus();
                 return;
             }
 
             Instantiate(Resources.Load<GameObject>("UI/UI_SysMenu"));
+        }
+
+        public static void CloseSysMenus()
+        {
+            foreach(SysMenuKind menu in FindObjectsOfType<SysMenuKind>())
+                Destroy(menu.gameObject);
         }
     }
 }

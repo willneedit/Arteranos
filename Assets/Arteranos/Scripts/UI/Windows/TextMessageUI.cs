@@ -134,8 +134,7 @@ namespace Arteranos.UI
         {
             if(already) return;
             already = true;
-
-            SysMenuKind.CloseSystemMenus();
+            SysMenu.CloseSysMenus();
             XRControl.Me.SendTextMessage(Receiver, text);
         }
 
@@ -143,8 +142,7 @@ namespace Arteranos.UI
         {
             if(already) return;
             already = true;
-
-            SysMenuKind.CloseSystemMenus();
+            SysMenu.CloseSysMenus();
             XRControl.Me.SendTextMessage(Receiver, txt_Message.text);
         }
     }

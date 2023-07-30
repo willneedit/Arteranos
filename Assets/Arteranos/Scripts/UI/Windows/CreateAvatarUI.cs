@@ -49,8 +49,7 @@ namespace Arteranos.UI
         private void OnAvatarSaved(string avatarId)
         {
             avatarCreatorStateMachine.gameObject.SetActive(false);
-
-            SysMenuKind.CloseSystemMenus();
+            SysMenu.CloseSysMenus();
 
             cs.AvatarURL = avatarId;
             cs.Me.CurrentAvatar.AvatarProvider = AvatarProvider.RPM;
