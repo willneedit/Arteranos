@@ -31,6 +31,7 @@ namespace Arteranos.UI
     {
         [SerializeField] private HUDButton SystemMenuButton;
         [SerializeField] private HUDButton[] HUDButtons;
+        [SerializeField] private RectTransform EmojiFlyout;
         [SerializeField] private TMP_Text ToolTipText;
 
         // Must match the ordering in the array, not necessarily the ordering in the UI
@@ -93,6 +94,27 @@ namespace Arteranos.UI
             HUDButtons[btn_disconnect].Button.gameObject.SetActive(online);
         }
 
+        IEnumerator ToggleFlyout(RectTransform rt)
+        {
+            float duration = 0.25f;
+
+            float elapsed = 0.0f;
+            float sourcescale = rt.localScale.x;
+            float targetScale = (sourcescale == 0) ? 1 : 0;
+
+            while(elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float normalizedProgress = elapsed / duration;
+
+                float currentScale = Mathf.Lerp(sourcescale, targetScale, normalizedProgress);
+
+                rt.localScale = new Vector2(currentScale, 1);
+
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
         private void OnSysMenuClicked() => SysMenu.OpenSysMenu();
 
         private void OnMuteClicked()
@@ -108,13 +130,13 @@ namespace Arteranos.UI
         }
 
         private void OnScreenshotClicked() => throw new NotImplementedException();
+
         private void OnDisconnectClicked()
         {
             NetworkStatus.StopHost(true);
             UpdateHUD();
         }
 
-        private void OnEmotesClicked() => throw new NotImplementedException();
-
+        private void OnEmotesClicked() => StartCoroutine(ToggleFlyout(EmojiFlyout));
     }
 }

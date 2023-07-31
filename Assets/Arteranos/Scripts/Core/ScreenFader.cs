@@ -31,7 +31,6 @@ namespace Arteranos
             float normalizedProgress = elapsed / duration;
 
             float alpha = Mathf.Lerp(currentOpacity, targetOpacity, normalizedProgress);
-            alpha = Mathf.Clamp01(alpha);
 
             faderImage.color = new Color(faderImage.color.r, faderImage.color.g, faderImage.color.b, alpha);
 
