@@ -15,8 +15,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.Editor;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 namespace Arteranos.UI
 {
@@ -27,10 +27,19 @@ namespace Arteranos.UI
         public string HoverTip;
     }
 
+    [Serializable]
+    internal struct EmojiButton
+    {
+        public Texture2D Image;
+        public string HoverTip;
+        public ParticleSystem Appearance;
+    }
+
     public class UserHUDUI : UIBehaviour
     {
         [SerializeField] private HUDButton SystemMenuButton;
         [SerializeField] private HUDButton[] HUDButtons;
+        [SerializeField] private EmojiButton[] EmojiButtons;
         [SerializeField] private RectTransform EmojiFlyout;
         [SerializeField] private TMP_Text ToolTipText;
 
@@ -62,6 +71,9 @@ namespace Arteranos.UI
             Action<bool> makeHoverTip(string hoverTip) =>
                 (x) => ToolTipText.text = hoverTip;
 
+            UnityAction makeClickedEmoji(Texture2D image, ParticleSystem ps) =>
+                () => PerformEmoji(image, ps);
+
             base.Start();
 
             SystemMenuButton.Button.onHover += makeHoverTip(SystemMenuButton.HoverTip);
@@ -72,6 +84,28 @@ namespace Arteranos.UI
                 HUDButton HudButton = HUDButtons[i];
                 HudButton.Button.onHover += makeHoverTip(HudButton.HoverTip);
                 HudButton.Button.onClick.AddListener(Actions[i]);
+            }
+
+            GameObject sampleButton = EmojiFlyout.transform.GetChild(0).gameObject;
+
+            for(int i = 0; i < EmojiButtons.Length; i++)
+            {
+                EmojiButton emojiButton = EmojiButtons[i];
+                Texture2D image = emojiButton.Image;
+
+                GameObject go = Instantiate(sampleButton, EmojiFlyout);
+                HoverButton eb = go.GetComponent<HoverButton>();
+
+                eb.onHover += makeHoverTip(emojiButton.HoverTip);
+
+                eb.image.sprite = Sprite.Create(
+                    image,
+                    new Rect(0, 0, image.width, image.height),
+                    Vector2.zero);
+                eb.name = emojiButton.HoverTip;
+                eb.onClick.AddListener(makeClickedEmoji(image, emojiButton.Appearance);
+
+                go.SetActive(true);
             }
 
             NetworkStatus.OnNetworkStatusChanged += (_1, _2) => UpdateHUD();
@@ -138,5 +172,10 @@ namespace Arteranos.UI
         }
 
         private void OnEmotesClicked() => StartCoroutine(ToggleFlyout(EmojiFlyout));
+
+        private void PerformEmoji(Texture2D image, ParticleSystem ps)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
