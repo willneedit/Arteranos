@@ -103,7 +103,7 @@ namespace Arteranos.UI
                     new Rect(0, 0, image.width, image.height),
                     Vector2.zero);
                 eb.name = emojiButton.HoverTip;
-                eb.onClick.AddListener(makeClickedEmoji(image, emojiButton.Appearance);
+                eb.onClick.AddListener(makeClickedEmoji(image, emojiButton.Appearance));
 
                 go.SetActive(true);
             }
