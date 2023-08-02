@@ -1194,54 +1194,71 @@ MonoBehaviour:
   EmojiButtons:
   - Image: {fileID: 2800000, guid: 0da01d3f2cb433a468f7c3f6c3ba7d97, type: 3}
     HoverTip: Waving
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: e2f959e51fe442740a99e97e5ce10c0b, type: 3}
     HoverTip: Raise Hand
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 1596675147151825326, guid: b53335b053f280b44b5dbb216b977a10,
+      type: 3}
   - Image: {fileID: 2800000, guid: 53e30d5515c46974f8f419127086bf69, type: 3}
     HoverTip: Clapping
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: 1a5e55eca7c95164ea15c5218c4804a7, type: 3}
     HoverTip: Heart
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 1614987338447697119, guid: 76b0d768e41ac234487e3f8b38cc864b,
+      type: 3}
   - Image: {fileID: 2800000, guid: 8591e5a17e5dbf141baa1479b291a50c, type: 3}
     HoverTip: Slight Smile
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: 58ed84aaa3083104d9c7d215736bbeb1, type: 3}
     HoverTip: Smile
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: 0907fc4ba95ab054194c6bd605ba6f60, type: 3}
     HoverTip: Laughing
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: 8d9096c3586ddb1499fd7d02fe902c10, type: 3}
     HoverTip: ROFL
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: a74ee3d233a2752409cc2d64b9fe1856, type: 3}
     HoverTip: Neutral
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: c77147b2ecb80c049baa229bbfea7241, type: 3}
     HoverTip: Smirk
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: 55af72a1620786546a0c77c628e6c04c, type: 3}
     HoverTip: Not funny
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: eb39bddcefceebf47b9b0bc2fb4d47f9, type: 3}
     HoverTip: 'Oh... '
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: f1c84a3e9199473419e8fc0ae92c44ae, type: 3}
     HoverTip: Slight frown
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: ccf1c3d1b0169f847983d8f2b5aa0de1, type: 3}
     HoverTip: Frown
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: 6802e09d0c3d3dd4db76bbb203f722ca, type: 3}
     HoverTip: Angry
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   - Image: {fileID: 2800000, guid: a3991b0badfebf942bb6442b9f21676f, type: 3}
     HoverTip: Enraged
-    Appearance: {fileID: 0}
+    Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
+      type: 3}
   EmojiFlyout: {fileID: 8419994093829650434}
   ToolTipText: {fileID: 7320566018290116340}
+  Material: {fileID: 2100000, guid: b660309bfa4e3ec439477083e7fafeae, type: 2}
 --- !u!114 &3695462963600023259
 MonoBehaviour:
   m_ObjectHideFlags: 0

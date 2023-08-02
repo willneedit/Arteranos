@@ -33,6 +33,7 @@ namespace Arteranos.UI
         public Texture2D Image;
         public string HoverTip;
         public ParticleSystem Appearance;
+        [NonSerialized] public Material Material;
     }
 
     public class UserHUDUI : UIBehaviour
@@ -42,11 +43,12 @@ namespace Arteranos.UI
         [SerializeField] private EmojiButton[] EmojiButtons;
         [SerializeField] private RectTransform EmojiFlyout;
         [SerializeField] private TMP_Text ToolTipText;
+        [SerializeField] private Material Material;
 
         // Must match the ordering in the array, not necessarily the ordering in the UI
         private const int btn_mute = 0;
         private const int btn_unmute = 1;
-        private const int btn_screenshot = 2;
+        // private const int btn_screenshot = 2;
         private const int btn_disconnect = 3;
         private const int btn_emotes = 4;
 
@@ -71,8 +73,8 @@ namespace Arteranos.UI
             Action<bool> makeHoverTip(string hoverTip) =>
                 (x) => ToolTipText.text = hoverTip;
 
-            UnityAction makeClickedEmoji(Texture2D image, ParticleSystem ps) =>
-                () => PerformEmoji(image, ps);
+            UnityAction makeClickedEmoji(EmojiButton but) =>
+                () => PerformEmoji(but);
 
             base.Start();
 
@@ -91,6 +93,7 @@ namespace Arteranos.UI
             for(int i = 0; i < EmojiButtons.Length; i++)
             {
                 EmojiButton emojiButton = EmojiButtons[i];
+                emojiButton.Material = null;
                 Texture2D image = emojiButton.Image;
 
                 GameObject go = Instantiate(sampleButton, EmojiFlyout);
@@ -103,7 +106,7 @@ namespace Arteranos.UI
                     new Rect(0, 0, image.width, image.height),
                     Vector2.zero);
                 eb.name = emojiButton.HoverTip;
-                eb.onClick.AddListener(makeClickedEmoji(image, emojiButton.Appearance));
+                eb.onClick.AddListener(makeClickedEmoji(emojiButton));
 
                 go.SetActive(true);
             }
@@ -124,6 +127,7 @@ namespace Arteranos.UI
 
             HUDButtons[btn_mute].Button.gameObject.SetActive(avatarOn && !muted);
             HUDButtons[btn_unmute].Button.gameObject.SetActive(avatarOn && muted);
+            HUDButtons[btn_emotes].Button.gameObject.SetActive(avatarOn);
 
             HUDButtons[btn_disconnect].Button.gameObject.SetActive(online);
         }
@@ -173,9 +177,34 @@ namespace Arteranos.UI
 
         private void OnEmotesClicked() => StartCoroutine(ToggleFlyout(EmojiFlyout));
 
-        private void PerformEmoji(Texture2D image, ParticleSystem ps)
+        // FIXME Local only! Has to be propagated in the network!
+        IEnumerator CleanupEmojiPS(ParticleSystem ps)
         {
-            throw new NotImplementedException();
+            yield return new WaitForSeconds(5);
+
+            Destroy(ps.gameObject);
+        }
+
+        private void PerformEmoji(EmojiButton but)
+        {
+            if(but.Material == null)
+            {
+                Material mat = new(Material) { mainTexture = but.Image };
+                but.Material = mat;
+            }
+
+            Transform myself = XRControl.Me.gameObject.transform;
+            ParticleSystem ps = Instantiate(but.Appearance, myself);
+
+            // A little bit 'up' (relative to the user)
+            Vector3 offset = myself.rotation * Vector3.up * (XRControl.Instance.BodyHeight * 1.10f);
+            ps.transform.SetLocalPositionAndRotation(offset, Quaternion.identity);
+
+            ParticleSystemRenderer render = ps.GetComponent<ParticleSystemRenderer>();
+            render.sharedMaterial = but.Material;
+
+
+            StartCoroutine(CleanupEmojiPS(ps));
         }
     }
 }
