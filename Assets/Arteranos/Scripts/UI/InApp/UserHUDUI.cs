@@ -17,6 +17,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.Editor;
 using UnityEngine.UI;
+using System.Linq;
 
 namespace Arteranos.UI
 {
@@ -74,7 +75,7 @@ namespace Arteranos.UI
                 (x) => ToolTipText.text = hoverTip;
 
             UnityAction makeClickedEmoji(EmojiButton but) =>
-                () => PerformEmoji(but);
+                () => PerformEmoji(XRControl.Me, but.Image.name);
 
             base.Start();
 
@@ -105,7 +106,7 @@ namespace Arteranos.UI
                     image,
                     new Rect(0, 0, image.width, image.height),
                     Vector2.zero);
-                eb.name = emojiButton.HoverTip;
+                eb.name = emojiButton.Image.name;
                 eb.onClick.AddListener(makeClickedEmoji(emojiButton));
 
                 go.SetActive(true);
@@ -185,26 +186,41 @@ namespace Arteranos.UI
             Destroy(ps.gameObject);
         }
 
-        private void PerformEmoji(EmojiButton but)
+        private void PerformEmoji(IAvatarBrain emitter, string emojiName)
         {
-            if(but.Material == null)
-            {
-                Material mat = new(Material) { mainTexture = but.Image };
-                but.Material = mat;
-            }
+            Transform myself = emitter.gameObject.transform;
 
-            Transform myself = XRControl.Me.gameObject.transform;
+            if(!GetEmoteButton(emojiName, out EmojiButton but)) return;
+
             ParticleSystem ps = Instantiate(but.Appearance, myself);
-
-            // A little bit 'up' (relative to the user)
-            Vector3 offset = myself.rotation * Vector3.up * (XRControl.Instance.BodyHeight * 1.10f);
-            ps.transform.SetLocalPositionAndRotation(offset, Quaternion.identity);
-
             ParticleSystemRenderer render = ps.GetComponent<ParticleSystemRenderer>();
             render.sharedMaterial = but.Material;
 
+            // A little bit 'up' (relative to the user)
+            Vector3 offset = myself.rotation * Vector3.up * (emitter.Body.FullHeight * 1.10f);
+            ps.transform.SetLocalPositionAndRotation(offset, Quaternion.identity);
 
             StartCoroutine(CleanupEmojiPS(ps));
+        }
+
+        private bool GetEmoteButton(string emojiName, out EmojiButton button)
+        {
+            button = new();
+            IEnumerable<EmojiButton> q = from entry in EmojiButtons
+                    where entry.Image.name == emojiName
+                    select entry;
+
+            if(q.Count() == 0) return false;
+
+            button = q.First();
+
+            if(button.Material == null)
+            {
+                Material mat = new(Material) { mainTexture = button.Image };
+                button.Material = mat;
+            }
+
+            return true;
         }
     }
 }

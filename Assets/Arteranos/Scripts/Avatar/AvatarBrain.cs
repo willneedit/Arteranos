@@ -44,25 +44,25 @@ namespace Arteranos.Avatar
         public string AvatarURL
         {
             get => m_strings.ContainsKey(AVKeys.AvatarURL) ? m_strings[AVKeys.AvatarURL] : null;
-            set => PropagateString(AVKeys.AvatarURL, value);
+            set => CmdPropagateString(AVKeys.AvatarURL, value);
         }
 
         public UserID UserID
         {
             get => m_userID;
-            private set => PropagateUserID(value);
+            private set => CmdPropagateUserID(value);
         }
 
         public byte[] PublicKey
         {
             get => m_blobs[AVKeys.PublicKey];
-            set => PropagateBlob(AVKeys.PublicKey, value);
+            set => CmdPropagateBlob(AVKeys.PublicKey, value);
         }
 
         public string Nickname
         {
             get => m_strings.ContainsKey(AVKeys.Nickname) ? m_strings[AVKeys.Nickname] : null;
-            private set => PropagateString(AVKeys.Nickname, value);
+            private set => CmdPropagateString(AVKeys.Nickname, value);
         }
 
         public int AppearanceStatus
@@ -89,7 +89,7 @@ namespace Arteranos.Avatar
 
                 if(oldNetAS != newNetAS)
                     // Spread the word...
-                    PropagateInt(AVKeys.NetAppearanceStatus, newNetAS);
+                    CmdPropagateInt(AVKeys.NetAppearanceStatus, newNetAS);
                 else
                     // Or, follow through.
                     UpdateNetAppearanceStatus(value);
@@ -348,20 +348,34 @@ namespace Arteranos.Avatar
 
 
         [Command]
-        private void PropagateInt(AVKeys key, int value) => m_ints[key] = value;
+        private void CmdPropagateInt(AVKeys key, int value) => m_ints[key] = value;
 
         [Command]
-        private void PropagateFloat(AVKeys key, float value) => m_floats[key] = value;
+        private void CmdPropagateFloat(AVKeys key, float value) => m_floats[key] = value;
 
         [Command]
-        private void PropagateString(AVKeys key, string value) => m_strings[key] = value;
+        private void CmdPropagateString(AVKeys key, string value) => m_strings[key] = value;
 
         [Command]
-        private void PropagateBlob(AVKeys key, byte[] value) => m_blobs[key] = value;
+        private void CmdPropagateBlob(AVKeys key, byte[] value) => m_blobs[key] = value;
 
         [Command]
-        private void PropagateUserID(UserID userID) => m_userID = userID;
+        private void CmdPropagateUserID(UserID userID) => m_userID = userID;
 
+
+        [Command]
+        private void CmdPerformEmote(string emojiName)
+        {
+            RpcPerformEmote(emojiName);
+        }
+
+        [ClientRpc]
+        private void RpcPerformEmote(string emojiName)
+        {
+            // Invisible users wouldn't see the emotes
+            if(Avatar.AppearanceStatus.IsInvisible(AppearanceStatus)) return;
+
+        }
 
         #endregion
         // ---------------------------------------------------------------
