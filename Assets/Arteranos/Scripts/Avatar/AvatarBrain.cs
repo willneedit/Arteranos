@@ -375,6 +375,7 @@ namespace Arteranos.Avatar
             // Invisible users wouldn't see the emotes
             if(Avatar.AppearanceStatus.IsInvisible(AppearanceStatus)) return;
 
+            LoopPerformEmoji(emojiName);
         }
 
         #endregion
@@ -596,6 +597,34 @@ namespace Arteranos.Avatar
             if (rc != 0 && sender != null)
                 replyTo = sender;
         }
+        #endregion
+        // ---------------------------------------------------------------
+        #region Emotes performance
+
+        IEnumerator CleanupEmojiPS(ParticleSystem ps)
+        {
+            yield return new WaitForSeconds(5);
+
+            Destroy(ps.gameObject);
+        }
+
+        private void LoopPerformEmoji(string emojiName)
+        {
+            ParticleSystem ps = EmojiSettings.Load().GetEmotePS(emojiName);
+
+            if(ps == null) return;
+
+            ps.transform.SetParent(transform, false);
+
+            // A little bit 'up' (relative to the user)
+            Vector3 offset = transform.rotation * Vector3.up * (Body.FullHeight * 1.10f);
+            ps.transform.SetLocalPositionAndRotation(offset, Quaternion.identity);
+
+            StartCoroutine(CleanupEmojiPS(ps));
+        }
+
+        public void PerformEmote(string emoteName) => CmdPerformEmote(emoteName);
+
         #endregion
     }
 }

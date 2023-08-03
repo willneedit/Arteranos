@@ -106,6 +106,7 @@ namespace Arteranos.Avatar
         public void SendTextMessage(IAvatarBrain receiver, string text)
             => LogDebug($"To {receiver.Nickname}: {text}");
         public void ReceiveTextMessage(IAvatarBrain sender, string text) => throw new NotImplementedException();
+        public void PerformEmote(string emoteName) => throw new NotImplementedException();
     }
 }
 

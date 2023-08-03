@@ -10,14 +10,10 @@ using Arteranos.Services;
 using Arteranos.XR;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem.Editor;
-using UnityEngine.UI;
-using System.Linq;
 using Arteranos.Core;
 
 namespace Arteranos.UI
@@ -66,9 +62,11 @@ namespace Arteranos.UI
                 (x) => ToolTipText.text = hoverTip;
 
             UnityAction makeClickedEmoji(EmojiButton but) =>
-                () => PerformEmoji(XRControl.Me, but.Image.name);
+                () => XRControl.Me.PerformEmote(but.Image.name);
 
             base.Start();
+
+            ToolTipText.text = string.Empty;
 
             SystemMenuButton.Button.onHover += makeHoverTip(SystemMenuButton.HoverTip);
             SystemMenuButton.Button.onClick.AddListener(OnSysMenuClicked);
@@ -106,13 +104,9 @@ namespace Arteranos.UI
 
                 go.SetActive(true);
             }
-
-            NetworkStatus.OnNetworkStatusChanged += (_1, _2) => UpdateHUD();
-
-            UpdateHUD();
         }
 
-        private void UpdateHUD()
+        private void Update()
         {
             bool avatarOn = XRControl.Me != null;
             bool muted = AppearanceStatus.IsSilent(XRControl.Me?.AppearanceStatus ?? AppearanceStatus.OK);
@@ -151,51 +145,14 @@ namespace Arteranos.UI
 
         private void OnSysMenuClicked() => SysMenu.OpenSysMenu();
 
-        private void OnMuteClicked()
-        {
-            XRControl.Me.AppearanceStatus |= AppearanceStatus.Muting;
-            UpdateHUD();
-        }
+        private void OnMuteClicked() => XRControl.Me.AppearanceStatus |= AppearanceStatus.Muting;
 
-        private void OnUnmuteClicked()
-        {
-            XRControl.Me.AppearanceStatus &= ~AppearanceStatus.Muting;
-            UpdateHUD();
-        }
+        private void OnUnmuteClicked() => XRControl.Me.AppearanceStatus &= ~AppearanceStatus.Muting;
 
         private void OnScreenshotClicked() => throw new NotImplementedException();
 
-        private void OnDisconnectClicked()
-        {
-            NetworkStatus.StopHost(true);
-            UpdateHUD();
-        }
+        private void OnDisconnectClicked() => NetworkStatus.StopHost(true);
 
         private void OnEmotesClicked() => StartCoroutine(ToggleFlyout(EmojiFlyout));
-
-        // FIXME Local only! Has to be propagated in the network!
-        IEnumerator CleanupEmojiPS(ParticleSystem ps)
-        {
-            yield return new WaitForSeconds(5);
-
-            Destroy(ps.gameObject);
-        }
-
-        private void PerformEmoji(IAvatarBrain emitter, string emojiName)
-        {
-            Transform myself = emitter.transform;
-
-            ParticleSystem ps = EmojiSettings.Load().GetEmotePS(emojiName);
-
-            if(ps == null) return;
-
-            ps.transform.SetParent(myself, false);
-
-            // A little bit 'up' (relative to the user)
-            Vector3 offset = myself.rotation * Vector3.up * (emitter.Body.FullHeight * 1.10f);
-            ps.transform.SetLocalPositionAndRotation(offset, Quaternion.identity);
-
-            StartCoroutine(CleanupEmojiPS(ps));
-        }
     }
 }

@@ -77,3 +77,4 @@ MonoBehaviour:
     HoverTip: Enraged
     Appearance: {fileID: 5420756394851761510, guid: 6811b3ded382c274a9c4f58dcadf7b48,
       type: 3}
+  MaterialTemplate: {fileID: 2100000, guid: b660309bfa4e3ec439477083e7fafeae, type: 2}
