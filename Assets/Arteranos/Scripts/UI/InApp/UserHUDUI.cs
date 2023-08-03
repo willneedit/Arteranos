@@ -183,7 +183,7 @@ namespace Arteranos.UI
 
         private void PerformEmoji(IAvatarBrain emitter, string emojiName)
         {
-            Transform myself = emitter.gameObject.transform;
+            Transform myself = emitter.transform;
 
             ParticleSystem ps = EmojiSettings.Load().GetEmotePS(emojiName);
 

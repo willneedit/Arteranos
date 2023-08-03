@@ -22,6 +22,7 @@ namespace Arteranos.Avatar
         bool isOwned { get; }
         IAvatarLoader Body { get; }
         GameObject gameObject { get; }
+        Transform transform { get; }
         UserID UserID { get; }
         byte[] PublicKey { get; set; }
 

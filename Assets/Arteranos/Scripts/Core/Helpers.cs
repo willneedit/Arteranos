@@ -77,7 +77,7 @@ namespace Arteranos.Avatar
         public static IHitBox New(IAvatarBrain brain)
         {
             GameObject go = Instantiate(
-                Resources.Load<GameObject>("UI/InApp/AvatarHitBox"), brain.gameObject.transform);
+                Resources.Load<GameObject>("UI/InApp/AvatarHitBox"), brain.transform);
             IHitBox hitBox = go.GetComponent<IHitBox>();
             hitBox.Brain = brain;
 
@@ -90,7 +90,7 @@ namespace Arteranos.Avatar
         public static IBubbleCoordinator New(IAvatarBrain brain)
         {
             GameObject go = Instantiate(
-                Resources.Load<GameObject>("UI/InApp/PrivacyBubble"), brain.gameObject.transform);
+                Resources.Load<GameObject>("UI/InApp/PrivacyBubble"), brain.transform);
             IBubbleCoordinator bc = go.GetComponent<IBubbleCoordinator>();
             bc.Brain = brain;
             return bc;

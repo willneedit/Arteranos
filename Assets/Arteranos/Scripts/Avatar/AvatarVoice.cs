@@ -117,7 +117,7 @@ namespace Arteranos.Avatar
                 // No sense if the speaker is too far away, skip it.
                 // FIXME hardcoded 40 meters
                 if(Vector3.SqrMagnitude(transform.position
-                    - user.gameObject.transform.position)
+                    - user.transform.position)
                     > 1600.0f)
                 {
                     continue;
