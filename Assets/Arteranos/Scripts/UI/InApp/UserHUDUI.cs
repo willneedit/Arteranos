@@ -18,6 +18,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.Editor;
 using UnityEngine.UI;
 using System.Linq;
+using Arteranos.Core;
 
 namespace Arteranos.UI
 {
@@ -28,20 +29,10 @@ namespace Arteranos.UI
         public string HoverTip;
     }
 
-    [Serializable]
-    internal struct EmojiButton
-    {
-        public Texture2D Image;
-        public string HoverTip;
-        public ParticleSystem Appearance;
-        [NonSerialized] public Material Material;
-    }
-
     public class UserHUDUI : UIBehaviour
     {
         [SerializeField] private HUDButton SystemMenuButton;
         [SerializeField] private HUDButton[] HUDButtons;
-        [SerializeField] private EmojiButton[] EmojiButtons;
         [SerializeField] private RectTransform EmojiFlyout;
         [SerializeField] private TMP_Text ToolTipText;
         [SerializeField] private Material Material;
@@ -91,13 +82,17 @@ namespace Arteranos.UI
 
             GameObject sampleButton = EmojiFlyout.transform.GetChild(0).gameObject;
 
-            for(int i = 0; i < EmojiButtons.Length; i++)
+            int emotes = 0;
+            foreach(EmojiButton emojiButton in EmojiSettings.Load().EnumerateEmotes())
             {
-                EmojiButton emojiButton = EmojiButtons[i];
-                emojiButton.Material = null;
+                // TODO Redirection with the favourite emotes preferences panel.
+                // Only for the first sixteen emotes in the set order
+                if(emotes++ >= 16) break;
+
                 Texture2D image = emojiButton.Image;
 
                 GameObject go = Instantiate(sampleButton, EmojiFlyout);
+
                 HoverButton eb = go.GetComponent<HoverButton>();
 
                 eb.onHover += makeHoverTip(emojiButton.HoverTip);
@@ -190,37 +185,17 @@ namespace Arteranos.UI
         {
             Transform myself = emitter.gameObject.transform;
 
-            if(!GetEmoteButton(emojiName, out EmojiButton but)) return;
+            ParticleSystem ps = EmojiSettings.Load().GetEmotePS(emojiName);
 
-            ParticleSystem ps = Instantiate(but.Appearance, myself);
-            ParticleSystemRenderer render = ps.GetComponent<ParticleSystemRenderer>();
-            render.sharedMaterial = but.Material;
+            if(ps == null) return;
+
+            ps.transform.SetParent(myself, false);
 
             // A little bit 'up' (relative to the user)
             Vector3 offset = myself.rotation * Vector3.up * (emitter.Body.FullHeight * 1.10f);
             ps.transform.SetLocalPositionAndRotation(offset, Quaternion.identity);
 
             StartCoroutine(CleanupEmojiPS(ps));
-        }
-
-        private bool GetEmoteButton(string emojiName, out EmojiButton button)
-        {
-            button = new();
-            IEnumerable<EmojiButton> q = from entry in EmojiButtons
-                    where entry.Image.name == emojiName
-                    select entry;
-
-            if(q.Count() == 0) return false;
-
-            button = q.First();
-
-            if(button.Material == null)
-            {
-                Material mat = new(Material) { mainTexture = button.Image };
-                button.Material = mat;
-            }
-
-            return true;
         }
     }
 }
