@@ -48,11 +48,11 @@ namespace Arteranos.UI
 
             Actions = new UnityAction[]
             {
-                OnMuteClicked,
-                OnUnmuteClicked,
-                OnScreenshotClicked,
-                OnDisconnectClicked,
-                OnEmotesClicked
+                () => XRControl.Me.AppearanceStatus |= AppearanceStatus.Muting,
+                () => XRControl.Me.AppearanceStatus &= ~AppearanceStatus.Muting,
+                () => throw new NotImplementedException(),
+                () => NetworkStatus.StopHost(true),
+                () => StartCoroutine(ToggleFlyout(EmojiFlyout))
             };
         }
 
@@ -69,7 +69,7 @@ namespace Arteranos.UI
             ToolTipText.text = string.Empty;
 
             SystemMenuButton.Button.onHover += makeHoverTip(SystemMenuButton.HoverTip);
-            SystemMenuButton.Button.onClick.AddListener(OnSysMenuClicked);
+            SystemMenuButton.Button.onClick.AddListener(SysMenu.OpenSysMenu);
 
             for(int i = 0; i < HUDButtons.Length; i++)
             {
@@ -142,17 +142,5 @@ namespace Arteranos.UI
                 yield return new WaitForEndOfFrame();
             }
         }
-
-        private void OnSysMenuClicked() => SysMenu.OpenSysMenu();
-
-        private void OnMuteClicked() => XRControl.Me.AppearanceStatus |= AppearanceStatus.Muting;
-
-        private void OnUnmuteClicked() => XRControl.Me.AppearanceStatus &= ~AppearanceStatus.Muting;
-
-        private void OnScreenshotClicked() => throw new NotImplementedException();
-
-        private void OnDisconnectClicked() => NetworkStatus.StopHost(true);
-
-        private void OnEmotesClicked() => StartCoroutine(ToggleFlyout(EmojiFlyout));
     }
 }
