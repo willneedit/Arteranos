@@ -348,7 +348,7 @@ MonoBehaviour:
   m_HoverTimeToSelect: 0.5
   m_EnableUIInteraction: 1
   m_AllowAnchorControl: 1
-  m_UseForceGrab: 1
+  m_UseForceGrab: 0
   m_RotateSpeed: 180
   m_TranslateSpeed: 1
   m_AnchorRotateReferenceFrame: {fileID: 0}
@@ -1005,6 +1005,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_System: {fileID: 7141498048079031374}
+  TeleportType: 0
+  TravelDuration: 0
 --- !u!143 &7141498048079031369
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1077,10 +1079,6 @@ MonoBehaviour:
   LeftLineVisual: {fileID: 0}
   RightInteractor: {fileID: 7141498047530980216}
   RightLineVisual: {fileID: 7141498047530980222}
-  SnapTurnProvider: {fileID: 7141498048079031375}
-  ContTurnProvider: {fileID: 4133316668455145817}
-  MoveProvider: {fileID: 7141498048079031368}
-  CTeleProvider: {fileID: 7141498048079031370}
 --- !u!1 &7141498049288442062
 GameObject:
   m_ObjectHideFlags: 0
