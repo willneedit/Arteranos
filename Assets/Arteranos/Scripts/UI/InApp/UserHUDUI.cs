@@ -50,7 +50,7 @@ namespace Arteranos.UI
             {
                 () => XRControl.Me.AppearanceStatus |= AppearanceStatus.Muting,
                 () => XRControl.Me.AppearanceStatus &= ~AppearanceStatus.Muting,
-                () => throw new NotImplementedException(),
+                OnTakePhotoClicked,
                 () => NetworkStatus.StopHost(true),
                 () => StartCoroutine(ToggleFlyout(EmojiFlyout))
             };
@@ -66,7 +66,7 @@ namespace Arteranos.UI
 
             base.Start();
 
-            ToolTipText.text = string.Empty;
+            ToolTipText.text = " "; // Empty, but still taking some vertical space.
 
             SystemMenuButton.Button.onHover += makeHoverTip(SystemMenuButton.HoverTip);
             SystemMenuButton.Button.onClick.AddListener(SysMenu.OpenSysMenu);
@@ -122,7 +122,7 @@ namespace Arteranos.UI
             HUDButtons[btn_disconnect].Button.gameObject.SetActive(online);
         }
 
-        IEnumerator ToggleFlyout(RectTransform rt)
+        private IEnumerator ToggleFlyout(RectTransform rt)
         {
             float duration = 0.25f;
 
@@ -141,6 +141,19 @@ namespace Arteranos.UI
 
                 yield return new WaitForEndOfFrame();
             }
+        }
+
+        private void OnTakePhotoClicked()
+        {
+            SysMenu.DismissGadget("Camera Drone");
+
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/InApp/CameraDrone"));
+
+            // In front of yourself
+            Transform view = Camera.main.transform;
+            Vector3 inFront = view.position + (view.rotation * new Vector3(0, -0.5f, 1));
+            go.transform.SetPositionAndRotation(inFront, Quaternion.Euler(0, 180, 0) * view.rotation);
+
         }
     }
 }

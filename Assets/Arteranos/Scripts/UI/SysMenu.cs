@@ -43,5 +43,11 @@ namespace Arteranos.UI
             UserHUDUI hud = FindObjectOfType<UserHUDUI>(true);
             if(hud != null) hud.gameObject.SetActive(show);
         }
+
+        public static void DismissGadget(string name = null)
+        {
+            foreach(GadgetKind gad in FindObjectsOfType<GadgetKind>())
+                if(name == null || name == gad.Name) Destroy(gad.gameObject);
+        }
     }
 }

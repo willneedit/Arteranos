@@ -1417,6 +1417,11 @@ PrefabInstance:
       propertyPath: m_Size
       value: 0.99998534
       objectReference: {fileID: 0}
+    - target: {fileID: 1054943575592786897, guid: 56cbf0290f4529b44b98f2095baa8d5c,
+        type: 3}
+      propertyPath: m_Value
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1054943576046784928, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_ChildScaleWidth
@@ -1465,7 +1470,7 @@ PrefabInstance:
     - target: {fileID: 1054943576046784930, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.001642743
+      value: 0.0023621812
       objectReference: {fileID: 0}
     - target: {fileID: 1054943576046784931, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
