@@ -302,6 +302,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1493369411741107114}
   - component: {fileID: 3521994735143150123}
+  - component: {fileID: 199709773458582222}
   - component: {fileID: -4251813118295903555}
   - component: {fileID: -5141838768434412532}
   - component: {fileID: 7943558260124293773}
@@ -341,6 +342,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: Camera Drone
+--- !u!114 &199709773458582222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1091690915500474784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ccf5db80445fa9449e55568f72d1686, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DroneCamera: {fileID: 9194713639230031033}
 --- !u!54 &-4251813118295903555
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5429,7 +5443,7 @@ GameObject:
   - component: {fileID: 9194713639230031033}
   - component: {fileID: 1752582379647632824}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: Drone Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

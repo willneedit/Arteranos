@@ -11,22 +11,46 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
+using System.IO;
 
 namespace Arteranos.UI
 {
-    public class CameraDroneUI : UIBehaviour
+    public class CameraDroneUI : MonoBehaviour
     {
-        [SerializeField] private Button btn_TakePhoto;
-        [SerializeField] private Button btn_Dismiss;
+        [SerializeField] private Camera DroneCamera;
 
-        protected override void Awake()
+        public void TakePhoto()
         {
-            base.Awake();
+            string name = $"Arteranos-Photo-{DateTime.Now.ToString("yyyyMMddHHmmss")}.png";
 
-            btn_TakePhoto.onClick.AddListener(OnTakePhotoClicked);
-            btn_Dismiss.onClick.AddListener(() => SysMenu.DismissGadget("Camera Drone"));
+            // FIXME Windows only?
+            string picpath = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+
+            RenderTexture rt = DroneCamera.targetTexture;
+
+            RenderTexture mRt = new RenderTexture(rt.width, rt.height, rt.depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            mRt.antiAliasing = rt.antiAliasing;
+
+            Texture2D Image = new(rt.width, rt.height, TextureFormat.ARGB32, false);
+            DroneCamera.targetTexture = mRt;
+            DroneCamera.Render();
+            RenderTexture.active = mRt;
+
+            Image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            Image.Apply();
+
+            DroneCamera.targetTexture = rt;
+            DroneCamera.Render();
+            RenderTexture.active = rt;
+
+            byte[] Bytes = Image.EncodeToPNG();
+            string path = Path.Combine(picpath, name);
+            Debug.Log($"Writing screenshot to {path}");
+            File.WriteAllBytes(path, Bytes);
+
+            Destroy(Image);
+
+            Destroy(mRt);
         }
-
-        private void OnTakePhotoClicked() => throw new NotImplementedException();
     }
 }

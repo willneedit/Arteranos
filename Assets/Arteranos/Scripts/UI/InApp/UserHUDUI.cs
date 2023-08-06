@@ -36,11 +36,14 @@ namespace Arteranos.UI
         // Must match the ordering in the array, not necessarily the ordering in the UI
         private const int btn_mute = 0;
         private const int btn_unmute = 1;
-        // private const int btn_screenshot = 2;
+        private const int btn_callcd = 2;
         private const int btn_disconnect = 3;
         private const int btn_emotes = 4;
-
+        private const int btn_takephoto = 5;
+        private const int btn_dismisscd = 6;
         private UnityAction[] Actions;
+
+        private bool cameraCalled = false;
 
         protected override void Awake()
         {
@@ -50,9 +53,11 @@ namespace Arteranos.UI
             {
                 () => XRControl.Me.AppearanceStatus |= AppearanceStatus.Muting,
                 () => XRControl.Me.AppearanceStatus &= ~AppearanceStatus.Muting,
-                OnTakePhotoClicked,
+                OnSummonCameraClicked,
                 () => NetworkStatus.StopHost(true),
-                () => StartCoroutine(ToggleFlyout(EmojiFlyout))
+                () => StartCoroutine(ToggleFlyout(EmojiFlyout)),
+                OnTakePhotoClicked,
+                OnDismissCameraClicked
             };
         }
 
@@ -120,6 +125,10 @@ namespace Arteranos.UI
             HUDButtons[btn_emotes].Button.gameObject.SetActive(avatarOn);
 
             HUDButtons[btn_disconnect].Button.gameObject.SetActive(online);
+
+            HUDButtons[btn_callcd].Button.gameObject.SetActive(!cameraCalled);
+            HUDButtons[btn_takephoto].Button.gameObject.SetActive(cameraCalled);
+            HUDButtons[btn_dismisscd].Button.gameObject.SetActive(cameraCalled);
         }
 
         private IEnumerator ToggleFlyout(RectTransform rt)
@@ -143,17 +152,31 @@ namespace Arteranos.UI
             }
         }
 
-        private void OnTakePhotoClicked()
+        private void OnSummonCameraClicked()
         {
-            SysMenu.DismissGadget("Camera Drone");
+            SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
 
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/InApp/CameraDrone"));
 
             // In front of yourself
             Transform view = Camera.main.transform;
             Vector3 inFront = view.position + (view.rotation * new Vector3(0, -0.5f, 1));
-            go.transform.SetPositionAndRotation(inFront, Quaternion.Euler(0, 180, 0) * view.rotation);
+            go.transform.SetPositionAndRotation(inFront, view.rotation);
 
+            cameraCalled = true;
+        }
+
+        private void OnDismissCameraClicked()
+        {
+            SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
+            cameraCalled = false;
+        }
+
+        private void OnTakePhotoClicked()
+        {
+            CameraDroneUI cdui = SysMenu.FindGadget(SysMenu.GADGET_CAMERA_DRONE).GetComponent<CameraDroneUI>();
+
+            cdui.TakePhoto();
         }
     }
 }

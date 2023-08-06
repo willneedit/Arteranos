@@ -15,6 +15,8 @@ namespace Arteranos.UI
     {
         [SerializeField] private InputActionHandler SystemMenu;
 
+        public const string GADGET_CAMERA_DRONE = "Camera Drone";
+
         public void Awake() => SystemMenu.PerformCallback = (InputAction.CallbackContext obj) => OpenSysMenu();
 
         public void OnEnable() => SystemMenu.BindAction();
@@ -48,6 +50,14 @@ namespace Arteranos.UI
         {
             foreach(GadgetKind gad in FindObjectsOfType<GadgetKind>())
                 if(name == null || name == gad.Name) Destroy(gad.gameObject);
+        }
+
+        public static GameObject FindGadget(string name)
+        {
+            foreach(GadgetKind gad in FindObjectsOfType<GadgetKind>())
+                if(name == gad.Name) return gad.gameObject;
+
+            return null;
         }
     }
 }
