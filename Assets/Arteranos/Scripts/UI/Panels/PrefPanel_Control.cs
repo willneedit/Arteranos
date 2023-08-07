@@ -47,17 +47,11 @@ namespace Arteranos.UI
             chk_active_left.onValueChanged.AddListener(OnControllersChanged);
             chk_active_right.onValueChanged.AddListener(OnControllersChanged);
 
-            spn_type_left.OnChanged += OnControllerChanged2;
-            spn_type_right.OnChanged += OnControllerChanged2;
+            spn_type_left.OnChanged += (_, x) => OnControllersChanged(x);
+            spn_type_right.OnChanged += (_, x) => OnControllersChanged(x);
         }
 
         private void OnControllersChanged(bool arg0)
-        {
-            UploadSettings();
-            cs.PingXRControllersChanged();
-        }
-
-        private void OnControllerChanged2(int arg1, bool arg2)
         {
             UploadSettings();
             cs.PingXRControllersChanged();
@@ -74,6 +68,10 @@ namespace Arteranos.UI
             spn_vk_active.FillSpinnerEnum(out spne_VKUsage, controls.VK_Usage);
             spn_vk_layout.FillSpinnerEnum(out spne_VKLayout, controls.VK_Layout);
 
+            UIUtils.CreateEnumValues(out spne_raytype);
+            spn_type_left.Options = spne_raytype.Keys.ToArray();
+            spn_type_right.Options = spne_raytype.Keys.ToArray();
+
             sldn_NameplateIn.value = controls.NameplateIn;
             sldn_NameplateOut.value = controls.NameplateOut;
 
@@ -89,9 +87,6 @@ namespace Arteranos.UI
             chk_active_left.isOn = controls.controller_active_left;
             chk_active_right.isOn = controls.controller_active_right;
 
-            UIUtils.CreateEnumValues(out spne_raytype);
-            spn_type_left.Options = spne_raytype.Keys.ToArray();
-            spn_type_right.Options = spne_raytype.Keys.ToArray();
             spn_type_left.SetEnumValue(controls.controller_Type_left);
             spn_type_right.SetEnumValue(controls.controller_Type_right);
         }
@@ -110,26 +105,25 @@ namespace Arteranos.UI
         {
             ControlSettingsJSON controls = cs?.Controls;
 
-            if(controls != null)
-            {
-                if((!chk_ctrl_left.isOn || !cs.VRMode) && !chk_ctrl_right.isOn)
-                    chk_ctrl_right.isOn = true;
+            if(controls == null) return;
 
-                controls.VK_Usage = spn_vk_active.GetEnumValue(spne_VKUsage);
-                controls.VK_Layout = spn_vk_layout.GetEnumValue(spne_VKLayout);
+            if((!chk_ctrl_left.isOn || !cs.VRMode) && !chk_ctrl_right.isOn)
+                chk_ctrl_right.isOn = true;
 
-                controls.NameplateIn = sldn_NameplateIn.value;
-                controls.NameplateOut = sldn_NameplateOut.value;
+            controls.VK_Usage = spn_vk_active.GetEnumValue(spne_VKUsage);
+            controls.VK_Layout = spn_vk_layout.GetEnumValue(spne_VKLayout);
 
-                controls.controller_left = chk_ctrl_left.isOn;
-                controls.controller_right = chk_ctrl_right.isOn;
+            controls.NameplateIn = sldn_NameplateIn.value;
+            controls.NameplateOut = sldn_NameplateOut.value;
 
-                controls.controller_active_left = chk_active_left.isOn;
-                controls.controller_active_right = chk_active_right.isOn;
+            controls.controller_left = chk_ctrl_left.isOn;
+            controls.controller_right = chk_ctrl_right.isOn;
 
-                controls.controller_Type_left = spn_type_left.GetEnumValue(spne_raytype);
-                controls.controller_Type_right = spn_type_right.GetEnumValue(spne_raytype);
-            }
+            controls.controller_active_left = chk_active_left.isOn;
+            controls.controller_active_right = chk_active_right.isOn;
+
+            controls.controller_Type_left = spn_type_left.GetEnumValue(spne_raytype);
+            controls.controller_Type_right = spn_type_right.GetEnumValue(spne_raytype);
         }
     }
 }
