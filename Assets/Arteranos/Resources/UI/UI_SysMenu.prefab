@@ -179,7 +179,7 @@ PrefabInstance:
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.size
-      value: 10
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
@@ -221,23 +221,29 @@ PrefabInstance:
         type: 3}
       propertyPath: ChoiceEntries.Array.data[6].UI
       value: 
-      objectReference: {fileID: 8078237096226495410, guid: 1a518f2e6a311fc41853b65a83802728,
+      objectReference: {fileID: 8891204037404472843, guid: 40649b65a34308141b678ef2eee8e1c9,
         type: 3}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[7].UI
       value: 
-      objectReference: {fileID: 5483533141505094440, guid: ff9affdedea5b0140938de845effff56,
+      objectReference: {fileID: 8078237096226495410, guid: 1a518f2e6a311fc41853b65a83802728,
         type: 3}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[8].UI
       value: 
-      objectReference: {fileID: 9194280072656090011, guid: c6d13c99d60ea47458fcd34469103000,
+      objectReference: {fileID: 5483533141505094440, guid: ff9affdedea5b0140938de845effff56,
         type: 3}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[9].UI
+      value: 
+      objectReference: {fileID: 9194280072656090011, guid: c6d13c99d60ea47458fcd34469103000,
+        type: 3}
+    - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
+        type: 3}
+      propertyPath: ChoiceEntries.Array.data[10].UI
       value: 
       objectReference: {fileID: 1053897557086906397, guid: edf4bf2fd74ae8f41a2abaf87994224c,
         type: 3}
@@ -274,21 +280,26 @@ PrefabInstance:
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[6].name
-      value: Moderation
+      value: HUD
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[7].name
-      value: Privacy
+      value: Moderation
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[8].name
-      value: Info
+      value: Privacy
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[9].name
+      value: Info
+      objectReference: {fileID: 0}
+    - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
+        type: 3}
+      propertyPath: ChoiceEntries.Array.data[10].name
       value: Exit
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682696, guid: e0188d43f9de31042ac67bbff8de2205,

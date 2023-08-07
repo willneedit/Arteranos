@@ -111,8 +111,20 @@ namespace Arteranos.UI
             }
         }
 
+        public bool lateInitialized = false;
+
         private void Update()
         {
+            if(!lateInitialized)
+            {
+                if(SettingsManager.Client != null)
+                {
+                    SettingsManager.Client.OnUserHUDSettingsChanged += DownloadUserHUDSettings;
+                    SettingsManager.Client.PingUserHUDChanged();
+                    lateInitialized= true;
+                }
+            }
+
             bool avatarOn = XRControl.Me != null;
             bool muted = AppearanceStatus.IsSilent(XRControl.Me?.AppearanceStatus ?? AppearanceStatus.OK);
 
@@ -129,6 +141,26 @@ namespace Arteranos.UI
             HUDButtons[btn_callcd].Button.gameObject.SetActive(!cameraCalled);
             HUDButtons[btn_takephoto].Button.gameObject.SetActive(cameraCalled);
             HUDButtons[btn_dismisscd].Button.gameObject.SetActive(cameraCalled);
+        }
+
+        private void DownloadUserHUDSettings(UserHUDSettingsJSON obj)
+        {
+            CameraUITracker ct = GetComponent<CameraUITracker>();
+            RectTransform rt = GetComponent<RectTransform>();
+
+            ct.m_offset = new Vector3(
+                obj.AxisX / 10.0f,
+                obj.AxisY / 10.0f,
+                0.25f);
+
+            rt.localScale = new Vector3(
+                Mathf.Pow(2, obj.Log2Size) * 0.001f,
+                Mathf.Pow(2, obj.Log2Size) * 0.001f,
+                1);
+
+            ct.m_Delay = obj.Delay;
+
+            ct.m_Tolerance = obj.Tightness;
         }
 
         private IEnumerator ToggleFlyout(RectTransform rt)

@@ -231,6 +231,21 @@ namespace Arteranos.Core
         public virtual List<SocialListEntryJSON> SocialList { get; set; } = new();
     }
 
+    public class UserHUDSettingsJSON
+    {
+        public virtual float AxisX { get; set; } = -1.5f;   // * 10
+
+        public virtual float AxisY { get; set; } = -1.0f;   // * 10
+
+        public virtual float Log2Size { get; set; } = 0;    // 2^x (-2 ... 2 <=> 0.25 ... 4 )
+
+        public virtual float Tightness { get; set; } = 0.1f;
+
+        public virtual float Delay { get; set; } = 2;
+
+        public virtual int ClockDisplay { get; set; } = 2;  // 0 to 2 should be self explanatory, right?
+    }
+
     public class ClientSettingsJSON
     {
         // More personal data
@@ -248,25 +263,27 @@ namespace Arteranos.Core
         // Strangers bubble size
         public virtual float SizeBubbleStrangers { get; set; } = 1.0f;
 
-        // The user's audio settings
+        // The audio settings
         public virtual ClientAudioSettingsJSON AudioSettings { get; set; } = new();
 
-        // The user's content filter preferences for sorting the servers
+        // The content filter preferences for sorting the servers
         public virtual ServerPermissionsJSON ContentFilterPreferences { get; set; } = new();
 
-        // The user's controls settings
+        // The controls settings
         public virtual ControlSettingsJSON Controls { get; set; } = new();
 
-        // The user's movement settings
+        // The movement settings
         public virtual MovementSettingsJSON Movement { get; set; } = new();
 
-        // The user's world collection
+        public virtual UserHUDSettingsJSON UserHUD { get; set; } = new();
+
+        // The world collection
         public virtual List<string> WorldList { get; set; } = new();
 
-        // The user's server collection
+        // The server collection
         public virtual List<string> ServerList { get; set; } = new();
 
-        // The user's text message templates
+        // The text message templates
         public virtual List<string> PresetStrings { get; set; } = new();
     }
 
@@ -280,6 +297,7 @@ namespace Arteranos.Core
         public event Action<bool> OnVRModeChanged;
         public event Action<float, float> OnPrivacyBubbleChanged;
         public event Action OnXRControllerChanged;
+        public event Action<UserHUDSettingsJSON> OnUserHUDSettingsChanged;
 
         [JsonIgnore]
         public UserID UserID { get; private set; } = null;
@@ -330,6 +348,8 @@ namespace Arteranos.Core
         }
 
         public void PingXRControllersChanged() => OnXRControllerChanged?.Invoke();
+
+        public void PingUserHUDChanged() => OnUserHUDSettingsChanged?.Invoke(UserHUD);
 
         #endregion
         // ---------------------------------------------------------------
