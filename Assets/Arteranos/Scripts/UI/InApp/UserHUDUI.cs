@@ -44,6 +44,10 @@ namespace Arteranos.UI
         private UnityAction[] Actions;
 
         private bool cameraCalled = false;
+        private string oldDTstring = null;
+        private DateTime nextUpdateDT = DateTime.MinValue;
+        private int clockSetting = 0;
+        private bool clockseconds = false;
 
         protected override void Awake()
         {
@@ -64,12 +68,18 @@ namespace Arteranos.UI
         protected override void Start()
         {
             Action<bool> makeHoverTip(string hoverTip) =>
-                (x) => ToolTipText.text = hoverTip;
+                (x) =>
+                {
+                    ToolTipText.text = hoverTip;
+                    nextUpdateDT = DateTime.Now + TimeSpan.FromSeconds(5.0f);
+                };
 
             UnityAction makeClickedEmoji(EmojiButton but) =>
                 () => XRControl.Me.PerformEmote(but.Image.name);
 
             base.Start();
+
+            nextUpdateDT = DateTime.Now;
 
             ToolTipText.text = " "; // Empty, but still taking some vertical space.
 
@@ -125,6 +135,31 @@ namespace Arteranos.UI
                 }
             }
 
+            DateTime now = DateTime.Now;
+
+            if(nextUpdateDT <= now && clockSetting != 0)
+            {
+                string pattern = (clockSetting * 10 + (clockseconds ? 1 : 0)) switch
+                {
+                    10 => "hh:mm tt",
+                    11 => "hh:mm:ss tt",
+                    // 20 => "HH:mm",
+                    21 => "HH:mm:ss",
+                    _ => "HH:mm"
+                };
+
+                string clockstring = now.ToString(pattern);
+                if(clockstring != oldDTstring)
+                {
+                    ToolTipText.text = clockstring;
+                    oldDTstring = clockstring;
+                }
+            }
+            else
+            {
+                oldDTstring = null;
+            }
+
             bool avatarOn = XRControl.Me != null;
             bool muted = AppearanceStatus.IsSilent(XRControl.Me?.AppearanceStatus ?? AppearanceStatus.OK);
 
@@ -161,6 +196,10 @@ namespace Arteranos.UI
             ct.m_Delay = obj.Delay;
 
             ct.m_Tolerance = obj.Tightness;
+
+            clockSetting = obj.ClockDisplay;
+
+            clockseconds = obj.Seconds;
         }
 
         private IEnumerator ToggleFlyout(RectTransform rt)

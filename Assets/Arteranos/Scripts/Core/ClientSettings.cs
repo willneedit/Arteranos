@@ -244,6 +244,8 @@ namespace Arteranos.Core
         public virtual float Delay { get; set; } = 2;
 
         public virtual int ClockDisplay { get; set; } = 2;  // 0 to 2 should be self explanatory, right?
+
+        public virtual bool Seconds { get; set; } = false;
     }
 
     public class ClientSettingsJSON
