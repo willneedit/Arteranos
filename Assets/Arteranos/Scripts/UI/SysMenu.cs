@@ -59,5 +59,8 @@ namespace Arteranos.UI
 
             return null;
         }
+
+        public static T FindGadget<T>(string name) where T : Component
+            => FindGadget(name)?.GetComponent<T>();
     }
 }

@@ -60,7 +60,7 @@ namespace Arteranos.UI
                 OnSummonCameraClicked,
                 () => NetworkStatus.StopHost(true),
                 () => StartCoroutine(ToggleFlyout(EmojiFlyout)),
-                OnTakePhotoClicked,
+                () => SysMenu.FindGadget<CameraDroneUI>(SysMenu.GADGET_CAMERA_DRONE).TakePhoto(),
                 OnDismissCameraClicked
             };
         }
@@ -241,13 +241,6 @@ namespace Arteranos.UI
         {
             SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
             cameraCalled = false;
-        }
-
-        private void OnTakePhotoClicked()
-        {
-            CameraDroneUI cdui = SysMenu.FindGadget(SysMenu.GADGET_CAMERA_DRONE).GetComponent<CameraDroneUI>();
-
-            cdui.TakePhoto();
         }
     }
 }
