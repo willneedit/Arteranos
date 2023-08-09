@@ -8,7 +8,6 @@
 using UnityEngine;
 using System;
 
-using Mirror;
 using System.ComponentModel;
 using System.Reflection;
 using System.Collections.Generic;
@@ -17,83 +16,6 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
-
-namespace Arteranos.ExtensionMethods
-{
-    using Arteranos.NetworkTypes;
-
-    public static class ExtendTransform
-    {
-        /// <summary>
-        /// Finds the transform in the hierarchy tree by name, including searching the
-        /// entire subtree below.
-        /// </summary>
-        /// <param name="t">The transform to begin searching</param>
-        /// <param name="name">The transform's name to search for</param>
-        /// <returns>The first found transform, otherwise null</returns>
-        public static Transform FindRecursive(this Transform t, string name)
-        {
-            if(t.name == name) return t;
-
-            for(int i = 0, c = t.childCount; i<c; i++)
-            {
-                Transform res = FindRecursive(t.GetChild(i), name);
-                if(res != null) return res;
-            }
-
-            return null;
-        }
-    }
-
-    public static class ExtendNetworkGuid
-    {
-        
-        public static NetworkGuid ToNetworkGuid(this Guid id)
-        {
-            NetworkGuid networkId = new()
-            {
-                FirstHalf = BitConverter.ToUInt64(id.ToByteArray(), 0),
-                SecondHalf = BitConverter.ToUInt64(id.ToByteArray(), 0)
-            };
-            return networkId;
-        }
-
-        public static Guid ToGuid(this NetworkGuid networkId)
-        {
-            byte[] bytes = new byte[16];
-            Buffer.BlockCopy(BitConverter.GetBytes(networkId.FirstHalf), 0, bytes, 0, 8);
-            Buffer.BlockCopy(BitConverter.GetBytes(networkId.SecondHalf), 0, bytes, 8, 8);
-            return new Guid(bytes);
-        }
-
-        public static void WriteNetworkGuid(this NetworkWriter writer, NetworkGuid value)
-        {
-            writer.WriteULong(value.FirstHalf);
-            writer.WriteULong(value.SecondHalf);
-        }
-
-        public static NetworkGuid ReadNetworkGuid(this NetworkReader reader)
-        {
-            NetworkGuid res = new()
-            {
-                FirstHalf = reader.ReadULong(),
-                SecondHalf = reader.ReadULong()
-            };
-            return res;
-        }
-
-    }
-}
-
-namespace Arteranos.NetworkTypes
-{
-    public class NetworkGuid 
-    {
-        public ulong FirstHalf;
-        public ulong SecondHalf;
-
-    }
-}
 
 namespace Arteranos.Core
 {
@@ -115,8 +37,35 @@ namespace Arteranos.Core
 
     public static class TransformExtensions
     {
-        // public static CancellationTokenSource ctx = null;
+        /// <summary>
+        /// Finds the transform in the hierarchy tree by name, including searching the
+        /// entire subtree below.
+        /// </summary>
+        /// <param name="t">The transform to begin searching</param>
+        /// <param name="name">The transform's name to search for</param>
+        /// <returns>The first found transform, otherwise null</returns>
+        public static Transform FindRecursive(this Transform t, string name)
+        {
+            if(t.name == name) return t;
 
+            for(int i = 0, c = t.childCount; i < c; i++)
+            {
+                Transform res = FindRecursive(t.GetChild(i), name);
+                if(res != null) return res;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Performs a movement over time to a dedicated transform, like with a camera movement
+        /// in a cutscene.
+        /// </summary>
+        /// <param name="transform"></param>
+        /// <param name="targetTransform"></param>
+        /// <param name="duration"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public static async Task LerpTransform(this Transform transform,
             Transform targetTransform, float duration, CancellationToken token)
         {
@@ -149,7 +98,7 @@ namespace Arteranos.Core
         }
     }
 
-    public class Utils
+    public static class Utils
     {
         /// <summary>
         /// Allows to tack on a Description attribute to enum values, e.g. a display name.
@@ -247,159 +196,6 @@ namespace Arteranos.Core
             return new(sb);
         }
     }
-
-    public class ServerPermissionsJSON
-    {
-        // Allow avatars from a URL outside of the avatar generator's scope.
-        public bool? CustomAvatars = false;
-
-        // Allow flying
-        public bool? Flying = false;
-
-        // Allow connections of unverified users
-        public bool? Guests = true;
-
-        // CONTENT MODERATION / FILTERING
-        // null allowed, and the user's filter could yield an inexact match, second only
-        // to an exact one, like....
-        //
-        //  Setting     User        Priority
-        //  false       false           1
-        //  false       true            --
-        //  false       null            1 (because the user says 'don't care')
-        //  true        false           --
-        //  true        true            1
-        //  true        null            1 (because the user says 'don't care')
-        //  null        false           2
-        //  null        true            2
-        //  null        null            2 (see below)
-        //
-        // as a side effect, server adminitrators get their servers a better ranking if they
-        // put down a definite answer, in opposite being wishy-washy.
-        //
-        // ref. https://www.techdirt.com/2023/04/20/bluesky-plans-decentralized-composable-moderation/
-        //      Defaults to Bluesky in the aforementioned website, with modifications
-
-        // Explicit Sexual Images
-        public bool? ExplicitNudes = null;
-
-        // Other Nudity (eg. non-sexual or artistic)
-        public bool? Nudity = true;
-
-        // Sexually suggestive (does not include nudity)
-        public bool? Suggestive = true;
-
-        // Violence (Cartoon / "Clean" violence)
-        public bool? Violence = null;
-
-        // NEW
-        //
-        // Excessive Violence / Blood (Gore, self-harm, torture)
-        public bool? ExcessiveViolence = false;
-
-        // OMITTED
-        //
-        // (Political) Hate Groups - FALSE - Conflicts the law in many occasions
-        // (eg. Germany, §1 GG, §130 StGB)
-        //
-        // Spam - FALSE - Self-explanatory
-        //
-        // Impersonation - FALSE - Self-explanatory
-
-        /// <summary>
-        /// Compute a match index for the server's settings against the user's filter preferences
-        /// </summary>
-        /// <param name="user">The user's server filter preferences</param>
-        /// <returns>The match score, higher is better</returns>
-        public int MatchIndex(ServerPermissionsJSON user)
-        {
-            int index = 0;
-
-            bool usesGuest = SettingsManager.Client?.Me.Login.IsGuest ?? true;
-
-            bool usesCustomAvatar = SettingsManager.Client?.Me.CurrentAvatar.IsCustom ?? true;
-
-            // The 'Big Three' are true booleans - either true or false, no inbetweens.
-
-            // Trying to use a guest login would be a disqualification criterium.
-            if(usesGuest && !(Guests ?? true)) return 0;
-
-            // Same as with custom avatars.
-            if(usesCustomAvatar && !(CustomAvatars ?? true)) return 0;
-
-            // Double weight for one of the 'Big Three'
-            index += Flying.FuzzyEq(user.Flying) * 2;
-
-
-            // Aggregate the matches of the permission settings against the user's
-            // filter settings.
-            index += ExplicitNudes.FuzzyEq(user.ExplicitNudes);
-
-            index += Nudity.FuzzyEq(user.Nudity);
-
-            index += Suggestive.FuzzyEq(user.Suggestive);
-
-            index += Violence.FuzzyEq(user.Violence);
-
-            index += ExcessiveViolence.FuzzyEq(user.ExcessiveViolence);
-
-            return index;
-        }
-
-    }
-
-    /// <summary>
-    /// The static server configuration data.
-    /// </summary>
-    public class ServerSettingsJSON
-    {
-        [JsonIgnore]
-        public static int DefaultMetadataPort = 9779;
-
-        [JsonIgnore]
-        public static string DefaultMetadataPath = "/metadata.json";
-
-        // The main server listen port.
-        public int ServerPort = 9777;
-
-        // The server metadata retrieval port.
-        public int MetadataPort = DefaultMetadataPort;
-
-        // Server listen address. Empty means allowing connections from anywhere.
-        public string ListenAddress = string.Empty;
-
-        // Allow viewing avatars in the server mode like in a spectator mode.
-        public bool ShowAvatars = true;
-
-        // The server nickname.
-        public string Name = string.Empty;
-
-        // The short server description.
-        public string Description = string.Empty;
-
-        // The server icon. PNG file bytes, at least 128x128, at most 512x512
-        public byte[] Icon = new byte[] { };
-
-        // The server's permissions
-        public ServerPermissionsJSON Permissions = new();
-
-        public ServerSettingsJSON Strip()
-        {
-            ServerSettingsJSON newSS = new()
-            {
-                ServerPort = ServerPort,
-                MetadataPort = MetadataPort,
-                ListenAddress = ListenAddress,
-                ShowAvatars = ShowAvatars,
-                Name = Name,
-                Description = Description,
-                Icon = new byte[0],         // Remove the icon to reduce the packet size
-                Permissions = Permissions
-            };
-            return newSS;
-        }
-    }
-
 
     /// <summary>
     /// Public server meta data with the connection data and the privileges

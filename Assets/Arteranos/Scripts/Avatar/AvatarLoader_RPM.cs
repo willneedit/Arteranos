@@ -5,18 +5,14 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
 using UnityEngine;
 
 using DitzelGames.FastIK;
 using ReadyPlayerMe.AvatarLoader;
 
-using Arteranos.ExtensionMethods;
-
-using Mirror;
 using System.Collections.Generic;
 using Arteranos.XR;
-using UnityEngine.Experimental.Rendering;
+using Arteranos.Core;
 
 namespace Arteranos.Avatar
 {

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Mirror;
-using Arteranos.ExtensionMethods;
+using Arteranos.Core;
 
 namespace Arteranos.NetworkIO
 {

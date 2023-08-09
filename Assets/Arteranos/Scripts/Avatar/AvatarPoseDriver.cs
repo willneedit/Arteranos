@@ -9,10 +9,9 @@ using UnityEngine;
 
 using Mirror;
 
-using Arteranos.ExtensionMethods;
-using Arteranos.Audio;
 using Arteranos.NetworkIO;
 using Arteranos.XR;
+using Arteranos.Core;
 
 namespace Arteranos.Avatar
 {
