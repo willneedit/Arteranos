@@ -50,17 +50,14 @@ namespace Arteranos.XR
         private void Start()
         {
             SettingsManager.Client.OnXRControllerChanged += DownloadControlSettings;
-            DownloadControlSettings();
+            SettingsManager.Client.PingXRControllersChanged();
         }
 
         private void OnDestroy() => SettingsManager.Client.OnXRControllerChanged -= DownloadControlSettings;
 
 
-        private void DownloadControlSettings()
+        private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs)
         {
-            ControlSettingsJSON ccs = SettingsManager.Client?.Controls;
-            MovementSettingsJSON mcs = SettingsManager.Client?.Movement;
-
             if(ccs == null) return;
 
             if(LeftInteractor != null)

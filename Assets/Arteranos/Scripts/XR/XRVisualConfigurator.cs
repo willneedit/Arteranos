@@ -32,7 +32,7 @@ namespace Arteranos.XR
             vol = GetComponentInChildren<Volume>();
 
             SettingsManager.Client.OnXRControllerChanged += DownloadControlSettings;
-            DownloadControlSettings();
+            SettingsManager.Client.PingXRControllersChanged();
         }
 
         void Update()
@@ -55,15 +55,10 @@ namespace Arteranos.XR
             if(vol != null) vol.weight = TweenedD * BlindersMaxValue;
         }
 
-        private void OnDestroy()
-        {
-            SettingsManager.Client.OnXRControllerChanged += DownloadControlSettings;
-        }
+        private void OnDestroy() => SettingsManager.Client.OnXRControllerChanged += DownloadControlSettings;
 
-        private void DownloadControlSettings()
+        private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs)
         {
-            MovementSettingsJSON mcs = SettingsManager.Client?.Movement;
-
             if(mcs == null) return;
 
             switch(mcs.ComfortBlinders)

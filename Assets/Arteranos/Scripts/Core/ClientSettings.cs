@@ -298,7 +298,7 @@ namespace Arteranos.Core
         public event Action<string> OnAvatarChanged;
         public event Action<bool> OnVRModeChanged;
         public event Action<float, float> OnPrivacyBubbleChanged;
-        public event Action OnXRControllerChanged;
+        public event Action<ControlSettingsJSON, MovementSettingsJSON> OnXRControllerChanged;
         public event Action<UserHUDSettingsJSON> OnUserHUDSettingsChanged;
 
         [JsonIgnore]
@@ -349,7 +349,7 @@ namespace Arteranos.Core
             }
         }
 
-        public void PingXRControllersChanged() => OnXRControllerChanged?.Invoke();
+        public void PingXRControllersChanged() => OnXRControllerChanged?.Invoke(Controls, Movement);
 
         public void PingUserHUDChanged() => OnUserHUDSettingsChanged?.Invoke(UserHUD);
 
