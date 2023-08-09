@@ -32,7 +32,7 @@ namespace Arteranos.UI
                 {
                     UserID = user.UserID,
                     Nickname = user.Nickname,
-                    state = SocialState.None,
+                    State = SocialState.None,
                 };
             }
 
@@ -41,7 +41,7 @@ namespace Arteranos.UI
             {
                 if(!list.ContainsKey(entry.UserID)) continue;
 
-                list[entry.UserID].state = entry.state;
+                list[entry.UserID].State = entry.State;
             }
 
             foreach(KeyValuePair<UserID, SocialListEntryJSON> entry in list) 

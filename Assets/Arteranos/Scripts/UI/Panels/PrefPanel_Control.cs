@@ -81,14 +81,14 @@ namespace Arteranos.UI
             chk_active_left.interactable = both;
             spn_type_left.enabled= both;
 
-            chk_ctrl_left.isOn = controls.controller_left;
-            chk_ctrl_right.isOn = controls.controller_right;
+            chk_ctrl_left.isOn = controls.Controller_left;
+            chk_ctrl_right.isOn = controls.Controller_right;
 
-            chk_active_left.isOn = controls.controller_active_left;
-            chk_active_right.isOn = controls.controller_active_right;
+            chk_active_left.isOn = controls.Controller_active_left;
+            chk_active_right.isOn = controls.Controller_active_right;
 
-            spn_type_left.SetEnumValue(controls.controller_Type_left);
-            spn_type_right.SetEnumValue(controls.controller_Type_right);
+            spn_type_left.SetEnumValue(controls.Controller_Type_left);
+            spn_type_right.SetEnumValue(controls.Controller_Type_right);
         }
 
         protected override void OnDisable()
@@ -116,14 +116,14 @@ namespace Arteranos.UI
             controls.NameplateIn = sldn_NameplateIn.value;
             controls.NameplateOut = sldn_NameplateOut.value;
 
-            controls.controller_left = chk_ctrl_left.isOn;
-            controls.controller_right = chk_ctrl_right.isOn;
+            controls.Controller_left = chk_ctrl_left.isOn;
+            controls.Controller_right = chk_ctrl_right.isOn;
 
-            controls.controller_active_left = chk_active_left.isOn;
-            controls.controller_active_right = chk_active_right.isOn;
+            controls.Controller_active_left = chk_active_left.isOn;
+            controls.Controller_active_right = chk_active_right.isOn;
 
-            controls.controller_Type_left = spn_type_left.GetEnumValue(spne_raytype);
-            controls.controller_Type_right = spn_type_right.GetEnumValue(spne_raytype);
+            controls.Controller_Type_left = spn_type_left.GetEnumValue(spne_raytype);
+            controls.Controller_Type_right = spn_type_right.GetEnumValue(spne_raytype);
         }
     }
 }

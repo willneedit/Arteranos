@@ -141,72 +141,72 @@ namespace Arteranos.Core
     public class ClientAudioSettingsJSON
     {
         // Master Volume, 0 to 100
-        public float MasterVolume = 100;
+        public virtual float MasterVolume { get; set; } = 100;
 
         // Voice volume, 0 to 100
-        public float VoiceVolume = 100;
+        public virtual float VoiceVolume { get; set; } = 100;
 
         // Environment volume, 0 to 100
-        public float EnvVolume = 100;
+        public virtual float EnvVolume { get; set; } = 100;
 
         // Mic Input Device, null means system default device
-        public string InputDevice = null;
+        public virtual string InputDevice { get; set; } = null;
 
         // Mic Input Gain in dB, -6 to +6, meaning factor 0.5 to 2
-        public float MicInputGain = 0;
+        public virtual float MicInputGain { get; set; } = 0;
 
         // Automatic Gain Control level, from none to high
-        public int AGCLevel = 0;
+        public virtual int AGCLevel { get; set; } = 0;
     }
 
     public class SocialListEntryJSON
     {
         // The user's nickname, at the time of entry or update
-        public string Nickname = null;
+        public virtual string Nickname { get; set; } = null;
 
         // The user's ID, global for friends, scoped otherwise
-        public UserID UserID = null;
+        public virtual UserID UserID { get; set; } = null;
 
         // ORed bits from Social.SocialState
-        public int state = SocialState.None;
+        public virtual int State { get; set; } = SocialState.None;
     }
 
     public class ControlSettingsJSON
     {
-        public VKUsage VK_Usage = VKUsage.VROnly;
+        public virtual VKUsage VK_Usage { get; set; } = VKUsage.VROnly;
 
-        public VKLayout VK_Layout = VKLayout.de_DE_full;
+        public virtual VKLayout VK_Layout { get; set; } = VKLayout.de_DE_full;
 
-        public float NameplateIn = 0.5f;
+        public virtual float NameplateIn { get; set; } = 0.5f;
 
-        public float NameplateOut = 4.0f;
+        public virtual float NameplateOut { get; set; } = 4.0f;
 
-        public bool controller_left = true;
+        public virtual bool Controller_left { get; set; } = true;
 
-        public bool controller_right = true;
+        public virtual bool Controller_right { get; set; } = true;
 
-        public bool controller_active_left = true;
+        public virtual bool Controller_active_left { get; set; } = true;
 
-        public bool controller_active_right = true;
+        public virtual bool Controller_active_right { get; set; } = true;
 
-        public RayType controller_Type_left = RayType.Straight;
+        public virtual RayType Controller_Type_left { get; set; } = RayType.Straight;
 
-        public RayType controller_Type_right = RayType.Straight;
+        public virtual RayType Controller_Type_right { get; set; } = RayType.Straight;
     }
 
     public class MovementSettingsJSON
     {
-        public bool Flying = false;
+        public virtual bool Flying { get; set; } = false;
 
-        public TurnType Turn = TurnType.Snap45;
+        public virtual TurnType Turn { get; set; } = TurnType.Snap45;
 
-        public float SmoothTurnSpeed = 60.0f;
+        public virtual float SmoothTurnSpeed { get; set; } = 60.0f;
 
-        public TeleportType Teleport = TeleportType.Instant;
+        public virtual TeleportType Teleport { get; set; } = TeleportType.Instant;
 
-        public float ZipLineDuration = 1.0f;
+        public virtual float ZipLineDuration { get; set; } = 1.0f;
 
-        public ComfortBlindersType ComfortBlinders = ComfortBlindersType.Off;
+        public virtual ComfortBlindersType ComfortBlinders { get; set; } = ComfortBlindersType.Off;
     }
 
     public class UserDataSettingsJSON
@@ -378,7 +378,7 @@ namespace Arteranos.Core
                 {
                     Nickname = nickname,
                     UserID = enteredUserID,
-                    state = state
+                    State = state
                 });
             }
 
@@ -404,7 +404,7 @@ namespace Arteranos.Core
             for(int i = 0; i < q.Length; ++i)
             {
                 Me.SocialList.Remove(q[i]);
-                aggregated |= q[i].state;
+                aggregated |= q[i].State;
                 nickname = q[i].Nickname;
             }
 
@@ -412,7 +412,7 @@ namespace Arteranos.Core
             {
                 Nickname = nickname,
                 UserID = globalUserID,
-                state = aggregated
+                State = aggregated
             });
 
             SaveSettings();
@@ -440,7 +440,7 @@ namespace Arteranos.Core
             int state = SocialState.None;
             if(q.Count() > 0)
             {
-                state = q.First().state;
+                state = q.First().State;
                 Nickname ??= q.First().Nickname;
             }
             else

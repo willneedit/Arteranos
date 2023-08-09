@@ -77,7 +77,7 @@ namespace Arteranos.UI
             {
                 IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetSocialList(targetUserID);
 
-                int currentState = (q.Count() > 0) ? q.First().state : SocialState.None;
+                int currentState = (q.Count() > 0) ? q.First().State : SocialState.None;
 
                 bool friends = SocialState.IsState(currentState, SocialState.Own_Friend_offered);
 

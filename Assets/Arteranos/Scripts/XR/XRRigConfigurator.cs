@@ -62,36 +62,36 @@ namespace Arteranos.XR
 
             if(LeftInteractor != null)
             {
-                LeftInteractor.enabled = ccs.controller_left;
-                LeftLineVisual.enabled = ccs.controller_left;
+                LeftInteractor.enabled = ccs.Controller_left;
+                LeftLineVisual.enabled = ccs.Controller_left;
 
-                LeftLineVisual.invalidColorGradient = ccs.controller_active_left
+                LeftLineVisual.invalidColorGradient = ccs.Controller_active_left
                     ? alwaysVisibleRay 
                     : onlyValidVisibleRay;
 
-                LeftInteractor.lineType = ccs.controller_Type_left == RayType.Straight
+                LeftInteractor.lineType = ccs.Controller_Type_left == RayType.Straight
                     ? XRRayInteractor.LineType.StraightLine
                     : XRRayInteractor.LineType.ProjectileCurve;
 
-                LeftInteractor.acceleration = ccs.controller_Type_left == RayType.HighArc
+                LeftInteractor.acceleration = ccs.Controller_Type_left == RayType.HighArc
                     ? 5.0f
                     : 9.8f;
             }
 
             if(RightInteractor != null)
             {
-                RightInteractor.enabled = ccs.controller_right;
-                RightLineVisual.enabled = ccs.controller_right;
+                RightInteractor.enabled = ccs.Controller_right;
+                RightLineVisual.enabled = ccs.Controller_right;
 
-                RightLineVisual.invalidColorGradient = ccs.controller_active_right
+                RightLineVisual.invalidColorGradient = ccs.Controller_active_right
                     ? alwaysVisibleRay
                     : onlyValidVisibleRay;
 
-                RightInteractor.lineType = ccs.controller_Type_right == RayType.Straight
+                RightInteractor.lineType = ccs.Controller_Type_right == RayType.Straight
                     ? XRRayInteractor.LineType.StraightLine
                     : XRRayInteractor.LineType.ProjectileCurve;
 
-                RightInteractor.acceleration = ccs.controller_Type_right == RayType.HighArc
+                RightInteractor.acceleration = ccs.Controller_Type_right == RayType.HighArc
                     ? 5.0f
                     : 9.8f;
             }

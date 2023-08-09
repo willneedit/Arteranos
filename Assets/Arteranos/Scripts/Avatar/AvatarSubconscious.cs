@@ -273,7 +273,7 @@ namespace Arteranos.Avatar
 
             // But, derive the global UserIDs to the scoped UserIDs.
             foreach(SocialListEntryJSON item in q)
-                ReloadSocialState(item.UserID.Derive(), item.state);
+                ReloadSocialState(item.UserID.Derive(), item.State);
         }
 
         #endregion
