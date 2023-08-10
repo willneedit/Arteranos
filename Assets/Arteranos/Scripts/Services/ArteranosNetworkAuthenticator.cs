@@ -1,7 +1,15 @@
+/*
+ * Copyright (c) 2023, willneedit
+ * 
+ * Licensed by the Mozilla Public License 2.0,
+ * residing in the LICENSE.md file in the project's root directory.
+ */
+
 using System.Net;
 using Mirror;
 
 using Arteranos.Core;
+using UnityEngine;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-authenticators
@@ -20,6 +28,7 @@ namespace Arteranos.Services
             public string Nickname;
             public bool isGuest;
             public bool isCustom;
+            public string deviceUID;
         }
 
         public struct AuthResponseMessage : NetworkMessage
@@ -37,21 +46,17 @@ namespace Arteranos.Services
         /// Called on server from StartServer to initialize the Authenticator
         /// <para>Server message handlers should be registered in this method.</para>
         /// </summary>
-        public override void OnStartServer()
-        {
+        public override void OnStartServer() =>
             // register a handler for the authentication request we expect from client
             NetworkServer.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage, false);
-        }
 
         /// <summary>
         /// Called on server from StopServer to reset the Authenticator
         /// <para>Server message handlers should be registered in this method.</para>
         /// </summary>
-        public override void OnStopServer()
-        {
+        public override void OnStopServer() =>
             // unregister the handler for the authentication request
             NetworkServer.UnregisterHandler<AuthRequestMessage>();
-        }
 
         /// <summary>
         /// Called on server from OnServerConnectInternal when a client needs to authenticate
@@ -132,21 +137,17 @@ namespace Arteranos.Services
         /// Called on client from StartClient to initialize the Authenticator
         /// <para>Client message handlers should be registered in this method.</para>
         /// </summary>
-        public override void OnStartClient()
-        {
+        public override void OnStartClient() =>
             // register a handler for the authentication response we expect from server
             NetworkClient.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage, false);
-        }
 
         /// <summary>
         /// Called on client from StopClient to reset the Authenticator
         /// <para>Client message handlers should be unregistered in this method.</para>
         /// </summary>
-        public override void OnStopClient()
-        {
+        public override void OnStopClient() =>
             // unregister the handler for the authentication response
             NetworkClient.UnregisterHandler<AuthResponseMessage>();
-        }
 
         /// <summary>
         /// Called on client from OnClientConnectInternal when a client needs to authenticate
@@ -157,10 +158,11 @@ namespace Arteranos.Services
 
             AuthRequestMessage authRequestMessage = new()
             {
-                ClientVersion = Core.Version.Load(),
+                ClientVersion = Version.Load(),
                 Nickname = cs.Me.Nickname,
                 isGuest = cs.Me.Login.IsGuest,
                 isCustom = cs.Me.CurrentAvatar.IsCustom,
+                deviceUID = SystemInfo.deviceUniqueIdentifier
             };
 
             NetworkClient.Send(authRequestMessage);

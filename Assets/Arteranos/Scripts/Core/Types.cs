@@ -223,7 +223,7 @@ namespace Arteranos.Core
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
                 File.WriteAllText($"{Application.persistentDataPath}/{PATH_METADATA_DEFAULTS}", json);
             }
-            catch(System.Exception ex)
+            catch(Exception ex)
             {
                 Debug.LogWarning($"Failed to save the metadata defaults: {ex.Message}");
             }
@@ -237,7 +237,7 @@ namespace Arteranos.Core
                 string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_METADATA_DEFAULTS}");
                 mdj = JsonConvert.DeserializeObject<WorldMetaData>(json);
             }
-            catch(System.Exception ex)
+            catch(Exception ex)
             {
                 Debug.LogWarning($"Failed to load the metadata defaults: {ex.Message}");
                 mdj = new();
