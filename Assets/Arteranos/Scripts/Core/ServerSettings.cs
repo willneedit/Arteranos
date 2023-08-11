@@ -124,6 +124,12 @@ namespace Arteranos.Core
         [JsonIgnore]
         public static string DefaultMetadataPath = "/metadata.json";
 
+        [JsonIgnore]
+        private bool includeCompleteKey = false;
+
+        [JsonIgnore]
+        private byte[] serverKey = null;
+
         // The main server listen port.
         public int ServerPort = 9777;
 
@@ -147,6 +153,24 @@ namespace Arteranos.Core
 
         // The server's permissions
         public ServerPermissionsJSON Permissions = new();
+
+        // The server's COMPLETE key
+        public byte[] ServerKey
+        {
+            // Require explicit enabling the export of the whole key to prevent leaking
+            // the key with the server settings
+            get => includeCompleteKey ? serverKey : null;
+            set => serverKey = value;
+        }
+
+        [JsonIgnore]
+        protected bool IncludeCompleteKey
+        {
+            get => includeCompleteKey;
+            set => includeCompleteKey = value;
+        }
+
+        public byte[] ServerPublicKey = null;
 
         public ServerSettingsJSON Strip()
         {
@@ -189,6 +213,8 @@ namespace Arteranos.Core
 
         public void SaveSettings()
         {
+            IncludeCompleteKey = true;
+
             try
             {
                 string json = ExportSettings();
@@ -198,6 +224,8 @@ namespace Arteranos.Core
             {
                 Debug.LogWarning($"Failed to save server settings: {e.Message}");
             }
+
+            IncludeCompleteKey = false;
         }
 
         public string ExportSettings() => JsonConvert.SerializeObject(this, Formatting.Indented);
@@ -216,6 +244,32 @@ namespace Arteranos.Core
                 Debug.LogWarning($"Failed to load server settings: {e.Message}");
                 ss = new();
             }
+
+            // Generate the server key if there isn't there one
+            ss.IncludeCompleteKey = true;
+
+            try
+            {
+                if(ss.ServerPublicKey == null)
+                {
+                    Crypto crypto = new();
+                    ss.ServerKey = crypto.Export(true);
+                    ss.ServerPublicKey = crypto.PublicKey;
+
+                    ss.SaveSettings();
+                }
+                else
+                {
+                    Crypto crypto = new(ss.ServerKey);
+                    ss.ServerPublicKey = crypto.PublicKey;
+                }
+            }
+            catch(Exception e)
+            {
+                Debug.LogError($"Internal error while regenerating server key: {e.Message}");
+            }
+
+            ss.IncludeCompleteKey = false;
 
             return ss;
         }

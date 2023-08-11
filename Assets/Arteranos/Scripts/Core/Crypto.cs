@@ -35,6 +35,20 @@ namespace Arteranos.Core
 
         }
 
+        public Crypto(byte[] rsaKeyBlob)
+        {
+            rsaKey = new();
+            rsaKey.ImportCspBlob(rsaKeyBlob);
+            publicKey = rsaKey.ExportCspBlob(false);
+        }
+
+        public byte[] Export(bool includePrivateParameters)
+        {
+            if(!includePrivateParameters) return publicKey;
+
+            return rsaKey.ExportCspBlob(true);
+        }
+
         public void Encrypt(byte[] payload, byte[] otherPublicKey, out CryptPacket p)
         {
             using Aes aes = new AesCryptoServiceProvider();
