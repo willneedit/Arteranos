@@ -222,24 +222,19 @@ namespace Arteranos.Services
 
             ClientSettings cs = SettingsManager.Client;
 
-            AuthRequestPayload authRequestMessage = new()
+            Crypto.Encrypt(new AuthRequestPayload()
             {
                 ClientVersion = Version.Load(),
                 Nickname = cs.Me.Nickname,
                 isGuest = cs.Me.Login.IsGuest,
                 isCustom = cs.Me.CurrentAvatar.IsCustom,
                 deviceUID = SystemInfo.deviceUniqueIdentifier
-            };
+            }, msg.ServerPublicKey, out CryptPacket p);
 
-            Crypto crypto = new();
-            crypto.Encrypt(authRequestMessage, msg.ServerPublicKey, out CryptPacket p);
-
-            AuthRequestMessage encryptedauthRequestMessage = new()
+            NetworkClient.Send(new AuthRequestMessage()
             {
                 Payload = p
-            };
-
-            NetworkClient.Send(encryptedauthRequestMessage);
+            });
         }
 
         /// <summary>

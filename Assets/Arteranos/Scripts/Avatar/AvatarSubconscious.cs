@@ -126,7 +126,7 @@ namespace Arteranos.Avatar
 
         private void TransmitTextMessage(GameObject receiverGO, string text)
         {
-            crypto.Encrypt(text, receiverGO.GetComponent<IAvatarBrain>().PublicKey, out CryptPacket p);
+            Crypto.Encrypt(text, receiverGO.GetComponent<IAvatarBrain>().PublicKey, out CryptPacket p);
             CmdTransmitTextMessage(receiverGO, p);
         }
 
@@ -198,7 +198,7 @@ namespace Arteranos.Avatar
         private void TransmitGlobalUserID(GameObject receiverGO, UserID globalUserID)
         {
             if(globalUserID.ServerName != null) throw new ArgumentException("Not a global userID");
-            crypto.Encrypt(globalUserID,
+            Crypto.Encrypt(globalUserID,
                 receiverGO.GetComponent<IAvatarBrain>().PublicKey,
                 out CryptPacket p);
             CmdTransmitGlobalUserID(receiverGO, p);

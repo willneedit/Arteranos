@@ -44,7 +44,7 @@ namespace Arteranos
 
         private void EncryptTest(string msg)
         {
-            alice.Encrypt(msg, bob.PublicKey, out CryptPacket p);
+            Crypto.Encrypt(msg, bob.PublicKey, out CryptPacket p);
 
             Debug.Log($"Ciphertext: {Hex(p.encryptedMessage)}");
 
@@ -56,7 +56,7 @@ namespace Arteranos
 
         private void EncryptStructTest(UserID userID)
         {
-            alice.Encrypt(userID, bob.PublicKey, out CryptPacket p);
+            Crypto.Encrypt(userID, bob.PublicKey, out CryptPacket p);
 
             Debug.Log($"Ciphertext: {Hex(p.encryptedMessage)}");
 

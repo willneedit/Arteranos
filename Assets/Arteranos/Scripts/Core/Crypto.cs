@@ -49,7 +49,7 @@ namespace Arteranos.Core
             return rsaKey.ExportCspBlob(true);
         }
 
-        public void Encrypt(byte[] payload, byte[] otherPublicKey, out CryptPacket p)
+        public static void Encrypt(byte[] payload, byte[] otherPublicKey, out CryptPacket p)
         {
             using Aes aes = new AesCryptoServiceProvider();
             p.iv = aes.IV;
@@ -86,11 +86,8 @@ namespace Arteranos.Core
             payload = plaintext.ToArray();
         }
 
-        public void Encrypt(string message, byte[] otherPublicKey, out CryptPacket p)
-        {
-            byte[] payload = Encoding.UTF8.GetBytes(message);
-            Encrypt(payload, otherPublicKey, out p);
-        }
+        public static void Encrypt(string message, byte[] otherPublicKey, out CryptPacket p) 
+            => Encrypt(Encoding.UTF8.GetBytes(message), otherPublicKey, out p);
 
         public void Decrypt(CryptPacket p, out string message)
         {
@@ -98,11 +95,8 @@ namespace Arteranos.Core
             message = Encoding.UTF8.GetString(payload);
         }
 
-        public void Encrypt<T>(T payload, byte[] otherPublicKey, out CryptPacket p)
-        {
-            string json = JsonConvert.SerializeObject(payload);
-            Encrypt(json, otherPublicKey, out p);
-        }
+        public static void Encrypt<T>(T payload, byte[] otherPublicKey, out CryptPacket p) 
+            => Encrypt(JsonConvert.SerializeObject(payload), otherPublicKey, out p);
 
         public void Decrypt<T>(CryptPacket p, out T payload)
         {
