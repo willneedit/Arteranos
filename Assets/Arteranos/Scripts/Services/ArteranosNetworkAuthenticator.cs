@@ -10,7 +10,6 @@ using Mirror;
 
 using Arteranos.Core;
 using UnityEngine;
-using System.Threading;
 using System.Threading.Tasks;
 
 /*
@@ -23,6 +22,13 @@ namespace Arteranos.Services
     public class ArteranosNetworkAuthenticator : NetworkAuthenticator
     {
         #region Messages
+
+        public struct AuthGreetingMessage : NetworkMessage
+        {
+            public Version ServerVersion;
+            public string ServerName;
+            public byte[] ServerPublicKey;
+        }
 
         public struct AuthRequestMessage : NetworkMessage
         {
@@ -64,20 +70,44 @@ namespace Arteranos.Services
         /// Called on server from OnServerConnectInternal when a client needs to authenticate
         /// </summary>
         /// <param name="conn">Connection to client.</param>
-        public override void OnServerAuthenticate(NetworkConnectionToClient conn) { }
+        public override void OnServerAuthenticate(NetworkConnectionToClient conn) 
+        {
+            // Take the first step to authenticate.
+            ServerSettings ss = SettingsManager.Server;
+
+            AuthGreetingMessage authGreetingMessage = new()
+            {
+                ServerVersion = Version.Load(),
+                ServerName = ss.Name,
+                ServerPublicKey = ss.ServerPublicKey
+            };
+
+            conn.Send(authGreetingMessage);
+        }
 
         /// <summary>
         /// Called on server when the client's AuthRequestMessage arrives
         /// </summary>
         /// <param name="conn">Connection to client.</param>
         /// <param name="msg">The message payload</param>
-        public void OnAuthRequestMessage(NetworkConnectionToClient conn, AuthRequestMessage msg) 
-            => Task.Run(() => DecideAuthenthicity(conn, msg));
+        public void OnAuthRequestMessage(NetworkConnectionToClient conn, AuthRequestMessage msg)
+            => Task.Run(() =>
+            {
+                try
+                {
+                    DecideAuthenthicity(conn, msg);
+                }
+                catch(System.Exception e)
+                {
+                    Debug.LogException(e);
+                    ServerReject(conn);
+                }
+            });
 
         private void DecideAuthenthicity(NetworkConnectionToClient conn, AuthRequestMessage msg)
         {
             // DEBUG
-            //Thread.Sleep(3000);
+            // System.Threading.Thread.Sleep(3000);
 
             // if(connectionsPendingDisconnect.Contains(conn)) return;
 
@@ -142,23 +172,45 @@ namespace Arteranos.Services
         /// Called on client from StartClient to initialize the Authenticator
         /// <para>Client message handlers should be registered in this method.</para>
         /// </summary>
-        public override void OnStartClient() =>
+        public override void OnStartClient()
+        {
+            // register a handler for the server's initial greeting message
+            NetworkClient.RegisterHandler<AuthGreetingMessage>(OnAuthGreetingMessage, false);
+
             // register a handler for the authentication response we expect from server
             NetworkClient.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage, false);
+        }
 
         /// <summary>
         /// Called on client from StopClient to reset the Authenticator
         /// <para>Client message handlers should be unregistered in this method.</para>
         /// </summary>
-        public override void OnStopClient() =>
+        public override void OnStopClient()
+        {
+            // unregister a handler for the server's initial greeting message
+            NetworkClient.UnregisterHandler<AuthGreetingMessage>();
+
             // unregister the handler for the authentication response
             NetworkClient.UnregisterHandler<AuthResponseMessage>();
+        }
 
         /// <summary>
         /// Called on client from OnClientConnectInternal when a client needs to authenticate
         /// </summary>
         public override void OnClientAuthenticate()
         {
+            // Do nothing. Until we got the server's greeting message, we cennot do anything.
+        }
+
+        /// <summary>
+        /// Called on client when the server's initial greeting message arrives
+        /// </summary>
+        /// <param name="msg">Self explanatory</param>
+        private void OnAuthGreetingMessage(AuthGreetingMessage msg)
+        {
+            Debug.Log($"[Client] Server name   : {msg.ServerName}");
+            Debug.Log($"[Client] Server version: {msg.ServerVersion.Full}");
+
             ClientSettings cs = SettingsManager.Client;
 
             AuthRequestMessage authRequestMessage = new()
