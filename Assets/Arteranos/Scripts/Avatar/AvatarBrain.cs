@@ -364,15 +364,12 @@ namespace Arteranos.Avatar
 
 
         [Command]
-        private void CmdPerformEmote(string emojiName)
-        {
-            RpcPerformEmote(emojiName);
-        }
+        private void CmdPerformEmote(string emojiName) => RpcPerformEmote(emojiName);
 
         [ClientRpc]
         private void RpcPerformEmote(string emojiName)
         {
-            // Invisible users wouldn't see the emotes
+            // Invisible users wouldn't show the emotes
             if(Avatar.AppearanceStatus.IsInvisible(AppearanceStatus)) return;
 
             LoopPerformEmoji(emojiName);
@@ -601,7 +598,7 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Emotes performance
 
-        IEnumerator CleanupEmojiPS(ParticleSystem ps)
+        private IEnumerator CleanupEmojiPS(ParticleSystem ps)
         {
             yield return new WaitForSeconds(5);
 
