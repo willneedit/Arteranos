@@ -208,6 +208,8 @@ namespace Arteranos.Core
             }
         }
 
+        [JsonIgnore]
+        private Crypto Crypto = null;
 
         public const string PATH_SERVER_SETTINGS = "ServerSettings.json";
 
@@ -217,7 +219,7 @@ namespace Arteranos.Core
 
             try
             {
-                string json = ExportSettings();
+                string json = JsonConvert.SerializeObject(this, Formatting.Indented);
                 File.WriteAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}", json);
             }
             catch(Exception e)
@@ -227,8 +229,6 @@ namespace Arteranos.Core
 
             IncludeCompleteKey = false;
         }
-
-        public string ExportSettings() => JsonConvert.SerializeObject(this, Formatting.Indented);
 
         public static ServerSettings LoadSettings()
         {
@@ -252,16 +252,16 @@ namespace Arteranos.Core
             {
                 if(ss.ServerPublicKey == null)
                 {
-                    Crypto crypto = new();
-                    ss.ServerKey = crypto.Export(true);
-                    ss.ServerPublicKey = crypto.PublicKey;
+                    ss.Crypto = new();
+                    ss.ServerKey = ss.Crypto.Export(true);
+                    ss.ServerPublicKey = ss.Crypto.PublicKey;
 
                     ss.SaveSettings();
                 }
                 else
                 {
-                    Crypto crypto = new(ss.ServerKey);
-                    ss.ServerPublicKey = crypto.PublicKey;
+                    ss.Crypto = new(ss.ServerKey);
+                    ss.ServerPublicKey = ss.Crypto.PublicKey;
                 }
             }
             catch(Exception e)
@@ -273,5 +273,8 @@ namespace Arteranos.Core
 
             return ss;
         }
+
+        public void Decrypt<T>(CryptPacket p, out T payload) => Crypto.Decrypt(p, out payload);
+
     }
 }

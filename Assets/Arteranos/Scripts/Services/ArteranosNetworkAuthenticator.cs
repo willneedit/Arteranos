@@ -23,14 +23,14 @@ namespace Arteranos.Services
     {
         #region Messages
 
-        public struct AuthGreetingMessage : NetworkMessage
+        internal struct AuthGreetingMessage : NetworkMessage
         {
             public Version ServerVersion;
             public string ServerName;
             public byte[] ServerPublicKey;
         }
 
-        public struct AuthRequestMessage : NetworkMessage
+        internal struct AuthRequestPayload
         {
             public Version ClientVersion;
             public string Nickname;
@@ -39,7 +39,12 @@ namespace Arteranos.Services
             public string deviceUID;
         }
 
-        public struct AuthResponseMessage : NetworkMessage
+        internal struct AuthRequestMessage : NetworkMessage
+        {
+            public CryptPacket Payload;
+        }
+
+        internal struct AuthResponseMessage : NetworkMessage
         {
             public HttpStatusCode status;
             public string message;
@@ -90,7 +95,7 @@ namespace Arteranos.Services
         /// </summary>
         /// <param name="conn">Connection to client.</param>
         /// <param name="msg">The message payload</param>
-        public void OnAuthRequestMessage(NetworkConnectionToClient conn, AuthRequestMessage msg)
+        private void OnAuthRequestMessage(NetworkConnectionToClient conn, AuthRequestMessage msg)
             => Task.Run(() =>
             {
                 try
@@ -104,12 +109,16 @@ namespace Arteranos.Services
                 }
             });
 
-        private void DecideAuthenthicity(NetworkConnectionToClient conn, AuthRequestMessage msg)
+        private void DecideAuthenthicity(NetworkConnectionToClient conn, AuthRequestMessage encryptedMsg)
         {
             // DEBUG
             // System.Threading.Thread.Sleep(3000);
 
             // if(connectionsPendingDisconnect.Contains(conn)) return;
+
+            ServerSettings ss = SettingsManager.Server;
+
+            ss.Decrypt(encryptedMsg.Payload, out AuthRequestPayload msg);
 
             AuthResponseMessage authResponseMessage;
 
@@ -213,7 +222,7 @@ namespace Arteranos.Services
 
             ClientSettings cs = SettingsManager.Client;
 
-            AuthRequestMessage authRequestMessage = new()
+            AuthRequestPayload authRequestMessage = new()
             {
                 ClientVersion = Version.Load(),
                 Nickname = cs.Me.Nickname,
@@ -222,14 +231,22 @@ namespace Arteranos.Services
                 deviceUID = SystemInfo.deviceUniqueIdentifier
             };
 
-            NetworkClient.Send(authRequestMessage);
+            Crypto crypto = new();
+            crypto.Encrypt(authRequestMessage, msg.ServerPublicKey, out CryptPacket p);
+
+            AuthRequestMessage encryptedauthRequestMessage = new()
+            {
+                Payload = p
+            };
+
+            NetworkClient.Send(encryptedauthRequestMessage);
         }
 
         /// <summary>
         /// Called on client when the server's AuthResponseMessage arrives
         /// </summary>
         /// <param name="msg">The message payload</param>
-        public void OnAuthResponseMessage(AuthResponseMessage msg)
+        private void OnAuthResponseMessage(AuthResponseMessage msg)
         {
             if(msg.status != HttpStatusCode.OK)
             {
