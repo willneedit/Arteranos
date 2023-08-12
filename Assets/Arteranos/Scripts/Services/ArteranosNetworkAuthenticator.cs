@@ -32,7 +32,6 @@ namespace Arteranos.Services
 
         internal struct AuthRequestPayload
         {
-            public Version ClientVersion;
             public string Nickname;
             public bool isGuest;
             public bool isCustom;
@@ -41,6 +40,7 @@ namespace Arteranos.Services
 
         internal struct AuthRequestMessage : NetworkMessage
         {
+            public Version ClientVersion;
             public CryptPacket Payload;
         }
 
@@ -122,7 +122,7 @@ namespace Arteranos.Services
 
             AuthResponseMessage authResponseMessage;
 
-            if(!msg.ClientVersion.IsGE(Version.VERSION_MIN))
+            if(!encryptedMsg.ClientVersion.IsGE(Version.VERSION_MIN))
             {
                 // Insufficient version
                 authResponseMessage = new()
@@ -224,7 +224,6 @@ namespace Arteranos.Services
 
             Crypto.Encrypt(new AuthRequestPayload()
             {
-                ClientVersion = Version.Load(),
                 Nickname = cs.Me.Nickname,
                 isGuest = cs.Me.Login.IsGuest,
                 isCustom = cs.Me.CurrentAvatar.IsCustom,
@@ -233,6 +232,7 @@ namespace Arteranos.Services
 
             NetworkClient.Send(new AuthRequestMessage()
             {
+                ClientVersion = Version.Load(),
                 Payload = p
             });
         }
