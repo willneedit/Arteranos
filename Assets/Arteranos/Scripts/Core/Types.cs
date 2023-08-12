@@ -250,4 +250,46 @@ namespace Arteranos.Core
 
         public static WorldMetaData Deserialize(string json) => JsonConvert.DeserializeObject<WorldMetaData>(json);
     }
+
+    /// <summary>
+    /// Suitable for locks/unlocks to properly deallocate resources when the control flow
+    /// leaves the scope, be it regular or by an exception.
+    /// 
+    /// Credits go for C++ :)
+    /// Best use with
+    ///             using(Guard guard = new(allocate, release)) { ... }
+    /// </summary>
+    public class Guard : IDisposable
+    {
+        private readonly Action disengage;
+
+        private bool _disposedValue;
+
+        public Guard(Action engage, Action disengage)
+        {
+            this.disengage = disengage;
+            engage();
+        }
+
+        ~Guard() => Dispose(false);
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if(_disposedValue) return;
+
+            //if(disposing)
+            //{
+            //    // Needed? Dispose managed state (managed objects).
+            //}
+
+            disengage();
+            _disposedValue = true;
+        }
+    }
 }

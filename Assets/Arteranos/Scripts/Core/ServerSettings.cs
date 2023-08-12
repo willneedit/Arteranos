@@ -215,19 +215,20 @@ namespace Arteranos.Core
 
         public void SaveSettings()
         {
-            IncludeCompleteKey = true;
-
-            try
+            using(Guard guard = new(
+                () => IncludeCompleteKey = true,
+                () => IncludeCompleteKey = false))
             {
-                string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                File.WriteAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}", json);
+                try
+                {
+                    string json = JsonConvert.SerializeObject(this, Formatting.Indented);
+                    File.WriteAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}", json);
+                }
+                catch(Exception e)
+                {
+                    Debug.LogWarning($"Failed to save server settings: {e.Message}");
+                }
             }
-            catch(Exception e)
-            {
-                Debug.LogWarning($"Failed to save server settings: {e.Message}");
-            }
-
-            IncludeCompleteKey = false;
         }
 
         public static ServerSettings LoadSettings()
@@ -245,31 +246,31 @@ namespace Arteranos.Core
                 ss = new();
             }
 
-            // Generate the server key if there isn't there one
-            ss.IncludeCompleteKey = true;
-
-            try
+            using(Guard guard = new(
+                () => ss.IncludeCompleteKey = true,
+                () => ss.IncludeCompleteKey = false))
             {
-                if(ss.ServerPublicKey == null)
+                try
                 {
-                    ss.Crypto = new();
-                    ss.ServerKey = ss.Crypto.Export(true);
-                    ss.ServerPublicKey = ss.Crypto.PublicKey;
+                    if(ss.ServerPublicKey == null)
+                    {
+                        ss.Crypto = new();
+                        ss.ServerKey = ss.Crypto.Export(true);
+                        ss.ServerPublicKey = ss.Crypto.PublicKey;
 
-                    ss.SaveSettings();
+                        ss.SaveSettings();
+                    }
+                    else
+                    {
+                        ss.Crypto = new(ss.ServerKey);
+                        ss.ServerPublicKey = ss.Crypto.PublicKey;
+                    }
                 }
-                else
+                catch(Exception e)
                 {
-                    ss.Crypto = new(ss.ServerKey);
-                    ss.ServerPublicKey = ss.Crypto.PublicKey;
+                    Debug.LogError($"Internal error while regenerating server key: {e.Message}");
                 }
             }
-            catch(Exception e)
-            {
-                Debug.LogError($"Internal error while regenerating server key: {e.Message}");
-            }
-
-            ss.IncludeCompleteKey = false;
 
             return ss;
         }
