@@ -33,10 +33,7 @@ namespace Arteranos.Core
 
             return !setting != user ? 5 : 0;
         }
-    }
 
-    public static class TransformExtensions
-    {
         /// <summary>
         /// Finds the transform in the hierarchy tree by name, including searching the
         /// entire subtree below.
@@ -65,7 +62,6 @@ namespace Arteranos.Core
         /// <param name="targetTransform"></param>
         /// <param name="duration"></param>
         /// <param name="token"></param>
-        /// <returns></returns>
         public static async Task LerpTransform(this Transform transform,
             Transform targetTransform, float duration, CancellationToken token)
         {

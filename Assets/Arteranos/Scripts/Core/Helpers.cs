@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2023, willneedit
  * 
  * Licensed by the Mozilla Public License 2.0,
@@ -387,7 +387,7 @@ namespace Arteranos.XR
 namespace Arteranos.Social
 {
     // -------------------------------------------------------------------
-    #region Social constants
+    #region Social & User constants
     public static class SocialState
     {
         public const int None = 0;
@@ -410,6 +410,80 @@ namespace Arteranos.Social
 
         public static bool IsState(int you, int stateBit)
             => ((you & stateBit) == stateBit);
+    }
+
+    public static class UserState
+    {
+        // Just an ordinary everyday user.
+        public const long Normal            = 0;
+
+        // ---------------------------------------------------------------
+        // 0  ... 15: User related
+
+        // Trusted user, whatever it shall be... ¯\_(ツ)_/¯
+        public const long Trusted           = (1 << 0);
+
+        // ---------------------------------------------------------------
+        // 16 ... 31: World related
+
+        // Derived from the world administrator, can elevate or demote assistants with the same powers
+        public const long World_admin_asstnt= (1 << 30);
+
+        // World administrators
+        public const long World_admin       = (1 << 31);
+
+        // ---------------------------------------------------------------
+        // 32 ... 47: Server related
+
+        // Derived from the world administrator, can elevate or demote assistants with the same powers
+        public const long Srv_admin_asstnt  = (1 << 46);
+
+        // Server administrators
+        public const long Srv_admin         = (1 << 47);
+
+
+        // ---------------------------------------------------------------
+        // 48 ... 63: Repercussions, especially with the regative result (= banned bit set)
+
+        // Below the user's legal or recommended age, e.g. below 13 b/c COPPA.
+        public const long Underage          = (1 << 48);
+
+        // Disruptive behavior
+        public const long Trolling          = (1 << 49);
+
+        // Discrimination/-phobic/hatemongering (see below)
+        public const long Hating            = (1 << 50);
+
+        // Incessantly loud (e.g. noisy mic) (Maybe automatically force-muted on login?)
+        public const long Loud              = (1 << 51);
+
+        // Mobbing/Bullying/Harassment
+        public const long Bullying          = (1 << 52);
+
+        // Undesired sexual advances or harassment
+        public const long SxHarassment      = (1 << 53);
+
+        // Exploit/security leak usage (maybe tripped in the network stack)
+        public const long Exploiting        = (1 << 60);
+
+        // Impersonation (to gain privileges by social engineering)
+        public const long Impersonation     = (1 << 61);
+
+        // Attempted ban evasion
+        public const long BanEvading        = (1 << 62);
+
+        // User has been banned
+        public const long Banned            = (1 << 63);
+
+        public static bool IsAllState(long you, long stateBit) => ((you & stateBit) == stateBit);
+
+        public static bool IsAnyState(long you, long stateBit) => ((you & stateBit) != 0);
+
+        public static bool IsBanned(long state) => state < 0;
+
+        public static bool IsWAdmin(long state) => IsAnyState(state, World_admin | World_admin_asstnt);
+
+        public static bool isSAdmin(long state) => IsAnyState(state, Srv_admin | Srv_admin_asstnt);
     }
     #endregion
     // -------------------------------------------------------------------

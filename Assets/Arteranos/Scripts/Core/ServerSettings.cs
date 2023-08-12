@@ -130,6 +130,13 @@ namespace Arteranos.Core
         [JsonIgnore]
         private byte[] serverKey = null;
 
+        [JsonIgnore]
+        protected bool IncludeCompleteKey
+        {
+            get => includeCompleteKey;
+            set => includeCompleteKey = value;
+        }
+
         // The main server listen port.
         public int ServerPort = 9777;
 
@@ -161,13 +168,6 @@ namespace Arteranos.Core
             // the key with the server settings
             get => includeCompleteKey ? serverKey : null;
             set => serverKey = value;
-        }
-
-        [JsonIgnore]
-        protected bool IncludeCompleteKey
-        {
-            get => includeCompleteKey;
-            set => includeCompleteKey = value;
         }
 
         public byte[] ServerPublicKey = null;
