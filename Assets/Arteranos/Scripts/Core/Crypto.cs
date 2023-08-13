@@ -49,6 +49,8 @@ namespace Arteranos.Core
             return rsaKey.ExportCspBlob(true);
         }
 
+        #region Encrypt and decrypt
+
         public static void Encrypt(byte[] payload, byte[] otherPublicKey, out CryptPacket p)
         {
             using Aes aes = new AesCryptoServiceProvider();
@@ -103,6 +105,23 @@ namespace Arteranos.Core
             Decrypt(p, out string json);
             payload = JsonConvert.DeserializeObject<T>(json);
         }
+
+        #endregion
+
+        #region Sign and verify
+
+        public static bool Verify(byte[] data, byte[] signature, byte[] otherPublicKey)
+        {
+            using RSACryptoServiceProvider otherKey = new();
+            otherKey.ImportCspBlob(otherPublicKey);
+
+            return otherKey.VerifyData(data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        }
+
+        public void Sign(byte[] data, out byte[] signature)
+            => signature = rsaKey.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+
+        #endregion
 
         public void Dispose() => rsaKey.Dispose();
     }

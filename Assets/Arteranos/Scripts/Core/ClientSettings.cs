@@ -211,6 +211,28 @@ namespace Arteranos.Core
 
     public class UserDataSettingsJSON
     {
+        [JsonIgnore]
+        private bool includeCompleteKey = false;
+
+        [JsonIgnore]
+        private byte[] userKey = null;
+
+        [JsonIgnore]
+        public bool IncludeCompleteKey
+        {
+            get => includeCompleteKey;
+            set => includeCompleteKey = value;
+        }
+
+        // The server's COMPLETE key
+        public byte[] UserKey
+        {
+            // Require explicit enabling the export of the whole key to prevent leaking
+            // the key with the server settings
+            get => includeCompleteKey ? userKey : null;
+            set => userKey = value;
+        }
+
         // The display name of the user. Generate if null
         public virtual string Nickname { get; set; } = null;
 
@@ -316,6 +338,13 @@ namespace Arteranos.Core
             }
         }
 
+        [JsonIgnore]
+        private Crypto Crypto = null;
+
+        [JsonIgnore]
+        public byte[] UserPublicKey => Crypto.PublicKey;
+
+
 #if UNITY_SERVER
         public override bool VRMode => false;
 #else
@@ -352,6 +381,10 @@ namespace Arteranos.Core
         public void PingXRControllersChanged() => OnXRControllerChanged?.Invoke(Controls, Movement);
 
         public void PingUserHUDChanged() => OnUserHUDSettingsChanged?.Invoke(UserHUD);
+
+        public void Decrypt<T>(CryptPacket p, out T payload) => Crypto.Decrypt(p, out payload);
+
+        public void Sign(byte[] data, out byte[] signature) => Crypto.Sign(data, out signature);
 
         #endregion
         // ---------------------------------------------------------------
@@ -497,6 +530,10 @@ namespace Arteranos.Core
 
         public void SaveSettings()
         {
+            using Guard guard = new(
+                () => Me.IncludeCompleteKey = true,
+                () => Me.IncludeCompleteKey = false);
+
             try
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
@@ -523,10 +560,35 @@ namespace Arteranos.Core
                 cs = new();
             }
 
-            // Postprocessing to generate the derived values
-            if(cs.RefreshAuthentication())
-                // Save the settings back if the randomized guest login occurs and the login token is deleted.
-                cs.SaveSettings();
+            using(Guard guard = new(
+                () => cs.Me.IncludeCompleteKey = true,
+                () => cs.Me.IncludeCompleteKey = false))
+            {
+
+                try
+                {
+                    if(cs.Me.UserKey == null)
+                    {
+                        cs.Crypto = new();
+                        cs.Me.UserKey = cs.Crypto.Export(true);
+
+                        cs.SaveSettings();
+                    }
+                    else
+                    {
+                        cs.Crypto = new(cs.Me.UserKey);
+                    }
+                }
+                catch(Exception e)
+                {
+                    Debug.LogError($"Internal error while regenerating server key: {e.Message}");
+                }
+                // Postprocessing to generate the derived values
+                if(cs.RefreshAuthentication())
+                    // Save the settings back if the randomized guest login occurs and the login token is deleted.
+                    cs.SaveSettings();
+            }
+
             return cs;
         }
 

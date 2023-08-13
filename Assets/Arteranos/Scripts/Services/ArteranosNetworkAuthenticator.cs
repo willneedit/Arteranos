@@ -11,6 +11,12 @@ using Mirror;
 using Arteranos.Core;
 using UnityEngine;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
+using Version = Arteranos.Core.Version;
+using Random = UnityEngine.Random;
+using System.Collections;
+using System.Linq;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-authenticators
@@ -28,10 +34,16 @@ namespace Arteranos.Services
             public Version ServerVersion;
             public string ServerName;
             public byte[] ServerPublicKey;
+            public byte[] ClientChallenge;
+            public int SequenceNumber;
         }
 
         internal struct AuthRequestPayload
         {
+            public int SequenceNumber;
+            public byte[] ClientResponse;
+            public byte[] ClientPublicKey;
+
             public string Nickname;
             public bool isGuest;
             public bool isCustom;
@@ -41,6 +53,7 @@ namespace Arteranos.Services
         internal struct AuthRequestMessage : NetworkMessage
         {
             public Version ClientVersion;
+
             public CryptPacket Payload;
         }
 
@@ -53,23 +66,89 @@ namespace Arteranos.Services
 
         #endregion
 
-        #region Server
+        #region Utilities
 
         /// <summary>
-        /// Called on server from StartServer to initialize the Authenticator
-        /// <para>Server message handlers should be registered in this method.</para>
+        /// Get (not necessarily cryptographically strong) random bytes for the challenge
         /// </summary>
-        public override void OnStartServer() =>
+        /// <param name="numBytes">How many bytes to get</param>
+        public byte[] GetChallengeBytes(int numBytes)
+        {
+            byte[] challengeBytes = new byte[numBytes];
+
+            for(int i = 0; i < challengeBytes.Length; i++)
+                challengeBytes[i] = (byte) Random.Range(0, 255);
+
+            return challengeBytes;
+        }
+
+        #endregion
+
+        #region Start & Stop
+
+        public override void OnStartServer()
+        {
             // register a handler for the authentication request we expect from client
             NetworkServer.RegisterHandler<AuthRequestMessage>(OnAuthRequestMessage, false);
 
-        /// <summary>
-        /// Called on server from StopServer to reset the Authenticator
-        /// <para>Server message handlers should be registered in this method.</para>
-        /// </summary>
-        public override void OnStopServer() =>
+            StartCoroutine(ScrubChallenges());
+        }
+
+        public override void OnStopServer()
+        {
             // unregister the handler for the authentication request
             NetworkServer.UnregisterHandler<AuthRequestMessage>();
+
+            StopAllCoroutines();
+        }
+
+        public override void OnStartClient()
+        {
+            // register a handler for the server's initial greeting message
+            NetworkClient.RegisterHandler<AuthGreetingMessage>(OnAuthGreetingMessage, false);
+
+            // register a handler for the authentication response we expect from server
+            NetworkClient.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage, false);
+        }
+
+        public override void OnStopClient()
+        {
+            // unregister a handler for the server's initial greeting message
+            NetworkClient.UnregisterHandler<AuthGreetingMessage>();
+
+            // unregister the handler for the authentication response
+            NetworkClient.UnregisterHandler<AuthResponseMessage>();
+        }
+
+        #endregion
+
+        #region Server
+
+        internal struct ChallengeListEntry
+        {
+            public byte[] challenge;
+            public DateTime time;
+        }
+
+        private readonly Dictionary<int, ChallengeListEntry> ChallengeList = new();
+
+        // Every two seconds, look for the outdated login attempts to remove them.
+        private IEnumerator ScrubChallenges()
+        {
+            while(true)
+            {
+                yield return new WaitForSeconds(2);
+
+                DateTime now = DateTime.Now;
+
+                int[] numbers = (from entry in ChallengeList
+                                 where entry.Value.time < now
+                                 select entry.Key).ToArray();
+
+                foreach(int number in numbers)
+                    ChallengeList.Remove(number);
+            }
+        }
 
         /// <summary>
         /// Called on server from OnServerConnectInternal when a client needs to authenticate
@@ -77,6 +156,25 @@ namespace Arteranos.Services
         /// <param name="conn">Connection to client.</param>
         public override void OnServerAuthenticate(NetworkConnectionToClient conn) 
         {
+            // Flooded. Too many login attempts at the same time.
+            if(ChallengeList.Count > 2000)
+            {
+                Debug.LogWarning($"Login attempt flood: Discarding connection from {conn.address}");
+                // conn.Disconnect();
+                return;
+            }
+                
+            int sequence = Random.Range(0, 1000000);
+            while(ChallengeList.TryGetValue(sequence, out _))
+                sequence = Random.Range(0, 1000000);
+
+            // Allow ten seconds between the greeting message and the client's reaction.
+            ChallengeListEntry entry = new()
+            {
+                challenge = GetChallengeBytes(32),
+                time = DateTime.Now + TimeSpan.FromSeconds(10),
+            };
+
             // Take the first step to authenticate.
             ServerSettings ss = SettingsManager.Server;
 
@@ -84,10 +182,14 @@ namespace Arteranos.Services
             {
                 ServerVersion = Version.Load(),
                 ServerName = ss.Name,
-                ServerPublicKey = ss.ServerPublicKey
+                ServerPublicKey = ss.ServerPublicKey,
+                ClientChallenge = entry.challenge,
+                SequenceNumber = sequence
             };
 
             conn.Send(authGreetingMessage);
+
+            ChallengeList.Add(sequence, entry);
         }
 
         /// <summary>
@@ -102,7 +204,7 @@ namespace Arteranos.Services
                 {
                     DecideAuthenthicity(conn, msg);
                 }
-                catch(System.Exception e)
+                catch(Exception e)
                 {
                     Debug.LogException(e);
                     ServerReject(conn);
@@ -131,11 +233,29 @@ namespace Arteranos.Services
                     message = $"Your client is outdated.\nVersion {Version.VERSION_MIN} required,\nPlease update.",
                 };
             }
+            else if(!ChallengeList.TryGetValue(msg.SequenceNumber, out ChallengeListEntry ce))
+            {
+                // Authentication attempt either out-of-band or expired. Or it's a replay attack.
+                authResponseMessage = new()
+                {
+                    status = HttpStatusCode.RequestTimeout,
+                    message = $"Request timed out",
+                };
+            }
+            else if(!Crypto.Verify(ce.challenge, msg.ClientResponse, msg.ClientPublicKey))
+            {
+                // Fake Client Public Key, Challenge signing failed, ...
+                authResponseMessage = new()
+                {
+                    status = HttpStatusCode.Unauthorized,
+                    message = $"Signature check failed.",
+                };
+            }
             else if(msg.isGuest && !(SettingsManager.Server.Permissions.Guests ?? false))
             {
                 authResponseMessage = new()
                 {
-                    status = HttpStatusCode.Unauthorized,
+                    status = HttpStatusCode.Forbidden,
                     message = $"Guests are disallowed.\nPlease login yourself to a login provider of your choice.",
                 };
             }
@@ -143,7 +263,7 @@ namespace Arteranos.Services
             {
                 authResponseMessage = new()
                 {
-                    status = HttpStatusCode.Unauthorized,
+                    status = HttpStatusCode.Forbidden,
                     message = $"Custom avatars are disallowed.\nPlease use an avatar generated by the offered avatar provider.",
                 };
             }
@@ -156,6 +276,9 @@ namespace Arteranos.Services
                     message = "OK",
                 };
             }
+
+            // Anyway, expire the thallenge.
+            ChallengeList.Remove(msg.SequenceNumber);
 
             authResponseMessage.ServerSettings = SettingsManager.Server.Strip();
 
@@ -178,32 +301,6 @@ namespace Arteranos.Services
         #region Client
 
         /// <summary>
-        /// Called on client from StartClient to initialize the Authenticator
-        /// <para>Client message handlers should be registered in this method.</para>
-        /// </summary>
-        public override void OnStartClient()
-        {
-            // register a handler for the server's initial greeting message
-            NetworkClient.RegisterHandler<AuthGreetingMessage>(OnAuthGreetingMessage, false);
-
-            // register a handler for the authentication response we expect from server
-            NetworkClient.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage, false);
-        }
-
-        /// <summary>
-        /// Called on client from StopClient to reset the Authenticator
-        /// <para>Client message handlers should be unregistered in this method.</para>
-        /// </summary>
-        public override void OnStopClient()
-        {
-            // unregister a handler for the server's initial greeting message
-            NetworkClient.UnregisterHandler<AuthGreetingMessage>();
-
-            // unregister the handler for the authentication response
-            NetworkClient.UnregisterHandler<AuthResponseMessage>();
-        }
-
-        /// <summary>
         /// Called on client from OnClientConnectInternal when a client needs to authenticate
         /// </summary>
         public override void OnClientAuthenticate()
@@ -222,8 +319,14 @@ namespace Arteranos.Services
 
             ClientSettings cs = SettingsManager.Client;
 
+            cs.Sign(msg.ClientChallenge, out byte[] response);
+
             Crypto.Encrypt(new AuthRequestPayload()
             {
+                SequenceNumber = msg.SequenceNumber,
+                ClientResponse = response,
+                ClientPublicKey = cs.UserPublicKey,
+
                 Nickname = cs.Me.Nickname,
                 isGuest = cs.Me.Login.IsGuest,
                 isCustom = cs.Me.CurrentAvatar.IsCustom,

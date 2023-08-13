@@ -170,8 +170,6 @@ namespace Arteranos.Core
             set => serverKey = value;
         }
 
-        public byte[] ServerPublicKey = null;
-
         public ServerSettingsJSON Strip()
         {
             return new ServerSettingsJSON()
@@ -211,23 +209,25 @@ namespace Arteranos.Core
         [JsonIgnore]
         private Crypto Crypto = null;
 
+        [JsonIgnore]
+        public byte[] ServerPublicKey => Crypto.PublicKey;
+
         public const string PATH_SERVER_SETTINGS = "ServerSettings.json";
 
         public void SaveSettings()
         {
-            using(Guard guard = new(
+            using Guard guard = new(
                 () => IncludeCompleteKey = true,
-                () => IncludeCompleteKey = false))
+                () => IncludeCompleteKey = false);
+
+            try
             {
-                try
-                {
-                    string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                    File.WriteAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}", json);
-                }
-                catch(Exception e)
-                {
-                    Debug.LogWarning($"Failed to save server settings: {e.Message}");
-                }
+                string json = JsonConvert.SerializeObject(this, Formatting.Indented);
+                File.WriteAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}", json);
+            }
+            catch(Exception e)
+            {
+                Debug.LogWarning($"Failed to save server settings: {e.Message}");
             }
         }
 
@@ -252,18 +252,16 @@ namespace Arteranos.Core
             {
                 try
                 {
-                    if(ss.ServerPublicKey == null)
+                    if(ss.ServerKey == null)
                     {
                         ss.Crypto = new();
                         ss.ServerKey = ss.Crypto.Export(true);
-                        ss.ServerPublicKey = ss.Crypto.PublicKey;
 
                         ss.SaveSettings();
                     }
                     else
                     {
                         ss.Crypto = new(ss.ServerKey);
-                        ss.ServerPublicKey = ss.Crypto.PublicKey;
                     }
                 }
                 catch(Exception e)
@@ -277,5 +275,6 @@ namespace Arteranos.Core
 
         public void Decrypt<T>(CryptPacket p, out T payload) => Crypto.Decrypt(p, out payload);
 
+        public void Sign(byte[] data, out byte[] signature) => Crypto.Sign(data, out signature);
     }
 }
