@@ -81,7 +81,7 @@ namespace Mono.Nat.Pmp
             tcs.Token.Register (() => udpClient.Dispose ());
 
             var data = message.Encode ();
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET_4_6
             await udpClient.SendAsync (data, data.Length, deviceEndpoint).ConfigureAwait (false);
 #else
             await udpClient.SendAsync (data, deviceEndpoint, CancellationToken.None).ConfigureAwait (false);
@@ -92,7 +92,7 @@ namespace Mono.Nat.Pmp
             for (int i = 0; i < PmpConstants.RetryAttempts && !receiveTask.IsCompleted; i++) {
                 await Task.Delay (delay).ConfigureAwait (false);
                 delay = TimeSpan.FromTicks (delay.Ticks * 2);
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET_4_6
                 await udpClient.SendAsync (data, data.Length, deviceEndpoint).ConfigureAwait (false);
 #else
                 await udpClient.SendAsync (data, deviceEndpoint, tcs.Token).ConfigureAwait (false);
@@ -106,7 +106,7 @@ namespace Mono.Nat.Pmp
         static async Task<ResponseMessage> ReceiveMessageAsync (UdpClient udpClient)
         {
             while (true) {
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NET_4_6
                 var receiveResult = await udpClient.ReceiveAsync ().ConfigureAwait (false);
 #else
                 var receiveResult = await udpClient.ReceiveAsync (CancellationToken.None).ConfigureAwait (false);
