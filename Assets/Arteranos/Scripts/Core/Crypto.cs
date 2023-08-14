@@ -121,6 +121,12 @@ namespace Arteranos.Core
         public void Sign(byte[] data, out byte[] signature)
             => signature = rsaKey.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
+        public static bool Verify<T>(T data, byte[] signature, byte[] otherPublicKey)
+            => Verify(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data)), signature, otherPublicKey);
+
+        public void Sign<T>(T data, out byte[] signature)
+            => Sign(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data)), out signature);
+
         #endregion
 
         public void Dispose() => rsaKey.Dispose();

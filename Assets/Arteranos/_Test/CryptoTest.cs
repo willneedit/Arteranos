@@ -40,13 +40,13 @@ namespace Arteranos
 
             EncryptTest("This is the second message");
 
+            SignTest("This is the signed message");
+
         }
 
         private void EncryptTest(string msg)
         {
             Crypto.Encrypt(msg, bob.PublicKey, out CryptPacket p);
-
-            Debug.Log($"Ciphertext: {Hex(p.encryptedMessage)}");
 
             bob.Decrypt(p, out string decryptedMessage);
 
@@ -58,12 +58,25 @@ namespace Arteranos
         {
             Crypto.Encrypt(userID, bob.PublicKey, out CryptPacket p);
 
-            Debug.Log($"Ciphertext: {Hex(p.encryptedMessage)}");
-
             bob.Decrypt(p, out UserID userID1);
 
             if(userID != userID1)
                 Debug.LogError($"FAILED: Decrypted message is garbled - supposed: {userID1}");
+
+        }
+
+        private void SignTest(string msg)
+        {
+            alice.Sign(msg, out byte[] signature);
+
+            if(!Crypto.Verify(msg, signature, alice.PublicKey))
+                Debug.LogError($"FAILED: Signature verification (+)");
+
+            // Breaking signature for negative test
+            signature[0] = (byte) ((signature[0] + 1) % 256);
+
+            if(Crypto.Verify(msg, signature, alice.PublicKey))
+                Debug.LogError($"FAILED: Signature verification (-)");
 
         }
     }
