@@ -22,32 +22,24 @@ namespace Arteranos.Core
 
     public class Crypto : IDisposable
     {
-        public byte[] PublicKey => this.publicKey;
+        public byte[] PublicKey => rsaKey.ExportCspBlob(false);
 
 
-        private readonly byte[] publicKey;
         private readonly RSACryptoServiceProvider rsaKey;
 
         public Crypto()
         {
             rsaKey = new();
-            publicKey = rsaKey.ExportCspBlob(false);
-
         }
 
         public Crypto(byte[] rsaKeyBlob)
         {
             rsaKey = new();
             rsaKey.ImportCspBlob(rsaKeyBlob);
-            publicKey = rsaKey.ExportCspBlob(false);
         }
 
         public byte[] Export(bool includePrivateParameters)
-        {
-            if(!includePrivateParameters) return publicKey;
-
-            return rsaKey.ExportCspBlob(true);
-        }
+            => rsaKey.ExportCspBlob(includePrivateParameters);
 
         #region Encrypt and decrypt
 
@@ -88,22 +80,13 @@ namespace Arteranos.Core
             payload = plaintext.ToArray();
         }
 
-        public static void Encrypt(string message, byte[] otherPublicKey, out CryptPacket p) 
-            => Encrypt(Encoding.UTF8.GetBytes(message), otherPublicKey, out p);
-
-        public void Decrypt(CryptPacket p, out string message)
-        {
-            Decrypt(p, out byte[] payload);
-            message = Encoding.UTF8.GetString(payload);
-        }
-
         public static void Encrypt<T>(T payload, byte[] otherPublicKey, out CryptPacket p) 
-            => Encrypt(JsonConvert.SerializeObject(payload), otherPublicKey, out p);
+            => Encrypt(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload)), otherPublicKey, out p);
 
         public void Decrypt<T>(CryptPacket p, out T payload)
         {
-            Decrypt(p, out string json);
-            payload = JsonConvert.DeserializeObject<T>(json);
+            Decrypt(p, out byte[] json);
+            payload = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(json));
         }
 
         #endregion

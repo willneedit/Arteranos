@@ -32,26 +32,44 @@ namespace Arteranos
             Debug.Log($"Pubkey Bob  : {Hex(bob.PublicKey)}");
 
 
-            EncryptTest("This is the first message");
+            EncryptTest(bob, "This is the first message");
 
             UserID testuser = new("Google", "6785874", null);
 
             EncryptStructTest(testuser);
 
-            EncryptTest("This is the second message");
+            EncryptTest(bob, "This is the second message");
+
+            byte[] rsaKeyBlob = bob.Export(true);
+            Crypto bob2 = new(rsaKeyBlob);
+
+            EncryptTest(bob2, "This is the copied second message");
 
             SignTest("This is the signed message");
 
         }
 
-        private void EncryptTest(string msg)
+        private void EncryptTest(Crypto b, string msg)
         {
             Crypto.Encrypt(msg, bob.PublicKey, out CryptPacket p);
 
-            bob.Decrypt(p, out string decryptedMessage);
+            b.Decrypt(p, out string decryptedMessage);
 
             if(decryptedMessage != msg)
-                Debug.LogError($"FAILED: Decrypted message is garbled - supposed: {msg}");
+                Debug.LogError($"FAILED: Decrypted message (+)");
+
+            p.encryptedMessage[0] = (byte) ((p.encryptedMessage[0] + 1) % 256);
+
+            try
+            {
+                b.Decrypt(p, out string notDecryptedMessage);
+                Debug.LogError($"FAILED: Decrypted message (-)");
+            }
+            catch(System.Exception)
+            {
+                Debug.Log("Expected: Caught exception due to failed decryption");
+            }
+
         }
 
         private void EncryptStructTest(UserID userID)
