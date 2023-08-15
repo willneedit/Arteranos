@@ -11,8 +11,11 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
+using AsymmetricKey = Arteranos.Core.CSPRSAKey;
+
 namespace Arteranos.Core
 {
+
     public struct CryptPacket
     {
         public byte[] iv;
@@ -22,24 +25,23 @@ namespace Arteranos.Core
 
     public class Crypto : IDisposable
     {
-        public byte[] PublicKey => rsaKey.ExportCspBlob(false);
+        public byte[] PublicKey => Key.PublicKey;
 
 
-        private readonly RSACryptoServiceProvider rsaKey;
+        private readonly AsymmetricKey Key;
 
         public Crypto()
         {
-            rsaKey = new();
+            Key = new();
         }
 
         public Crypto(byte[] rsaKeyBlob)
         {
-            rsaKey = new();
-            rsaKey.ImportCspBlob(rsaKeyBlob);
+            Key = new(rsaKeyBlob);
         }
 
         public byte[] Export(bool includePrivateParameters)
-            => rsaKey.ExportCspBlob(includePrivateParameters);
+            => includePrivateParameters ? Key.ExportPrivateKey() : Key.PublicKey;
 
         #region Encrypt and decrypt
 
@@ -48,10 +50,8 @@ namespace Arteranos.Core
             using Aes aes = new AesCryptoServiceProvider();
             p.iv = aes.IV;
 
-            using RSACryptoServiceProvider otherKey = new();
-            otherKey.ImportCspBlob(otherPublicKey);
-            RSAPKCS1KeyExchangeFormatter keyFormatter = new(otherKey);
-            p.encryptedSessionKey = keyFormatter.CreateKeyExchange(aes.Key, typeof(Aes));
+            using AsymmetricKey otherKey = new(otherPublicKey);
+            otherKey.WrapKey(aes.Key, out p.encryptedSessionKey);
 
             using MemoryStream ciphertext = new();
             using CryptoStream cs = new(ciphertext, aes.CreateEncryptor(), CryptoStreamMode.Write);
@@ -67,11 +67,9 @@ namespace Arteranos.Core
             using Aes aes = new AesCryptoServiceProvider();
             aes.IV = p.iv;
 
-            // Decrypt the session key
-            RSAPKCS1KeyExchangeDeformatter keyDeformatter = new(rsaKey);
-            aes.Key = keyDeformatter.DecryptKeyExchange(p.encryptedSessionKey);
+            Key.UnwrapKey(p.encryptedSessionKey, out byte[] aesKey);
+            aes.Key = aesKey;
 
-            // Decrypt the message
             using MemoryStream plaintext = new();
             using CryptoStream cs = new(plaintext, aes.CreateDecryptor(), CryptoStreamMode.Write);
             cs.Write(p.encryptedMessage, 0, p.encryptedMessage.Length);
@@ -95,14 +93,13 @@ namespace Arteranos.Core
 
         public static bool Verify(byte[] data, byte[] signature, byte[] otherPublicKey)
         {
-            using RSACryptoServiceProvider otherKey = new();
-            otherKey.ImportCspBlob(otherPublicKey);
+            using AsymmetricKey otherKey = new(otherPublicKey);
 
-            return otherKey.VerifyData(data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            return otherKey.Verify(data, signature);
         }
 
         public void Sign(byte[] data, out byte[] signature)
-            => signature = rsaKey.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            => Key.Sign(data, out signature);
 
         public static bool Verify<T>(T data, byte[] signature, byte[] otherPublicKey)
             => Verify(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data)), signature, otherPublicKey);
@@ -112,6 +109,6 @@ namespace Arteranos.Core
 
         #endregion
 
-        public void Dispose() => rsaKey.Dispose();
+        public void Dispose() => Key.Dispose();
     }
 }
