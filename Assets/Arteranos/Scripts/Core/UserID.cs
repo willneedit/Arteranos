@@ -31,18 +31,7 @@ namespace Arteranos.Core
 
         }
 
-        public UserID(string LoginProvider, string LoginUsername, string ServerName = null)
-        {
-            this.ServerName = null;
-            Hash = ComputeUserHash(LoginProvider, LoginUsername);
-
-            if(ServerName == null) return;
-
-            Hash = DeriveScopedUserHash(Hash, ServerName);
-            this.ServerName = ServerName;
-        }
-
-        public UserID(byte[] Hash, string ServerName)
+        public UserID(byte[] Hash, string ServerName = null)
         {
             this.Hash = Hash;
             this.ServerName = null;
@@ -51,19 +40,6 @@ namespace Arteranos.Core
 
             this.Hash = DeriveScopedUserHash(Hash, ServerName);
             this.ServerName = ServerName;
-        }
-
-        private byte[] ComputeUserHash(string LoginProvider, string LoginUsername)
-        {
-            string source = $"{LoginProvider}_{LoginUsername}";
-
-            byte[] bytes = Encoding.UTF8.GetBytes(source);
-            using IncrementalHash myHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-            myHash.AppendData(bytes);
-            return myHash.GetHashAndReset();
-
-            //string hashString = string.Empty;
-            //foreach(byte x in hashBytes) { hashString += String.Format("{0:x2}", x);  }
         }
 
         private byte[] DeriveScopedUserHash(byte[] UserHash, string ServerName)

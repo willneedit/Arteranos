@@ -511,7 +511,7 @@ namespace Arteranos.Core
                 }
             }
 
-            UserID = new(l.LoginProvider, l.Username);
+            UserID = new(Crypto.Fingerprint);
 
             return dirty;
         }
