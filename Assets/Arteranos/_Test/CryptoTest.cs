@@ -8,6 +8,7 @@
 using UnityEngine;
 
 using Arteranos.Core;
+using System;
 
 namespace Arteranos
 {
@@ -16,32 +17,24 @@ namespace Arteranos
         Crypto alice = null;
         Crypto bob = null;
 
-        string Hex(byte[] b)
-        {
-            string str = string.Empty;
-            foreach(byte x in b) { str += string.Format("{0:x2}", x);  }
-            return str;
-        }
-
-        void Start()
-        {
-            DefaultCryptoTest();
-        }
+        void Start() => DefaultCryptoTest();
 
         private void DefaultCryptoTest()
         {
             alice = new();
             bob = new();
 
-            Debug.Log($"Pubkey Alice: {Hex(alice.PublicKey)}");
-            Debug.Log($"Pubkey Bob  : {Hex(bob.PublicKey)}");
+            Debug.Log($"Alice SHA256 fingerprint: {alice}");
+            Debug.Log($"Alice short Base64 fingerprint: {alice.ToString(Crypto.FP_Base64_10)}");
+            Debug.Log($"Alice four words fingerprint: {alice.ToString(Crypto.FP_Dice_4)}");
 
-
-            EncryptTest("This is the first message");
+            EqualityTest();
 
             CopyTest();
 
-            UserID testuser = new("Google", "6785874", null);
+            EncryptTest("This is the first message");
+
+            UserID testuser = new(alice.Fingerprint, null);
 
             EncryptStructTest(testuser);
 
@@ -50,6 +43,22 @@ namespace Arteranos
             SignTest("This is the signed message");
         }
 
+        private void EqualityTest()
+        {
+            Crypto bobComplete = new(bob.Export(true));
+
+            Crypto bobPubOnly = new(bob.Export(false));
+
+            if(bob != bobComplete)
+                Debug.Log("FAILED: Equality (with complete key)");
+
+            if(bob != bobPubOnly)
+                Debug.Log("FAILED: Equality (with public-only key)");
+
+            if(bob == alice)
+                Debug.Log("FAILED: Equality negative test");
+
+        }
         private void CopyTest()
         {
             // Key is supposed to be complete
@@ -70,7 +79,7 @@ namespace Arteranos
                 bob3.Decrypt(p1, out string nothing);
                 Debug.LogError($"FAILED: Decrypted message with copied key (-)");
             }
-            catch(System.Exception)
+            catch(Exception)
             {
                 // Debug.Log("Expected: Caught exception due to failed decryption");
             }
@@ -93,7 +102,7 @@ namespace Arteranos
                 bob.Decrypt(p, out string notDecryptedMessage);
                 Debug.LogError($"FAILED: Decrypted message (-)");
             }
-            catch(System.Exception)
+            catch(Exception)
             {
                 // Debug.Log("Expected: Caught exception due to failed decryption");
             }

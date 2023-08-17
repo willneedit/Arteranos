@@ -12,21 +12,23 @@ namespace Arteranos.Core
     public class CSPRSAKey : IAsymmetricKey, IKeyWrapKey, ISignKey
     {
         public KeyType KeyType => KeyType.RSA;
-        public ProviderType ProviderType => ProviderType.CSP;
-        public byte[] PublicKey => rsaKey.ExportCspBlob(false);
+        public byte[] PublicKey => publicKey;
         public byte[] ExportPrivateKey() => rsaKey.ExportCspBlob(true);
 
         private readonly RSACryptoServiceProvider rsaKey;
+        private readonly byte[] publicKey;
 
         public CSPRSAKey()
         {
             rsaKey = new();
+            publicKey = rsaKey.ExportCspBlob(false);
         }
 
         public CSPRSAKey(byte[] exportedKey)
         {
             rsaKey = new();
             rsaKey.ImportCspBlob(exportedKey);
+            publicKey = rsaKey.ExportCspBlob(false);
         }
 
         public void Dispose() => rsaKey.Dispose();

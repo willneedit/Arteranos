@@ -12,14 +12,8 @@ namespace Arteranos.Core
     public enum KeyType
     {
         RSA = 0,
-        EC = 1
-    }
-
-    public enum ProviderType
-    {
-        CSP = 0,
-        CNG = 1,
-        OpenSSL = 2
+        ECDH,
+        ECDSA
     }
 
     /// <summary>
@@ -28,7 +22,6 @@ namespace Arteranos.Core
     internal interface IAsymmetricKey : IDisposable
     {
         public KeyType KeyType { get; }
-        public ProviderType ProviderType { get; }
 
         //public IAsymmetricKey Create();
         //public IAsymmetricKey Create(byte[] exportedPrivateKey);
@@ -38,7 +31,7 @@ namespace Arteranos.Core
     }
 
     /// <summary>
-    /// Provides functions for wrapping keys
+    /// Provides functions for wrapping keys with this key
     /// </summary>
     internal interface IKeyWrapKey
     {
