@@ -9,9 +9,9 @@ using System;
 
 namespace Arteranos.Core
 {
-    public enum KeyType
+    public enum KeyType : ushort
     {
-        RSA = 0,
+        RSA = 1,
         ECDH,
         ECDSA
     }

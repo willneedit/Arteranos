@@ -8,7 +8,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -19,6 +18,26 @@ using AsymmetricKey = Arteranos.Core.CSPRSAKey;
 
 namespace Arteranos.Core
 {
+    // Needed for the distictiveness of the legacy key blobs in the future
+    // wincrypt.h, BLOBHEADER
+    internal struct CspKeyBlobHeader
+    {
+        public byte type;       // 0: 0x6 or 0x7 (public or private keys)
+        public byte version;    // 1: always 2 (in this scope)
+        public ushort reserved; // 2: always 0
+        public uint keyAlg;     // 4: ALGID_KEY_SIGN (0xa4)
+        public ulong magic;     // 8: "RSA1" or "RSA2"
+                                // 12: 
+    }
+
+    internal struct OurKeyBlobHeader
+    {
+        public byte type;       // 0: Same as with CspKeyBlobHeader
+        public byte version;    // 1: 0x80 (or higher - unsigned)
+        public KeyType keyType; // 2: As seen in Interfaces.cs
+                                // 4: 
+    }
+
     public struct CryptPacket
     {
         public byte[] iv;
