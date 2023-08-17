@@ -17,6 +17,7 @@ using Version = Arteranos.Core.Version;
 using Random = UnityEngine.Random;
 using System.Collections;
 using System.Linq;
+using Arteranos.UI;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-authenticators
@@ -62,6 +63,7 @@ namespace Arteranos.Services
             public HttpStatusCode status;
             public string message;
             public ServerSettingsJSON ServerSettings;
+            public byte[] ClientPubKeySig;
         }
 
         #endregion
@@ -157,7 +159,7 @@ namespace Arteranos.Services
         public override void OnServerAuthenticate(NetworkConnectionToClient conn) 
         {
             // Flooded. Too many login attempts at the same time.
-            if(ChallengeList.Count > 2000)
+            if(ChallengeList.Count > 12000)
             {
                 Debug.LogWarning($"Login attempt flood: Discarding connection from {conn.address}");
                 // conn.Disconnect();
@@ -168,11 +170,11 @@ namespace Arteranos.Services
             while(ChallengeList.TryGetValue(sequence, out _))
                 sequence = Random.Range(0, 1000000);
 
-            // Allow ten seconds between the greeting message and the client's reaction.
+            // Allow sixty seconds between the greeting message and the client's reaction.
             ChallengeListEntry entry = new()
             {
                 challenge = GetChallengeBytes(32),
-                time = DateTime.Now + TimeSpan.FromSeconds(10),
+                time = DateTime.Now + TimeSpan.FromSeconds(60),
             };
 
             // Take the first step to authenticate.
@@ -275,12 +277,15 @@ namespace Arteranos.Services
                     status = HttpStatusCode.OK,
                     message = "OK",
                 };
+
+                // Add the server settings and the signature of the client's public key.
+                ss.Sign(msg.ClientPublicKey, out authResponseMessage.ClientPubKeySig);
+                authResponseMessage.ServerSettings = SettingsManager.Server.Strip();
             }
 
             // Anyway, expire the thallenge.
             ChallengeList.Remove(msg.SequenceNumber);
 
-            authResponseMessage.ServerSettings = SettingsManager.Server.Strip();
 
             conn.Send(authResponseMessage);
 
@@ -314,9 +319,71 @@ namespace Arteranos.Services
         /// <param name="msg">Self explanatory</param>
         private void OnAuthGreetingMessage(AuthGreetingMessage msg)
         {
+            string address = NetworkClient.connection.address;
+            Debug.Log($"[Client] Server address: {address}");
             Debug.Log($"[Client] Server name   : {msg.ServerName}");
             Debug.Log($"[Client] Server version: {msg.ServerVersion.Full}");
 
+            ClientSettings cs = SettingsManager.Client;
+
+            if(!cs.ServerKeys.TryGetValue(address, out byte[] pubKey))
+            {
+                // New server encountered. Yay!
+                cs.ServerKeys.Add(address, msg.ServerPublicKey);
+                SubmitAuthRequest(msg);
+                cs.SaveSettings();
+                return;
+            }
+            else if(msg.ServerPublicKey.SequenceEqual(pubKey))
+            {
+                // Known server, everything is okay.
+                SubmitAuthRequest(msg);
+                return;
+            }
+            else
+            {
+                // Something is very, very wrong....!
+                IDialogUI dialog = DialogUIFactory.New();
+
+                dialog.Text =
+                    "!! SERVER KEY CHANGED !!\n\n" +
+                    "Maybe someone is doing something\n" +
+                    "very nasty!";
+
+                dialog.Buttons = new[]
+                {
+                    "Go offline",
+                    "Accept once",
+                    "Accept"
+                };
+
+                dialog.OnDialogDone += (rc) => OnHostKeyChangedResponse(rc, msg);
+            }
+        }
+
+        private void OnHostKeyChangedResponse(int rc, AuthGreetingMessage msg)
+        {
+            if(rc == 0)
+            {
+                ClientReject();
+                return;
+            }
+
+            if(rc == 2)
+            {
+                ClientSettings cs = SettingsManager.Client;
+                string address = NetworkClient.connection.address;
+
+                cs.ServerKeys.Remove(address);
+                cs.ServerKeys.Add(address, msg.ServerPublicKey);
+                cs.SaveSettings();
+            }
+
+            SubmitAuthRequest(msg);
+        }
+
+        private static void SubmitAuthRequest(AuthGreetingMessage msg)
+        {
             ClientSettings cs = SettingsManager.Client;
 
             cs.Sign(msg.ClientChallenge, out byte[] response);
@@ -348,7 +415,7 @@ namespace Arteranos.Services
         {
             if(msg.status != HttpStatusCode.OK)
             {
-                UI.IDialogUI dialog = UI.DialogUIFactory.New();
+                IDialogUI dialog = DialogUIFactory.New();
 
                 dialog.Buttons = new string[] { "OK" };
                 dialog.Text = $"Cannot connect.\n\nServer says:\n{msg.message}";
