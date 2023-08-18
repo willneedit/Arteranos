@@ -388,7 +388,7 @@ namespace Arteranos.Core
         // ---------------------------------------------------------------
         #region Social States
 
-        public void SaveSocialStates(UserID userID, string nickname, int state)
+        public void SaveSocialStates(UserID userID, int state)
         {
             // It _should_ be zero or exactly one entries to update
             SocialListEntryJSON[] q = GetSocialList(userID).ToArray();
@@ -423,7 +423,7 @@ namespace Arteranos.Core
                    select entry;
         }
 
-        public void UpdateSocialListEntry(UserID userID, int statusBit, bool set, string Nickname = null)
+        public void UpdateSocialListEntry(UserID userID, int statusBit, bool set)
         {
             IEnumerable<SocialListEntryJSON> q = GetSocialList(userID);
             int state = SocialState.None;
@@ -437,7 +437,7 @@ namespace Arteranos.Core
             else
                 state &= ~statusBit;
 
-            SaveSocialStates(userID, Nickname, state);
+            SaveSocialStates(userID, state);
         }
 
         #endregion

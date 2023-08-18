@@ -6,13 +6,11 @@ using Mirror;
 
 using Arteranos.Services;
 using Arteranos.Core;
-using Arteranos.Audio;
 using System;
 using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
 using Arteranos.Social;
-using System.Linq;
 
 namespace Arteranos.Avatar
 {
@@ -54,8 +52,7 @@ namespace Arteranos.Avatar
 
         public string Nickname
         {
-            get => m_strings.ContainsKey(AVKeys.Nickname) ? m_strings[AVKeys.Nickname] : null;
-            private set => CmdPropagateString(AVKeys.Nickname, value);
+            get => m_userID;
         }
 
         public int AppearanceStatus
@@ -232,7 +229,6 @@ namespace Arteranos.Avatar
             if(isOwned)
             {
                 AvatarURL = cs.AvatarURL;
-                Nickname = cs.Me.Nickname;
 
                 UserID = new(cs.UserPublicKey, cs.Me.Nickname);
             }

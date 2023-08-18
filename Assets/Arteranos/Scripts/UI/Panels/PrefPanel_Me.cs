@@ -46,8 +46,8 @@ namespace Arteranos.UI
             }
 
             spn_OnlineStatus.OnChanged += OnVisibilityChanged;
-            txt_Nickname.onValueChanged.AddListener(OnNicknameChanged);
-            txt_AvatarURL.onValueChanged.AddListener(OnAvatarURLChanged);
+            txt_Nickname.onValueChanged.AddListener((string current) => dirty = true);
+            txt_AvatarURL.onValueChanged.AddListener((string current) => dirty = true);
 
             btn_CreateAvatar.onClick.AddListener(OnCreateAvatarClicked);
             btn_AvatarGallery.onClick.AddListener(OnAvatarGalleryClicked);
@@ -94,11 +94,6 @@ namespace Arteranos.UI
             if(dirty) cs?.SaveSettings();
             dirty = false;
         }
-
-
-        private void OnAvatarURLChanged(string current) => dirty = true;
-
-        private void OnNicknameChanged(string current) => dirty = true;
 
         private void OnVisibilityChanged(int old, bool current)
         {

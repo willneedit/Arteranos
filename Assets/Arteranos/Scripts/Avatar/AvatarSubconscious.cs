@@ -195,7 +195,6 @@ namespace Arteranos.Avatar
         private void SaveSocialState(IAvatarBrain receiver, UserID userID)
         {
             SettingsManager.Client.SaveSocialStates(userID,
-                receiver?.Nickname ?? "<unknown>",
                 SocialMemory[userID]);
         }
 
