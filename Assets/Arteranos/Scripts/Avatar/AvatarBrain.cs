@@ -23,8 +23,7 @@ namespace Arteranos.Avatar
         AvatarURL,
         CurrentWorld,
         Nickname,
-        NetAppearanceStatus,
-        PublicKey
+        NetAppearanceStatus
     }
 
     public class AvatarBrain : NetworkBehaviour, IAvatarBrain
@@ -51,12 +50,6 @@ namespace Arteranos.Avatar
         {
             get => m_userID;
             private set => CmdPropagateUserID(value);
-        }
-
-        public byte[] PublicKey
-        {
-            get => m_blobs[AVKeys.PublicKey];
-            private set => CmdPropagateBlob(AVKeys.PublicKey, value);
         }
 
         public string Nickname
@@ -240,9 +233,8 @@ namespace Arteranos.Avatar
             {
                 AvatarURL = cs.AvatarURL;
                 Nickname = cs.Me.Nickname;
-                PublicKey = cs.UserPublicKey;
 
-                UserID = new(cs.UserPublicKey);
+                UserID = new(cs.UserPublicKey, cs.Me.Nickname);
             }
         }
 
@@ -333,17 +325,13 @@ namespace Arteranos.Avatar
 
         private void OnMBlobsChanged(SyncIDictionary<AVKeys, byte[]>.Operation op, AVKeys key, byte[] value)
         {
-            switch(key)
-            {
-                case AVKeys.PublicKey:
-                    Subconscious.ReadyState = AvatarSubconscious.READY_CRYPTO;
-                    break;
-            }
         }
 
         private void OnUserIDChanged(UserID _1, UserID _2)
-            => Subconscious.ReadyState = AvatarSubconscious.READY_USERID;
-
+        {
+            Subconscious.ReadyState = AvatarSubconscious.READY_USERID;
+            Subconscious.ReadyState = AvatarSubconscious.READY_CRYPTO;
+        }
 
         [Command]
         private void CmdPropagateInt(AVKeys key, int value) => m_ints[key] = value;

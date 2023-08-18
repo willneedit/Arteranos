@@ -34,7 +34,7 @@ namespace Arteranos
 
             EncryptTest("This is the first message");
 
-            UserID testuser = new(alice.Fingerprint);
+            UserID testuser = new(alice.PublicKey, "Alice");
 
             EncryptStructTest(testuser);
 
@@ -117,6 +117,10 @@ namespace Arteranos
 
             if(userID != userID1)
                 Debug.LogError($"FAILED: Decrypted message is garbled - supposed: {userID1}");
+
+            // Nickname is irrelevent for the comparison
+            if(userID.Nickname != userID1.Nickname)
+                Debug.LogError($"FAILED: Nickname lost in transmission");
 
         }
 

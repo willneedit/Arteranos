@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Text;
-using System.Security.Cryptography;
-using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,30 +6,36 @@ namespace Arteranos.Core
 {
     public class UserID : IEquatable<UserID>
     {
-        public byte[] Hash = null;
-
         // Has to be there, for serialization.
+        public byte[] PublicKey = null;
+        public string Nickname = null;
+
         public UserID()
         {
 
         }
 
-        public UserID(byte[] Hash)
+        public UserID(byte[] PublicKey, string Nickname)
         {
-            this.Hash = Hash;
+            this.PublicKey = PublicKey;
+            this.Nickname = Nickname;
         }
 
         public bool Equals(UserID other)
         {
             if(other == null) return false;
 
-            return Hash.SequenceEqual(other.Hash);
+            return PublicKey.SequenceEqual(other.PublicKey);
         }
+
+        public static implicit operator byte[](UserID userID) => userID.PublicKey;
+
+        public static implicit operator string(UserID userID) => userID.Nickname;
 
         public override string ToString()
         {
             string hashString = string.Empty;
-            foreach(byte x in Hash) hashString += String.Format("{0:x2}", x);
+            foreach(byte x in PublicKey) hashString += String.Format("{0:x2}", x);
             return hashString;
         }
 
@@ -41,7 +43,7 @@ namespace Arteranos.Core
         public override int GetHashCode()
         {
             HashCode hc = new();
-            foreach(byte b in Hash) hc.Add(b);
+            foreach(byte b in PublicKey) hc.Add(b);
             return hc.ToHashCode();
         }
 

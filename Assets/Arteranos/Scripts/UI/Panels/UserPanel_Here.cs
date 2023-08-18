@@ -31,7 +31,6 @@ namespace Arteranos.UI
                 list[user.UserID] = new SocialListEntryJSON()
                 {
                     UserID = user.UserID,
-                    Nickname = user.Nickname,
                     State = SocialState.None,
                 };
             }

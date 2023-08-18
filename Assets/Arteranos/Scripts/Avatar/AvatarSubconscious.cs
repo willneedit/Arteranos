@@ -121,7 +121,7 @@ namespace Arteranos.Avatar
 
         private void TransmitTextMessage(GameObject receiverGO, string text)
         {
-            Crypto.Encrypt(text, receiverGO.GetComponent<IAvatarBrain>().PublicKey, out CryptPacket p);
+            Crypto.Encrypt(text, receiverGO.GetComponent<IAvatarBrain>().UserID, out CryptPacket p);
             CmdTransmitTextMessage(receiverGO, p);
         }
 

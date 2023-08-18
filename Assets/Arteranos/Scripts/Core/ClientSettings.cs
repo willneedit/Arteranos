@@ -161,9 +161,6 @@ namespace Arteranos.Core
 
     public class SocialListEntryJSON
     {
-        // The user's nickname, at the time of entry or update
-        public virtual string Nickname { get; set; } = null;
-
         // The user's ID, global for friends, scoped otherwise
         public virtual UserID UserID { get; set; } = null;
 
@@ -402,7 +399,6 @@ namespace Arteranos.Core
             {
                 Me.SocialList.Add(new()
                 {
-                    Nickname = nickname,
                     UserID = userID,
                     State = state
                 });
@@ -434,11 +430,6 @@ namespace Arteranos.Core
             if(q.Count() > 0)
             {
                 state = q.First().State;
-                Nickname ??= q.First().Nickname;
-            }
-            else
-            {
-                Nickname ??= "(unknown)";
             }
 
             if(set)

@@ -54,7 +54,7 @@ namespace Arteranos.Avatar
 
         public IAvatarLoader Body => GetComponent<IAvatarLoader>();
 
-        public UserID UserID => new(UserHash);
+        public UserID UserID => new(UserHash, Nickname);
 
         public byte[] PublicKey { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

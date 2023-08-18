@@ -30,18 +30,16 @@ namespace Arteranos.UI
         private HoverButton btn_Unblock= null; // Unblock user
 
         public UserID targetUserID = null;
-        public string Nickname = null;
 
         private IAvatarBrain Me = null;
         private ClientSettings cs = null;
 
-        public static UserListItem New(Transform parent, UserID targetUserID, string Nickname)
+        public static UserListItem New(Transform parent, UserID targetUserID)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/UserListItem"));
             go.transform.SetParent(parent, false);
             UserListItem UserListItem = go.GetComponent<UserListItem>();
             UserListItem.targetUserID = targetUserID;
-            UserListItem.Nickname = Nickname;
             return UserListItem;
         }
 
@@ -67,7 +65,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            lbl_caption.text = Nickname;
+            lbl_caption.text = targetUserID;
         }
 
         private void Update()
@@ -100,7 +98,7 @@ namespace Arteranos.UI
                 return;
             }
 
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Friend_offered, true, Nickname);
+            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Friend_offered, true);
         }
 
         private void OnDelFriendButtonClicked()
@@ -112,7 +110,7 @@ namespace Arteranos.UI
                 return;
             }
 
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Friend_offered, false, Nickname);
+            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Friend_offered, false);
         }
 
         private void OnBlockButtonClicked()
@@ -124,7 +122,7 @@ namespace Arteranos.UI
                 return;
             }
 
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Blocked, true, Nickname);
+            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Blocked, true);
         }
 
         private void OnUnblockButtonClicked()
@@ -135,7 +133,7 @@ namespace Arteranos.UI
                 Me.BlockUser(targetUser, false);
                 return;
             }
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Blocked, false, Nickname);
+            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Blocked, false);
         }
     }
 }

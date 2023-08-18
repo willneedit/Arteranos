@@ -32,7 +32,7 @@ namespace Arteranos.UI
             if(cs == null) return;
 
             foreach(SocialListEntryJSON entry in GetSocialListTab())
-                UserListItem.New(lvc_UserList.transform, entry.UserID, entry.Nickname);
+                UserListItem.New(lvc_UserList.transform, entry.UserID);
         }
 
         protected override void OnDisable()
