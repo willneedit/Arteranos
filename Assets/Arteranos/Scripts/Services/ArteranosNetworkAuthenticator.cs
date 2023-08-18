@@ -346,14 +346,17 @@ namespace Arteranos.Services
                 IDialogUI dialog = DialogUIFactory.New();
 
                 dialog.Text =
-                    "!! SERVER KEY CHANGED !!\n\n" +
-                    "Maybe someone is doing something\n" +
-                    "very nasty!";
+                    "!!! SERVER KEY CHANGED !!!\n\n" +
+                    "It's possible that someone is doing\n" +
+                    "something very nasty!\n\n" +
+                    "Or, the server's adminitrator being\n" +
+                    "careless about his machine.\n\n"+
+                    "Only accept it if you're really,\n" +
+                    "absolutely positive, sure about it!\n\n";
 
                 dialog.Buttons = new[]
                 {
                     "Go offline",
-                    "Accept once",
                     "Accept"
                 };
 
@@ -369,15 +372,12 @@ namespace Arteranos.Services
                 return;
             }
 
-            if(rc == 2)
-            {
-                ClientSettings cs = SettingsManager.Client;
-                string address = NetworkClient.connection.address;
+            ClientSettings cs = SettingsManager.Client;
+            string address = NetworkClient.connection.address;
 
-                cs.ServerKeys.Remove(address);
-                cs.ServerKeys.Add(address, msg.ServerPublicKey);
-                cs.SaveSettings();
-            }
+            cs.ServerKeys.Remove(address);
+            cs.ServerKeys.Add(address, msg.ServerPublicKey);
+            cs.SaveSettings();
 
             SubmitAuthRequest(msg);
         }
