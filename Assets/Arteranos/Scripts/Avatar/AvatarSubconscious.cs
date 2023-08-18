@@ -46,7 +46,7 @@ namespace Arteranos.Avatar
         private readonly Dictionary<UserID, int> SocialMemory = new();
 
         private IAvatarBrain Brain = null;
-        private Crypto crypto = null;
+        private readonly Crypto crypto = null;
 
         private int m_ReadyState = 0;
 
@@ -63,11 +63,6 @@ namespace Arteranos.Avatar
             base.OnStartClient();
 
             ReadyStateChanged += OnReadyStateChanged;
-
-            // Initialize the crypto module and distribute the public key
-            crypto = new();
-
-            Brain.PublicKey = crypto.PublicKey;
 
             // Initialize the filtered friend (and shit) list
             if(isOwned)
@@ -194,38 +189,6 @@ namespace Arteranos.Avatar
         }
         #endregion
         // ---------------------------------------------------------------
-        #region Global UserID transmission
-        private void TransmitGlobalUserID(GameObject receiverGO, UserID globalUserID)
-        {
-            if(globalUserID.ServerName != null) throw new ArgumentException("Not a global userID");
-            Crypto.Encrypt(globalUserID,
-                receiverGO.GetComponent<IAvatarBrain>().PublicKey,
-                out CryptPacket p);
-            CmdTransmitGlobalUserID(receiverGO, p);
-        }
-
-        [Command]
-        private void CmdTransmitGlobalUserID(GameObject receiverGO, CryptPacket p) 
-            => GetSC(receiverGO).TargetReceiveGlobalUserID(gameObject, p);
-
-        [TargetRpc]
-        private void TargetReceiveGlobalUserID(GameObject senderGO, CryptPacket p)
-        {
-            crypto.Decrypt(p, out UserID globalUserID);
-            ReceiveGlobalUserID(senderGO, globalUserID);
-        }
-
-        private void ReceiveGlobalUserID(GameObject senderGO, UserID globalUserID)
-        {
-            if(!isOwned) throw new Exception("Not owner");
-
-            IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
-            if(sender.UserID != globalUserID.Derive()) throw new Exception("Received global User ID goesn't match to the sender's -- possible MITM attack?");
-            Brain.LogDebug($"{sender.Nickname}'s UserID was updated to global UserID {globalUserID}");
-            SettingsManager.Client.UpdateToGlobalUserID(globalUserID);
-        }
-        #endregion
-        // ---------------------------------------------------------------
         #endregion
         // ---------------------------------------------------------------
         #region Social State handling
@@ -269,11 +232,11 @@ namespace Arteranos.Avatar
 
             // Copy users with the global UserIDs and the scoped UserIDs matching this server
             // Note, both current and logged-out users!
-            IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetFilteredSocialList(null);
+            IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetSocialList(null);
 
             // But, derive the global UserIDs to the scoped UserIDs.
             foreach(SocialListEntryJSON item in q)
-                ReloadSocialState(item.UserID.Derive(), item.State);
+                ReloadSocialState(item.UserID, item.State);
         }
 
         #endregion
@@ -282,7 +245,6 @@ namespace Arteranos.Avatar
 
         public void AnnounceArrival(UserID userID)
         {
-            userID = userID.Derive();
             int state = SocialMemory.TryGetValue(userID, out int v) ? v : SocialState.None;
 
             ReloadSocialState(userID, state);
@@ -301,16 +263,6 @@ namespace Arteranos.Avatar
 
         public void SendTextMessage(IAvatarBrain receiver, string text)
             => TransmitTextMessage(receiver.gameObject, text);
-
-        public void AttemptFriendNegotiation(IAvatarBrain receiver)
-        {
-            bool result = IsMutualFriends(receiver);
-
-            if(!result) return;
-
-            // But, I have to take the first step....
-            TransmitGlobalUserID(receiver.gameObject, SettingsManager.Client.UserID);
-        }
 
         public bool IsMutualFriends(IAvatarBrain receiver)
         {

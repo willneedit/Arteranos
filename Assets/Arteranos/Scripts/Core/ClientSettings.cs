@@ -327,10 +327,6 @@ namespace Arteranos.Core
         public event Action<UserHUDSettingsJSON> OnUserHUDSettingsChanged;
 
         [JsonIgnore]
-        public UserID UserID { get; private set; } = null;
-
-
-        [JsonIgnore]
         public string AvatarURL
         {
             get => Me.CurrentAvatar.AvatarURL;
@@ -389,6 +385,8 @@ namespace Arteranos.Core
 
         public void Sign(byte[] data, out byte[] signature) => Crypto.Sign(data, out signature);
 
+        public string GetFingerprint(string fmt = null) => Crypto.ToString(fmt);
+
         #endregion
         // ---------------------------------------------------------------
         #region Social States
@@ -398,14 +396,6 @@ namespace Arteranos.Core
             // It _should_ be zero or exactly one entries to update
             SocialListEntryJSON[] q = GetSocialList(userID).ToArray();
 
-            // If there's a global UserID lurking around, find it.
-            SocialListEntryJSON[] globalq = (from entry in q
-                                             where entry.UserID.ServerName == null
-                                             select entry).ToArray();
-
-            // Despite passing around a scoped UserID, keep the equivalent global UserID.
-            UserID enteredUserID = (globalq.Count() > 0) ? globalq[0].UserID : userID;
-
             for(int i = 0; i < q.Length; ++i) Me.SocialList.Remove(q[i]);
 
             if(state != SocialState.None)
@@ -413,43 +403,10 @@ namespace Arteranos.Core
                 Me.SocialList.Add(new()
                 {
                     Nickname = nickname,
-                    UserID = enteredUserID,
+                    UserID = userID,
                     State = state
                 });
             }
-
-            SaveSettings();
-        }
-
-        public void UpdateToGlobalUserID(UserID globalUserID)
-        {
-            // The global UserID is considered equal to all of the scoped UserIDs, too.
-            SocialListEntryJSON[] q = GetSocialList(globalUserID).ToArray();
-
-            if(q.Count() > 0 && q[0].UserID.ServerName == null)
-            {
-                // No point proceeding.
-                Debug.Log($"There already is a global UserID");
-                return;
-            }
-
-            // That would mean that we have a shiny new global User ID? HOW?
-            string nickname = "<unknown>";
-            int aggregated = SocialState.None;
-
-            for(int i = 0; i < q.Length; ++i)
-            {
-                Me.SocialList.Remove(q[i]);
-                aggregated |= q[i].State;
-                nickname = q[i].Nickname;
-            }
-
-            Me.SocialList.Add(new()
-            {
-                Nickname = nickname,
-                UserID = globalUserID,
-                State = aggregated
-            });
 
             SaveSettings();
         }
@@ -472,7 +429,7 @@ namespace Arteranos.Core
 
         public void UpdateSocialListEntry(UserID userID, int statusBit, bool set, string Nickname = null)
         {
-            IEnumerable<SocialListEntryJSON> q = GetFilteredSocialList(userID);
+            IEnumerable<SocialListEntryJSON> q = GetSocialList(userID);
             int state = SocialState.None;
             if(q.Count() > 0)
             {
@@ -514,8 +471,6 @@ namespace Arteranos.Core
                 }
             }
 
-            UserID = new(Crypto.Fingerprint);
-
             return dirty;
         }
 
@@ -524,12 +479,8 @@ namespace Arteranos.Core
         /// </summary>
         /// <param name="userID">The userID</param>
         /// <returns>The scoped or even the global UserID's entry</returns>
-        public IEnumerable<SocialListEntryJSON> GetFilteredSocialList(UserID userID = null)
-        {
-            return GetSocialList(userID, (x) => 
-                x.UserID.ServerName == null
-                || x.UserID.ServerName == SettingsManager.CurrentServer?.Name);
-        }
+        [Obsolete]
+        public IEnumerable<SocialListEntryJSON> GetFilteredSocialList(UserID userID = null) => GetSocialList(userID, (x) => true);
 
         public void SaveSettings()
         {

@@ -56,7 +56,7 @@ namespace Arteranos.Avatar
         public byte[] PublicKey
         {
             get => m_blobs[AVKeys.PublicKey];
-            set => CmdPropagateBlob(AVKeys.PublicKey, value);
+            private set => CmdPropagateBlob(AVKeys.PublicKey, value);
         }
 
         public string Nickname
@@ -240,11 +240,9 @@ namespace Arteranos.Avatar
             {
                 AvatarURL = cs.AvatarURL;
                 Nickname = cs.Me.Nickname;
+                PublicKey = cs.UserPublicKey;
 
-                // Distribute the with the server's name derived hash to the server's user
-                // list, _not_ the original hash.
-                // Underived hashes are for close friends only.
-                UserID = new(cs.UserID.Hash, SettingsManager.CurrentServer.Name);
+                UserID = new(cs.UserPublicKey);
             }
         }
 
@@ -507,8 +505,6 @@ namespace Arteranos.Avatar
             bool them_blocked = (state & SocialState.Them_Blocked) != 0;
             receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocking, them_blocked);
             if(them_blocked) return;
-
-            Subconscious.AttemptFriendNegotiation(receiver);
         }
 
         public void SendTextMessage(IAvatarBrain receiver, string text)

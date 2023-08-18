@@ -8,21 +8,8 @@ using System.Linq;
 
 namespace Arteranos.Core
 {
-    /// <summary>
-    /// The user ID.
-    /// null ServerName means it's global, only for being distributed to friends, to be
-    /// recognizable across the metaverse.
-    /// non-null ServerName means it's scoped to a specific server.
-    /// </summary>
     public class UserID : IEquatable<UserID>
     {
-        // Maybe I have to invent a secret server key to fend off identity theft attacks
-        // just by copying the server's name?
-        //
-        // Reminds me of EvE Online: Using chinese letters to ward
-        // off undercover enemies flying under the radar by copying
-        // their ship's name to confuse allies.
-        public string ServerName = null;
         public byte[] Hash = null;
 
         // Has to be there, for serialization.
@@ -31,70 +18,21 @@ namespace Arteranos.Core
 
         }
 
-        public UserID(byte[] Hash, string ServerName = null)
+        public UserID(byte[] Hash)
         {
             this.Hash = Hash;
-            this.ServerName = null;
-
-            if(ServerName == null) return;
-
-            this.Hash = DeriveScopedUserHash(Hash, ServerName);
-            this.ServerName = ServerName;
-        }
-
-        private byte[] DeriveScopedUserHash(byte[] UserHash, string ServerName)
-        {
-            if(ServerName == null) return UserHash;
-
-            byte[] bytes = Encoding.UTF8.GetBytes(ServerName);
-
-            using IncrementalHash myHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-            myHash.AppendData(UserHash);
-            myHash.AppendData(Encoding.UTF8.GetBytes("_ServerNameDerivation_"));
-            myHash.AppendData(bytes);
-            return myHash.GetHashAndReset();
-        }
-
-        public UserID Derive(string ServerName)
-        {
-            if(this.ServerName != null && this.ServerName != ServerName)
-                return null;
-
-            if(this.ServerName == ServerName) return this;
-
-            return new UserID(Hash, ServerName);
-        }
-
-        public UserID Derive()
-        {
-            if(SettingsManager.CurrentServer?.Name == null)
-                throw new InvalidOperationException("Derive() without current server name (e.g. offline");
-
-            return Derive(SettingsManager.CurrentServer.Name);
         }
 
         public bool Equals(UserID other)
         {
             if(other == null) return false;
 
-            // If neccessary, derive the hash with the counterpart's Server name.
-            byte[] thisHash = (this.ServerName == null)
-                ? DeriveScopedUserHash(this.Hash, other.ServerName)
-                : this.Hash;
-
-            byte[] otherHash = (other.ServerName == null)
-                ? DeriveScopedUserHash(other.Hash, this.ServerName)
-                : other.Hash;
-
-            // And, compare.
-            return thisHash.SequenceEqual(otherHash);
+            return Hash.SequenceEqual(other.Hash);
         }
 
         public override string ToString()
         {
-            string hashString = (ServerName != null) 
-                ? $"{ServerName}:" 
-                : string.Empty;
+            string hashString = string.Empty;
             foreach(byte x in Hash) hashString += String.Format("{0:x2}", x);
             return hashString;
         }
@@ -103,7 +41,6 @@ namespace Arteranos.Core
         public override int GetHashCode()
         {
             HashCode hc = new();
-            if(ServerName != null) foreach(char c in ServerName) hc.Add(c);
             foreach(byte b in Hash) hc.Add(b);
             return hc.ToHashCode();
         }

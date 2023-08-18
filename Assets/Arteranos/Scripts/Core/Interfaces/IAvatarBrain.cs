@@ -24,7 +24,7 @@ namespace Arteranos.Avatar
         GameObject gameObject { get; }
         Transform transform { get; }
         UserID UserID { get; }
-        byte[] PublicKey { get; set; }
+        byte[] PublicKey { get; }
 
         event Action<string> OnAvatarChanged;
         event Action<int> OnAppearanceStatusChanged;

@@ -37,7 +37,7 @@ namespace Arteranos.UI
             }
 
             // Fill in the subset of the data in the social database.
-            foreach(SocialListEntryJSON entry in cs.GetFilteredSocialList())
+            foreach(SocialListEntryJSON entry in cs.GetSocialList())
             {
                 if(!list.ContainsKey(entry.UserID)) continue;
 

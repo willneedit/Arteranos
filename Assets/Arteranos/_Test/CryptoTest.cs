@@ -34,7 +34,7 @@ namespace Arteranos
 
             EncryptTest("This is the first message");
 
-            UserID testuser = new(alice.Fingerprint, null);
+            UserID testuser = new(alice.Fingerprint);
 
             EncryptStructTest(testuser);
 
