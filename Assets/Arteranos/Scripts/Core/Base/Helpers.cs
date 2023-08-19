@@ -483,7 +483,7 @@ namespace Arteranos.Social
 
         public static bool IsWAdmin(long state) => IsAnyState(state, World_admin | World_admin_asstnt);
 
-        public static bool isSAdmin(long state) => IsAnyState(state, Srv_admin | Srv_admin_asstnt);
+        public static bool IsSAdmin(long state) => IsAnyState(state, Srv_admin | Srv_admin_asstnt);
     }
     #endregion
     // -------------------------------------------------------------------

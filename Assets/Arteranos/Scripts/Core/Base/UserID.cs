@@ -23,7 +23,7 @@ namespace Arteranos.Core
 
         public bool Equals(UserID other)
         {
-            if(other == null) return false;
+            if(other?.PublicKey == null || PublicKey == null) return false;
 
             return PublicKey.SequenceEqual(other.PublicKey);
         }
