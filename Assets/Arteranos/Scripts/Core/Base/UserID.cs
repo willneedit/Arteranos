@@ -32,13 +32,6 @@ namespace Arteranos.Core
 
         public static implicit operator string(UserID userID) => userID.Nickname;
 
-        public override string ToString()
-        {
-            string hashString = string.Empty;
-            foreach(byte x in PublicKey) hashString += String.Format("{0:x2}", x);
-            return hashString;
-        }
-
         public override bool Equals(object obj) => Equals(obj as UserID);
         public override int GetHashCode()
         {
