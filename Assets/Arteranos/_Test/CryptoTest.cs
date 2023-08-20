@@ -25,8 +25,8 @@ namespace Arteranos
             bob = new();
 
             Debug.Log($"Alice SHA256 fingerprint: {alice}");
-            Debug.Log($"Alice short Base64 fingerprint: {alice.ToString(Crypto.FP_Base64_10)}");
-            Debug.Log($"Alice four words fingerprint: {alice.ToString(Crypto.FP_Dice_4)}");
+            Debug.Log($"Alice short Base64 fingerprint: {alice.ToString(CryptoHelpers.FP_Base64_10)}");
+            Debug.Log($"Alice four words fingerprint: {alice.ToString(CryptoHelpers.FP_Dice_4)}");
 
             EqualityTest();
 
