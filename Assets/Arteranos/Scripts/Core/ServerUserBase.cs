@@ -14,39 +14,6 @@ using System.Linq;
 
 namespace Arteranos.Core
 {
-    /// <summary>
-    /// Cut-down instance of BitArray, limited to 64 bits for optimization
-    /// </summary>
-    public class Bit64field
-    {
-        public virtual ulong Bits { get; set; }
-
-        public Bit64field(ulong bits = 0) 
-        {
-            this.Bits = bits; 
-        }
-
-        public static implicit operator ulong(Bit64field field) => field.Bits;
-
-        public override string ToString() => Bits.ToString();
-
-        public void Set(ulong bits, bool desired)
-        {
-            if(desired)
-            {
-                this.Bits |= bits;
-            }
-            else
-            {
-                this.Bits &= ~bits;
-            }
-        }
-
-        public bool IsAll(ulong bits) => (this.Bits & bits) == bits;
-
-        public bool IsAny(ulong bits) => (this.Bits & bits) != 0;
-    }
-
     public class UserState : Bit64field
     {
         // Just an ordinary everyday user.
@@ -110,30 +77,29 @@ namespace Arteranos.Core
         // User has been banned
         public const ulong Banned = ((ulong) 1 << 63);
 
-        public override string ToString() => base.ToString();
+        public static bool IsBanned(ulong field) => IsAny(field, Banned);
 
-        public override ulong Bits { get => base.Bits; set => base.Bits = value; }
+        public static bool IsWAdmin(ulong field) => IsAny(field, World_admin | World_admin_asstnt);
 
-        [JsonIgnore]
-        public bool IsBanned => IsAny(Banned);
-
-        [JsonIgnore]
-        public bool IsWAdmin => IsAny(World_admin | World_admin_asstnt);
-
-        [JsonIgnore]
-        public bool IsSAdmin => IsAny(Srv_admin | Srv_admin_asstnt);
-
-        public UserState(ulong init) : base(init) { }
-
+        public static bool IsSAdmin(ulong field) => IsAny(field, Srv_admin | Srv_admin_asstnt);
     }
 
     public struct ServerUserState
     {
         public UserID userID;
-        public UserState state;
+        public ulong userState;
         public string address;
         public string deviceUID;
         public string remarks;
+
+        [JsonIgnore]
+        public bool IsBanned => UserState.IsBanned(userState);
+
+        [JsonIgnore]
+        public bool IsWAdmin => UserState.IsWAdmin(userState);
+
+        [JsonIgnore]
+        public bool IsSAdmin => UserState.IsSAdmin(userState);
     }
 
     public class ServerUserBase
@@ -184,7 +150,7 @@ namespace Arteranos.Core
             AddUser(new ServerUserState()
             {
                 userID = new(cs.UserPublicKey, cs.Me.Nickname),
-                state = new UserState(UserState.Srv_admin),
+                userState = UserState.Srv_admin,
                 address = null,
                 deviceUID = null,
                 remarks = "Auto-generated root user"
