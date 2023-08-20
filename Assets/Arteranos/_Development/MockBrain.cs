@@ -9,8 +9,6 @@
 
 using Arteranos.Core;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Arteranos.Avatar
@@ -19,16 +17,9 @@ namespace Arteranos.Avatar
     {
         public string AvatarURL => "6394c1e69ef842b3a5112221";
 
-        public int ChatOwnID => 9999;
-
         public uint NetID => 9999;
 
-        public byte[] UserHash => new byte[] { 
-            0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff,
-            0xad, 0xea, 0xdb, 0xee, 0xab, 0xad, 0xf0, 0x0d, 0xca, 0xfe, 0xf0, 0x0d, 0xde, 0xad, 0xbe, 0xef
-        };
-
-        public string Nickname => "TI-99 4a";
+        public string Nickname { get => UserID; }
 
         public int AppearanceStatus { 
             get => m_NetMuteStatus;
@@ -54,9 +45,7 @@ namespace Arteranos.Avatar
 
         public IAvatarLoader Body => GetComponent<IAvatarLoader>();
 
-        public UserID UserID => new(UserHash, Nickname);
-
-        public byte[] PublicKey { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public UserID UserID { get; set; } = null;
 
         public event Action<string> OnAvatarChanged;
         public event Action<int> OnAppearanceStatusChanged;
@@ -66,6 +55,10 @@ namespace Arteranos.Avatar
         private void Start()
         {
             if(!isOwned) AvatarHitBoxFactory.New(this);
+
+            Crypto crypto = new();
+
+            UserID = new(crypto.PublicKey, "TI-99 4a");
         }
 
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)

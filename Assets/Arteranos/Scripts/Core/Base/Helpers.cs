@@ -336,10 +336,11 @@ namespace Arteranos.UI
 
             if(nameplate == null)
             {
-                go = Instantiate(
-                    Resources.Load<GameObject>("UI/InApp/Nameplate"),
-                    bearer.transform
-                    );
+                GameObject original = Resources.Load<GameObject>("UI/InApp/Nameplate");
+                original.SetActive(false);
+
+                go = Instantiate(original, bearer.transform);
+
                 nameplate = go.GetComponent<INameplateUI>();
             }
 

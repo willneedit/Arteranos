@@ -20,6 +20,7 @@ namespace Arteranos.UI
         public IAvatarBrain Bearer { get; set; } = null;
 
         [SerializeField] private TextMeshProUGUI lbl_Name = null;
+        [SerializeField] private TextMeshProUGUI lbl_Caption = null;
         [SerializeField] private Button btn_mute = null;
         [SerializeField] private Button btn_unmute = null;
         [SerializeField] private Button btn_friend_add = null;
@@ -44,6 +45,7 @@ namespace Arteranos.UI
             base.OnEnable();
 
             lbl_Name.text = GetLabelText();
+            lbl_Caption.text = GetCaptionText();
 
             Bearer.OnAppearanceStatusChanged += OnAppearanceStatusChanged;
             float fullHeight = Bearer.Body.FullHeight;
@@ -68,28 +70,28 @@ namespace Arteranos.UI
             transform.Rotate(aboutFace);
         }
 
-        private string GetLabelText()
-        {
-            string tagstr = null;
+        private string GetLabelText() => Bearer.Nickname;
 
+        private string GetCaptionText()
+        {
             int yourstate = XRControl.Me?.GetOwnState(Bearer) ?? SocialState.None;
 
             if(SocialState.IsState(yourstate,
                 SocialState.Own_Friend_offered | SocialState.Them_Friend_offered))
             {
-                tagstr = "Friend";
+                return "Friend";
             }
             else if(SocialState.IsState(yourstate, SocialState.Them_Friend_offered))
             {
-                tagstr = "Wants to be your friend";
+                return "Wants to be your friend";
+            }
+            else if(SocialState.IsState(yourstate, SocialState.Own_Friend_offered))
+            {
+                return "Friend request sent";
             }
 
-            //else if(SocialState.IsState(yourstate, SocialState.Own_Friend_offered))
-            //    tagstr = "Is still indecisive";
-
-            return tagstr == null
-                ? Bearer.Nickname
-                : $"{Bearer.Nickname}\n{tagstr}";
+            // TODO Finish the username preference setting
+            return CryptoHelpers.ToString(CryptoHelpers.FP_Dice_4, Bearer.UserID);
         }
 
         private void OnAppearanceStatusChanged(int status)
