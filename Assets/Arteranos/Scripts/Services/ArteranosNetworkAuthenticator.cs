@@ -18,6 +18,8 @@ using Random = UnityEngine.Random;
 using System.Collections;
 using System.Linq;
 using Arteranos.UI;
+using static Arteranos.Services.ArteranosNetworkAuthenticator;
+using System.Collections.Concurrent;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-authenticators
@@ -84,6 +86,13 @@ namespace Arteranos.Services
             return challengeBytes;
         }
 
+        private void Update()
+        {
+            if(!ResponseQueue.TryDequeue(out ResponseQueueEntry e)) return;
+
+            EmitAuthResponse(e.conn, e.msg);
+        }
+
         #endregion
 
         #region Start & Stop
@@ -131,6 +140,14 @@ namespace Arteranos.Services
             public byte[] challenge;
             public DateTime time;
         }
+
+        internal struct ResponseQueueEntry
+        {
+            public NetworkConnectionToClient conn;
+            public AuthResponseMessage msg;
+        }
+
+        private readonly ConcurrentQueue<ResponseQueueEntry> ResponseQueue = new();
 
         private readonly Dictionary<int, ChallengeListEntry> ChallengeList = new();
 
@@ -286,7 +303,16 @@ namespace Arteranos.Services
             // Anyway, expire the thallenge.
             ChallengeList.Remove(msg.SequenceNumber);
 
+            // Hand the authentication response to send to the main thread
+            ResponseQueue.Enqueue(new()
+            {
+                conn = conn,
+                msg = authResponseMessage,
+            });
+        }
 
+        private void EmitAuthResponse(NetworkConnectionToClient conn, AuthResponseMessage authResponseMessage)
+        {
             conn.Send(authResponseMessage);
 
             bool accepted = authResponseMessage.status == HttpStatusCode.OK;
