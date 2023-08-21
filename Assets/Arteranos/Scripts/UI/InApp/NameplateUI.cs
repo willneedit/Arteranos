@@ -74,18 +74,15 @@ namespace Arteranos.UI
 
         private string GetCaptionText()
         {
-            int yourstate = XRControl.Me?.GetOwnState(Bearer) ?? SocialState.None;
-
-            if(SocialState.IsState(yourstate,
-                SocialState.Own_Friend_offered | SocialState.Them_Friend_offered))
+            if(SocialState.IsFriends(Bearer))
             {
                 return "Friend";
             }
-            else if(SocialState.IsState(yourstate, SocialState.Them_Friend_offered))
+            else if(SocialState.IsFriendOffered(Bearer))
             {
                 return "Wants to be your friend";
             }
-            else if(SocialState.IsState(yourstate, SocialState.Own_Friend_offered))
+            else if(SocialState.IsFriendRequested(Bearer))
             {
                 return "Friend request sent";
             }
@@ -96,11 +93,8 @@ namespace Arteranos.UI
 
         private void OnAppearanceStatusChanged(int status)
         {
-            // Adding friends is visible if it's not already in progress
-            int yourstate = XRControl.Me?.GetOwnState(Bearer) ?? SocialState.None;
-
-            bool friends = SocialState.IsState(yourstate, SocialState.Own_Friend_offered);
-            bool blocked = SocialState.IsState(yourstate, SocialState.Own_Blocked);
+            bool friends = SocialState.IsFriendRequested(Bearer);
+            bool blocked = SocialState.IsBlocked(Bearer);
 
             // No point of dealing with the blocked status - it isn't visible if it is blocked.
             btn_friend_add.gameObject.SetActive(!friends && !blocked);

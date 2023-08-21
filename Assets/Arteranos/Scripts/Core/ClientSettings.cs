@@ -423,19 +423,12 @@ namespace Arteranos.Core
                    select entry;
         }
 
-        public void UpdateSocialListEntry(UserID userID, int statusBit, bool set)
+        public void UpdateSocialListEntry(UserID userID, Func<int, int> modification)
         {
             IEnumerable<SocialListEntryJSON> q = GetSocialList(userID);
-            int state = SocialState.None;
-            if(q.Count() > 0)
-            {
-                state = q.First().State;
-            }
+            int state = (q.Count() > 0) ? q.First().State : SocialState.None;
 
-            if(set)
-                state |= statusBit;
-            else
-                state &= ~statusBit;
+            state = modification(state);
 
             SaveSocialStates(userID, state);
         }

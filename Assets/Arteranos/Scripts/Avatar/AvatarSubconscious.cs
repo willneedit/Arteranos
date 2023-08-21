@@ -46,7 +46,6 @@ namespace Arteranos.Avatar
         private readonly Dictionary<UserID, int> SocialMemory = new();
 
         private IAvatarBrain Brain = null;
-        private readonly Crypto crypto = null;
 
         private int m_ReadyState = 0;
 
@@ -71,8 +70,6 @@ namespace Arteranos.Avatar
 
         public override void OnStopClient()
         {
-            crypto.Dispose();
-
             ReadyStateChanged -= OnReadyStateChanged;
 
             base.OnStopClient();
@@ -132,7 +129,7 @@ namespace Arteranos.Avatar
         [TargetRpc]
         private void TargetReceiveTextMessage(GameObject senderGO, CryptPacket p)
         {
-            crypto.Decrypt(p, out string text);
+            SettingsManager.Client.Decrypt(p, out string text);
             ReceiveTextMessage(senderGO, text);
         }
 
@@ -148,7 +145,7 @@ namespace Arteranos.Avatar
             Brain.LogDebug($"Message from {sender.Nickname}: {text}");
 
             // "Well... Errr... You've blocked that user." -- Discord, paraphrased
-            if((GetOwnState(sender) & (SocialState.Own_Blocked | SocialState.Them_Blocked)) != 0)
+            if(SocialState.IsSomehowBlocked(GetOwnState(sender.UserID)))
                 return;
 
             Brain.ReceiveTextMessage(sender, text);
@@ -177,26 +174,22 @@ namespace Arteranos.Avatar
 
             UserID key = sender.UserID;
 
-            state = (state & SocialState.OWN_MASK) << SocialState.THEM_SHIFT;
-            int old = SocialMemory.TryGetValue(key, out int v) ? v : SocialState.None;
+            SocialMemory[key] = SocialState.ReflectSocialState(state, GetOwnState(key));
 
-            SocialMemory[key] = (old & SocialState.OWN_MASK) | state;
-            
             Brain.UpdateSSEffects(sender, SocialMemory[key]);
 
-            SaveSocialState(sender, key);
+            SaveSocialState(key);
 
         }
+
         #endregion
         // ---------------------------------------------------------------
         #endregion
         // ---------------------------------------------------------------
         #region Social State handling
-        private void SaveSocialState(IAvatarBrain receiver, UserID userID)
-        {
-            SettingsManager.Client.SaveSocialStates(userID,
-                SocialMemory[userID]);
-        }
+
+        private void SaveSocialState(UserID userID) 
+            => SettingsManager.Client.SaveSocialStates(userID, SocialMemory[userID]);
 
         private void ReloadSocialState(UserID userID, int state)
         {
@@ -207,22 +200,17 @@ namespace Arteranos.Avatar
             Brain.UpdateSSEffects(SearchUser(userID), state);
         }
 
-        private void UpdateSocialState(IAvatarBrain receiver, int state, bool set)
+        private void UpdateSocialState(IAvatarBrain receiver, int state)
         {
             UserID userID = receiver.UserID;
 
-            if(!SocialMemory.ContainsKey(userID)) SocialMemory[userID] = SocialState.None;
-
-            if(set)
-                SocialMemory[userID] |= state;
-            else
-                SocialMemory[userID] &= ~state;
+            SocialMemory[userID] = state;
 
             Brain.UpdateSSEffects(receiver, SocialMemory[userID]);
 
             CmdUpdateReflectiveSocialState(userID, SocialMemory[userID]);
 
-            SaveSocialState(receiver, userID);
+            SaveSocialState(userID);
         }
         public void InitializeSocialStates()
         {
@@ -242,41 +230,32 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Interface
 
-        public void AnnounceArrival(UserID userID)
-        {
-            int state = SocialMemory.TryGetValue(userID, out int v) ? v : SocialState.None;
-
-            ReloadSocialState(userID, state);
-        }
+        public void AnnounceArrival(UserID userID) 
+            => ReloadSocialState(userID, GetOwnState(userID));
 
         public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
-            => UpdateSocialState(receiver, SocialState.Own_Friend_offered, offering);
+        {
+            int state = GetOwnState(receiver.UserID);
+            SocialState.SetFriendState(ref state, offering);
+
+            UpdateSocialState(receiver, state);
+        }
 
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
         {
+            int state = GetOwnState(receiver.UserID);
             if(blocking)
-                UpdateSocialState(receiver, SocialState.Own_Friend_offered, false);
+                SocialState.SetFriendState(ref state, false);
 
-            UpdateSocialState(receiver, SocialState.Own_Blocked, blocking);
+            SocialState.SetBlockState(ref state, blocking);
+            UpdateSocialState(receiver, state);
         }
 
         public void SendTextMessage(IAvatarBrain receiver, string text)
             => TransmitTextMessage(receiver.gameObject, text);
 
-        public bool IsMutualFriends(IAvatarBrain receiver)
-        {
-            // "I love you, you love me, let us..." -- nope. Nope! NOPE!!
-            // Not that imbecile pink dinosaur !
-            int you = SocialMemory.TryGetValue(receiver.UserID, out int v1) ? v1 : SocialState.None;
-
-            bool result = SocialState.IsState(
-                you, SocialState.Own_Friend_offered | SocialState.Them_Friend_offered);
-            
-            return result;
-        }
-
-        public int GetOwnState(IAvatarBrain receiver)
-            => SocialMemory.TryGetValue(receiver.UserID, out int v) ? v : SocialState.None;
+        public int GetOwnState(UserID userID) 
+            => SocialMemory.TryGetValue(userID, out int v) ? v : SocialState.None;
 
         #endregion
         // ---------------------------------------------------------------

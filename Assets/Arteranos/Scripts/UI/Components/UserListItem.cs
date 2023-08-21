@@ -77,9 +77,9 @@ namespace Arteranos.UI
 
                 int currentState = (q.Count() > 0) ? q.First().State : SocialState.None;
 
-                bool friends = SocialState.IsState(currentState, SocialState.Own_Friend_offered);
+                bool friends = SocialState.IsFriendRequested(currentState);
 
-                bool blocked = SocialState.IsState(currentState, SocialState.Own_Blocked);
+                bool blocked = SocialState.IsBlocked(currentState);
 
                 btn_AddFriend.gameObject.SetActive(!friends && !blocked);
                 btn_DelFriend.gameObject.SetActive(friends && !blocked);
@@ -98,7 +98,12 @@ namespace Arteranos.UI
                 return;
             }
 
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Friend_offered, true);
+            cs.UpdateSocialListEntry(targetUserID, (x) =>
+            {
+                int state = x;
+                SocialState.SetFriendState(ref state, true);
+                return state;
+            });
         }
 
         private void OnDelFriendButtonClicked()
@@ -110,7 +115,12 @@ namespace Arteranos.UI
                 return;
             }
 
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Friend_offered, false);
+            cs.UpdateSocialListEntry(targetUserID, (x) =>
+            {
+                int state = x;
+                SocialState.SetFriendState(ref state, false);
+                return state;
+            });
         }
 
         private void OnBlockButtonClicked()
@@ -122,7 +132,12 @@ namespace Arteranos.UI
                 return;
             }
 
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Blocked, true);
+            cs.UpdateSocialListEntry(targetUserID, (x) =>
+            {
+                int state = x;
+                SocialState.SetBlockState(ref state, true);
+                return state;
+            });
         }
 
         private void OnUnblockButtonClicked()
@@ -133,7 +148,12 @@ namespace Arteranos.UI
                 Me.BlockUser(targetUser, false);
                 return;
             }
-            cs.UpdateSocialListEntry(targetUserID, SocialState.Own_Blocked, false);
+            cs.UpdateSocialListEntry(targetUserID, (x) =>
+            {
+                int state = x;
+                SocialState.SetBlockState(ref state, false);
+                return state;
+            });
         }
     }
 }

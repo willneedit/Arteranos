@@ -25,6 +25,6 @@ namespace Arteranos.UI
         }
 
         private bool IsFriends(SocialListEntryJSON arg)
-            => (arg.State & SocialState.Own_Blocked) == SocialState.Own_Blocked;
+            => SocialState.IsBlocked(arg.State);
     }
 }

@@ -99,7 +99,7 @@ namespace Arteranos.Avatar
         public void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered)
         {
             // Not for the desired sphere of influence
-            if(isFriend != Subconscious.IsMutualFriends(touchy)) return;
+            if(isFriend != SocialState.IsFriends(touchy)) return;
 
             touchy.SetAppearanceStatusBit(Avatar.AppearanceStatus.Bubbled, entered);
         }
@@ -481,12 +481,12 @@ namespace Arteranos.Avatar
             LogDebug($"I feel about {receiver.Nickname}: {state}");
 
             // You blocked him.
-            bool own_blocked = (state & SocialState.Own_Blocked) != 0;
+            bool own_blocked = SocialState.IsBlocked(state);
             receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocked, own_blocked);
             if(own_blocked) return;
 
             // Retaliatory blocking.
-            bool them_blocked = (state & SocialState.Them_Blocked) != 0;
+            bool them_blocked = SocialState.IsBeingBlocked(state);
             receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocking, them_blocked);
             if(them_blocked) return;
         }
@@ -500,7 +500,7 @@ namespace Arteranos.Avatar
         }
 
         public int GetOwnState(IAvatarBrain receiver)
-            => Subconscious.GetOwnState(receiver);
+            => Subconscious.GetOwnState(receiver.UserID);
         #endregion
         // ---------------------------------------------------------------
         #region Text message reception
