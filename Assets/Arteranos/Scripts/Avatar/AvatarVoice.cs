@@ -133,6 +133,12 @@ namespace Arteranos.Avatar
         {
             IAvatarBrain emitter = NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
 
+            if(emitter == null)
+            {
+                Debug.Log($"Received a voice packet from unknown client with NetID {voicePacket.senderNetID}");
+                return;
+            }
+
             // While the sound is heard by you, it has to be located at the sound source.
             emitter.gameObject.GetComponent<AvatarVoice>()
                               .ReceivedNetworkInput(voicePacket, IsMutedTo(emitter));

@@ -26,8 +26,9 @@ namespace Arteranos.UI
         public void NotifyTriggering(GameObject go, bool hit)
         {
             IHitBox hb = go.GetComponentInParent<IHitBox>();
-            
-            if(hb == null) return;
+
+            // UserID could be not yet established, in case you're lingering on the spawn point...
+            if(hb?.Brain?.UserID == null) return;
 
             coord.NotifyTrigger(hb.Brain, IsFriend, hit);
         }

@@ -20,7 +20,6 @@ namespace Arteranos.Avatar
         _ChatOwnID,
         AvatarURL,
         CurrentWorld,
-        Nickname,
         NetAppearanceStatus
     }
 
@@ -304,18 +303,6 @@ namespace Arteranos.Avatar
             {
                 case AVKeys.AvatarURL:
                     OnAvatarChanged?.Invoke(value); break;
-                case AVKeys.Nickname:
-                    if(isServer)
-                    {
-                        int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
-                        name = $"Avatar [{value}][connId={connId}, netId={netId}]";
-                    }
-                    else
-                    {
-                        name = $"Avatar [{value}][netId={netId}]";
-                    }
-
-                    break;
             }
         }
 
@@ -323,10 +310,20 @@ namespace Arteranos.Avatar
         {
         }
 
-        private void OnUserIDChanged(UserID _1, UserID _2)
+        private void OnUserIDChanged(UserID _1, UserID userID)
         {
             Subconscious.ReadyState = AvatarSubconscious.READY_USERID;
             Subconscious.ReadyState = AvatarSubconscious.READY_CRYPTO;
+
+            if(isServer)
+            {
+                int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
+                name = $"Avatar [{userID.Nickname}][connId={connId}, netId={netId}]";
+            }
+            else
+            {
+                name = $"Avatar [{userID.Nickname}][netId={netId}]";
+            }
         }
 
         [Command]
