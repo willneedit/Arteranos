@@ -73,7 +73,7 @@ namespace Arteranos.Core
 
         public byte[] Fingerprint { get => CryptoHelpers.GetFingerprint(Key.PublicKey); }
         public override string ToString() => ToString(CryptoHelpers.FP_SHA256);
-        public string ToString(string v) => CryptoHelpers.ToString(v, Fingerprint);
+        public string ToString(string v) => CryptoHelpers.ToString(v, Key.PublicKey);
 
         #endregion
 
