@@ -29,7 +29,7 @@ namespace Arteranos.Avatar
         event Action<int> OnAppearanceStatusChanged;
 
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
-        int GetOwnState(IAvatarBrain receiver);
+        ulong GetOwnState(IAvatarBrain receiver);
         void LogDebug(object message);
         void LogError(object message);
         void LogWarning(object message);
@@ -39,6 +39,6 @@ namespace Arteranos.Avatar
         void ReceiveTextMessage(IAvatarBrain sender, string text);
         void SendTextMessage(IAvatarBrain receiver, string text);
         void SetAppearanceStatusBit(int ASBit, bool set);
-        void UpdateSSEffects(IAvatarBrain receiver, int state);
+        void UpdateSSEffects(IAvatarBrain receiver, ulong state);
     }
 }

@@ -165,7 +165,7 @@ namespace Arteranos.Core
         public virtual UserID UserID { get; set; } = null;
 
         // ORed bits from Social.SocialState
-        public virtual int State { get; set; } = SocialState.None;
+        public virtual ulong State { get; set; } = SocialState.None;
     }
 
     public class ControlSettingsJSON
@@ -388,7 +388,7 @@ namespace Arteranos.Core
         // ---------------------------------------------------------------
         #region Social States
 
-        public void SaveSocialStates(UserID userID, int state)
+        public void SaveSocialStates(UserID userID, ulong state)
         {
             // It _should_ be zero or exactly one entries to update
             SocialListEntryJSON[] q = GetSocialList(userID).ToArray();
@@ -423,10 +423,10 @@ namespace Arteranos.Core
                    select entry;
         }
 
-        public void UpdateSocialListEntry(UserID userID, Func<int, int> modification)
+        public void UpdateSocialListEntry(UserID userID, Func<ulong, ulong> modification)
         {
             IEnumerable<SocialListEntryJSON> q = GetSocialList(userID);
-            int state = (q.Count() > 0) ? q.First().State : SocialState.None;
+            ulong state = (q.Count() > 0) ? q.First().State : SocialState.None;
 
             state = modification(state);
 

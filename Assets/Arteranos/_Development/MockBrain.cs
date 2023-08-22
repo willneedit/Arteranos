@@ -89,12 +89,12 @@ namespace Arteranos.Avatar
                 AppearanceStatus &= ~ASBit;
         }
 
-        public void UpdateSSEffects(IAvatarBrain receiver, int state)
+        public void UpdateSSEffects(IAvatarBrain receiver, ulong state)
         {
 
         }
 
-        public int GetOwnState(IAvatarBrain receiver) => 0;
+        public ulong GetOwnState(IAvatarBrain receiver) => 0;
 
         public void SendTextMessage(IAvatarBrain receiver, string text)
             => LogDebug($"To {receiver.Nickname}: {text}");

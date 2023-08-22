@@ -43,7 +43,7 @@ namespace Arteranos.Avatar
         public event Action<int, int> ReadyStateChanged;
 
         // The own ideas about the other users, and vice versa
-        private readonly Dictionary<UserID, int> SocialMemory = new();
+        private readonly Dictionary<UserID, ulong> SocialMemory = new();
 
         private IAvatarBrain Brain = null;
 
@@ -156,7 +156,7 @@ namespace Arteranos.Avatar
         #region Reflectice Social State distribution
 
         [Command]
-        private void CmdUpdateReflectiveSocialState(UserID userID, int state)
+        private void CmdUpdateReflectiveSocialState(UserID userID, ulong state)
         {
             GameObject receiverGO = SearchUser(userID)?.gameObject;
 
@@ -166,7 +166,7 @@ namespace Arteranos.Avatar
         }
 
         [TargetRpc]
-        private void TargetReceiveReflectiveSocialState(GameObject senderGO, int state)
+        private void TargetReceiveReflectiveSocialState(GameObject senderGO, ulong state)
         {
             if(!isOwned) throw new Exception("Not owner");
 
@@ -191,7 +191,7 @@ namespace Arteranos.Avatar
         private void SaveSocialState(UserID userID) 
             => SettingsManager.Client.SaveSocialStates(userID, SocialMemory[userID]);
 
-        private void ReloadSocialState(UserID userID, int state)
+        private void ReloadSocialState(UserID userID, ulong state)
         {
             SocialMemory[userID] = state;
 
@@ -200,7 +200,7 @@ namespace Arteranos.Avatar
             Brain.UpdateSSEffects(SearchUser(userID), state);
         }
 
-        private void UpdateSocialState(IAvatarBrain receiver, int state)
+        private void UpdateSocialState(IAvatarBrain receiver, ulong state)
         {
             UserID userID = receiver.UserID;
 
@@ -235,7 +235,7 @@ namespace Arteranos.Avatar
 
         public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
         {
-            int state = GetOwnState(receiver.UserID);
+            ulong state = GetOwnState(receiver.UserID);
             SocialState.SetFriendState(ref state, offering);
 
             UpdateSocialState(receiver, state);
@@ -243,7 +243,7 @@ namespace Arteranos.Avatar
 
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
         {
-            int state = GetOwnState(receiver.UserID);
+            ulong state = GetOwnState(receiver.UserID);
             if(blocking)
                 SocialState.SetFriendState(ref state, false);
 
@@ -254,8 +254,8 @@ namespace Arteranos.Avatar
         public void SendTextMessage(IAvatarBrain receiver, string text)
             => TransmitTextMessage(receiver.gameObject, text);
 
-        public int GetOwnState(UserID userID) 
-            => SocialMemory.TryGetValue(userID, out int v) ? v : SocialState.None;
+        public ulong GetOwnState(UserID userID) 
+            => SocialMemory.TryGetValue(userID, out ulong v) ? v : SocialState.None;
 
         #endregion
         // ---------------------------------------------------------------

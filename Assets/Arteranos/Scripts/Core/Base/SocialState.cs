@@ -6,6 +6,7 @@
  */
 
 using Arteranos.Avatar;
+using Arteranos.Core;
 using Arteranos.XR;
 
 namespace Arteranos.Social
@@ -14,85 +15,77 @@ namespace Arteranos.Social
     #region Social & User constants
     public static class SocialState
     {
-        public const int None = 0;
+        public const ulong None = 0;
 
         // You offered your friendship to the targeted user.
-        private const int Own_Friend_requested   = (1 << 0);
+        private const ulong Own_Friend_requested   = (1 << 0);
 
         // You blocked the targeted user.
-        private const int Own_Blocked            = (1 << 4);
+        private const ulong Own_Blocked            = (1 << 4);
 
         private const int THEM_SHIFT             = 16;
 
-        private const int OWN_MASK               = (1 << THEM_SHIFT) - 1;
+        private const ulong OWN_MASK               = (1 << THEM_SHIFT) - 1;
 
         // The targeted user offered his frienship to you.
-        private const int Them_Friend_requested  = Own_Friend_requested << THEM_SHIFT;
+        private const ulong Them_Friend_requested  = Own_Friend_requested << THEM_SHIFT;
 
         // The targeted user blocked you.
-        private const int Them_Blocked           = Own_Blocked << THEM_SHIFT;
+        private const ulong Them_Blocked           = Own_Blocked << THEM_SHIFT;
 
 
-        public static void Set(ref int field, int bits, bool desired)
-        {
-            if(desired)
-                field |= bits;
-            else
-                field &= ~bits;
-        }
+        public static void Set(ref ulong field, ulong bits, bool desired) => Bit64field.Set(ref field, bits, desired);
 
-        private static bool IsAll(int you, int stateBit)
-            => ((you & stateBit) == stateBit);
+        private static bool IsAll(ulong you, ulong stateBit) => Bit64field.IsAll(you, stateBit);
 
-        private static bool IsAny(int you, int stateBit)
-            => ((you & stateBit) != 0);
+        private static bool IsAny(ulong you, ulong stateBit) => Bit64field.IsAny(you, stateBit);
 
-        private static bool IsAll(IAvatarBrain target, int stateBit) 
+        private static bool IsAll(IAvatarBrain target, ulong stateBit) 
             => IsAll(XRControl.Me?.GetOwnState(target) ?? None, stateBit);
 
-        //private static bool IsAny(IAvatarBrain target, int stateBit)
+        //private static bool IsAny(IAvatarBrain target, ulong stateBit)
         //    => IsAny(XRControl.Me?.GetOwnState(target) ?? None, stateBit);
 
-        public static int ReflectSocialState(int other, int me)
+        public static ulong ReflectSocialState(ulong other, ulong me)
             => (me & OWN_MASK) | (other & OWN_MASK) << THEM_SHIFT;
 
         public static bool IsFriends(IAvatarBrain target)
             => IsAll(target, Own_Friend_requested | Them_Friend_requested);
 
-        public static bool IsFriends(int state)
+        public static bool IsFriends(ulong state)
             => IsAll(state, Own_Friend_requested | Them_Friend_requested);
 
         public static bool IsFriendOffered(IAvatarBrain target)
             => IsAll(target, Them_Friend_requested);
 
-        public static bool IsFriendOffered(int state)
+        public static bool IsFriendOffered(ulong state)
             => IsAll(state, Them_Friend_requested);
 
         public static bool IsFriendRequested(IAvatarBrain target)
             => IsAll(target, Own_Friend_requested);
 
-        public static bool IsFriendRequested(int state)
+        public static bool IsFriendRequested(ulong state)
             => IsAll(state, Own_Friend_requested);
 
         public static bool IsBlocked(IAvatarBrain target)
             => IsAll(target, Own_Blocked);
 
-        public static bool IsBlocked(int state)
+        public static bool IsBlocked(ulong state)
             => IsAll(state, Own_Blocked);
 
         public static bool IsBeingBlocked(IAvatarBrain target)
             => IsAll(target, Them_Blocked);
 
-        public static bool IsBeingBlocked(int state)
+        public static bool IsBeingBlocked(ulong state)
             => IsAll(state, Them_Blocked);
 
-        public static bool IsSomehowBlocked(int state)
+        public static bool IsSomehowBlocked(ulong state)
             => IsAny(state, Own_Blocked | Them_Blocked);
 
-        public static void SetFriendState(ref int state, bool value)
+        public static void SetFriendState(ref ulong state, bool value)
             => Set(ref state, Own_Friend_requested, value);
 
-        public static void SetBlockState(ref int state, bool value)
+        public static void SetBlockState(ref ulong state, bool value)
             => Set(ref state, Own_Blocked, value);
     }
 

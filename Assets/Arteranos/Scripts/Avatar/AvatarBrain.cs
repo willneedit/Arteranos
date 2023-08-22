@@ -474,7 +474,7 @@ namespace Arteranos.Avatar
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
             => Subconscious.BlockUser(receiver, blocking);
 
-        public void UpdateSSEffects(IAvatarBrain receiver, int state)
+        public void UpdateSSEffects(IAvatarBrain receiver, ulong state)
         {
             if(receiver == null) return;
 
@@ -499,7 +499,7 @@ namespace Arteranos.Avatar
             Subconscious.SendTextMessage(receiver, text);
         }
 
-        public int GetOwnState(IAvatarBrain receiver)
+        public ulong GetOwnState(IAvatarBrain receiver)
             => Subconscious.GetOwnState(receiver.UserID);
         #endregion
         // ---------------------------------------------------------------

@@ -75,7 +75,7 @@ namespace Arteranos.UI
             {
                 IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetSocialList(targetUserID);
 
-                int currentState = (q.Count() > 0) ? q.First().State : SocialState.None;
+                ulong currentState = (q.Count() > 0) ? q.First().State : SocialState.None;
 
                 bool friends = SocialState.IsFriendRequested(currentState);
 
@@ -100,7 +100,7 @@ namespace Arteranos.UI
 
             cs.UpdateSocialListEntry(targetUserID, (x) =>
             {
-                int state = x;
+                ulong state = x;
                 SocialState.SetFriendState(ref state, true);
                 return state;
             });
@@ -117,7 +117,7 @@ namespace Arteranos.UI
 
             cs.UpdateSocialListEntry(targetUserID, (x) =>
             {
-                int state = x;
+                ulong state = x;
                 SocialState.SetFriendState(ref state, false);
                 return state;
             });
@@ -134,7 +134,7 @@ namespace Arteranos.UI
 
             cs.UpdateSocialListEntry(targetUserID, (x) =>
             {
-                int state = x;
+                ulong state = x;
                 SocialState.SetBlockState(ref state, true);
                 return state;
             });
@@ -150,7 +150,7 @@ namespace Arteranos.UI
             }
             cs.UpdateSocialListEntry(targetUserID, (x) =>
             {
-                int state = x;
+                ulong state = x;
                 SocialState.SetBlockState(ref state, false);
                 return state;
             });
