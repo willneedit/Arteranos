@@ -75,7 +75,8 @@ namespace Arteranos.UI
 
             spn_OnlineStatus.value = Array.IndexOf(spn_OnlineStatus.Options, Utils.GetEnumDescription(cs.Visibility));
             txt_Nickname.text = cs.Me.Nickname;
-            tro_UserID.text = cs.GetFingerprint();
+            // TODO PrefPanel_Privacy improvement (#37)
+            tro_UserID.text = cs.GetFingerprint(CryptoHelpers.FP_Dice_4);
             txt_AvatarURL.text = cs.AvatarURL;
             tro_AvatarProvider.text = Utils.GetEnumDescription(cs.Me.CurrentAvatar.AvatarProvider);
 

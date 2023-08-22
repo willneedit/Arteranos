@@ -87,7 +87,7 @@ namespace Arteranos.UI
                 return "Friend request sent";
             }
 
-            // TODO Finish the username preference setting
+            // TODO PrefPanel_Privacy improvement (#37)
             return CryptoHelpers.ToString(CryptoHelpers.FP_Dice_4, Bearer.UserID);
         }
 

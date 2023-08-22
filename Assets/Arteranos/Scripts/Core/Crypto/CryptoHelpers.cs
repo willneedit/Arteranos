@@ -53,14 +53,12 @@ public static class CryptoHelpers
 
     public static string ToString(string v, byte[] publicKey)
     {
-        byte[] fingerprint;
-
         switch(v)
         {
             case FP_Dice_4:
-                return WordListSelector(publicKey, 4);
+                return WordListSelector(GetFingerprint(publicKey), 4);
             case FP_Dice_5:
-                return WordListSelector(publicKey, 5);
+                return WordListSelector(GetFingerprint(publicKey), 5);
             case FP_Base64_15:
                 return ToString(FP_Base64, publicKey)[0..14];
             case FP_Base64_10:
@@ -68,17 +66,15 @@ public static class CryptoHelpers
             case FP_Base64_8:
                 return ToString(FP_Base64, publicKey)[0..7];
             case FP_Base64:
-                fingerprint = GetFingerprint(publicKey);
-                return Convert.ToBase64String(fingerprint);
+                return Convert.ToBase64String(GetFingerprint(publicKey));
             case FP_SHA256_20:
                 return ToString(FP_SHA256, publicKey)[0..19];
             case FP_SHA256_16:
                 return ToString(FP_SHA256, publicKey)[0..15];
             case FP_SHA256:
             default:
-                fingerprint = GetFingerprint(publicKey);
                 string hashString = string.Empty;
-                foreach(byte x in fingerprint) { hashString += String.Format("{0:x2}", x); }
+                foreach(byte x in GetFingerprint(publicKey)) { hashString += String.Format("{0:x2}", x); }
                 return hashString;
         }
     }
