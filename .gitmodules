@@ -10,3 +10,6 @@
 [submodule "Packages/Mirror"]
 	path = Packages/Mirror
 	url = https://github.com/willneedit/Mirror.git
+[submodule "Packages/Unity-asn1-package"]
+	path = Packages/Unity-asn1-package
+	url = https://github.com/willneedit/Unity-asn1-package.git

@@ -427,6 +427,12 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.willneedit.asn1": {
+      "version": "file:Unity-asn1-package",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "li.lightingtools.lightmapswitcher": {
       "version": "https://github.com/willneedit/lightmap-switching-tool.git#package",
       "depth": 0,
