@@ -6,29 +6,29 @@
  */
 
 using System.Security.Cryptography;
+using ASN1Utils;
 
 namespace Arteranos.Core
 {
-    public class CSPRSAKey : IAsymmetricKey, IKeyWrapKey, ISignKey
+    public class RSAKey : IAsymmetricKey, IKeyWrapKey, ISignKey
     {
         public KeyType KeyType => KeyType.RSA;
         public byte[] PublicKey => publicKey;
-        public byte[] ExportPrivateKey() => rsaKey.ExportCspBlob(true);
+        public byte[] ExportPrivateKey() => rsaKey.ExportDER(true);
 
-        private readonly RSACryptoServiceProvider rsaKey;
+        private readonly RSA rsaKey;
         private readonly byte[] publicKey;
 
-        public CSPRSAKey()
+        public RSAKey()
         {
-            rsaKey = new();
-            publicKey = rsaKey.ExportCspBlob(false);
+            rsaKey = RSA.Create();
+            publicKey = rsaKey.ExportDER(false);
         }
 
-        public CSPRSAKey(byte[] exportedKey)
+        public RSAKey(byte[] exportedKey)
         {
-            rsaKey = new();
-            rsaKey.ImportCspBlob(exportedKey);
-            publicKey = rsaKey.ExportCspBlob(false);
+            KeyImport.ImportDER(exportedKey, out rsaKey);
+            publicKey = rsaKey.ExportDER(false);
         }
 
         public void Dispose() => rsaKey.Dispose();

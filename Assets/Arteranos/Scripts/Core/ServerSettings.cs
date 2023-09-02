@@ -266,7 +266,11 @@ namespace Arteranos.Core
                 }
                 catch(Exception e)
                 {
-                    Debug.LogError($"Internal error while regenerating server key: {e.Message}");
+                    Debug.LogError($"Internal error while regenerating server key - regenerating...: {e.Message}");
+                    ss.Crypto = new();
+                    ss.ServerKey = ss.Crypto.Export(true);
+
+                    ss.SaveSettings();
                 }
             }
 

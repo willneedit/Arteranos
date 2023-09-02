@@ -519,7 +519,11 @@ namespace Arteranos.Core
                 }
                 catch(Exception e)
                 {
-                    Debug.LogError($"Internal error while regenerating server key: {e.Message}");
+                    Debug.LogError($"Internal error while regenerating user key - regenerating...: {e.Message}");
+                    cs.Crypto = new();
+                    cs.Me.UserKey = cs.Crypto.Export(true);
+
+                    cs.SaveSettings();
                 }
                 // Postprocessing to generate the derived values
                 if(cs.RefreshAuthentication())

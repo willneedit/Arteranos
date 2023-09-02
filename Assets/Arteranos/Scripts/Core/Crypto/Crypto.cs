@@ -14,7 +14,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 
-using AsymmetricKey = Arteranos.Core.CSPRSAKey;
+using AsymmetricKey = Arteranos.Core.RSAKey;
 
 namespace Arteranos.Core
 {
