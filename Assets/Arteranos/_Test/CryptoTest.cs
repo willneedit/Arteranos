@@ -12,10 +12,26 @@ using System;
 
 namespace Arteranos
 {
+    public struct Teststruct : IEquatable<Teststruct>
+    { 
+        public int x;
+        public int y;
+        public string name;
+
+        public override bool Equals(object obj) => obj is Teststruct teststruct && Equals(teststruct);
+        public bool Equals(Teststruct other) => x == other.x && y == other.y && name == other.name;
+        public override int GetHashCode() => HashCode.Combine(x, y, name);
+
+        public static bool operator ==(Teststruct left, Teststruct right) => left.Equals(right);
+        public static bool operator !=(Teststruct left, Teststruct right) => !(left == right);
+    }
+
     public class CryptoTest : MonoBehaviour
     {
         Crypto alice = null;
         Crypto bob = null;
+
+        Teststruct s1;
 
         void Start() => DefaultCryptoTest();
 
@@ -23,6 +39,13 @@ namespace Arteranos
         {
             alice = new();
             bob = new();
+
+            s1 = new()
+            {
+                x = 1,
+                y = 2,
+                name = "origin"
+            };
 
             Debug.Log($"Alice SHA256 fingerprint: {alice}");
             Debug.Log($"Alice short Base64 fingerprint: {alice.ToString(CryptoHelpers.FP_Base64_10)}");
@@ -34,9 +57,7 @@ namespace Arteranos
 
             EncryptTest("This is the first message");
 
-            UserID testuser = new(alice.PublicKey, "Alice");
-
-            EncryptStructTest(testuser);
+            EncryptStructTest(s1);
 
             EncryptTest("This is the second message");
 
@@ -109,18 +130,14 @@ namespace Arteranos
 
         }
 
-        private void EncryptStructTest(UserID userID)
+        private void EncryptStructTest(Teststruct @struct)
         {
-            Crypto.Encrypt(userID, bob.PublicKey, out CryptPacket p);
+            Crypto.Encrypt(@struct, bob.PublicKey, out CryptPacket p);
 
-            bob.Decrypt(p, out UserID userID1);
+            bob.Decrypt(p, out Teststruct userID1);
 
-            if(userID != userID1)
+            if(@struct != userID1)
                 Debug.LogError($"FAILED: Decrypted message is garbled - supposed: {userID1}");
-
-            // Nickname is irrelevent for the comparison
-            if(userID.Nickname != userID1.Nickname)
-                Debug.LogError($"FAILED: Nickname lost in transmission");
 
         }
 
