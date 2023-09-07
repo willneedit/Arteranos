@@ -5,14 +5,12 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Security.Cryptography;
-using System.Text;
+using DERSerializer;
 
 using AsymmetricKey = Arteranos.Core.RSAKey;
 
@@ -112,13 +110,15 @@ namespace Arteranos.Core
             payload = plaintext.ToArray();
         }
 
-        public static void Encrypt<T>(T payload, byte[] otherPublicKey, out CryptPacket p) 
-            => Encrypt(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(payload)), otherPublicKey, out p);
+        public static void Encrypt<T>(T payload, byte[] otherPublicKey, out CryptPacket p)
+        {
+            Encrypt(Serializer.Serialize(payload), otherPublicKey, out p);
+        }
 
         public void Decrypt<T>(CryptPacket p, out T payload)
         {
             Decrypt(p, out byte[] json);
-            payload = JsonConvert.DeserializeObject<T>(Encoding.UTF8.GetString(json));
+            payload = Serializer.Deserialize<T>(json);
         }
 
         #endregion
@@ -136,10 +136,10 @@ namespace Arteranos.Core
             => Key.Sign(data, out signature);
 
         public static bool Verify<T>(T data, byte[] signature, byte[] otherPublicKey)
-            => Verify(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data)), signature, otherPublicKey);
+            => Verify(Serializer.Serialize(data), signature, otherPublicKey);
 
         public void Sign<T>(T data, out byte[] signature)
-            => Sign(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data)), out signature);
+            => Sign(Serializer.Serialize(data), out signature);
 
         #endregion
 
