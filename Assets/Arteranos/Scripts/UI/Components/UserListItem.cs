@@ -28,6 +28,7 @@ namespace Arteranos.UI
         private HoverButton btn_DelFriend = null; // Revoking Friend offer or unfriend
         private HoverButton btn_Block = null; // Block user
         private HoverButton btn_Unblock= null; // Unblock user
+        private HoverButton btn_SendText= null; // Message user
 
         public UserID targetUserID = null;
 
@@ -51,11 +52,13 @@ namespace Arteranos.UI
             btn_DelFriend= btns_ItemButton[1];
             btn_Block= btns_ItemButton[2];
             btn_Unblock= btns_ItemButton[3];
+            btn_SendText= btns_ItemButton[4];
 
             btn_AddFriend.onClick.AddListener(OnAddFriendButtonClicked);
             btn_DelFriend.onClick.AddListener(OnDelFriendButtonClicked);
             btn_Block.onClick.AddListener(OnBlockButtonClicked);
             btn_Unblock.onClick.AddListener(OnUnblockButtonClicked);
+            btn_SendText.onClick.AddListener(OnSendTextButtonClicked);
 
             Me = XRControl.Me;
             cs = SettingsManager.Client;
@@ -86,6 +89,8 @@ namespace Arteranos.UI
 
                 btn_Block.gameObject.SetActive(!blocked && !friends);
                 btn_Unblock.gameObject.SetActive(blocked && !friends);
+
+                btn_SendText.gameObject.SetActive(friends && !blocked);
             }
         }
 
@@ -154,6 +159,21 @@ namespace Arteranos.UI
                 SocialState.SetBlockState(ref state, false);
                 return state;
             });
+        }
+
+        private void OnSendTextButtonClicked()
+        {
+            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+            if (targetUser == null)
+            {
+                IDialogUI dialog = DialogUIFactory.New();
+                dialog.Text = "User is offline.";
+                dialog.Buttons = new string[] { "OK" };
+                return;
+            }
+
+            SysMenu.CloseSysMenus();
+            TextMessageUIFactory.New(targetUser);
         }
     }
 }
