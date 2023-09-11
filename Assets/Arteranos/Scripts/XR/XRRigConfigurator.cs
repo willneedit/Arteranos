@@ -58,15 +58,15 @@ namespace Arteranos.XR
 
         private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs)
         {
-            if(ccs == null) return;
+            if (ccs == null) return;
 
-            if(LeftInteractor != null)
+            if (LeftInteractor != null)
             {
                 LeftInteractor.enabled = ccs.Controller_left;
                 LeftLineVisual.enabled = ccs.Controller_left;
 
                 LeftLineVisual.invalidColorGradient = ccs.Controller_active_left
-                    ? alwaysVisibleRay 
+                    ? alwaysVisibleRay
                     : onlyValidVisibleRay;
 
                 LeftInteractor.lineType = ccs.Controller_Type_left == RayType.Straight
@@ -78,7 +78,7 @@ namespace Arteranos.XR
                     : 9.8f;
             }
 
-            if(RightInteractor != null)
+            if (RightInteractor != null)
             {
                 RightInteractor.enabled = ccs.Controller_right;
                 RightLineVisual.enabled = ccs.Controller_right;
@@ -100,10 +100,31 @@ namespace Arteranos.XR
             // TODO - movement vector direction needs the y component when flying is enabled
             MoveProvider.useGravity = !mcs.Flying;
 
-            SnapTurnProvider.enabled = mcs.Turn != TurnType.Smooth;
-            ContTurnProvider.enabled = mcs.Turn == TurnType.Smooth;
+            TurnType turnType = mcs.Turn;
+            StartCoroutine(ReconfigureTurnType(turnType));
 
-            switch(mcs.Turn)
+            ContTurnProvider.turnSpeed = mcs.SmoothTurnSpeed;
+
+            CTeleProvider.TravelDuration = mcs.Teleport == TeleportType.Instant
+                ? 0.0f
+                : mcs.ZipLineDuration;
+
+            CTeleProvider.TeleportType = mcs.Teleport;
+        }
+
+        private IEnumerator ReconfigureTurnType(TurnType turnType)
+        {
+            yield return new WaitForSeconds(0.25f);
+
+            SnapTurnProvider.enabled = false;
+            ContTurnProvider.enabled = false;
+
+            yield return new WaitForSeconds(0.25f);
+
+            SnapTurnProvider.enabled = turnType != TurnType.Smooth;
+            ContTurnProvider.enabled = turnType == TurnType.Smooth;
+
+            switch (turnType)
             {
                 case TurnType.Snap90:
                     SnapTurnProvider.turnAmount = 90;
@@ -118,14 +139,6 @@ namespace Arteranos.XR
                     SnapTurnProvider.turnAmount = 22.5f;
                     break;
             }
-
-            ContTurnProvider.turnSpeed = mcs.SmoothTurnSpeed;
-
-            CTeleProvider.TravelDuration = mcs.Teleport == TeleportType.Instant
-                ? 0.0f
-                : mcs.ZipLineDuration;
-
-            CTeleProvider.TeleportType = mcs.Teleport;
         }
     }
 }
