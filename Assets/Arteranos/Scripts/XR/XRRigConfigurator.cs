@@ -12,6 +12,7 @@ using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
 using Arteranos.Core;
+using UnityEngine.XR.Interaction.Toolkit.Inputs;
 
 namespace Arteranos.XR
 {
@@ -26,6 +27,7 @@ namespace Arteranos.XR
         private ActionBasedContinuousTurnProvider ContTurnProvider = null;
         private ActionBasedContinuousMoveProvider MoveProvider = null;
         private CTeleProvider CTeleProvider = null;
+        private InputActionManager InputActionManager = null;
 
         private readonly Gradient onlyValidVisibleRay = new()
         {
@@ -45,6 +47,7 @@ namespace Arteranos.XR
             ContTurnProvider = GetComponent<ActionBasedContinuousTurnProvider>();
             MoveProvider     = GetComponent<ActionBasedContinuousMoveProvider>();
             CTeleProvider    = GetComponent<CTeleProvider>();
+            InputActionManager = GetComponent<InputActionManager>();
         }
 
         private void Start()
@@ -114,6 +117,13 @@ namespace Arteranos.XR
 
         private IEnumerator ReconfigureTurnType(TurnType turnType)
         {
+            // Issue #52: Unity's Input system occasionally borks if input handlers
+            // have been disabled/enabled too quickly.
+            // TODO Maybe with FreezeControl for the VR keyboard?
+            yield return new WaitForSeconds(0.25f);
+
+            InputActionManager.enabled = false;
+
             yield return new WaitForSeconds(0.25f);
 
             SnapTurnProvider.enabled = false;
@@ -139,6 +149,10 @@ namespace Arteranos.XR
                     SnapTurnProvider.turnAmount = 22.5f;
                     break;
             }
+
+            yield return new WaitForSeconds(0.25f);
+
+            InputActionManager.enabled = true;
         }
     }
 }
