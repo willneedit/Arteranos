@@ -754,7 +754,7 @@ GameObject:
   - component: {fileID: 6826848587015489433}
   - component: {fileID: 6826848587015489428}
   - component: {fileID: 2131407614293044574}
-  - component: {fileID: 6826848587015489427}
+  - component: {fileID: 9026550181651742556}
   - component: {fileID: 6826848587015489429}
   - component: {fileID: 6826848587015489425}
   - component: {fileID: 6826848587015489426}
@@ -822,7 +822,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6826848587015489434}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2213c36610e3b1c4bbf886810ed9db12, type: 3}
   m_Name: 
@@ -898,7 +898,7 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f,
       type: 3}
---- !u!114 &6826848587015489427
+--- !u!114 &9026550181651742556
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -907,22 +907,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 6826848587015489434}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bf296fc962d7184ab14ad1841598d5f, type: 3}
+  m_Script: {fileID: 11500000, guid: 49b706dd52b123d44937c2b1f0d6fc78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_System: {fileID: 6826848587015489429}
-  m_MoveSpeed: 1
+  m_MoveSpeed: 2
   m_EnableStrafe: 0
   m_UseGravity: 1
   m_GravityApplicationMode: 1
-  m_ForwardSource: {fileID: 6826848587015489431}
+  m_ForwardSource: {fileID: 6826848586923029061}
   m_LeftHandMoveAction:
     m_UseReference: 1
     m_Action:
       m_Name: Left Hand Move
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 75f1b245-c357-48c8-9acb-8967bec9dda2
+      m_Id: 10c5e20b-35c1-4b48-950d-d9f8ec0325f6
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -935,7 +935,7 @@ MonoBehaviour:
       m_Name: Right Hand Move
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 6bf6c732-e011-46b1-acc5-b649a4ec5f10
+      m_Id: f1ccd565-179a-4613-926e-7b5ad674b7c9
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -969,6 +969,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_System: {fileID: 6826848587015489429}
+  TeleportType: 0
+  TravelDuration: 0
 --- !u!143 &6826848587015489426
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1041,10 +1043,6 @@ MonoBehaviour:
   LeftLineVisual: {fileID: 6826848586482858149}
   RightInteractor: {fileID: 6826848588470939982}
   RightLineVisual: {fileID: 6826848588470939952}
-  SnapTurnProvider: {fileID: 6826848587015489428}
-  ContTurnProvider: {fileID: 2131407614293044574}
-  MoveProvider: {fileID: 6826848587015489427}
-  CTeleProvider: {fileID: 6826848587015489425}
 --- !u!1 &6826848588470939954
 GameObject:
   m_ObjectHideFlags: 0

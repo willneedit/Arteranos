@@ -791,7 +791,7 @@ GameObject:
   - component: {fileID: 7141498048079031362}
   - component: {fileID: 7141498048079031375}
   - component: {fileID: 4133316668455145817}
-  - component: {fileID: 7141498048079031368}
+  - component: {fileID: 7665613597267182130}
   - component: {fileID: 7141498048079031374}
   - component: {fileID: 7141498048079031370}
   - component: {fileID: 7141498048079031369}
@@ -859,7 +859,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7141498048079031361}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2213c36610e3b1c4bbf886810ed9db12, type: 3}
   m_Name: 
@@ -934,7 +934,7 @@ MonoBehaviour:
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: 0}
---- !u!114 &7141498048079031368
+--- !u!114 &7665613597267182130
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -943,22 +943,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 7141498048079031361}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bf296fc962d7184ab14ad1841598d5f, type: 3}
+  m_Script: {fileID: 11500000, guid: 49b706dd52b123d44937c2b1f0d6fc78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_System: {fileID: 7141498048079031374}
-  m_MoveSpeed: 1
+  m_MoveSpeed: 2
   m_EnableStrafe: 0
   m_UseGravity: 1
   m_GravityApplicationMode: 1
-  m_ForwardSource: {fileID: 7141498048079031372}
+  m_ForwardSource: {fileID: 7141498047634495902}
   m_LeftHandMoveAction:
     m_UseReference: 1
     m_Action:
       m_Name: Left Hand Move
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 75f1b245-c357-48c8-9acb-8967bec9dda2
+      m_Id: 9b95e708-8d43-4f82-b4c1-792f0545eda4
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -971,13 +971,12 @@ MonoBehaviour:
       m_Name: Right Hand Move
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 6bf6c732-e011-46b1-acc5-b649a4ec5f10
+      m_Id: 2bb0dd9f-6746-4ece-84ae-cf5f93c95c92
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
       m_Flags: 0
-    m_Reference: {fileID: -8198699208435500284, guid: c348712bda248c246b8c49b3db54643f,
-      type: 3}
+    m_Reference: {fileID: 0}
 --- !u!114 &7141498048079031374
 MonoBehaviour:
   m_ObjectHideFlags: 0
