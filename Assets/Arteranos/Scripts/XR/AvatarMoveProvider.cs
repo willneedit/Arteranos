@@ -46,12 +46,9 @@ namespace Arteranos.XR
 
             // As long you're obeying gravity, you're stuck to the ground plane.
 
-            Quaternion forwardRotation;
-            if (useGravity)
-                forwardRotation = Quaternion.FromToRotation(originTransform.forward, inputForwardProjectedInWorldSpace);
-            else
-                forwardRotation = forwardSourceTransform.localRotation;
-
+            Quaternion forwardRotation = useGravity
+                ? Quaternion.FromToRotation(originTransform.forward, inputForwardProjectedInWorldSpace)
+                : forwardSourceTransform.localRotation;
             Vector3 translationInRigSpace = forwardRotation * inputMove * (moveSpeed * Time.deltaTime);
             Vector3 translationInWorldSpace = originTransform.TransformDirection(translationInRigSpace);
 

@@ -197,6 +197,9 @@ public class ArteranosNetworkManager : NetworkManager
         NetworkStatus.OnClientConnectionResponse?.Invoke(false);
 
         SettingsManager.CurrentServer = null;
+
+        // Fall back to the client's only permissions, like flying
+        SettingsManager.Client.PingXRControllersChanged();
     }
 
     /// <summary>

@@ -99,9 +99,11 @@ namespace Arteranos.XR
                     : 9.8f;
             }
 
-            // TODO - user privilege management and server restrictions
-            // TODO - movement vector direction needs the y component when flying is enabled
-            MoveProvider.useGravity = !mcs.Flying;
+            // TODO - maybe world restrictions.
+            // Maybe add SettingsManager.Client.PingXRControllersChanged();
+            // in the world transition, too.
+            MoveProvider.useGravity = !(mcs.Flying                                  // User preferences
+                && (SettingsManager.CurrentServer?.Permissions.Flying ?? true));    // Server restrictions (no server = true)
 
             TurnType turnType = mcs.Turn;
             StartCoroutine(ReconfigureTurnType(turnType));

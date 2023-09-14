@@ -452,6 +452,10 @@ namespace Arteranos.Services
             else
             {
                 SettingsManager.CurrentServer = msg.ServerSettings;
+
+                // Update the sserver's restrictions, like flying.
+                SettingsManager.Client.PingXRControllersChanged();
+
                 // Authentication has been accepted
                 ClientAccept();
             }
