@@ -84,22 +84,13 @@ namespace Arteranos.Core
         public static bool IsSAdmin(ulong field) => IsAny(field, Srv_admin | Srv_admin_asstnt);
     }
 
-    public struct ServerUserState
+    public class ServerUserState : UserState
     {
         public UserID userID;
         public ulong userState;
         public string address;
         public string deviceUID;
         public string remarks;
-
-        [JsonIgnore]
-        public bool IsBanned => UserState.IsBanned(userState);
-
-        [JsonIgnore]
-        public bool IsWAdmin => UserState.IsWAdmin(userState);
-
-        [JsonIgnore]
-        public bool IsSAdmin => UserState.IsSAdmin(userState);
     }
 
     public class ServerUserBase
