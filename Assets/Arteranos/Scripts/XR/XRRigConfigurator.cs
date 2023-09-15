@@ -119,22 +119,35 @@ namespace Arteranos.XR
 
         private IEnumerator ReconfigureTurnType(TurnType turnType)
         {
-            // Issue #52: Unity's Input system occasionally borks if input handlers
-            // have been disabled/enabled too quickly.
-            // TODO Maybe with FreezeControl for the VR keyboard?
-            yield return new WaitForSeconds(0.25f);
+            bool actual = ContTurnProvider.enabled;
+            bool desired = turnType == TurnType.Smooth;
 
-            InputActionManager.enabled = false;
+            bool update = (actual != desired)
+                || !(ContTurnProvider.enabled || SnapTurnProvider.enabled);
 
-            yield return new WaitForSeconds(0.25f);
+            if (update)
+            {
+                // Issue #52: Unity's Input system occasionally borks if input handlers
+                // have been disabled/enabled too quickly.
+                // TODO Maybe with FreezeControl for the VR keyboard?
+                yield return new WaitForSeconds(0.25f);
 
-            SnapTurnProvider.enabled = false;
-            ContTurnProvider.enabled = false;
+                InputActionManager.enabled = false;
 
-            yield return new WaitForSeconds(0.25f);
+                yield return new WaitForSeconds(0.25f);
 
-            SnapTurnProvider.enabled = turnType != TurnType.Smooth;
-            ContTurnProvider.enabled = turnType == TurnType.Smooth;
+                SnapTurnProvider.enabled = false;
+                ContTurnProvider.enabled = false;
+
+                yield return new WaitForSeconds(0.25f);
+
+                SnapTurnProvider.enabled = !desired;
+                ContTurnProvider.enabled = desired;
+
+                yield return new WaitForSeconds(0.25f);
+
+                InputActionManager.enabled = true;
+            }
 
             switch (turnType)
             {
@@ -152,9 +165,6 @@ namespace Arteranos.XR
                     break;
             }
 
-            yield return new WaitForSeconds(0.25f);
-
-            InputActionManager.enabled = true;
         }
     }
 }

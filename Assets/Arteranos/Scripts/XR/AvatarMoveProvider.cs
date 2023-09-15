@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
@@ -55,8 +56,53 @@ namespace Arteranos.XR
             return translationInWorldSpace;
         }
 
+        private Vector3? m_LastGrounded = null;
+        private CharacterController m_cc = null;
+        private bool saved = false;
+
         protected override void MoveRig(Vector3 translationInWorldSpace)
         {
+            XROrigin xrOrigin = system.xrOrigin;
+            if (xrOrigin == null)
+            {
+                base.MoveRig(translationInWorldSpace);
+                return;
+            }
+
+            if(m_cc == null)
+                m_cc = xrOrigin.Origin.GetComponent<CharacterController>();
+
+            Transform originTransform = xrOrigin.Origin.transform;
+
+            if (m_LastGrounded == null) 
+                m_LastGrounded = originTransform.position;
+
+
+            // Update if the avatar is safe: grounded or floating -- not falling.
+            if (m_cc.isGrounded || !useGravity)
+            {
+                m_LastGrounded = originTransform.position;
+                saved = false;
+            }
+
+            // Too far below of the last safe position
+            if (originTransform.position.y - m_LastGrounded.Value.y < -100.0f)
+            {
+                // Looks like a spawn point in the void if the avatar never touched
+                // ground since the time he's been dropped off of it.
+                // World creator's concern, then.
+                if(saved) useGravity = false;
+
+                m_LastGrounded = originTransform.position;
+                // Hard move, we have to bypass the locomotion system to prevent the
+                // ongoing move process cluttering the system.
+                //
+                // Just like with games when the character is stuck, unable to move while
+                // being in the eternal falling animation.
+                XRControl.Instance.MoveRig();
+                saved = true;
+            }
+
             base.MoveRig(translationInWorldSpace);
         }
     }
