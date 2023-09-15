@@ -50,7 +50,7 @@ namespace Arteranos.UI
             base.OnDisable();
 
             // Might be to disabled before it's really started, so cs may be null yet.
-            if(dirty) cs?.SaveSettings();
+            if(dirty) cs?.Save();
             dirty = false;
         }
 
@@ -77,7 +77,7 @@ namespace Arteranos.UI
             cui.spj = SettingsManager.Client.ContentFilterPreferences;
 
             cui.OnFinishConfiguring +=
-                () => SettingsManager.Client?.SaveSettings();
+                () => SettingsManager.Client?.Save();
         }
     }
 }

@@ -92,7 +92,7 @@ namespace Arteranos.UI
             cs.Me.Nickname = txt_Nickname.text;
 
             // Might be to disabled before it's really started, so cs may be null yet.
-            if(dirty) cs?.SaveSettings();
+            if(dirty) cs?.Save();
             dirty = false;
         }
 

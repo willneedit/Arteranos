@@ -214,7 +214,7 @@ namespace Arteranos.Core
 
         public const string PATH_SERVER_SETTINGS = "ServerSettings.json";
 
-        public void SaveSettings()
+        public void Save()
         {
             using Guard guard = new(
                 () => IncludeCompleteKey = true,
@@ -231,7 +231,7 @@ namespace Arteranos.Core
             }
         }
 
-        public static ServerSettings LoadSettings()
+        public static ServerSettings Load()
         {
             ServerSettings ss;
 
@@ -257,7 +257,7 @@ namespace Arteranos.Core
                         ss.Crypto = new();
                         ss.ServerKey = ss.Crypto.Export(true);
 
-                        ss.SaveSettings();
+                        ss.Save();
                     }
                     else
                     {
@@ -270,7 +270,7 @@ namespace Arteranos.Core
                     ss.Crypto = new();
                     ss.ServerKey = ss.Crypto.Export(true);
 
-                    ss.SaveSettings();
+                    ss.Save();
                 }
             }
 

@@ -116,7 +116,7 @@ namespace Arteranos.UI
             }
 
             // Might be to disabled before it's really started, so cs may be null yet.
-            if(dirty) ss?.SaveSettings();
+            if(dirty) ss?.Save();
             dirty = false;
         }
 
@@ -136,7 +136,7 @@ namespace Arteranos.UI
             cui.spj = SettingsManager.Server.Permissions;
 
             cui.OnFinishConfiguring +=
-                () => SettingsManager.Server?.SaveSettings();
+                () => SettingsManager.Server?.Save();
         }
 
         private void OnIconClicked()

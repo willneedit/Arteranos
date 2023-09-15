@@ -23,59 +23,59 @@ namespace Arteranos.Core
         // 0  ... 15: User related
 
         // Trusted user, whatever it shall be... ¯\_(ツ)_/¯
-        public const ulong Trusted = (1 << 0);
+        public const ulong Trusted = (ulong) 1 << 0;
 
         // ---------------------------------------------------------------
         // 16 ... 31: World related
 
         // Derived from the world administrator, can elevate or demote assistants with the same powers
-        public const ulong World_admin_asstnt = (1 << 30);
+        public const ulong World_admin_asstnt = (ulong) 1 << 30;
 
         // World administrators
-        public const ulong World_admin = ((ulong) 1 << 31);
+        public const ulong World_admin = (ulong) 1 << 31;
 
         // ---------------------------------------------------------------
         // 32 ... 47: Server related
 
         // Derived from the world administrator, can elevate or demote assistants with the same powers
-        public const ulong Srv_admin_asstnt = (1 << 46);
+        public const ulong Srv_admin_asstnt = (ulong) 1 << 46;
 
         // Server administrators
-        public const ulong Srv_admin = (1 << 47);
+        public const ulong Srv_admin = (ulong) 1 << 47;
 
 
         // ---------------------------------------------------------------
         // 48 ... 63: Repercussions, especially with the regative result (= banned bit set)
 
         // Below the user's legal or recommended age, e.g. below 13 b/c COPPA.
-        public const ulong Underage = (1 << 48);
+        public const ulong Underage = (ulong) 1 << 48;
 
         // Disruptive behavior
-        public const ulong Trolling = (1 << 49);
+        public const ulong Trolling = (ulong) 1 << 49;
 
         // Discrimination/-phobic/hatemongering (see below)
-        public const ulong Hating = (1 << 50);
+        public const ulong Hating = (ulong) 1 << 50;
 
         // Incessantly loud (e.g. noisy mic) (Maybe automatically force-muted on login?)
-        public const ulong Loud = (1 << 51);
+        public const ulong Loud = (ulong) 1 << 51;
 
         // Mobbing/Bullying/Harassment
-        public const ulong Bullying = (1 << 52);
+        public const ulong Bullying = (ulong) 1 << 52;
 
         // Undesired sexual advances or harassment
-        public const ulong SxHarassment = (1 << 53);
+        public const ulong SxHarassment = (ulong) 1 << 53;
 
         // Exploit/security leak usage (maybe tripped in the network stack)
-        public const ulong Exploiting = (1 << 60);
+        public const ulong Exploiting = (ulong) 1 << 60;
 
         // Impersonation (to gain privileges by social engineering)
-        public const ulong Impersonation = (1 << 61);
+        public const ulong Impersonation = (ulong) 1 << 61;
 
         // Attempted ban evasion
-        public const ulong BanEvading = (1 << 62);
+        public const ulong BanEvading = (ulong) 1 << 62;
 
         // User has been banned
-        public const ulong Banned = ((ulong) 1 << 63);
+        public const ulong Banned = (ulong) 1 << 63;
 
         public static bool IsBanned(ulong field) => IsAny(field, Banned);
 

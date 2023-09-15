@@ -283,7 +283,7 @@ namespace Arteranos.UI
             Login.LoginProvider = lp;
             Login.Username = Username;
             SettingsManager.Client.RefreshAuthentication();
-            SettingsManager.Client.SaveSettings();
+            SettingsManager.Client.Save();
             Debug.Log("Saving succeeded");
             OnRefreshLoginUI?.Invoke(lp);
         }

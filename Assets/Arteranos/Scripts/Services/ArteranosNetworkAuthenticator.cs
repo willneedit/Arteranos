@@ -357,7 +357,7 @@ namespace Arteranos.Services
                 // New server encountered. Yay!
                 cs.ServerKeys.Add(address, msg.ServerPublicKey);
                 SubmitAuthRequest(msg);
-                cs.SaveSettings();
+                cs.Save();
                 return;
             }
             else if(msg.ServerPublicKey.SequenceEqual(pubKey))
@@ -403,7 +403,7 @@ namespace Arteranos.Services
 
             cs.ServerKeys.Remove(address);
             cs.ServerKeys.Add(address, msg.ServerPublicKey);
-            cs.SaveSettings();
+            cs.Save();
 
             SubmitAuthRequest(msg);
         }

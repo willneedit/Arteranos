@@ -147,7 +147,7 @@ namespace Arteranos.UI
             if(!cs.WorldList.Contains(worldURL))
             {
                 cs.WorldList.Add(worldURL);
-                cs.SaveSettings();
+                cs.Save();
             }
 
             // And lastly, visualize the changed state.
@@ -165,7 +165,7 @@ namespace Arteranos.UI
             if(cs.WorldList.Contains(worldURL))
             {
                 cs.WorldList.Remove(worldURL);
-                cs.SaveSettings();
+                cs.Save();
             }
 
             // And, zip, gone.

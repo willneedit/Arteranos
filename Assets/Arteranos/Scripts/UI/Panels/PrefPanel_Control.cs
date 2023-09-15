@@ -98,7 +98,7 @@ namespace Arteranos.UI
             UploadSettings();
 
             // Might be to disabled before it's really started, so cs may be null yet.
-            cs?.SaveSettings();
+            cs?.Save();
         }
 
         private void UploadSettings()

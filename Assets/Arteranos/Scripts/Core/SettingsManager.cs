@@ -60,8 +60,8 @@ namespace Arteranos.Core
                 return def;
             }
 
-            Client = ClientSettings.LoadSettings();
-            Server = ServerSettings.LoadSettings();
+            Client = ClientSettings.Load();
+            Server = ServerSettings.Load();
             ServerUsers = ServerUserBase.Load();
             Command = ScriptableObject.CreateInstance<CommandLine>();
 

@@ -39,7 +39,7 @@ namespace Arteranos.UI
         private void OnDisable()
         {
             if(dirty)
-                SettingsManager.Client.SaveSettings();
+                SettingsManager.Client.Save();
         }
 
         private void ShowAvatar()

@@ -170,7 +170,7 @@ namespace Arteranos.UI
             if(!cs.ServerList.Contains(serverURL))
             {
                 cs.ServerList.Add(serverURL);
-                cs.SaveSettings();
+                cs.Save();
             }
 
             // Visualize the changed state.
@@ -185,7 +185,7 @@ namespace Arteranos.UI
             if(!cs.ServerList.Contains(serverURL))
             {
                 cs.ServerList.Add(serverURL);
-                cs.SaveSettings();
+                cs.Save();
             }
 
             // Store the server settings data now, or if it's not there, later.
@@ -208,7 +208,7 @@ namespace Arteranos.UI
             if(cs.ServerList.Contains(serverURL))
             {
                 cs.ServerList.Remove(serverURL);
-                cs.SaveSettings();
+                cs.Save();
             }
 
             // And, zip, gone.

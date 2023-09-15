@@ -404,7 +404,7 @@ namespace Arteranos.Core
                 });
             }
 
-            SaveSettings();
+            Save();
         }
 
         /// <summary>
@@ -466,7 +466,7 @@ namespace Arteranos.Core
         [Obsolete]
         public IEnumerable<SocialListEntryJSON> GetFilteredSocialList(UserID userID = null) => GetSocialList(userID, (x) => true);
 
-        public void SaveSettings()
+        public void Save()
         {
             using Guard guard = new(
                 () => Me.IncludeCompleteKey = true,
@@ -483,7 +483,7 @@ namespace Arteranos.Core
             }
         }
 
-        public static ClientSettings LoadSettings()
+        public static ClientSettings Load()
         {
             ClientSettings cs;
 
@@ -510,7 +510,7 @@ namespace Arteranos.Core
                         cs.Crypto = new();
                         cs.Me.UserKey = cs.Crypto.Export(true);
 
-                        cs.SaveSettings();
+                        cs.Save();
                     }
                     else
                     {
@@ -523,12 +523,12 @@ namespace Arteranos.Core
                     cs.Crypto = new();
                     cs.Me.UserKey = cs.Crypto.Export(true);
 
-                    cs.SaveSettings();
+                    cs.Save();
                 }
                 // Postprocessing to generate the derived values
                 if(cs.RefreshAuthentication())
                     // Save the settings back if the randomized guest login occurs and the login token is deleted.
-                    cs.SaveSettings();
+                    cs.Save();
             }
 
             return cs;

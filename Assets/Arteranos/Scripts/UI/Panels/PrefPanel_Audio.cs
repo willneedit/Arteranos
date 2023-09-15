@@ -86,7 +86,7 @@ namespace Arteranos.UI
                 cs.AudioSettings.MicInputGain = sld_MicInputGain.value;
                 cs.AudioSettings.AGCLevel = spn_AGC.value;
 
-                cs?.SaveSettings();
+                cs?.Save();
                 if(needsRenew) AudioManager.RenewMic();
             }
 
