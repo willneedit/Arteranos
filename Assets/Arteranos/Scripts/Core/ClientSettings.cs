@@ -284,6 +284,9 @@ namespace Arteranos.Core
         // Strangers bubble size
         public virtual float SizeBubbleStrangers { get; set; } = 1.0f;
 
+        // Privacy settings
+        public virtual UserPrivacy UserPrivacy { get; set; } = new();
+
         // The audio settings
         public virtual ClientAudioSettingsJSON AudioSettings { get; set; } = new();
 
@@ -322,6 +325,7 @@ namespace Arteranos.Core
         public event Action<float, float> OnPrivacyBubbleChanged;
         public event Action<ControlSettingsJSON, MovementSettingsJSON> OnXRControllerChanged;
         public event Action<UserHUDSettingsJSON> OnUserHUDSettingsChanged;
+        public event Action<UserPrivacy> OnUserPrivacyChanged;
 
         [JsonIgnore]
         public string AvatarURL
@@ -374,9 +378,21 @@ namespace Arteranos.Core
             }
         }
 
+        public override UserPrivacy UserPrivacy
+        {
+            get => base.UserPrivacy;
+            set
+            {
+                base.UserPrivacy = value;
+                OnUserPrivacyChanged?.Invoke(value);
+            }
+        }
+
         public void PingXRControllersChanged() => OnXRControllerChanged?.Invoke(Controls, Movement);
 
         public void PingUserHUDChanged() => OnUserHUDSettingsChanged?.Invoke(UserHUD);
+
+        public void PingUserPrivacyChanged() => OnUserPrivacyChanged?.Invoke(UserPrivacy);
 
         public void Decrypt<T>(CryptPacket p, out T payload) => Crypto.Decrypt(p, out payload);
 

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System.Linq;
+using System.ComponentModel;
 
 namespace Arteranos.Core
 {
@@ -82,6 +83,35 @@ namespace Arteranos.Core
         public static bool IsWAdmin(ulong field) => IsAny(field, World_admin | World_admin_asstnt);
 
         public static bool IsSAdmin(ulong field) => IsAny(field, Srv_admin | Srv_admin_asstnt);
+    }
+
+    public class UserPrivacy
+    {
+        public UserVisibility UIDVisibility;
+        public UIDRepresentation UIDRepresentation;
+        public UserVisibility TextReception;
+    }
+
+    public enum UserVisibility
+    {
+        [Description("everyone")]
+        everyone = 0,
+        [Description("friends only")]
+        friends = 1,
+        [Description("no one")]
+        none = 2
+    }
+
+    public enum UIDRepresentation
+    {
+        [Description("8 characters")]
+        base64_8,
+        [Description("15 characters")]
+        base64_15,
+        [Description("4 words")]
+        Dice_4,
+        [Description("5 words")]
+        Dice_5
     }
 
     public class ServerUserState : UserState

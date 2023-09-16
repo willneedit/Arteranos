@@ -54,6 +54,12 @@ namespace Arteranos.Avatar
             get => m_userID;
         }
 
+        public UserPrivacy UserPrivacy
+        {
+            get => m_UserPrivacy;
+            private set => CmdPropagateUserPrivacy(value);
+        }
+
         public int AppearanceStatus
         {
             get
@@ -157,6 +163,7 @@ namespace Arteranos.Avatar
             m_blobs.Callback += OnMBlobsChanged;
 
             SettingsManager.Client.OnAvatarChanged += (x) => { if(isOwned) AvatarURL = x; };
+            SettingsManager.Client.OnUserPrivacyChanged += (x) => { if (isOwned) UserPrivacy = x; };
             SettingsManager.Server.OnWorldURLChanged += CommitWorldChanged;
 
             ResyncInitialValues();
@@ -230,6 +237,8 @@ namespace Arteranos.Avatar
                 AvatarURL = cs.AvatarURL;
 
                 UserID = new(cs.UserPublicKey, cs.Me.Nickname);
+
+                UserPrivacy = cs.UserPrivacy;
             }
         }
 
@@ -258,6 +267,8 @@ namespace Arteranos.Avatar
         [SyncVar(hook = nameof(OnUserIDChanged))]
         private UserID m_userID = null;
 
+        [SyncVar(hook = nameof(OnUserPrivacyChanged))]
+        private UserPrivacy m_UserPrivacy = null;
 
         void Awake()
         {
@@ -326,6 +337,11 @@ namespace Arteranos.Avatar
             }
         }
 
+        private void OnUserPrivacyChanged(UserPrivacy _1, UserPrivacy _2)
+        {
+
+        }
+
         [Command]
         private void CmdPropagateInt(AVKeys key, int value) => m_ints[key] = value;
 
@@ -341,6 +357,8 @@ namespace Arteranos.Avatar
         [Command]
         private void CmdPropagateUserID(UserID userID) => m_userID = userID;
 
+        [Command]
+        private void CmdPropagateUserPrivacy(UserPrivacy userPrivacy) => m_UserPrivacy = userPrivacy;
 
         [Command]
         private void CmdPerformEmote(string emojiName) => RpcPerformEmote(emojiName);

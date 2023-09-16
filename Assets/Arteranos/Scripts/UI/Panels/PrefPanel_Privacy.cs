@@ -5,13 +5,8 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 using Arteranos.Core;
 
@@ -25,7 +20,6 @@ namespace Arteranos.UI
         [SerializeField] private Spinner spn_uid_visible = null;
         [SerializeField] private Spinner spn_uid_type = null;
         [SerializeField] private Spinner spn_msg_reception = null;
-        [SerializeField] private Spinner spn_friendreq_filter = null;
             
         private ClientSettings cs = null;
         private bool dirty = false;
@@ -36,6 +30,28 @@ namespace Arteranos.UI
 
             sldn_bubble_friends.OnValueChanged += Sldn_bubble_friends_OnValueChanged;
             sldn_bubble_strangers.OnValueChanged += Sldn_bubble_strangers_OnValueChanged;
+
+            spn_uid_visible.OnChanged += Spn_uid_visible_OnChanged;
+            spn_uid_type.OnChanged += Spn_uid_type_OnChanged;
+            spn_msg_reception.OnChanged += Spn_msg_reception_OnChanged;
+        }
+
+        private void Spn_msg_reception_OnChanged(int arg1, bool arg2)
+        {
+            cs.UserPrivacy.TextReception = (UserVisibility)spn_msg_reception.value;
+            dirty = true;
+        }
+
+        private void Spn_uid_type_OnChanged(int arg1, bool arg2)
+        {
+            cs.UserPrivacy.UIDRepresentation = (UIDRepresentation)spn_uid_type.value;
+            dirty = true;
+        }
+
+        private void Spn_uid_visible_OnChanged(int arg1, bool arg2)
+        {
+            cs.UserPrivacy.UIDVisibility = (UserVisibility)spn_uid_visible.value;
+            dirty = true;
         }
 
         protected override void Start()
@@ -46,6 +62,10 @@ namespace Arteranos.UI
 
             sldn_bubble_friends.value = cs.SizeBubbleFriends;
             sldn_bubble_strangers.value = cs.SizeBubbleStrangers;
+
+            spn_uid_visible.value = (int) cs.UserPrivacy.UIDVisibility;
+            spn_uid_type.value = (int) cs.UserPrivacy.UIDRepresentation;
+            spn_msg_reception.value = (int) cs.UserPrivacy.TextReception;
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
@@ -58,6 +78,7 @@ namespace Arteranos.UI
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty) cs?.Save();
             dirty = false;
+            cs?.PingUserPrivacyChanged();
         }
 
         private void Sldn_bubble_strangers_OnValueChanged(float obj)

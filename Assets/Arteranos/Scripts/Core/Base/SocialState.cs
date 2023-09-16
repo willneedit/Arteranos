@@ -18,14 +18,14 @@ namespace Arteranos.Social
         public const ulong None = 0;
 
         // You offered your friendship to the targeted user.
-        private const ulong Own_Friend_requested   = (1 << 0);
+        private const ulong Own_Friend_requested   = (ulong) 1 << 0;
 
         // You blocked the targeted user.
-        private const ulong Own_Blocked            = (1 << 4);
+        private const ulong Own_Blocked            = (ulong) 1 << 4;
 
-        private const int THEM_SHIFT             = 16;
+        private const int THEM_SHIFT               = 16;
 
-        private const ulong OWN_MASK               = (1 << THEM_SHIFT) - 1;
+        private const ulong OWN_MASK               = ((ulong) 1 << THEM_SHIFT) - 1;
 
         // The targeted user offered his frienship to you.
         private const ulong Them_Friend_requested  = Own_Friend_requested << THEM_SHIFT;
@@ -87,6 +87,23 @@ namespace Arteranos.Social
 
         public static void SetBlockState(ref ulong state, bool value)
             => Set(ref state, Own_Blocked, value);
+
+        /// <summary>
+        /// checks if the action (like seeing someone's user name or sending texts) is permitted
+        /// </summary>
+        /// <param name="target">The target user</param>
+        /// <param name="visibility">The tatget's visibility setting, or your setting if this action is being remotely invoked</param>
+        /// <returns>Self explanatory.</returns>
+        public static bool IsPermitted(IAvatarBrain target, UserVisibility visibility)
+        {
+            return visibility switch
+            {
+                UserVisibility.none => false,
+                UserVisibility.friends => IsFriends(target),
+                UserVisibility.everyone => true,
+                _ => throw new System.NotImplementedException() // Not gonna happen. Supposedly...
+            };
+        }
     }
 
     #endregion
