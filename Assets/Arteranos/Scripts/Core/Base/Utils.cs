@@ -76,7 +76,7 @@ namespace Arteranos.Core
                         string path = null,
                         string query = null,
                         string fragment = null
-)
+            )
         {
             urilike = urilike.Trim();
 
@@ -110,6 +110,23 @@ namespace Arteranos.Core
                 : uri.Fragment;
 
             return new(sb);
+        }
+
+        /// <summary>
+        /// Get the user ID fingerprint's encoding according to visibility's User ID settings
+        /// </summary>
+        /// <param name="fpmodeSet">The setting in question (your, or the nameplate user's setting)</param>
+        /// <returns>The CryptoHelper's ToString() parameter</returns>
+        public static string GetUIDFPEncoding(UIDRepresentation fpmodeSet)
+        {
+            return fpmodeSet switch
+            {
+                UIDRepresentation.base64_8 => CryptoHelpers.FP_Base64_8,
+                UIDRepresentation.base64_15 => CryptoHelpers.FP_Base64_15,
+                UIDRepresentation.Dice_4 => CryptoHelpers.FP_Dice_4,
+                UIDRepresentation.Dice_5 => CryptoHelpers.FP_Dice_5,
+                _ => CryptoHelpers.FP_Base64
+            };
         }
     }
 }

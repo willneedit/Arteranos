@@ -73,14 +73,9 @@ namespace Arteranos.UI
 
             cs = SettingsManager.Client;
 
-            string fpmode = cs.UserPrivacy.UIDRepresentation switch
-            {
-                UIDRepresentation.base64_8 => CryptoHelpers.FP_Base64_8,
-                UIDRepresentation.base64_15 => CryptoHelpers.FP_Base64_15,
-                UIDRepresentation.Dice_4 => CryptoHelpers.FP_Dice_4,
-                UIDRepresentation.Dice_5 => CryptoHelpers.FP_Dice_5,
-                _ => CryptoHelpers.FP_Base64
-            };
+            UIDRepresentation fpmodeSet = cs.UserPrivacy.UIDRepresentation;
+
+            string fpmode = Utils.GetUIDFPEncoding(fpmodeSet);
 
             spn_OnlineStatus.value = Array.IndexOf(spn_OnlineStatus.Options, Utils.GetEnumDescription(cs.Visibility));
             txt_Nickname.text = cs.Me.Nickname;
