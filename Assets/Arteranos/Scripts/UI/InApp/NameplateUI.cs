@@ -127,6 +127,10 @@ namespace Arteranos.UI
 
             // Only interactable if there's no other reason for it.
             current.interactable = (status & ~AppearanceStatus.Muted) == AppearanceStatus.OK;
+
+            // Send text button is only available if the receiver wants it to.
+            // TODO #11 - User privileges. World and server administrators have to be able, everytime.
+            btn_send_text.gameObject.SetActive(SocialState.IsPermitted(Bearer, Bearer.UserPrivacy.TextReception));
         }
 
         private void OnMuteButtonClicked()
@@ -136,7 +140,6 @@ namespace Arteranos.UI
 
             // Elevated users can gag other users.
             // TODO User privileges management
-            // TODO Client HUD UI - self-muting
             // Bearer.AudioStatus ^= Avatar.AudioStatus.Gagged;
 
             // Update the visible state
