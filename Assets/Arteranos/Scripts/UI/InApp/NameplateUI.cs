@@ -12,6 +12,8 @@ using TMPro;
 using Arteranos.Avatar;
 using Arteranos.XR;
 using Arteranos.Social;
+using UnityEngine.Diagnostics;
+using System;
 
 namespace Arteranos.UI
 {
@@ -45,7 +47,6 @@ namespace Arteranos.UI
             base.OnEnable();
 
             lbl_Name.text = GetLabelText();
-            lbl_Caption.text = GetCaptionText();
 
             Bearer.OnAppearanceStatusChanged += OnAppearanceStatusChanged;
             float fullHeight = Bearer.Body.FullHeight;
@@ -64,6 +65,8 @@ namespace Arteranos.UI
 
         private void Update()
         {
+            lbl_Caption.text = GetCaptionText();
+
             // LookAt can take a second vector as the Up vector.
             // Seems that we'd use _the client's_ Up vector, not the targeted avatar's.
             transform.LookAt(XRControl.Instance.cameraTransform);
@@ -74,21 +77,35 @@ namespace Arteranos.UI
 
         private string GetCaptionText()
         {
-            if(SocialState.IsFriends(Bearer))
+            string capMessage = string.Empty;
+
+            // Maybe always visible for world/server administrators?
+            if (SocialState.IsPermitted(Bearer, Bearer.UserPrivacy.UIDVisibility))
+                capMessage = CryptoHelpers.ToString(
+                    Core.Utils.GetUIDFPEncoding(Bearer.UserPrivacy.UIDRepresentation), Bearer.UserID);
+            else
+                capMessage = "<Undisclosed user name>";
+
+            DateTime now = DateTime.Now;
+
+            // Overlay the informational message for three out of six seconds.
+            if(now.Second % 6 > 2)
             {
-                return "Friend";
-            }
-            else if(SocialState.IsFriendOffered(Bearer))
-            {
-                return "Wants to be your friend";
-            }
-            else if(SocialState.IsFriendRequested(Bearer))
-            {
-                return "Friend request sent";
+                if (SocialState.IsFriends(Bearer))
+                {
+                    capMessage = "Friend";
+                }
+                else if (SocialState.IsFriendOffered(Bearer))
+                {
+                    capMessage = "Wants to be your friend";
+                }
+                else if (SocialState.IsFriendRequested(Bearer))
+                {
+                    capMessage = "Friend request sent";
+                }
             }
 
-            // TODO PrefPanel_Privacy improvement (#37)
-            return CryptoHelpers.ToString(CryptoHelpers.FP_Dice_4, Bearer.UserID);
+            return capMessage;
         }
 
         private void OnAppearanceStatusChanged(int status)
