@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -65,5 +64,14 @@ public class ChoiceBook : UIBehaviour
 
         OnChoicePageChanged?.Invoke(CurrentChoice, newChoice);
         CurrentChoice = newChoice;
+    }
+
+    public void SetPageActive(int index, bool active)
+    {
+        PaneList.GetChild(index).gameObject.SetActive(active);
+        ButtonList.GetChild(index).gameObject.SetActive(active);
+
+        // Pulling the rug from under your feet?
+        if (!active && CurrentChoice == index && CurrentChoice > 0) OnButtonClicked(CurrentChoice - 1);
     }
 }
