@@ -122,7 +122,9 @@ namespace Arteranos.Avatar
             if(isOwned) modestr += ", Owned";
 
             string objmsg = (message is string msgstr) ? msgstr : message.ToString();
-            return $"[{Nickname}][{modestr}] {objmsg}";
+            return UserID != null 
+                ? $"[{Nickname}][{modestr}] {objmsg}"
+                : $"[???][{modestr}] {objmsg}";
         }
 
         public void LogDebug(object message) => Debug.unityLogger.Log(LogType.Log, PrefixMessage(message));

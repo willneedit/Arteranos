@@ -100,7 +100,8 @@ namespace Arteranos.UI
 
             Debug.Log("Reload finished.");
 
-            btn_Reload.interactable = true;
+            // Maybe it's already closed. Impatient users...
+            if(btn_Reload != null) btn_Reload.interactable = true;
         }
     }
 }
