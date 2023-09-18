@@ -7,6 +7,9 @@
 
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Linq;
+using Arteranos.Services;
+using System;
 
 namespace Arteranos.UI
 {
@@ -31,7 +34,30 @@ namespace Arteranos.UI
                 return;
             }
 
-            Instantiate(Resources.Load<GameObject>("UI/UI_SysMenu"));
+            GameObject original = Resources.Load<GameObject>("UI/UI_SysMenu");
+            // NB: The resource is _cached_, the blueprint itself is modified and couldn't find the component
+            // because it's already disabled the second time around!
+            original.GetComponentInChildren<ChoiceBook>(true).gameObject.SetActive(false);
+            GameObject sysmenu = Instantiate(original);
+            ChoiceBook choiceBook = sysmenu.GetComponentInChildren<ChoiceBook>(true);
+
+            choiceBook.gameObject.SetActive(true);
+
+            // For now, restricting working on the remote server.
+            // TODO #11: This would need a protocol for the remote server maintenance,
+            // like changing the server port is like remotely configuring a firewall...
+            if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
+                RestrictRemoteServerConfig(choiceBook);
+
+        }
+
+        private static void RestrictRemoteServerConfig(ChoiceBook choiceBook)
+        {
+            int found = -1;
+            for (int i = 0; i < choiceBook.ChoiceEntries.Length; i++)
+                if (choiceBook.ChoiceEntries[i].name == "Moderation") found = i;
+
+            choiceBook.SetPageActive(found, false);
         }
 
         public static void CloseSysMenus()
