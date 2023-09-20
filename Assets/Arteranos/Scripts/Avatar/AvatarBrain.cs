@@ -182,9 +182,21 @@ namespace Arteranos.Avatar
                 {
                     string world = SettingsManager.ResetStartupTrigger();
 
-                    Debug.Log($"Invoking startup world '{world}'");
+                    m_strings.TryGetValue(AVKeys.CurrentWorld, out string serversworld);
+
+                    // Only an 'empty' server regards the startup world URL.
+                    if (!string.IsNullOrEmpty(serversworld))
+                        world = serversworld;
+
                     if(!string.IsNullOrEmpty(world))
+                    {
+                        Debug.Log($"Invoking startup world '{world}'");
                         WorldTransition.InitiateTransition(world);
+                    }
+                    else
+                    {
+                        Debug.Log("Connected to a server at startup, neither server has a world nor the commandline URL.");
+                    }
                 }
 
                 // The server already uses a world, so download and transition into the targeted world immediately.

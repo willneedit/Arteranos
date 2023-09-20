@@ -23,14 +23,17 @@ namespace Arteranos.Core
             // Default invocation
             string[] args = { "Arteranos.exe" };
 
-            // Connect to server and load the world (to be changed?)
+            // Connect to server and load the world if it's empty.
             // string[] args = { "Arteranos.exe", "arteranos://localhost/https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip" };
-            
+
             // Connect to server, loading the server's world
             // string[] args = { "Arteranos.exe", "arteranos://localhost/" };
 
             // Set up host with the preloaded world
             // string[] args = { "Arteranos.exe", "arteranos:///https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip" };
+
+            // (Not yet implemented) Search for server with this world.
+            // string[] args = { "Arteranos.exe", "arteranos:/anyhost//https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip" };
 #else
             var args = System.Environment.GetCommandLineArgs();            
 #endif

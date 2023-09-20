@@ -21,7 +21,7 @@ namespace Arteranos.Services
 
         IEnumerator StartupCoroutine()
         {
-            if(!StartupTrigger)
+            if(string.IsNullOrEmpty(DesiredWorld))
             {
                 AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
 
@@ -41,7 +41,7 @@ namespace Arteranos.Services
                     port: ServerSettingsJSON.DefaultMetadataPort
                 );
 
-                Web.ConnectionManager.ConnectToServer(uri.ToString());
+                ConnectionManager.ConnectToServer(uri.ToString());
             }
             else if(!string.IsNullOrEmpty(DesiredWorld))
             {
@@ -53,14 +53,14 @@ namespace Arteranos.Services
             yield return new WaitForEndOfFrame();
 
             // Enter the initial world, if we're not starting up with a startup trigger
-            if(!StartupTrigger)
+            if(string.IsNullOrEmpty(DesiredWorld))
                 WorldDownloaderLow.MoveToDownloadedWorld();
 
             // Finish the startup...
             enabled = false;
 
-            // ... and raise the curtains.
-            ScreenFader.StartFading(0.0f, 1.0f);
+            if(string.IsNullOrEmpty(DesiredWorld))
+                ScreenFader.StartFading(0.0f, 1.0f);
         }
 
         protected void Update()
