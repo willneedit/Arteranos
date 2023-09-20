@@ -19,7 +19,18 @@ namespace Arteranos.Core
         {
 #if UNITY_EDITOR
             // DEBUG: Commandline mocking in Editor
-            string[] args = {  };
+
+            // Default invocation
+            string[] args = { "Arteranos.exe" };
+
+            // Connect to server and load the world (to be changed?)
+            // string[] args = { "Arteranos.exe", "arteranos://localhost/https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip" };
+            
+            // Connect to server, loading the server's world
+            // string[] args = { "Arteranos.exe", "arteranos://localhost/" };
+
+            // Set up host with the preloaded world
+            // string[] args = { "Arteranos.exe", "arteranos:///https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip" };
 #else
             var args = System.Environment.GetCommandLineArgs();            
 #endif
