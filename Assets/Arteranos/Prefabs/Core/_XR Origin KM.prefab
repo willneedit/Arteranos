@@ -852,6 +852,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ActionAssets:
   - {fileID: -944628639613478452, guid: 2fa17d14f9fd10d4cb243ab38776f236, type: 3}
+  - {fileID: -944628639613478452, guid: 7ea47aba90bc97b49b8cdfd50b5deff1, type: 3}
 --- !u!114 &7141498048079031375
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -883,7 +884,7 @@ MonoBehaviour:
     m_Reference: {fileID: 1010738217276881514, guid: 2fa17d14f9fd10d4cb243ab38776f236,
       type: 3}
   m_RightHandSnapTurnAction:
-    m_UseReference: 0
+    m_UseReference: 1
     m_Action:
       m_Name: Right Hand Snap Turn
       m_Type: 0
@@ -893,7 +894,7 @@ MonoBehaviour:
       m_Interactions: 
       m_SingletonActionBindings: []
       m_Flags: 0
-    m_Reference: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f,
+    m_Reference: {fileID: 1010738217276881514, guid: 7ea47aba90bc97b49b8cdfd50b5deff1,
       type: 3}
 --- !u!114 &4133316668455145817
 MonoBehaviour:
@@ -923,7 +924,7 @@ MonoBehaviour:
     m_Reference: {fileID: 1010738217276881514, guid: 2fa17d14f9fd10d4cb243ab38776f236,
       type: 3}
   m_RightHandTurnAction:
-    m_UseReference: 0
+    m_UseReference: 1
     m_Action:
       m_Name: Right Hand Turn
       m_Type: 0
@@ -933,7 +934,8 @@ MonoBehaviour:
       m_Interactions: 
       m_SingletonActionBindings: []
       m_Flags: 0
-    m_Reference: {fileID: 0}
+    m_Reference: {fileID: 1010738217276881514, guid: 7ea47aba90bc97b49b8cdfd50b5deff1,
+      type: 3}
 --- !u!114 &7665613597267182130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -966,7 +968,7 @@ MonoBehaviour:
     m_Reference: {fileID: 6972639530819350904, guid: 2fa17d14f9fd10d4cb243ab38776f236,
       type: 3}
   m_RightHandMoveAction:
-    m_UseReference: 0
+    m_UseReference: 1
     m_Action:
       m_Name: Right Hand Move
       m_Type: 0
@@ -976,7 +978,8 @@ MonoBehaviour:
       m_Interactions: 
       m_SingletonActionBindings: []
       m_Flags: 0
-    m_Reference: {fileID: 0}
+    m_Reference: {fileID: 6972639530819350904, guid: 7ea47aba90bc97b49b8cdfd50b5deff1,
+      type: 3}
 --- !u!114 &7141498048079031374
 MonoBehaviour:
   m_ObjectHideFlags: 0
