@@ -28,6 +28,7 @@ namespace Arteranos.UI
         [SerializeField] private Button btn_friend_add = null;
         [SerializeField] private Button btn_block = null;
         [SerializeField] private Button btn_send_text = null;
+        [SerializeField] private Button btn_kick_user = null;
 
         private readonly Vector3 aboutFace = new(0, 180, 0);
 
@@ -40,6 +41,12 @@ namespace Arteranos.UI
             btn_friend_add.onClick.AddListener(OnFriendAddButtonClicked);
             btn_block.onClick.AddListener(OnBlockButtonClicked);
             btn_send_text.onClick.AddListener(OnSendTextButtonClicked);
+            btn_kick_user.onClick.AddListener(OnKickUserButtonClicked);
+        }
+
+        private void OnKickUserButtonClicked()
+        {
+            throw new NotImplementedException();
         }
 
         protected override void OnEnable()
