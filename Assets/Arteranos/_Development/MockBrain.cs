@@ -49,6 +49,8 @@ namespace Arteranos.Avatar
 
         public UserPrivacy UserPrivacy => throw new NotImplementedException();
 
+        public ulong UserState { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public event Action<string> OnAvatarChanged;
         public event Action<int> OnAppearanceStatusChanged;
 

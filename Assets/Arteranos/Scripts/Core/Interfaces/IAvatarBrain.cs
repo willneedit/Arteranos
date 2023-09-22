@@ -25,6 +25,7 @@ namespace Arteranos.Avatar
         Transform transform { get; }
         UserID UserID { get; }
         UserPrivacy UserPrivacy { get; }
+        ulong UserState { get; set; }
 
         event Action<string> OnAvatarChanged;
         event Action<int> OnAppearanceStatusChanged;

@@ -40,7 +40,7 @@ namespace Arteranos.Avatar
         public string AvatarURL
         {
             get => m_strings.ContainsKey(AVKeys.AvatarURL) ? m_strings[AVKeys.AvatarURL] : null;
-            set => CmdPropagateString(AVKeys.AvatarURL, value);
+            private set => CmdPropagateString(AVKeys.AvatarURL, value);
         }
 
         public UserID UserID
@@ -52,6 +52,7 @@ namespace Arteranos.Avatar
         public string Nickname
         {
             get => m_userID;
+            private set => throw new NotImplementedException();
         }
 
         public UserPrivacy UserPrivacy
@@ -59,6 +60,9 @@ namespace Arteranos.Avatar
             get => m_UserPrivacy;
             private set => CmdPropagateUserPrivacy(value);
         }
+
+        // Okay to use the setter. The SyncVar would yell at you if you fiddle with the privilege client-side
+        public ulong UserState { get => m_UserState; set => m_UserState = value; }
 
         public int AppearanceStatus
         {
@@ -283,6 +287,9 @@ namespace Arteranos.Avatar
 
         [SyncVar(hook = nameof(OnUserPrivacyChanged))]
         private UserPrivacy m_UserPrivacy = null;
+
+        [SyncVar] // Default if someone circumvented the Authenticator and the Network Manager.
+        public ulong m_UserState = (Core.UserState.Banned | Core.UserState.Exploiting);
 
         void Awake()
         {
