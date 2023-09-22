@@ -1,9 +1,9 @@
-using System;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Mirror;
 using Arteranos.Services;
 using Arteranos.Core;
+using Arteranos.Avatar;
+using System.Collections.Generic;
 
 /*
 	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -14,7 +14,9 @@ public class ArteranosNetworkManager : NetworkManager
 {
     // Overrides the base singleton so we don't
     // have to cast to this type everywhere.
-    public static new ArteranosNetworkManager singleton { get; private set; }
+    public static ArteranosNetworkManager Instance { get; private set; }
+
+    private readonly Dictionary<int, ArteranosNetworkAuthenticator.AuthResponseMessage> ResponseMessages = new();
 
     /// <summary>
     /// Runs on both Server and Client
@@ -23,8 +25,24 @@ public class ArteranosNetworkManager : NetworkManager
     public override void Awake()
     {
         base.Awake();
-        singleton = this;
+        Instance = this;
     }
+
+    #region Utilities
+
+    internal void AddResponseMessage(int connid, ArteranosNetworkAuthenticator.AuthResponseMessage message)
+    {
+        if(ResponseMessages.ContainsKey(connid))
+        {
+            // Connid collision exploit?!
+            message.UserState = 0; // Maybe banned if it's proven reliable as an attack indication.
+            Debug.LogWarning($"ConnID {connid} assigned twice - race condition or a attack?");
+        }
+
+        ResponseMessages.Add(connid, message);
+    }
+
+    #endregion
 
     #region Unity Callbacks
 
@@ -152,7 +170,22 @@ public class ArteranosNetworkManager : NetworkManager
     /// <param name="conn">Connection from client.</param>
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
-        base.OnServerAddPlayer(conn);
+        Transform startPos = GetStartPosition();
+        GameObject player = startPos != null
+            ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
+            : Instantiate(playerPrefab);
+
+        NetworkServer.AddPlayerForConnection(conn, player);
+
+        // Initialize the avatar's brain directly from the server's resources
+        IAvatarBrain brain = player.GetComponent<IAvatarBrain>();
+
+        if (ResponseMessages.TryGetValue(conn.connectionId, out ArteranosNetworkAuthenticator.AuthResponseMessage authResponse))
+        {
+            ResponseMessages.Remove(conn.connectionId);
+            brain.UserState = authResponse.UserState;
+        }
+        else brain.UserState = UserState.Banned | UserState.Exploiting;
     }
 
     /// <summary>
@@ -163,6 +196,10 @@ public class ArteranosNetworkManager : NetworkManager
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
         base.OnServerDisconnect(conn);
+
+        // Maybe the client never made it so far, just past the authentication.
+        if(ResponseMessages.ContainsKey(conn.connectionId))
+            ResponseMessages.Remove(conn.connectionId);
     }
 
     /// <summary>
@@ -232,7 +269,10 @@ public class ArteranosNetworkManager : NetworkManager
     /// This is invoked when a server is started - including when a host is started.
     /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
     /// </summary>
-    public override void OnStartServer() { }
+    public override void OnStartServer() 
+    {
+        ResponseMessages.Clear();
+    }
 
     /// <summary>
     /// This is invoked when the client is started.

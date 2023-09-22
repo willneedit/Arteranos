@@ -78,6 +78,9 @@ namespace Arteranos.Core
         // User has been banned
         public const ulong Banned = (ulong) 1 << 63;
 
+        // All of the 'good' bits.
+        public const ulong GOOD_MASK = ((ulong)1 << 48) - 1;
+
         public static bool IsBanned(ulong field) => IsAny(field, Banned);
 
         public static bool IsWAdmin(ulong field) => IsAny(field, World_admin | World_admin_asstnt);
@@ -139,10 +142,26 @@ namespace Arteranos.Core
                 MatchElement(entry.address, query.address) &&
                 MatchElement(entry.deviceUID, query.deviceUID);
         }
+
+        public static bool MatchOR(ServerUserState entry, ServerUserState query)
+        {
+            return
+                MatchElement(entry.userID, query.userID) ||
+                MatchElement(entry.address, query.address) ||
+                MatchElement(entry.deviceUID, query.deviceUID);
+        }
+
         public IEnumerable<ServerUserState> FindUsers(ServerUserState query)
         {
             return from entry in Base
                    where Match(entry, query)
+                   select entry;
+        }
+
+        public IEnumerable<ServerUserState> FindUsersOR(ServerUserState query)
+        {
+            return from entry in Base
+                   where MatchOR(entry, query)
                    select entry;
         }
 

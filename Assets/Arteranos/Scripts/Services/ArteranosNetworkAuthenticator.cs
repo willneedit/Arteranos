@@ -18,7 +18,6 @@ using Random = UnityEngine.Random;
 using System.Collections;
 using System.Linq;
 using Arteranos.UI;
-using static Arteranos.Services.ArteranosNetworkAuthenticator;
 using System.Collections.Concurrent;
 
 /*
@@ -66,11 +65,17 @@ namespace Arteranos.Services
             public string message;
             public ServerSettingsJSON ServerSettings;
             public byte[] ClientPubKeySig;
+            public ulong UserState;
         }
 
         #endregion
 
         #region Utilities
+
+        private readonly ConcurrentQueue<ResponseQueueEntry> ResponseQueue = new();
+
+        private readonly Dictionary<int, ChallengeListEntry> ChallengeList = new();
+
 
         /// <summary>
         /// Get (not necessarily cryptographically strong) random bytes for the challenge
@@ -146,10 +151,6 @@ namespace Arteranos.Services
             public NetworkConnectionToClient conn;
             public AuthResponseMessage msg;
         }
-
-        private readonly ConcurrentQueue<ResponseQueueEntry> ResponseQueue = new();
-
-        private readonly Dictionary<int, ChallengeListEntry> ChallengeList = new();
 
         // Every two seconds, look for the outdated login attempts to remove them.
         private IEnumerator ScrubChallenges()
@@ -298,6 +299,35 @@ namespace Arteranos.Services
                 // Add the server settings and the signature of the client's public key.
                 ss.Sign(msg.ClientPublicKey, out authResponseMessage.ClientPubKeySig);
                 authResponseMessage.ServerSettings = SettingsManager.Server.Strip();
+
+                ServerUserState query = new()
+                {
+                    userID = new UserID(msg.ClientPublicKey, msg.Nickname),
+                    address = conn.address,
+                    deviceUID = msg.deviceUID
+                };
+
+                IEnumerable<ServerUserState> q = SettingsManager.ServerUsers.FindUsersOR(query);
+
+                ulong aggregated = 0;
+                foreach (ServerUserState user in q) { aggregated |= user.userState; }
+
+                // Conflicting server user base's entries. Maybe a user's deep fall or a
+                // ban evasion.
+                // But, for example, one user could be a world administrator due to the authoring of a world,
+                // and a server administrator as his origin as the server.... perfectly valid.
+                //
+                // But, banned means revoking all of the privileges, of course.
+                if((aggregated & UserState.Banned) != 0)
+                {
+                    aggregated &= ~UserState.GOOD_MASK;
+
+                    if (q.Count() > 1)
+                        aggregated |= UserState.BanEvading;
+                }
+
+                // TODO #11 Look up the user's privilege state
+                authResponseMessage.UserState = aggregated;
             }
 
             // Anyway, expire the thallenge.
@@ -322,9 +352,12 @@ namespace Arteranos.Services
                 Debug.Log($"  Reason: {authResponseMessage.status}, Message:\n{authResponseMessage.message}");
 
             if(accepted)
+            {
+                // Transfer the AuthResponse for the Manager to initialize the avatar.
+                ArteranosNetworkManager.Instance.AddResponseMessage(conn.connectionId, authResponseMessage);
                 ServerAccept(conn);
-            else
-                ServerReject(conn);
+            }
+            else ServerReject(conn);
         }
 
         #endregion
