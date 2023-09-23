@@ -12,11 +12,17 @@ using System.Collections.Generic;
 
 public class ArteranosNetworkManager : NetworkManager
 {
+    internal struct AuthSequence
+    {
+        public ArteranosNetworkAuthenticator.AuthRequestPayload request;
+        public ArteranosNetworkAuthenticator.AuthResponseMessage response;
+    }
+
     // Overrides the base singleton so we don't
     // have to cast to this type everywhere.
     public static ArteranosNetworkManager Instance { get; private set; }
 
-    private readonly Dictionary<int, ArteranosNetworkAuthenticator.AuthResponseMessage> ResponseMessages = new();
+    private readonly Dictionary<int, AuthSequence> ResponseMessages = new();
 
     /// <summary>
     /// Runs on both Server and Client
@@ -30,16 +36,16 @@ public class ArteranosNetworkManager : NetworkManager
 
     #region Utilities
 
-    internal void AddResponseMessage(int connid, ArteranosNetworkAuthenticator.AuthResponseMessage message)
+    internal void AddResponseMessage(int connid, AuthSequence sequence)
     {
         if(ResponseMessages.ContainsKey(connid))
         {
             // Connid collision exploit?!
-            message.UserState = 0; // Maybe banned if it's proven reliable as an attack indication.
+            sequence.response.UserState = 0; // Maybe banned if it's proven reliable as an attack indication.
             Debug.LogWarning($"ConnID {connid} assigned twice - race condition or a attack?");
         }
 
-        ResponseMessages.Add(connid, message);
+        ResponseMessages.Add(connid, sequence);
     }
 
     #endregion
@@ -177,15 +183,17 @@ public class ArteranosNetworkManager : NetworkManager
 
         NetworkServer.AddPlayerForConnection(conn, player);
 
-        // Initialize the avatar's brain directly from the server's resources
+        // Initialize the avatar's brain directly from the server's resources as with the login history
         IAvatarBrain brain = player.GetComponent<IAvatarBrain>();
 
-        if (ResponseMessages.TryGetValue(conn.connectionId, out ArteranosNetworkAuthenticator.AuthResponseMessage authResponse))
+        if (ResponseMessages.TryGetValue(conn.connectionId, out AuthSequence seq))
         {
             ResponseMessages.Remove(conn.connectionId);
-            brain.UserState = authResponse.UserState;
+            brain.UserState = seq.response.UserState;
+
+            brain.UserID = new UserID(seq.request.ClientPublicKey, seq.request.Nickname);
         }
-        else brain.UserState = UserState.Banned | UserState.Exploiting;
+        else conn.Disconnect();  // No discussion, there'd be something fishy...
     }
 
     /// <summary>

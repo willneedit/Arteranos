@@ -43,11 +43,7 @@ namespace Arteranos.Avatar
             private set => CmdPropagateString(AVKeys.AvatarURL, value);
         }
 
-        public UserID UserID
-        {
-            get => m_userID;
-            private set => CmdPropagateUserID(value);
-        }
+        public UserID UserID { get => m_userID; set => m_userID = value; }
 
         public string Nickname
         {
@@ -153,16 +149,6 @@ namespace Arteranos.Avatar
 
             base.OnStartClient();
 
-            if(isServer)
-            {
-                int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
-                name = $"Avatar [???][connId={connId}, netId={netId}]";
-            }
-            else
-            {
-                name = $"Avatar [???][netId={netId}]";
-            }
-
             m_ints.Callback += OnMIntsChanged;
             m_floats.Callback += OnMFloatsChanged;
             m_strings.Callback += OnMStringsChanged;
@@ -254,8 +240,6 @@ namespace Arteranos.Avatar
             {
                 AvatarURL = cs.AvatarURL;
 
-                UserID = new(cs.UserPublicKey, cs.Me.Nickname);
-
                 UserPrivacy = cs.UserPrivacy;
             }
         }
@@ -289,7 +273,7 @@ namespace Arteranos.Avatar
         private UserPrivacy m_UserPrivacy = null;
 
         [SyncVar] // Default if someone circumvented the Authenticator and the Network Manager.
-        public ulong m_UserState = (Core.UserState.Banned | Core.UserState.Exploiting);
+        private ulong m_UserState = (Core.UserState.Banned | Core.UserState.Exploiting);
 
         void Awake()
         {
@@ -374,9 +358,6 @@ namespace Arteranos.Avatar
 
         [Command]
         private void CmdPropagateBlob(AVKeys key, byte[] value) => m_blobs[key] = value;
-
-        [Command]
-        private void CmdPropagateUserID(UserID userID) => m_userID = userID;
 
         [Command]
         private void CmdPropagateUserPrivacy(UserPrivacy userPrivacy) => m_UserPrivacy = userPrivacy;
@@ -637,6 +618,22 @@ namespace Arteranos.Avatar
         }
 
         public void PerformEmote(string emoteName) => CmdPerformEmote(emoteName);
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Capabilities
+
+        public bool IsAbleTo(UserCapabilities cap, IAvatarBrain target)
+        {
+            // Server admins rule their own domain.
+            if (Core.UserState.IsSAdmin(UserState)) return true;
+
+            // World admins are just one tier below.
+            if(Core.UserState.IsWAdmin(UserState) && (target == null || !Core.UserState.IsSAdmin(target.UserState))) return true;
+
+            // TODO #11 detailed analysis and comparison
+            return false;
+        }
 
         #endregion
     }

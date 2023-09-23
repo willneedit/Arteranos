@@ -8,6 +8,7 @@
 #if UNITY_EDITOR
 
 using Arteranos.Core;
+using Arteranos.Social;
 using System;
 using UnityEngine;
 
@@ -104,6 +105,11 @@ namespace Arteranos.Avatar
             => LogDebug($"To {receiver.Nickname}: {text}");
         public void ReceiveTextMessage(IAvatarBrain sender, string text) => throw new NotImplementedException();
         public void PerformEmote(string emoteName) => throw new NotImplementedException();
+
+        public bool IsAbleTo(UserCapabilities cap, IAvatarBrain target)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

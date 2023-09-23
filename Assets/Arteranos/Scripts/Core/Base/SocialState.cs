@@ -92,7 +92,7 @@ namespace Arteranos.Social
         /// checks if the action (like seeing someone's user name or sending texts) is permitted
         /// </summary>
         /// <param name="target">The target user</param>
-        /// <param name="visibility">The tatget's visibility setting, or your setting if this action is being remotely invoked</param>
+        /// <param name="visibility">The target's visibility setting, or your setting if this action is being remotely invoked</param>
         /// <returns>Self explanatory.</returns>
         public static bool IsPermitted(IAvatarBrain target, UserVisibility visibility)
         {
@@ -108,5 +108,19 @@ namespace Arteranos.Social
 
     #endregion
     // -------------------------------------------------------------------
+    #region Capabilities handling
+    public enum UserCapabilities
+    {
+        CanFly = 0,
+        CanTalk = 1,
+        CanGagUser = 2,
+        CanKickUser = 3,
+        CanBanUser = 4,
+        CanViewUsersID = 5,
+        CanSendText = 6,
+        ResistMuting = 32,
+        ResistBlocking = 33,
+    }
+    #endregion
 
 }

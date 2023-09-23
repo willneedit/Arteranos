@@ -8,6 +8,7 @@
 #pragma warning disable IDE1006 // Because Unity's more relaxed naming convention
 
 using Arteranos.Core;
+using Arteranos.Social;
 using System;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace Arteranos.Avatar
         IAvatarLoader Body { get; }
         GameObject gameObject { get; }
         Transform transform { get; }
-        UserID UserID { get; }
+        UserID UserID { get; set; }
         UserPrivacy UserPrivacy { get; }
         ulong UserState { get; set; }
 
@@ -32,6 +33,7 @@ namespace Arteranos.Avatar
 
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
         ulong GetOwnState(IAvatarBrain receiver);
+        bool IsAbleTo(UserCapabilities cap, IAvatarBrain target);
         void LogDebug(object message);
         void LogError(object message);
         void LogWarning(object message);
