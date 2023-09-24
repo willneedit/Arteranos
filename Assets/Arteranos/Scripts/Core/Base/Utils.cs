@@ -11,6 +11,9 @@ using System;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text;
+using Arteranos.Avatar;
+using Arteranos.Social;
+using Arteranos.XR;
 
 namespace Arteranos.Core
 {
@@ -127,6 +130,20 @@ namespace Arteranos.Core
                 UIDRepresentation.Dice_5 => CryptoHelpers.FP_Dice_5,
                 _ => CryptoHelpers.FP_Base64
             };
+        }
+
+        /// <summary>
+        /// Determine if you are able to do the action in the question (to the targeted user)
+        /// </summary>
+        /// <param name="cap">The action you want to do</param>
+        /// <param name="target">The targeted user you want to do for (or, against)</param>
+        /// <returns>Self explanatory.</returns>
+        public static bool IsAbleTo(UserCapabilities cap, IAvatarBrain target)
+        {
+            // You are offline, it has to be your own computer.
+            if(XRControl.Me == null) return true;
+
+            return XRControl.Me.IsAbleTo(cap, target);
         }
     }
 }

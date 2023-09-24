@@ -11,6 +11,7 @@ using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
 using Arteranos.Social;
+using PlasticGui.WebApi.Responses;
 
 namespace Arteranos.Avatar
 {
@@ -625,14 +626,47 @@ namespace Arteranos.Avatar
 
         public bool IsAbleTo(UserCapabilities cap, IAvatarBrain target)
         {
-            // Server admins rule their own domain.
-            if (Core.UserState.IsSAdmin(UserState)) return true;
+            bool isAnyAdmin = (Core.UserState.IsSAdmin(UserState) || Core.UserState.IsWAdmin(UserState));
 
-            // World admins are just one tier below.
-            if(Core.UserState.IsWAdmin(UserState) && (target == null || !Core.UserState.IsSAdmin(target.UserState))) return true;
+            bool targetIsAnyAdmin = (target == null || Core.UserState.IsSAdmin(target.UserState) || Core.UserState.IsWAdmin(target.UserState));
 
-            // TODO #11 detailed analysis and comparison
-            return false;
+            bool userHigher = target == null || 
+                (UserState & Core.UserState.GOOD_MASK) > (target.UserState & Core.UserState.GOOD_MASK);
+
+            return cap switch
+            {
+                // User can enable flying if the current(!) server permits it
+                // TODO - maybe world restrictions.
+                // Maybe add SettingsManager.Client.PingXRControllersChanged();
+                // in the world transition, too.
+                UserCapabilities.CanEnableFly => isAnyAdmin || (SettingsManager.CurrentServer?.Permissions.Flying ?? true),
+
+                // Every user can mute others on their own clients, but they cannot mute admins.
+                UserCapabilities.CanMuteUser => !targetIsAnyAdmin,
+
+                // Same as with blocking users.
+                UserCapabilities.CanBlockUser => !targetIsAnyAdmin,
+
+                // Gag User is reserved to to admins. Note that they _can_ gag higher tiers in
+                // case the don't notice when their microphone is noisy.
+                UserCapabilities.CanGagUser => isAnyAdmin,
+
+                // Kicking users is reserved to any admin, but only the lower tiers
+                UserCapabilities.CanKickUser => isAnyAdmin && userHigher,
+
+                // Banning users is for server admin only,
+                UserCapabilities.CanBanUser => Core.UserState.IsSAdmin(UserState) && userHigher,
+
+                // Admins can view user IDs, even if the users don't want to.
+                // Especially for the risk of user impersonation
+                UserCapabilities.CanViewUsersID => isAnyAdmin || (target != null && SocialState.IsPermitted(target, target.UserPrivacy.UIDVisibility)),
+
+                // Admin can send text, even to higher tiers, for a reason
+                UserCapabilities.CanSendText => isAnyAdmin || (target != null && SocialState.IsPermitted(target, target.UserPrivacy.TextReception)),
+
+
+                _ => throw new NotImplementedException(),
+            };
         }
 
         #endregion

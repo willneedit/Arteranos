@@ -44,11 +44,6 @@ namespace Arteranos.UI
             btn_kick_user.onClick.AddListener(OnKickUserButtonClicked);
         }
 
-        private void OnKickUserButtonClicked()
-        {
-            throw new NotImplementedException();
-        }
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -84,32 +79,21 @@ namespace Arteranos.UI
 
         private string GetCaptionText()
         {
-            string capMessage = string.Empty;
+            string capMessage;
 
-            // Maybe always visible for world/server administrators?
-            if (SocialState.IsPermitted(Bearer, Bearer.UserPrivacy.UIDVisibility))
+            if (Core.Utils.IsAbleTo(UserCapabilities.CanViewUsersID, Bearer))
                 capMessage = CryptoHelpers.ToString(
                     Core.Utils.GetUIDFPEncoding(Bearer.UserPrivacy.UIDRepresentation), Bearer.UserID);
-            else
-                capMessage = "<Undisclosed user name>";
+            else capMessage = "<Undisclosed user name>";
 
             DateTime now = DateTime.Now;
 
             // Overlay the informational message for three out of six seconds.
             if(now.Second % 6 > 2)
             {
-                if (SocialState.IsFriends(Bearer))
-                {
-                    capMessage = "Friend";
-                }
-                else if (SocialState.IsFriendOffered(Bearer))
-                {
-                    capMessage = "Wants to be your friend";
-                }
-                else if (SocialState.IsFriendRequested(Bearer))
-                {
-                    capMessage = "Friend request sent";
-                }
+                if (SocialState.IsFriends(Bearer)) capMessage = "Friend";
+                else if (SocialState.IsFriendOffered(Bearer)) capMessage = "Wants to be your friend";
+                else if (SocialState.IsFriendRequested(Bearer)) capMessage = "Friend request sent";
             }
 
             return capMessage;
@@ -122,7 +106,8 @@ namespace Arteranos.UI
 
             // No point of dealing with the blocked status - it isn't visible if it is blocked.
             btn_friend_add.gameObject.SetActive(!friends && !blocked);
-            btn_block.gameObject.SetActive(!friends);
+
+            btn_block.gameObject.SetActive(!friends && Core.Utils.IsAbleTo(UserCapabilities.CanBlockUser, Bearer));
 
             //       Design: Speaker on if the audio status okay and not individually muted
             //               Speaker off it it's anything else
@@ -134,10 +119,17 @@ namespace Arteranos.UI
 
             // Only interactable if there's no other reason for it.
             current.interactable = (status & ~AppearanceStatus.Muted) == AppearanceStatus.OK;
+            // And if the viewed user is an admin, you cannot mute him at all. :)
+            current.gameObject.SetActive(Core.Utils.IsAbleTo(UserCapabilities.CanMuteUser, Bearer));
 
-            // Send text button is only available if the receiver wants it to.
-            // TODO #11 - User privileges. World and server administrators have to be able, everytime.
-            btn_send_text.gameObject.SetActive(SocialState.IsPermitted(Bearer, Bearer.UserPrivacy.TextReception));
+            // Self explanatory.
+            btn_send_text.gameObject.SetActive(Core.Utils.IsAbleTo(UserCapabilities.CanSendText, Bearer));
+            
+            // Combined function, further inquiry if it's for kicking or banning.
+            btn_kick_user.gameObject.SetActive(
+Core.Utils.IsAbleTo(UserCapabilities.CanKickUser, Bearer) ||
+Core.Utils.IsAbleTo(UserCapabilities.CanBanUser, Bearer)
+                );
         }
 
         private void OnMuteButtonClicked()
@@ -171,5 +163,9 @@ namespace Arteranos.UI
             TextMessageUIFactory.New(Bearer);
         }
 
+        private void OnKickUserButtonClicked()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

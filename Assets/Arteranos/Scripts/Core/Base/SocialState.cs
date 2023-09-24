@@ -111,15 +111,14 @@ namespace Arteranos.Social
     #region Capabilities handling
     public enum UserCapabilities
     {
-        CanFly = 0,
-        CanTalk = 1,
-        CanGagUser = 2,
-        CanKickUser = 3,
-        CanBanUser = 4,
-        CanViewUsersID = 5,
-        CanSendText = 6,
-        ResistMuting = 32,
-        ResistBlocking = 33,
+        CanEnableFly = 0,
+        CanMuteUser,
+        CanGagUser,
+        CanBlockUser,
+        CanKickUser,
+        CanBanUser,
+        CanViewUsersID,
+        CanSendText,
     }
     #endregion
 

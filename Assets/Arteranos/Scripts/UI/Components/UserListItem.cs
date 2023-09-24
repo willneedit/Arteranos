@@ -93,8 +93,8 @@ namespace Arteranos.UI
                 // Connot send texts to offline users. They could want to deny them.
                 // TODO #11 - User privileges. World and server administrators have to be able, everytime.
                 IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
-                if (targetUser != null)
-                    btn_SendText.gameObject.SetActive(SocialState.IsPermitted(targetUser, targetUser.UserPrivacy.TextReception));
+                if (targetUser != null && XRControl.Me != null)
+                    btn_SendText.gameObject.SetActive(Utils.IsAbleTo(UserCapabilities.CanSendText, targetUser));
                 else
                     btn_SendText.gameObject.SetActive(false);
             }

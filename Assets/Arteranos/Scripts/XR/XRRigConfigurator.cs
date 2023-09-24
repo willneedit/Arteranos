@@ -99,11 +99,8 @@ namespace Arteranos.XR
                     : 9.8f;
             }
 
-            // TODO - maybe world restrictions.
-            // Maybe add SettingsManager.Client.PingXRControllersChanged();
-            // in the world transition, too.
-            MoveProvider.useGravity = !(mcs.Flying                                  // User preferences
-                && (SettingsManager.CurrentServer?.Permissions.Flying ?? true));    // Server restrictions (no server = true)
+            MoveProvider.useGravity = !(mcs.Flying                                       // User preferences
+                && (Utils.IsAbleTo(Social.UserCapabilities.CanEnableFly, null)));        // Server restrictions (no server = true)
 
             TurnType turnType = mcs.Turn;
             StartCoroutine(ReconfigureTurnType(turnType));
