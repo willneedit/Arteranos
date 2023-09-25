@@ -11,7 +11,6 @@ using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
 using Arteranos.Social;
-using PlasticGui.WebApi.Responses;
 
 namespace Arteranos.Avatar
 {
@@ -628,7 +627,7 @@ namespace Arteranos.Avatar
         {
             bool isAnyAdmin = (Core.UserState.IsSAdmin(UserState) || Core.UserState.IsWAdmin(UserState));
 
-            bool targetIsAnyAdmin = (target == null || Core.UserState.IsSAdmin(target.UserState) || Core.UserState.IsWAdmin(target.UserState));
+            bool targetIsAnyAdmin = (target != null && (Core.UserState.IsSAdmin(target.UserState) || Core.UserState.IsWAdmin(target.UserState)));
 
             bool userHigher = target == null || 
                 (UserState & Core.UserState.GOOD_MASK) > (target.UserState & Core.UserState.GOOD_MASK);

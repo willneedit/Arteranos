@@ -20,6 +20,7 @@ namespace Arteranos.UI
     public class PrefPanel_Movement : UIBehaviour
     {
         [SerializeField] private Toggle chk_Flying = null;
+        [SerializeField] private TMP_Text lbl_Fly_disabled = null;
         [SerializeField] private Spinner spn_Turning= null;
         [SerializeField] private NumberedSlider sldn_SmoothTurnSpeed = null;
         [SerializeField] private Spinner spn_Teleporting= null;
@@ -44,6 +45,19 @@ namespace Arteranos.UI
             spn_Blinders.OnChanged += OnBlindersChanged;
             sldn_SmoothTurnSpeed.OnValueChanged += OnSmoothTurnSpeedChanged;
             sldn_ZiplineDuration.OnValueChanged += OnZipLineDurationChanged;
+        }
+
+        private bool? oldFlyingPermission = null;
+        private void Update()
+        {
+            bool flyingPermission = Utils.IsAbleTo(Social.UserCapabilities.CanEnableFly, null);
+
+            if(flyingPermission != oldFlyingPermission)
+            {
+                chk_Flying.gameObject.SetActive(flyingPermission);
+                lbl_Fly_disabled.gameObject.SetActive(!flyingPermission);
+                oldFlyingPermission = flyingPermission;
+            }
         }
 
         private void OnFlyingChanged(bool arg0)
