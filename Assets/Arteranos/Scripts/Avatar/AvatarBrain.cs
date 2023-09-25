@@ -625,6 +625,8 @@ namespace Arteranos.Avatar
 
         public bool IsAbleTo(UserCapabilities cap, IAvatarBrain target)
         {
+            bool friends = (target != null) && SocialState.IsFriendRequested(target);
+
             bool isAnyAdmin = (Core.UserState.IsSAdmin(UserState) || Core.UserState.IsWAdmin(UserState));
 
             bool targetIsAnyAdmin = (target != null && (Core.UserState.IsSAdmin(target.UserState) || Core.UserState.IsWAdmin(target.UserState)));
@@ -640,11 +642,14 @@ namespace Arteranos.Avatar
                 // in the world transition, too.
                 UserCapabilities.CanEnableFly => isAnyAdmin || (SettingsManager.CurrentServer?.Permissions.Flying ?? true),
 
+                // Maybe some accesss restriction for requesting friendships...?
+                UserCapabilities.CanFriendUser => !friends,
+
                 // Every user can mute others on their own clients, but they cannot mute admins.
                 UserCapabilities.CanMuteUser => !targetIsAnyAdmin,
 
-                // Same as with blocking users.
-                UserCapabilities.CanBlockUser => !targetIsAnyAdmin,
+                // Users should not block admins. Friends should not block friends, too.
+                UserCapabilities.CanBlockUser => !friends && !targetIsAnyAdmin,
 
                 // Gag User is reserved to to admins. Note that they _can_ gag higher tiers in
                 // case the don't notice when their microphone is noisy.

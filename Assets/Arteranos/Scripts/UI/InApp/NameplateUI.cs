@@ -101,13 +101,10 @@ namespace Arteranos.UI
 
         private void OnAppearanceStatusChanged(int status)
         {
-            bool friends = SocialState.IsFriendRequested(Bearer);
-            bool blocked = SocialState.IsBlocked(Bearer);
-
             // No point of dealing with the blocked status - it isn't visible if it is blocked.
-            btn_friend_add.gameObject.SetActive(!friends && !blocked);
+            btn_friend_add.gameObject.SetActive(Core.Utils.IsAbleTo(UserCapabilities.CanFriendUser, Bearer));
 
-            btn_block.gameObject.SetActive(!friends && Core.Utils.IsAbleTo(UserCapabilities.CanBlockUser, Bearer));
+            btn_block.gameObject.SetActive(Core.Utils.IsAbleTo(UserCapabilities.CanBlockUser, Bearer));
 
             //       Design: Speaker on if the audio status okay and not individually muted
             //               Speaker off it it's anything else

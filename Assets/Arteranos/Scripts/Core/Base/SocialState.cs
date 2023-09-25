@@ -112,6 +112,7 @@ namespace Arteranos.Social
     public enum UserCapabilities
     {
         CanEnableFly = 0,
+        CanFriendUser,
         CanMuteUser,
         CanGagUser,
         CanBlockUser,
