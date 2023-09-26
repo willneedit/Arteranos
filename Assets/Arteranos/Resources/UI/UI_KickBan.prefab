@@ -974,6 +974,7 @@ GameObject:
   - component: {fileID: 2172038527422595236}
   - component: {fileID: 2172038527422595237}
   - component: {fileID: 2172038527422595234}
+  - component: {fileID: 7950683082265344095}
   m_Layer: 5
   m_Name: UI_KickBan
   m_TagString: Untagged
@@ -1045,7 +1046,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &2172038527422595237
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1082,6 +1083,33 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RaycastTriggerInteraction: 1
+--- !u!114 &7950683082265344095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2172038527422595235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cacbd35882b754644986b54ec120f812, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lbl_Reason: {fileID: 3862519708247704533}
+  spn_Reason: {fileID: 5678383033270673712}
+  txt_ReasonDetail: {fileID: 6464597522070111126}
+  txt_RD_Hint: {fileID: 740139635704843389}
+  lbl_BanHow: {fileID: 5557278827331952098}
+  grp_BanHow: {fileID: 7517327008202653040}
+  chk_Ban_UID: {fileID: 3885662538600523099}
+  chk_Ban_Address: {fileID: 729705357211900128}
+  chk_Ban_DID: {fileID: 2042433905959469996}
+  lbl_Ban_UID: {fileID: 9046799308787449855}
+  lbl_Ban_Address: {fileID: 8663114437970737766}
+  lbl_Ban_DID: {fileID: 7181153987084623784}
+  btn_Cancel: {fileID: 1572229043478814079}
+  btn_Commit: {fileID: 9047099605079717283}
+  btn_Commit_txt: {fileID: 4553579373828821755}
 --- !u!1 &2280822240609644277
 GameObject:
   m_ObjectHideFlags: 0
@@ -3604,6 +3632,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: de5e0a57164cb56478e36110bdfa5e74, type: 3}
+--- !u!114 &5678383033270673712 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2832715246127269007, guid: de5e0a57164cb56478e36110bdfa5e74,
+    type: 3}
+  m_PrefabInstance: {fileID: 7602771932207637951}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62557b8a1c285c54a801acd8447351c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &5678383033270673713 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2832715246127269006, guid: de5e0a57164cb56478e36110bdfa5e74,
