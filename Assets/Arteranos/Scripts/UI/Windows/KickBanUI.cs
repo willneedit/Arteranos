@@ -6,7 +6,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -14,15 +13,12 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using UnityEngine.Events;
-
-using System.Reflection;
 using Arteranos.Avatar;
 using Arteranos.XR;
 
 namespace Arteranos.UI
 {
-    public class KickBanUI : UIBehaviour
+    public class KickBanUI : UIBehaviour, IKickBanUI
     {
         [SerializeField] private TMP_Text lbl_Reason = null;
         [SerializeField] private Spinner spn_Reason = null;
@@ -117,54 +113,81 @@ namespace Arteranos.UI
             }
         };
 
-        public IAvatarBrain target = null;
+        public IAvatarBrain Target { get; set; } = null;
 
         protected override void Awake()
         {
             base.Awake();
 
             spn_Reason.Options = (from entry in reasons select entry.description).ToArray();
-            spn_Reason.OnChanged += (int arg1, bool arg2) => txt_RD_Hint.text = reasons[arg1].reasonText;
+            spn_Reason.OnChanged += OnReasonChange;
+            
 
             chk_Ban_UID.onValueChanged.AddListener(OnBanMethodChange);
             chk_Ban_Address.onValueChanged.AddListener(OnBanMethodChange);
             chk_Ban_DID.onValueChanged.AddListener(OnBanMethodChange);
 
             btn_Commit.onClick.AddListener(OnCommitClicked);
-        }
+            btn_Cancel.onClick.AddListener(OnCancelClicked);
 
-        private void OnCommitClicked()
-        {
-            bool banning = chk_Ban_DID.isOn || chk_Ban_UID.isOn || chk_Ban_Address.isOn;
-            ulong banbits = reasons[spn_Reason.value].reasonBit |
-                (banning ? UserState.Banned : 0);
-
-            // Fill out the pattern of the targeted user action and transmit it
-            // to the server to fill the fields and do the final decision.
-            ServerUserState banPacket = new()
-            {
-                userID = chk_Ban_UID.isOn ? target.UserID : null,
-                userState = banbits,
-                address = chk_Ban_Address.isOn ? string.Empty : null,
-                deviceUID = chk_Ban_DID.isOn ? string.Empty : null,
-                remarks = txt_ReasonDetail.text,
-            };
-
-            // XRControl.Me.AttemptKickUser(target, banPacket);
-            throw new NotImplementedException();
+            OnBanMethodChange(false);
         }
 
         protected override void Start()
         {
             base.Start();
 
-            if(target == null) throw new ArgumentNullException("target");
+            if(Target == null) throw new ArgumentNullException("target");
+
+            // If you cannot ban the target, hide the portion of the UI
+            if(!Utils.IsAbleTo(Social.UserCapabilities.CanBanUser, Target))
+            {
+                lbl_BanHow.gameObject.SetActive(false);
+                grp_BanHow.SetActive(false);
+            }
+
+            lbl_Reason.text = string.Format(lbl_Reason.text, Target.Nickname);
         }
+
+        private void OnReasonChange(int arg1, bool arg2)
+        {
+            txt_RD_Hint.text = reasons[arg1].reasonText;
+            OnBanMethodChange(false);
+        }
+
         private void OnBanMethodChange(bool arg0)
         {
-            btn_Commit_txt.text = chk_Ban_DID.isOn || chk_Ban_UID.isOn || chk_Ban_Address.isOn 
-                ? "Ban" 
+            btn_Commit_txt.text = IsBanning()
+                ? "Ban"
                 : "Kick";
         }
+
+        private bool IsBanning()
+        {
+            return (chk_Ban_DID.isOn || chk_Ban_UID.isOn || chk_Ban_Address.isOn) &&
+                spn_Reason.value != 0;
+        }
+
+        private void OnCommitClicked()
+        {
+            ulong banbits = reasons[spn_Reason.value].reasonBit |
+                (IsBanning() ? UserState.Banned : 0);
+
+            // Fill out the pattern of the targeted user action and transmit it
+            // to the server to fill the fields and do the final decision.
+            ServerUserState banPacket = new()
+            {
+                userID = chk_Ban_UID.isOn ? Target.UserID : null,
+                userState = banbits,
+                address = chk_Ban_Address.isOn ? string.Empty : null,
+                deviceUID = chk_Ban_DID.isOn ? string.Empty : null,
+                remarks = txt_ReasonDetail.text,
+            };
+
+            XRControl.Me.AttemptKickUser(Target, banPacket);
+            Destroy(gameObject);
+        }
+
+        private void OnCancelClicked() => Destroy(gameObject);
     }
 }

@@ -26,7 +26,7 @@ namespace Arteranos.Services
 
         public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 
-        public Action<bool> OnClientConnectionResponse { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
+        public Action<bool, string> OnClientConnectionResponse { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
 
 
         public new bool enabled
@@ -50,7 +50,7 @@ namespace Arteranos.Services
             }
         }
 
-        private Action<bool> m_OnClientConnectionResponse = null;
+        private Action<bool, string> m_OnClientConnectionResponse = null;
 
         public bool ServerPortPublic = false;
         public bool MetadataPortPublic = false;

@@ -325,6 +325,9 @@ namespace Arteranos.Services
 
                     if (q.Count() > 1)
                         aggregated |= UserState.BanEvading;
+
+                    response.status = HttpStatusCode.Forbidden;
+                    response.message = "You are banned from this server.";
                 }
 
                 // TODO #11 Look up the user's privilege state
@@ -365,7 +368,14 @@ namespace Arteranos.Services
                 ArteranosNetworkManager.Instance.AddResponseMessage(e.conn.connectionId, seq);
                 ServerAccept(e.conn);
             }
-            else ServerReject(e.conn);
+            else StartCoroutine(DelayedServerReject(e.conn));
+        }
+
+        private IEnumerator DelayedServerReject(NetworkConnectionToClient conn)
+        {
+            yield return new WaitForSeconds(2);
+
+            ServerReject(conn);
         }
 
         #endregion
@@ -482,10 +492,7 @@ namespace Arteranos.Services
         {
             if(msg.status != HttpStatusCode.OK)
             {
-                IDialogUI dialog = DialogUIFactory.New();
-
-                dialog.Buttons = new string[] { "OK" };
-                dialog.Text = $"Cannot connect.\n\nServer says:\n{msg.message}";
+                ArteranosNetworkManager.Instance.OnClientDisconnect(msg.message);
 
                 // Just only some formality, the server will disconnect anyway.
                 ClientReject();

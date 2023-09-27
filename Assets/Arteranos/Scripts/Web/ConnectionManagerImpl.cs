@@ -45,7 +45,7 @@ namespace Arteranos.Web
                 if(ssj == null)
                 {
                     Debug.Log("Still no viable metadata, giving up.");
-                    ConnectionResponse(false);
+                    ConnectionResponse(false, null);
                     return false;
                 }
 
@@ -69,15 +69,15 @@ namespace Arteranos.Web
             return true;
         }
 
-        private void ConnectionResponse(bool success)
+        private void ConnectionResponse(bool success, string message)
         {
             NetworkStatus.OnClientConnectionResponse = null;
 
             if(success) return;
-
+            
             UI.IDialogUI dialog = UI.DialogUIFactory.New();
             dialog.Buttons = new[] { "Okay" };
-            dialog.Text =
+            dialog.Text = message ??
                 "Failed to connect to this server.\n" +
                 "Maybe it's offline.";
         }

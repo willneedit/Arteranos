@@ -162,7 +162,8 @@ Core.Utils.IsAbleTo(UserCapabilities.CanBanUser, Bearer)
 
         private void OnKickUserButtonClicked()
         {
-            throw new NotImplementedException();
+            SysMenu.CloseSysMenus();
+            KickBanUIFactory.New(Bearer);
         }
     }
 }

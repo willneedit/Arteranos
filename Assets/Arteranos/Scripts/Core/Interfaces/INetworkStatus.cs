@@ -38,7 +38,7 @@ namespace Arteranos.Services
         IPAddress ExternalAddress { get; }
         bool OpenPorts { get; set; }
         bool enabled { get; set; }
-        Action<bool> OnClientConnectionResponse { get; set; }
+        Action<bool, string> OnClientConnectionResponse { get; set; }
 
         event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 

@@ -48,9 +48,11 @@ namespace Arteranos.Avatar
 
         public UserID UserID { get; set; } = null;
 
-        public UserPrivacy UserPrivacy => throw new NotImplementedException();
+        public UserPrivacy UserPrivacy { get; set; } = new();
 
-        public ulong UserState { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public ulong UserState { get; set; } = 0;
+        public string Address { get; set; } = string.Empty;
+        public string DeviceID { get; set; } = string.Empty;
 
         public event Action<string> OnAvatarChanged;
         public event Action<int> OnAppearanceStatusChanged;
@@ -107,6 +109,11 @@ namespace Arteranos.Avatar
         public void PerformEmote(string emoteName) => throw new NotImplementedException();
 
         public bool IsAbleTo(UserCapabilities cap, IAvatarBrain target)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AttemptKickUser(IAvatarBrain target, ServerUserState banPacket)
         {
             throw new NotImplementedException();
         }

@@ -27,10 +27,13 @@ namespace Arteranos.Avatar
         UserID UserID { get; set; }
         UserPrivacy UserPrivacy { get; }
         ulong UserState { get; set; }
+        string Address { get; set; }
+        string DeviceID { get; set; }
 
         event Action<string> OnAvatarChanged;
         event Action<int> OnAppearanceStatusChanged;
 
+        void AttemptKickUser(IAvatarBrain target, ServerUserState banPacket);
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
         ulong GetOwnState(IAvatarBrain receiver);
         bool IsAbleTo(UserCapabilities cap, IAvatarBrain target);

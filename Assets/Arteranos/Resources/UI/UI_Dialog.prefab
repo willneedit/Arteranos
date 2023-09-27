@@ -409,6 +409,7 @@ GameObject:
   - component: {fileID: 1401308523161811378}
   - component: {fileID: 1401308523161811383}
   - component: {fileID: 7611069168814350563}
+  - component: {fileID: 931349074516357223}
   m_Layer: 5
   m_Name: UI_Dialog
   m_TagString: Untagged
@@ -480,7 +481,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &1401308523161811379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -529,10 +530,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f10469b86b192244f8a300936b9073db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: Dialog text
-  buttons:
-  - OK
-  - Cancel
   Caption: {fileID: 1401308523138471636}
   ButtonPane: {fileID: 1401308521623149281}
 --- !u!114 &7611069168814350563
@@ -551,6 +548,18 @@ MonoBehaviour:
   m_Duration: 5
   m_Tolerance: 0.5
   m_offset: {x: 0, y: 0, z: 0.9}
+--- !u!114 &931349074516357223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401308523161811021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 504c971a29732eb4eb888fcb0f455b49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1401308523170195920
 GameObject:
   m_ObjectHideFlags: 0

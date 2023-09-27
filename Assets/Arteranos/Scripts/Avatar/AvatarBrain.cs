@@ -45,11 +45,7 @@ namespace Arteranos.Avatar
 
         public UserID UserID { get => m_userID; set => m_userID = value; }
 
-        public string Nickname
-        {
-            get => m_userID;
-            private set => throw new NotImplementedException();
-        }
+        public string Nickname { get => m_userID; }
 
         public UserPrivacy UserPrivacy
         {
@@ -59,6 +55,10 @@ namespace Arteranos.Avatar
 
         // Okay to use the setter. The SyncVar would yell at you if you fiddle with the privilege client-side
         public ulong UserState { get => m_UserState; set => m_UserState = value; }
+
+        public string Address { get => m_Address; set => m_Address = value; }
+
+        public string DeviceID { get => m_DeviceID; set => m_DeviceID = value; }
 
         public int AppearanceStatus
         {
@@ -274,6 +274,12 @@ namespace Arteranos.Avatar
 
         [SyncVar] // Default if someone circumvented the Authenticator and the Network Manager.
         private ulong m_UserState = (Core.UserState.Banned | Core.UserState.Exploiting);
+
+        // No [SyncVar] - server only for privacy reasons
+        private string m_Address = null;
+
+        // No [SyncVar] - server only for privacy reasons
+        private string m_DeviceID = null;
 
         void Awake()
         {
@@ -671,6 +677,61 @@ namespace Arteranos.Avatar
 
                 _ => throw new NotImplementedException(),
             };
+        }
+
+        public void AttemptKickUser(IAvatarBrain target, ServerUserState banPacket)
+        {
+            bool allowed = ((banPacket.userState & Core.UserState.Banned) != 0)
+                ? IsAbleTo(UserCapabilities.CanBanUser, target)
+                : IsAbleTo(UserCapabilities.CanKickUser, target);
+
+            if (!allowed) return; // Client side. Last chance to back off.
+
+            CmdAttemptKickUser(target.gameObject, banPacket);
+        }
+
+        [Command]
+        private void CmdAttemptKickUser(GameObject targetGO, ServerUserState banPacket)
+        {
+            IAvatarBrain target = targetGO.GetComponent<IAvatarBrain>();
+
+            // Fill up the banPacket's fields server-side
+            if (banPacket.userID != null) banPacket.userID = target.UserID;
+            if (banPacket.address != null) banPacket.address = target.Address;
+            if (banPacket.deviceUID != null) banPacket.deviceUID = target.DeviceID;
+
+            bool allowed = ((banPacket.userState & Core.UserState.Banned) != 0)
+                ? IsAbleTo(UserCapabilities.CanBanUser, target)
+                : IsAbleTo(UserCapabilities.CanKickUser, target);
+
+            if (!allowed) // Server side. It has to be a modified client to reach it that far.
+            {
+                // ... Seppuku.
+                banPacket.userState = Core.UserState.Banned | Core.UserState.Exploiting;
+                banPacket.userID = UserID;
+                banPacket.address = Address;
+                banPacket.deviceUID = DeviceID;
+                banPacket.remarks = "Attempt to perform a privilege escalation with a hacked client";
+                target = this;
+            }
+
+            // If banned, save the target user's (or the hacker's) data...
+            if((banPacket.userState & Core.UserState.Banned) != 0)
+            {
+                SettingsManager.ServerUsers.AddUser(banPacket);
+                SettingsManager.ServerUsers.Save();
+            }
+
+            // ... and gone.
+            KickUser(target);
+        }
+
+        private void KickUser(IAvatarBrain target)
+        {
+            GameObject targetGO = target.gameObject;
+            NetworkConnectionToClient conn = targetGO.GetComponent<NetworkIdentity>().connectionToClient;
+
+            conn.Disconnect();
         }
 
         #endregion

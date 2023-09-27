@@ -6,8 +6,8 @@ using Arteranos.Avatar;
 using System.Collections.Generic;
 
 /*
-	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
-	API Reference: https://mirror-networking.com/docs/api/Mirror.NetworkManager.html
+    Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
+    API Reference: https://mirror-networking.com/docs/api/Mirror.NetworkManager.html
 */
 
 public class ArteranosNetworkManager : NetworkManager
@@ -189,9 +189,11 @@ public class ArteranosNetworkManager : NetworkManager
         if (ResponseMessages.TryGetValue(conn.connectionId, out AuthSequence seq))
         {
             ResponseMessages.Remove(conn.connectionId);
-            brain.UserState = seq.response.UserState;
 
+            brain.UserState = seq.response.UserState;
             brain.UserID = new UserID(seq.request.ClientPublicKey, seq.request.Nickname);
+            brain.Address = conn.address;
+            brain.DeviceID = seq.request.deviceUID;
         }
         else conn.Disconnect();  // No discussion, there'd be something fishy...
     }
@@ -230,7 +232,7 @@ public class ArteranosNetworkManager : NetworkManager
     {
         base.OnClientConnect();
 
-        NetworkStatus.OnClientConnectionResponse?.Invoke(true);
+        NetworkStatus.OnClientConnectionResponse?.Invoke(true, null);
     }
 
     /// <summary>
@@ -239,7 +241,17 @@ public class ArteranosNetworkManager : NetworkManager
     /// </summary>
     public override void OnClientDisconnect()
     {
-        NetworkStatus.OnClientConnectionResponse?.Invoke(false);
+        NetworkStatus.OnClientConnectionResponse?.Invoke(false, null);
+
+        SettingsManager.CurrentServer = null;
+
+        // Fall back to the client's only permissions, like flying
+        SettingsManager.Client.PingXRControllersChanged();
+    }
+
+    public void OnClientDisconnect(string cause)
+    {
+        NetworkStatus.OnClientConnectionResponse?.Invoke(false, cause);
 
         SettingsManager.CurrentServer = null;
 

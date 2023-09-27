@@ -114,7 +114,7 @@ namespace Arteranos.Services
             get => Instance.OpenPorts;
             set => Instance.OpenPorts = value;
         }
-        public static Action<bool> OnClientConnectionResponse 
+        public static Action<bool, string> OnClientConnectionResponse 
         {
             get => Instance?.OnClientConnectionResponse;
             set => Instance.OnClientConnectionResponse = value;
@@ -362,6 +362,16 @@ namespace Arteranos.UI
         }
     }
 
+    public class KickBanUIFactory : UIBehaviour
+    {
+        public static IKickBanUI New(IAvatarBrain target)
+        {
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_KickBan"));
+            IKickBanUI kickBanUI = go.GetComponentInChildren<IKickBanUI>();
+            kickBanUI.Target = target;
+            return kickBanUI;
+        }
+    }
 
     #endregion
     // -------------------------------------------------------------------
