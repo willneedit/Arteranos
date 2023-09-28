@@ -16,26 +16,6 @@ using AsymmetricKey = Arteranos.Core.RSAKey;
 
 namespace Arteranos.Core
 {
-    // Needed for the distictiveness of the legacy key blobs in the future
-    // wincrypt.h, BLOBHEADER
-    internal struct CspKeyBlobHeader
-    {
-        public byte type;       // 0: 0x6 or 0x7 (public or private keys)
-        public byte version;    // 1: always 2 (in this scope)
-        public ushort reserved; // 2: always 0
-        public uint keyAlg;     // 4: ALGID_KEY_SIGN (0xa4)
-        public ulong magic;     // 8: "RSA1" or "RSA2"
-                                // 12: 
-    }
-
-    internal struct OurKeyBlobHeader
-    {
-        public byte type;       // 0: Same as with CspKeyBlobHeader
-        public byte version;    // 1: 0x80 (or higher - unsigned)
-        public KeyType keyType; // 2: As seen in Interfaces.cs
-                                // 4: 
-    }
-
     public struct CryptPacket
     {
         public byte[] iv;
@@ -43,9 +23,24 @@ namespace Arteranos.Core
         public byte[] encryptedMessage;
     }
 
-    public static class FPPresenter
+    public struct CMSPacket
     {
+        public byte[] iv;
+        public byte[] payloadDER;
+        internal List<ESKEntry> encryptedSessionKeys;
+    }
 
+    internal struct ESKEntry
+    {
+        public byte[] fingerprint;
+        public byte[] encryptedSessionKey;
+    }
+
+    internal struct CMSPayload
+    {
+        public byte[] messageDER;
+        public byte[] signatureKey;
+        public byte[] signature;
     }
 
     public class Crypto : IDisposable, IEquatable<Crypto>
@@ -70,9 +65,6 @@ namespace Arteranos.Core
         #region Public Key Fingerprint
 
         public byte[] Fingerprint { get => CryptoHelpers.GetFingerprint(Key.PublicKey); }
-        public override string ToString() => ToString(CryptoHelpers.FP_SHA256);
-        public string ToString(string v) => CryptoHelpers.ToString(v, Key.PublicKey);
-
         #endregion
 
         #region Encrypt and decrypt
@@ -143,6 +135,128 @@ namespace Arteranos.Core
 
         #endregion
 
+        #region Encapsulating
+
+        private void EncapsulateMessage<T>(T message, out CMSPayload payload)
+        {
+            payload = new()
+            {
+                messageDER = Serializer.Serialize(message),
+                signatureKey = PublicKey,
+            };
+
+            // Sign with the corresponding private key.
+            Sign(payload.messageDER, out payload.signature);
+        }
+
+        private static void DecapsulateMessage<T>(CMSPayload payload, out T message, out byte[] signatureKey)
+        {
+            // Verify against the sender's public key
+            if (!Verify(payload.messageDER, payload.signature, payload.signatureKey))
+                throw new CryptographicException("Signature verification failed");
+
+            signatureKey = payload.signatureKey;
+            message = Serializer.Deserialize<T>(payload.messageDER);
+        }
+
+        private static Aes CreateSessionKeys(byte[][] receiverPublicKeys, out List<ESKEntry> entries)
+        {
+            Aes aes = new AesCryptoServiceProvider();
+
+            entries = new();
+            foreach (byte[] key in receiverPublicKeys)
+            {
+                ESKEntry entry = new()
+                {
+                    // Use the receiver's public key fingerprints to identify them
+                    fingerprint = CryptoHelpers.GetFingerprint(key)
+                };
+                // Wrap the session key with the receiver's public keys
+                using AsymmetricKey wrapKey = new(key);
+                wrapKey.WrapKey(aes.Key, out entry.encryptedSessionKey);
+                entries.Add(entry);
+            }
+
+            return aes;
+        }
+
+        private Aes FindSessionKey(List<ESKEntry> entries)
+        {
+            foreach(ESKEntry entry in entries)
+            {
+                if(entry.fingerprint.SequenceEqual(Fingerprint))
+                {
+                    Key.UnwrapKey(entry.encryptedSessionKey, out byte[] aesKey);
+                    Aes aes = new AesCryptoServiceProvider();
+                    aes.Key = aesKey;
+                    return aes;
+                }
+            }
+
+            throw new CryptographicException("Cannot find encrypted session key");
+        }
+
+        private static CMSPacket EncryptMessage(byte[][] receiverPublicKeys, CMSPayload payload)
+        {
+            using Aes aes = CreateSessionKeys(receiverPublicKeys, out List<ESKEntry> entries);
+
+            CMSPacket packet;
+
+            packet.iv = aes.IV;
+            packet.encryptedSessionKeys = entries;
+
+            byte[] payloadDER = Serializer.Serialize(payload);
+
+            using MemoryStream ciphertext = new();
+            using CryptoStream cs = new(ciphertext, aes.CreateEncryptor(), CryptoStreamMode.Write);
+            cs.Write(payloadDER, 0, payloadDER.Length);
+            cs.Close();
+
+            packet.payloadDER = ciphertext.ToArray();
+
+            return packet;
+        }
+
+        private CMSPayload DecryptMessage(CMSPacket packet)
+        {
+            using Aes aes = FindSessionKey(packet.encryptedSessionKeys);
+            aes.IV = packet.iv;
+
+            using MemoryStream plaintext = new();
+            using CryptoStream cs = new(plaintext, aes.CreateDecryptor(), CryptoStreamMode.Write);
+            cs.Write(packet.payloadDER, 0, packet.payloadDER.Length);
+            cs.Close();
+
+            return Serializer.Deserialize<CMSPayload>(plaintext.ToArray());
+        }
+
+        public void TransmitMessage<T>(T data, byte[][] receiverPublicKeys, out CMSPacket packet)
+        {
+            EncapsulateMessage(data, out CMSPayload payload);
+
+            packet = EncryptMessage(receiverPublicKeys, payload);
+        }
+
+        public void TransmitMessage<T>(T data, byte[] receiverPublicKey, out CMSPacket packet) 
+            => TransmitMessage(data, new byte[][] { receiverPublicKey }, out packet);
+
+        public void ReceiveMessage<T>(CMSPacket packet, ref byte[] expectedSignatureKey, out T data)
+        {
+            CMSPayload payload = DecryptMessage(packet);
+
+            DecapsulateMessage(payload, out data, out byte[] signatureKey);
+            if (expectedSignatureKey == null)
+                expectedSignatureKey = signatureKey;
+            else if (!expectedSignatureKey.SequenceEqual(signatureKey))
+            {
+                expectedSignatureKey = signatureKey; // Nevertheless, return the key we've got.
+                throw new CryptographicException("Sender mismatch");
+            }
+        }
+        #endregion
+
+        #region Boilerplate
+
         public void Dispose() => Key.Dispose();
         public override bool Equals(object obj) => Equals(obj as Crypto);
         public bool Equals(Crypto other) => other is not null && PublicKey.SequenceEqual(other.PublicKey);
@@ -150,5 +264,9 @@ namespace Arteranos.Core
 
         public static bool operator ==(Crypto left, Crypto right) => EqualityComparer<Crypto>.Default.Equals(left, right);
         public static bool operator !=(Crypto left, Crypto right) => !(left == right);
+        public override string ToString() => ToString(CryptoHelpers.FP_SHA256);
+        public string ToString(string v) => CryptoHelpers.ToString(v, Key.PublicKey);
+
+        #endregion
     }
 }

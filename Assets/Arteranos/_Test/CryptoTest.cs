@@ -9,6 +9,7 @@ using UnityEngine;
 
 using Arteranos.Core;
 using System;
+using System.Linq;
 
 namespace Arteranos
 {
@@ -62,6 +63,8 @@ namespace Arteranos
             EncryptTest("This is the second message");
 
             SignTest("This is the signed message");
+
+            MessageTest();
         }
 
         private void EqualityTest()
@@ -154,6 +157,71 @@ namespace Arteranos
             if(Crypto.Verify(msg, signature, alice.PublicKey))
                 Debug.LogError($"FAILED: Signature verification (-)");
 
+        }
+
+        struct testmessage
+        {
+            public string s1;
+            public int i1;
+        }
+
+        private void MessageTest()
+        {
+            testmessage msg = new()
+            {
+                s1 = "test",
+                i1 = 1337
+            };
+
+            testmessage wrongmsg = new()
+            { 
+                s1 = "mallory", 
+                i1 = -1 
+            };
+
+            alice.TransmitMessage(msg, bob.PublicKey, out CMSPacket packet);
+
+            byte[] signatureKey = null; // return the sender's public key
+            bob.ReceiveMessage(packet, ref signatureKey, out testmessage msg2);
+
+            Debug.Log(msg2.s1);
+            Debug.Log(msg2.i1);
+            if (!alice.PublicKey.SequenceEqual(signatureKey))
+                Debug.LogError("FAILED: Sender's signature key wrong");
+
+            Crypto mallory = new();
+
+            // Malicious sender
+            mallory.TransmitMessage(wrongmsg, bob.PublicKey, out CMSPacket malpacket);
+            signatureKey = alice.PublicKey;
+
+            try
+            {
+                bob.ReceiveMessage(malpacket, ref signatureKey, out testmessage wrongmsg2);
+                Debug.LogError("FAILED: Malicious sender identification (-)");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+                if(!mallory.PublicKey.SequenceEqual(signatureKey))
+                    Debug.LogError("FAILED: Malicious sender identification 2 (-)");
+            }
+
+            // Malicious receiver
+            alice.TransmitMessage(wrongmsg, mallory.PublicKey, out CMSPacket malpacket2);
+            signatureKey = null;
+            try
+            {
+                bob.ReceiveMessage(malpacket2, ref signatureKey, out testmessage wrongmsg3);
+                Debug.LogError("FAILED: Misdirected message (-)");
+            }
+            catch(Exception e)
+            {
+                Debug.Log(e.Message);
+                // We shouldn't made it so far, because we cannot decrypt the message
+                if (signatureKey != null)
+                    Debug.LogError("FAILED: Misdirected message 2 (-)");
+            }
         }
     }
 }
