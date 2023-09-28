@@ -11,6 +11,7 @@ using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
 using Arteranos.Social;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Arteranos.Avatar
 {
@@ -687,22 +688,48 @@ namespace Arteranos.Avatar
 
             if (!allowed) return; // Client side. Last chance to back off.
 
-            CmdAttemptKickUser(target.gameObject, banPacket);
+            // Sign, encrypt and transmit.
+
+            // Note to hackers:
+            // Using target.CmdAttemptKickUser(...) won't work. TransmitMessage() uses the client's
+            // private key for signing... a key for only you have, not someone else's.
+            ClientSettings.TransmitMessage(
+                banPacket, 
+                SettingsManager.CurrentServer.ServerPublicKey,
+                out CMSPacket p);
+
+            CmdAttemptKickUser(target.gameObject, p);
         }
 
         [Command]
-        private void CmdAttemptKickUser(GameObject targetGO, ServerUserState banPacket)
+        private void CmdAttemptKickUser(GameObject targetGO, CMSPacket p)
         {
             IAvatarBrain target = targetGO.GetComponent<IAvatarBrain>();
 
-            // Fill up the banPacket's fields server-side
-            if (banPacket.userID != null) banPacket.userID = target.UserID;
-            if (banPacket.address != null) banPacket.address = target.Address;
-            if (banPacket.deviceUID != null) banPacket.deviceUID = target.DeviceID;
+            byte[] expectedSignatureKey = UserID;
+            bool allowed = false;
+            ServerUserState banPacket;
 
-            bool allowed = ((banPacket.userState & Core.UserState.Banned) != 0)
-                ? IsAbleTo(UserCapabilities.CanBanUser, target)
-                : IsAbleTo(UserCapabilities.CanKickUser, target);
+            try
+            {
+                ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out banPacket);
+
+                // Fill up the banPacket's fields server-side
+                if (banPacket.userID != null) banPacket.userID = target.UserID;
+                if (banPacket.address != null) banPacket.address = target.Address;
+                if (banPacket.deviceUID != null) banPacket.deviceUID = target.DeviceID;
+
+                allowed = ((banPacket.userState & Core.UserState.Banned) != 0)
+                    ? IsAbleTo(UserCapabilities.CanBanUser, target)
+                    : IsAbleTo(UserCapabilities.CanKickUser, target);
+            }
+            catch (Exception e)
+            {
+                banPacket = new();
+
+                Debug.LogWarning($"PRIVILEGE ESCALATION DETECTED: Maliciously constructed banPacket, supposedly from {Nickname}");
+                Debug.LogWarning(e.Message);
+            }
 
             if (!allowed) // Server side. It has to be a modified client to reach it that far.
             {

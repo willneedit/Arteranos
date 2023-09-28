@@ -170,6 +170,10 @@ namespace Arteranos.Core
             set => serverKey = value;
         }
 
+        [JsonIgnore]
+        public byte[] ServerPublicKey { get; set; } = null;
+
+
         public ServerSettingsJSON Strip()
         {
             return new ServerSettingsJSON()
@@ -208,9 +212,6 @@ namespace Arteranos.Core
 
         [JsonIgnore]
         private Crypto Crypto = null;
-
-        [JsonIgnore]
-        public byte[] ServerPublicKey => Crypto.PublicKey;
 
         public const string PATH_SERVER_SETTINGS = "ServerSettings.json";
 
@@ -274,6 +275,7 @@ namespace Arteranos.Core
                 }
             }
 
+            ss.ServerPublicKey = ss.Crypto.PublicKey;
             return ss;
         }
 
@@ -281,13 +283,13 @@ namespace Arteranos.Core
 
         public void Sign(byte[] data, out byte[] signature) => Crypto.Sign(data, out signature);
 
-        public void TransmitMessage<T>(T data, byte[][] receiverPublicKeys, out CMSPacket packet)
-            => Crypto.TransmitMessage(data, receiverPublicKeys, out packet);
+        public static void TransmitMessage<T>(T data, byte[][] receiverPublicKeys, out CMSPacket packet)
+            => SettingsManager.Server.Crypto.TransmitMessage(data, receiverPublicKeys, out packet);
 
-        public void TransmitMessage<T>(T data, byte[] receiverPublicKey, out CMSPacket packet)
-            => Crypto.TransmitMessage(data, receiverPublicKey, out packet);
+        public static void TransmitMessage<T>(T data, byte[] receiverPublicKey, out CMSPacket packet)
+            => SettingsManager.Server.Crypto.TransmitMessage(data, receiverPublicKey, out packet);
 
-        public void ReceiveMessage<T>(CMSPacket packet, ref byte[] expectedSignatureKey, out T data)
-            => Crypto.ReceiveMessage(packet, ref expectedSignatureKey, out data);
+        public static void ReceiveMessage<T>(CMSPacket packet, ref byte[] expectedSignatureKey, out T data)
+            => SettingsManager.Server.Crypto.ReceiveMessage(packet, ref expectedSignatureKey, out data);
     }
 }

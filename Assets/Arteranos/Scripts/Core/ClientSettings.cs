@@ -398,14 +398,14 @@ namespace Arteranos.Core
 
         public void Sign(byte[] data, out byte[] signature) => Crypto.Sign(data, out signature);
 
-        public void TransmitMessage<T>(T data, byte[][] receiverPublicKeys, out CMSPacket packet)
-            => Crypto.TransmitMessage(data, receiverPublicKeys, out packet);
+        public static void TransmitMessage<T>(T data, byte[][] receiverPublicKeys, out CMSPacket packet)
+            => SettingsManager.Client.Crypto.TransmitMessage(data, receiverPublicKeys, out packet);
 
-        public void TransmitMessage<T>(T data, byte[] receiverPublicKey, out CMSPacket packet)
-            => Crypto.TransmitMessage(data, receiverPublicKey, out packet);
+        public static void TransmitMessage<T>(T data, byte[] receiverPublicKey, out CMSPacket packet)
+            => SettingsManager.Client.Crypto.TransmitMessage(data, receiverPublicKey, out packet);
 
-        public void ReceiveMessage<T>(CMSPacket packet, ref byte[] expectedSignatureKey, out T data)
-            => Crypto.ReceiveMessage(packet, ref expectedSignatureKey, out data);
+        public static void ReceiveMessage<T>(CMSPacket packet, ref byte[] expectedSignatureKey, out T data)
+            => SettingsManager.Client.Crypto.ReceiveMessage(packet, ref expectedSignatureKey, out data);
 
         public string GetFingerprint(string fmt = null) => Crypto.ToString(fmt);
 
