@@ -171,7 +171,7 @@ namespace Arteranos.Core
         }
 
         [JsonIgnore]
-        public byte[] ServerPublicKey { get; set; } = null;
+        public byte[] ServerPublicKey = null;
 
 
         public ServerSettingsJSON Strip()
@@ -185,7 +185,8 @@ namespace Arteranos.Core
                 Name = Name,
                 Description = Description,
                 Icon = new byte[0],         // Remove the icon to reduce the packet size
-                Permissions = Permissions
+                Permissions = Permissions,
+                ServerPublicKey = ServerPublicKey
             };
         }
     }

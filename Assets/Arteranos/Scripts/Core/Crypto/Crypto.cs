@@ -27,10 +27,10 @@ namespace Arteranos.Core
     {
         public byte[] iv;
         public byte[] payloadDER;
-        internal List<ESKEntry> encryptedSessionKeys;
+        public List<ESKEntry> encryptedSessionKeys;
     }
 
-    internal struct ESKEntry
+    public struct ESKEntry
     {
         public byte[] fingerprint;
         public byte[] encryptedSessionKey;

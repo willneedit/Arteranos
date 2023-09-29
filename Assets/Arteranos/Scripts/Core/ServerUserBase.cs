@@ -15,7 +15,7 @@ using System.ComponentModel;
 
 namespace Arteranos.Core
 {
-    public class UserState : Bit64field
+    public struct UserState
     {
         // Just an ordinary everyday user.
         public const ulong Normal = 0;
@@ -81,11 +81,11 @@ namespace Arteranos.Core
         // All of the 'good' bits.
         public const ulong GOOD_MASK = ((ulong)1 << 48) - 1;
 
-        public static bool IsBanned(ulong field) => IsAny(field, Banned);
+        public static bool IsBanned(ulong field) => Bit64field.IsAny(field, Banned);
 
-        public static bool IsWAdmin(ulong field) => IsAny(field, World_admin | World_admin_asstnt);
+        public static bool IsWAdmin(ulong field) => Bit64field.IsAny(field, World_admin | World_admin_asstnt);
 
-        public static bool IsSAdmin(ulong field) => IsAny(field, Srv_admin | Srv_admin_asstnt);
+        public static bool IsSAdmin(ulong field) => Bit64field.IsAny(field, Srv_admin | Srv_admin_asstnt);
     }
 
     public class UserPrivacy
@@ -117,7 +117,7 @@ namespace Arteranos.Core
         Dice_5
     }
 
-    public class ServerUserState : UserState
+    public struct ServerUserState
     {
         public UserID userID;
         public ulong userState;

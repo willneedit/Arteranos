@@ -707,7 +707,7 @@ namespace Arteranos.Avatar
             IAvatarBrain target = targetGO.GetComponent<IAvatarBrain>();
 
             byte[] expectedSignatureKey = UserID;
-            bool allowed = false;
+            bool allowed;
             ServerUserState banPacket;
 
             try
@@ -725,22 +725,14 @@ namespace Arteranos.Avatar
             }
             catch (Exception e)
             {
-                banPacket = new();
 
                 Debug.LogWarning($"PRIVILEGE ESCALATION DETECTED: Maliciously constructed banPacket, supposedly from {Nickname}");
                 Debug.LogWarning(e.Message);
+                return;
             }
 
-            if (!allowed) // Server side. It has to be a modified client to reach it that far.
-            {
-                // ... Seppuku.
-                banPacket.userState = Core.UserState.Banned | Core.UserState.Exploiting;
-                banPacket.userID = UserID;
-                banPacket.address = Address;
-                banPacket.deviceUID = DeviceID;
-                banPacket.remarks = "Attempt to perform a privilege escalation with a hacked client";
-                target = this;
-            }
+            // No retaliatory action because risking using malicious packets as a denial-of-service attack
+            if (!allowed) return;
 
             // If banned, save the target user's (or the hacker's) data...
             if((banPacket.userState & Core.UserState.Banned) != 0)
