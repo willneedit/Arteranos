@@ -28,9 +28,9 @@ namespace Arteranos.Core
             return PublicKey.SequenceEqual(other.PublicKey);
         }
 
-        public static implicit operator byte[](UserID userID) => userID.PublicKey;
+        public static implicit operator byte[](UserID userID) => userID?.PublicKey;
 
-        public static implicit operator string(UserID userID) => userID.Nickname;
+        public static implicit operator string(UserID userID) => userID?.Nickname;
 
         public override bool Equals(object obj) => Equals(obj as UserID);
         public override int GetHashCode()

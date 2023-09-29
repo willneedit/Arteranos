@@ -13,6 +13,8 @@ using UnityEngine;
 using System.Linq;
 using System.ComponentModel;
 
+using DERSerializer;
+
 namespace Arteranos.Core
 {
     public struct UserState
@@ -117,6 +119,39 @@ namespace Arteranos.Core
         Dice_5
     }
 
+    /*
+     * BanPacket ::= SEQUENCE {
+     *      publicKey [1] OCTET STRING OPTIONAL,
+     *      nickname      UTF8STRING,
+     *      userState     INTEGER,
+     *      address   [2] UTF8STRING OPTIONAL,
+     *      deviceUID [3] UTF8STRING OPTIONAL,
+     *      remarks   [4] UTF8STRING OPTIONAL
+     * }
+     */
+    public struct BanPacket
+    {
+        [ASN1Tag(1, true)]
+        public byte[] publicKey;
+        public string nickname;
+        public ulong userState;
+        [ASN1Tag(2, true)]
+        public string address;
+        [ASN1Tag(3, true)]
+        public string deviceUID;
+        [ASN1Tag(4, true)]
+        public string remarks;
+
+        public ServerUserState ImportBanPacket() => new()
+        {
+            userID = publicKey != null ? new(publicKey, nickname) : null,
+            userState = userState,
+            address = address,
+            deviceUID = deviceUID,
+            remarks = remarks
+        };
+    }
+
     public struct ServerUserState
     {
         public UserID userID;
@@ -124,6 +159,16 @@ namespace Arteranos.Core
         public string address;
         public string deviceUID;
         public string remarks;
+
+        public BanPacket ExportBanPacket() => new()
+        {
+            publicKey = userID ?? null,
+            nickname = userID ?? "<any user>",
+            userState = userState,
+            address = address,
+            deviceUID = deviceUID,
+            remarks = remarks
+        };
     }
 
     public class ServerUserBase

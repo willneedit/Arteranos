@@ -690,11 +690,13 @@ namespace Arteranos.Avatar
 
             // Sign, encrypt and transmit.
 
+            BanPacket bp = banPacket.ExportBanPacket();
+
             // Note to hackers:
             // Using target.CmdAttemptKickUser(...) won't work. TransmitMessage() uses the client's
             // private key for signing... a key for only you have, not someone else's.
             ClientSettings.TransmitMessage(
-                banPacket, 
+                bp, 
                 SettingsManager.CurrentServer.ServerPublicKey,
                 out CMSPacket p);
 
@@ -708,14 +710,14 @@ namespace Arteranos.Avatar
 
             byte[] expectedSignatureKey = UserID;
             bool allowed;
-            ServerUserState banPacket;
+            BanPacket banPacket;
 
             try
             {
                 ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out banPacket);
 
                 // Fill up the banPacket's fields server-side
-                if (banPacket.userID != null) banPacket.userID = target.UserID;
+                if (banPacket.publicKey != null) banPacket.publicKey = target.UserID;
                 if (banPacket.address != null) banPacket.address = target.Address;
                 if (banPacket.deviceUID != null) banPacket.deviceUID = target.DeviceID;
 
@@ -737,7 +739,7 @@ namespace Arteranos.Avatar
             // If banned, save the target user's (or the hacker's) data...
             if((banPacket.userState & Core.UserState.Banned) != 0)
             {
-                SettingsManager.ServerUsers.AddUser(banPacket);
+                SettingsManager.ServerUsers.AddUser(banPacket.ImportBanPacket());
                 SettingsManager.ServerUsers.Save();
             }
 
