@@ -682,7 +682,7 @@ namespace Arteranos.Avatar
 
         public void AttemptKickUser(IAvatarBrain target, ServerUserState banPacket)
         {
-            bool allowed = ((banPacket.userState & Core.UserState.Banned) != 0)
+            bool allowed = Core.UserState.IsBanned(banPacket.userState)
                 ? IsAbleTo(UserCapabilities.CanBanUser, target)
                 : IsAbleTo(UserCapabilities.CanKickUser, target);
 
@@ -721,7 +721,7 @@ namespace Arteranos.Avatar
                 if (banPacket.address != null) banPacket.address = target.Address;
                 if (banPacket.deviceUID != null) banPacket.deviceUID = target.DeviceID;
 
-                allowed = ((banPacket.userState & Core.UserState.Banned) != 0)
+                allowed = Core.UserState.IsBanned(banPacket.userState)
                     ? IsAbleTo(UserCapabilities.CanBanUser, target)
                     : IsAbleTo(UserCapabilities.CanKickUser, target);
             }
@@ -737,7 +737,7 @@ namespace Arteranos.Avatar
             if (!allowed) return;
 
             // If banned, save the target user's (or the hacker's) data...
-            if((banPacket.userState & Core.UserState.Banned) != 0)
+            if(Core.UserState.IsBanned(banPacket.userState))
             {
                 SettingsManager.ServerUsers.AddUser(banPacket.ImportBanPacket());
                 SettingsManager.ServerUsers.Save();

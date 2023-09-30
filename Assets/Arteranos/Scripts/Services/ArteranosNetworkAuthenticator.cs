@@ -319,7 +319,7 @@ namespace Arteranos.Services
                 // and a server administrator as his origin as the server.... perfectly valid.
                 //
                 // But, banned means revoking all of the privileges, of course.
-                if((aggregated & UserState.Banned) != 0)
+                if(UserState.IsBanned(aggregated))
                 {
                     aggregated &= ~UserState.GOOD_MASK;
 

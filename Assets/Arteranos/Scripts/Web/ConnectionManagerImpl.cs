@@ -69,17 +69,33 @@ namespace Arteranos.Web
             return true;
         }
 
+        bool wasOnline = false;
         private void ConnectionResponse(bool success, string message)
         {
-            NetworkStatus.OnClientConnectionResponse = null;
+            // Debug.Log($"Onlinelevel={NetworkStatus.GetOnlineLevel()}, Success={success}, wasOnline={wasOnline}");
+            string text = null;
 
-            if(success) return;
+            if(!success)
+            {
+                bool remoteDisconnected = (NetworkStatus.GetOnlineLevel() == OnlineLevel.Client 
+                    || NetworkStatus.GetOnlineLevel() == OnlineLevel.Host);
+
+                if (message == null)
+                {
+                    // Only if we were never online in the first place
+                    if (!wasOnline) text = "Failed to connect to this server";
+                    // Only if you're disconnecting of your own volition
+                    else if (remoteDisconnected) text = "Disconnected from the server";
+                }
+            }
+            wasOnline = success;
+            // NetworkStatus.OnClientConnectionResponse = null;
+
+            if(text == null) return;
             
             UI.IDialogUI dialog = UI.DialogUIFactory.New();
             dialog.Buttons = new[] { "Okay" };
-            dialog.Text = message ??
-                "Failed to connect to this server.\n" +
-                "Maybe it's offline.";
+            dialog.Text = text;
         }
     }
 }
