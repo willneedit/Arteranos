@@ -19,6 +19,7 @@ using System.Collections;
 using System.Linq;
 using Arteranos.UI;
 using System.Collections.Concurrent;
+using Arteranos.Web;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-authenticators
@@ -492,7 +493,7 @@ namespace Arteranos.Services
         {
             if(msg.status != HttpStatusCode.OK)
             {
-                ArteranosNetworkManager.Instance.OnClientDisconnect(msg.message);
+                ConnectionManager.DeliverDisconnectReason(msg.message);
 
                 // Just only some formality, the server will disconnect anyway.
                 ClientReject();

@@ -224,6 +224,8 @@ namespace Arteranos.Web
         public static IConnectionManager Instance { get; set; }
 
         public static Task<bool> ConnectToServer(string serverURL) => Instance.ConnectToServer(serverURL);
+
+        public static void DeliverDisconnectReason(string reason) => Instance.DeliverDisconnectReason(reason);
     }
 
     public static class ServerGallery

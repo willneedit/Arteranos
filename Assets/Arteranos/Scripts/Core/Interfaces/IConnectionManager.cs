@@ -12,6 +12,7 @@ namespace Arteranos.Web
     public interface IConnectionManager
     {
         Task<bool> ConnectToServer(string serverURL);
+        void DeliverDisconnectReason(string reason);
     }
 
 }

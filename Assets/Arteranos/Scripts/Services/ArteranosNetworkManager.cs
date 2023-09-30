@@ -249,16 +249,6 @@ public class ArteranosNetworkManager : NetworkManager
         SettingsManager.Client.PingXRControllersChanged();
     }
 
-    public void OnClientDisconnect(string cause)
-    {
-        NetworkStatus.OnClientConnectionResponse?.Invoke(false, cause);
-
-        SettingsManager.CurrentServer = null;
-
-        // Fall back to the client's only permissions, like flying
-        SettingsManager.Client.PingXRControllersChanged();
-    }
-
     /// <summary>
     /// Called on clients when a servers tells the client it is no longer ready.
     /// <para>This is commonly used when switching scenes.</para>

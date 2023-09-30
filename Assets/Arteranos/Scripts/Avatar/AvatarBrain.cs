@@ -744,16 +744,36 @@ namespace Arteranos.Avatar
             }
 
             // ... and gone.
-            KickUser(target);
+            ServerKickUser(target, banPacket);
         }
 
-        private void KickUser(IAvatarBrain target)
+        [Server]
+        private void ServerKickUser(IAvatarBrain target, BanPacket bp)
         {
-            GameObject targetGO = target.gameObject;
-            NetworkConnectionToClient conn = targetGO.GetComponent<NetworkIdentity>().connectionToClient;
+            IEnumerator KNBCoroutine(NetworkConnectionToClient targetConn, string text)
+            {
+                TargetDeliverMessage(targetConn, text);
 
-            conn.Disconnect();
+                // Let the target have the message before the disconnect
+                yield return new WaitForSeconds(0.5f);
+
+                targetConn.Disconnect();
+            }
+
+            GameObject targetGO = target.gameObject;
+            NetworkConnectionToClient targetConn = targetGO.GetComponent<NetworkIdentity>().connectionToClient;
+
+            string text = Core.UserState.IsBanned(bp.userState)
+                ? "You've been banned from this server."
+                : "You've been kicked from this server.";
+
+            StartCoroutine(KNBCoroutine(targetConn, text));
         }
+
+
+        [TargetRpc]
+        private void TargetDeliverMessage(NetworkConnectionToClient _, string message) 
+            => ConnectionManager.DeliverDisconnectReason(message);
 
         #endregion
     }

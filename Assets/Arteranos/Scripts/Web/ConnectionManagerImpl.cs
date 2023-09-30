@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 using Arteranos.Services;
+using System.ComponentModel.Design.Serialization;
 
 namespace Arteranos.Web
 {
@@ -70,32 +71,40 @@ namespace Arteranos.Web
         }
 
         bool wasOnline = false;
+        string reason = null;
+
         private void ConnectionResponse(bool success, string message)
         {
-            // Debug.Log($"Onlinelevel={NetworkStatus.GetOnlineLevel()}, Success={success}, wasOnline={wasOnline}");
-            string text = null;
+            Debug.Log($"Onlinelevel={NetworkStatus.GetOnlineLevel()}, Success={success}, wasOnline={wasOnline}, reason={reason}");
 
             if(!success)
             {
                 bool remoteDisconnected = (NetworkStatus.GetOnlineLevel() == OnlineLevel.Client 
                     || NetworkStatus.GetOnlineLevel() == OnlineLevel.Host);
 
-                if (message == null)
+                if (reason != null)
                 {
-                    // Only if we were never online in the first place
-                    if (!wasOnline) text = "Failed to connect to this server";
+                    message = reason;
+                    reason = null;
+                }
+                else if (message == null)
+                {
                     // Only if you're disconnecting of your own volition
-                    else if (remoteDisconnected) text = "Disconnected from the server";
+                    if (remoteDisconnected && wasOnline) message = "Disconnected from the server.";
+                    // Only if we were never online in the first place
+                    else if (!wasOnline) message = "Failed to connect to this server.";
                 }
             }
             wasOnline = success;
             // NetworkStatus.OnClientConnectionResponse = null;
 
-            if(text == null) return;
+            if(message == null) return;
             
             UI.IDialogUI dialog = UI.DialogUIFactory.New();
             dialog.Buttons = new[] { "Okay" };
-            dialog.Text = text;
+            dialog.Text = message;
         }
+
+        public void DeliverDisconnectReason(string reason) => this.reason = reason;
     }
 }
