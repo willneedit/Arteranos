@@ -91,7 +91,6 @@ namespace Arteranos.UI
                 btn_Unblock.gameObject.SetActive(blocked && !friends);
 
                 // Connot send texts to offline users. They could want to deny them.
-                // TODO #11 - User privileges. World and server administrators have to be able, everytime.
                 IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
                 if (targetUser != null && XRControl.Me != null)
                     btn_SendText.gameObject.SetActive(Utils.IsAbleTo(UserCapabilities.CanSendText, targetUser));

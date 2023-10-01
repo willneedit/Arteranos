@@ -331,7 +331,6 @@ namespace Arteranos.Services
                     response.message = "You are banned from this server.";
                 }
 
-                // TODO #11 Look up the user's privilege state
                 response.UserState = aggregated;
             }
 

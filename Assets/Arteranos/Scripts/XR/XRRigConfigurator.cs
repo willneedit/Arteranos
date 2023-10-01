@@ -124,9 +124,6 @@ namespace Arteranos.XR
 
             if (update)
             {
-                // Issue #52: Unity's Input system occasionally borks if input handlers
-                // have been disabled/enabled too quickly.
-                // TODO Maybe with FreezeControl for the VR keyboard?
                 yield return new WaitForSeconds(0.25f);
 
                 InputActionManager.enabled = false;
