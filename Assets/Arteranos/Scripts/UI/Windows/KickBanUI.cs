@@ -15,6 +15,7 @@ using UnityEngine.UI;
 using Arteranos.Core;
 using Arteranos.Avatar;
 using Arteranos.XR;
+using System.Collections.Generic;
 
 namespace Arteranos.UI
 {
@@ -36,6 +37,7 @@ namespace Arteranos.UI
         [SerializeField] private Button btn_Commit = null;
         [SerializeField] private TMP_Text btn_Commit_txt = null;
 
+        // TODO Maybe move the list to a more common part of the code.
         internal struct BanReasonEntry
         {
             public string description;
@@ -43,7 +45,7 @@ namespace Arteranos.UI
             public string reasonText;
         }
 
-        internal readonly BanReasonEntry[] reasons = new BanReasonEntry[]
+        internal static readonly BanReasonEntry[] reasons = new BanReasonEntry[]
         {
             new()
             {
@@ -112,6 +114,17 @@ namespace Arteranos.UI
                 reasonText = "Other, please specify the detailed reason"
             }
         };
+
+        public static string FindBanReason(ulong userState)
+        {
+            if(!UserState.IsBanned(userState)) return null; // Not banned at all.
+
+            IEnumerable<string> q = from entry in reasons 
+                                    where entry.reasonBit != 0 && Bit64field.IsAll(userState, entry.reasonBit) 
+                                    select entry.description;
+
+            return q.FirstOrDefault(null); // null means something like "Other..."
+        }
 
         public IAvatarBrain Target { get; set; } = null;
 
