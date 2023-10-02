@@ -381,6 +381,78 @@ namespace Arteranos.Avatar
             LoopPerformEmoji(emojiName);
         }
 
+        [Command]
+        private void CmdAttemptKickUser(GameObject targetGO, CMSPacket p)
+        {
+            IAvatarBrain target = targetGO.GetComponent<IAvatarBrain>();
+
+            byte[] expectedSignatureKey = UserID;
+            bool allowed;
+            BanPacket banPacket;
+
+            try
+            {
+                ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out banPacket);
+
+                // Fill up the banPacket's fields server-side
+                if (banPacket.publicKey != null) banPacket.publicKey = target.UserID;
+                if (banPacket.address != null) banPacket.address = target.Address;
+                if (banPacket.deviceUID != null) banPacket.deviceUID = target.DeviceID;
+
+                allowed = Core.UserState.IsBanned(banPacket.userState)
+                    ? IsAbleTo(UserCapabilities.CanBanUser, target)
+                    : IsAbleTo(UserCapabilities.CanKickUser, target);
+            }
+            catch (Exception e)
+            {
+
+                Debug.LogWarning($"PRIVILEGE ESCALATION DETECTED: Maliciously constructed banPacket, supposedly from {Nickname}");
+                Debug.LogWarning(e.Message);
+                return;
+            }
+
+            // No retaliatory action because risking using malicious packets as a denial-of-service attack
+            if (!allowed) return;
+
+            // If banned, save the target user's (or the hacker's) data...
+            if (Core.UserState.IsBanned(banPacket.userState))
+            {
+                SettingsManager.ServerUsers.AddUser(banPacket.ImportBanPacket());
+                SettingsManager.ServerUsers.Save();
+            }
+
+            // ... and gone.
+            ServerKickUser(target, banPacket);
+        }
+
+        [Server]
+        private void ServerKickUser(IAvatarBrain target, BanPacket bp)
+        {
+            IEnumerator KNBCoroutine(NetworkConnectionToClient targetConn, string text)
+            {
+                TargetDeliverMessage(targetConn, text);
+
+                // Let the target have the message before the disconnect
+                yield return new WaitForSeconds(0.5f);
+
+                targetConn.Disconnect();
+            }
+
+            GameObject targetGO = target.gameObject;
+            NetworkConnectionToClient targetConn = targetGO.GetComponent<NetworkIdentity>().connectionToClient;
+
+            string text = Core.UserState.IsBanned(bp.userState)
+                ? "You've been banned from this server."
+                : "You've been kicked from this server.";
+
+            StartCoroutine(KNBCoroutine(targetConn, text));
+        }
+
+
+        [TargetRpc]
+        private void TargetDeliverMessage(NetworkConnectionToClient _, string message)
+            => ConnectionManager.DeliverDisconnectReason(message);
+
         #endregion
         // ---------------------------------------------------------------
         #region Appearance Status
@@ -628,7 +700,7 @@ namespace Arteranos.Avatar
 
         #endregion
         // ---------------------------------------------------------------
-        #region Capabilities
+        #region Server User Management
 
         public bool IsAbleTo(UserCapabilities cap, IAvatarBrain target)
         {
@@ -668,6 +740,12 @@ namespace Arteranos.Avatar
                 // Banning users is for server admin only,
                 UserCapabilities.CanBanUser => Core.UserState.IsSAdmin(UserState) && userHigher,
 
+                // Edit server's user base (server admins and its deputies)
+                UserCapabilities.CanAdminServerUsers => Core.UserState.IsSAdmin(UserState),
+
+                // Edit server configuration itself (only true server admins)
+                UserCapabilities.CanEditServer => Bit64field.IsAny(UserState, Core.UserState.Srv_admin),
+
                 // Admins can view user IDs, even if the users don't want to.
                 // Especially for the risk of user impersonation
                 UserCapabilities.CanViewUsersID => isAnyAdmin || (target != null && SocialState.IsPermitted(target, target.UserPrivacy.UIDVisibility)),
@@ -689,91 +767,13 @@ namespace Arteranos.Avatar
             if (!allowed) return; // Client side. Last chance to back off.
 
             // Sign, encrypt and transmit.
-
-            BanPacket bp = banPacket.ExportBanPacket();
-
-            // Note to hackers:
-            // Using target.CmdAttemptKickUser(...) won't work. TransmitMessage() uses the client's
-            // private key for signing... a key for only you have, not someone else's.
             ClientSettings.TransmitMessage(
-                bp, 
+                banPacket.ExportBanPacket(), 
                 SettingsManager.CurrentServer.ServerPublicKey,
                 out CMSPacket p);
 
             CmdAttemptKickUser(target.gameObject, p);
         }
-
-        [Command]
-        private void CmdAttemptKickUser(GameObject targetGO, CMSPacket p)
-        {
-            IAvatarBrain target = targetGO.GetComponent<IAvatarBrain>();
-
-            byte[] expectedSignatureKey = UserID;
-            bool allowed;
-            BanPacket banPacket;
-
-            try
-            {
-                ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out banPacket);
-
-                // Fill up the banPacket's fields server-side
-                if (banPacket.publicKey != null) banPacket.publicKey = target.UserID;
-                if (banPacket.address != null) banPacket.address = target.Address;
-                if (banPacket.deviceUID != null) banPacket.deviceUID = target.DeviceID;
-
-                allowed = Core.UserState.IsBanned(banPacket.userState)
-                    ? IsAbleTo(UserCapabilities.CanBanUser, target)
-                    : IsAbleTo(UserCapabilities.CanKickUser, target);
-            }
-            catch (Exception e)
-            {
-
-                Debug.LogWarning($"PRIVILEGE ESCALATION DETECTED: Maliciously constructed banPacket, supposedly from {Nickname}");
-                Debug.LogWarning(e.Message);
-                return;
-            }
-
-            // No retaliatory action because risking using malicious packets as a denial-of-service attack
-            if (!allowed) return;
-
-            // If banned, save the target user's (or the hacker's) data...
-            if(Core.UserState.IsBanned(banPacket.userState))
-            {
-                SettingsManager.ServerUsers.AddUser(banPacket.ImportBanPacket());
-                SettingsManager.ServerUsers.Save();
-            }
-
-            // ... and gone.
-            ServerKickUser(target, banPacket);
-        }
-
-        [Server]
-        private void ServerKickUser(IAvatarBrain target, BanPacket bp)
-        {
-            IEnumerator KNBCoroutine(NetworkConnectionToClient targetConn, string text)
-            {
-                TargetDeliverMessage(targetConn, text);
-
-                // Let the target have the message before the disconnect
-                yield return new WaitForSeconds(0.5f);
-
-                targetConn.Disconnect();
-            }
-
-            GameObject targetGO = target.gameObject;
-            NetworkConnectionToClient targetConn = targetGO.GetComponent<NetworkIdentity>().connectionToClient;
-
-            string text = Core.UserState.IsBanned(bp.userState)
-                ? "You've been banned from this server."
-                : "You've been kicked from this server.";
-
-            StartCoroutine(KNBCoroutine(targetConn, text));
-        }
-
-
-        [TargetRpc]
-        private void TargetDeliverMessage(NetworkConnectionToClient _, string message) 
-            => ConnectionManager.DeliverDisconnectReason(message);
 
         #endregion
     }

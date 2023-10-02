@@ -120,6 +120,8 @@ namespace Arteranos.Social
         CanBanUser,
         CanViewUsersID,
         CanSendText,
+        CanAdminServerUsers,
+        CanEditServer,
     }
     #endregion
 
