@@ -72,6 +72,19 @@ namespace Arteranos.Core
         /// <returns>Ife plain factor.</returns>
         public static float LoudnessToFactor(float dBvalue) => MathF.Pow(10.0f, dBvalue / 10.0f);
 
+        /// <summary>
+        /// Converts an 'url-like' string to an URI, with zero assumption of the parts likw
+        /// host and port.
+        /// </summary>
+        /// <param name="urilike">The (incomplete) URI</param>
+        /// <param name="scheme"></param>
+        /// <param name="host"></param>
+        /// <param name="port"></param>
+        /// <param name="path"></param>
+        /// <param name="query"></param>
+        /// <param name="fragment"></param>
+        /// <returns>A filled-out URI</returns>
+        /// <exception cref="ArgumentNullException">Port is unknown nor implied.</exception>
         public static Uri ProcessUriString(string urilike,
                         string scheme = null,
                         string host = null,
@@ -144,6 +157,35 @@ namespace Arteranos.Core
             if(XRControl.Me == null) return true;
 
             return XRControl.Me.IsAbleTo(cap, target);
+        }
+
+        public struct Paginated<T>
+        {
+            public int page;
+            public int maxPage;
+            public T[] payload;
+        }
+
+        /// <summary>
+        /// Chops an array of T into smaller chunks
+        /// </summary>
+        /// <typeparam name="T">The payload data type</typeparam>
+        /// <param name="whole">the data to cut into pages</param>
+        /// <param name="page">Current page, from 1 up to including maxPage, or 0 to only get the number of pages</param>
+        /// <param name="pageSize">Number of items per page</param>
+        /// <returns>the data</returns>
+        public static Paginated<T> Paginate<T>(T[] whole, int page, int pageSize = 25)
+        {
+            int maxPage = (whole.Length + pageSize - 1) / pageSize;
+            int ceil = page * pageSize;
+            if(whole.Length < ceil) ceil = whole.Length;
+
+            return new Paginated<T>()
+            {
+                page = page,
+                maxPage = maxPage,
+                payload = page > 0 ? whole[((page - 1) * pageSize)..(ceil)] : null
+            };  
         }
     }
 }
