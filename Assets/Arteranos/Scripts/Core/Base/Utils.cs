@@ -184,7 +184,9 @@ namespace Arteranos.Core
             {
                 page = page,
                 maxPage = maxPage,
-                payload = page > 0 ? whole[((page - 1) * pageSize)..(ceil)] : null
+                payload = page <= maxPage && page > 0 
+                ? whole[((page - 1) * pageSize)..(ceil)] 
+                : null
             };  
         }
     }

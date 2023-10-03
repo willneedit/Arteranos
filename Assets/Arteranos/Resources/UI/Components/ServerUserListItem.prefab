@@ -1004,7 +1004,7 @@ GameObject:
   - component: {fileID: 4933298610032072770}
   - component: {fileID: 3020844609690722426}
   m_Layer: 5
-  m_Name: ServerUserBaseListItem
+  m_Name: ServerUserListItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1051,7 +1051,6 @@ MonoBehaviour:
   - {fileID: 2091766806737322682}
   - {fileID: 1500925236040272809}
   - {fileID: 698042746411202326}
-  worldURL: 
   img_Screenshot: {fileID: 7778222521864700034}
   lbl_Caption: {fileID: 7778222522103766469}
 --- !u!114 &3020844609690722426

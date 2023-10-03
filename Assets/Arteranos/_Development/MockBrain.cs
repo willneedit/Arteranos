@@ -117,6 +117,11 @@ namespace Arteranos.Avatar
         {
             throw new NotImplementedException();
         }
+
+        public void QueryServerUserBase(Action<ServerUserState> callback)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

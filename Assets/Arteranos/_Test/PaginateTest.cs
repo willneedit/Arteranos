@@ -20,7 +20,13 @@ namespace Arteranos
 
         private void DumpInts(int[] ints)
         {
-            StringBuilder sb = new StringBuilder();
+            if(ints == null)
+            {
+                Debug.Log("(null)");
+                return;
+            }
+
+            StringBuilder sb = new();
             bool first = true;
             foreach (int i in ints)
             {
@@ -38,7 +44,7 @@ namespace Arteranos
 
             page = Utils.Paginate(ints, 0, 3);
             Debug.Log($"maxPage={page.maxPage} page={page.page}");
-            // DumpInts(page.payload);
+            DumpInts(page.payload);
 
             page = Utils.Paginate(ints, 1, 3);
             Debug.Log($"maxPage={page.maxPage} page={page.page}");
@@ -49,6 +55,10 @@ namespace Arteranos
             DumpInts(page.payload);
 
             page = Utils.Paginate(ints, 6, 3);
+            Debug.Log($"maxPage={page.maxPage} page={page.page}");
+            DumpInts(page.payload);
+
+            page = Utils.Paginate(ints, 7, 3);
             Debug.Log($"maxPage={page.maxPage} page={page.page}");
             DumpInts(page.payload);
         }

@@ -19,7 +19,7 @@ using System.Collections.Generic;
 
 namespace Arteranos.UI
 {
-    public class ServerUserBaseListItem : ListItemBase
+    public class ServerUserListItem : ListItemBase
     {
         private HoverButton btn_Ban = null;
         private HoverButton btn_Unban = null;
@@ -30,11 +30,11 @@ namespace Arteranos.UI
         public Image img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
 
-        public static ServerUserBaseListItem New(Transform parent, ServerUserState user)
+        public static ServerUserListItem New(Transform parent, ServerUserState user)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/ServerUserBaseListItem"));
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/ServerUserListItem"));
             go.transform.SetParent(parent, false);
-            ServerUserBaseListItem userListItem = go.GetComponent<ServerUserBaseListItem>();
+            ServerUserListItem userListItem = go.GetComponent<ServerUserListItem>();
             userListItem.user = user;
             return userListItem;
         }

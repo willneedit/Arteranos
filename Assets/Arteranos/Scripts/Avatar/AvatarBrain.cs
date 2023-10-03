@@ -12,6 +12,7 @@ using Arteranos.UI;
 using Arteranos.XR;
 using Arteranos.Social;
 using System.Security.Cryptography.X509Certificates;
+using System.Linq;
 
 namespace Arteranos.Avatar
 {
@@ -773,6 +774,73 @@ namespace Arteranos.Avatar
                 out CMSPacket p);
 
             CmdAttemptKickUser(target.gameObject, p);
+        }
+
+        private Action<ServerUserState> currentCallback_sus = null;
+        public void QueryServerUserBase(Action<ServerUserState> callback)
+        {
+            // Requests on top of an ongoing requests are ignored.
+            if (currentCallback_sus != null) return;
+
+            currentCallback_sus = callback;
+
+            // Turn it over to the current(!) server
+            CmdQueryServerUserBase();
+        }
+
+        [Command]
+        private void CmdQueryServerUserBase()
+        {
+            // TODO Maybe a generic function to deliver large amounts of data from the current server back to the user?
+            IEnumerator EmitSusPages(ServerUserState[] states)
+            {
+                int pagenum = 1;
+                while(true)
+                {
+                    Core.Utils.Paginated<ServerUserState> page = Core.Utils.Paginate(states, pagenum++);
+
+
+                    List<BanPacket> packets = new();
+                    if (page.payload != null)
+                        packets = (from entry in page.payload select entry.ExportBanPacket()).ToList();
+
+                    ServerSettings.TransmitMessage(packets, UserID.PublicKey, out CMSPacket packet);
+                    TargetDeliverServerUserBase(packet);
+
+                    if(page.payload == null) break;
+
+                    yield return new WaitForEndOfFrame();
+                }
+            }
+
+            if (!IsAbleTo(UserCapabilities.CanAdminServerUsers, null))
+            {
+                // Insufficient privileges yield nothing.
+                StartCoroutine(EmitSusPages(new ServerUserState[0]));
+                return;
+            }
+
+            StartCoroutine(EmitSusPages(SettingsManager.ServerUsers.FindUsers(new()).ToArray()));
+        }
+
+        [TargetRpc]
+        private void TargetDeliverServerUserBase(CMSPacket packet)
+        {
+            try
+            {
+                byte[] serverPublicKey = SettingsManager.CurrentServer.ServerPublicKey;
+                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<BanPacket> packets);
+
+                if (packets.Count == 0)
+                    currentCallback_sus = null;
+
+                foreach (BanPacket banPacket in packets)
+                    currentCallback_sus?.Invoke(banPacket.ImportBanPacket());
+            }
+            catch(Exception)
+            {
+                // Ignore injected messages.
+            }
         }
 
         #endregion

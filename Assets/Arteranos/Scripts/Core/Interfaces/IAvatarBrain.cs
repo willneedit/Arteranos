@@ -43,6 +43,7 @@ namespace Arteranos.Avatar
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
         void OfferFriendship(IAvatarBrain receiver, bool offering = true);
         void PerformEmote(string emoteName);
+        void QueryServerUserBase(Action<ServerUserState> callback);
         void ReceiveTextMessage(IAvatarBrain sender, string text);
         void SendTextMessage(IAvatarBrain receiver, string text);
         void SetAppearanceStatusBit(int ASBit, bool set);
