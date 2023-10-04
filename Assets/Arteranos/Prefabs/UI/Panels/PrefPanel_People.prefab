@@ -60,7 +60,7 @@ PrefabInstance:
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.size
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
@@ -96,7 +96,7 @@ PrefabInstance:
         type: 3}
       propertyPath: ChoiceEntries.Array.data[5].UI
       value: 
-      objectReference: {fileID: 2071027444668359036, guid: 98cf5c799cd879e41bee0fc8758403b5,
+      objectReference: {fileID: 1054943574781234315, guid: 705b435be8abc22439bc453f08487b53,
         type: 3}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
@@ -150,7 +150,7 @@ PrefabInstance:
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[5].name
-      value: Controls
+      value: Server Users
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}

@@ -48,7 +48,7 @@ namespace Arteranos.UI
             btn_Ban = btns_ItemButton[0];
             btn_Unban = btns_ItemButton[1];
             btn_Promote = btns_ItemButton[2];
-            btn_Demote = btns_ItemButton[4];
+            btn_Demote = btns_ItemButton[3];
 
 
             btn_Ban.onClick.AddListener(OnBanClicked);

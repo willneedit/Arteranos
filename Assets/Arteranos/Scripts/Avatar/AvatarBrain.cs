@@ -779,6 +779,13 @@ namespace Arteranos.Avatar
         private Action<ServerUserState> currentCallback_sus = null;
         public void QueryServerUserBase(Action<ServerUserState> callback)
         {
+            // callback == null means to abort
+            if (callback == null)
+            {
+                currentCallback_sus = null;
+                return;
+            }
+
             // Requests on top of an ongoing requests are ignored.
             if (currentCallback_sus != null) return;
 
