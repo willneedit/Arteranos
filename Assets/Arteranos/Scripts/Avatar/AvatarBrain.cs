@@ -850,6 +850,44 @@ namespace Arteranos.Avatar
             }
         }
 
+        public void UpdateServerUserState(ServerUserState user)
+        {
+            // Sign, encrypt and transmit.
+            ClientSettings.TransmitMessage(
+                user.ExportBanPacket(),
+                SettingsManager.CurrentServer.ServerPublicKey,
+                out CMSPacket p);
+
+            CmdUpdateServerUserState(p);
+        }
+
+        [Command]
+        private void CmdUpdateServerUserState(CMSPacket p)
+        {
+            byte[] expectedSignatureKey = UserID;
+            BanPacket banPacket;
+
+            try
+            {
+                ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out banPacket);
+            }
+            catch (Exception) 
+            {
+                // Something is wrong for the user administration, no matter what.
+                return;
+            }
+
+            if (!IsAbleTo(UserCapabilities.CanAdminServerUsers, null)) return;
+
+            ServerUserBase sub = SettingsManager.ServerUsers;
+            ServerUserState user = banPacket.ImportBanPacket();
+
+            sub.RemoveUsers(user);
+            sub.AddUser(user);
+            sub.Save();
+        }
+
+
         #endregion
     }
 }

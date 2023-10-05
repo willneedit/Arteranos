@@ -389,7 +389,7 @@ namespace Arteranos.XR
 
         public static IAvatarBrain Me
         {
-            get => Instance.Me;
+            get => Instance?.Me;
             set => Instance.Me = value;
         }
     }

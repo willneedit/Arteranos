@@ -21,7 +21,6 @@ namespace Arteranos.UI
 {
     public class ServerUserListItem : ListItemBase
     {
-        private HoverButton btn_Ban = null;
         private HoverButton btn_Unban = null;
         private HoverButton btn_Promote = null;
         private HoverButton btn_Demote = null;
@@ -45,13 +44,11 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            btn_Ban = btns_ItemButton[0];
-            btn_Unban = btns_ItemButton[1];
-            btn_Promote = btns_ItemButton[2];
-            btn_Demote = btns_ItemButton[3];
+            btn_Unban = btns_ItemButton[0];
+            btn_Promote = btns_ItemButton[1];
+            btn_Demote = btns_ItemButton[2];
 
 
-            btn_Ban.onClick.AddListener(OnBanClicked);
             btn_Unban.onClick.AddListener(OnUnbanClicked);
             btn_Promote.onClick.AddListener(OnPromoteClicked);
             btn_Demote.onClick.AddListener(OnDemoteClicked);
@@ -69,6 +66,19 @@ namespace Arteranos.UI
             (string idline, string statelist) = PopulateUserData(user);
 
             lbl_Caption.text = $"{idline}\n{statelist}";
+
+            bool IsBanned = UserState.IsBanned(user.userState);
+            bool isSrvAdminAsstnt = Bit64field.IsAny(user.userState, UserState.Srv_admin_asstnt);
+            bool canEditUsers = Utils.IsAbleTo(Social.UserCapabilities.CanAdminServerUsers, null);
+
+            btn_Unban.gameObject.SetActive(IsBanned && canEditUsers);
+
+            // User in question could not be a server admin of any kind
+            btn_Promote.gameObject.SetActive(!UserState.IsSAdmin(user.userState) && !IsBanned && canEditUsers);
+
+            // if it's a deputy server admin it's okay to self-demote.
+            btn_Demote.gameObject.SetActive(isSrvAdminAsstnt && canEditUsers);
+
         }
 
         private static (string, string) PopulateUserData(ServerUserState user)
@@ -83,8 +93,6 @@ namespace Arteranos.UI
                 return $"Banned ({reason ?? "unknown"})";
             }
 
-            string idlinefmt = "ID: {0] Address: {1}, Device ID: {2}";
-
             string userID = user.userID ?? "<unset>";
             string address = user.address ?? "<unset>";
             string deviceUID = user.deviceUID != null ? user.deviceUID[0..9] : "<unset>";
@@ -96,15 +104,10 @@ namespace Arteranos.UI
             if (Bit64field.IsAny(user.userState, UserState.Srv_admin_asstnt)) states.Add("Deputy Server Admin");
 
             string statelist = string.Join(", ", states);
-            string idline = string.Format(idlinefmt, userID, address, deviceUID);
+            string idline = string.Format("ID: {0}, Address: {1}, Device ID: {2}", userID, address, deviceUID);
             return (idline, statelist);
         }
 
-
-        private void OnBanClicked()
-        {
-            throw new NotImplementedException();
-        }
 
         private void OnUnbanClicked()
         {
