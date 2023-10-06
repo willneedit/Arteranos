@@ -14,6 +14,8 @@ using Arteranos.Core;
 using Arteranos.XR;
 using System;
 using System.Collections.Generic;
+using Arteranos.Avatar;
+using Arteranos.Services;
 
 namespace Arteranos.UI
 {
@@ -31,10 +33,17 @@ namespace Arteranos.UI
             // Offline, query directly from the local database.
             if (XRControl.Me == null)
             {
-                foreach(ServerUserState item in SettingsManager.ServerUsers.FindUsers(new()))
+                foreach (ServerUserState item in SettingsManager.ServerUsers.FindUsers(new()))
                     PopulateSUBItem(item);
             }
-            else XRControl.Me.QueryServerUserBase(PopulateSUBItem);
+            else
+            {
+                // Online users first.
+                foreach (IAvatarBrain user in NetworkStatus.GetOnlineUsers())
+                    PopulateOnlineSUBItem(user);
+
+                XRControl.Me.QueryServerUserBase(PopulateSUBItem);
+            }
         }
 
         protected override void OnDisable()
@@ -50,6 +59,20 @@ namespace Arteranos.UI
             XRControl.Me?.QueryServerUserBase(null);
 
             base.OnDisable();
+        }
+
+        private void PopulateOnlineSUBItem(IAvatarBrain onlineUser)
+        {
+            // If it's there, you'll find it in the database.
+            if (onlineUser.UserState != UserState.Normal) return;
+
+            ServerUserState user = new()
+            {
+                userID = onlineUser.UserID,
+                userState = onlineUser.UserState,
+                remarks = string.Empty
+            };
+            PopulateSUBItem(user);
         }
 
         private void PopulateSUBItem(ServerUserState state) 

@@ -128,7 +128,9 @@ namespace Arteranos.UI
 
         private void OnUnbanClicked()
         {
-            user.userState &= ~UserState.Banned;
+            // Clear the rap sheet.
+            user.userState &= UserState.GOOD_MASK;
+            user.remarks = string.Empty;
 
             UpdateServerUserState();
         }

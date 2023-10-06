@@ -212,9 +212,9 @@ namespace Arteranos.Core
 
         public void RemoveUsers(ServerUserState removals)
         {
-            IEnumerable<ServerUserState> newBase = from entry in Base
+            ServerUserState[] newBase = (from entry in Base
                           where !Match(entry, removals)
-                          select entry;
+                          select entry).ToArray();
 
             Base.Clear();
             foreach(ServerUserState entry in newBase)

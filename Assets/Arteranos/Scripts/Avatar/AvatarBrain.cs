@@ -11,7 +11,6 @@ using Arteranos.Web;
 using Arteranos.UI;
 using Arteranos.XR;
 using Arteranos.Social;
-using System.Security.Cryptography.X509Certificates;
 using System.Linq;
 
 namespace Arteranos.Avatar
@@ -454,6 +453,96 @@ namespace Arteranos.Avatar
         private void TargetDeliverMessage(NetworkConnectionToClient _, string message)
             => ConnectionManager.DeliverDisconnectReason(message);
 
+        [Command]
+        private void CmdQueryServerUserBase()
+        {
+            // TODO Maybe a generic function to deliver large amounts of data from the current server back to the user?
+            IEnumerator EmitSusPages(ServerUserState[] states)
+            {
+                int pagenum = 1;
+                while (true)
+                {
+                    Core.Utils.Paginated<ServerUserState> page = Core.Utils.Paginate(states, pagenum++);
+
+
+                    List<BanPacket> packets = new();
+                    if (page.payload != null)
+                        packets = (from entry in page.payload select entry.ExportBanPacket()).ToList();
+
+                    ServerSettings.TransmitMessage(packets, UserID.PublicKey, out CMSPacket packet);
+                    TargetDeliverServerUserBase(packet);
+
+                    if (page.payload == null) break;
+
+                    yield return new WaitForEndOfFrame();
+                }
+            }
+
+            if (!IsAbleTo(UserCapabilities.CanAdminServerUsers, null))
+            {
+                // Insufficient privileges yield nothing.
+                StartCoroutine(EmitSusPages(new ServerUserState[0]));
+                return;
+            }
+
+            StartCoroutine(EmitSusPages(SettingsManager.ServerUsers.FindUsers(new()).ToArray()));
+        }
+
+        [TargetRpc]
+        private void TargetDeliverServerUserBase(CMSPacket packet)
+        {
+            try
+            {
+                byte[] serverPublicKey = SettingsManager.CurrentServer.ServerPublicKey;
+                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<BanPacket> packets);
+
+                if (packets.Count == 0)
+                    currentCallback_sus = null;
+
+                foreach (BanPacket banPacket in packets)
+                    currentCallback_sus?.Invoke(banPacket.ImportBanPacket());
+            }
+            catch (Exception)
+            {
+                // Ignore injected messages.
+            }
+        }
+
+        [Command]
+        private void CmdUpdateServerUserState(CMSPacket p)
+        {
+            byte[] expectedSignatureKey = UserID;
+            BanPacket banPacket;
+
+            try
+            {
+                ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out banPacket);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning(e.Message);
+                // Something is wrong for the user administration, no matter what.
+                return;
+            }
+
+            if (!IsAbleTo(UserCapabilities.CanAdminServerUsers, null)) return;
+
+            ServerUserBase sub = SettingsManager.ServerUsers;
+            ServerUserState user = banPacket.ImportBanPacket();
+
+            sub.RemoveUsers(user);
+            sub.AddUser(user);
+            sub.Save();
+
+            // If the targeted user is approachable, immediately update the state.
+            if (user.userID != null)
+            {
+                foreach (IAvatarBrain onlineUser in NetworkStatus.GetOnlineUsers())
+                    if (user.userID == onlineUser.UserID)
+                        onlineUser.UserState = user.userState;
+            }
+        }
+
         #endregion
         // ---------------------------------------------------------------
         #region Appearance Status
@@ -795,61 +884,6 @@ namespace Arteranos.Avatar
             CmdQueryServerUserBase();
         }
 
-        [Command]
-        private void CmdQueryServerUserBase()
-        {
-            // TODO Maybe a generic function to deliver large amounts of data from the current server back to the user?
-            IEnumerator EmitSusPages(ServerUserState[] states)
-            {
-                int pagenum = 1;
-                while(true)
-                {
-                    Core.Utils.Paginated<ServerUserState> page = Core.Utils.Paginate(states, pagenum++);
-
-
-                    List<BanPacket> packets = new();
-                    if (page.payload != null)
-                        packets = (from entry in page.payload select entry.ExportBanPacket()).ToList();
-
-                    ServerSettings.TransmitMessage(packets, UserID.PublicKey, out CMSPacket packet);
-                    TargetDeliverServerUserBase(packet);
-
-                    if(page.payload == null) break;
-
-                    yield return new WaitForEndOfFrame();
-                }
-            }
-
-            if (!IsAbleTo(UserCapabilities.CanAdminServerUsers, null))
-            {
-                // Insufficient privileges yield nothing.
-                StartCoroutine(EmitSusPages(new ServerUserState[0]));
-                return;
-            }
-
-            StartCoroutine(EmitSusPages(SettingsManager.ServerUsers.FindUsers(new()).ToArray()));
-        }
-
-        [TargetRpc]
-        private void TargetDeliverServerUserBase(CMSPacket packet)
-        {
-            try
-            {
-                byte[] serverPublicKey = SettingsManager.CurrentServer.ServerPublicKey;
-                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<BanPacket> packets);
-
-                if (packets.Count == 0)
-                    currentCallback_sus = null;
-
-                foreach (BanPacket banPacket in packets)
-                    currentCallback_sus?.Invoke(banPacket.ImportBanPacket());
-            }
-            catch(Exception)
-            {
-                // Ignore injected messages.
-            }
-        }
-
         public void UpdateServerUserState(ServerUserState user)
         {
             // Sign, encrypt and transmit.
@@ -860,33 +894,6 @@ namespace Arteranos.Avatar
 
             CmdUpdateServerUserState(p);
         }
-
-        [Command]
-        private void CmdUpdateServerUserState(CMSPacket p)
-        {
-            byte[] expectedSignatureKey = UserID;
-            BanPacket banPacket;
-
-            try
-            {
-                ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out banPacket);
-            }
-            catch (Exception) 
-            {
-                // Something is wrong for the user administration, no matter what.
-                return;
-            }
-
-            if (!IsAbleTo(UserCapabilities.CanAdminServerUsers, null)) return;
-
-            ServerUserBase sub = SettingsManager.ServerUsers;
-            ServerUserState user = banPacket.ImportBanPacket();
-
-            sub.RemoveUsers(user);
-            sub.AddUser(user);
-            sub.Save();
-        }
-
 
         #endregion
     }

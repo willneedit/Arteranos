@@ -123,7 +123,7 @@ namespace Arteranos.UI
                                     where entry.reasonBit != 0 && Bit64field.IsAll(userState, entry.reasonBit) 
                                     select entry.description;
 
-            return q.FirstOrDefault(null); // null means something like "Other..."
+            return q.Count() != 0 ? q.First() : null;
         }
 
         public IAvatarBrain Target { get; set; } = null;
