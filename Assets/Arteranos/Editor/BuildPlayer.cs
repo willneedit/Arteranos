@@ -88,6 +88,15 @@ namespace Arteranos
 
             File.WriteAllText("build/WiXVersion.wxi",WiXFileText);
         }
+
+        public static void UpdateLicenseFiles()
+        {
+            File.Copy("LICENSE.md", "Assets\\Generated\\Resources\\LICENSE.md", true);
+            File.Copy("Third Party Notices.md", "Assets\\Generated\\Resources\\Third Party Notices.md", true);
+
+            AssetDatabase.Refresh();
+        }
+
         [MenuItem("Arteranos/Update Project Version", false, 101)]
         public static void SetVersion()
         {
@@ -95,6 +104,8 @@ namespace Arteranos
 
             Core.Version v = Core.Version.Load();
             Debug.Log($"Version detected: {v.Full}");
+
+            UpdateLicenseFiles();
         }
 
         public static string[] GetSceneNames()
