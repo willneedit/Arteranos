@@ -47,6 +47,7 @@ namespace Arteranos.Avatar
         void ReceiveTextMessage(IAvatarBrain sender, string text);
         void SendTextMessage(IAvatarBrain receiver, string text);
         void SetAppearanceStatusBit(int ASBit, bool set);
+        void UpdateServerUserState(ServerUserState user);
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
     }
 }

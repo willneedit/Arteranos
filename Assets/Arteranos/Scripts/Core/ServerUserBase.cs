@@ -221,7 +221,12 @@ namespace Arteranos.Core
                 Base.Add(entry);
         }
 
-        public void AddUser(ServerUserState user) => Base.Add(user);
+        public void AddUser(ServerUserState user)
+        {
+            if (user.userState == UserState.Normal) return;
+
+            Base.Add(user);
+        }
 
         private void AddRootSA()
         {

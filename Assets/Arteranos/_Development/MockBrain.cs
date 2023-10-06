@@ -122,6 +122,11 @@ namespace Arteranos.Avatar
         {
             throw new NotImplementedException();
         }
+
+        public void UpdateServerUserState(ServerUserState user)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

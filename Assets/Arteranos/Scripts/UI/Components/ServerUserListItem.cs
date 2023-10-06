@@ -16,6 +16,7 @@ using System.IO;
 using UnityEngine.Networking;
 using Arteranos.Core;
 using System.Collections.Generic;
+using Arteranos.XR;
 
 namespace Arteranos.UI
 {
@@ -108,20 +109,42 @@ namespace Arteranos.UI
             return (idline, statelist);
         }
 
+        private void UpdateServerUserState()
+        {
+            // Offline, modifying local installation
+            if(XRControl.Me == null)
+            {
+                ServerUserBase sub = SettingsManager.ServerUsers;
+
+                sub.RemoveUsers(user);
+                sub.AddUser(user);
+                sub.Save();
+            }
+            else
+                XRControl.Me.UpdateServerUserState(user);
+
+            UpdateUserData();
+        }
 
         private void OnUnbanClicked()
         {
-            throw new NotImplementedException();
+            user.userState &= ~UserState.Banned;
+
+            UpdateServerUserState();
         }
 
         private void OnPromoteClicked()
         {
-            throw new NotImplementedException();
+            user.userState |= UserState.Srv_admin_asstnt;
+
+            UpdateServerUserState();
         }
 
         private void OnDemoteClicked()
         {
-            throw new NotImplementedException();
+            user.userState &= ~UserState.Srv_admin_asstnt;
+
+            UpdateServerUserState();
         }
     }
 }
