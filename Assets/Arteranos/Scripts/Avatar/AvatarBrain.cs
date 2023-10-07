@@ -388,14 +388,14 @@ namespace Arteranos.Avatar
 
             byte[] expectedSignatureKey = UserID;
             bool allowed;
-            BanPacket banPacket;
+            ServerUserState banPacket;
 
             try
             {
                 ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out banPacket);
 
                 // Fill up the banPacket's fields server-side
-                if (banPacket.publicKey != null) banPacket.publicKey = target.UserID;
+                if (banPacket.userID != null) banPacket.userID = target.UserID;
                 if (banPacket.address != null) banPacket.address = target.Address;
                 if (banPacket.deviceUID != null) banPacket.deviceUID = target.DeviceID;
 
@@ -417,7 +417,7 @@ namespace Arteranos.Avatar
             // If banned, save the target user's (or the hacker's) data...
             if (Core.UserState.IsBanned(banPacket.userState))
             {
-                SettingsManager.ServerUsers.AddUser(banPacket.ImportBanPacket());
+                SettingsManager.ServerUsers.AddUser(banPacket);
                 SettingsManager.ServerUsers.Save();
             }
 
@@ -426,7 +426,7 @@ namespace Arteranos.Avatar
         }
 
         [Server]
-        private void ServerKickUser(IAvatarBrain target, BanPacket bp)
+        private void ServerKickUser(IAvatarBrain target, ServerUserState bp)
         {
             IEnumerator KNBCoroutine(NetworkConnectionToClient targetConn, string text)
             {
@@ -465,9 +465,9 @@ namespace Arteranos.Avatar
                     Core.Utils.Paginated<ServerUserState> page = Core.Utils.Paginate(states, pagenum++);
 
 
-                    List<BanPacket> packets = new();
+                    List<ServerUserState> packets = new();
                     if (page.payload != null)
-                        packets = (from entry in page.payload select entry.ExportBanPacket()).ToList();
+                        packets = page.payload.ToList();
 
                     ServerSettings.TransmitMessage(packets, UserID.PublicKey, out CMSPacket packet);
                     TargetDeliverServerUserBase(packet);
@@ -494,13 +494,13 @@ namespace Arteranos.Avatar
             try
             {
                 byte[] serverPublicKey = SettingsManager.CurrentServer.ServerPublicKey;
-                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<BanPacket> packets);
+                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<ServerUserState> packets);
 
                 if (packets.Count == 0)
                     currentCallback_sus = null;
 
-                foreach (BanPacket banPacket in packets)
-                    currentCallback_sus?.Invoke(banPacket.ImportBanPacket());
+                foreach (ServerUserState banPacket in packets)
+                    currentCallback_sus?.Invoke(banPacket);
             }
             catch (Exception)
             {
@@ -512,11 +512,11 @@ namespace Arteranos.Avatar
         private void CmdUpdateServerUserState(CMSPacket p)
         {
             byte[] expectedSignatureKey = UserID;
-            BanPacket banPacket;
+            ServerUserState user;
 
             try
             {
-                ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out banPacket);
+                ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out user);
             }
             catch (Exception e)
             {
@@ -528,7 +528,6 @@ namespace Arteranos.Avatar
             if (!IsAbleTo(UserCapabilities.CanAdminServerUsers, null)) return;
 
             ServerUserBase sub = SettingsManager.ServerUsers;
-            ServerUserState user = banPacket.ImportBanPacket();
 
             sub.RemoveUsers(user);
             sub.AddUser(user);
@@ -848,9 +847,9 @@ namespace Arteranos.Avatar
             };
         }
 
-        public void AttemptKickUser(IAvatarBrain target, ServerUserState banPacket)
+        public void AttemptKickUser(IAvatarBrain target, ServerUserState user)
         {
-            bool allowed = Core.UserState.IsBanned(banPacket.userState)
+            bool allowed = Core.UserState.IsBanned(user.userState)
                 ? IsAbleTo(UserCapabilities.CanBanUser, target)
                 : IsAbleTo(UserCapabilities.CanKickUser, target);
 
@@ -858,7 +857,7 @@ namespace Arteranos.Avatar
 
             // Sign, encrypt and transmit.
             ClientSettings.TransmitMessage(
-                banPacket.ExportBanPacket(), 
+                user, 
                 SettingsManager.CurrentServer.ServerPublicKey,
                 out CMSPacket p);
 
@@ -888,7 +887,7 @@ namespace Arteranos.Avatar
         {
             // Sign, encrypt and transmit.
             ClientSettings.TransmitMessage(
-                user.ExportBanPacket(),
+                user,
                 SettingsManager.CurrentServer.ServerPublicKey,
                 out CMSPacket p);
 
