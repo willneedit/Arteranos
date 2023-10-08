@@ -149,15 +149,8 @@ namespace Arteranos.Core
             Sign(payload.messageDER, out payload.signature);
         }
 
-        private static void DecapsulateMessage<T>(CMSPayload payload, out T message, out byte[] signatureKey)
-        {
-            // Verify against the sender's public key
-            if (!Verify(payload.messageDER, payload.signature, payload.signatureKey))
-                throw new CryptographicException("Signature verification failed");
-
-            signatureKey = payload.signatureKey;
-            message = Serializer.Deserialize<T>(payload.messageDER);
-        }
+        private static void DecapsulateMessage<T>(CMSPayload payload, out T message) 
+            => message = Serializer.Deserialize<T>(payload.messageDER);
 
         private static Aes CreateSessionKeys(byte[][] receiverPublicKeys, out List<ESKEntry> entries)
         {
@@ -187,8 +180,7 @@ namespace Arteranos.Core
                 if(entry.fingerprint.SequenceEqual(Fingerprint))
                 {
                     Key.UnwrapKey(entry.encryptedSessionKey, out byte[] aesKey);
-                    Aes aes = new AesCryptoServiceProvider();
-                    aes.Key = aesKey;
+                    Aes aes = new AesCryptoServiceProvider { Key = aesKey };
                     return aes;
                 }
             }
@@ -217,6 +209,25 @@ namespace Arteranos.Core
             return packet;
         }
 
+        private static void CheckMessageConsistency(ref byte[] expectedSignatureKey, CMSPayload payload)
+        {
+            byte[] signatureKey = payload.signatureKey;
+
+            if (expectedSignatureKey == null)
+                expectedSignatureKey = signatureKey;
+
+            // Check against a specific sender
+            else if (!expectedSignatureKey.SequenceEqual(signatureKey))
+            {
+                expectedSignatureKey = signatureKey; // Nevertheless, return the key we've got.
+                throw new CryptographicException("Sender mismatch");
+            }
+
+            // Verify against the sender's public key
+            if (!Verify(payload.messageDER, payload.signature, payload.signatureKey))
+                throw new CryptographicException("Signature verification failed");
+        }
+
         private CMSPayload DecryptMessage(CMSPacket packet)
         {
             using Aes aes = FindSessionKey(packet.encryptedSessionKeys);
@@ -233,7 +244,6 @@ namespace Arteranos.Core
         public void TransmitMessage<T>(T data, byte[][] receiverPublicKeys, out CMSPacket packet)
         {
             EncapsulateMessage(data, out CMSPayload payload);
-
             packet = EncryptMessage(receiverPublicKeys, payload);
         }
 
@@ -243,16 +253,10 @@ namespace Arteranos.Core
         public void ReceiveMessage<T>(CMSPacket packet, ref byte[] expectedSignatureKey, out T data)
         {
             CMSPayload payload = DecryptMessage(packet);
-
-            DecapsulateMessage(payload, out data, out byte[] signatureKey);
-            if (expectedSignatureKey == null)
-                expectedSignatureKey = signatureKey;
-            else if (!expectedSignatureKey.SequenceEqual(signatureKey))
-            {
-                expectedSignatureKey = signatureKey; // Nevertheless, return the key we've got.
-                throw new CryptographicException("Sender mismatch");
-            }
+            CheckMessageConsistency(ref expectedSignatureKey, payload);
+            DecapsulateMessage(payload, out data);
         }
+
         #endregion
 
         #region Boilerplate
