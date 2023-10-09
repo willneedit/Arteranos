@@ -485,7 +485,7 @@ namespace Arteranos.Avatar
                 return;
             }
 
-            StartCoroutine(EmitSusPages(SettingsManager.ServerUsers.FindUsers(new()).ToArray()));
+            StartCoroutine(EmitSusPages(ServerConfig.QueryLocalUserBase().ToArray()));
         }
 
         [TargetRpc]
@@ -525,21 +525,7 @@ namespace Arteranos.Avatar
                 return;
             }
 
-            if (!IsAbleTo(UserCapabilities.CanAdminServerUsers, null)) return;
-
-            ServerUserBase sub = SettingsManager.ServerUsers;
-
-            sub.RemoveUsers(user);
-            sub.AddUser(user);
-            sub.Save();
-
-            // If the targeted user is approachable, immediately update the state.
-            if (user.userID != null)
-            {
-                foreach (IAvatarBrain onlineUser in NetworkStatus.GetOnlineUsers())
-                    if (user.userID == onlineUser.UserID)
-                        onlineUser.UserState = user.userState;
-            }
+            ServerConfig.UpdateLocalUserState(user);
         }
 
         #endregion

@@ -127,7 +127,7 @@ namespace Arteranos.Services
         }
 
         public static ConnectivityLevel GetConnectivityLevel() => Instance.GetConnectivityLevel();
-        public static OnlineLevel GetOnlineLevel() => Instance.GetOnlineLevel();
+        public static OnlineLevel GetOnlineLevel() => Instance?.GetOnlineLevel() ?? OnlineLevel.Offline;
         public static void StartClient(Uri connectionUri) => Instance.StartClient(connectionUri);
         public static void StartHost() => Instance.StartHost();
         public static void StartServer() => Instance.StartServer();

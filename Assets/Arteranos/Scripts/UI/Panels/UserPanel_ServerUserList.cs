@@ -30,20 +30,11 @@ namespace Arteranos.UI
         {
             base.OnEnable();
 
-            // Offline, query directly from the local database.
-            if (XRControl.Me == null)
-            {
-                foreach (ServerUserState item in SettingsManager.ServerUsers.FindUsers(new()))
-                    PopulateSUBItem(item);
-            }
-            else
-            {
-                // Online users first.
-                foreach (IAvatarBrain user in NetworkStatus.GetOnlineUsers())
-                    PopulateOnlineSUBItem(user);
+            // Online users first.
+            foreach (IAvatarBrain user in NetworkStatus.GetOnlineUsers())
+                PopulateOnlineSUBItem(user);
 
-                XRControl.Me.QueryServerUserBase(PopulateSUBItem);
-            }
+            ServerConfig.QueryServerUserBase(PopulateSUBItem);
         }
 
         protected override void OnDisable()
@@ -56,7 +47,7 @@ namespace Arteranos.UI
             foreach (GameObject item in list) Destroy(item);
 
             // Abort the server user database query if necessary.
-            XRControl.Me?.QueryServerUserBase(null);
+            ServerConfig.QueryServerUserBase(null);
 
             base.OnDisable();
         }

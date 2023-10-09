@@ -111,17 +111,7 @@ namespace Arteranos.UI
 
         private void UpdateServerUserState()
         {
-            // Offline, modifying local installation
-            if(XRControl.Me == null)
-            {
-                ServerUserBase sub = SettingsManager.ServerUsers;
-
-                sub.RemoveUsers(user);
-                sub.AddUser(user);
-                sub.Save();
-            }
-            else
-                XRControl.Me.UpdateServerUserState(user);
+            ServerConfig.UpdateServerUserState(user);
 
             UpdateUserData();
         }
