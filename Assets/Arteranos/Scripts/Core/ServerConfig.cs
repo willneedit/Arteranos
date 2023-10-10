@@ -11,6 +11,7 @@ using Arteranos.XR;
 using Arteranos.Avatar;
 using Arteranos.Services;
 using Arteranos.Social;
+using Mirror;
 
 namespace Arteranos.Core
 {
@@ -23,14 +24,24 @@ namespace Arteranos.Core
 
     public static class ServerConfig
     {
+        #region Interface
+
         public static void UpdateServerUserState(ServerUserState user)
         {
             if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
                 // Directly access the user database
                 UpdateLocalUserState(user);
             else
+            {
+                // Sign, encrypt and transmit.
+                ClientSettings.TransmitMessage(
+                    user,
+                    SettingsManager.CurrentServer.ServerPublicKey,
+                    out CMSPacket p);
+
                 // Use Network Behavior to contact the remote server
-                XRControl.Me.UpdateServerUserState(user);
+                XRControl.Me.UpdateServerUserState(p);
+            }
         }
 
         public static void QueryServerUserBase(Action<ServerUserState> callback)
@@ -39,9 +50,92 @@ namespace Arteranos.Core
                 // Directly access the user database
                 foreach (ServerUserState q in QueryLocalUserBase()) callback?.Invoke(q);
             else
+            {
+                if(!HandleCallbacks(callback, ref Callback_ServerUserState)) return;
                 // Use Network Behavior to contact the remote server
-                XRControl.Me.QueryServerUserBase(callback);
+                XRControl.Me.QueryServerUserBase();
+            }
         }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Server actions
+
+        [Server]
+        public static byte[] ServerPerformServerPacket(SCMType type, CMSPacket p, byte[] expectedSignatureKey)
+        {
+            switch (type)
+            {
+                case SCMType.ClnUpdateUserInfo:
+                    ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out ServerUserState user);
+                    UpdateLocalUserState(user);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            return expectedSignatureKey;
+        }
+
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Client actions
+
+        [Client]
+        public static void TargetDeliverServerPacket(SCMType type, CMSPacket packet)
+        {
+            switch (type)
+            {
+                case SCMType.SrvReportUserInfo:
+                    ClientDeliverServerPacket(packet, ref Callback_ServerUserState);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Client return
+
+        private static Action<ServerUserState> Callback_ServerUserState = null;
+
+        private static bool HandleCallbacks<T>(Action<T> callback, ref Action<T> callbackStore)
+        {
+            if (callback == null)
+            {
+                callbackStore = null;
+                return false;
+            }
+
+            // Requests on top of an ongoing requests are ignored.
+            if (callbackStore != null) return false;
+
+            callbackStore = callback;
+            return true;
+        }
+
+        private static void ClientDeliverServerPacket<T>(CMSPacket packet, ref Action<T> callback)
+        {
+            try
+            {
+                byte[] serverPublicKey = SettingsManager.CurrentServer.ServerPublicKey;
+                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<T> packets);
+
+                if (packets.Count == 0) callback = null;
+                foreach (T entry in packets) callback?.Invoke(entry);
+            }
+            catch (Exception)
+            {
+                // Ignore injected messages.
+            }
+        }
+
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Server side processing
 
         public static void UpdateLocalUserState(ServerUserState user)
         {
@@ -70,5 +164,7 @@ namespace Arteranos.Core
 
             foreach(var user in q) yield return user;
         }
+
+        #endregion
     }
 }

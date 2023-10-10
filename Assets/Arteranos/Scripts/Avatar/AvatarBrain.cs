@@ -502,33 +502,7 @@ namespace Arteranos.Avatar
 
         [TargetRpc]
         private void TargetDeliverServerPacket(SCMType type, CMSPacket packet)
-        {
-            switch (type)
-            {
-                case SCMType.SrvReportUserInfo:
-                    ClientDeliverServerPacket(packet, ref currentCallback_sus);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        [Client]
-        private void ClientDeliverServerPacket<T>(CMSPacket packet, ref Action<T> callback)
-        {
-            try
-            {
-                byte[] serverPublicKey = SettingsManager.CurrentServer.ServerPublicKey;
-                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<T> packets);
-
-                if (packets.Count == 0) callback = null;
-                foreach (T entry in packets) callback?.Invoke(entry);
-            }
-            catch (Exception)
-            {
-                // Ignore injected messages.
-            }
-        }
+            => ServerConfig.TargetDeliverServerPacket(type, packet);
 
         [Command]
         private void CmdPerformServerPacket(SCMType type, CMSPacket p)
@@ -537,7 +511,7 @@ namespace Arteranos.Avatar
 
             try
             {
-                expectedSignatureKey = ServerPerformServerPacket(type, p, expectedSignatureKey);
+                expectedSignatureKey = ServerConfig.ServerPerformServerPacket(type, p, expectedSignatureKey);
             }
             catch (Exception e)
             {
@@ -546,21 +520,6 @@ namespace Arteranos.Avatar
                 return;
             }
 
-        }
-        [Server]
-        private static byte[] ServerPerformServerPacket(SCMType type, CMSPacket p, byte[] expectedSignatureKey)
-        {
-            switch (type)
-            {
-                case SCMType.ClnUpdateUserInfo:
-                    ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out ServerUserState user);
-                    ServerConfig.UpdateLocalUserState(user);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-
-            return expectedSignatureKey;
         }
         #endregion
 
@@ -886,35 +845,11 @@ namespace Arteranos.Avatar
             CmdAttemptKickUser(target.gameObject, p);
         }
 
-        private Action<ServerUserState> currentCallback_sus = null;
-        public void QueryServerUserBase(Action<ServerUserState> callback)
-        {
-            // callback == null means to abort
-            if (callback == null)
-            {
-                currentCallback_sus = null;
-                return;
-            }
+        public void QueryServerUserBase()
+            => CmdQueryServerPacket(SCMType.SrvReportUserInfo);
 
-            // Requests on top of an ongoing requests are ignored.
-            if (currentCallback_sus != null) return;
-
-            currentCallback_sus = callback;
-
-            // Turn it over to the current(!) server
-            CmdQueryServerPacket(SCMType.SrvReportUserInfo);
-        }
-
-        public void UpdateServerUserState(ServerUserState user)
-        {
-            // Sign, encrypt and transmit.
-            ClientSettings.TransmitMessage(
-                user,
-                SettingsManager.CurrentServer.ServerPublicKey,
-                out CMSPacket p);
-
-            CmdPerformServerPacket(SCMType.ClnUpdateUserInfo, p);
-        }
+        public void UpdateServerUserState(CMSPacket p) 
+            => CmdPerformServerPacket(SCMType.ClnUpdateUserInfo, p);
 
         #endregion
     }

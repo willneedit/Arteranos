@@ -118,12 +118,12 @@ namespace Arteranos.Avatar
             throw new NotImplementedException();
         }
 
-        public void QueryServerUserBase(Action<ServerUserState> callback)
+        public void QueryServerUserBase()
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateServerUserState(ServerUserState user)
+        public void UpdateServerUserState(CMSPacket p)
         {
             throw new NotImplementedException();
         }
