@@ -381,6 +381,8 @@ namespace Arteranos.Avatar
             LoopPerformEmoji(emojiName);
         }
 
+        #region User kicking and banning
+
         [Command]
         private void CmdAttemptKickUser(GameObject targetGO, CMSPacket p)
         {
@@ -453,24 +455,41 @@ namespace Arteranos.Avatar
         private void TargetDeliverMessage(NetworkConnectionToClient _, string message)
             => ConnectionManager.DeliverDisconnectReason(message);
 
+        #endregion
+
+        #region Server side queries and actions interface
+
         [Command]
-        private void CmdQueryServerUserBase()
+        private void CmdQueryServerPacket(SCMType type)
         {
-            // TODO Maybe a generic function to deliver large amounts of data from the current server back to the user?
-            IEnumerator EmitSusPages(ServerUserState[] states)
+            switch (type)
+            {
+                case SCMType.SrvReportUserInfo:
+                    ServerQueryServerPacket(type, ServerConfig.QueryLocalUserBase());
+                    break;
+                default:
+                    throw new NotImplementedException();
+
+            }
+        }
+
+        [Server]
+        private void ServerQueryServerPacket<T>(SCMType type, IEnumerable<T> data)
+        {
+            IEnumerator EmitSusPages(SCMType type, T[] data)
             {
                 int pagenum = 1;
                 while (true)
                 {
-                    Core.Utils.Paginated<ServerUserState> page = Core.Utils.Paginate(states, pagenum++);
+                    Core.Utils.Paginated<T> page = Core.Utils.Paginate(data, pagenum++);
 
 
-                    List<ServerUserState> packets = new();
+                    List<T> packets = new();
                     if (page.payload != null)
                         packets = page.payload.ToList();
 
                     ServerSettings.TransmitMessage(packets, UserID.PublicKey, out CMSPacket packet);
-                    TargetDeliverServerUserBase(packet);
+                    TargetDeliverServerPacket(type, packet);
 
                     if (page.payload == null) break;
 
@@ -478,29 +497,32 @@ namespace Arteranos.Avatar
                 }
             }
 
-            if (!IsAbleTo(UserCapabilities.CanAdminServerUsers, null))
-            {
-                // Insufficient privileges yield nothing.
-                StartCoroutine(EmitSusPages(new ServerUserState[0]));
-                return;
-            }
-
-            StartCoroutine(EmitSusPages(ServerConfig.QueryLocalUserBase().ToArray()));
+            StartCoroutine(EmitSusPages(type, data.ToArray()));
         }
 
         [TargetRpc]
-        private void TargetDeliverServerUserBase(CMSPacket packet)
+        private void TargetDeliverServerPacket(SCMType type, CMSPacket packet)
+        {
+            switch (type)
+            {
+                case SCMType.SrvReportUserInfo:
+                    ClientDeliverServerPacket(packet, ref currentCallback_sus);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        [Client]
+        private void ClientDeliverServerPacket<T>(CMSPacket packet, ref Action<T> callback)
         {
             try
             {
                 byte[] serverPublicKey = SettingsManager.CurrentServer.ServerPublicKey;
-                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<ServerUserState> packets);
+                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<T> packets);
 
-                if (packets.Count == 0)
-                    currentCallback_sus = null;
-
-                foreach (ServerUserState banPacket in packets)
-                    currentCallback_sus?.Invoke(banPacket);
+                if (packets.Count == 0) callback = null;
+                foreach (T entry in packets) callback?.Invoke(entry);
             }
             catch (Exception)
             {
@@ -509,14 +531,13 @@ namespace Arteranos.Avatar
         }
 
         [Command]
-        private void CmdUpdateServerUserState(CMSPacket p)
+        private void CmdPerformServerPacket(SCMType type, CMSPacket p)
         {
             byte[] expectedSignatureKey = UserID;
-            ServerUserState user;
 
             try
             {
-                ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out user);
+                expectedSignatureKey = ServerPerformServerPacket(type, p, expectedSignatureKey);
             }
             catch (Exception e)
             {
@@ -525,8 +546,23 @@ namespace Arteranos.Avatar
                 return;
             }
 
-            ServerConfig.UpdateLocalUserState(user);
         }
+        [Server]
+        private static byte[] ServerPerformServerPacket(SCMType type, CMSPacket p, byte[] expectedSignatureKey)
+        {
+            switch (type)
+            {
+                case SCMType.ClnUpdateUserInfo:
+                    ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out ServerUserState user);
+                    ServerConfig.UpdateLocalUserState(user);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            return expectedSignatureKey;
+        }
+        #endregion
 
         #endregion
         // ---------------------------------------------------------------
@@ -866,7 +902,7 @@ namespace Arteranos.Avatar
             currentCallback_sus = callback;
 
             // Turn it over to the current(!) server
-            CmdQueryServerUserBase();
+            CmdQueryServerPacket(SCMType.SrvReportUserInfo);
         }
 
         public void UpdateServerUserState(ServerUserState user)
@@ -877,7 +913,7 @@ namespace Arteranos.Avatar
                 SettingsManager.CurrentServer.ServerPublicKey,
                 out CMSPacket p);
 
-            CmdUpdateServerUserState(p);
+            CmdPerformServerPacket(SCMType.ClnUpdateUserInfo, p);
         }
 
         #endregion

@@ -14,11 +14,18 @@ using Arteranos.Social;
 
 namespace Arteranos.Core
 {
+    public enum SCMType
+    {
+        _Invalid = 0,
+        SrvReportUserInfo,      // Server to client : Server User State
+        ClnUpdateUserInfo,      // Client to server : Server User State
+    }
+
     public static class ServerConfig
     {
         public static void UpdateServerUserState(ServerUserState user)
         {
-            if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Client)
+            if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
                 // Directly access the user database
                 UpdateLocalUserState(user);
             else
@@ -28,7 +35,7 @@ namespace Arteranos.Core
 
         public static void QueryServerUserBase(Action<ServerUserState> callback)
         {
-            if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Client)
+            if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
                 // Directly access the user database
                 foreach (ServerUserState q in QueryLocalUserBase()) callback?.Invoke(q);
             else
