@@ -43,11 +43,11 @@ namespace Arteranos.Avatar
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
         void OfferFriendship(IAvatarBrain receiver, bool offering = true);
         void PerformEmote(string emoteName);
-        void QueryServerUserBase();
+        void QueryServerPacket(SCMType type);
         void ReceiveTextMessage(IAvatarBrain sender, string text);
         void SendTextMessage(IAvatarBrain receiver, string text);
         void SetAppearanceStatusBit(int ASBit, bool set);
-        void UpdateServerUserState(CMSPacket p);
+        void PerformServerPacket(SCMType type, CMSPacket p);
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
     }
 }

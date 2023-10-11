@@ -40,7 +40,7 @@ namespace Arteranos.Core
                     out CMSPacket p);
 
                 // Use Network Behavior to contact the remote server
-                XRControl.Me.UpdateServerUserState(p);
+                XRControl.Me.PerformServerPacket(SCMType.ClnUpdateUserInfo, p);
             }
         }
 
@@ -53,7 +53,7 @@ namespace Arteranos.Core
             {
                 if(!HandleCallbacks(callback, ref Callback_ServerUserState)) return;
                 // Use Network Behavior to contact the remote server
-                XRControl.Me.QueryServerUserBase();
+                XRControl.Me.QueryServerPacket(SCMType.SrvReportUserInfo);
             }
         }
 

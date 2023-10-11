@@ -845,11 +845,11 @@ namespace Arteranos.Avatar
             CmdAttemptKickUser(target.gameObject, p);
         }
 
-        public void QueryServerUserBase()
-            => CmdQueryServerPacket(SCMType.SrvReportUserInfo);
+        public void QueryServerPacket(SCMType type)
+            => CmdQueryServerPacket(type);
 
-        public void UpdateServerUserState(CMSPacket p) 
-            => CmdPerformServerPacket(SCMType.ClnUpdateUserInfo, p);
+        public void PerformServerPacket(SCMType type, CMSPacket p)
+            => CmdPerformServerPacket(type, p);
 
         #endregion
     }

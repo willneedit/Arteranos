@@ -118,12 +118,12 @@ namespace Arteranos.Avatar
             throw new NotImplementedException();
         }
 
-        public void QueryServerUserBase()
+        public void QueryServerPacket(SCMType type)
         {
             throw new NotImplementedException();
         }
 
-        public void UpdateServerUserState(CMSPacket p)
+        public void PerformServerPacket(SCMType type, CMSPacket p)
         {
             throw new NotImplementedException();
         }
