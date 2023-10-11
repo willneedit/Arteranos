@@ -151,12 +151,15 @@ namespace Arteranos.Core
         /// <param name="cap">The action you want to do</param>
         /// <param name="target">The targeted user you want to do for (or, against)</param>
         /// <returns>Self explanatory.</returns>
-        public static bool IsAbleTo(UserCapabilities cap, IAvatarBrain target)
+        public static bool IsAbleTo(UserCapabilities cap, IAvatarBrain target) 
+            => IsAbleTo(XRControl.Me, cap, target);
+
+        public static bool IsAbleTo(IAvatarBrain source, UserCapabilities cap, IAvatarBrain target)
         {
             // You are offline, it has to be your own computer.
-            if(XRControl.Me == null) return true;
+            if (source == null) return true;
 
-            return XRControl.Me.IsAbleTo(cap, target);
+            return source.IsAbleTo(cap, target);
         }
 
         public struct Paginated<T>

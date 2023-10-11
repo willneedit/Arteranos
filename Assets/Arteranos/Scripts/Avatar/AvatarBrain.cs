@@ -465,7 +465,7 @@ namespace Arteranos.Avatar
             switch (type)
             {
                 case SCMType.SrvReportUserInfo:
-                    ServerQueryServerPacket(type, ServerConfig.QueryLocalUserBase());
+                    ServerQueryServerPacket(type, ServerConfig.QueryLocalUserBase(this));
                     break;
                 default:
                     throw new NotImplementedException();
@@ -507,11 +507,9 @@ namespace Arteranos.Avatar
         [Command]
         private void CmdPerformServerPacket(SCMType type, CMSPacket p)
         {
-            byte[] expectedSignatureKey = UserID;
-
             try
             {
-                expectedSignatureKey = ServerConfig.ServerPerformServerPacket(type, p, expectedSignatureKey);
+                _ = ServerConfig.ServerPerformServerPacket(this, type, p);
             }
             catch (Exception e)
             {

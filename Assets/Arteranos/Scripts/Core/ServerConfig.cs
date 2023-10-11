@@ -30,7 +30,7 @@ namespace Arteranos.Core
         {
             if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
                 // Directly access the user database
-                UpdateLocalUserState(user);
+                UpdateLocalUserState(null, user);
             else
             {
                 // Sign, encrypt and transmit.
@@ -48,7 +48,7 @@ namespace Arteranos.Core
         {
             if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
                 // Directly access the user database
-                foreach (ServerUserState q in QueryLocalUserBase()) callback?.Invoke(q);
+                foreach (ServerUserState q in QueryLocalUserBase(null)) callback?.Invoke(q);
             else
             {
                 if(!HandleCallbacks(callback, ref Callback_ServerUserState)) return;
@@ -62,13 +62,15 @@ namespace Arteranos.Core
         #region Server actions
 
         [Server]
-        public static byte[] ServerPerformServerPacket(SCMType type, CMSPacket p, byte[] expectedSignatureKey)
+        public static byte[] ServerPerformServerPacket(IAvatarBrain source, SCMType type, CMSPacket p)
         {
+            byte[] expectedSignatureKey = source.UserID;
+
             switch (type)
             {
                 case SCMType.ClnUpdateUserInfo:
                     ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out ServerUserState user);
-                    UpdateLocalUserState(user);
+                    UpdateLocalUserState(source, user);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -137,9 +139,9 @@ namespace Arteranos.Core
         // ---------------------------------------------------------------
         #region Server side processing
 
-        public static void UpdateLocalUserState(ServerUserState user)
+        public static void UpdateLocalUserState(IAvatarBrain source, ServerUserState user)
         {
-            if (!Utils.IsAbleTo(UserCapabilities.CanAdminServerUsers, null)) return;
+            if (!Utils.IsAbleTo(source, UserCapabilities.CanAdminServerUsers, null)) return;
 
             ServerUserBase sub = SettingsManager.ServerUsers;
 
@@ -156,9 +158,9 @@ namespace Arteranos.Core
             }
         }
 
-        public static IEnumerable<ServerUserState> QueryLocalUserBase()
+        public static IEnumerable<ServerUserState> QueryLocalUserBase(IAvatarBrain source)
         {
-            if (!Utils.IsAbleTo(UserCapabilities.CanAdminServerUsers, null)) yield break;
+            if (!Utils.IsAbleTo(source, UserCapabilities.CanAdminServerUsers, null)) yield break;
 
             IEnumerable<ServerUserState> q = SettingsManager.ServerUsers.FindUsers(new());
 
