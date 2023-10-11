@@ -84,29 +84,30 @@ namespace Arteranos.UI
 
         private static (string, string) PopulateUserData(ServerUserState user)
         {
-            static string Elaborate(ServerUserState user)
+            static string ElaborateBanReason(ServerUserState user)
             {
                 if (!string.IsNullOrEmpty(user.remarks))
                     return $"Banned ({user.remarks})";
 
-                string reason = KickBanUI.FindBanReason(user.userState);
+                string reason = BanHandling.FindBanReason(user.userState);
 
                 return $"Banned ({reason ?? "unknown"})";
             }
 
-            string userID = user.userID ?? "<unset>";
-            string address = user.address ?? "<unset>";
-            string deviceUID = user.deviceUID != null ? user.deviceUID[0..9] : "<unset>";
-
             List<string> states = new();
+            List<string> ids = new();
 
-            if (UserState.IsBanned(user.userState)) states.Add(Elaborate(user));
+            if (UserState.IsBanned(user.userState)) states.Add(ElaborateBanReason(user));
             if (Bit64field.IsAny(user.userState, UserState.Srv_admin)) states.Add("Server Admin");
             if (Bit64field.IsAny(user.userState, UserState.Srv_admin_asstnt)) states.Add("Deputy Server Admin");
 
+            if ((string)user.userID != null) ids.Add($"ID: {(string)user.userID}");
+            if (user.address != null) ids.Add($"Address: {user.address}");
+            if (user.deviceUID != null) ids.Add($"Device ID: {user.deviceUID[0..9]}");
+
             string statelist = string.Join(", ", states);
-            string idline = string.Format("ID: {0}, Address: {1}, Device ID: {2}", userID, address, deviceUID);
-            return (idline, statelist);
+            string idlist = string.Join("; ", ids);
+            return (idlist, statelist);
         }
 
         private void UpdateServerUserState()

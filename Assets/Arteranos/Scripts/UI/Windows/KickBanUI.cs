@@ -14,8 +14,6 @@ using UnityEngine.UI;
 
 using Arteranos.Core;
 using Arteranos.Avatar;
-using Arteranos.XR;
-using System.Collections.Generic;
 
 namespace Arteranos.UI
 {
@@ -37,54 +35,13 @@ namespace Arteranos.UI
         [SerializeField] private Button btn_Commit = null;
         [SerializeField] private TMP_Text btn_Commit_txt = null;
 
-        // TODO Maybe move the list to a more common part of the code.
-        internal struct BanReasonEntry
-        {
-            public string description;
-            public ulong reasonBit;
-            public string reasonText;
-
-            public BanReasonEntry(string description, ulong reasonBit, string reasonText)
-            {
-                this.description = description;
-                this.reasonBit = reasonBit;
-                this.reasonText = reasonText;
-            }
-        }
-
-        internal static readonly BanReasonEntry[] reasons = new BanReasonEntry[]        
-        {
-            new("Pick a reason...",     0,                          "Please specify..."),
-            new("Underage",             UserState.Underage,         "Below the legal or recommended age, e.g. 13 b/c COPPA"),
-            new("Trolling",             UserState.Trolling,         "Disruptive behavior"),
-            new("Hate Speech",          UserState.Hating,           "Discrimination/-phobic/hatemongering"),
-            new("Loud/Disruptive",      UserState.Loud,             "Incessantly loud, even with repeated muting"),
-            new("Bullying",             UserState.Bullying,         "Mobbing/Bullying/Harassment"),
-            new("Sexual Harassment",    UserState.SxHarassment,     "Undesired sexual advances or harassment"),
-            new("Exploit Use",          UserState.Exploiting,       "Exploit/security leak usage"),
-            new("Impersonation",        UserState.Impersonation,    "Impersonation/Deliberately false representation"),
-            new("Ban Evasion",          UserState.BanEvading,       "Attempted Ban evasion"),
-            new("Other...",             0,                          "Other, please specify the detailed reason")
-        };
-
-        public static string FindBanReason(ulong userState)
-        {
-            if(!UserState.IsBanned(userState)) return null; // Not banned at all.
-
-            IEnumerable<string> q = from entry in reasons 
-                                    where entry.reasonBit != 0 && Bit64field.IsAll(userState, entry.reasonBit) 
-                                    select entry.description;
-
-            return q.Count() != 0 ? q.First() : null;
-        }
-
         public IAvatarBrain Target { get; set; } = null;
 
         protected override void Awake()
         {
             base.Awake();
 
-            spn_Reason.Options = (from entry in reasons select entry.description).ToArray();
+            spn_Reason.Options = BanHandling.ReasonList().ToArray();
             spn_Reason.OnChanged += OnReasonChange;
             
 
@@ -116,7 +73,7 @@ namespace Arteranos.UI
 
         private void OnReasonChange(int arg1, bool arg2)
         {
-            txt_RD_Hint.text = reasons[arg1].reasonText;
+            txt_RD_Hint.text = BanHandling.GetReasonText(arg1);
             OnBanMethodChange(false);
         }
 
@@ -135,7 +92,7 @@ namespace Arteranos.UI
 
         private void OnCommitClicked()
         {
-            ulong banbits = reasons[spn_Reason.value].reasonBit |
+            ulong banbits = BanHandling.GetReasonBit(spn_Reason.value) |
                 (IsBanning() ? UserState.Banned : 0);
 
             // Fill out the pattern of the targeted user action and transmit it

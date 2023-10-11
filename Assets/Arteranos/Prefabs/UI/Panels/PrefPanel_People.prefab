@@ -150,7 +150,7 @@ PrefabInstance:
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: ChoiceEntries.Array.data[5].name
-      value: Server Users
+      value: In Server
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}

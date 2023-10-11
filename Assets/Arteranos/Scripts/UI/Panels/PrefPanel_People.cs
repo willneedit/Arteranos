@@ -43,7 +43,7 @@ namespace Arteranos.UI
         {
             int found = -1;
             for (int i = 0; i < choiceBook.ChoiceEntries.Length; i++)
-                if (choiceBook.ChoiceEntries[i].name == "Server Users") found = i;
+                if (choiceBook.ChoiceEntries[i].name == "In Server") found = i;
 
             choiceBook.SetPageActive(found, false);
         }

@@ -90,6 +90,59 @@ namespace Arteranos.Core
         public static bool IsSAdmin(ulong field) => Bit64field.IsAny(field, Srv_admin | Srv_admin_asstnt);
     }
 
+    public static class  BanHandling
+    {
+        internal struct BanReasonEntry
+        {
+            public string description;
+            public ulong reasonBit;
+            public string reasonText;
+
+            public BanReasonEntry(string description, ulong reasonBit, string reasonText)
+            {
+                this.description = description;
+                this.reasonBit = reasonBit;
+                this.reasonText = reasonText;
+            }
+        }
+
+        internal static readonly BanReasonEntry[] reasons = new BanReasonEntry[]
+        {
+            new("Pick a reason...",     0,                          "Please specify..."),
+            new("Underage",             UserState.Underage,         "Below the legal or recommended age, e.g. 13 b/c COPPA"),
+            new("Trolling",             UserState.Trolling,         "Disruptive behavior"),
+            new("Hate Speech",          UserState.Hating,           "Discrimination/-phobic/hatemongering"),
+            new("Loud/Disruptive",      UserState.Loud,             "Incessantly loud, even with repeated muting"),
+            new("Bullying",             UserState.Bullying,         "Mobbing/Bullying/Harassment"),
+            new("Sexual Harassment",    UserState.SxHarassment,     "Undesired sexual advances or harassment"),
+            new("Exploit Use",          UserState.Exploiting,       "Exploit/security leak usage"),
+            new("Impersonation",        UserState.Impersonation,    "Impersonation/Deliberately false representation"),
+            new("Ban Evasion",          UserState.BanEvading,       "Attempted Ban evasion"),
+            new("Other...",             0,                          "Other, please specify the detailed reason")
+        };
+
+        public static string FindBanReason(ulong userState)
+        {
+            if (!UserState.IsBanned(userState)) return null; // Not banned at all.
+
+            IEnumerable<string> q = from entry in reasons
+                                    where entry.reasonBit != 0 && Bit64field.IsAll(userState, entry.reasonBit)
+                                    select entry.description;
+
+            return q.Count() != 0 ? q.First() : null;
+        }
+
+        public static IEnumerable<string> ReasonList(bool includezeroes = true)
+            => from reason in reasons
+               where includezeroes || reason.reasonBit != 0 
+               select reason.description;
+
+        public static string GetReasonText(int index) => reasons[index].reasonText;
+
+        public static ulong GetReasonBit(int index) => reasons[index].reasonBit;
+    }
+
+
     public class UserPrivacy
     {
         public UserVisibility UIDVisibility;
