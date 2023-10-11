@@ -6,9 +6,9 @@
  */
 
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 using Arteranos.Core;
+using Arteranos.Social;
 
 namespace Arteranos.UI
 {
@@ -22,6 +22,11 @@ namespace Arteranos.UI
         protected override void Start()
         {
             base.Start();
+
+            ChoiceBook choiceBook = GetComponentInChildren<ChoiceBook>(true);
+
+            if (!Utils.IsAbleTo(UserCapabilities.CanAdminServerUsers, null))
+                RestrictRemoteServerConfig(choiceBook);
         }
 
         protected override void OnEnable()
@@ -33,5 +38,15 @@ namespace Arteranos.UI
         {
             base.OnDisable();
         }
+
+        private static void RestrictRemoteServerConfig(ChoiceBook choiceBook)
+        {
+            int found = -1;
+            for (int i = 0; i < choiceBook.ChoiceEntries.Length; i++)
+                if (choiceBook.ChoiceEntries[i].name == "Server Users") found = i;
+
+            choiceBook.SetPageActive(found, false);
+        }
+
     }
 }

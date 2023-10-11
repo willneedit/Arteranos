@@ -44,8 +44,6 @@ namespace Arteranos.UI
             choiceBook.gameObject.SetActive(true);
 
             // For now, restricting working on the remote server.
-            // TODO #61: This would need a protocol for the remote server maintenance,
-            // like changing the server port is like remotely configuring a firewall...
             if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
                 RestrictRemoteServerConfig(choiceBook);
 

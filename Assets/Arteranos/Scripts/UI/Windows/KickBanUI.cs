@@ -43,76 +43,28 @@ namespace Arteranos.UI
             public string description;
             public ulong reasonBit;
             public string reasonText;
+
+            public BanReasonEntry(string description, ulong reasonBit, string reasonText)
+            {
+                this.description = description;
+                this.reasonBit = reasonBit;
+                this.reasonText = reasonText;
+            }
         }
 
-        internal static readonly BanReasonEntry[] reasons = new BanReasonEntry[]
+        internal static readonly BanReasonEntry[] reasons = new BanReasonEntry[]        
         {
-            new()
-            {
-                description = "Pick a reason...",
-                reasonBit = 0,
-                reasonText = "Please specify..."
-            },
-            new()
-            {
-                description = "Underage",
-                reasonBit = UserState.Underage,
-                reasonText = "Below the legal or recommended age, e.g. 13 b/c COPPA"
-            },
-            new()
-            {
-                description = "Trolling",
-                reasonBit = UserState.Trolling,
-                reasonText = "Disruptive behavior"
-            },
-            new()
-            {
-                description = "Hate Speech",
-                reasonBit = UserState.Hating,
-                reasonText = "Discrimination/-phobic/hatemongering"
-            },
-            new()
-            {
-                description = "Loud/Disruptive",
-                reasonBit = UserState.Loud,
-                reasonText = "Incessantly loud, even with repeated muting"
-            },
-            new()
-            {
-                description = "Bullying",
-                reasonBit = UserState.Bullying,
-                reasonText = "Mobbing/Bullying/Harassment"
-            },
-            new()
-            {
-                description = "Sexual Harassment",
-                reasonBit = UserState.SxHarassment,
-                reasonText = "Undesired sexual advances or harassment"
-            },
-            new()
-            {
-                description = "Exploit Use",
-                reasonBit = UserState.Exploiting,
-                reasonText = "Exploit/security leak usage"
-            },
-            new()
-            {
-                description = "Impersonation",
-                reasonBit = UserState.Impersonation,
-                reasonText = "Impersonation/Deliberately false representation"
-            },
-            new()
-            {
-                description = "Ban Evasion",
-                reasonBit = UserState.BanEvading,
-                reasonText = "Attempted Ban evasion"
-            },
-            new()
-            {
-                description = "Other...",
-                reasonBit = 0,
-                reasonText = "Other, please specify the detailed reason"
-            }
+            new("Pick a reason...",     0,                          "Please specify..."),
+            new("Underage",             UserState.Underage,         "Below the legal or recommended age, e.g. 13 b/c COPPA"),
+            new("Trolling",             UserState.Trolling,         "Disruptive behavior"),
+            new("Hate Speech",          UserState.Hating,           "Discrimination/-phobic/hatemongering"),
+            new("Loud/Disruptive",      UserState.Loud,             "Incessantly loud, even with repeated muting"),
+            new("Bullying",             UserState.Bullying,         "Mobbing/Bullying/Harassment"),
+            new("Sexual Harassment",    UserState.SxHarassment,     "Undesired sexual advances or harassment"),
+            new("Exploit Use",          UserState.Exploiting,       "Exploit/security leak usage"),
+            new("Impersonation",        UserState.Impersonation,    "Impersonation/Deliberately false representation"),
+            new("Ban Evasion",          UserState.BanEvading,       "Attempted Ban evasion"),
+            new("Other...",             0,                          "Other, please specify the detailed reason")
         };
 
         public static string FindBanReason(ulong userState)
@@ -189,10 +141,10 @@ namespace Arteranos.UI
             // Fill out the pattern of the targeted user action and transmit it
             // to the server to fill the fields and do the final decision.
 
-            KickPacket kickPacket = new KickPacket()
+            KickPacket kickPacket = new()
             {
                 UserID = Target.UserID,
-                State = new ServerUserState()
+                State = new()
                 {
                     userID = chk_Ban_UID.isOn ? Target.UserID : null,
                     userState = banbits,
