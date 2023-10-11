@@ -19,7 +19,14 @@ namespace Arteranos.Core
     {
         _Invalid = 0,
         SrvReportUserInfo,      // Server to client : Server User State
-        ClnUpdateUserInfo,      // Client to server : Server User State
+        ClnUpdateUserInfo,      // Client to server : Server User State (ServerUserState)
+        ClnKickUser             // Client to Server : Kick/Ban targeted user (KickPacket)
+    }
+
+    public struct KickPacket
+    {
+        public UserID UserID;
+        public ServerUserState State;
     }
 
     public static class ServerConfig
@@ -57,6 +64,25 @@ namespace Arteranos.Core
             }
         }
 
+        public static void KickUser(KickPacket kp)
+        {
+            if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
+                // Uuh? Maybe for embedded AI's? 
+                CommitLocalKickUser(null, kp);
+            else
+            {
+                // Sign, encrypt and transmit.
+                ClientSettings.TransmitMessage(
+                    kp, 
+                    SettingsManager.CurrentServer.ServerPublicKey, 
+                    out CMSPacket p);
+
+                // Use Network Behavior to contact the remote server
+                XRControl.Me.PerformServerPacket(SCMType.ClnKickUser, p);
+
+            }
+        }
+
         #endregion
         // ---------------------------------------------------------------
         #region Server actions
@@ -71,6 +97,10 @@ namespace Arteranos.Core
                 case SCMType.ClnUpdateUserInfo:
                     ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out ServerUserState user);
                     UpdateLocalUserState(source, user);
+                    break;
+                case SCMType.ClnKickUser:
+                    ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out KickPacket target);
+                    CommitLocalKickUser(source, target);
                     break;
                 default:
                     throw new NotImplementedException();
@@ -165,6 +195,40 @@ namespace Arteranos.Core
             IEnumerable<ServerUserState> q = SettingsManager.ServerUsers.FindUsers(new());
 
             foreach(var user in q) yield return user;
+        }
+
+        public static void CommitLocalKickUser(IAvatarBrain source, KickPacket kickPacket)
+        {
+
+            ServerUserState toGo = kickPacket.State;
+            IAvatarBrain target = NetworkStatus.GetOnlineUser(kickPacket.UserID);
+
+            // Maybe it's already gone.
+            if (target == null) return;
+
+            // Fill up the banPacket's fields server-side
+            if (toGo.userID != null) toGo.userID = target.UserID;
+            if (toGo.address != null) toGo.address = target.Address;
+            if (toGo.deviceUID != null) toGo.deviceUID = target.DeviceID;
+
+            bool allowed = UserState.IsBanned(toGo.userState)
+                ? Utils.IsAbleTo(source, UserCapabilities.CanBanUser, target)
+                : Utils.IsAbleTo(source, UserCapabilities.CanKickUser, target);
+
+            if (!allowed) return;
+
+            if (UserState.IsBanned(toGo.userState))
+            {
+                SettingsManager.ServerUsers.AddUser(toGo);
+                SettingsManager.ServerUsers.Save();
+            }
+
+            string reason = UserState.IsBanned(toGo.userState)
+                ? "You've been banned from this server."
+                : "You've been kicked from this server.";
+
+
+            target.ServerKickUser(reason);
         }
 
         #endregion

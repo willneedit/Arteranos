@@ -188,16 +188,21 @@ namespace Arteranos.UI
 
             // Fill out the pattern of the targeted user action and transmit it
             // to the server to fill the fields and do the final decision.
-            ServerUserState banPacket = new()
+
+            KickPacket kickPacket = new KickPacket()
             {
-                userID = chk_Ban_UID.isOn ? Target.UserID : null,
-                userState = banbits,
-                address = chk_Ban_Address.isOn ? string.Empty : null,
-                deviceUID = chk_Ban_DID.isOn ? string.Empty : null,
-                remarks = txt_ReasonDetail.text,
+                UserID = Target.UserID,
+                State = new ServerUserState()
+                {
+                    userID = chk_Ban_UID.isOn ? Target.UserID : null,
+                    userState = banbits,
+                    address = chk_Ban_Address.isOn ? string.Empty : null,
+                    deviceUID = chk_Ban_DID.isOn ? string.Empty : null,
+                    remarks = txt_ReasonDetail.text,
+                }
             };
 
-            XRControl.Me.AttemptKickUser(Target, banPacket);
+            ServerConfig.KickUser(kickPacket);
             Destroy(gameObject);
         }
 

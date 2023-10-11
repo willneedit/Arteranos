@@ -33,7 +33,6 @@ namespace Arteranos.Avatar
         event Action<string> OnAvatarChanged;
         event Action<int> OnAppearanceStatusChanged;
 
-        void AttemptKickUser(IAvatarBrain target, ServerUserState banPacket);
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
         ulong GetOwnState(IAvatarBrain receiver);
         bool IsAbleTo(UserCapabilities cap, IAvatarBrain target);
@@ -49,5 +48,6 @@ namespace Arteranos.Avatar
         void SetAppearanceStatusBit(int ASBit, bool set);
         void PerformServerPacket(SCMType type, CMSPacket p);
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
+        void ServerKickUser(string reason);
     }
 }

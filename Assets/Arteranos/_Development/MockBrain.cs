@@ -113,17 +113,17 @@ namespace Arteranos.Avatar
             throw new NotImplementedException();
         }
 
-        public void AttemptKickUser(IAvatarBrain target, ServerUserState banPacket)
-        {
-            throw new NotImplementedException();
-        }
-
         public void QueryServerPacket(SCMType type)
         {
             throw new NotImplementedException();
         }
 
         public void PerformServerPacket(SCMType type, CMSPacket p)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ServerKickUser(string reason)
         {
             throw new NotImplementedException();
         }
