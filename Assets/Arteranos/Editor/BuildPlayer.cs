@@ -58,10 +58,9 @@ namespace Arteranos
             if(parts.Length > 3)
                 version.Tag = "-"+string.Join("-", parts[1..^2]);
 
-            version.Full = $"{version.MMP}.{version.B}-{version.Hash}";
+            version.Full = $"{version.MMP}.{version.B}{version.Tag}-{version.Hash}";
 
-            string json = JsonConvert.SerializeObject(version, Formatting.Indented);
-            TextAsset textAsset = new(json);
+            TextAsset textAsset = new(JsonConvert.SerializeObject(version, Formatting.Indented));
 
             if(!Directory.Exists("Assets/Generated"))
                 AssetDatabase.CreateFolder("Assets", "Generated");

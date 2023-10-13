@@ -15,7 +15,7 @@ namespace Arteranos.Core
         public const string VERSION_MIN = "0.5.5";
 
         public string MMP = "0.0.0";    // Major, minor, patch
-        public string MMPB = "0.0.0.0"; // Major, minor, patch, buld
+        public string MMPB = "0.0.0.0"; // Major, minor, patch, build
         public string B = "0";          // build
         public string Hash = "0000000"; // Abbreviated commit hash
         public string Tag = "";         // Optional tag
