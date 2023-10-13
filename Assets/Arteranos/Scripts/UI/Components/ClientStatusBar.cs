@@ -26,6 +26,8 @@ namespace Arteranos.UI
             btn_Offline.onClick.AddListener(OnOfflineClicked);
             btn_Server.onClick.AddListener(OnServerClicked);
             btn_Host.onClick.AddListener(OnHostClicked);
+
+            btn_Server.gameObject.SetActive(false);
         }
 
         protected override void Start()
@@ -60,22 +62,22 @@ namespace Arteranos.UI
             {
                 case OnlineLevel.Offline:
                     btn_Offline.gameObject.SetActive(false);
-                    btn_Server.gameObject.SetActive(true);
+                    // btn_Server.gameObject.SetActive(true);
                     btn_Host.gameObject.SetActive(true);
                     break;
                 case OnlineLevel.Client:
                     btn_Offline.gameObject.SetActive(true);
-                    btn_Server.gameObject.SetActive(false);
+                    // btn_Server.gameObject.SetActive(false);
                     btn_Host.gameObject.SetActive(true);
                     break;
                 case OnlineLevel.Server:
                     btn_Offline.gameObject.SetActive(true);
-                    btn_Server.gameObject.SetActive(false);
+                    // btn_Server.gameObject.SetActive(false);
                     btn_Host.gameObject.SetActive(false);
                     break;
                 case OnlineLevel.Host:
                     btn_Offline.gameObject.SetActive(true);
-                    btn_Server.gameObject.SetActive(false);
+                    // btn_Server.gameObject.SetActive(false);
                     btn_Host.gameObject.SetActive(false);
                     break;
             }
