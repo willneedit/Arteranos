@@ -39,5 +39,6 @@ move Arteranos.exe Win64
 
 "%wix%"\bin\light.exe -ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension MainBurn.wixobj -o ArteranosSetup
 
+7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on ArteranosSetup.7z ArteranosSetup.exe
 
 cd ..
