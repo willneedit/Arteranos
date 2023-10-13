@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -30,28 +29,33 @@ using UnityEngine.SceneManagement;
 namespace Bootstrap
 {
     internal class AssetStoreLoader
+
+    // --------------------------------------------------------------------
+    #region ASSET STORE SHOPPING LIST
+
     {
         static AssetStoreItem[] current = null;
 
-        // --------------------------------------------------------------------
-        #region ASSET STORE SHOPPING LIST
         public static AssetStoreItem[] GetShoppingList()
         {
             current ??= new AssetStoreItem[]
                 {
+#if false
+                    // EXAMPLE
                     new("Sci-fi GUI skin",
                         "https://assetstore.unity.com/packages/2d/gui/sci-fi-gui-skin-15606",
                         "3drina/Textures MaterialsGUI Skins/Sci-fi GUI skin",
                         "Sci-Fi UI"
                     )
+#endif
                 };
 
             return current;
         }
 
-        #endregion
-        // --------------------------------------------------------------------
-        #region CONTROLLER
+    #endregion
+    // --------------------------------------------------------------------
+    #region CONTROLLER
 
         public static void ImportUnityPackage(string path)
         {
@@ -156,12 +160,12 @@ namespace Bootstrap
     }
 
     #endregion
-
+    // --------------------------------------------------------------------
+    #region WORKER
 
     public class AssetStoreWorker : MonoBehaviour
     {
         // --------------------------------------------------------------------
-        #region WORKER
 
         IEnumerator WorkThroughShoppingList()
         {
@@ -231,7 +235,6 @@ namespace Bootstrap
             StartCoroutine(WorkThroughShoppingList());
         }
 
-        #endregion
     }
 
     class AssetStoreItem
@@ -306,6 +309,8 @@ namespace Bootstrap
         NotDownloaded,      // Item hasn't downloaded from the Store yet
         NotShown            // The user needs to visit the Store and perform the transaction
     }
+
+    #endregion
 
 }
 
