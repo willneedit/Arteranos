@@ -68,9 +68,17 @@ namespace Arteranos.XR
 
             if (XRGeneralSettings.Instance.Manager.activeLoader == null)
             {
-                Debug.LogWarning("Initializing XR Failed. Check Editor or Player log for details. Maybe there's no VR device available.");
+                Debug.Log("Initializing XR Failed. Maybe there's no VR device available.");
+
+                // die, Die, DIE, blast you....!
+                var go = GameObject.Find("~oxrestarter");
+                Destroy(go);
+
                 Core.SettingsManager.Client.VRMode = false;
                 UpdateXROrigin(false);
+
+                // Fall back to the desktop mode for future attempts only if it's explicitely wanted
+                Core.SettingsManager.Client.Save();
             }
             else
             {
