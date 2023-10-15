@@ -81,6 +81,10 @@ namespace Arteranos.UI
             chk_active_left.interactable = both;
             spn_type_left.enabled= both;
 
+            chk_ctrl_right.interactable = both;
+            chk_active_right.interactable = both;
+            spn_type_right.enabled = both;
+
             chk_ctrl_left.isOn = controls.Controller_left;
             chk_ctrl_right.isOn = controls.Controller_right;
 
@@ -106,9 +110,6 @@ namespace Arteranos.UI
             ControlSettingsJSON controls = cs?.Controls;
 
             if(controls == null) return;
-
-            if((!chk_ctrl_left.isOn || !cs.VRMode) && !chk_ctrl_right.isOn)
-                chk_ctrl_right.isOn = true;
 
             controls.VK_Usage = spn_vk_active.GetEnumValue(spne_VKUsage);
             controls.VK_Layout = spn_vk_layout.GetEnumValue(spne_VKLayout);

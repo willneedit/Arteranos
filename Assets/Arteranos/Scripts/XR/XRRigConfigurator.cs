@@ -63,10 +63,12 @@ namespace Arteranos.XR
         {
             if (ccs == null) return;
 
+            bool vrmode = SettingsManager.Client.VRMode;
+
             if (LeftInteractor != null)
             {
-                LeftInteractor.enabled = ccs.Controller_left;
-                LeftLineVisual.enabled = ccs.Controller_left;
+                LeftInteractor.enabled = ccs.Controller_left && vrmode;
+                LeftLineVisual.enabled = ccs.Controller_left && vrmode;
 
                 LeftLineVisual.invalidColorGradient = ccs.Controller_active_left
                     ? alwaysVisibleRay
@@ -83,8 +85,8 @@ namespace Arteranos.XR
 
             if (RightInteractor != null)
             {
-                RightInteractor.enabled = ccs.Controller_right;
-                RightLineVisual.enabled = ccs.Controller_right;
+                RightInteractor.enabled = ccs.Controller_right && vrmode;
+                RightLineVisual.enabled = ccs.Controller_right && vrmode;
 
                 RightLineVisual.invalidColorGradient = ccs.Controller_active_right
                     ? alwaysVisibleRay
