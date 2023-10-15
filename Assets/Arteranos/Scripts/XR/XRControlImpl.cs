@@ -18,7 +18,6 @@ namespace Arteranos.XR
     public class XRControlImpl : MonoBehaviour, IXRControl
     {
         public XROrigin VRRig;
-        public XROrigin NoVRRig;
 
         public IAvatarBrain Me { get; set; }
         public bool UsingXR { get; private set; }
@@ -124,7 +123,7 @@ namespace Arteranos.XR
         {
             IEnumerator ReconfigureCR()
             {
-                yield return new WaitForSeconds(5);
+                yield return new WaitForSeconds(0.5f);
                 ReconfigureXRRig();
             };
 
@@ -141,7 +140,7 @@ namespace Arteranos.XR
                 Destroy(CurrentVRRig.gameObject);
             }
 
-            CurrentVRRig = Instantiate(useVR ? VRRig : NoVRRig, position, rotation);
+            CurrentVRRig = Instantiate(VRRig, position, rotation);
             StartCoroutine(ReconfigureCR());
             XRSwitchEvent?.Invoke(useVR);
             UsingXR = useVR;

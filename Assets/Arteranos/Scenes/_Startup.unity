@@ -130,6 +130,46 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 486473499397676316, guid: d4474b3215e621b4bbc707cb0c3e8d45,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 486473499397676316, guid: d4474b3215e621b4bbc707cb0c3e8d45,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 486473499397676316, guid: d4474b3215e621b4bbc707cb0c3e8d45,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 486473499397676316, guid: d4474b3215e621b4bbc707cb0c3e8d45,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4777903769453808532, guid: d4474b3215e621b4bbc707cb0c3e8d45,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4777903769453808532, guid: d4474b3215e621b4bbc707cb0c3e8d45,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4777903769453808532, guid: d4474b3215e621b4bbc707cb0c3e8d45,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4777903769453808532, guid: d4474b3215e621b4bbc707cb0c3e8d45,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6743197664947950785, guid: d4474b3215e621b4bbc707cb0c3e8d45,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -625,6 +665,12 @@ PrefabInstance:
       propertyPath: playerSpawnMethod
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3772151105963276859, guid: 0c924ef8e01e2974ba2fde7066698900,
+        type: 3}
+      propertyPath: NoVRRig
+      value: 
+      objectReference: {fileID: 6826848587015489432, guid: db551c4eeae27cd4990850962a0520c1,
+        type: 3}
     - target: {fileID: 3840780144436917895, guid: 0c924ef8e01e2974ba2fde7066698900,
         type: 3}
       propertyPath: m_RootOrder
