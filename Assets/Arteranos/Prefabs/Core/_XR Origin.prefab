@@ -752,8 +752,8 @@ GameObject:
   - component: {fileID: 6826848587015489431}
   - component: {fileID: 6826848587015489432}
   - component: {fileID: 6826848587015489433}
-  - component: {fileID: 6826848587015489428}
-  - component: {fileID: 2131407614293044574}
+  - component: {fileID: 5781944506753649582}
+  - component: {fileID: -8349098519950017063}
   - component: {fileID: 9026550181651742556}
   - component: {fileID: 6826848587015489429}
   - component: {fileID: 6826848587015489425}
@@ -815,7 +815,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ActionAssets:
   - {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
---- !u!114 &6826848587015489428
+  - {fileID: -944628639613478452, guid: 2fa17d14f9fd10d4cb243ab38776f236, type: 3}
+--- !u!114 &5781944506753649582
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -824,10 +825,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6826848587015489434}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2213c36610e3b1c4bbf886810ed9db12, type: 3}
+  m_Script: {fileID: 11500000, guid: 37e617ba895c4eb4188a5577dcc10824, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_System: {fileID: 6826848587015489429}
+  m_System: {fileID: 0}
   m_TurnAmount: 45
   m_DebounceTime: 0.5
   m_EnableTurnLeftRight: 1
@@ -838,7 +839,7 @@ MonoBehaviour:
       m_Name: Left Hand Snap Turn
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: a1d07c24-ca50-422a-a23f-685d9fabf63b
+      m_Id: dd68a827-ee8b-471a-a1ff-bc93de89e247
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -851,14 +852,27 @@ MonoBehaviour:
       m_Name: Right Hand Snap Turn
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: a7b54797-6974-4f75-81d0-42b9c15ef1e0
+      m_Id: 84d6d197-4fa1-4cb9-8954-37d78b8eaa12
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f,
       type: 3}
---- !u!114 &2131407614293044574
+  m_KeyboardMouseSnapTurnAction:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Keyboard Mouse Snap Turn
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 4d79c357-e825-4e69-994c-eecb4726b8c4
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 1010738217276881514, guid: 2fa17d14f9fd10d4cb243ab38776f236,
+      type: 3}
+--- !u!114 &-8349098519950017063
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -867,7 +881,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6826848587015489434}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 919e39492806b334982b6b84c90dd927, type: 3}
+  m_Script: {fileID: 11500000, guid: de5ca3ea89844c446bb8c2cd159c384d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_System: {fileID: 0}
@@ -878,7 +892,7 @@ MonoBehaviour:
       m_Name: Left Hand Turn
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: f97600b6-817d-4e45-9826-0bd949ff31c1
+      m_Id: fa3d9d1d-8702-4f6a-8491-1f9d12adc8de
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -891,12 +905,25 @@ MonoBehaviour:
       m_Name: Right Hand Turn
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: d802319d-420f-45a4-80ca-5e40dc900404
+      m_Id: 57461e32-8493-43a4-997c-044d3ede7fce
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f,
+      type: 3}
+  m_KeyboardMouseTurnAction:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Keyboard Mouse Turn
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 56844f1a-a03a-46d6-8046-febe01077ef4
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 1010738217276881514, guid: 2fa17d14f9fd10d4cb243ab38776f236,
       type: 3}
 --- !u!114 &9026550181651742556
 MonoBehaviour:
@@ -941,6 +968,19 @@ MonoBehaviour:
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: -8198699208435500284, guid: c348712bda248c246b8c49b3db54643f,
+      type: 3}
+  m_KeyboardMouseMoveAction:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Keyboard Mouse Move
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 3ea920ce-2fad-4f33-8dfa-6ab29be44628
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 6972639530819350904, guid: 2fa17d14f9fd10d4cb243ab38776f236,
       type: 3}
 --- !u!114 &6826848587015489429
 MonoBehaviour:

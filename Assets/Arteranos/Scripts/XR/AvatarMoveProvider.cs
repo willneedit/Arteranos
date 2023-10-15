@@ -7,12 +7,57 @@
 
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Inputs;
 
 namespace Arteranos.XR
 {
     public class AvatarMoveProvider : ActionBasedContinuousMoveProvider
     {
+        [SerializeField]
+        [Tooltip("The Input System Action that will be used to read Move data from the keyboard and mouse. Must be a Value Vector2 Control.")]
+        InputActionProperty m_KeyboardMouseMoveAction;
+        /// <summary>
+        /// The Input System Action that Unity uses to read Move data from the right hand controller. Must be a <see cref="InputActionType.Value"/> <see cref="Vector2Control"/> Control.
+        /// </summary>
+        public InputActionProperty KeyboardMouseMoveAction
+        {
+            get => m_KeyboardMouseMoveAction;
+            set => SetInputActionProperty(ref m_KeyboardMouseMoveAction, value);
+        }
+
+        void SetInputActionProperty(ref InputActionProperty property, InputActionProperty value)
+        {
+            if (Application.isPlaying)
+                property.DisableDirectAction();
+
+            property = value;
+
+            if (Application.isPlaying && isActiveAndEnabled)
+                property.EnableDirectAction();
+        }
+
+        protected new void OnEnable()
+        {
+            base.OnEnable();
+
+            m_KeyboardMouseMoveAction.EnableDirectAction();
+        }
+
+        protected new void OnDisable()
+        {
+            base.OnDisable();
+
+            m_KeyboardMouseMoveAction.DisableDirectAction();
+        }
+
+        protected override Vector2 ReadInput()
+        {
+            return base.ReadInput() +
+                m_KeyboardMouseMoveAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+        }
+
         protected override Vector3 ComputeDesiredMove(Vector2 input)
         {
             if (input == Vector2.zero)
