@@ -1299,8 +1299,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7320566017384123864}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 1.2}
-  m_LocalScale: {x: 0.001, y: 0.001, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 2}
+  m_LocalScale: {x: 0.002, y: 0.002, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6743197664947950785}
@@ -1356,7 +1356,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &7320566017384123870
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1440,6 +1440,7 @@ MonoBehaviour:
   EmojiFlyout: {fileID: 8419994093829650434}
   ToolTipText: {fileID: 7320566018290116340}
   Material: {fileID: 2100000, guid: b660309bfa4e3ec439477083e7fafeae, type: 2}
+  lateInitialized: 0
 --- !u!114 &3695462963600023259
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1455,7 +1456,7 @@ MonoBehaviour:
   m_Delay: 2
   m_Duration: 3
   m_Tolerance: 0.1
-  m_offset: {x: -0.15, y: -0.1, z: 0.25}
+  m_offset: {x: 0.3, y: 0.3, z: 0.5}
 --- !u!114 &7892542513495148636
 MonoBehaviour:
   m_ObjectHideFlags: 0

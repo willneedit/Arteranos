@@ -49,6 +49,9 @@ namespace Arteranos.UI
         private int clockSetting = 0;
         private bool clockseconds = false;
 
+        private Vector3 PositionFactor = Vector3.one;
+        private Vector3 ScaleFactor = Vector3.one;
+
         protected override void Awake()
         {
             base.Awake();
@@ -63,6 +66,12 @@ namespace Arteranos.UI
                 () => SysMenu.FindGadget<CameraDroneUI>(SysMenu.GADGET_CAMERA_DRONE).TakePhoto(),
                 OnDismissCameraClicked
             };
+
+            CameraUITracker ct = GetComponent<CameraUITracker>();
+            RectTransform rt = GetComponent<RectTransform>();
+
+            PositionFactor = ct.m_offset;
+            ScaleFactor = rt.localScale;
         }
 
         protected override void Start()
@@ -183,15 +192,16 @@ namespace Arteranos.UI
             CameraUITracker ct = GetComponent<CameraUITracker>();
             RectTransform rt = GetComponent<RectTransform>();
 
-            ct.m_offset = new Vector3(
-                obj.AxisX / 10.0f,
-                obj.AxisY / 10.0f,
-                0.25f);
 
-            rt.localScale = new Vector3(
-                Mathf.Pow(2, obj.Log2Size) * 0.001f,
-                Mathf.Pow(2, obj.Log2Size) * 0.001f,
-                1);
+            ct.m_offset = Vector3.Scale(new Vector3(
+                obj.AxisX, 
+                obj.AxisY, 
+                1), PositionFactor);
+
+            rt.localScale = Vector3.Scale(new Vector3(
+                Mathf.Pow(2, obj.Log2Size), 
+                Mathf.Pow(2, obj.Log2Size),
+                1), ScaleFactor);
 
             ct.m_Delay = obj.Delay;
 
