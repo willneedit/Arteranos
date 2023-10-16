@@ -57,8 +57,9 @@ namespace Arteranos.UI
 
         private void OnVRModeChanged(bool current)
         {
-            btn_ModeSwitch.GetComponentInChildren<TextMeshProUGUI>().text =
-                current ? "Switch to Desktop" : "Switch to VR";
+            if (btn_ModeSwitch != null)
+                btn_ModeSwitch.GetComponentInChildren<TextMeshProUGUI>().text = 
+                    current ? "Switch to Desktop" : "Switch to VR";
         }
 
         private void OnModeSwitchClick()
@@ -68,6 +69,10 @@ namespace Arteranos.UI
                 yield return null;
                 cs.VRMode = !cs.VRMode;
                 btn_ModeSwitch.interactable = true;
+
+                // Unconditionally save the desktop mode, the VR mode is another problem to
+                // deal with.
+                if(!cs.VRMode) cs.Save();
             }
 
             btn_ModeSwitch.interactable = false;
