@@ -393,6 +393,14 @@ namespace Arteranos.XR
             set => Instance.Me = value;
         }
     }
+
+    public static class ScreenFader
+    {
+        public static IXRVisualConfigurator Instance { get; set; }
+
+        public static void StartFading(float opacity, float duration = 0.5f)
+            => Instance?.StartFading(opacity, duration);
+    }
     #endregion
     // -------------------------------------------------------------------
 }

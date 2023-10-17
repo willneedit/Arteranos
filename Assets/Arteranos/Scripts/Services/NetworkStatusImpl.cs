@@ -245,7 +245,7 @@ namespace Arteranos.Services
         {
             if(loadOfflineScene)
             {
-                ScreenFader.StartFading(1.0f);
+                XR.ScreenFader.StartFading(1.0f);
 
                 yield return new WaitForSeconds(0.5f);
                 AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");

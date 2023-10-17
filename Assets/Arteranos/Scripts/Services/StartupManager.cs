@@ -60,7 +60,7 @@ namespace Arteranos.Services
             enabled = false;
 
             if(string.IsNullOrEmpty(DesiredWorld))
-                ScreenFader.StartFading(0.0f, 1.0f);
+                XR.ScreenFader.StartFading(0.0f, 1.0f);
         }
 
         protected void Update()

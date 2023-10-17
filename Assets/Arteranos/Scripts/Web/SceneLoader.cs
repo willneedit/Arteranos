@@ -131,7 +131,7 @@ namespace Arteranos.Web
             yield return null;
 
             // Fade to black...
-            ScreenFader.StartFading(1.0f);
+            XR.ScreenFader.StartFading(1.0f);
             yield return new WaitForSeconds(0.5f);
 
             AssetBundle loadedAB = AssetBundle.LoadFromFile(name);
@@ -220,7 +220,7 @@ namespace Arteranos.Web
 
             // We could have a MoveToDownloadedWorld() in the event listener,
             // but just to be sure in the case if we could be stuck in the black.
-            ScreenFader.StartFading(0.0f);
+            XR.ScreenFader.StartFading(0.0f);
 
             SceneManager.UnloadSceneAsync(prev);
 

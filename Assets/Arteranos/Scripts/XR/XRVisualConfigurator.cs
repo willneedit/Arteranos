@@ -12,7 +12,8 @@ using UnityEngine.Rendering;
 
 namespace Arteranos.XR
 {
-    public class XRVisualConfigurator : MonoBehaviour
+
+    public class XRVisualConfigurator : MonoBehaviour, IXRVisualConfigurator
     {
         // The required speed (2m/s) to fully close the shutters (or rather to fully use the effects)
         [SerializeField] private float VelocityMax = 2.0f;
@@ -29,6 +30,14 @@ namespace Arteranos.XR
         private float FadeDuration = 0.0f;
         private float FadeStrength = 0.0f;
         private Volume FaderVolume;
+
+        private void Awake() => ScreenFader.Instance = this;
+
+        private void OnDestroy()
+        {
+            SettingsManager.Client.OnXRControllerChanged -= DownloadControlSettings;
+            ScreenFader.Instance = null;
+        }
 
         void Start()
         {
@@ -53,12 +62,12 @@ namespace Arteranos.XR
             pos = t.position;
 
             Utils.Tween(ref BlinderStrength, d, BlinderDuration);
+            Utils.Tween(ref FadeStrength, FadeTargetStrength, FadeDuration);
 
             // Too much hassle to pick out the vignette. Just use the whole global volume.
-            if(BlinderVolume != null) BlinderVolume.weight = BlinderStrength * BlindersMaxValue;
+            if (BlinderVolume != null) BlinderVolume.weight = BlinderStrength * BlindersMaxValue;
+            if (FaderVolume != null) FaderVolume.weight = FadeStrength;
         }
-
-        private void OnDestroy() => SettingsManager.Client.OnXRControllerChanged -= DownloadControlSettings;
 
         private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs)
         {
@@ -79,6 +88,12 @@ namespace Arteranos.XR
                     BlindersMaxValue = 1.0f;
                     break;
             }
+        }
+
+        public void StartFading(float opacity, float duration = 0.5f)
+        {
+            FadeTargetStrength = opacity;
+            FadeDuration = duration;
         }
     }
 }
