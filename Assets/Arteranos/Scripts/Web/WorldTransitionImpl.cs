@@ -25,6 +25,7 @@ namespace Arteranos.Web
 
             pui.AllowCancel = true;
 
+            // FIXME See #71
             (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(url, true);
 
             pui.Completed += (context) => OnLoadWorldComplete(url, context, successCallback);
