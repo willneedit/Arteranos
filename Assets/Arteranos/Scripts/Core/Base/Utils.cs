@@ -146,6 +146,25 @@ namespace Arteranos.Core
         }
 
         /// <summary>
+        /// Advances the tweened value towards the target value with the given timespan
+        /// </summary>
+        /// <param name="current">The current value, normalized</param>
+        /// <param name="target">The targeet value, normalized</param>
+        /// <param name="duration">How many seconds to take it across the whole scale</param>
+        public static void Tween(ref float current, float target, float duration)
+        {
+            if (duration == 0) // That would not be tweening, but rather setting the value.
+            {
+                current = target;
+                return;
+            }
+
+            if (target > current) current += Time.deltaTime / duration;
+            if (target < current) current -= Time.deltaTime / duration;
+            current = Mathf.Clamp01(current);
+        }
+
+        /// <summary>
         /// Determine if you are able to do the action in the question (to the targeted user)
         /// </summary>
         /// <param name="cap">The action you want to do</param>

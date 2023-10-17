@@ -14,22 +14,27 @@ namespace Arteranos.XR
 {
     public class XRVisualConfigurator : MonoBehaviour
     {
-        // The required speed (1m/s) to fully close the shutters (or rather to fully use the effects)
-        [SerializeField] private float VelocityMax = 1.0f;
+        // The required speed (2m/s) to fully close the shutters (or rather to fully use the effects)
+        [SerializeField] private float VelocityMax = 2.0f;
 
         // 1/4th of a second to close/open the shutters
-        [SerializeField] private float TweenSpeed = 4.0f;
+        [SerializeField] private float BlinderDuration = 0.25f;
 
         private Vector3 pos = Vector3.zero;
         private float BlindersMaxValue = 0.0f;
+        private float BlinderStrength = 0.0f;
+        private Volume BlinderVolume;
 
-        private float TweenedD = 0.0f;
-
-        private Volume vol;
+        private float FadeTargetStrength = 0.0f;
+        private float FadeDuration = 0.0f;
+        private float FadeStrength = 0.0f;
+        private Volume FaderVolume;
 
         void Start()
         {
-            vol = GetComponentInChildren<Volume>();
+            Volume[] volumes = GetComponentsInChildren<Volume>();
+            BlinderVolume = volumes[0];
+            FaderVolume = volumes[1];
 
             SettingsManager.Client.OnXRControllerChanged += DownloadControlSettings;
             SettingsManager.Client.PingXRControllersChanged();
@@ -47,15 +52,13 @@ namespace Arteranos.XR
             d = Mathf.Clamp01(d / VelocityMax);
             pos = t.position;
 
-            if(d > TweenedD) TweenedD += TweenSpeed * Time.deltaTime;
-            if(d < TweenedD) TweenedD -= TweenSpeed * Time.deltaTime;
-            TweenedD = Mathf.Clamp01(TweenedD);
+            Utils.Tween(ref BlinderStrength, d, BlinderDuration);
 
             // Too much hassle to pick out the vignette. Just use the whole global volume.
-            if(vol != null) vol.weight = TweenedD * BlindersMaxValue;
+            if(BlinderVolume != null) BlinderVolume.weight = BlinderStrength * BlindersMaxValue;
         }
 
-        private void OnDestroy() => SettingsManager.Client.OnXRControllerChanged += DownloadControlSettings;
+        private void OnDestroy() => SettingsManager.Client.OnXRControllerChanged -= DownloadControlSettings;
 
         private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs)
         {
