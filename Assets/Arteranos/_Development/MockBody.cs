@@ -40,9 +40,9 @@ namespace Arteranos
 
         public float FullHeight => 1.75f;
 
-        public bool invisible { get; set; }
+        public bool Invisible { get; set; }
 
-        public void ResetPose() => throw new System.NotImplementedException();
+        public void ResetPose(bool leftHand, bool rightHand) => throw new System.NotImplementedException();
         public void UpdateOpenMouth(float amount) => throw new System.NotImplementedException();
     }
 }

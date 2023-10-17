@@ -61,7 +61,7 @@ namespace Arteranos.Avatar
             else
             {
                 // In 2D, just use the default pose and leave it be.
-                m_AvatarData.ResetPose();
+                m_AvatarData.ResetPose(true, true);
             }
 
             // And, move the XR (or 2D) rig to the own avatar's position.
@@ -103,18 +103,23 @@ namespace Arteranos.Avatar
                 if(m_AvatarData.CenterEye == null) return;
 
                 Transform cam = XRControl.Instance.cameraTransform;
+                ControlSettingsJSON ccs = SettingsManager.Client.Controls;
 
                 Vector3 cEyeOffset = m_AvatarData.CenterEye.position -
                     cam.position;
 
-                if(LeftHand && m_AvatarData.LeftHand)
+                // If the respective controllers are disabled, reset their hand poses
+                // and bypass the tracking.
+                m_AvatarData.ResetPose(!ccs.Controller_left, !ccs.Controller_right);
+
+                if(LeftHand && m_AvatarData.LeftHand && ccs.Controller_left)
                 {
                     m_AvatarData.LeftHand.SetPositionAndRotation(
                             LeftHand.position + cEyeOffset,
                             LeftHand.rotation * m_AvatarData.LhrOffset);
                 }
 
-                if(RightHand && m_AvatarData.RightHand)
+                if(RightHand && m_AvatarData.RightHand && ccs.Controller_right)
                 {
                     m_AvatarData.RightHand.SetPositionAndRotation(
                             RightHand.position + cEyeOffset,

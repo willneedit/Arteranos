@@ -47,7 +47,7 @@ namespace Arteranos.Avatar
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
 
 
-        public bool invisible
+        public bool Invisible
         {
             get => m_invisible;
             set
@@ -57,7 +57,7 @@ namespace Arteranos.Avatar
                 {
                     Renderer[] renderers = m_AvatarGameObject.GetComponentsInChildren<Renderer>();
                     foreach(Renderer renderer in renderers)
-                        renderer.enabled = !invisible;
+                        renderer.enabled = !Invisible;
                 }
             }
         }
@@ -168,16 +168,16 @@ namespace Arteranos.Avatar
         /// Reset the avatar to the 'attention' pose rather than the A- or T-pose, using
         /// the IK handles.
         /// </summary>
-        public void ResetPose()
+        public void ResetPose(bool leftHand, bool rightHand)
         {
-            if(LeftHand != null)
+            if(LeftHand != null && leftHand)
             {
                 Vector3 idle_lh = new(-0.4f, 0, 0);
                 Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
                 LeftHand.SetLocalPositionAndRotation(idle_lh, idle_rlh);
             }
 
-            if(RightHand != null)
+            if(RightHand != null && rightHand)
             {
                 Vector3 idle_rh = new(0.4f, 0, 0);
                 Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
@@ -277,7 +277,8 @@ namespace Arteranos.Avatar
             // Now upload the skeleton joint data to the Avatar Pose driver.
             GetComponent<AvatarPoseDriver>().UploadJointNames(agot, jointnames.ToArray());
 
-            ResetPose();
+            // Set the avatar to the attention pose from the A- or T-pose.
+            ResetPose(true, true);
 
             Transform fullHeight = agot.FindRecursive("HeadTop_End");
 
@@ -327,7 +328,7 @@ namespace Arteranos.Avatar
             }
 
             // Refresh the visibility state for the new avatar
-            invisible = m_invisible;
+            Invisible = m_invisible;
 
             Debug.Log("Successfully loaded avatar");
             last = present;

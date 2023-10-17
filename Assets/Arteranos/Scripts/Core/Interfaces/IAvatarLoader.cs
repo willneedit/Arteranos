@@ -28,12 +28,12 @@ namespace Arteranos.Avatar
         string GalleryModeURL { get; set; }
         float EyeHeight { get; }
         float FullHeight { get; }
-        bool invisible { get; set; }
+        bool Invisible { get; set; }
 
         /// <summary>
         /// Reset the the avatar to an 'Attention' pose
         /// </summary>
-        public void ResetPose();
+        public void ResetPose(bool leftHand, bool rightHand);
 
         /// <summary>
         /// Update the mouth open/closed state

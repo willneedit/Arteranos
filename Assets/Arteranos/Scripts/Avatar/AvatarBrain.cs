@@ -481,7 +481,7 @@ namespace Arteranos.Avatar
             // Special case - self-modifying appearance status, like making yourself invisible,
             // and, to a lesser extent, self-muting.
             if(HitBox != null) HitBox.interactable = !Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
-            if(Body != null) Body.invisible = Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
+            if(Body != null) Body.Invisible = Avatar.AppearanceStatus.IsInvisible(AppearanceStatus);
 
             OnAppearanceStatusChanged?.Invoke(AppearanceStatus);
         }
