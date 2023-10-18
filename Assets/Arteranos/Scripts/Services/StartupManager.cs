@@ -59,8 +59,9 @@ namespace Arteranos.Services
             // Finish the startup...
             enabled = false;
 
+            // ... and raise the curtains. Though, keep waiting if we have to load the world.
             if(string.IsNullOrEmpty(DesiredWorld))
-                XR.ScreenFader.StartFading(0.0f, 1.0f);
+                XR.ScreenFader.StartFading(0.0f, 2.0f);
         }
 
         protected void Update()
@@ -68,6 +69,9 @@ namespace Arteranos.Services
             if(initialized) return;
 
             initialized = true;
+
+            // Initialize with the black screen
+            XR.ScreenFader.StartFading(1.0f, 0.0f);
 
             StartCoroutine(StartupCoroutine());
         }
