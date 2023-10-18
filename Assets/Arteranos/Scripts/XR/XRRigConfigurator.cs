@@ -65,10 +65,18 @@ namespace Arteranos.XR
 
             bool vrmode = SettingsManager.Client.VRMode;
 
+            bool left_on = ccs.Controller_left && vrmode;
+            bool right_on = ccs.Controller_right && vrmode;
+
+            // The configuration could be a leftover from the desktop mode, set
+            // the right controller active as an emergency.
+            if (vrmode && !left_on && !right_on)
+                right_on = true;
+
             if (LeftInteractor != null)
             {
-                LeftInteractor.enabled = ccs.Controller_left && vrmode;
-                LeftLineVisual.enabled = ccs.Controller_left && vrmode;
+                LeftInteractor.enabled = left_on;
+                LeftLineVisual.enabled = left_on;
 
                 LeftLineVisual.invalidColorGradient = ccs.Controller_active_left
                     ? alwaysVisibleRay
@@ -85,8 +93,8 @@ namespace Arteranos.XR
 
             if (RightInteractor != null)
             {
-                RightInteractor.enabled = ccs.Controller_right && vrmode;
-                RightLineVisual.enabled = ccs.Controller_right && vrmode;
+                RightInteractor.enabled = right_on;
+                RightLineVisual.enabled = right_on;
 
                 RightLineVisual.invalidColorGradient = ccs.Controller_active_right
                     ? alwaysVisibleRay

@@ -2779,7 +2779,7 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 0
+  m_ChildAlignment: 3
   m_Spacing: 10
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
@@ -2810,6 +2810,7 @@ MonoBehaviour:
   chk_active_right: {fileID: 4410776149312809008}
   spn_type_left: {fileID: 1879282601181042501}
   spn_type_right: {fileID: 6556426603080722204}
+  grp_Ray_Controls: {fileID: 8899294226115729521}
 --- !u!1 &9191675737667765828
 GameObject:
   m_ObjectHideFlags: 0

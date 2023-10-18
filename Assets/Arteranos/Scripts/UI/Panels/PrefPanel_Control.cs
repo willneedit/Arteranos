@@ -12,6 +12,8 @@ using UnityEngine.UI;
 using Arteranos.Core;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using Arteranos.XR;
 
 namespace Arteranos.UI
 {
@@ -30,7 +32,11 @@ namespace Arteranos.UI
         [SerializeField] private Spinner spn_type_left = null;
         [SerializeField] private Spinner spn_type_right = null;
 
+        [SerializeField] private GameObject grp_Ray_Controls = null;
+
         private ClientSettings cs = null;
+        private ControlSettingsJSON controls;
+        private bool dirty = false;
 
         private Dictionary<string, VKUsage> spne_VKUsage;
         private Dictionary<string, VKLayout> spne_VKLayout;
@@ -42,19 +48,89 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            chk_ctrl_left.onValueChanged.AddListener(OnControllersChanged);
-            chk_ctrl_right.onValueChanged.AddListener(OnControllersChanged);
-            chk_active_left.onValueChanged.AddListener(OnControllersChanged);
-            chk_active_right.onValueChanged.AddListener(OnControllersChanged);
+            spn_vk_active.OnChanged += OnVKActiveChanged;
+            spn_vk_layout.OnChanged += OnVKLayoutChanged;
 
-            spn_type_left.OnChanged += (_, x) => OnControllersChanged(x);
-            spn_type_right.OnChanged += (_, x) => OnControllersChanged(x);
+            sldn_NameplateIn.OnValueChanged += OnNameplaneInChanged;
+            sldn_NameplateOut.OnValueChanged += OnNameplaneOutChanged;
+
+            chk_ctrl_left.onValueChanged.AddListener(OnLeftControllerEnabled);
+            chk_ctrl_right.onValueChanged.AddListener(OnRightControllerEnabled);
+            chk_active_left.onValueChanged.AddListener(OnLeftControllerAlwaysSeen);
+            chk_active_right.onValueChanged.AddListener(OnRightControllerAlwaysSeen);
+
+            spn_type_left.OnChanged += OnLeftControllerTypeChanged;
+            spn_type_right.OnChanged += OnRightControllerTypeChanged;
         }
 
-        private void OnControllersChanged(bool arg0)
+        private void OnNameplaneInChanged(float obj)
         {
-            UploadSettings();
+            controls.NameplateIn = sldn_NameplateIn.value;
+            OnControllersChanged();
+        }
+
+        private void OnNameplaneOutChanged(float obj)
+        {
+            controls.NameplateOut = sldn_NameplateOut.value;
+            OnControllersChanged();
+        }
+
+        private void OnVKActiveChanged(int arg1, bool arg2)
+        {
+            controls.VK_Usage = spn_vk_active.GetEnumValue(spne_VKUsage);
+            OnControllersChanged();
+        }
+
+        private void OnVKLayoutChanged(int arg1, bool arg2)
+        {
+            controls.VK_Layout = spn_vk_layout.GetEnumValue(spne_VKLayout);
+            OnControllersChanged();
+        }
+
+        private void OnLeftControllerEnabled(bool arg0)
+        {
+            controls.Controller_left = chk_ctrl_left.isOn;
+            OnControllersChanged();
+        }
+
+        private void OnRightControllerEnabled(bool arg0)
+        {
+            controls.Controller_right = chk_ctrl_right.isOn;
+            OnControllersChanged();
+        }
+
+        private void OnLeftControllerAlwaysSeen(bool arg0)
+        {
+            controls.Controller_active_left = chk_active_left.isOn;
+            OnControllersChanged();
+        }
+
+        private void OnRightControllerAlwaysSeen(bool arg0)
+        {
+            controls.Controller_active_right = chk_active_right.isOn;
+            OnControllersChanged();
+        }
+
+        private void OnLeftControllerTypeChanged(int arg1, bool arg2)
+        {
+            controls.Controller_Type_left = spn_type_left.GetEnumValue(spne_raytype);
+            OnControllersChanged();
+        }
+
+        private void OnRightControllerTypeChanged(int arg1, bool arg2)
+        {
+            controls.Controller_Type_right = spn_type_right.GetEnumValue(spne_raytype);
+            OnControllersChanged();
+        }
+
+        private void OnControllersChanged()
+        {
+            // Keep at least one controller on, given you're in VR.
+            if (!chk_ctrl_left.isOn && !chk_ctrl_right.isOn && cs.VRMode)
+                chk_ctrl_right.isOn = true;
+
             cs.PingXRControllersChanged();
+            dirty = true;
         }
 
         protected override void Start()
@@ -63,7 +139,7 @@ namespace Arteranos.UI
 
             cs = SettingsManager.Client;
 
-            ControlSettingsJSON controls = cs.Controls;
+            controls = cs.Controls;
 
             spn_vk_active.FillSpinnerEnum(out spne_VKUsage, controls.VK_Usage);
             spn_vk_layout.FillSpinnerEnum(out spne_VKLayout, controls.VK_Layout);
@@ -75,15 +151,7 @@ namespace Arteranos.UI
             sldn_NameplateIn.value = controls.NameplateIn;
             sldn_NameplateOut.value = controls.NameplateOut;
 
-            bool both = cs.VRMode;
-
-            chk_ctrl_left.interactable = both;
-            chk_active_left.interactable = both;
-            spn_type_left.enabled= both;
-
-            chk_ctrl_right.interactable = both;
-            chk_active_right.interactable = both;
-            spn_type_right.enabled = both;
+            grp_Ray_Controls.SetActive(cs.VRMode);
 
             chk_ctrl_left.isOn = controls.Controller_left;
             chk_ctrl_right.isOn = controls.Controller_right;
@@ -93,38 +161,19 @@ namespace Arteranos.UI
 
             spn_type_left.SetEnumValue(controls.Controller_Type_left);
             spn_type_right.SetEnumValue(controls.Controller_Type_right);
+
+            // Reset the state as it's the initial state, not the blank slate.
+            dirty = false;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
 
-            UploadSettings();
-
             // Might be to disabled before it's really started, so cs may be null yet.
-            cs?.Save();
-        }
-
-        private void UploadSettings()
-        {
-            ControlSettingsJSON controls = cs?.Controls;
-
-            if(controls == null) return;
-
-            controls.VK_Usage = spn_vk_active.GetEnumValue(spne_VKUsage);
-            controls.VK_Layout = spn_vk_layout.GetEnumValue(spne_VKLayout);
-
-            controls.NameplateIn = sldn_NameplateIn.value;
-            controls.NameplateOut = sldn_NameplateOut.value;
-
-            controls.Controller_left = chk_ctrl_left.isOn;
-            controls.Controller_right = chk_ctrl_right.isOn;
-
-            controls.Controller_active_left = chk_active_left.isOn;
-            controls.Controller_active_right = chk_active_right.isOn;
-
-            controls.Controller_Type_left = spn_type_left.GetEnumValue(spne_raytype);
-            controls.Controller_Type_right = spn_type_right.GetEnumValue(spne_raytype);
+            if (dirty) cs?.Save();
+            dirty = false;
+            cs?.PingXRControllersChanged();
         }
     }
 }
