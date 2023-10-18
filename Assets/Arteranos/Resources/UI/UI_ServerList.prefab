@@ -379,7 +379,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -575,7 +575,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -769,7 +769,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -904,7 +904,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -1039,7 +1039,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -1175,7 +1175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -1330,7 +1330,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -1468,7 +1468,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -1557,6 +1557,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1889180529122461150}
     m_Modifications:
+    - target: {fileID: 1054943574781234315, guid: 56cbf0290f4529b44b98f2095baa8d5c,
+        type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
     - target: {fileID: 1054943574781234318, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_Pivot.x
@@ -1695,12 +1700,12 @@ PrefabInstance:
     - target: {fileID: 1054943575592786897, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_Size
-      value: 0.99998534
+      value: 0.999978
       objectReference: {fileID: 0}
     - target: {fileID: 1054943575592786897, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1054943576046784928, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
@@ -1750,7 +1755,7 @@ PrefabInstance:
     - target: {fileID: 1054943576046784930, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.004881358
+      value: 0.00028145203
       objectReference: {fileID: 0}
     - target: {fileID: 1054943576046784931, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}

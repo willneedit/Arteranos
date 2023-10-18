@@ -412,6 +412,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ChoiceBook
       objectReference: {fileID: 0}
+    - target: {fileID: 3995104436472947777, guid: e0188d43f9de31042ac67bbff8de2205,
+        type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
     - target: {fileID: 3995104436472947779, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -452,6 +457,11 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 0.1882353
       objectReference: {fileID: 0}
+    - target: {fileID: 3995104436571264515, guid: e0188d43f9de31042ac67bbff8de2205,
+        type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e0188d43f9de31042ac67bbff8de2205, type: 3}
 --- !u!224 &955284842016247779 stripped
