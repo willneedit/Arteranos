@@ -139,6 +139,7 @@ namespace Arteranos.UI
                 if(SettingsManager.Client != null)
                 {
                     SettingsManager.Client.OnUserHUDSettingsChanged += DownloadUserHUDSettings;
+                    SettingsManager.Client.OnVRModeChanged += (_) => SettingsManager.Client.PingUserHUDChanged();
                     SettingsManager.Client.PingUserHUDChanged();
                     lateInitialized= true;
                 }
@@ -198,9 +199,11 @@ namespace Arteranos.UI
                 obj.AxisY, 
                 1), PositionFactor);
 
+            float actualSize = Mathf.Pow(2, (float)(obj.Log2Size + (SettingsManager.Client.VRMode ? 1.0f : 0.0f)));
+
             rt.localScale = Vector3.Scale(new Vector3(
-                Mathf.Pow(2, obj.Log2Size), 
-                Mathf.Pow(2, obj.Log2Size),
+                actualSize,
+                actualSize,
                 1), ScaleFactor);
 
             ct.m_Delay = obj.Delay;

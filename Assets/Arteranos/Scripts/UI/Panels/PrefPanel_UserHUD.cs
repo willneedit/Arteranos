@@ -129,6 +129,7 @@ namespace Arteranos.UI
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty) cs?.Save();
             dirty = false;
+            cs?.PingUserHUDChanged();
         }
     }
 }
