@@ -16,8 +16,8 @@ namespace Arteranos.Web
         private static string GetRootPath(string url, bool cached)
         {
             return cached
-                ? $"{Application.temporaryCachePath}/WorldCache/{Utils.GetURLHash(url)}/world.dir"
-                : $"{Application.persistentDataPath}/WorldGallery/{Utils.GetURLHash(url)}";
+                ? $"{Utils.WorldCacheRootDir}/{Utils.GetURLHash(url)}/world.dir"
+                : $"{Utils.WorldStorageDir}/{Utils.GetURLHash(url)}";
         }
 
         private void Awake() => WorldGallery.Instance = this;

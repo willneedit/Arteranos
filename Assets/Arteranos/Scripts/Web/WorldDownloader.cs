@@ -129,7 +129,7 @@ namespace Arteranos.Web
             WorldDownloaderContext context = _context as WorldDownloaderContext;
 
             context.hashed = Utils.GetURLHash(context.url);
-            context.cachedir = $"{Application.temporaryCachePath}/WorldCache/{context.hashed}";
+            context.cachedir = $"{Utils.WorldCacheRootDir}/{context.hashed}";
             context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
 
             if(context.reload)
