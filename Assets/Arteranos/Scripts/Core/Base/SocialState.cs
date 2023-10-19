@@ -122,6 +122,7 @@ namespace Arteranos.Social
         CanSendText,
         CanAdminServerUsers,
         CanEditServer,
+        CanInitiateWorldTransition,
     }
     #endregion
 

@@ -772,6 +772,8 @@ namespace Arteranos.Avatar
                 // Admin can send text, even to higher tiers, for a reason
                 UserCapabilities.CanSendText => isAnyAdmin || (target != null && SocialState.IsPermitted(target, target.UserPrivacy.TextReception)),
 
+                // Both server and world admins can initiate the world transition
+                UserCapabilities.CanInitiateWorldTransition => isAnyAdmin,
 
                 _ => throw new NotImplementedException(),
             };
