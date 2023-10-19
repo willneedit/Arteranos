@@ -173,13 +173,12 @@ namespace Arteranos.UI
             bool avatarOn = XRControl.Me != null;
             bool muted = AppearanceStatus.IsSilent(XRControl.Me?.AppearanceStatus ?? AppearanceStatus.OK);
 
-            // Safety measure, to accidentally shut down a hosted session.
-//            bool online = NetworkStatus.GetOnlineLevel() == OnlineLevel.Client;
-            bool online = NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline;
+            // Safety measure, to prevent accidental shut down a hosted session.
+            bool online = NetworkStatus.GetOnlineLevel() == OnlineLevel.Client;
 
             HUDButtons[btn_mute].Button.gameObject.SetActive(avatarOn && !muted);
             HUDButtons[btn_unmute].Button.gameObject.SetActive(avatarOn && muted);
-            HUDButtons[btn_emotes].Button.gameObject.SetActive(avatarOn);
+            //HUDButtons[btn_emotes].Button.gameObject.SetActive(avatarOn);
 
             HUDButtons[btn_disconnect].Button.gameObject.SetActive(online);
 
