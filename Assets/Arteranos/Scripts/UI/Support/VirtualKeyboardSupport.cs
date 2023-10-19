@@ -68,20 +68,26 @@ namespace Arteranos.UI
 
             AttachedKB = FindObjectOfType<KeyboardUI>(true);
 
-            if(AttachedKB == null)
+            Vector3 forward = Vector3.forward * (SettingsManager.Client.VRMode ? 0.25f : 0.99f);
+            Vector3 scale = (SettingsManager.Client.VRMode ? 0.50f : 1.00f) * 0.005f * Vector3.one;
+
+            CameraUITracker ct;
+            if (AttachedKB == null)
             {
                 AttachedKB = Instantiate(SoftKeyboard, 
-                    transform.position + (transform.rotation * Vector3.forward * 0.99f), // Move a little bit to me to prevent z-fighting
+                    transform.position + (transform.rotation * forward), // Move a little bit to me to prevent z-fighting
                     transform.rotation);
 
-                CameraUITracker new_ct = AttachedKB.gameObject.AddComponent<CameraUITracker>();
-                new_ct.m_offset = Vector3.forward * 0.99f;
+                ct = AttachedKB.gameObject.AddComponent<CameraUITracker>();
             }
+            else
+                ct = AttachedKB.gameObject.GetComponent<CameraUITracker>();
 
-            CameraUITracker ct = AttachedKB.gameObject.AddComponent<CameraUITracker>();
+            ct.m_offset = forward;
             ct.enabled = FollowsCamera;
 
             AttachedKB.gameObject.SetActive(false);
+            AttachedKB.transform.localScale = scale;
             AttachedKB.Text = field.text;
             AttachedKB.StringPosition = field.text.Length;
             AttachedKB.characterLimit = field.characterLimit;

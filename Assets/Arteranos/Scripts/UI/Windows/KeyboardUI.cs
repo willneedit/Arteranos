@@ -165,7 +165,7 @@ namespace Arteranos.UI
                     btn.onClick.AddListener(makeKeyPressedFunc(row, col));
 
                     RectTransform rt = btn.GetComponent<RectTransform>();
-                    rt.localPosition = new Vector2(x, y);
+                    rt.localPosition = new Vector3(x, y, -2);
                     rt.sizeDelta = new(rt.sizeDelta.x * keywidth, rt.sizeDelta.y);
 
                     btn.name = $"Key_{name}";
