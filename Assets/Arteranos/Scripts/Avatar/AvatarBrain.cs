@@ -559,6 +559,10 @@ namespace Arteranos.Avatar
         [Command]
         private void PropagateWorldTransition(string worldURL)
         {
+            // The hacked client may display the new world, but we won't distribute the
+            // world throughout the server.
+            if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
+
             // Pure server needs to be notified and transitioned, too.
             if(isServer && !isClient && !string.IsNullOrEmpty(worldURL))
             {
