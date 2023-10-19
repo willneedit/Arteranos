@@ -14,6 +14,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 using System;
+using System.IO;
 
 namespace Arteranos.UI
 {
@@ -34,6 +35,8 @@ namespace Arteranos.UI
         public Toggle chk_Guests = null;
         public Toggle chk_CustomAvatars = null;
         public Toggle chk_Flying = null;
+
+        public Button btn_ClearCaches = null;
 
         private ServerSettings ss = null;
 
@@ -60,6 +63,8 @@ namespace Arteranos.UI
             chk_CustomAvatars.onValueChanged.AddListener(SetDirty);
             chk_Flying.onValueChanged.AddListener(SetDirty);
             chk_Guests.onValueChanged.AddListener(SetDirty);
+
+            btn_ClearCaches.onClick.AddListener(OnClearCachesClicked);
         }
 
         //private char OnValidatePort(string text, int charIndex, char addedChar)
@@ -181,6 +186,15 @@ namespace Arteranos.UI
             img_IconImage.sprite = Sprite.Create(tex,
                 new Rect(0, 0, tex.width, tex.height),
                 Vector2.zero);
+        }
+
+        private void OnClearCachesClicked()
+        {
+            if(Directory.Exists(Utils.WorldCacheRootDir))
+                Directory.Delete(Utils.WorldCacheRootDir, true);
+
+            if (Directory.Exists(Utils.RPMAvatarCache))
+                Directory.Delete(Utils.RPMAvatarCache, true);
         }
     }
 }
