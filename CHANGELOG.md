@@ -1,3 +1,33 @@
+# Version 1.0.0
+
+## New Features
+
+- User Heads Up Display (HUD) doubling as a quick menu
+  - Size and position configurable 
+- Emojis pane - sixteen emojis to display for you
+- Passwordless authentication
+  - Secret key in a file in your device
+  - No password eavesdropping!
+  - Public key to identify your friends across the servers
+- Text messages button in the 'People' panel (if the receiver wants it to)
+- **Flying!**
+- Privacy panel: Hiding the user ID, or blocking text messages for strangers, and more
+- Camera drone. Place it, or toss it high up, and snap a photo.
+- Microserver for providing web links. Place a link in Discord to invite user into your server
+- Kicking and banning users (if the user has sufficient privileges)
+- Controller configuration
+  - Disabling controllers let your avatar's hand be at rest - not in your face!
+
+## Fixes and improvements
+
+- Merging the voice and the world server -- one less port to be opened.
+- User privileges and capabilities
+- Massive improvements to authentication
+- Nameplate improvements
+- Virtual keyboard improvements
+- VR look & feel improvements
+- Various stability and bug fixes
+
 # Version 0.5.0
 
 ## New Features
