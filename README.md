@@ -1,17 +1,20 @@
 # Arteranos
 
 ## Under heavy development
-__*Currently it's in alpha - so don't expect too much!*__
+__*So don't expect too much!*__
 
 This is intended to be a VR social app - To meet and greet people in the metaverse, conduct or attend events, create worlds, and much more, built upon a decentralized architecture to host individual users in numerous small(er) servers as an alternative to the singular "mega-servers" which are administered or switched off by a single person's royal whim.
 
 ### System requirements
 
-- Known to work: Windows 10 and newer, 64-Bit.
+- Windows 10/11, 64-Bit.
   - It's designed to be architecture agnostic, so more recent versions of Windows should likely work.
   - Other architectures (e.g. Linux) are in the planning stage
+
 - OpenXR-supported tethered headset, _if applicable_<sup>*</sup>
-  - Known to work: Oculus Quest 2, linked (Oculus Link, or using Virtual Desktop)
+  - ~~Oculus~~ Meta Quest 2, using Oculus Link (both Air and cable)
+  - Meta Quest 2, Virtual Desktop
+  
 - For building you need:
   - **Unity 2021.3.15f1** with the installed modules for the desired target platform
   - **Visual Studio**, together installed with Unity
@@ -23,12 +26,9 @@ This is intended to be a VR social app - To meet and greet people in the metaver
 ### Quick Building (Windows 64)
  1. Download the source using git: `git clone --recurse-submodules https://github.com/willneedit/Arteranos.git`
  2. `cd Arteranos`
- 3. **OPTIONAL** - Only if the OAuth2 keys are available:
-    1. cd Assets
-    2. git clone \[**REDACTED**\]
- 4. Edit the `build.bat` script to find the Unity Editor you've installed in your build machine
- 5. `build.bat`
- 6. If all goes well, please find the newly created `build` folder including the installation wizard, `ArteranosSetup.msi` (or `ArteranosSetup.exe` as an alternative), amongst other files.
+ 3. Edit the `build.bat` script to find the Unity Editor you've installed in your build machine
+ 4. `build.bat`
+ 5. If all goes well, please find the newly created `build` folder including the installation wizard, `ArteranosSetup.msi` (or `ArteranosSetup.exe` as an alternative), amongst other files.
     - Also, you'll find the `Arteranos.exe` and `Arteranos-Server.exe`, respectively.
 
 ### Installing
