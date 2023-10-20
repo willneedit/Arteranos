@@ -1,12 +1,13 @@
 # Security policy
 
-Note, this is not even an alpha - as of this time, there aren't semi-stable versions yet. Daring developers are encouraged to use the `master` branch, or even the more unstable branches. If you discover a security risk, let me know.
+Daring developers are encouraged to use the `master` branch, or even the more unstable branches. If you discover a security risk, let me know.
 
 ## Supported versions
 
 | Versions   | Supported           |
 |------------|---------------------|
 | ~~0.0.1~~  | :white_check_mark:  |
+| 1.0.0      | :white_check_mark:  |
 | master     | :x:                 |
 
 
