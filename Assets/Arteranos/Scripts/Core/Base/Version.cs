@@ -12,7 +12,7 @@ namespace Arteranos.Core
 {
     public class Version
     {
-        public const string VERSION_MIN = "1.0.0";
+        public const string VERSION_MIN = "1.1.0";
 
         public string MMP = "0.0.0";    // Major, minor, patch
         public string MMPB = "0.0.0.0"; // Major, minor, patch, build
