@@ -127,12 +127,18 @@ namespace Arteranos.Core
         // Avatar provider to get the user's avatar
         public AvatarProvider AvatarProvider { get; set; }
 
+        // Avatar height in cm
+        public float AvatarHeight { get; set; } = 175;
+
         [JsonIgnore]
         public bool IsCustom => AvatarProvider == AvatarProvider.Raw || AvatarProvider == AvatarProvider.Invalid;
 
         public override bool Equals(object obj) => obj is AvatarDescriptionJSON jSON && Equals(jSON);
-        public bool Equals(AvatarDescriptionJSON other) => AvatarURL == other.AvatarURL && AvatarProvider == other.AvatarProvider;
-        public override int GetHashCode() => HashCode.Combine(AvatarURL, AvatarProvider);
+        public bool Equals(AvatarDescriptionJSON other) 
+            => AvatarURL == other.AvatarURL 
+            && AvatarProvider == other.AvatarProvider 
+            && AvatarHeight == other.AvatarHeight;
+        public override int GetHashCode() => HashCode.Combine(AvatarURL, AvatarProvider, AvatarHeight);
 
         public static bool operator ==(AvatarDescriptionJSON left, AvatarDescriptionJSON right) => left.Equals(right);
         public static bool operator !=(AvatarDescriptionJSON left, AvatarDescriptionJSON right) => !(left == right);
@@ -240,7 +246,8 @@ namespace Arteranos.Core
         public virtual AvatarDescriptionJSON CurrentAvatar { get; set; } = new() 
         {
             AvatarProvider = AvatarProvider.RPM,
-            AvatarURL = "6394c1e69ef842b3a5112221" 
+            AvatarURL = "6394c1e69ef842b3a5112221",
+            AvatarHeight = 175
         };
 
         // Avatar storage
@@ -320,7 +327,7 @@ namespace Arteranos.Core
 
         public const string PATH_CLIENT_SETTINGS = "UserSettings.json";
 
-        public event Action<string> OnAvatarChanged;
+        public event Action<string, float> OnAvatarChanged;
         public event Action<bool> OnVRModeChanged;
         public event Action<float, float> OnPrivacyBubbleChanged;
         public event Action<ControlSettingsJSON, MovementSettingsJSON> OnXRControllerChanged;
@@ -331,13 +338,25 @@ namespace Arteranos.Core
         public string AvatarURL
         {
             get => Me.CurrentAvatar.AvatarURL;
-            set {
+            set 
+            {
                 string old = Me.CurrentAvatar.AvatarURL;
                 Me.CurrentAvatar.AvatarURL = value;
-                if(old != Me.CurrentAvatar.AvatarURL) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarURL);
+                if(old != Me.CurrentAvatar.AvatarURL) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarURL, Me.CurrentAvatar.AvatarHeight);
             }
         }
 
+        [JsonIgnore]
+        public float AvatarHeight
+        {
+            get => Me.CurrentAvatar.AvatarHeight;
+            set
+            {
+                float old = Me.CurrentAvatar.AvatarHeight;
+                Me.CurrentAvatar.AvatarHeight = value;
+                if (old != Me.CurrentAvatar.AvatarHeight) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarURL, Me.CurrentAvatar.AvatarHeight);
+            }
+        }
         [JsonIgnore]
         private Crypto Crypto = null;
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine;
 
 using Arteranos.Core;
 using System.Linq;
@@ -11,13 +12,14 @@ namespace Arteranos.UI
 {
     public class PrefPanel_Me : UIBehaviour
     {
-        public Spinner spn_OnlineStatus = null;
-        public TMP_InputField txt_Nickname = null;
-        public TMP_Text tro_UserID = null;
-        public TMP_InputField txt_AvatarURL = null;
-        public TMP_Text tro_AvatarProvider = null;
-        public Button btn_CreateAvatar = null;
-        public Button btn_AvatarGallery = null;
+        [SerializeField] private Spinner spn_OnlineStatus = null;
+        [SerializeField] private TMP_InputField txt_Nickname = null;
+        [SerializeField] private TMP_Text tro_UserID = null;
+        [SerializeField] private TMP_InputField txt_AvatarURL = null;
+        [SerializeField] private TMP_Text tro_AvatarProvider = null;
+        [SerializeField] private NumberedSlider sldn_AvatarHeight = null;
+        [SerializeField] private Button btn_CreateAvatar = null;
+        [SerializeField] private Button btn_AvatarGallery = null;
 
         private readonly Dictionary<string, Visibility> statusNames = new();
         private readonly Dictionary<string, AvatarProvider> APNames = new();

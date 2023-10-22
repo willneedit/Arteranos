@@ -84,14 +84,14 @@ namespace Arteranos.Avatar
             else
             {
                 avatarBrain = GetComponent<AvatarBrain>();
-                avatarBrain.OnAvatarChanged += RequestAvatarChange;
+                avatarBrain.BodyAvatarURLChanging += RequestAvatarChange;
             }
         }
 
         public void OnDisable()
         {
             if(string.IsNullOrEmpty(GalleryModeURL))
-                avatarBrain.OnAvatarChanged -= RequestAvatarChange;
+                avatarBrain.BodyAvatarURLChanging -= RequestAvatarChange;
         }
 
         private string last = null;

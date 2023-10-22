@@ -18,8 +18,6 @@ namespace Arteranos.Avatar
     internal enum AVKeys : byte
     {
         _Invalid = 0,
-        _ChatOwnID,
-        AvatarURL,
         CurrentWorld,
         NetAppearanceStatus
     }
@@ -27,7 +25,8 @@ namespace Arteranos.Avatar
     public class AvatarBrain : NetworkBehaviour, IAvatarBrain
     {
         #region Interface
-        public event Action<string> OnAvatarChanged;
+        public event Action<string> BodyAvatarURLChanging;
+        public event Action<float> BodyAvatarHeightChanging;
         public event Action<int> OnAppearanceStatusChanged;
 
         private int LocalAppearanceStatus = 0;
@@ -38,11 +37,9 @@ namespace Arteranos.Avatar
 
         public uint NetID => netIdentity.netId;
 
-        public string AvatarURL
-        {
-            get => m_strings.ContainsKey(AVKeys.AvatarURL) ? m_strings[AVKeys.AvatarURL] : null;
-            private set => CmdPropagateString(AVKeys.AvatarURL, value);
-        }
+        public string AvatarURL { get => m_AvatarURL; private set => CmdPropagateAvatarURL(value); }
+
+        public float AvatarHeight { get => m_AvatarHeight; private set => CmdPropagateAvatarHeight(value); }
 
         public UserID UserID { get => m_userID; set => m_userID = value; }
 
@@ -151,11 +148,8 @@ namespace Arteranos.Avatar
             base.OnStartClient();
 
             m_ints.Callback += OnMIntsChanged;
-            m_floats.Callback += OnMFloatsChanged;
-            m_strings.Callback += OnMStringsChanged;
-            m_blobs.Callback += OnMBlobsChanged;
 
-            SettingsManager.Client.OnAvatarChanged += (x) => { if(isOwned) AvatarURL = x; };
+            SettingsManager.Client.OnAvatarChanged += CommitAvatarChanged;
             SettingsManager.Client.OnUserPrivacyChanged += (x) => { if (isOwned) UserPrivacy = x; };
             SettingsManager.Server.OnWorldURLChanged += CommitWorldChanged;
 
@@ -163,13 +157,13 @@ namespace Arteranos.Avatar
 
             DownloadClientSettings();
 
-            if(isOwned)
+            if (isOwned)
             {
                 // That's me, set aside from the unwashed crowd. :)
                 XRControl.Me = this;
 
                 // Invoked by command line - only once
-                if(SettingsManager.StartupTrigger)
+                if (SettingsManager.StartupTrigger)
                 {
                     string world = SettingsManager.ResetStartupTrigger();
 
@@ -179,7 +173,7 @@ namespace Arteranos.Avatar
                     if (!string.IsNullOrEmpty(serversworld))
                         world = serversworld;
 
-                    if(!string.IsNullOrEmpty(world))
+                    if (!string.IsNullOrEmpty(world))
                     {
                         Debug.Log($"Invoking startup world '{world}'");
                         WorldTransition.InitiateTransition(world);
@@ -191,7 +185,7 @@ namespace Arteranos.Avatar
                 }
 
                 // The server already uses a world, so download and transition into the targeted world immediately.
-                else if(!string.IsNullOrEmpty(m_strings[AVKeys.CurrentWorld]))
+                else if (!string.IsNullOrEmpty(m_strings[AVKeys.CurrentWorld]))
                 {
                     WorldTransition.InitiateTransition(m_strings[AVKeys.CurrentWorld]);
                 }
@@ -210,21 +204,25 @@ namespace Arteranos.Avatar
             Subconscious.ReadyState = AvatarSubconscious.READY_COMPLETE;
         }
 
+        private void CommitAvatarChanged(string URL, float Height)
+        {
+            if (isOwned)
+            {
+                AvatarURL = URL;
+
+                AvatarHeight = Height;
+            }
+        }
+
         public override void OnStopClient()
         {
             // Maybe it isn't owned anymore, but it would be worse the other way round.
             if(isOwned) XRControl.Me = null;
 
             SettingsManager.Server.OnWorldURLChanged -= CommitWorldChanged;
-            SettingsManager.Client.OnAvatarChanged -= (x) =>
-            {
-                if(isOwned) AvatarURL = x;
-            };
+            SettingsManager.Client.OnAvatarChanged -= CommitAvatarChanged;
 
             m_ints.Callback -= OnMIntsChanged;
-            m_floats.Callback -= OnMFloatsChanged;
-            m_strings.Callback -= OnMStringsChanged;
-            m_blobs.Callback -= OnMBlobsChanged;
 
             base.OnStopClient();
         }
@@ -263,18 +261,22 @@ namespace Arteranos.Avatar
         #region Networking
 
         private readonly SyncDictionary<AVKeys, int> m_ints = new();
-        private readonly SyncDictionary<AVKeys, float> m_floats = new();
         private readonly SyncDictionary<AVKeys, string> m_strings = new();
-        private readonly SyncDictionary<AVKeys, byte[]> m_blobs = new();
 
         [SyncVar(hook = nameof(OnUserIDChanged))]
         private UserID m_userID = null;
 
-        [SyncVar(hook = nameof(OnUserPrivacyChanged))]
+        [SyncVar]
         private UserPrivacy m_UserPrivacy = null;
 
         [SyncVar] // Default if someone circumvented the Authenticator and the Network Manager.
         private ulong m_UserState = (Core.UserState.Banned | Core.UserState.Exploiting);
+
+        [SyncVar(hook = nameof(OnAvatarURLChanged))]
+        private string m_AvatarURL = null;
+
+        [SyncVar(hook = nameof(OnAvatarHeightChanged))]
+        private float m_AvatarHeight = 175;
 
         // No [SyncVar] - server only for privacy reasons
         private string m_Address = null;
@@ -294,14 +296,6 @@ namespace Arteranos.Avatar
             foreach(KeyValuePair<AVKeys, int> kvpi in m_ints)
                 OnMIntsChanged(SyncDictionary<AVKeys, int>.Operation.OP_ADD, kvpi.Key, kvpi.Value);
 
-            foreach(KeyValuePair<AVKeys, float> kvpf in m_floats)
-                OnMFloatsChanged(SyncDictionary<AVKeys, float>.Operation.OP_ADD, kvpf.Key, kvpf.Value);
-
-            foreach(KeyValuePair<AVKeys, string> kvps in m_strings)
-                OnMStringsChanged(SyncDictionary<AVKeys, string>.Operation.OP_ADD, kvps.Key, kvps.Value);
-
-            foreach(KeyValuePair<AVKeys, byte[]> kvpb in m_blobs)
-                OnMBlobsChanged(SyncDictionary<AVKeys, byte[]>.Operation.OP_ADD, kvpb.Key, kvpb.Value);
         }
 
 
@@ -315,23 +309,9 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void OnMFloatsChanged(SyncIDictionary<AVKeys, float>.Operation op, AVKeys key, float value)
-        {
-            // Reserved for future use
-        }
+        private void OnAvatarURLChanged(string _, string URL) => BodyAvatarURLChanging?.Invoke(URL);
 
-        private void OnMStringsChanged(SyncIDictionary<AVKeys, string>.Operation op, AVKeys key, string value)
-        {
-            switch(key)
-            {
-                case AVKeys.AvatarURL:
-                    OnAvatarChanged?.Invoke(value); break;
-            }
-        }
-
-        private void OnMBlobsChanged(SyncIDictionary<AVKeys, byte[]>.Operation op, AVKeys key, byte[] value)
-        {
-        }
+        private void OnAvatarHeightChanged(float _, float height) => BodyAvatarHeightChanging?.Invoke(height);
 
         private void OnUserIDChanged(UserID _1, UserID userID)
         {
@@ -349,25 +329,17 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void OnUserPrivacyChanged(UserPrivacy _1, UserPrivacy _2)
-        {
-
-        }
-
         [Command]
         private void CmdPropagateInt(AVKeys key, int value) => m_ints[key] = value;
 
         [Command]
-        private void CmdPropagateFloat(AVKeys key, float value) => m_floats[key] = value;
-
-        [Command]
-        private void CmdPropagateString(AVKeys key, string value) => m_strings[key] = value;
-
-        [Command]
-        private void CmdPropagateBlob(AVKeys key, byte[] value) => m_blobs[key] = value;
-
-        [Command]
         private void CmdPropagateUserPrivacy(UserPrivacy userPrivacy) => m_UserPrivacy = userPrivacy;
+
+        [Command]
+        private void CmdPropagateAvatarURL(string URL) => m_AvatarURL = URL;
+
+        [Command]
+        private void CmdPropagateAvatarHeight(float height) => m_AvatarHeight = height;
 
         [Command]
         private void CmdPerformEmote(string emojiName) => RpcPerformEmote(emojiName);

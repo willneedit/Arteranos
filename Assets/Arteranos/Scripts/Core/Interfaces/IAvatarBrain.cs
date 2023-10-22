@@ -29,8 +29,10 @@ namespace Arteranos.Avatar
         ulong UserState { get; set; }
         string Address { get; set; }
         string DeviceID { get; set; }
+        float AvatarHeight { get; }
 
-        event Action<string> OnAvatarChanged;
+        event Action<string> BodyAvatarURLChanging;
+        event Action<float> BodyAvatarHeightChanging;
         event Action<int> OnAppearanceStatusChanged;
 
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
