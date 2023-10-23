@@ -22,7 +22,11 @@ namespace Arteranos.UI
 
         public float value {
             get => sld_Slider.value;
-            set => sld_Slider.value = value;
+            set
+            {
+                sld_Slider.value = value;
+                lbl_number.text = string.Format(Format, value);
+            }
         }
 
         public bool interactable 
@@ -31,15 +35,12 @@ namespace Arteranos.UI
             set => sld_Slider.interactable = value;
         }
 
-        private Slider sld_Slider = null;
-        private TextMeshProUGUI lbl_number = null;
+        private Slider sld_Slider => transform.GetChild(0).GetComponent<Slider>();
+        private TextMeshProUGUI lbl_number => transform.GetChild(1).GetComponent<TextMeshProUGUI>();
 
         protected override void Awake()
         {
             base.Awake();
-
-            sld_Slider = transform.GetChild(0).GetComponent<Slider>();
-            lbl_number = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
 
             sld_Slider.onValueChanged.AddListener(OnInternalValueChanged);
         }
