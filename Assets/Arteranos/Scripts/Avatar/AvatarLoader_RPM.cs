@@ -103,35 +103,19 @@ namespace Arteranos.Avatar
 
             if (DesiredHeight != null && targetHeight == DesiredHeight.Value) return;
 
-            Debug.Log($"Resizing avatar to {targetHeight}");
+            DesiredHeight = targetHeight / 100.0f;
+            Debug.Log($"Resizing avatar to {DesiredHeight}");
 
-            // No need to configure the avatar structure, we just need to scale up or down the related values.
-            DesiredHeight = targetHeight;
-            Transform agot = m_AvatarGameObject.transform;
+            last = string.Empty;
 
-            // Avatar is measured in meters - user UI in centimeters
-            MeasureAvatar(agot, DesiredHeight / 100.0f);
-
-            // Reload and measure the IK limbs to match the new size
-            RefreshJoints();
-
-            // Right, and put it into the rig/camera settings.
-            MatchXRRigToAvatar(agot);
+            // FIXME Maybe it needs the regular avatar loading, too?
+            SetupMouthBlendShapes(null);
+            Destroy(m_AvatarGameObject); m_AvatarGameObject = null;
+            RequestAvatarURLChange(present);
         }
 
         // --------------------------------------------------------------------
         #region Skeleton/Pose measurement
-
-        void RemoveIK(Transform root, Transform limbT, string limb)
-        {
-            Transform tt = root.Find("Target_" + limb);
-            Transform pt = root.Find("Pole_" + limb);
-            FastIKFabric limbIK = limbT.gameObject.GetComponent<FastIKFabric>();
-
-            if (tt != null) Destroy(tt.gameObject);
-            if (pt != null) Destroy(pt.gameObject);
-            if (limbIK != null) Destroy(limbIK);
-        }
 
         Transform RigNetworkIK(
             GameObject avatar, string limb, ref List<string> jointnames,
@@ -147,7 +131,6 @@ namespace Arteranos.Avatar
             }
 
             Transform at = avatar.transform;
-            RemoveIK(at, limbT, limb);
 
             avatar.SetActive(false);
 
@@ -229,6 +212,14 @@ namespace Arteranos.Avatar
 
         private void SetupMouthBlendShapes(GameObject ago)
         {
+            if (ago == null)
+            {
+                mouthOpenBlendShapeIndexOnHeadMesh = -1;
+                mouthOpenBlendShapeIndexOnBeardMesh = -1;
+                mouthOpenBlendShapeIndexOnTeethMesh = -1;
+                return;
+            }
+
             headMesh = GetMeshAndSetIndex(ago, MeshType.HeadMesh, ref mouthOpenBlendShapeIndexOnHeadMesh);
             beardMesh = GetMeshAndSetIndex(ago, MeshType.BeardMesh, ref mouthOpenBlendShapeIndexOnBeardMesh);
             teethMesh = GetMeshAndSetIndex(ago, MeshType.TeethMesh, ref mouthOpenBlendShapeIndexOnTeethMesh);
@@ -270,9 +261,9 @@ namespace Arteranos.Avatar
             Transform fullHeight = agot.FindRecursive("HeadTop_End");
             OriginalFullHeight = fullHeight.transform.position.y - transform.position.y;
 
-            ConfigureAvatarBones(agot);
-
             MeasureAvatar(agot);
+
+            ConfigureAvatarBones(agot);
 
             MatchXRRigToAvatar(agot);
 
@@ -281,13 +272,13 @@ namespace Arteranos.Avatar
             eah.BlinkInterval = 6; // 3 seconds is a little bit too fast.
         }
 
-        private void MeasureAvatar(Transform agot, float? targetFullHeight = null)
+        private void MeasureAvatar(Transform agot)
         {
-            if(targetFullHeight != null)
+            if(DesiredHeight != null)
             {
-                float scale = targetFullHeight.Value / OriginalFullHeight;
+                float scale = DesiredHeight.Value / OriginalFullHeight;
                 agot.localScale = new Vector3(scale, scale, scale);
-                FullHeight = targetFullHeight.Value;
+                FullHeight = DesiredHeight.Value;
             }
             else FullHeight = OriginalFullHeight;
 
