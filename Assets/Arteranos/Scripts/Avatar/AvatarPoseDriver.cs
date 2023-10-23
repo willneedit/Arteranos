@@ -140,8 +140,14 @@ namespace Arteranos.Avatar
 
             if(anim != null)
             {
+                // The direction...
                 Vector3 moveSpeed = Quaternion.Inverse(transform.rotation) * cc.velocity;
+
+                // ... and smaller people has to walk in a quicker pace.
+                float speedScale = m_AvatarData.OriginalFullHeight / m_AvatarData.FullHeight;
+
                 anim.SetFloat("Walking", moveSpeed.z);
+                anim.SetFloat("SpeedScale", speedScale);
             }
         }
 
