@@ -50,6 +50,7 @@ namespace Arteranos.UI
             spn_OnlineStatus.OnChanged += OnVisibilityChanged;
             txt_Nickname.onValueChanged.AddListener((string current) => dirty = true);
             txt_AvatarURL.onValueChanged.AddListener((string current) => dirty = true);
+            sldn_AvatarHeight.OnValueChanged += (float height) => dirty = true;
 
             btn_CreateAvatar.onClick.AddListener(OnCreateAvatarClicked);
             btn_AvatarGallery.onClick.AddListener(OnAvatarGalleryClicked);
@@ -84,6 +85,7 @@ namespace Arteranos.UI
 
             tro_UserID.text = cs.GetFingerprint(fpmode);
             txt_AvatarURL.text = cs.AvatarURL;
+            sldn_AvatarHeight.value = cs.AvatarHeight;
             tro_AvatarProvider.text = Utils.GetEnumDescription(cs.Me.CurrentAvatar.AvatarProvider);
 
             // Reset the state as it's the initial state, not the blank slate.
@@ -95,6 +97,7 @@ namespace Arteranos.UI
             base.OnDisable();
 
             cs.AvatarURL = txt_AvatarURL.text;
+            cs.AvatarHeight = sldn_AvatarHeight.value;
             cs.Me.Nickname = txt_Nickname.text;
 
             // Might be to disabled before it's really started, so cs may be null yet.

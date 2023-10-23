@@ -25,8 +25,6 @@ namespace Arteranos.Avatar
     public class AvatarBrain : NetworkBehaviour, IAvatarBrain
     {
         #region Interface
-        public event Action<string> BodyAvatarURLChanging;
-        public event Action<float> BodyAvatarHeightChanging;
         public event Action<int> OnAppearanceStatusChanged;
 
         private int LocalAppearanceStatus = 0;
@@ -41,17 +39,13 @@ namespace Arteranos.Avatar
 
         public float AvatarHeight { get => m_AvatarHeight; private set => CmdPropagateAvatarHeight(value); }
 
+        public UserPrivacy UserPrivacy { get => m_UserPrivacy; private set => CmdPropagateUserPrivacy(value); }
+
+        // Okay to use the setter. The SyncVar would yell at you if you fiddle with the privilege client-side
         public UserID UserID { get => m_userID; set => m_userID = value; }
 
         public string Nickname { get => m_userID; }
 
-        public UserPrivacy UserPrivacy
-        {
-            get => m_UserPrivacy;
-            private set => CmdPropagateUserPrivacy(value);
-        }
-
-        // Okay to use the setter. The SyncVar would yell at you if you fiddle with the privilege client-side
         public ulong UserState { get => m_UserState; set => m_UserState = value; }
 
         public string Address { get => m_Address; set => m_Address = value; }
@@ -107,6 +101,9 @@ namespace Arteranos.Avatar
             touchy.SetAppearanceStatusBit(Avatar.AppearanceStatus.Bubbled, entered);
         }
 
+        #endregion
+        // ---------------------------------------------------------------
+        #region Debug Messages
 
         private string PrefixMessage(object message)
         {
@@ -234,13 +231,7 @@ namespace Arteranos.Avatar
         private void DownloadClientSettings()
         {
             ClientSettings cs = SettingsManager.Client;
-
-            if(isOwned)
-            {
-                AvatarURL = cs.AvatarURL;
-
-                UserPrivacy = cs.UserPrivacy;
-            }
+            CommitAvatarChanged(cs.AvatarURL, cs.AvatarHeight);
         }
 
         #endregion
@@ -309,9 +300,9 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void OnAvatarURLChanged(string _, string URL) => BodyAvatarURLChanging?.Invoke(URL);
+        private void OnAvatarURLChanged(string _, string URL) => Body?.RequestAvatarURLChange(URL);
 
-        private void OnAvatarHeightChanged(float _, float height) => BodyAvatarHeightChanging?.Invoke(height);
+        private void OnAvatarHeightChanged(float _, float height) => Body?.RequestAvatarHeightChange(height);
 
         private void OnUserIDChanged(UserID _1, UserID userID)
         {

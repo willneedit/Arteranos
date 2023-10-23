@@ -29,6 +29,10 @@ namespace Arteranos.Avatar
         float EyeHeight { get; }
         float FullHeight { get; }
         bool Invisible { get; set; }
+        float OriginalFullHeight { get; }
+
+        void RequestAvatarHeightChange(float targetHeight);
+        void RequestAvatarURLChange(string current);
 
         /// <summary>
         /// Reset the the avatar to an 'Attention' pose

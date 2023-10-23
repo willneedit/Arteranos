@@ -42,6 +42,18 @@ namespace Arteranos
 
         public bool Invisible { get; set; }
 
+        public float OriginalFullHeight => throw new System.NotImplementedException();
+
+        public void RequestAvatarHeightChange(float targetHeight)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void RequestAvatarURLChange(string current)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void ResetPose(bool leftHand, bool rightHand) => throw new System.NotImplementedException();
         public void UpdateOpenMouth(float amount) => throw new System.NotImplementedException();
     }

@@ -86,7 +86,10 @@ namespace Arteranos.Avatar
             // Everything except Layers 17 and 18 (BubbleFriend and BubbleStranger)
             int layerMask = ~((1 << 17) | (1 << 18));
 
-            Ray ray = new(foot.position + Vector3.up * 0.5f, Vector3.down);
+            // If the avatar is a midget, he cannot lift his feet half a meter up, so sacle down accordingly.
+            float maxLiftKnees = 0.50f * (m_AvatarData.OriginalFullHeight / m_AvatarData.FullHeight);
+
+            Ray ray = new(foot.position + Vector3.up * maxLiftKnees, Vector3.down);
 
             if(Physics.SphereCast(ray, m_AvatarData.FootElevation, out RaycastHit hitInfo, 0.50f, layerMask))
             {

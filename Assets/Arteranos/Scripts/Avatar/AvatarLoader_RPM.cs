@@ -41,11 +41,11 @@ namespace Arteranos.Avatar
         public float FootElevation { get; private set; }
         public float EyeHeight { get; private set; }
         public float FullHeight { get; private set; }
+        public float OriginalFullHeight { get; private set; }
 
 
         public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
-
 
         public bool Invisible
         {
@@ -66,6 +66,8 @@ namespace Arteranos.Avatar
 
         private void Awake() => m_AvatarStandin = Resources.Load<GameObject>("Avatar/Avatar_StandIn");
         private bool m_invisible = false;
+        private float? DesiredHeight = null;
+
 
         public void OnEnable()
         {
@@ -77,27 +79,14 @@ namespace Arteranos.Avatar
             m_AvatarGameObject = Instantiate(m_AvatarStandin);
             m_AvatarGameObject.transform.SetParent(transform, false);
 
-            if(!string.IsNullOrEmpty(GalleryModeURL))
-            {
-                RequestAvatarChange(GalleryModeURL);
-            }
-            else
-            {
-                avatarBrain = GetComponent<AvatarBrain>();
-                avatarBrain.BodyAvatarURLChanging += RequestAvatarChange;
-            }
-        }
-
-        public void OnDisable()
-        {
-            if(string.IsNullOrEmpty(GalleryModeURL))
-                avatarBrain.BodyAvatarURLChanging -= RequestAvatarChange;
+            if (!string.IsNullOrEmpty(GalleryModeURL)) RequestAvatarURLChange(GalleryModeURL);
+            else avatarBrain = GetComponent<AvatarBrain>();
         }
 
         private string last = null;
         private string present = null;
 
-        void RequestAvatarChange(string current)
+        public void RequestAvatarURLChange(string current)
         {
             if(loading || current == null || last == current) return;
             present= current;
@@ -108,9 +97,41 @@ namespace Arteranos.Avatar
             m_AvatarLoader.LoadAvatar(current.ToString());
         }
 
+        public void RequestAvatarHeightChange(float targetHeight)
+        {
+            if(loading) return;
+
+            if (DesiredHeight != null && targetHeight == DesiredHeight.Value) return;
+
+            Debug.Log($"Resizing avatar to {targetHeight}");
+
+            // No need to configure the avatar structure, we just need to scale up or down the related values.
+            DesiredHeight = targetHeight;
+            Transform agot = m_AvatarGameObject.transform;
+
+            // Avatar is measured in meters - user UI in centimeters
+            MeasureAvatar(agot, DesiredHeight / 100.0f);
+
+            // Reload and measure the IK limbs to match the new size
+            RefreshJoints();
+
+            // Right, and put it into the rig/camera settings.
+            MatchXRRigToAvatar(agot);
+        }
 
         // --------------------------------------------------------------------
         #region Skeleton/Pose measurement
+
+        void RemoveIK(Transform root, Transform limbT, string limb)
+        {
+            Transform tt = root.Find("Target_" + limb);
+            Transform pt = root.Find("Pole_" + limb);
+            FastIKFabric limbIK = limbT.gameObject.GetComponent<FastIKFabric>();
+
+            if (tt != null) Destroy(tt.gameObject);
+            if (pt != null) Destroy(pt.gameObject);
+            if (limbIK != null) Destroy(limbIK);
+        }
 
         Transform RigNetworkIK(
             GameObject avatar, string limb, ref List<string> jointnames,
@@ -125,24 +146,28 @@ namespace Arteranos.Avatar
                 return null;
             }
 
+            Transform at = avatar.transform;
+            RemoveIK(at, limbT, limb);
+
             avatar.SetActive(false);
 
             // Owner is setting up the IK and the puppet handles...
             if(avatarBrain.isOwned)
             {
+
                 Transform pole = null;
 
                 handle = new GameObject("Target_" + limb).transform;
                 handle.SetPositionAndRotation(limbT.position, limbT.rotation);
-                handle.SetParent(avatar.transform);
+                handle.SetParent(at);
 
                 if(poleOffset != null)
                 {
                     pole = new GameObject("Pole_" + limb).transform;
                     pole.SetPositionAndRotation(
-                        limbT.position + avatar.transform.rotation * poleOffset.Value,
+                        limbT.position + at.rotation * poleOffset.Value,
                         limbT.rotation);
-                    pole.SetParent(avatar.transform);
+                    pole.SetParent(at);
                 }
                 FastIKFabric limbIK = limbT.gameObject.AddComponent<FastIKFabric>();
 
@@ -187,7 +212,6 @@ namespace Arteranos.Avatar
         }
 
         #endregion
-
         // --------------------------------------------------------------------
         #region Mouth morphing
 
@@ -243,14 +267,29 @@ namespace Arteranos.Avatar
             m_AvatarGameObject = args.Avatar;
             Transform agot = m_AvatarGameObject.transform;
 
+            Transform fullHeight = agot.FindRecursive("HeadTop_End");
+            OriginalFullHeight = fullHeight.transform.position.y - transform.position.y;
 
-            List<string> jointnames = new();
+            ConfigureAvatarBones(agot);
 
-            LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames);
-            RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames);
-            LeftFoot = RigNetworkIK(m_AvatarGameObject, "LeftFoot", ref jointnames, new Vector3(0, 0, 2));
-            RightFoot = RigNetworkIK(m_AvatarGameObject, "RightFoot", ref jointnames, new Vector3(0, 0, 2));
-            Head = RigNetworkIK(m_AvatarGameObject, "Head", ref jointnames, null, 1);
+            MeasureAvatar(agot);
+
+            MatchXRRigToAvatar(agot);
+
+            // Lastly, breathe some life into the avatar.
+            EyeAnimationHandler eah = m_AvatarGameObject.AddComponent<EyeAnimationHandler>();
+            eah.BlinkInterval = 6; // 3 seconds is a little bit too fast.
+        }
+
+        private void MeasureAvatar(Transform agot, float? targetFullHeight = null)
+        {
+            if(targetFullHeight != null)
+            {
+                float scale = targetFullHeight.Value / OriginalFullHeight;
+                agot.localScale = new Vector3(scale, scale, scale);
+                FullHeight = targetFullHeight.Value;
+            }
+            else FullHeight = OriginalFullHeight;
 
             Transform rEye = agot.FindRecursive("RightEye");
             Transform lEye = agot.FindRecursive("LeftEye");
@@ -258,21 +297,26 @@ namespace Arteranos.Avatar
             // FIXME Fixup for the VR device specific skew?
             Vector3 cEyePos = (lEye.position + rEye.position) / 2 + new Vector3(0, 0, 0.11f);
 
+            EyeHeight = cEyePos.y - transform.position.y;
+
             // Animation and pose data will be transmitted though the NetworkPose, so
             // the animator will be owner-driven.
-            if(avatarBrain.isOwned)
+            if (avatarBrain.isOwned)
             {
-                CenterEye = new GameObject("Target_centerEye").transform;
-                CenterEye.SetPositionAndRotation(cEyePos, rEye.rotation);
-                CenterEye.SetParent(agot);
+                // Unneeded? Maybe.
+                //CenterEye = new GameObject("Target_centerEye").transform;
+                //CenterEye.SetPositionAndRotation(cEyePos, rEye.rotation);
+                //CenterEye.SetParent(agot);
 
-                Animator anim = args.Avatar.GetComponent<Animator>();
+                Animator anim = m_AvatarGameObject.GetComponent<Animator>();
                 anim.avatar = null;
                 anim.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>(AvatarAnimator);
-
-                // Height of feet joints to the floor
-                FootElevation = (LeftFoot.position.y + RightFoot.position.y) / 2 - agot.position.y;
             }
+        }
+
+        private void ConfigureAvatarBones(Transform agot)
+        {
+            List<string> jointnames = RefreshJoints();
 
             // Now upload the skeleton joint data to the Avatar Pose driver.
             GetComponent<AvatarPoseDriver>().UploadJointNames(agot, jointnames.ToArray());
@@ -280,12 +324,27 @@ namespace Arteranos.Avatar
             // Set the avatar to the attention pose from the A- or T-pose.
             ResetPose(true, true);
 
-            Transform fullHeight = agot.FindRecursive("HeadTop_End");
+            SetupMouthBlendShapes(m_AvatarGameObject);
+        }
 
-            EyeHeight = cEyePos.y - transform.position.y;
-            FullHeight = fullHeight.transform.position.y - transform.position.y;
+        private List<string> RefreshJoints()
+        {
+            List<string> jointnames = new();
 
-            if(avatarBrain.isOwned)
+            LeftHand = RigNetworkIK(m_AvatarGameObject, "LeftHand", ref jointnames);
+            RightHand = RigNetworkIK(m_AvatarGameObject, "RightHand", ref jointnames);
+            LeftFoot = RigNetworkIK(m_AvatarGameObject, "LeftFoot", ref jointnames, new Vector3(0, 0, 2));
+            RightFoot = RigNetworkIK(m_AvatarGameObject, "RightFoot", ref jointnames, new Vector3(0, 0, 2));
+            Head = RigNetworkIK(m_AvatarGameObject, "Head", ref jointnames, null, 1);
+            return jointnames;
+        }
+
+        private void MatchXRRigToAvatar(Transform agot)
+        {
+            // Height of feet joints to the floor
+            FootElevation = (LeftFoot.position.y + RightFoot.position.y) / 2 - agot.position.y;
+
+            if (avatarBrain.isOwned)
             {
                 // And reconfigure the XR Rig to match the avatar's dimensions.
                 IXRControl xrc = XRControl.Instance;
@@ -295,12 +354,6 @@ namespace Arteranos.Avatar
 
                 xrc.ReconfigureXRRig();
             }
-
-            // Lastly, breathe some life into the avatar.
-            EyeAnimationHandler eah = args.Avatar.AddComponent<EyeAnimationHandler>();
-            eah.BlinkInterval = 6; // 3 seconds is a little bit too fast.
-
-            SetupMouthBlendShapes(m_AvatarGameObject);
         }
 
         void AvatarLoadComplete(object _, CompletionEventArgs args)

@@ -31,8 +31,6 @@ namespace Arteranos.Avatar
         string DeviceID { get; set; }
         float AvatarHeight { get; }
 
-        event Action<string> BodyAvatarURLChanging;
-        event Action<float> BodyAvatarHeightChanging;
         event Action<int> OnAppearanceStatusChanged;
 
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
