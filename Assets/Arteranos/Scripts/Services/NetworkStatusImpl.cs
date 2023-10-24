@@ -234,59 +234,61 @@ namespace Arteranos.Services
         #region Connections
         public void StartClient(Uri connectionUri)
         {
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+            NetworkManager manager = FindObjectOfType<NetworkManager>();
 
             Debug.Log($"Attempting to connect to {connectionUri}...");
 
             manager.StartClient(connectionUri);
         }
 
-        private IEnumerator StopHostCoroutine(bool loadOfflineScene)
-        {
-            if(loadOfflineScene)
-            {
-                XR.ScreenFader.StartFading(1.0f);
-
-                yield return new WaitForSeconds(0.5f);
-                AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
-
-                if(!ao.isDone)
-                    yield return new WaitForEndOfFrame();
-            }
-
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
-            manager.StopHost();
-            Services.NetworkStatus.OpenPorts = false;
-
-            if(loadOfflineScene)
-                WorldDownloaderLow.MoveToDownloadedWorld();
-        }
-
         public void StopHost(bool loadOfflineScene)
         {
+            static IEnumerator StopHostCoroutine(bool loadOfflineScene)
+            {
+                if (loadOfflineScene)
+                {
+                    XR.ScreenFader.StartFading(1.0f);
+
+                    yield return new WaitForSeconds(1.0f);
+                    AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
+
+                    if (!ao.isDone)
+                        yield return new WaitForEndOfFrame();
+                }
+
+                NetworkManager manager = FindObjectOfType<NetworkManager>();
+                manager.StopHost();
+                NetworkStatus.OpenPorts = false;
+
+                if (loadOfflineScene)
+                    WorldDownloaderLow.MoveToDownloadedWorld();
+            }
+
             StartCoroutine(StopHostCoroutine(loadOfflineScene));
         }
 
         public void StartHost()
         {
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+            NetworkManager manager = FindObjectOfType<NetworkManager>();
 
-            Services.NetworkStatus.OpenPorts = true;
+            NetworkStatus.OpenPorts = true;
+            
+            ConnectionManager.Instance.ExpectConnectionResponse();
             manager.StartHost();
         }
 
         public async void StartServer()
         {
-            NetworkManager manager = GameObject.FindObjectOfType<NetworkManager>();
+            NetworkManager manager = FindObjectOfType<NetworkManager>();
 
             if(manager.isNetworkActive)
             {
                 manager.StopHost();
 
-                await Task.Delay(1009);
+                await Task.Delay(1000);
             }
 
-            Services.NetworkStatus.OpenPorts = true;
+            NetworkStatus.OpenPorts = true;
             manager.StartServer();
         }
 

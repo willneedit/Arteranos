@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 using Arteranos.Services;
-using System.ComponentModel.Design.Serialization;
 
 namespace Arteranos.Web
 {
@@ -23,7 +22,7 @@ namespace Arteranos.Web
 
         public async Task<bool> ConnectToServer(string serverURL)
         {
-            if(NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
+            if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
             {
                 // Anything but idle, cut off all connections before connecting to the desired server.
                 NetworkStatus.StopHost(false);
@@ -33,7 +32,7 @@ namespace Arteranos.Web
 
             ServerSettingsJSON ssj = ServerGallery.RetrieveServerSettings(serverURL);
 
-            if(ssj == null)
+            if (ssj == null)
             {
                 Debug.Log($"{serverURL} has no meta data, downloading...");
                 ServerMetadataJSON smdj;
@@ -43,7 +42,7 @@ namespace Arteranos.Web
 
                 ssj = smdj?.Settings;
 
-                if(ssj == null)
+                if (ssj == null)
                 {
                     Debug.Log("Still no viable metadata, giving up.");
                     ConnectionResponse(false, null);
@@ -62,12 +61,16 @@ namespace Arteranos.Web
 
             // FIXME Telepathy Transport specific.
             Uri connectionUri = new($"tcp4://{serverURI.Host}:{ssj.ServerPort}");
-
-            NetworkStatus.OnClientConnectionResponse = ConnectionResponse;
+            ExpectConnectionResponse();
             NetworkStatus.StartClient(connectionUri);
 
             // Here goes nothing...
             return true;
+        }
+
+        public void ExpectConnectionResponse()
+        {
+            NetworkStatus.OnClientConnectionResponse = ConnectionResponse;
         }
 
         bool wasOnline = false;

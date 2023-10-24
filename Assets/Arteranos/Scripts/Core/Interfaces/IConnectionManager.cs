@@ -13,6 +13,7 @@ namespace Arteranos.Web
     {
         Task<bool> ConnectToServer(string serverURL);
         void DeliverDisconnectReason(string reason);
+        void ExpectConnectionResponse();
     }
 
 }
