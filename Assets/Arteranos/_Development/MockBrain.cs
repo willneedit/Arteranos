@@ -56,9 +56,7 @@ namespace Arteranos.Avatar
 
         public float AvatarHeight { get; set; } = 175;
 
-        public event Action<string> BodyAvatarURLChanging;
         public event Action<int> OnAppearanceStatusChanged;
-        public event Action<float> BodyAvatarHeightChanging;
 
         [SerializeField] private int m_NetMuteStatus = 0;
 
