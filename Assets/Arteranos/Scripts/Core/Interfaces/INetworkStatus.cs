@@ -39,6 +39,7 @@ namespace Arteranos.Services
         bool OpenPorts { get; set; }
         bool enabled { get; set; }
         Action<bool, string> OnClientConnectionResponse { get; set; }
+        IPAddress PublicIPAddress { get; }
 
         event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 

@@ -14,6 +14,7 @@ using System.Text;
 using Arteranos.Avatar;
 using Arteranos.Social;
 using Arteranos.XR;
+using System.Collections.Generic;
 
 namespace Arteranos.Core
 {
@@ -224,6 +225,21 @@ namespace Arteranos.Core
                 ? whole[((page - 1) * pageSize)..(ceil)] 
                 : null
             };  
+        }
+
+        /// <summary>
+        /// Shuffle a list of items at random.
+        /// </summary>
+        /// <param name="list">The list items to be shuffled</param>
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            System.Random random = new();
+
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int rnd = random.Next(i + 1);
+                (list[i], list[rnd]) = (list[rnd], list[i]);
+            }
         }
     }
 }

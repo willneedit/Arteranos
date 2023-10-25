@@ -16,6 +16,11 @@ using Mirror;
 using System.Net;
 using Arteranos.Web;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Linq;
+using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace Arteranos.Services
 {
@@ -24,16 +29,11 @@ namespace Arteranos.Services
         private INatDevice device = null;
         public IPAddress ExternalAddress { get; internal set; } = null;
 
+        public IPAddress PublicIPAddress { get; internal set; } = null;
+
         public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 
         public Action<bool, string> OnClientConnectionResponse { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
-
-
-        public new bool enabled
-        {
-            get => base.enabled;
-            set => base.enabled = value;
-        }
 
         public bool OpenPorts
         {
@@ -72,7 +72,7 @@ namespace Arteranos.Services
         }
 
         // -------------------------------------------------------------------
-        #region Connectivity and UPnP
+        #region Running
         public ConnectivityLevel GetConnectivityLevel()
         {
             if(Application.internetReachability == NetworkReachability.NotReachable)
@@ -100,21 +100,42 @@ namespace Arteranos.Services
         {
             Debug.Log("Setting up NAT gateway configuration");
 
-            static IEnumerator RefreshDiscovery()
+            void FoundPublicIPAddress(IPAddress address)
+            {
+                PublicIPAddress = address;
+                Debug.Log($"    Public IP: {PublicIPAddress}");
+            }
+
+            IEnumerator RefreshDiscovery()
             {
                 while(true)
                 {
-                    yield return new WaitForSeconds(500);
+                    // No sense for router and IP detection if the computer's network cable is unplugged
+                    // and in its airplane mode.
+                    if (GetConnectivityLevel() == ConnectivityLevel.Unconnected)
+                    {
+                        PublicIPAddress = null;
+                        yield return new WaitForSeconds(10);
+                    }
+                    else
+                    {
+                        // Needs to be refreshed anytime, because the router invalidates port forwarding
+                        // if the connected device falls idle, or catatonic.
+                        NatUtility.StartDiscovery();
+
+                        // Only lean on the remote services if we don't have the public IP determined yet.
+                        if (PublicIPAddress == null) GetMyIP(FoundPublicIPAddress);
+
+                        // Wait for refresh...
+                        yield return new WaitForSeconds(500);
+                    }
+
 
                     NatUtility.StopDiscovery();
-                    NatUtility.StartDiscovery();
                 }
             }
 
             NatUtility.DeviceFound += DeviceFound;
-
-            // Look for any device, any protocol.
-            NatUtility.StartDiscovery();
 
             StartCoroutine(RefreshDiscovery());
         }
@@ -122,6 +143,8 @@ namespace Arteranos.Services
         private void OnDisable()
         {
             Debug.Log("Shutting down NAT gateway configuration");
+
+            NatUtility.DeviceFound -= DeviceFound;
 
             StopAllCoroutines();
 
@@ -144,6 +167,10 @@ namespace Arteranos.Services
             CurrentConnectivityLevel = c1;
             CurrentOnlineLevel = c2;
         }
+
+        #endregion
+        // -------------------------------------------------------------------
+        #region Connectivity and UPnP
 
         private async void DeviceFound(object sender, DeviceEventArgs e)
         {
@@ -229,6 +256,66 @@ namespace Arteranos.Services
             ServerPortPublic = false;
             MetadataPortPublic = false;
         }
+
+        #endregion
+        // -------------------------------------------------------------------
+        #region IP Address determination
+
+        public async void GetMyIP(Action<IPAddress> callback) 
+            => callback?.Invoke(await GetMyIpAsync());
+
+        private static CancellationTokenSource s_cts = null;
+
+        public static async Task<IPAddress> GetMyIpAsync()
+        {
+            // Services from https://stackoverflow.com/questions/3253701/get-public-external-ip-address
+            List<string> services = new()
+            {
+                "https://ipv4.icanhazip.com",
+                "https://api.ipify.org",
+                "https://ipinfo.io/ip",
+                "https://checkip.amazonaws.com",
+                "https://wtfismyip.com/text",
+                "http://icanhazip.com"
+            };
+
+            // Spread the load throughout on all of the services.
+            services.Shuffle();
+
+            s_cts = new CancellationTokenSource();
+
+            int index = 0;
+            List<Task<IPAddress>> runners = services.Select(service => GetMyIPAsync(service, index++)).ToList();
+
+            // winner takes all ...
+            Task<IPAddress> winner = await Task.WhenAny(runners);
+            IPAddress result = await winner;
+
+            // ... losers get nothing.
+            s_cts.Cancel();
+
+            return result;
+        }
+
+        public static async Task<IPAddress> GetMyIPAsync(string service, int index)
+        {
+            try
+            {
+                await Task.Delay(index * 250, s_cts.Token);
+                using HttpClient webclient = new();
+
+                HttpResponseMessage response = await webclient.GetAsync(service, s_cts.Token);
+                string ipString = await response.Content.ReadAsStringAsync();
+
+                // https://ihateregex.io/expr/ip
+                Match m = Regex.Match(ipString, @"(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}");
+                
+                return m.Success ? IPAddress.Parse(m.Value) : null;
+            }
+            catch { }
+            return null;
+        }
+
         #endregion
         // -------------------------------------------------------------------
         #region Connections
