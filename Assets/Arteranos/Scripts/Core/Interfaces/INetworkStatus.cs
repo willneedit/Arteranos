@@ -40,6 +40,7 @@ namespace Arteranos.Services
         bool enabled { get; set; }
         Action<bool, string> OnClientConnectionResponse { get; set; }
         IPAddress PublicIPAddress { get; }
+        string ServerHost { get; }
 
         event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 

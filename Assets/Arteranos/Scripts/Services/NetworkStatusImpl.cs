@@ -31,6 +31,8 @@ namespace Arteranos.Services
 
         public IPAddress PublicIPAddress { get; internal set; } = null;
 
+        public string ServerHost { get; internal set; } = null;
+
         public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 
         public Action<bool, string> OnClientConnectionResponse { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
@@ -326,6 +328,9 @@ namespace Arteranos.Services
             Debug.Log($"Attempting to connect to {connectionUri}...");
 
             manager.StartClient(connectionUri);
+
+            // It's preliminary, sure...
+            ServerHost = connectionUri.Host;
         }
 
         public void StopHost(bool loadOfflineScene)
@@ -351,6 +356,7 @@ namespace Arteranos.Services
                     WorldDownloaderLow.MoveToDownloadedWorld();
             }
 
+            ServerHost = null;
             StartCoroutine(StopHostCoroutine(loadOfflineScene));
         }
 

@@ -109,6 +109,11 @@ namespace Arteranos.Services
         public static INetworkStatus Instance { get; set; }
 
         public static IPAddress ExternalAddress { get => Instance.ExternalAddress; }
+
+        public static IPAddress PublicIPAddress { get => Instance.PublicIPAddress; }
+
+        public static string ServerHost { get => Instance.ServerHost; }
+
         public static bool OpenPorts
         {
             get => Instance.OpenPorts;

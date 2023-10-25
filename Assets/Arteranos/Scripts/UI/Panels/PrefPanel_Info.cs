@@ -11,6 +11,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Services;
+using Arteranos.Core;
 
 namespace Arteranos.UI
 {
@@ -22,6 +23,9 @@ namespace Arteranos.UI
         public TMP_Text lbl_GraphicsDevice = null;
         public TMP_Text lbl_GraphicsVersion = null;
         public TMP_Text lbl_ExternalIPAddr = null;
+        public TMP_Text lbl_LauncherLink = null;
+
+        public Button btn_CopyToClipboard = null;
         public Button btn_license = null;
         public Button btn_3rdParty = null;
 
@@ -29,7 +33,7 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            Core.Version v = Core.Version.Load();
+            Version v = Version.Load();
 
             lbl_Version.text = v.Full;
             lbl_DeviceName.text = SystemInfo.deviceName;
@@ -37,12 +41,34 @@ namespace Arteranos.UI
             lbl_GraphicsDevice.text = SystemInfo.graphicsDeviceName;
             lbl_GraphicsVersion.text = SystemInfo.graphicsDeviceVersion;
 
-            System.Net.IPAddress extip = NetworkStatus.ExternalAddress;
-
-            lbl_ExternalIPAddr.text = (extip != null) ? extip.ToString() : "Unknown";
 
             btn_license.onClick.AddListener(() => OnLicenseClicked(false));
             btn_3rdParty.onClick.AddListener(() => OnLicenseClicked(true));
+            btn_CopyToClipboard.onClick.AddListener(OnClipboardClicked);
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            System.Net.IPAddress extip = NetworkStatus.PublicIPAddress;
+            lbl_ExternalIPAddr.text = (extip != null) ? extip.ToString() : "Unknown";
+
+            OnlineLevel ol = NetworkStatus.GetOnlineLevel();
+
+            lbl_LauncherLink.text = ol switch
+            {
+                OnlineLevel.Offline => "Offline",
+                OnlineLevel.Client => $"http://{NetworkStatus.ServerHost}:{SettingsManager.CurrentServer.MetadataPort}/",
+                OnlineLevel.Server => $"http://{NetworkStatus.PublicIPAddress}:{SettingsManager.Server.MetadataPort}/",
+                OnlineLevel.Host => $"http://{NetworkStatus.PublicIPAddress}:{SettingsManager.Server.MetadataPort}/",
+                _ => throw new System.NotImplementedException(),
+            };
+        }
+
+        private void Update()
+        {
+            btn_CopyToClipboard.interactable = NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline;
         }
 
         private void OnLicenseClicked(bool thirdparty)
@@ -51,5 +77,9 @@ namespace Arteranos.UI
 
             LicenseTextUI.New(thirdparty);
         }
+
+        private void OnClipboardClicked() 
+            => GUIUtility.systemCopyBuffer = lbl_LauncherLink.text;
+
     }
 }
