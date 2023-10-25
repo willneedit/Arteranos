@@ -332,11 +332,11 @@ namespace Arteranos.Avatar
 
         private void MatchXRRigToAvatar(Transform agot)
         {
-            // Height of feet joints to the floor
-            FootElevation = (LeftFoot.position.y + RightFoot.position.y) / 2 - agot.position.y;
-
             if (avatarBrain.isOwned)
             {
+                // Height of feet joints to the floor
+                FootElevation = (LeftFoot.position.y + RightFoot.position.y) / 2 - agot.position.y;
+
                 // And reconfigure the XR Rig to match the avatar's dimensions.
                 IXRControl xrc = XRControl.Instance;
 
