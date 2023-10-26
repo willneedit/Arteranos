@@ -21,6 +21,7 @@ public class CameraUITracker : MonoBehaviour
     private bool m_moving = false;
 
     private bool initial = true;
+    private Collider Collider = null;
 
     // Update is called once per frame
     void LateUpdate()
@@ -33,6 +34,10 @@ public class CameraUITracker : MonoBehaviour
 
         if(initial)
         {
+            Collider = gameObject.GetComponentInChildren<Collider>();
+
+            if(Collider != null) Collider.enabled = false;
+
             // VR guideline: approach the viewer from the front, a bit to the side.
             Vector3 iniOffset = m_camera.transform.rotation * new Vector3(5, 0, 10);
             transform.SetPositionAndRotation(m_camera.transform.position + iniOffset, m_camera.transform.rotation);
@@ -48,6 +53,8 @@ public class CameraUITracker : MonoBehaviour
             m_countdown = m_Delay;
             m_currentSpeed = 0.0f;
             m_moving = false;
+
+            if(Collider != null) Collider.enabled = true;
             return;
         }
 
@@ -56,6 +63,7 @@ public class CameraUITracker : MonoBehaviour
         if(m_countdown > 0) return;
 
         m_moving = true;
+        if(Collider != null) Collider.enabled = false;
 
         if(m_currentSpeed < tolerance) m_currentSpeed = tolerance;
 
