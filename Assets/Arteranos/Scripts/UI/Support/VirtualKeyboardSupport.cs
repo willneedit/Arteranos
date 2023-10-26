@@ -68,14 +68,18 @@ namespace Arteranos.UI
 
             AttachedKB = FindObjectOfType<KeyboardUI>(true);
 
-            Vector3 forward = Vector3.forward * (SettingsManager.Client.VRMode ? 0.25f : 0.99f);
-            Vector3 scale = (SettingsManager.Client.VRMode ? 0.50f : 1.00f) * 0.005f * Vector3.one;
+            // Desktop mode: straight up, in front of the camera.
+            // VR mode: 45°, a little bit down below of the camera's forward vector.
+            bool vRMode = SettingsManager.Client.VRMode;
+            Vector3 forward = Vector3.forward * (vRMode ? 0.25f : 0.99f) + (vRMode ? transform.rotation * Vector3.down * 0.25f: Vector3.zero);
+            Vector3 scale = (vRMode ? 0.50f : 1.00f) * 0.005f * Vector3.one;
+            Quaternion rotation = vRMode ? Quaternion.Euler(45,0,0) : Quaternion.identity;
 
             CameraUITracker ct;
             if (AttachedKB == null)
             {
                 AttachedKB = Instantiate(SoftKeyboard, 
-                    transform.position + (transform.rotation * forward), // Move a little bit to me to prevent z-fighting
+                    transform.position + (transform.rotation * forward),
                     transform.rotation);
 
                 ct = AttachedKB.gameObject.AddComponent<CameraUITracker>();
@@ -83,7 +87,9 @@ namespace Arteranos.UI
             else
                 ct = AttachedKB.gameObject.GetComponent<CameraUITracker>();
 
+            ct.m_Delay = 0.50f;
             ct.m_offset = forward;
+            ct.m_rotation = rotation;
             ct.enabled = FollowsCamera;
 
             AttachedKB.gameObject.SetActive(false);

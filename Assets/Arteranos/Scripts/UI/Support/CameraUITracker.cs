@@ -14,6 +14,7 @@ public class CameraUITracker : MonoBehaviour
     public float m_Duration = 5.0f;
     public float m_Tolerance = 1.00f;
     public Vector3 m_offset = Vector3.forward;
+    public Quaternion m_rotation = Quaternion.identity;
 
     private float m_countdown;
     private GameObject m_camera;
@@ -69,7 +70,7 @@ public class CameraUITracker : MonoBehaviour
 
         Vector3 target = m_camera.transform.position + relOffset;
         Vector3 destination = Vector3.Lerp(transform.position, target, -m_countdown / m_Duration);
-        Quaternion destrot = Quaternion.Lerp(transform.rotation, m_camera.transform.rotation, -m_countdown / m_Duration);
+        Quaternion destrot = Quaternion.Lerp(transform.rotation, m_camera.transform.rotation * m_rotation, -m_countdown / m_Duration);
 
         transform.SetPositionAndRotation(destination, destrot);
 
