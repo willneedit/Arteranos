@@ -90,7 +90,7 @@ namespace Arteranos.UI
             AttachedKB.transform.localScale = scale;
             AttachedKB.Text = field.text;
             AttachedKB.StringPosition = field.text.Length;
-            AttachedKB.characterLimit = field.characterLimit;
+            AttachedKB.CharacterLimit = field.characterLimit;
             AttachedKB.OnFinishing += MakeKbdCallback(field);
             AttachedKB.gameObject.SetActive(true);
         }

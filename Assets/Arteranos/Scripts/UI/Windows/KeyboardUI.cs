@@ -36,6 +36,7 @@ namespace Arteranos.UI
         public Button KeyCap = null;
         public TMP_InputField PreviewField = null;
         public TextMeshProUGUI lbl_RemainingChars = null;
+        public Button btn_CloseButton = null;
 
         public event Action<string, bool> OnFinishing;
 
@@ -51,7 +52,7 @@ namespace Arteranos.UI
             set => PreviewField.stringPosition = value;
         }
 
-        public int characterLimit
+        public int CharacterLimit
         {
             get => PreviewField.characterLimit;
             set {
@@ -60,7 +61,7 @@ namespace Arteranos.UI
             }
         }
 
-        public Vector2 TopLeft = new(1, -21);
+        public Vector2 TopLeft = new(1, -41);
         public Vector2 GridSize = new(20, 20);
 
         private int current_modeIndex = 0;
@@ -83,6 +84,8 @@ namespace Arteranos.UI
             LayoutKeyboard();
 
             PreviewField.onValueChanged.AddListener(OnValueChanged);
+
+            btn_CloseButton.onClick.AddListener(OnCloseButtonClicked);
 
             Debug.Log($"Loaded keyboard layout: {layout}");
         }
@@ -275,13 +278,6 @@ namespace Arteranos.UI
                 return;
             }
 
-            // Esc, cancel.
-            if(keyaction[0] == '\u001b')
-            {
-                OnFinishing?.Invoke(Text, false);
-                return;
-            }
-
             SynthesizeAndSendKeyDownEvent((KeyCode) keyaction[0], keyaction[0]);
 
             if(!current_modeLock) current_modeIndex = ShowModeChange(0);
@@ -302,6 +298,12 @@ namespace Arteranos.UI
 
             PreviewField.Select();
             PreviewField.ProcessEvent(evt);
+        }
+
+        private void OnCloseButtonClicked()
+        {
+            OnFinishing?.Invoke(Text, false);
+            return;
         }
     }
 }
