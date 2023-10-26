@@ -75,9 +75,6 @@ namespace Arteranos.XR
 
                 Core.SettingsManager.Client.VRMode = false;
                 UpdateXROrigin(false);
-
-                // Fall back to the desktop mode for future attempts only if it's explicitely wanted
-                Core.SettingsManager.Client.Save();
             }
             else
             {
@@ -86,6 +83,9 @@ namespace Arteranos.XR
                 VRRunning = true;
                 UpdateXROrigin(true);
             }
+
+            // Fall back to the desktop mode for future attempts only if it's explicitely wanted
+            Core.SettingsManager.Client.Save();
         }
 
         void StopXR()
