@@ -27,6 +27,8 @@ namespace Arteranos.Web
         public bool reload = false;
         public string cachedir = null;
         public bool cacheHit = false;
+        public DateTime lastModified = DateTime.MinValue;
+        public long size = -1;
         public string worldZipFile = null;
         public string worldAssetBundleFile = null;
     }
@@ -173,21 +175,14 @@ namespace Arteranos.Web
                 return context;
             }
 
-            DateTime netDT = DateTime.UnixEpoch;
-            long netSize = -1;
+            string lmstr = uwr.GetResponseHeader("Last-Modified");
+            context.lastModified = (lmstr != null) ? DateTime.Parse(lmstr) : DateTime.UnixEpoch;
 
-            Dictionary<string, string> responseHeader = uwr.GetResponseHeaders();
-
-            if(responseHeader.TryGetValue("Last-Modified", out string lmstr))
-                netDT = DateTime.Parse(lmstr);
-
-            if(responseHeader.TryGetValue("Content-Length", out string sizestr))
-                netSize = long.Parse(sizestr);
+            string sizestr = uwr.GetResponseHeader("Content-Length");
+            context.size = (sizestr != null) ? long.Parse(sizestr) : -1;
 
             // It's outdated if it's newer in the net, or the reported size differs.
-            bool outdated = (netDT > locDT) || (netSize != locSize);
-
-            context.cacheHit = !outdated;
+            context.cacheHit = !((context.lastModified > locDT) || (context.size != locSize));
             return context;
         }
 
@@ -210,9 +205,10 @@ namespace Arteranos.Web
                 new CheckCacheOp(),
                 new DownloadOp(),
                 new UnzipWorldFileOp()
-            });
-
-            executor.Timeout = timeout;
+            })
+            {
+                Timeout = timeout
+            };
 
             return (executor, context);
 
