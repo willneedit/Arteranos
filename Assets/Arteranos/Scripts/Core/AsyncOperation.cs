@@ -21,7 +21,7 @@ namespace Arteranos.Core
     {
         int Timeout { get; set; }
         float Weight { get; set; }
-        string Caption { get; set; }
+        string Caption { get; }
 
         Action<float> ProgressChanged { get; set; }
 

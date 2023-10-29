@@ -81,18 +81,32 @@ namespace Arteranos.Web
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 8.0f;
-        public string Caption { 
-            get => "Downloading...";
-            set { }
-        }
+        public string Caption { get => GetProgressText(); }
 
         public Action<float> ProgressChanged { get; set; }
+
+        private float normalizedProgress = 0.0f;
+        private long totalBytes = 0;
+        private string totalBytesMag = null;
+
+        private string GetProgressText()
+        {
+            long actualBytes = (long)(normalizedProgress * totalBytes);
+
+            // Maybe the UI buildup was quicker than the initialization...
+            if (totalBytesMag == null || totalBytes <= 0) return "Downloading...";
+
+            return $"Downloading ({Utils.Magnitude(actualBytes)} of {totalBytesMag})...";
+        }
 
         public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
             WorldDownloaderContext context = _context as WorldDownloaderContext;
 
-            if(context.cacheHit) return context;
+            totalBytes = context.size;
+            totalBytesMag = Utils.Magnitude(totalBytes);
+
+            if (context.cacheHit) return context;
 
             using UnityWebRequest uwr = new(context.url, UnityWebRequest.kHttpVerbGET);
 
@@ -104,6 +118,7 @@ namespace Arteranos.Web
             while(!uwr_ao.isDone && !token.IsCancellationRequested)
             {
                 await Task.Yield();
+                normalizedProgress = uwr.downloadProgress;
                 ProgressChanged?.Invoke(uwr.downloadProgress);
             }
 

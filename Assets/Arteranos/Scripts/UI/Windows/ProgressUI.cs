@@ -22,7 +22,7 @@ namespace Arteranos.UI
         public CanvasRenderer Panel = null;
 
         // How many seconds to start to show the progress dialog.
-        public float PatienceThreshold = 5.0f;
+        public float PatienceThreshold = 2.0f;
 
         // But, if the operation would last less than these seconds, it'd be no sense to show it up.
         public float AlmostFinishedThreshold = 1.0f;

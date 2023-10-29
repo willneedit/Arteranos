@@ -30,11 +30,16 @@ namespace Arteranos.User
                         Debug.Log($"   {mod.Name}");
                 }
             }
-        }
 
-        // Update is called once per frame
-        void Update()
-        {
+            Debug.Log(Core.Utils.Magnitude(50)); // 50 B
+            Debug.Log(Core.Utils.Magnitude(5000)); // 5 KB
+            Debug.Log(Core.Utils.Magnitude(5000000)); // 5 MB
+            Debug.Log(Core.Utils.Magnitude(5000000000)); // 5 GB
+            Debug.Log(Core.Utils.Magnitude(900000000000)); // 0.9 TB 
+            Debug.Log(Core.Utils.Magnitude(5000000000000)); // 5 TB
+            Debug.Log(Core.Utils.Magnitude(5000000000000000)); // 5 EB
+            Debug.Log(Core.Utils.Magnitude(5000000000000000000)); // 5000 EB
+            // ... damn cat napping on my keyboard....
         }
     }
 }

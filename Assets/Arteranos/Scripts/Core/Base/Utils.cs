@@ -241,5 +241,37 @@ namespace Arteranos.Core
                 (list[i], list[rnd]) = (list[rnd], list[i]);
             }
         }
+
+        /// <summary>
+        /// Advance one frame for exponential smoothing
+        /// (ref. https://en.wikipedia.org/wiki/Exponential_smoothing )
+        /// </summary>
+        /// <param name="smoothed">The moving average throughout the data points</param>
+        /// <param name="input">The current data point</param>
+        /// <param name="tconst">Time in seconds where the average goes back</param>
+        public static void AdvanceSmoothing(ref float smoothed, float input, float tconst)
+        {
+            float alpha = Time.deltaTime / tconst;
+            smoothed =  alpha * input + (1  - alpha) * smoothed;
+        }
+
+        /// <summary>
+        /// Returns a human-readable value with the appropiate number prefixes and the measure unit
+        /// </summary>
+        /// <param name="value">The value to describe</param>
+        /// <returns>The human readable string</returns>
+        public static string Magnitude(long value, string suffix = "B")
+        {
+            float val = value;
+            string[] prefixes = { "", "K", "M", "G", "T", "E" };
+            for(int i = 0; i < prefixes.Length - 1; i++)
+            {
+                if (val < 900) return (i > 0)
+                        ? string.Format("{0:F1} {1}{2}", val, prefixes[i], suffix)
+                        : string.Format("{0:F0} {1}", val, suffix);
+                val /= 1000;
+            }
+            return string.Format("{0:F1} {1}{2}", val, prefixes[^1], suffix);
+        }
     }
 }

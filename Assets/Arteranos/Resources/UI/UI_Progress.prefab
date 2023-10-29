@@ -143,7 +143,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &2306558801302682175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -211,7 +211,8 @@ MonoBehaviour:
   m_Delay: 2
   m_Duration: 5
   m_Tolerance: 1
-  m_offset: {x: 0.5, y: -0.5, z: 0.9}
+  m_offset: {x: 0, y: 0, z: 0.9}
+  m_rotation: {x: 0, y: 0, z: 0, w: 1}
 --- !u!1 &2613065973329851003
 GameObject:
   m_ObjectHideFlags: 0
