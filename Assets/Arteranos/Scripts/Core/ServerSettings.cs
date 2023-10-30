@@ -10,19 +10,21 @@ using System;
 using System.IO;
 using UnityEngine;
 
+using DERSerializer;
+
 namespace Arteranos.Core
 {
 
-    public class ServerPermissionsJSON
+    public class ServerPermissions
     {
         // Allow avatars from a URL outside of the avatar generator's scope.
-        public bool? CustomAvatars = false;
+        [ASN1Tag( 1, true)] public bool? CustomAvatars = false;
 
         // Allow flying
-        public bool? Flying = false;
+        [ASN1Tag( 2, true)] public bool? Flying = false;
 
         // Allow connections of unverified users
-        public bool? Guests = true;
+        [ASN1Tag( 3, true)] public bool? Guests = true;
 
         // CONTENT MODERATION / FILTERING
         // null allowed, and the user's filter could yield an inexact match, second only
@@ -46,21 +48,21 @@ namespace Arteranos.Core
         //      Defaults to Bluesky in the aforementioned website, with modifications
 
         // Explicit Sexual Images
-        public bool? ExplicitNudes = null;
+        [ASN1Tag(11, true)] public bool? ExplicitNudes = null;
 
         // Other Nudity (eg. non-sexual or artistic)
-        public bool? Nudity = true;
+        [ASN1Tag(12, true)] public bool? Nudity = true;
 
         // Sexually suggestive (does not include nudity)
-        public bool? Suggestive = true;
+        [ASN1Tag(13, true)] public bool? Suggestive = true;
 
         // Violence (Cartoon / "Clean" violence)
-        public bool? Violence = null;
+        [ASN1Tag(14, true)] public bool? Violence = null;
 
         // NEW
         //
         // Excessive Violence / Blood (Gore, self-harm, torture)
-        public bool? ExcessiveViolence = false;
+        [ASN1Tag(15, true)] public bool? ExcessiveViolence = false;
 
         // OMITTED
         //
@@ -76,7 +78,7 @@ namespace Arteranos.Core
         /// </summary>
         /// <param name="user">The user's server filter preferences</param>
         /// <returns>The match score, higher is better</returns>
-        public int MatchIndex(ServerPermissionsJSON user)
+        public int MatchIndex(ServerPermissions user)
         {
             int index = 0;
 
@@ -158,8 +160,11 @@ namespace Arteranos.Core
         // The server icon. PNG file bytes, at least 128x128, at most 512x512
         public byte[] Icon = new byte[] { };
 
+        // Public server. True means that the server's data can be spread around.
+        public bool Public = true;
+
         // The server's permissions
-        public ServerPermissionsJSON Permissions = new();
+        public ServerPermissions Permissions = new();
 
         // The server's COMPLETE key
         public byte[] ServerKey

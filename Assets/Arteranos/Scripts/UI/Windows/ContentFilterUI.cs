@@ -40,10 +40,10 @@ namespace Arteranos.UI
         public Transform tbl_Table;
         public TextMeshProUGUI lbl_HelpText;
 
-        public ServerPermissionsJSON spj = null;
+        public ServerPermissions spj = null;
 
-        private readonly List<Button> btns_Help = new();
-        private readonly List<Spinner> spns_Config = new();
+        // private readonly List<Button> btns_Help = new();
+        // private readonly List<Spinner> spns_Config = new();
 
         internal readonly ContentFilterEntry[] Filters = new ContentFilterEntry[]
         {
