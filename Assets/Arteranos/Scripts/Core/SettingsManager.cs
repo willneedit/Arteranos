@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Services;
 using System;
 using UnityEngine;
 
@@ -94,6 +95,26 @@ namespace Arteranos.Core
             Purgatory = new GameObject("_Purgatory").transform;
             Purgatory.position = new Vector3(0, -9000, 0);
             DontDestroyOnLoad(Purgatory.gameObject);
+        }
+
+        /// <summary>
+        /// Returns the connection data of the remote server (in client mode) or the
+        /// local server in the server and host mode. Nulls if offline.
+        /// </summary>
+        /// <returns>IP address, server port, metadata port</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public static (string address, int port, int mdport) GetServerConnectionData()
+        {
+            OnlineLevel ol = NetworkStatus.GetOnlineLevel();
+
+            return ol switch
+            {
+                OnlineLevel.Offline => (null, 0, 0),
+                OnlineLevel.Client => (NetworkStatus.ServerHost, CurrentServer.ServerPort, CurrentServer.MetadataPort),
+                OnlineLevel.Server => (NetworkStatus.PublicIPAddress.ToString(), Server.ServerPort, Server.MetadataPort),
+                OnlineLevel.Host => (NetworkStatus.PublicIPAddress.ToString(), Server.ServerPort, Server.MetadataPort),
+                _ => throw new NotImplementedException()
+            };
         }
     }
 }

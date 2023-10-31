@@ -54,16 +54,9 @@ namespace Arteranos.UI
             System.Net.IPAddress extip = NetworkStatus.PublicIPAddress;
             lbl_ExternalIPAddr.text = (extip != null) ? extip.ToString() : "Unknown";
 
-            OnlineLevel ol = NetworkStatus.GetOnlineLevel();
-
-            lbl_LauncherLink.text = ol switch
-            {
-                OnlineLevel.Offline => "Offline",
-                OnlineLevel.Client => $"http://{NetworkStatus.ServerHost}:{SettingsManager.CurrentServer.MetadataPort}/",
-                OnlineLevel.Server => $"http://{NetworkStatus.PublicIPAddress}:{SettingsManager.Server.MetadataPort}/",
-                OnlineLevel.Host => $"http://{NetworkStatus.PublicIPAddress}:{SettingsManager.Server.MetadataPort}/",
-                _ => throw new System.NotImplementedException(),
-            };
+            (string address, int _, int mdport) = SettingsManager.GetServerConnectionData();
+            
+            lbl_LauncherLink.text = address != null ? $"http://{address}:{mdport}/" : "Offline";
         }
 
         private void Update()
