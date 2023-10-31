@@ -17,7 +17,7 @@ namespace Arteranos.Avatar
         private SphereCollider Friend = null;
         private SphereCollider Stranger = null;
 
-        private readonly ClientSettings cs = SettingsManager.Client;
+        private readonly Client cs = SettingsManager.Client;
 
         private void OnEnable() => cs.OnPrivacyBubbleChanged += OnPrivacyBubbleChanged;
 

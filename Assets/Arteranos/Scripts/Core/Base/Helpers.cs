@@ -242,8 +242,8 @@ namespace Arteranos.Web
             => Instance.DownloadServerMetadataAsync(url, timeout);
         public static void DownloadServerMetadataAsync(string url, Action<string, ServerMetadataJSON> callback, int timeout = 20)
             => Instance.DownloadServerMetadataAsync(url, callback, timeout);
-        public static ServerSettingsJSON RetrieveServerSettings(string url) => Instance.RetrieveServerSettings(url);
-        public static void StoreServerSettings(string url, ServerSettingsJSON serverSettings) => Instance.StoreServerSettings(url, serverSettings);
+        public static ServerJSON RetrieveServerSettings(string url) => Instance.RetrieveServerSettings(url);
+        public static void StoreServerSettings(string url, ServerJSON serverSettings) => Instance.StoreServerSettings(url, serverSettings);
     }
 
     public static class WorldGallery

@@ -28,7 +28,7 @@ namespace Arteranos.UI
 
         public event Action<ServerListItem> OnUpdateFinished;
 
-        private ServerSettingsJSON ssj = null;
+        private ServerJSON ssj = null;
         private string CurrentWorld = null;
         private int CurrentUsers = -1;
 
@@ -164,7 +164,7 @@ namespace Arteranos.UI
             // Transfer the metadata in our persistent storage.
             ServerGallery.StoreServerSettings(serverURL, ssj);
 
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             // Put it down into our bookmark list.
             if(!cs.ServerList.Contains(serverURL))
@@ -179,7 +179,7 @@ namespace Arteranos.UI
 
         private void OnAddClicked()
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             // Put it down into our bookmark list.
             if(!cs.ServerList.Contains(serverURL))
@@ -199,7 +199,7 @@ namespace Arteranos.UI
 
         private void OnDeleteClicked()
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             // Remove the metadata from the persistent storage.
             ServerGallery.DeleteServerSettings(serverURL);

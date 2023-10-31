@@ -34,7 +34,7 @@ namespace Arteranos.UI
 
         [SerializeField] private GameObject grp_Ray_Controls = null;
 
-        private ClientSettings cs = null;
+        private Client cs = null;
         private ControlSettingsJSON controls;
         private bool dirty = false;
 

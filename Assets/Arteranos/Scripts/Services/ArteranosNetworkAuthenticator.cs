@@ -64,7 +64,7 @@ namespace Arteranos.Services
         {
             public HttpStatusCode status;
             public string message;
-            public ServerSettingsJSON ServerSettings;
+            public ServerJSON ServerSettings;
             public byte[] ClientPubKeySig;
             public ulong UserState;
         }
@@ -198,7 +198,7 @@ namespace Arteranos.Services
             };
 
             // Take the first step to authenticate.
-            ServerSettings ss = SettingsManager.Server;
+            Server ss = SettingsManager.Server;
 
             AuthGreetingMessage authGreetingMessage = new()
             {
@@ -240,7 +240,7 @@ namespace Arteranos.Services
 
             // if(connectionsPendingDisconnect.Contains(conn)) return;
 
-            ServerSettings ss = SettingsManager.Server;
+            Server ss = SettingsManager.Server;
 
             ss.Decrypt(encryptedMsg.Payload, out AuthRequestPayload request);
 
@@ -401,7 +401,7 @@ namespace Arteranos.Services
             Debug.Log($"[Client] Server name   : {msg.ServerName}");
             Debug.Log($"[Client] Server version: {msg.ServerVersion.Full}");
 
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             if(!cs.ServerKeys.TryGetValue(address, out byte[] pubKey))
             {
@@ -449,7 +449,7 @@ namespace Arteranos.Services
                 return;
             }
 
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
             string address = NetworkClient.connection.address;
 
             cs.ServerKeys.Remove(address);
@@ -461,7 +461,7 @@ namespace Arteranos.Services
 
         private static void SubmitAuthRequest(AuthGreetingMessage msg)
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             cs.Sign(msg.ClientChallenge, out byte[] response);
 

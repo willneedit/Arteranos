@@ -21,8 +21,8 @@ namespace Arteranos.UI
         public TMP_InputField txt_AddWorldURL;
         public Button btn_AddWorld;
 
-        private ClientSettings cs = null;
-        private ServerSettings ss = null;
+        private Client cs = null;
+        private Server ss = null;
 
         public static WorldListUI New()
         {

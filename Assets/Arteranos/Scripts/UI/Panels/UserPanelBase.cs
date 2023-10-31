@@ -21,7 +21,7 @@ namespace Arteranos.UI
     {
         public RectTransform lvc_UserList;
 
-        protected ClientSettings cs = null;
+        protected Client cs = null;
 
         protected override void OnEnable()
         {

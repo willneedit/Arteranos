@@ -34,7 +34,7 @@ namespace Arteranos.Web
 
         private static void OnLoadWorldComplete(string worldURL, Context _context, Action successCallback)
         {
-            ServerSettings ss = SettingsManager.Server;
+            Server ss = SettingsManager.Server;
 
             WorldDownloader.EnterDownloadedWorld(_context);
 

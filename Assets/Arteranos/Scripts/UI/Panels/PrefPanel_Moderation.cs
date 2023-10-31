@@ -38,7 +38,7 @@ namespace Arteranos.UI
 
         public Button btn_ClearCaches = null;
 
-        private ServerSettings ss = null;
+        private Server ss = null;
 
         private bool dirty = false;
 

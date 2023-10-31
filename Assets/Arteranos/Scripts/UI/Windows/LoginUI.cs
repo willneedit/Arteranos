@@ -231,7 +231,7 @@ namespace Arteranos.UI
 
         private void ManageVRLoginFlow(bool inProgress)
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
             if(inProgress)
             {
                 // Already in Desktop mode, nothing to do.

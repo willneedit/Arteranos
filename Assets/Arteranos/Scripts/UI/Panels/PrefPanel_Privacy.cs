@@ -21,7 +21,7 @@ namespace Arteranos.UI
         [SerializeField] private Spinner spn_uid_type = null;
         [SerializeField] private Spinner spn_msg_reception = null;
             
-        private ClientSettings cs = null;
+        private Client cs = null;
         private bool dirty = false;
 
         protected override void Awake()

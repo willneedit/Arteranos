@@ -103,7 +103,7 @@ namespace Arteranos.Services
                 //    // Ignore.
                 //}
                 //else 
-                if(request.HttpMethod == "GET" && request.Url.AbsolutePath == ServerSettingsJSON.DefaultMetadataPath)
+                if(request.HttpMethod == "GET" && request.Url.AbsolutePath == ServerJSON.DefaultMetadataPath)
                 {
                     YieldMetadata(response);
                 }

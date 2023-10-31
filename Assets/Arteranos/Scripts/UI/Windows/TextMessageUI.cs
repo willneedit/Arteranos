@@ -30,7 +30,7 @@ namespace Arteranos.UI
 
         public IAvatarBrain Receiver { get; set; } = null;
 
-        private ClientSettings cs = null;
+        private Client cs = null;
         private bool dirty = false;
 
 

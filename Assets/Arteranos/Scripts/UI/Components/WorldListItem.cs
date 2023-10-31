@@ -138,7 +138,7 @@ namespace Arteranos.UI
 
         private void OnAddClicked()
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             // Transfer the metadata in our persistent storage.
             WorldGallery.StoreWorld(worldURL);
@@ -156,7 +156,7 @@ namespace Arteranos.UI
 
         private void OnDeleteClicked()
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             // Remove the metadata from the persistent storage.
             WorldGallery.DeleteWorld(worldURL);

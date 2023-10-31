@@ -26,7 +26,7 @@ namespace Arteranos.UI
         public Button btn_AddServer;
         public Button btn_Reload;
 
-        private ClientSettings cs = null;
+        private Client cs = null;
 
         private readonly Dictionary<string, ServerListItem> ServerList = new();
         private readonly Queue<string> RemainingServerList = new();

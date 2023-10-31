@@ -18,7 +18,7 @@ namespace Arteranos.UI
     {
         [SerializeField] private AvatarCreatorStateMachine avatarCreatorStateMachine;
 
-        private ClientSettings cs = null;
+        private Client cs = null;
 
         protected override void Awake()
         {

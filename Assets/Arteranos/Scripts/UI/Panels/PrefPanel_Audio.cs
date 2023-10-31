@@ -26,7 +26,7 @@ namespace Arteranos.UI
         public Spinner spn_AGC = null;
         public Image img_Microphone = null;
 
-        private ClientSettings cs = null;
+        private Client cs = null;
         private bool dirty = false;
         private bool needsRenew = false;
 

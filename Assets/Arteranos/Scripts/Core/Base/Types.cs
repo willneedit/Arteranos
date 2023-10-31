@@ -19,7 +19,7 @@ namespace Arteranos.Core
     /// </summary>
     public class ServerMetadataJSON
     {
-        public ServerSettingsJSON Settings = null;
+        public ServerJSON Settings = null;
         public string CurrentWorld = null;
         public List<string> CurrentUsers = new();
     }

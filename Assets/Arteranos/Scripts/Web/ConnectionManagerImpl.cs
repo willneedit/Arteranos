@@ -30,7 +30,7 @@ namespace Arteranos.Web
                 await Task.Delay(3000);
             }
 
-            ServerSettingsJSON ssj = ServerGallery.RetrieveServerSettings(serverURL);
+            ServerJSON ssj = ServerGallery.RetrieveServerSettings(serverURL);
 
             if (ssj == null)
             {
@@ -55,8 +55,8 @@ namespace Arteranos.Web
 
             Uri serverURI = Utils.ProcessUriString(serverURL,
                 scheme: "http",
-                port: ServerSettingsJSON.DefaultMetadataPort,
-                path: ServerSettingsJSON.DefaultMetadataPath
+                port: ServerJSON.DefaultMetadataPort,
+                path: ServerJSON.DefaultMetadataPath
                 );
 
             // FIXME Telepathy Transport specific.

@@ -250,7 +250,7 @@ namespace Arteranos.Core
 
         private void AddRootSA()
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
             if(cs == null)
             {
                 Debug.LogWarning("Client Settings is not initialized - skipping");

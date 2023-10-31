@@ -18,7 +18,7 @@ namespace Arteranos.UI
         public Button btn_ServerGallery = null;
         public Button btn_SetContent = null;
 
-        private ClientSettings cs = null;
+        private Client cs = null;
         private bool dirty = false;
 
         protected override void Awake()

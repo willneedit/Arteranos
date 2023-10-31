@@ -41,7 +41,7 @@ namespace Arteranos.Core
             else
             {
                 // Sign, encrypt and transmit.
-                ClientSettings.TransmitMessage(
+                Client.TransmitMessage(
                     user,
                     SettingsManager.CurrentServer.ServerPublicKey,
                     out CMSPacket p);
@@ -72,7 +72,7 @@ namespace Arteranos.Core
             else
             {
                 // Sign, encrypt and transmit.
-                ClientSettings.TransmitMessage(
+                Client.TransmitMessage(
                     kp, 
                     SettingsManager.CurrentServer.ServerPublicKey, 
                     out CMSPacket p);
@@ -95,11 +95,11 @@ namespace Arteranos.Core
             switch (type)
             {
                 case SCMType.ClnUpdateUserInfo:
-                    ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out ServerUserState user);
+                    Server.ReceiveMessage(p, ref expectedSignatureKey, out ServerUserState user);
                     UpdateLocalUserState(source, user);
                     break;
                 case SCMType.ClnKickUser:
-                    ServerSettings.ReceiveMessage(p, ref expectedSignatureKey, out KickPacket target);
+                    Server.ReceiveMessage(p, ref expectedSignatureKey, out KickPacket target);
                     CommitLocalKickUser(source, target);
                     break;
                 default:
@@ -153,7 +153,7 @@ namespace Arteranos.Core
             try
             {
                 byte[] serverPublicKey = SettingsManager.CurrentServer.ServerPublicKey;
-                ClientSettings.ReceiveMessage(packet, ref serverPublicKey, out List<T> packets);
+                Client.ReceiveMessage(packet, ref serverPublicKey, out List<T> packets);
 
                 if (packets.Count == 0) callback = null;
                 foreach (T entry in packets) callback?.Invoke(entry);

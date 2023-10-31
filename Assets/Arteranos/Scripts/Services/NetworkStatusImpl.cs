@@ -234,7 +234,7 @@ namespace Arteranos.Services
 
             Debug.Log("Opening ports in the router");
 
-            ServerSettings ss = SettingsManager.Server;
+            Server ss = SettingsManager.Server;
 
             ServerPortPublic = await OpenPortAsync(ss.ServerPort);
             MetadataPortPublic = await OpenPortAsync(ss.MetadataPort);
@@ -247,7 +247,7 @@ namespace Arteranos.Services
 
             Debug.Log("Closing ports in the router, if there's need to do.");
 
-            ServerSettings ss = SettingsManager.Server;
+            Server ss = SettingsManager.Server;
 
             if(ServerPortPublic)
                 ClosePortAsync(ss.ServerPort);

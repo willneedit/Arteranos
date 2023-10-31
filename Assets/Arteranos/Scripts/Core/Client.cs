@@ -321,7 +321,7 @@ namespace Arteranos.Core
         public virtual List<string> PresetStrings { get; set; } = new();
     }
 
-    public class ClientSettings : ClientSettingsJSON
+    public class Client : ClientSettingsJSON
     {
         #region Change events
 
@@ -527,14 +527,14 @@ namespace Arteranos.Core
             }
         }
 
-        public static ClientSettings Load()
+        public static Client Load()
         {
-            ClientSettings cs;
+            Client cs;
 
             try
             {
                 string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_CLIENT_SETTINGS}");
-                cs = JsonConvert.DeserializeObject<ClientSettings>(json);
+                cs = JsonConvert.DeserializeObject<Client>(json);
             }
             catch(Exception e)
             {

@@ -69,7 +69,7 @@ namespace Arteranos.Core
 
         public static void EnqueueIncoming(UserID sender, string senderNickname, string text)
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             // Look for your friend list if the sender is a friend - use the global UserID
             IEnumerable<SocialListEntryJSON> q = cs.GetSocialList(sender);

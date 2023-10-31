@@ -25,7 +25,7 @@ namespace Arteranos.Web
 
         private static string GetRootPath(string url) => $"{Application.persistentDataPath}/ServerGallery/{Utils.GetURLHash(url)}";
 
-        public ServerSettingsJSON RetrieveServerSettings(string url)
+        public ServerJSON RetrieveServerSettings(string url)
         {
             string rootPath = GetRootPath(url);
 
@@ -34,10 +34,10 @@ namespace Arteranos.Web
             if(!File.Exists(metadataFile)) return null;
 
             string json = File.ReadAllText(metadataFile);
-            return JsonConvert.DeserializeObject<ServerSettingsJSON>(json);
+            return JsonConvert.DeserializeObject<ServerJSON>(json);
         }
 
-        public void StoreServerSettings(string url, ServerSettingsJSON serverSettings)
+        public void StoreServerSettings(string url, ServerJSON serverSettings)
         {
             string rootPath = GetRootPath(url);
 
@@ -62,8 +62,8 @@ namespace Arteranos.Web
         {
             Uri uri = Utils.ProcessUriString(url,
                 scheme: "http",
-                port: ServerSettingsJSON.DefaultMetadataPort,
-                path: ServerSettingsJSON.DefaultMetadataPath
+                port: ServerJSON.DefaultMetadataPort,
+                path: ServerJSON.DefaultMetadataPath
                 );
 
             DownloadHandlerBuffer dh = new();

@@ -140,7 +140,7 @@ namespace Arteranos.Avatar
 
         public override void OnStartClient()
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             base.OnStartClient();
 
@@ -230,7 +230,7 @@ namespace Arteranos.Avatar
         /// </summary>
         private void DownloadClientSettings()
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
             CommitAvatarChanged(cs.AvatarURL, cs.AvatarHeight);
         }
 
@@ -402,7 +402,7 @@ namespace Arteranos.Avatar
                     if (page.payload != null)
                         packets = page.payload.ToList();
 
-                    ServerSettings.TransmitMessage(packets, UserID.PublicKey, out CMSPacket packet);
+                    Server.TransmitMessage(packets, UserID.PublicKey, out CMSPacket packet);
                     TargetDeliverServerPacket(type, packet);
 
                     if (page.payload == null) break;
@@ -457,7 +457,7 @@ namespace Arteranos.Avatar
         [ClientRpc]
         private void ReceiveWorldTransition(string worldURL)
         {
-            ServerSettings ss = SettingsManager.Server;
+            Server ss = SettingsManager.Server;
 
             Debug.Log($"Received world transition: isServer={isServer}, isOwned={isOwned}, Source World={ss.WorldURL}, Target World={worldURL}");
 

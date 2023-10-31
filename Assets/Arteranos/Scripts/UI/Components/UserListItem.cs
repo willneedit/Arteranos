@@ -33,7 +33,7 @@ namespace Arteranos.UI
         public UserID targetUserID = null;
 
         private IAvatarBrain Me = null;
-        private ClientSettings cs = null;
+        private Client cs = null;
 
         public static UserListItem New(Transform parent, UserID targetUserID)
         {

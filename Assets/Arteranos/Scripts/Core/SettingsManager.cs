@@ -26,11 +26,11 @@ namespace Arteranos.Core
             return DesiredWorld;
         }
 
-        public static ServerSettingsJSON CurrentServer { get; set; } = null;
+        public static ServerJSON CurrentServer { get; set; } = null;
 
         public static Transform Purgatory { get; private set; }
-        public static ClientSettings Client { get; internal set; }
-        public static ServerSettings Server { get; internal set; }
+        public static Client Client { get; internal set; }
+        public static Server Server { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
 
         private void Awake()
@@ -58,8 +58,8 @@ namespace Arteranos.Core
                 return def;
             }
 
-            Client = ClientSettings.Load();
-            Server = ServerSettings.Load();
+            Client = Client.Load();
+            Server = Server.Load();
             ServerUsers = ServerUserBase.Load();
             Command = ScriptableObject.CreateInstance<CommandLine>();
 
@@ -72,7 +72,7 @@ namespace Arteranos.Core
                     Command.PlainArgs[0],
            
                     scheme: "arteranos",
-                    port: ServerSettingsJSON.DefaultMetadataPort
+                    port: ServerJSON.DefaultMetadataPort
                 );
 
                 Command.PlainArgs.RemoveAt(0);

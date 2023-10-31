@@ -21,7 +21,7 @@ namespace Arteranos.UI
         public Button btn_LoginUI = null;
         public Button btn_Exit = null;
 
-        private ClientSettings cs = null;
+        private Client cs = null;
         private bool dirty = false;
 
         protected override void Awake()

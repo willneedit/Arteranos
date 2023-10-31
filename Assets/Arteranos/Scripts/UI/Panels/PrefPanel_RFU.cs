@@ -19,7 +19,7 @@ namespace Arteranos.UI
 {
     public class PrefPanel_RFU : UIBehaviour
     {
-        private ClientSettings cs = null;
+        private Client cs = null;
         private bool dirty = false;
 
         protected override void Awake()

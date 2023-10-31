@@ -38,7 +38,7 @@ namespace Arteranos.Services
             {
                 Uri uri = Utils.ProcessUriString(TargetedServerPort,
                     scheme: "http",
-                    port: ServerSettingsJSON.DefaultMetadataPort
+                    port: ServerJSON.DefaultMetadataPort
                 );
 
                 ConnectionManager.ConnectToServer(uri.ToString());

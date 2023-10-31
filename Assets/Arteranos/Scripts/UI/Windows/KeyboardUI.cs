@@ -108,7 +108,7 @@ namespace Arteranos.UI
 
         public string GetKeyboardLayout()
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             switch(cs.Controls.VK_Layout)
             {

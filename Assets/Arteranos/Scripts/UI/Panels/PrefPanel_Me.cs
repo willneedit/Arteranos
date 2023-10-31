@@ -24,7 +24,7 @@ namespace Arteranos.UI
         private readonly Dictionary<string, Visibility> statusNames = new();
         private readonly Dictionary<string, AvatarProvider> APNames = new();
 
-        private ClientSettings cs = null;
+        private Client cs = null;
         private bool dirty = false;
 
         protected override void Awake()

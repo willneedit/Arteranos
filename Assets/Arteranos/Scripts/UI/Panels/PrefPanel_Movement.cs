@@ -27,7 +27,7 @@ namespace Arteranos.UI
         [SerializeField] private NumberedSlider sldn_ZiplineDuration = null;
         [SerializeField] private Spinner spn_Blinders = null;
 
-        private ClientSettings cs = null;
+        private Client cs = null;
         private bool dirty = false;
 
         private Dictionary<string, TurnType> spne_turn;

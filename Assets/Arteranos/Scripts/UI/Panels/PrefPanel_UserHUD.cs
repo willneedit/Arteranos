@@ -26,7 +26,7 @@ namespace Arteranos.UI
         [SerializeField] private Spinner spn_Clock;
         [SerializeField] private Toggle chk_Seconds;
 
-        private ClientSettings cs = null;
+        private Client cs = null;
         private bool dirty = false;
 
         protected override void Awake()

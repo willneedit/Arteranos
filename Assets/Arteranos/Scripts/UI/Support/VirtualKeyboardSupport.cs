@@ -60,7 +60,7 @@ namespace Arteranos.UI
 
         private void HookVirtualKB(TMP_InputField field)
         {
-            ClientSettings cs = SettingsManager.Client;
+            Client cs = SettingsManager.Client;
 
             if(cs.Controls.VK_Usage == VKUsage.Never) return;
 

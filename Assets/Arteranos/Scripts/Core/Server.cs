@@ -118,7 +118,7 @@ namespace Arteranos.Core
     /// <summary>
     /// The static server configuration data.
     /// </summary>
-    public class ServerSettingsJSON
+    public class ServerJSON
     {
         [JsonIgnore]
         public static int DefaultMetadataPort = 9779;
@@ -179,9 +179,9 @@ namespace Arteranos.Core
         public byte[] ServerPublicKey = null;
 
 
-        public ServerSettingsJSON Strip()
+        public ServerJSON Strip()
         {
-            return new ServerSettingsJSON()
+            return new ServerJSON()
             {
                 ServerPort = ServerPort,
                 MetadataPort = MetadataPort,
@@ -196,7 +196,7 @@ namespace Arteranos.Core
         }
     }
 
-    public class ServerSettings : ServerSettingsJSON
+    public class Server : ServerJSON
     {
         public event Action<string> OnWorldURLChanged;
 
@@ -238,14 +238,14 @@ namespace Arteranos.Core
             }
         }
 
-        public static ServerSettings Load()
+        public static Server Load()
         {
-            ServerSettings ss;
+            Server ss;
 
             try
             {
                 string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}");
-                ss = JsonConvert.DeserializeObject<ServerSettings>(json);
+                ss = JsonConvert.DeserializeObject<Server>(json);
             }
             catch(Exception e)
             {
