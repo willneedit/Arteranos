@@ -31,6 +31,8 @@ namespace Arteranos.Core
         public static Transform Purgatory { get; private set; }
         public static Client Client { get; internal set; }
         public static Server Server { get; internal set; }
+        public static ServerCollection ServerCollection { get; internal set; }
+
         public static ServerUserBase ServerUsers { get; internal set; }
 
         private void Awake()
@@ -61,6 +63,7 @@ namespace Arteranos.Core
             Client = Client.Load();
             Server = Server.Load();
             ServerUsers = ServerUserBase.Load();
+            ServerCollection = ServerCollection.Load();
             Command = ScriptableObject.CreateInstance<CommandLine>();
 
             Command.GetCommandlineArgs();

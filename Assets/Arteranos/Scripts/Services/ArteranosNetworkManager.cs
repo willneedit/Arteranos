@@ -4,6 +4,8 @@ using Arteranos.Services;
 using Arteranos.Core;
 using Arteranos.Avatar;
 using System.Collections.Generic;
+using System;
+using GluonGui.Dialog;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -16,6 +18,11 @@ public class ArteranosNetworkManager : NetworkManager
     {
         public ArteranosNetworkAuthenticator.AuthRequestPayload request;
         public ArteranosNetworkAuthenticator.AuthResponseMessage response;
+    }
+
+    internal struct ServerCollectionEntryMessage : NetworkMessage
+    {
+        public ServerCollectionEntry sce;
     }
 
     // Overrides the base singleton so we don't
@@ -281,13 +288,21 @@ public class ArteranosNetworkManager : NetworkManager
     /// </summary>
     public override void OnStartServer() 
     {
+        base.OnStartServer();
         ResponseMessages.Clear();
+
+        NetworkServer.RegisterHandler<ServerCollectionEntryMessage>(OnServerGotSCE);
     }
 
     /// <summary>
     /// This is invoked when the client is started.
     /// </summary>
-    public override void OnStartClient() { }
+    public override void OnStartClient()
+    {
+        base .OnStartClient();
+
+        NetworkClient.RegisterHandler<ServerCollectionEntryMessage>(OnClientGotSCE);
+    }
 
     /// <summary>
     /// This is called when a host is stopped.
@@ -297,12 +312,90 @@ public class ArteranosNetworkManager : NetworkManager
     /// <summary>
     /// This is called when a server is stopped - including when a host is stopped.
     /// </summary>
-    public override void OnStopServer() { }
+    public override void OnStopServer() 
+    {
+        base.OnStopServer();
+
+        NetworkServer.UnregisterHandler<ServerCollectionEntryMessage>();
+    }
 
     /// <summary>
     /// This is called when a client is stopped.
     /// </summary>
-    public override void OnStopClient() { }
+    public override void OnStopClient() 
+    {
+        base.OnStopClient();
+
+        NetworkClient.UnregisterHandler<ServerCollectionEntryMessage>();
+    }
+
+    #endregion
+
+    #region Server Collection Synchronization
+
+    private void OnServerGotSCE(NetworkConnectionToClient client, ServerCollectionEntryMessage message)
+    {
+        ServerCollectionEntry entry = message.sce;
+
+        // That's me....! :-O
+        if (entry.Address == NetworkStatus.PublicIPAddress.ToString()) return;
+
+        ServerCollection sc = SettingsManager.ServerCollection;
+
+        // If it's more recent, add or update it to the list.
+        sc.Update(entry, result => {
+            // On top of it, tell the client the more recent version.
+            if (!result) ReplyServerSCEntry(client, entry.Address);
+        });
+
+        return;
+    }
+
+    private void ReplyServerSCEntry(NetworkConnectionToClient client, string address)
+    {
+        ServerCollection sc = SettingsManager.ServerCollection;
+
+        ServerCollectionEntry? entry = sc.Get(address);
+        if(entry == null) return;
+
+        ServerCollectionEntryMessage message;
+        message.sce = entry.Value;
+
+        client.Send(message);
+    }
+
+    private void OnClientGotSCE(ServerCollectionEntryMessage message)
+    {
+        ServerCollectionEntry entry = message.sce;
+
+        // That's me....! :-O
+        if (entry.Address == NetworkStatus.PublicIPAddress.ToString()) return;
+
+        ServerCollection sc = SettingsManager.ServerCollection;
+
+        // If it's more recent, add or update it to the list.
+        sc.Update(entry, result => {
+            // On top of it, tell the server the more recent version.
+            if (!result) ReplyClientSCEntry(entry.Address);
+        });
+
+        return;
+    }
+
+    private void ReplyClientSCEntry(string address)
+    {
+        ServerCollection sc = SettingsManager.ServerCollection;
+
+        ServerCollectionEntry? entry = sc.Get(address);
+        if (entry == null) return;
+
+        ServerCollectionEntryMessage message;
+        message.sce = entry.Value;
+
+        NetworkClient.Send(message);
+    }
+
+
 
     #endregion
 }
