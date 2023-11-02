@@ -60,7 +60,6 @@ namespace Arteranos.Core
         public Dictionary<string, ServerCollectionEntry> entries = new();
 
         private readonly static Mutex SCMutex = new();
-        private bool dirty = false;
         private DateTime nextSave = DateTime.MinValue;
 
 
@@ -85,18 +84,19 @@ namespace Arteranos.Core
             bool _Update(ServerCollectionEntry entry)
             {
                 // Critical Section Gate
-                using Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex());
-
-                if (entries.ContainsKey(entry.Address))
+                using (Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex()))
                 {
-                    // We have a more recent entry than you offered, bin it.
-                    // Same as with the exactly equal time, to prevent loops
-                    if (entries[entry.Address].LastUpdated >= entry.LastUpdated) return false;
-                    entries.Remove(entry.Address);
+                    if (entries.ContainsKey(entry.Address))
+                    {
+                        // We have a more recent entry than you offered, bin it.
+                        // Same as with the exactly equal time, to prevent loops
+                        if (entries[entry.Address].LastUpdated >= entry.LastUpdated) return false;
+                        entries.Remove(entry.Address);
+                    }
+                    entries[entry.Address] = entry;
                 }
 
-                entries[entry.Address] = entry;
-                dirty = true;
+                SaveAsync();
                 return true;
             }
         }
@@ -115,14 +115,17 @@ namespace Arteranos.Core
             bool _Update(string address, bool online, int ping)
             {
                 // Critical Section Gate
-                using Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex());
+                using (Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex()))
+                {
+                    ServerCollectionEntry entry = Get(address) ?? throw new ArgumentNullException("Update without existing entry");
+                    entry.LastUpdated = DateTime.Now;
+                    entry.PingMillis = ping;
+                    entry.Reliability = ((entry.Reliability << 1) & ((1 << 30) - 1)) | (online ? 1 : 0);
+                    if (online) entry.LastOnline = DateTime.Now;
+                    entries[entry.Address] = entry;
+                }
 
-                ServerCollectionEntry entry = Get(address) ?? throw new ArgumentNullException("Update without existing entry");
-                entry.LastUpdated = DateTime.Now;
-                entry.PingMillis = ping;
-                entry.Reliability = ((entry.Reliability << 1) & ((1 << 30) - 1)) | (online ? 1 : 0);
-                if (online) entry.LastOnline = DateTime.Now;
-                dirty = true;
+                SaveAsync();
                 return true;
             }
         }
@@ -137,18 +140,16 @@ namespace Arteranos.Core
                 entries.TryAdd(entry.Address, entry);
         }
 
-        public const string PATH_SERVER_COLLECTION = "ServerCollection.der";
+        public const string PATH_SERVER_COLLECTION = "ServerCollection.asn1";
+
+        private string oldFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}.old";
+        private string currentFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}";
 
         public async void SaveAsync()
         {
-            string oldFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}.old";
-            string currentFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}";
 
             // Critical Section Gate
             using Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex());
-
-            // No sense if there's no change to save.
-            if (!dirty) return;
 
             // earliest time to next save is not passed yet.
             if (nextSave > DateTime.Now) return;
@@ -163,9 +164,9 @@ namespace Arteranos.Core
 
             try
             {
-                byte[] dataDER = Serializer.Serialize(Dump());
+                List<ServerCollectionEntry> obj = Dump();
+                byte[] dataDER = Serializer.Serialize(obj);
                 await File.WriteAllBytesAsync(currentFileName, dataDER);
-                dirty = false;
                 nextSave = DateTime.Now + TimeSpan.FromSeconds(60);
             }
             catch (Exception e)
@@ -185,14 +186,14 @@ namespace Arteranos.Core
             {
                 byte[] dataDER = File.ReadAllBytes($"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}");
                 sc.Restore(Serializer.Deserialize<List<ServerCollectionEntry>>(dataDER));
+                sc.nextSave = DateTime.Now + TimeSpan.FromSeconds(60);
             }
             catch (Exception e)
             {
                 Debug.LogWarning($"Failed to load server collection: {e.Message}");
+                sc.nextSave = DateTime.MinValue;
             }
 
-            sc.dirty = false;
-            sc.nextSave = DateTime.Now + TimeSpan.FromSeconds(60);
             return sc;
         }
     }

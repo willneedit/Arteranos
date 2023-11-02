@@ -5,8 +5,9 @@ using Arteranos.Core;
 using Arteranos.Avatar;
 using System.Collections.Generic;
 using System;
-using GluonGui.Dialog;
 using System.Collections;
+
+using DERSerializer;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -23,7 +24,7 @@ public class ArteranosNetworkManager : NetworkManager
 
     internal struct ServerCollectionEntryMessage : NetworkMessage
     {
-        public ServerCollectionEntry sce;
+        public byte[] sceDER;
     }
 
     // Overrides the base singleton so we don't
@@ -298,7 +299,8 @@ public class ArteranosNetworkManager : NetworkManager
             EmitServerCollectionCoroutine(entry =>
             {
                 ServerCollectionEntryMessage scm;
-                scm.sce = entry;
+                scm.sceDER = Serializer.Serialize(entry);
+                // Debug.Log(Serializer.Hexdump(scm.sceDER));
                 NetworkServer.SendToAll(scm);
             }, true)); // DEBUG: SettingsManager.Server.Public
     }
@@ -316,7 +318,7 @@ public class ArteranosNetworkManager : NetworkManager
             EmitServerCollectionCoroutine(entry =>
             {
                 ServerCollectionEntryMessage scm;
-                scm.sce = entry;
+                scm.sceDER = Serializer.Serialize(entry);
                 NetworkClient.Send(scm);
             }, false));
     }
@@ -373,7 +375,7 @@ public class ArteranosNetworkManager : NetworkManager
 
     private static void ParseSCEMessage(ServerCollectionEntryMessage message)
     {
-        ServerCollectionEntry entry = message.sce;
+        ServerCollectionEntry entry = Serializer.Deserialize<ServerCollectionEntry>(message.sceDER);
 
         // That's me....! :-O
         if (entry.Address == NetworkStatus.PublicIPAddress.ToString()) return;
