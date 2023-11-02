@@ -127,7 +127,7 @@ namespace Arteranos.Core
             }
         }
 
-        private List<ServerCollectionEntry> Dump() 
+        public List<ServerCollectionEntry> Dump() 
             => entries.Select((kvp) => kvp.Value).ToList();
 
         private void Restore(List<ServerCollectionEntry> entryList)

@@ -6,6 +6,7 @@ using Arteranos.Avatar;
 using System.Collections.Generic;
 using System;
 using GluonGui.Dialog;
+using System.Collections;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -292,6 +293,14 @@ public class ArteranosNetworkManager : NetworkManager
         ResponseMessages.Clear();
 
         NetworkServer.RegisterHandler<ServerCollectionEntryMessage>(OnServerGotSCE);
+
+        CoEmitServer = StartCoroutine(
+            EmitServerCollectionCoroutine(entry =>
+            {
+                ServerCollectionEntryMessage scm;
+                scm.sce = entry;
+                NetworkServer.SendToAll(scm);
+            }, true)); // DEBUG: SettingsManager.Server.Public
     }
 
     /// <summary>
@@ -299,9 +308,17 @@ public class ArteranosNetworkManager : NetworkManager
     /// </summary>
     public override void OnStartClient()
     {
-        base .OnStartClient();
+        base.OnStartClient();
 
         NetworkClient.RegisterHandler<ServerCollectionEntryMessage>(OnClientGotSCE);
+
+        if (!NetworkServer.active) CoEmitServer = StartCoroutine(
+            EmitServerCollectionCoroutine(entry =>
+            {
+                ServerCollectionEntryMessage scm;
+                scm.sce = entry;
+                NetworkClient.Send(scm);
+            }, false));
     }
 
     /// <summary>
@@ -316,6 +333,11 @@ public class ArteranosNetworkManager : NetworkManager
     {
         base.OnStopServer();
 
+        if (CoEmitServer != null)
+        {
+            StopCoroutine(CoEmitServer);
+            CoEmitServer = null;
+        }
         NetworkServer.UnregisterHandler<ServerCollectionEntryMessage>();
     }
 
@@ -326,6 +348,11 @@ public class ArteranosNetworkManager : NetworkManager
     {
         base.OnStopClient();
 
+        if (CoEmitServer != null)
+        {
+            StopCoroutine(CoEmitServer);
+            CoEmitServer = null;
+        }
         NetworkClient.UnregisterHandler<ServerCollectionEntryMessage>();
     }
 
@@ -333,39 +360,19 @@ public class ArteranosNetworkManager : NetworkManager
 
     #region Server Collection Synchronization
 
-    private void OnServerGotSCE(NetworkConnectionToClient client, ServerCollectionEntryMessage message)
-    {
-        ServerCollectionEntry entry = message.sce;
-
-        // That's me....! :-O
-        if (entry.Address == NetworkStatus.PublicIPAddress.ToString()) return;
-
-        ServerCollection sc = SettingsManager.ServerCollection;
-
-        // If it's more recent, add or update it to the list.
-        sc.Update(entry, result => {
-            // On top of it, tell the client the more recent version.
-            if (!result) ReplyServerSCEntry(client, entry.Address);
-        });
-
-        return;
-    }
-
-    private void ReplyServerSCEntry(NetworkConnectionToClient client, string address)
-    {
-        ServerCollection sc = SettingsManager.ServerCollection;
-
-        ServerCollectionEntry? entry = sc.Get(address);
-        if(entry == null) return;
-
-        ServerCollectionEntryMessage message;
-        message.sce = entry.Value;
-
-        client.Send(message);
-    }
+    private void OnServerGotSCE(NetworkConnectionToClient client, ServerCollectionEntryMessage message) 
+        => ParseSCEMessage(message);
 
     private void OnClientGotSCE(ServerCollectionEntryMessage message)
     {
+        // No point to deal with the loopback
+        if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host) return;
+
+        ParseSCEMessage(message);
+    }
+
+    private static void ParseSCEMessage(ServerCollectionEntryMessage message)
+    {
         ServerCollectionEntry entry = message.sce;
 
         // That's me....! :-O
@@ -374,28 +381,38 @@ public class ArteranosNetworkManager : NetworkManager
         ServerCollection sc = SettingsManager.ServerCollection;
 
         // If it's more recent, add or update it to the list.
-        sc.Update(entry, result => {
-            // On top of it, tell the server the more recent version.
-            if (!result) ReplyClientSCEntry(entry.Address);
-        });
+        _ = sc.UpdateAsync(entry);
 
         return;
     }
 
-    private void ReplyClientSCEntry(string address)
+    private Coroutine CoEmitServer = null;
+
+    private IEnumerator EmitServerCollectionCoroutine(Action<ServerCollectionEntry> emitter, bool self)
     {
-        ServerCollection sc = SettingsManager.ServerCollection;
+        yield return new WaitForSeconds(5.0f);
 
-        ServerCollectionEntry? entry = sc.Get(address);
-        if (entry == null) return;
+        (string address, int _, int _) = SettingsManager.GetServerConnectionData();
+        ServerCollectionEntry selfEntry = new(SettingsManager.Server, address, true, 0);
 
-        ServerCollectionEntryMessage message;
-        message.sce = entry.Value;
+        while(true)
+        {
+            if (self) emitter(selfEntry);
 
-        NetworkClient.Send(message);
+            List<ServerCollectionEntry> snapshot = SettingsManager.ServerCollection.Dump();
+
+            foreach (ServerCollectionEntry entry in snapshot)
+            {
+                emitter(entry);
+
+                // Rate throttling
+                yield return new WaitForSeconds(0.2f);
+            }
+
+            // Update interval
+            yield return new WaitForSeconds(10.0f);
+        }
     }
-
-
 
     #endregion
 }
