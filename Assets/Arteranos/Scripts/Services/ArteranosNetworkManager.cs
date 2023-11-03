@@ -33,9 +33,9 @@ public class ArteranosNetworkManager : NetworkManager
 
     private readonly Dictionary<int, AuthSequence> ResponseMessages = new();
 
-    private readonly Dictionary<int, DateTime> SCLastUpdatedServer = new();
+    private readonly Dictionary<int, DateTime> SCLastUpdatedToClient = new();
 
-    private DateTime SCLastUpdatedClient = DateTime.MinValue;
+    private DateTime SCSnapshotCutoff = DateTime.MinValue;
 
     /// <summary>
     /// Runs on both Server and Client
@@ -170,7 +170,13 @@ public class ArteranosNetworkManager : NetworkManager
     /// <para>Unity calls this on the Server when a Client connects to the Server. Use an override to tell the NetworkManager what to do when a client connects to the server.</para>
     /// </summary>
     /// <param name="conn">Connection from client.</param>
-    public override void OnServerConnect(NetworkConnectionToClient conn) { }
+    public override void OnServerConnect(NetworkConnectionToClient conn)
+    {
+        // Next time, prepare the next collection list as the full list
+        // to cater to the latecomer.
+        SCSnapshotCutoff = DateTime.MinValue;
+        SCLastUpdatedToClient[conn.connectionId] = DateTime.MinValue;
+    }
 
     /// <summary>
     /// Called on the server when a client is ready.
@@ -224,8 +230,8 @@ public class ArteranosNetworkManager : NetworkManager
         if(ResponseMessages.ContainsKey(conn.connectionId))
             ResponseMessages.Remove(conn.connectionId);
 
-        if(SCLastUpdatedServer.ContainsKey(conn.connectionId))
-            SCLastUpdatedServer.Remove(conn.connectionId);
+        if(SCLastUpdatedToClient.ContainsKey(conn.connectionId))
+            SCLastUpdatedToClient.Remove(conn.connectionId);
     }
 
     /// <summary>
@@ -300,12 +306,12 @@ public class ArteranosNetworkManager : NetworkManager
         base.OnStartServer();
 
         ResponseMessages.Clear();
-        SCLastUpdatedServer.Clear();
+        SCLastUpdatedToClient.Clear();
 
         NetworkServer.RegisterHandler<ServerCollectionEntryMessage>(OnServerGotSCE);
 
         CoEmitServer = StartCoroutine(
-            EmitServerCollectionCoroutine(EmitToClients, true, true)); // DEBUG: SettingsManager.Server.Public
+            EmitServerCollectionCoroutine(EmitToClients, true)); // DEBUG: SettingsManager.Server.Public
     }
 
     /// <summary>
@@ -315,12 +321,12 @@ public class ArteranosNetworkManager : NetworkManager
     {
         base.OnStartClient();
 
-        SCLastUpdatedClient = DateTime.MinValue;
+        SCSnapshotCutoff = DateTime.MinValue;
 
         NetworkClient.RegisterHandler<ServerCollectionEntryMessage>(OnClientGotSCE);
 
         if (!NetworkServer.active) CoEmitServer = StartCoroutine(
-            EmitServerCollectionCoroutine(EmitToServer, false, false));
+            EmitServerCollectionCoroutine(EmitToServer, false));
     }
 
     /// <summary>
@@ -390,7 +396,7 @@ public class ArteranosNetworkManager : NetworkManager
 
     private Coroutine CoEmitServer = null;
 
-    private IEnumerator EmitServerCollectionCoroutine(Action<ServerCollectionEntry> emitter, bool isServer, bool self)
+    private IEnumerator EmitServerCollectionCoroutine(Action<ServerCollectionEntry> emitter, bool self)
     {
         yield return new WaitForSeconds(5.0f);
 
@@ -401,11 +407,9 @@ public class ArteranosNetworkManager : NetworkManager
         {
             if (self) emitter(selfEntry);
 
-            // Server needs to have the full set ready for the latecomers.
-            // Clients need to have a full set only once per session.
-            DateTime cutoff = isServer ? DateTime.MinValue : SCLastUpdatedClient;
+            List<ServerCollectionEntry> snapshot = SettingsManager.ServerCollection.Dump(SCSnapshotCutoff);
 
-            List<ServerCollectionEntry> snapshot = SettingsManager.ServerCollection.Dump(cutoff);
+            SCSnapshotCutoff = DateTime.Now;
 
             foreach (ServerCollectionEntry entry in snapshot)
             {
@@ -415,7 +419,6 @@ public class ArteranosNetworkManager : NetworkManager
                 yield return new WaitForSeconds(0.2f);
             }
 
-            if (!isServer) SCLastUpdatedClient = DateTime.Now;
 
             // Update interval
             yield return new WaitForSeconds(10.0f);
@@ -430,15 +433,12 @@ public class ArteranosNetworkManager : NetworkManager
         foreach (NetworkConnectionToClient conn in NetworkServer.connections.Values)
         {
             int cid = conn.connectionId;
-            DateTime cutoff = SCLastUpdatedServer.ContainsKey(cid) 
-                ? SCLastUpdatedServer[cid] : DateTime.MinValue;
-
-            if (cutoff < entry.LastUpdated)
+            if (SCLastUpdatedToClient[cid] < entry.LastUpdated)
             {
                 conn.Send(scm);
                 Debug.Log($"[Server] Sending entry of {entry.Name} to conn {cid}");
             }
-            SCLastUpdatedServer[cid] = DateTime.Now;
+            SCLastUpdatedToClient[cid] = SCSnapshotCutoff;
         }
     }
 
