@@ -20,6 +20,7 @@ namespace Arteranos.Core
     {
         public string Name;
         public string Address;
+        public int Port;
         public string Description;
         public ServerPermissions Permissions;
         public DateTime LastOnline;
@@ -29,9 +30,10 @@ namespace Arteranos.Core
         // Bits 0 - 29 are the history of the availability, with Bit 0 the most recent
         public int Reliability;
 
-        public ServerCollectionEntry(ServerJSON settings, string address, bool online, int ping)
+        public ServerCollectionEntry(ServerJSON settings, string address, int port, bool online, int ping)
         {
             Name = settings.Name;
+            Port = port;
             Address = address;
             Description = settings.Description;
             Permissions = settings.Permissions;
@@ -52,6 +54,10 @@ namespace Arteranos.Core
                 if ((Reliability & (1 << i)) != 0) count++;
             return count / 30.0f;
         }
+
+        public readonly string Key() => Key(Address, Port);
+
+        public static string Key(string address, int port) => $"{address}:{port}";
     }
 
     public class ServerCollection
@@ -63,8 +69,8 @@ namespace Arteranos.Core
         private DateTime nextSave = DateTime.MinValue;
 
 
-        public ServerCollectionEntry? Get(string address) 
-            => entries.TryGetValue(address, out ServerCollectionEntry entry) ? entry : null;
+        public ServerCollectionEntry? Get(string address, int port)
+            => entries.TryGetValue(ServerCollectionEntry.Key(address, port), out ServerCollectionEntry entry) ? entry : null;
 
         public async void Update(ServerCollectionEntry entry, Action<bool> callback)
         {
@@ -86,14 +92,14 @@ namespace Arteranos.Core
                 // Critical Section Gate
                 using (Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex()))
                 {
-                    if (entries.ContainsKey(entry.Address))
+                    if (entries.ContainsKey(entry.Key()))
                     {
                         // We have a more recent entry than you offered, bin it.
                         // Same as with the exactly equal time, to prevent loops
-                        if (entries[entry.Address].LastUpdated >= entry.LastUpdated) return false;
-                        entries.Remove(entry.Address);
+                        if (entries[entry.Key()].LastUpdated >= entry.LastUpdated) return false;
+                        entries.Remove(entry.Key());
                     }
-                    entries[entry.Address] = entry;
+                    entries[entry.Key()] = entry;
                 }
 
                 SaveAsync();
@@ -105,10 +111,11 @@ namespace Arteranos.Core
         /// Advance the server's ping and availability statistics
         /// </summary>
         /// <param name="address"></param>
+        /// <param name="port"></param>
         /// <param name="online"></param>
-        /// <param name="ping"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<bool> UpdateAsync(string address, bool online, int ping)
+        /// <param name="ping"></param>
+        public async Task<bool> UpdateAsync(string address, int port, bool online, int ping)
         {
             return await Task.Run(() => _Update(address, online, ping));
 
@@ -117,12 +124,12 @@ namespace Arteranos.Core
                 // Critical Section Gate
                 using (Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex()))
                 {
-                    ServerCollectionEntry entry = Get(address) ?? throw new ArgumentNullException("Update without existing entry");
+                    ServerCollectionEntry entry = Get(address, port) ?? throw new ArgumentNullException("Update without existing entry");
                     entry.LastUpdated = DateTime.Now;
                     entry.PingMillis = ping;
                     entry.Reliability = ((entry.Reliability << 1) & ((1 << 30) - 1)) | (online ? 1 : 0);
                     if (online) entry.LastOnline = DateTime.Now;
-                    entries[entry.Address] = entry;
+                    entries[entry.Key()] = entry;
                 }
 
                 SaveAsync();
@@ -142,13 +149,13 @@ namespace Arteranos.Core
         {
             entries.Clear();
             foreach(ServerCollectionEntry entry in entryList)
-                entries.TryAdd(entry.Address, entry);
+                entries.TryAdd(entry.Key(), entry);
         }
 
         public const string PATH_SERVER_COLLECTION = "ServerCollection.asn1";
 
-        private string oldFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}.old";
-        private string currentFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}";
+        private readonly string oldFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}.old";
+        private readonly string currentFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}";
 
         public async void SaveAsync()
         {

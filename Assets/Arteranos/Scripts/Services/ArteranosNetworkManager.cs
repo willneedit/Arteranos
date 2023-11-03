@@ -400,8 +400,8 @@ public class ArteranosNetworkManager : NetworkManager
     {
         yield return new WaitForSeconds(5.0f);
 
-        (string address, int _, int _) = SettingsManager.GetServerConnectionData();
-        ServerCollectionEntry selfEntry = new(SettingsManager.Server, address, true, 0);
+        (string address, int _, int mdport) = SettingsManager.GetServerConnectionData();
+        ServerCollectionEntry selfEntry = new(SettingsManager.Server, address, mdport, true, 0);
 
         while(true)
         {
