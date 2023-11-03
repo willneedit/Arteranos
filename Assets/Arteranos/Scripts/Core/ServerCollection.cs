@@ -130,8 +130,13 @@ namespace Arteranos.Core
             }
         }
 
-        public List<ServerCollectionEntry> Dump() 
-            => entries.Select((kvp) => kvp.Value).ToList();
+        public List<ServerCollectionEntry> Dump(DateTime increment)
+        {
+            IEnumerable<ServerCollectionEntry> q = from entry in entries
+                    where entry.Value.LastUpdated > increment
+                    select entry.Value;
+            return q.ToList();
+        }
 
         private void Restore(List<ServerCollectionEntry> entryList)
         {
@@ -164,7 +169,7 @@ namespace Arteranos.Core
 
             try
             {
-                List<ServerCollectionEntry> obj = Dump();
+                List<ServerCollectionEntry> obj = Dump(DateTime.MinValue);
                 byte[] dataDER = Serializer.Serialize(obj);
                 await File.WriteAllBytesAsync(currentFileName, dataDER);
                 nextSave = DateTime.Now + TimeSpan.FromSeconds(60);

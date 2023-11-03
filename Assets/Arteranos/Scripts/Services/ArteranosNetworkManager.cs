@@ -33,6 +33,10 @@ public class ArteranosNetworkManager : NetworkManager
 
     private readonly Dictionary<int, AuthSequence> ResponseMessages = new();
 
+    private readonly Dictionary<int, DateTime> SCLastUpdatedServer = new();
+
+    private DateTime SCLastUpdatedClient = DateTime.MinValue;
+
     /// <summary>
     /// Runs on both Server and Client
     /// Networking is NOT initialized when this fires
@@ -219,6 +223,9 @@ public class ArteranosNetworkManager : NetworkManager
         // Maybe the client never made it so far, just past the authentication.
         if(ResponseMessages.ContainsKey(conn.connectionId))
             ResponseMessages.Remove(conn.connectionId);
+
+        if(SCLastUpdatedServer.ContainsKey(conn.connectionId))
+            SCLastUpdatedServer.Remove(conn.connectionId);
     }
 
     /// <summary>
@@ -291,18 +298,14 @@ public class ArteranosNetworkManager : NetworkManager
     public override void OnStartServer() 
     {
         base.OnStartServer();
+
         ResponseMessages.Clear();
+        SCLastUpdatedServer.Clear();
 
         NetworkServer.RegisterHandler<ServerCollectionEntryMessage>(OnServerGotSCE);
 
         CoEmitServer = StartCoroutine(
-            EmitServerCollectionCoroutine(entry =>
-            {
-                ServerCollectionEntryMessage scm;
-                scm.sceDER = Serializer.Serialize(entry);
-                // Debug.Log(Serializer.Hexdump(scm.sceDER));
-                NetworkServer.SendToAll(scm);
-            }, true)); // DEBUG: SettingsManager.Server.Public
+            EmitServerCollectionCoroutine(EmitToClients, true, true)); // DEBUG: SettingsManager.Server.Public
     }
 
     /// <summary>
@@ -312,15 +315,12 @@ public class ArteranosNetworkManager : NetworkManager
     {
         base.OnStartClient();
 
+        SCLastUpdatedClient = DateTime.MinValue;
+
         NetworkClient.RegisterHandler<ServerCollectionEntryMessage>(OnClientGotSCE);
 
         if (!NetworkServer.active) CoEmitServer = StartCoroutine(
-            EmitServerCollectionCoroutine(entry =>
-            {
-                ServerCollectionEntryMessage scm;
-                scm.sceDER = Serializer.Serialize(entry);
-                NetworkClient.Send(scm);
-            }, false));
+            EmitServerCollectionCoroutine(EmitToServer, false, false));
     }
 
     /// <summary>
@@ -368,7 +368,7 @@ public class ArteranosNetworkManager : NetworkManager
     private void OnClientGotSCE(ServerCollectionEntryMessage message)
     {
         // No point to deal with the loopback
-        if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host) return;
+        // DEBUG: if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host) return;
 
         ParseSCEMessage(message);
     }
@@ -378,7 +378,7 @@ public class ArteranosNetworkManager : NetworkManager
         ServerCollectionEntry entry = Serializer.Deserialize<ServerCollectionEntry>(message.sceDER);
 
         // That's me....! :-O
-        if (entry.Address == NetworkStatus.PublicIPAddress.ToString()) return;
+        // DEBUG: if (entry.Address == NetworkStatus.PublicIPAddress.ToString()) return;
 
         ServerCollection sc = SettingsManager.ServerCollection;
 
@@ -390,7 +390,7 @@ public class ArteranosNetworkManager : NetworkManager
 
     private Coroutine CoEmitServer = null;
 
-    private IEnumerator EmitServerCollectionCoroutine(Action<ServerCollectionEntry> emitter, bool self)
+    private IEnumerator EmitServerCollectionCoroutine(Action<ServerCollectionEntry> emitter, bool isServer, bool self)
     {
         yield return new WaitForSeconds(5.0f);
 
@@ -401,7 +401,11 @@ public class ArteranosNetworkManager : NetworkManager
         {
             if (self) emitter(selfEntry);
 
-            List<ServerCollectionEntry> snapshot = SettingsManager.ServerCollection.Dump();
+            // Server needs to have the full set ready for the latecomers.
+            // Clients need to have a full set only once per session.
+            DateTime cutoff = isServer ? DateTime.MinValue : SCLastUpdatedClient;
+
+            List<ServerCollectionEntry> snapshot = SettingsManager.ServerCollection.Dump(cutoff);
 
             foreach (ServerCollectionEntry entry in snapshot)
             {
@@ -411,10 +415,41 @@ public class ArteranosNetworkManager : NetworkManager
                 yield return new WaitForSeconds(0.2f);
             }
 
+            if (!isServer) SCLastUpdatedClient = DateTime.Now;
+
             // Update interval
             yield return new WaitForSeconds(10.0f);
         }
     }
+
+    private void EmitToClients(ServerCollectionEntry entry)
+    {
+        ServerCollectionEntryMessage scm;
+        scm.sceDER = Serializer.Serialize(entry);
+
+        foreach (NetworkConnectionToClient conn in NetworkServer.connections.Values)
+        {
+            int cid = conn.connectionId;
+            DateTime cutoff = SCLastUpdatedServer.ContainsKey(cid) 
+                ? SCLastUpdatedServer[cid] : DateTime.MinValue;
+
+            if (cutoff < entry.LastUpdated)
+            {
+                conn.Send(scm);
+                Debug.Log($"[Server] Sending entry of {entry.Name} to conn {cid}");
+            }
+            SCLastUpdatedServer[cid] = DateTime.Now;
+        }
+    }
+
+    private void EmitToServer(ServerCollectionEntry entry)
+    {
+        ServerCollectionEntryMessage scm;
+        scm.sceDER = Serializer.Serialize(entry);
+        NetworkClient.Send(scm);
+        Debug.Log($"[Client] Sending entry of {entry.Name} to server");
+    }
+
 
     #endregion
 }
