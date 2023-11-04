@@ -8,8 +8,6 @@
 using Arteranos.Core;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -81,8 +79,8 @@ namespace Arteranos.Web
 
             ServerMetadataJSON smdj = null;
 
-            if(uwr.result == UnityWebRequest.Result.Success)
-                smdj = JsonConvert.DeserializeObject<ServerMetadataJSON>(dh.text);
+            if (uwr.result == UnityWebRequest.Result.Success)
+                smdj = DERSerializer.Serializer.Deserialize<ServerMetadataJSON>(dh.data);
 
             return (url, smdj);
         }

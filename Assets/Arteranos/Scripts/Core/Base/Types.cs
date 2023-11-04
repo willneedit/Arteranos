@@ -21,7 +21,7 @@ namespace Arteranos.Core
     {
         public ServerJSON Settings = null;
         public string CurrentWorld = null;
-        public List<string> CurrentUsers = new();
+        public List<byte []> CurrentUsers = new();
     }
 
     public class WorldMetaData

@@ -124,7 +124,7 @@ namespace Arteranos.Core
         public static int DefaultMetadataPort = 9779;
 
         [JsonIgnore]
-        public static string DefaultMetadataPath = "/metadata.json";
+        public static string DefaultMetadataPath = "/metadata.asn1";
 
         [JsonIgnore]
         private bool includeCompleteKey = false;

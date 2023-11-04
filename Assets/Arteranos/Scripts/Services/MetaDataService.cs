@@ -130,13 +130,11 @@ namespace Arteranos.Services
             {
                 Settings = SettingsManager.Server,
                 CurrentWorld = SettingsManager.Server.WorldURL,
-                CurrentUsers = NetworkStatus.GetOnlineUsers().Select(x => x.UserID.ToString()).ToList(),
+                CurrentUsers = NetworkStatus.GetOnlineUsers().Select(x => (byte[]) x.UserID).ToList(),
             };
 
-            string json = JsonConvert.SerializeObject(mdj);
-
-            byte[] data = Encoding.UTF8.GetBytes(json);
-            response.ContentType = "application/json";
+            byte[] data = DERSerializer.Serializer.Serialize(mdj);
+            response.ContentType = "application/octet-stream";
             response.ContentEncoding = Encoding.UTF8;
             response.ContentLength64 = data.LongLength;
             response.StatusCode = (int) HttpStatusCode.OK;
