@@ -130,7 +130,10 @@ namespace Arteranos.Services
             {
                 Settings = SettingsManager.Server,
                 CurrentWorld = SettingsManager.Server.WorldURL,
-                CurrentUsers = NetworkStatus.GetOnlineUsers().Select(x => (byte[]) x.UserID).ToList(),
+
+                CurrentUsers = (from user in NetworkStatus.GetOnlineUsers()
+                                where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
+                                select (byte[])user.UserID).ToList(),
             };
 
             byte[] data = DERSerializer.Serializer.Serialize(mdj);

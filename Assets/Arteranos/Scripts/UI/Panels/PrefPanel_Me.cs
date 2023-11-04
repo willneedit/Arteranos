@@ -80,7 +80,7 @@ namespace Arteranos.UI
 
             string fpmode = Utils.GetUIDFPEncoding(fpmodeSet);
 
-            spn_OnlineStatus.value = Array.IndexOf(spn_OnlineStatus.Options, Utils.GetEnumDescription(cs.Visibility));
+            spn_OnlineStatus.value = Array.IndexOf(spn_OnlineStatus.Options, Utils.GetEnumDescription(cs.UserPrivacy.Visibility));
             txt_Nickname.text = cs.Me.Nickname;
 
             tro_UserID.text = cs.GetFingerprint(fpmode);
@@ -110,7 +110,10 @@ namespace Arteranos.UI
             string vname = spn_OnlineStatus.Options[spn_OnlineStatus.value];
 
             if(statusNames.TryGetValue(vname, out Visibility v))
-                cs.Visibility = v;
+            {
+                cs.UserPrivacy.Visibility = v;
+                cs.PingUserPrivacyChanged();
+            }
 
             dirty = true;
         }

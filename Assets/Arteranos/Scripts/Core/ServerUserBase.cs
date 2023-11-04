@@ -145,6 +145,7 @@ namespace Arteranos.Core
 
     public class UserPrivacy
     {
+        public Visibility Visibility = Visibility.Online;
         public UserVisibility UIDVisibility;
         public UIDRepresentation UIDRepresentation;
         public UserVisibility TextReception;

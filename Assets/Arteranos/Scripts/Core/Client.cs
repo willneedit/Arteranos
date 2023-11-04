@@ -280,7 +280,7 @@ namespace Arteranos.Core
         public virtual UserDataSettingsJSON Me { get; set; } = new();
 
         // Guides the online and availability state
-        public virtual Visibility Visibility { get; set; } = Visibility.Online;
+        // public virtual Visibility Visibility { get; set; } = Visibility.Online;
 
         // VR mode, if available
         public virtual bool VRMode { get; set; } = true;

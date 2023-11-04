@@ -231,7 +231,10 @@ namespace Arteranos.Avatar
         private void DownloadClientSettings()
         {
             Client cs = SettingsManager.Client;
+
             CommitAvatarChanged(cs.AvatarURL, cs.AvatarHeight);
+
+            UserPrivacy = cs.UserPrivacy;
         }
 
         #endregion
@@ -612,7 +615,7 @@ namespace Arteranos.Avatar
             busy |= m_txtMessageBox != null;
 
             // "Dammit! Not right now!"
-            busy |= SettingsManager.Client.Visibility != Core.Visibility.Online;
+            busy |= SettingsManager.Client.UserPrivacy.Visibility != Core.Visibility.Online;
             return busy;
         }
 
