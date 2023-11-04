@@ -13,6 +13,7 @@ using System;
 using System.Threading.Tasks;
 using Arteranos.Core;
 using Mirror;
+
 using System.Net;
 using Arteranos.Web;
 using UnityEngine.SceneManagement;
@@ -367,6 +368,9 @@ namespace Arteranos.Services
             NetworkStatus.OpenPorts = true;
             
             ConnectionManager.Instance.ExpectConnectionResponse();
+
+            // Custom server port -- Transport specific!
+            FindObjectOfType<TelepathyTransport>().port = (ushort) SettingsManager.Server.ServerPort;
             manager.StartHost();
         }
 
