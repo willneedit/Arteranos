@@ -311,7 +311,7 @@ public class ArteranosNetworkManager : NetworkManager
         NetworkServer.RegisterHandler<ServerCollectionEntryMessage>(OnServerGotSCE);
 
         CoEmitServer = StartCoroutine(
-            EmitServerCollectionCoroutine(EmitToClients, true)); // DEBUG: SettingsManager.Server.Public
+            EmitServerCollectionCoroutine(EmitToClients, SettingsManager.Server.Public));
     }
 
     /// <summary>

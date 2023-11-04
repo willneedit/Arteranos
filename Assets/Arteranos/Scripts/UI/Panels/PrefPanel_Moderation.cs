@@ -36,6 +36,8 @@ namespace Arteranos.UI
         public Toggle chk_CustomAvatars = null;
         public Toggle chk_Flying = null;
 
+        public Toggle chk_Public = null;
+
         public Button btn_ClearCaches = null;
 
         private Server ss = null;
@@ -56,6 +58,7 @@ namespace Arteranos.UI
             //txt_MetdadataPort.onValidateInput += OnValidatePort;
 
             btn_Icon.onClick.AddListener(OnIconClicked);
+            chk_Public.onValueChanged.AddListener(SetDirty);
 
             btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
             btn_ContentPermissions.onClick.AddListener(OnContentPermissionsClicked);
@@ -96,6 +99,8 @@ namespace Arteranos.UI
             chk_CustomAvatars.isOn = ss.Permissions.CustomAvatars ?? false;
             chk_Flying.isOn = ss.Permissions.Flying ?? true;
 
+            chk_Public.isOn = ss.Public;
+
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
         }
@@ -118,6 +123,8 @@ namespace Arteranos.UI
                 ss.Permissions.Flying = chk_Flying.isOn;
                 ss.Permissions.CustomAvatars = chk_CustomAvatars.isOn;
                 ss.Permissions.Guests = chk_Guests.isOn;
+
+                ss.Public = chk_Public.isOn;
             }
 
             // Might be to disabled before it's really started, so cs may be null yet.
