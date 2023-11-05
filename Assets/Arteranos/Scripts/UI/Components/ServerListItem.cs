@@ -12,6 +12,7 @@ using UnityEngine.UI;
 
 using Arteranos.Core;
 using Arteranos.Web;
+using System.Threading.Tasks;
 
 namespace Arteranos.UI
 {
@@ -65,7 +66,7 @@ namespace Arteranos.UI
             PopulateServerData();
         }
 
-        private void GotSMD(string url, ServerMetadataJSON smdj)
+        public void GotSMD(string url, ServerMetadataJSON smdj)
         {
             // Not for me?
             if(url != serverURL) return;
@@ -122,10 +123,9 @@ namespace Arteranos.UI
             PopulateServerData();
         }
 
-        public void ReloadServerData()
+        public Task<(string, ServerMetadataJSON)> ReloadServerDataAsync()
         {
-            InvalidateServerData();
-            ServerGallery.DownloadServerMetadataAsync(serverURL, GotSMD);
+            return ServerGallery.DownloadServerMetadataAsync(serverURL, 1);
         }
 
         private void VisualizeServerData()

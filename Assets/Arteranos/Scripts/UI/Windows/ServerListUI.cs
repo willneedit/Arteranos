@@ -11,10 +11,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Threading;
 
 namespace Arteranos.UI
 {
@@ -29,8 +27,6 @@ namespace Arteranos.UI
         private Client cs = null;
 
         private readonly Dictionary<string, ServerListItem> ServerList = new();
-        private readonly Queue<string> RemainingServerList = new();
-        private int InProgress = 0;
 
         public static ServerListUI New()
         {
@@ -64,44 +60,28 @@ namespace Arteranos.UI
 
         private async void OnReloadClicked()
         {
+            async Task DoUpdate(ServerListItem server)
+            {
+                (string url, ServerMetadataJSON smdj) = await server.ReloadServerDataAsync();
+                server.GotSMD(url, smdj);
+            }
+
             btn_Reload.interactable = false;
 
-            void OnUpdateFinished(ServerListItem obj)
+            TaskPool<ServerListItem> pool = new();
+
+            Debug.Log($"Reload started, queued {ServerList.Count} servers");
+
+            foreach (ServerListItem server in ServerList.Values)
             {
-                obj.OnUpdateFinished -= OnUpdateFinished;
-                Interlocked.Decrement(ref InProgress);
+                server.InvalidateServerData();
+                pool.Schedule(server, DoUpdate);
             }
 
-            foreach(string server in ServerList.Keys)
-            {
-                if(ServerList[server] != null)
-                {
-                    RemainingServerList.Enqueue(server);
-                    ServerList[server].InvalidateServerData();
-                }
-            }
-
-            Debug.Log($"Reload started, queued {RemainingServerList.Count} servers");
-
-            while(InProgress > 0 || RemainingServerList.Count > 0)
-            {
-                while(InProgress < 5)
-                {
-                    if(RemainingServerList.Count == 0) break;
-
-                    string server = RemainingServerList.Dequeue();
-                    ServerList[server].OnUpdateFinished += OnUpdateFinished;
-                    ServerList[server].ReloadServerData();
-                    Interlocked.Increment(ref InProgress);
-                }
-
-                await Task.Yield();
-            }
+            await pool.Run();
 
             Debug.Log("Reload finished.");
-
-            // Maybe it's already closed. Impatient users...
-            if(btn_Reload != null) btn_Reload.interactable = true;
+            if (btn_Reload != null) btn_Reload.interactable = true;
         }
     }
 }
