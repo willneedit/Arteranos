@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DERSerializer;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Arteranos.Core
 {
@@ -25,12 +26,8 @@ namespace Arteranos.Core
         public ServerPermissions Permissions;
         public DateTime LastOnline;
         public DateTime LastUpdated;
-        // Ping time, in milliseconds
-        public int PingMillis;
-        // Bits 0 - 29 are the history of the availability, with Bit 0 the most recent
-        public int Reliability;
 
-        public ServerCollectionEntry(ServerJSON settings, string address, int port, bool online, int ping)
+        public ServerCollectionEntry(ServerJSON settings, string address, int port, bool online)
         {
             Name = settings.Name;
             Port = port;
@@ -38,26 +35,34 @@ namespace Arteranos.Core
             Description = settings.Description;
             Permissions = settings.Permissions;
             LastUpdated = DateTime.Now;
-            Reliability = (1 << 30) - (online ? 1 : 2); // 3FFFFFFF or 3FFFFFFE :)
             LastOnline = (online ? DateTime.Now : DateTime.MinValue);
-            PingMillis = ping;
-        }
-
-        /// <summary>
-        /// Normalized reliability index over the past thirty attempts.
-        /// </summary>
-        /// <returns>0.0 means permanently offline, 1.0 means it's always online</returns>
-        public readonly float ReliabilityIndex()
-        {
-            int count = 0;
-            for (int i = 0; i < 30; i++)
-                if ((Reliability & (1 << i)) != 0) count++;
-            return count / 30.0f;
         }
 
         public readonly string Key() => Key(Address, Port);
 
         public static string Key(string address, int port) => $"{address}:{port}";
+
+        public async Task<bool> PingServer()
+        {
+            Uri uri = new($"http://{Address}:{Port}/");
+
+            DownloadHandlerBuffer dh = new();
+            using UnityWebRequest uwr = new(
+                uri,
+                UnityWebRequest.kHttpVerbHEAD,
+                dh,
+                null);
+            uwr.timeout = 1;
+
+            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
+            while (!uwr_ao.isDone) await Task.Yield();
+
+            bool success = uwr.result == UnityWebRequest.Result.Success;
+
+            LastUpdated = DateTime.Now;
+            if (success) LastOnline = DateTime.Now;
+            return success;
+        }
     }
 
     public class ServerCollection
@@ -99,36 +104,6 @@ namespace Arteranos.Core
                         if (entries[entry.Key()].LastUpdated >= entry.LastUpdated) return false;
                         entries.Remove(entry.Key());
                     }
-                    entries[entry.Key()] = entry;
-                }
-
-                SaveAsync();
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// Advance the server's ping and availability statistics
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="port"></param>
-        /// <param name="online"></param>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <param name="ping"></param>
-        public async Task<bool> UpdateAsync(string address, int port, bool online, int ping)
-        {
-            return await Task.Run(() => _Update(address, online, ping));
-
-            bool _Update(string address, bool online, int ping)
-            {
-                // Critical Section Gate
-                using (Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex()))
-                {
-                    ServerCollectionEntry entry = Get(address, port) ?? throw new ArgumentNullException("Update without existing entry");
-                    entry.LastUpdated = DateTime.Now;
-                    entry.PingMillis = ping;
-                    entry.Reliability = ((entry.Reliability << 1) & ((1 << 30) - 1)) | (online ? 1 : 0);
-                    if (online) entry.LastOnline = DateTime.Now;
                     entries[entry.Key()] = entry;
                 }
 

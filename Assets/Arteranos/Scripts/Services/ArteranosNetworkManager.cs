@@ -401,7 +401,7 @@ public class ArteranosNetworkManager : NetworkManager
         yield return new WaitForSeconds(5.0f);
 
         (string address, int _, int mdport) = SettingsManager.GetServerConnectionData();
-        ServerCollectionEntry selfEntry = new(SettingsManager.Server, address, mdport, true, 0);
+        ServerCollectionEntry selfEntry = new(SettingsManager.Server, address, mdport, true);
 
         while(true)
         {

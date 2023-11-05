@@ -60,7 +60,7 @@ namespace Arteranos.UI
 
         private async void OnReloadClicked()
         {
-            async Task DoUpdate(ServerListItem server)
+            static async Task DoUpdate(ServerListItem server)
             {
                 (string url, ServerMetadataJSON smdj) = await server.ReloadServerDataAsync();
                 server.GotSMD(url, smdj);
