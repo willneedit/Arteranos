@@ -17,7 +17,16 @@ using UnityEngine.Networking;
 
 namespace Arteranos.Core
 {
-    public struct ServerCollectionEntry
+    public struct ServerOnlineData
+    {
+        public int ServerPort;
+        public byte[] ServerPublicKey;
+        public byte[] Icon;
+        public List<byte[]> UserPublicKeys;
+        public string CurrentWorld;
+    }
+
+    public struct ServerPublicData
     {
         public string Name;
         public string Address;
@@ -27,7 +36,7 @@ namespace Arteranos.Core
         public DateTime LastOnline;
         public DateTime LastUpdated;
 
-        public ServerCollectionEntry(ServerJSON settings, string address, int port, bool online)
+        public ServerPublicData(ServerJSON settings, string address, int port, bool online)
         {
             Name = settings.Name;
             Port = port;
@@ -38,10 +47,25 @@ namespace Arteranos.Core
             LastOnline = (online ? DateTime.Now : DateTime.MinValue);
         }
 
+        public ServerPublicData(string address, int port)
+        {
+            Name = string.Empty;
+            Address = address;
+            Port = port;
+            Description = string.Empty;
+            Permissions = new();
+            LastOnline = DateTime.UnixEpoch;
+            LastUpdated = DateTime.Now;
+        }
+
         public readonly string Key() => Key(Address, Port);
 
         public static string Key(string address, int port) => $"{address}:{port}";
 
+        /// <summary>
+        /// Ping and update the server
+        /// </summary>
+        /// <returns>true if it seems to be alive</returns>
         public async Task<bool> PingServer()
         {
             Uri uri = new($"http://{Address}:{Port}/");
@@ -63,36 +87,110 @@ namespace Arteranos.Core
             if (success) LastOnline = DateTime.Now;
             return success;
         }
+
+        /// <summary>
+        /// Retrieve the essential server data
+        /// </summary>
+        /// <param name="timeout">Timeout in seconds</param>
+        /// <returns>Visible users public keys, current world, Server public key, Icon</returns>
+        public async Task<ServerOnlineData?> GetServerDataAsync(int timeout = 20)
+        {
+            Uri uri = new($"http://{Address}:{Port}{ServerJSON.DefaultMetadataPath}");
+
+            DownloadHandlerBuffer dh = new();
+            using UnityWebRequest uwr = new(
+                uri,
+                UnityWebRequest.kHttpVerbGET,
+                dh,
+                null);
+
+            uwr.timeout = timeout;
+
+            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
+
+            while (!uwr_ao.isDone) await Task.Yield();
+
+            ServerMetadataJSON smdj = null;
+
+            bool success = uwr.result == UnityWebRequest.Result.Success;
+
+            LastUpdated = DateTime.Now;
+
+            if (success)
+            {
+                LastOnline = DateTime.Now;
+                smdj = Serializer.Deserialize<ServerMetadataJSON>(dh.data);
+
+                Name = smdj.Settings.Name;
+                Description = smdj.Settings.Description;
+                Permissions = smdj.Settings.Permissions;
+
+                return new ServerOnlineData()
+                {
+                    ServerPort = smdj.Settings.ServerPort,
+                    ServerPublicKey = smdj.Settings.ServerPublicKey,
+                    Icon = smdj.Settings.Icon,
+                    CurrentWorld = smdj.CurrentWorld,
+                    UserPublicKeys = smdj.CurrentUsers
+                };
+            }
+            else return null;
+        }
+
+        public static async Task<(ServerPublicData?, ServerOnlineData?)> GetServerDataAsync(string address, int port, int timeout = 20)
+        {
+            ServerCollection sc = SettingsManager.ServerCollection;
+
+            ServerPublicData? stored = sc.Get(address, port);
+
+            ServerPublicData work = stored ?? new(address, port);
+
+            ServerOnlineData? result = await work.GetServerDataAsync(timeout);
+
+            if(stored != null) _ = sc.UpdateAsync(work); 
+            
+            return (stored, result);
+        }
+
+        public static Task<(ServerPublicData?, ServerOnlineData?)> GetServerDataAsync(string url, int timeout = 20)
+        {
+            Uri uri = Utils.ProcessUriString(url,
+                scheme: "http",
+                port: ServerJSON.DefaultMetadataPort,
+                path: ServerJSON.DefaultMetadataPath
+                );
+
+            return GetServerDataAsync(uri.Host, uri.Port, timeout);
+        }
     }
 
     public class ServerCollection
     {
 
-        public Dictionary<string, ServerCollectionEntry> entries = new();
+        public Dictionary<string, ServerPublicData> entries = new();
 
         private readonly static Mutex SCMutex = new();
         private DateTime nextSave = DateTime.MinValue;
 
+        public ServerPublicData? Get(string key)
+            => entries.TryGetValue(key, out ServerPublicData entry) ? entry : null;
 
-        public ServerCollectionEntry? Get(string address, int port)
-            => entries.TryGetValue(ServerCollectionEntry.Key(address, port), out ServerCollectionEntry entry) ? entry : null;
+        public ServerPublicData? Get(string address, int port)
+            => Get(ServerPublicData.Key(address, port));
 
-        public async void Update(ServerCollectionEntry entry, Action<bool> callback)
-        {
-            bool result = await UpdateAsync(entry);
-            callback(result);
-        }
+        public ServerPublicData? Get(Uri uri)
+            => Get(uri.Host, uri.Port);
 
         /// <summary>
         /// Update (or add) the server's general data
         /// </summary>
         /// <param name="entry"></param>
         /// <returns>true if the collection is updated, false if we have a more recent entry</returns>
-        public async Task<bool> UpdateAsync(ServerCollectionEntry entry)
+        public async Task<bool> UpdateAsync(ServerPublicData entry)
         {
             return await Task.Run(() => _Update(entry));
 
-            bool _Update(ServerCollectionEntry entry)
+            bool _Update(ServerPublicData entry)
             {
                 // Critical Section Gate
                 using (Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex()))
@@ -112,18 +210,18 @@ namespace Arteranos.Core
             }
         }
 
-        public List<ServerCollectionEntry> Dump(DateTime increment)
+        public List<ServerPublicData> Dump(DateTime increment)
         {
-            IEnumerable<ServerCollectionEntry> q = from entry in entries
+            IEnumerable<ServerPublicData> q = from entry in entries
                     where entry.Value.LastUpdated > increment
                     select entry.Value;
             return q.ToList();
         }
 
-        private void Restore(List<ServerCollectionEntry> entryList)
+        private void Restore(List<ServerPublicData> entryList)
         {
             entries.Clear();
-            foreach(ServerCollectionEntry entry in entryList)
+            foreach(ServerPublicData entry in entryList)
                 entries.TryAdd(entry.Key(), entry);
         }
 
@@ -151,7 +249,7 @@ namespace Arteranos.Core
 
             try
             {
-                List<ServerCollectionEntry> obj = Dump(DateTime.MinValue);
+                List<ServerPublicData> obj = Dump(DateTime.MinValue);
                 byte[] dataDER = Serializer.Serialize(obj);
                 await File.WriteAllBytesAsync(currentFileName, dataDER);
                 nextSave = DateTime.Now + TimeSpan.FromSeconds(60);
@@ -172,7 +270,7 @@ namespace Arteranos.Core
             try
             {
                 byte[] dataDER = File.ReadAllBytes($"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}");
-                sc.Restore(Serializer.Deserialize<List<ServerCollectionEntry>>(dataDER));
+                sc.Restore(Serializer.Deserialize<List<ServerPublicData>>(dataDER));
                 sc.nextSave = DateTime.Now + TimeSpan.FromSeconds(60);
             }
             catch (Exception e)

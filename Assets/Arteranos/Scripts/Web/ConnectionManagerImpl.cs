@@ -30,27 +30,22 @@ namespace Arteranos.Web
                 await Task.Delay(3000);
             }
 
-            ServerJSON ssj = ServerGallery.RetrieveServerSettings(serverURL);
+            ServerOnlineData? sod = ServerGallery.RetrieveServerSettings(serverURL);
 
-            if (ssj == null)
+            if (sod == null)
             {
                 Debug.Log($"{serverURL} has no meta data, downloading...");
-                ServerMetadataJSON smdj;
-                (_, smdj) = await ServerGallery.DownloadServerMetadataAsync(serverURL);
+                (_, sod) = await ServerPublicData.GetServerDataAsync(serverURL);
 
-                Debug.Log($"Metadata download: {smdj != null}");
+                Debug.Log($"Metadata download: {sod != null}");
 
-                ssj = smdj?.Settings;
-
-                if (ssj == null)
+                if (sod == null)
                 {
                     Debug.Log("Still no viable metadata, giving up.");
                     ConnectionResponse(false, null);
                     return false;
                 }
-
-                // Store it for the posterity.
-                ServerGallery.StoreServerSettings(serverURL, ssj);
+                else ServerGallery.StoreServerSettings(serverURL, sod.Value);
             }
 
             Uri serverURI = Utils.ProcessUriString(serverURL,
@@ -60,7 +55,7 @@ namespace Arteranos.Web
                 );
 
             // FIXME Telepathy Transport specific.
-            Uri connectionUri = new($"tcp4://{serverURI.Host}:{ssj.ServerPort}");
+            Uri connectionUri = new($"tcp4://{serverURI.Host}:{sod?.ServerPort}");
             ExpectConnectionResponse();
             NetworkStatus.StartClient(connectionUri);
 

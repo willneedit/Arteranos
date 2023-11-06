@@ -60,10 +60,9 @@ namespace Arteranos.UI
 
         private async void OnReloadClicked()
         {
-            static async Task DoUpdate(ServerListItem server)
+            static Task DoUpdate(ServerListItem server)
             {
-                (string url, ServerMetadataJSON smdj) = await server.ReloadServerDataAsync();
-                server.GotSMD(url, smdj);
+                return server.RefreshServerDataAsync();
             }
 
             btn_Reload.interactable = false;

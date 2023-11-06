@@ -381,7 +381,7 @@ public class ArteranosNetworkManager : NetworkManager
 
     private static void ParseSCEMessage(ServerCollectionEntryMessage message)
     {
-        ServerCollectionEntry entry = Serializer.Deserialize<ServerCollectionEntry>(message.sceDER);
+        ServerPublicData entry = Serializer.Deserialize<ServerPublicData>(message.sceDER);
 
         // That's me....! :-O
         // DEBUG: if (entry.Address == NetworkStatus.PublicIPAddress.ToString()) return;
@@ -396,22 +396,22 @@ public class ArteranosNetworkManager : NetworkManager
 
     private Coroutine CoEmitServer = null;
 
-    private IEnumerator EmitServerCollectionCoroutine(Action<ServerCollectionEntry> emitter, bool self)
+    private IEnumerator EmitServerCollectionCoroutine(Action<ServerPublicData> emitter, bool self)
     {
         yield return new WaitForSeconds(5.0f);
 
         (string address, int _, int mdport) = SettingsManager.GetServerConnectionData();
-        ServerCollectionEntry selfEntry = new(SettingsManager.Server, address, mdport, true);
+        ServerPublicData selfEntry = new(SettingsManager.Server, address, mdport, true);
 
         while(true)
         {
             if (self) emitter(selfEntry);
 
-            List<ServerCollectionEntry> snapshot = SettingsManager.ServerCollection.Dump(SCSnapshotCutoff);
+            List<ServerPublicData> snapshot = SettingsManager.ServerCollection.Dump(SCSnapshotCutoff);
 
             SCSnapshotCutoff = DateTime.Now;
 
-            foreach (ServerCollectionEntry entry in snapshot)
+            foreach (ServerPublicData entry in snapshot)
             {
                 emitter(entry);
 
@@ -425,7 +425,7 @@ public class ArteranosNetworkManager : NetworkManager
         }
     }
 
-    private void EmitToClients(ServerCollectionEntry entry)
+    private void EmitToClients(ServerPublicData entry)
     {
         ServerCollectionEntryMessage scm;
         scm.sceDER = Serializer.Serialize(entry);
@@ -442,7 +442,7 @@ public class ArteranosNetworkManager : NetworkManager
         }
     }
 
-    private void EmitToServer(ServerCollectionEntry entry)
+    private void EmitToServer(ServerPublicData entry)
     {
         ServerCollectionEntryMessage scm;
         scm.sceDER = Serializer.Serialize(entry);

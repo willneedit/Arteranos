@@ -14,9 +14,7 @@ namespace Arteranos.Web
     public interface IServerGallery
     {
         void DeleteServerSettings(string url);
-        Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(string url, int timeout = 20);
-        void DownloadServerMetadataAsync(string url, Action<string, ServerMetadataJSON> callback, int timeout = 20);
-        ServerJSON RetrieveServerSettings(string url);
-        void StoreServerSettings(string url, ServerJSON serverSettings);
+        ServerOnlineData? RetrieveServerSettings(string url);
+        void StoreServerSettings(string url, ServerOnlineData onlineData);
     }
 }

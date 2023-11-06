@@ -6,13 +6,14 @@
  */
 
 using Arteranos.Core;
-using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using Utils = Arteranos.Core.Utils;
+
+using DERSerializer;
 
 namespace Arteranos.Web
 {
@@ -21,81 +22,40 @@ namespace Arteranos.Web
         private void Awake() => ServerGallery.Instance = this;
         private void OnDestroy() => ServerGallery.Instance = null;
 
-        private static string GetRootPath(string url) => $"{Application.persistentDataPath}/ServerGallery/{Utils.GetURLHash(url)}";
+        private static string GetMDFile(string url) => $"{Application.persistentDataPath}/ServerGallery/{Utils.GetURLHash(url)}.asn1";
 
-        public ServerJSON RetrieveServerSettings(string url)
+        public ServerOnlineData? RetrieveServerSettings(string url)
         {
-            string rootPath = GetRootPath(url);
+            try
+            {
+                byte[] der = File.ReadAllBytes(GetMDFile(url));
+                return Serializer.Deserialize<ServerOnlineData>(der);
+            }
+            catch { }
 
-            string metadataFile = $"{rootPath}/ServerSettings.json";
-
-            if(!File.Exists(metadataFile)) return null;
-
-            string json = File.ReadAllText(metadataFile);
-            return JsonConvert.DeserializeObject<ServerJSON>(json);
+            return null;
         }
 
-        public void StoreServerSettings(string url, ServerJSON serverSettings)
+        public void StoreServerSettings(string url, ServerOnlineData onlineData)
         {
-            string rootPath = GetRootPath(url);
 
-            string metadataFile = $"{rootPath}/ServerSettings.json";
+            string metadataFile = GetMDFile(url);
+            try
+            {
+                // Remove the transient data before storage
+                onlineData.CurrentWorld = string.Empty;
+                onlineData.UserPublicKeys = new();
 
-            Directory.CreateDirectory(rootPath);
-
-            string json = JsonConvert.SerializeObject(serverSettings, Formatting.Indented);
-            File.WriteAllText(metadataFile, json);
+                Directory.CreateDirectory(Path.GetDirectoryName(metadataFile));
+                byte[] der = Serializer.Serialize(onlineData);
+                File.WriteAllBytes(metadataFile, der);
+            }
+            catch { }
         }
 
         public void DeleteServerSettings(string url)
         {
-            string rootPath = GetRootPath(url);
-
-            if(Directory.Exists(rootPath)) Directory.Delete(rootPath, true);
+            try { File.Delete(GetMDFile(url)); } catch { }
         }
-
-        public async Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(
-            string url,
-            int timeout = 20)
-        {
-            Uri uri = Utils.ProcessUriString(url,
-                scheme: "http",
-                port: ServerJSON.DefaultMetadataPort,
-                path: ServerJSON.DefaultMetadataPath
-                );
-
-            DownloadHandlerBuffer dh = new();
-            using UnityWebRequest uwr = new(
-                uri,
-                UnityWebRequest.kHttpVerbGET,
-                dh,
-                null);
-
-            uwr.timeout = timeout;
-
-            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
-
-            while(!uwr_ao.isDone) await Task.Yield();
-
-            ServerMetadataJSON smdj = null;
-
-            if (uwr.result == UnityWebRequest.Result.Success)
-                smdj = DERSerializer.Serializer.Deserialize<ServerMetadataJSON>(dh.data);
-
-            return (url, smdj);
-        }
-
-        public async void DownloadServerMetadataAsync(
-            string url,
-            Action<string, ServerMetadataJSON> callback,
-            int timeout = 20)
-        {
-            string resultUrl;
-            ServerMetadataJSON smdj;
-            (resultUrl, smdj) = await DownloadServerMetadataAsync(url, timeout);
-
-            callback(resultUrl, smdj);
-        }
-
     }
 }

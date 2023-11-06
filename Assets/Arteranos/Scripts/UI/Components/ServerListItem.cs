@@ -27,11 +27,9 @@ namespace Arteranos.UI
         private HoverButton btn_Visit = null;
         private HoverButton btn_Delete = null;
 
-        public event Action<ServerListItem> OnUpdateFinished;
 
-        private ServerJSON ssj = null;
-        private string CurrentWorld = null;
-        private int CurrentUsers = -1;
+        private ServerPublicData? spd = null;
+        private ServerOnlineData? ssj = null;
 
         public static ServerListItem New(Transform parent, string url)
         {
@@ -66,25 +64,6 @@ namespace Arteranos.UI
             PopulateServerData();
         }
 
-        public void GotSMD(string url, ServerMetadataJSON smdj)
-        {
-            // Not for me?
-            if(url != serverURL) return;
-
-            if(smdj != null)
-            {
-                ssj = smdj.Settings;
-                CurrentWorld = smdj.CurrentWorld;
-                CurrentUsers = smdj.CurrentUsers.Count;
-            }
-            else
-                Debug.LogWarning($"{url} yielded no data.");
-
-            StoreUpdatedServerListItem();
-
-            OnUpdateFinished?.Invoke(this);
-        }
-
         public void PopulateServerData()
         {
             // Could be that the list item bas been deleted in th meantime.
@@ -95,7 +74,8 @@ namespace Arteranos.UI
             btn_Visit.gameObject.SetActive(true);
             btn_Delete.gameObject.SetActive(false);
 
-            ssj = ServerGallery.RetrieveServerSettings(serverURL);
+            spd = spd ?? SettingsManager.ServerCollection.Get(new Uri(serverURL));
+            ssj = ssj ?? ServerGallery.RetrieveServerSettings(serverURL);
 
             if(ssj != null)
             {
@@ -117,15 +97,9 @@ namespace Arteranos.UI
 
         public void InvalidateServerData()
         {
-            CurrentUsers = -1;
-            CurrentWorld = null;
-
+            ssj = null;
+            spd = null;
             PopulateServerData();
-        }
-
-        public Task<(string, ServerMetadataJSON)> ReloadServerDataAsync()
-        {
-            return ServerGallery.DownloadServerMetadataAsync(serverURL, 1);
         }
 
         private void VisualizeServerData()
@@ -133,17 +107,20 @@ namespace Arteranos.UI
             if(ssj == null) return;
 
             Texture2D icon = new(2, 2);
-            ImageConversion.LoadImage(icon, ssj.Icon);
+            ImageConversion.LoadImage(icon, ssj.Value.Icon);
 
             img_Icon.sprite = Sprite.Create(icon,
                 new Rect(0, 0, icon.width, icon.height),
                 Vector2.zero);
 
-            string serverstr = ssj.Name;
+            string serverstr = spd?.Name;
+
+            string CurrentWorld = ssj?.CurrentWorld;
+            int CurrentUsers = (ssj != null) ? ssj.Value.UserPublicKeys.Count : -1;
 
             if(string.IsNullOrEmpty(CurrentWorld)) CurrentWorld = null;
 
-            if(CurrentUsers >= 0) serverstr = $"{ssj.Name} (Users: {CurrentUsers})";
+            if(CurrentUsers >= 0) serverstr = $"{spd?.Name} (Users: {CurrentUsers})";
 
             lbl_Caption.text = $"Server: {serverstr}\nCurrent World: {CurrentWorld ?? "Unknown"}";
         }
@@ -162,7 +139,7 @@ namespace Arteranos.UI
         private void StoreUpdatedServerListItem()
         {
             // Transfer the metadata in our persistent storage.
-            ServerGallery.StoreServerSettings(serverURL, ssj);
+            ServerGallery.StoreServerSettings(serverURL, ssj.Value);
 
             Client cs = SettingsManager.Client;
 
@@ -177,7 +154,7 @@ namespace Arteranos.UI
             PopulateServerData();
         }
 
-        private void OnAddClicked()
+        private async void OnAddClicked()
         {
             Client cs = SettingsManager.Client;
 
@@ -188,13 +165,7 @@ namespace Arteranos.UI
                 cs.Save();
             }
 
-            // Store the server settings data now, or if it's not there, later.
-            // Either way, the URL will be put into the server list, either with
-            // a full entry, or the URL in brackets.
-            if(ssj == null)
-                ServerGallery.DownloadServerMetadataAsync(serverURL, GotSMD);
-            else
-                StoreUpdatedServerListItem();
+            await RefreshServerDataAsync();
         }
 
         private void OnDeleteClicked()
@@ -213,6 +184,15 @@ namespace Arteranos.UI
 
             // And, zip, gone.
             Destroy(gameObject);
+        }
+
+        public async Task RefreshServerDataAsync()
+        {
+            (ServerPublicData? spd, ServerOnlineData? sod) = await ServerPublicData.GetServerDataAsync(serverURL, 1);
+            this.spd = spd;
+            this.ssj = sod;
+
+            if (sod != null) StoreUpdatedServerListItem();
         }
     }
 }

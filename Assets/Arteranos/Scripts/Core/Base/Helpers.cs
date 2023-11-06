@@ -237,13 +237,12 @@ namespace Arteranos.Web
     {
         public static IServerGallery Instance { get; set; }
 
-        public static void DeleteServerSettings(string url) => Instance.DeleteServerSettings(url);
-        public static Task<(string, ServerMetadataJSON)> DownloadServerMetadataAsync(string url, int timeout = 20)
-            => Instance.DownloadServerMetadataAsync(url, timeout);
-        public static void DownloadServerMetadataAsync(string url, Action<string, ServerMetadataJSON> callback, int timeout = 20)
-            => Instance.DownloadServerMetadataAsync(url, callback, timeout);
-        public static ServerJSON RetrieveServerSettings(string url) => Instance.RetrieveServerSettings(url);
-        public static void StoreServerSettings(string url, ServerJSON serverSettings) => Instance.StoreServerSettings(url, serverSettings);
+        public static void DeleteServerSettings(string url)
+            => Instance?.DeleteServerSettings(url);
+        public static ServerOnlineData? RetrieveServerSettings(string url)
+            => Instance?.RetrieveServerSettings(url);
+        public static void StoreServerSettings(string url, ServerOnlineData onlineData)
+            => Instance?.StoreServerSettings(url, onlineData);
     }
 
     public static class WorldGallery
