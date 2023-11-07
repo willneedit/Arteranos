@@ -142,7 +142,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1889180529585697682}
   - component: {fileID: 1889180529585697683}
-  - component: {fileID: 1889180529585697680}
   - component: {fileID: 1889180529585697681}
   - component: {fileID: 1889180529585697686}
   - component: {fileID: 1943824474716096331}
@@ -198,29 +197,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &1889180529585697680
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1889180529585697687}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
-  m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
-  m_PhysicalUnit: 3
-  m_FallbackScreenDPI: 96
-  m_DefaultSpriteDPI: 96
-  m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
 --- !u!114 &1889180529585697681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,6 +278,7 @@ MonoBehaviour:
   m_Duration: 5
   m_Tolerance: 1
   m_offset: {x: 0, y: 0, z: 1}
+  m_rotation: {x: 0, y: 0, z: 0, w: 1}
 --- !u!114 &-3480630777290480473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1700,12 +1677,12 @@ PrefabInstance:
     - target: {fileID: 1054943575592786897, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_Size
-      value: 0.999978
+      value: 0.99999267
       objectReference: {fileID: 0}
     - target: {fileID: 1054943575592786897, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_Value
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1054943576046784928, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
@@ -1755,7 +1732,7 @@ PrefabInstance:
     - target: {fileID: 1054943576046784930, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00028145203
+      value: 0.0016352029
       objectReference: {fileID: 0}
     - target: {fileID: 1054943576046784931, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
