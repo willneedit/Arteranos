@@ -66,7 +66,7 @@ namespace Arteranos.Core
         /// Ping and update the server
         /// </summary>
         /// <returns>true if it seems to be alive</returns>
-        public async Task<bool> PingServer()
+        public async Task<(ServerPublicData, bool)> PingServer()
         {
             Uri uri = new($"http://{Address}:{Port}/");
 
@@ -85,15 +85,15 @@ namespace Arteranos.Core
 
             LastUpdated = DateTime.Now;
             if (success) LastOnline = DateTime.Now;
-            return success;
+            return (this, success);
         }
 
         /// <summary>
         /// Retrieve the essential server data
         /// </summary>
         /// <param name="timeout">Timeout in seconds</param>
-        /// <returns>Visible users public keys, current world, Server public key, Icon</returns>
-        public async Task<ServerOnlineData?> GetServerDataAsync(int timeout = 20)
+        /// <returns>The updated public data, the online data</returns>
+        public async Task<(ServerPublicData, ServerOnlineData?)> GetServerDataAsync(int timeout = 20)
         {
             Uri uri = new($"http://{Address}:{Port}{ServerJSON.DefaultMetadataPath}");
 
@@ -125,16 +125,16 @@ namespace Arteranos.Core
                 Description = smdj.Settings.Description;
                 Permissions = smdj.Settings.Permissions;
 
-                return new ServerOnlineData()
+                return (this, new ServerOnlineData()
                 {
                     ServerPort = smdj.Settings.ServerPort,
                     ServerPublicKey = smdj.Settings.ServerPublicKey,
                     Icon = smdj.Settings.Icon,
                     CurrentWorld = smdj.CurrentWorld,
                     UserPublicKeys = smdj.CurrentUsers
-                };
+                });
             }
-            else return null;
+            else return (this, null);
         }
 
         public static async Task<(ServerPublicData?, ServerOnlineData?)> GetServerDataAsync(string address, int port, int timeout = 20)
@@ -145,7 +145,8 @@ namespace Arteranos.Core
 
             ServerPublicData work = stored ?? new(address, port);
 
-            ServerOnlineData? result = await work.GetServerDataAsync(timeout);
+            ServerOnlineData? result;
+            (work, result) = await work.GetServerDataAsync(timeout);
 
             if(stored != null) _ = sc.UpdateAsync(work); 
             

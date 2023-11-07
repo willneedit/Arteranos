@@ -60,10 +60,8 @@ namespace Arteranos.UI
 
         private async void OnReloadClicked()
         {
-            static Task DoUpdate(ServerListItem server)
-            {
-                return server.RefreshServerDataAsync();
-            }
+            static Task DoUpdate(ServerListItem server) 
+                => server.RefreshServerDataAsync();
 
             btn_Reload.interactable = false;
 

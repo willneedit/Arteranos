@@ -29,7 +29,7 @@ namespace Arteranos.UI
 
 
         private ServerPublicData? spd = null;
-        private ServerOnlineData? ssj = null;
+        private ServerOnlineData? sod = null;
 
         public static ServerListItem New(Transform parent, string url)
         {
@@ -55,8 +55,6 @@ namespace Arteranos.UI
             btn_Delete.onClick.AddListener(OnDeleteClicked);
         }
 
-        private void OnInfoClicked() => throw new NotImplementedException();
-
         protected override void Start()
         {
             base.Start();
@@ -74,10 +72,10 @@ namespace Arteranos.UI
             btn_Visit.gameObject.SetActive(true);
             btn_Delete.gameObject.SetActive(false);
 
-            spd = spd ?? SettingsManager.ServerCollection.Get(new Uri(serverURL));
-            ssj = ssj ?? ServerGallery.RetrieveServerSettings(serverURL);
+            spd ??= SettingsManager.ServerCollection.Get(new Uri(serverURL));
+            sod ??= ServerGallery.RetrieveServerSettings(serverURL);
 
-            if(ssj != null)
+            if(sod != null)
             {
                 VisualizeServerData();
                 btn_Add.gameObject.SetActive(false);
@@ -97,30 +95,28 @@ namespace Arteranos.UI
 
         public void InvalidateServerData()
         {
-            ssj = null;
+            sod = null;
             spd = null;
             PopulateServerData();
         }
 
         private void VisualizeServerData()
         {
-            if(ssj == null) return;
+            if(sod == null) return;
 
             Texture2D icon = new(2, 2);
-            ImageConversion.LoadImage(icon, ssj.Value.Icon);
+            ImageConversion.LoadImage(icon, sod.Value.Icon);
 
             img_Icon.sprite = Sprite.Create(icon,
                 new Rect(0, 0, icon.width, icon.height),
                 Vector2.zero);
 
-            string serverstr = spd?.Name;
-
-            string CurrentWorld = ssj?.CurrentWorld;
-            int CurrentUsers = (ssj != null) ? ssj.Value.UserPublicKeys.Count : -1;
+            string CurrentWorld = sod?.CurrentWorld;
+            int CurrentUsers = sod.Value.UserPublicKeys.Count;
 
             if(string.IsNullOrEmpty(CurrentWorld)) CurrentWorld = null;
 
-            if(CurrentUsers >= 0) serverstr = $"{spd?.Name} (Users: {CurrentUsers})";
+            string serverstr = $"{spd?.Name} (Users: {CurrentUsers})";
 
             lbl_Caption.text = $"Server: {serverstr}\nCurrent World: {CurrentWorld ?? "Unknown"}";
         }
@@ -139,7 +135,7 @@ namespace Arteranos.UI
         private void StoreUpdatedServerListItem()
         {
             // Transfer the metadata in our persistent storage.
-            ServerGallery.StoreServerSettings(serverURL, ssj.Value);
+            ServerGallery.StoreServerSettings(serverURL, sod.Value);
 
             Client cs = SettingsManager.Client;
 
@@ -186,11 +182,18 @@ namespace Arteranos.UI
             Destroy(gameObject);
         }
 
-        public async Task RefreshServerDataAsync()
+        private async void OnInfoClicked()
         {
-            (ServerPublicData? spd, ServerOnlineData? sod) = await ServerPublicData.GetServerDataAsync(serverURL, 1);
+            btn_Info.interactable = false;
+            await RefreshServerDataAsync(5);
+            btn_Info.interactable = true;
+        }
+
+        public async Task RefreshServerDataAsync(int timeout = 1)
+        {
+            (ServerPublicData? spd, ServerOnlineData? sod) = await ServerPublicData.GetServerDataAsync(serverURL, timeout);
             this.spd = spd;
-            this.ssj = sod;
+            this.sod = sod;
 
             if (sod != null) StoreUpdatedServerListItem();
         }
