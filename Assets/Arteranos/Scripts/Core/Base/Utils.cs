@@ -15,6 +15,7 @@ using Arteranos.Avatar;
 using Arteranos.Social;
 using Arteranos.XR;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace Arteranos.Core
 {
@@ -272,6 +273,26 @@ namespace Arteranos.Core
                 val /= 1000;
             }
             return string.Format("{0:F1} {1}{2}", val, prefixes[^1], suffix);
+        }
+
+        /// <summary>
+        /// Decode a blob of image data to show it in an UI element
+        /// </summary>
+        /// <param name="imageData">The data</param>
+        /// <param name="image">The image UI element to display</param>
+        public static void ShowImage(byte[] imageData, Image image)
+        {
+            Texture2D icon = new(2, 2);
+            ImageConversion.LoadImage(icon, imageData);
+
+            ShowImage(icon, image);
+        }
+
+        public static void ShowImage(Texture2D icon, Image image)
+        {
+            image.sprite = Sprite.Create(icon,
+                new Rect(0, 0, icon.width, icon.height),
+                Vector2.zero);
         }
     }
 }

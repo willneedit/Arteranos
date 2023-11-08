@@ -119,10 +119,7 @@ namespace Arteranos.UI
 
                 eb.onHover += makeHoverTip(emojiButton.HoverTip);
 
-                eb.image.sprite = Sprite.Create(
-                    image,
-                    new Rect(0, 0, image.width, image.height),
-                    Vector2.zero);
+                Utils.ShowImage(image, eb.image);
                 eb.name = emojiButton.Image.name;
                 eb.onClick.AddListener(makeClickedEmoji(emojiButton));
 

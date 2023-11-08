@@ -173,7 +173,7 @@ namespace Arteranos.UI
                         yield break;
 
                     ss.Icon = data;
-                    UpdateIcon(data, tex);
+                    UpdateIcon(data);
                     dirty = true;
                 }
                 else
@@ -185,14 +185,9 @@ namespace Arteranos.UI
             StartCoroutine(GetTexture(txt_IconURL.text));
         }
 
-        private void UpdateIcon(byte[] data, Texture2D tex = null)
+        private void UpdateIcon(byte[] data)
         {
-            tex = tex != null ? tex : new(2, 2);
-
-            ImageConversion.LoadImage(tex, data);
-            img_IconImage.sprite = Sprite.Create(tex,
-                new Rect(0, 0, tex.width, tex.height),
-                Vector2.zero);
+            Utils.ShowImage(data, img_IconImage);
         }
 
         private void OnClearCachesClicked()

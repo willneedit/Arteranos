@@ -102,25 +102,22 @@ namespace Arteranos.UI
 
         private void VisualizeServerData()
         {
-            if(sod == null) return;
+            if (sod == null) return;
 
-            Texture2D icon = new(2, 2);
-            ImageConversion.LoadImage(icon, sod.Value.Icon);
+            byte[] imageData = sod.Value.Icon;
+            Image image = img_Icon;
 
-            img_Icon.sprite = Sprite.Create(icon,
-                new Rect(0, 0, icon.width, icon.height),
-                Vector2.zero);
+            Utils.ShowImage(imageData, image);
 
             string CurrentWorld = sod?.CurrentWorld;
             int CurrentUsers = sod.Value.UserPublicKeys.Count;
 
-            if(string.IsNullOrEmpty(CurrentWorld)) CurrentWorld = null;
+            if (string.IsNullOrEmpty(CurrentWorld)) CurrentWorld = null;
 
             string serverstr = $"{spd?.Name} (Users: {CurrentUsers})";
 
             lbl_Caption.text = $"Server: {serverstr}\nCurrent World: {CurrentWorld ?? "Unknown"}";
         }
-
 
         private async void OnVisitClicked()
         {

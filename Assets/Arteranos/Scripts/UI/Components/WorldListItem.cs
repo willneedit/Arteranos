@@ -101,10 +101,8 @@ namespace Arteranos.UI
 
                 if(www.result == UnityWebRequest.Result.Success)
                 {
-                    Texture2D screenshot = ((DownloadHandlerTexture) www.downloadHandler).texture;
-                    img_Screenshot.sprite = Sprite.Create(screenshot,
-                        new Rect(0, 0, screenshot.width, screenshot.height),
-                        Vector2.zero);
+                    Utils.ShowImage(((DownloadHandlerTexture)www.downloadHandler).texture,
+                        img_Screenshot);
                 }
                 else
                 {
