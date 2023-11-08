@@ -10,7 +10,7 @@ using ASN1Utils;
 
 namespace Arteranos.Core
 {
-    public class RSAKey : IAsymmetricKey, IKeyWrapKey, ISignKey
+    public class RSAKey : IFullAsymmetricKey
     {
         public KeyType KeyType => KeyType.RSA;
         public byte[] PublicKey => publicKey;

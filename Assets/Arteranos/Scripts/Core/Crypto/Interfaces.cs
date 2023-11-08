@@ -33,7 +33,7 @@ namespace Arteranos.Core
     /// <summary>
     /// Provides functions for wrapping keys with this key
     /// </summary>
-    internal interface IKeyWrapKey
+    internal interface IKeyWrapKey : IDisposable
     {
         public void WrapKey(byte[] symKey, out byte[] wrappedKey);
         public void UnwrapKey(byte[] wrappedKey, out byte[] symKey);
@@ -42,10 +42,15 @@ namespace Arteranos.Core
     /// <summary>
     /// Provides signing any data with this key
     /// </summary>
-    internal interface ISignKey
+    internal interface ISignKey : IDisposable
     {
         public void Sign(byte[] data, out byte[] signature);
         public bool Verify(byte[] data, byte[] signature);
+    }
+
+    internal interface IFullAsymmetricKey : IAsymmetricKey, IKeyWrapKey, ISignKey
+    {
+
     }
 
 }

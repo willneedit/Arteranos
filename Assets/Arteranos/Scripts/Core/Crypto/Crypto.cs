@@ -12,8 +12,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using DERSerializer;
 
-using AsymmetricKey = Arteranos.Core.RSAKey;
-
 namespace Arteranos.Core
 {
     public struct CryptPacket
@@ -47,16 +45,24 @@ namespace Arteranos.Core
     {
         public byte[] PublicKey => Key.PublicKey;
 
-        private readonly AsymmetricKey Key;
+        private readonly IFullAsymmetricKey Key;
 
         public Crypto()
         {
-            Key = new();
+            Key = CreateKey();
         }
 
-        public Crypto(byte[] rsaKeyBlob)
+        public Crypto(byte[] keyBlob)
         {
-            Key = new(rsaKeyBlob);
+            Key = CreateKey(keyBlob);
+        }
+
+        private static IFullAsymmetricKey CreateKey(byte[] keyBlob = null)
+        {
+            // TODO Extend to return ECC keys as default, and to determine the blob's key type
+            if (keyBlob == null) return new RSAKey();
+
+            return new RSAKey(keyBlob);
         }
 
         public byte[] Export(bool includePrivateParameters)
@@ -74,7 +80,7 @@ namespace Arteranos.Core
             using Aes aes = new AesCryptoServiceProvider();
             p.iv = aes.IV;
 
-            using AsymmetricKey otherKey = new(otherPublicKey);
+            using IKeyWrapKey otherKey = CreateKey(otherPublicKey);
             otherKey.WrapKey(aes.Key, out p.encryptedSessionKey);
 
             using MemoryStream ciphertext = new();
@@ -119,7 +125,7 @@ namespace Arteranos.Core
 
         public static bool Verify(byte[] data, byte[] signature, byte[] otherPublicKey)
         {
-            using AsymmetricKey otherKey = new(otherPublicKey);
+            using ISignKey otherKey = CreateKey(otherPublicKey);
 
             return otherKey.Verify(data, signature);
         }
@@ -165,7 +171,7 @@ namespace Arteranos.Core
                     fingerprint = CryptoHelpers.GetFingerprint(key)
                 };
                 // Wrap the session key with the receiver's public keys
-                using AsymmetricKey wrapKey = new(key);
+                using IKeyWrapKey wrapKey = CreateKey(key);
                 wrapKey.WrapKey(aes.Key, out entry.encryptedSessionKey);
                 entries.Add(entry);
             }
