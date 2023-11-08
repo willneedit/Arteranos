@@ -241,8 +241,6 @@ namespace Arteranos.Core
         public async void SaveAsync()
         {
 
-            // Critical Section Gate
-            using Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex());
 
             // earliest time to next save is not passed yet.
             if (nextSave > DateTime.Now) return;
@@ -255,10 +253,18 @@ namespace Arteranos.Core
             }
             catch { }
 
-            try
+            byte[] dataDER;
+
+            // Critical Section Gate
+            using (Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex()))
             {
                 List<ServerPublicData> obj = Dump(DateTime.MinValue);
-                byte[] dataDER = Serializer.Serialize(obj);
+                dataDER = Serializer.Serialize(obj);
+            }
+
+
+            try
+            {
                 await File.WriteAllBytesAsync(currentFileName, dataDER);
                 nextSave = DateTime.Now + TimeSpan.FromSeconds(60);
             }
