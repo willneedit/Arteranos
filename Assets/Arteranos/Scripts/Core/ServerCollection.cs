@@ -167,10 +167,10 @@ namespace Arteranos.Core
 
     public class ServerCollection
     {
+        private readonly Mutex SCMutex = null;
 
         public Dictionary<string, ServerPublicData> entries = new();
 
-        private readonly static Mutex SCMutex = new();
         private DateTime nextSave = DateTime.MinValue;
 
         public ServerPublicData? Get(string key)
@@ -181,6 +181,13 @@ namespace Arteranos.Core
 
         public ServerPublicData? Get(Uri uri)
             => Get(uri.Host, uri.Port);
+
+        public ServerCollection()
+        {
+            // static members are iffy in Unity, especially in the Editor.
+            // Especially without a proper initialization on playmode startup.
+            SCMutex = new();
+        }
 
         /// <summary>
         /// Update (or add) the server's general data

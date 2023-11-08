@@ -85,7 +85,14 @@ namespace Arteranos.Core
         public Guard(Action engage, Action disengage)
         {
             this.disengage = disengage;
-            engage();
+            try
+            {
+                engage();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
         }
 
         ~Guard() => Dispose(false);
@@ -105,7 +112,14 @@ namespace Arteranos.Core
             //    // Needed? Dispose managed state (managed objects).
             //}
 
-            disengage();
+            try
+            {
+                disengage();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
             _disposedValue = true;
         }
     }
