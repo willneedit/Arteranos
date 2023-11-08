@@ -182,8 +182,10 @@ namespace Arteranos.UI
         private async void OnInfoClicked()
         {
             btn_Info.interactable = false;
-            await RefreshServerDataAsync(5);
+            await RefreshServerDataAsync(1);
             btn_Info.interactable = true;
+
+            ServerInfoUI.New(serverURL);
         }
 
         public async Task RefreshServerDataAsync(int timeout = 1)

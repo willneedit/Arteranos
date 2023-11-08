@@ -8,6 +8,7 @@
 using UnityEngine;
 using System.Threading.Tasks;
 using System.Threading;
+using System;
 
 namespace Arteranos.Core
 {
@@ -83,6 +84,49 @@ namespace Arteranos.Core
                 transform.localRotation = targetTransform.localRotation;
                 transform.localScale = targetTransform.localScale;
             }
+        }
+
+        public static string HumanReadable(this DateTime dt)
+        {
+            TimeSpan difference = DateTime.UtcNow - dt;
+
+            double t = difference.TotalMinutes; int ti = (int)t;
+            if (t < 30)
+                return t switch
+                {
+                    < 0.1f => "just now",
+                    < 1.0f => "less than a minute",
+                    < 2.0f => "one minute ago",
+                    _ => $"{ti} minutes ago"
+                };
+
+            t = difference.TotalHours; ti = (int)t;
+            if (t < 12)
+                return t switch
+                {
+                    < 1.0f => "less than a hour",
+                    < 2.0f => "a hour ago",
+                    _ => $"{ti} hours ago"
+                };
+
+            t = difference.TotalDays; ti = (int)t;
+            if (t < 360)
+                return t switch
+                {
+                    < 1.0f => "less than a day",
+                    < 2.0f => "yesterday",
+                    < 7.0f => $"{ti} days ago",
+                    < 10.0f => "around a week ago",
+                    < 15.0f => "around two weeks ago",
+                    < 30.0f => "around three weeks ago",
+                    < 40.0f => "around a month ago",
+                    < 60.0f => "more than last month",
+                    < 180.0f => $"{ti} months ago",
+                    _ => "more than half a year"
+                };
+
+            return "more than a year ago";
+
         }
     }
 }
