@@ -22,9 +22,11 @@ namespace Arteranos.Core
         /// <returns>5 for an exact determinate match, 1 for an inexact match, 0 for a mismatch</returns>
         public static int FuzzyEq(this bool? setting, bool? user)
         {
-            if(setting == null) return 1;
+            if(setting == null &&  user == null) return 2;
 
-            return !setting != user ? 5 : 0;
+            if(setting == null || user == null) return 1;
+
+            return (setting == user) ? 5 : 0;
         }
 
         /// <summary>

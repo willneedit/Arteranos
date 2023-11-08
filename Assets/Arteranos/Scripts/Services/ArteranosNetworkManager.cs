@@ -255,6 +255,9 @@ public class ArteranosNetworkManager : NetworkManager
         base.OnClientConnect();
 
         NetworkStatus.OnClientConnectionResponse?.Invoke(true, null);
+
+        if (!NetworkServer.active) CoEmitServer = StartCoroutine(
+            EmitServerCollectionCoroutine(EmitToServer, false));
     }
 
     /// <summary>
@@ -324,9 +327,6 @@ public class ArteranosNetworkManager : NetworkManager
         SCSnapshotCutoff = DateTime.MinValue;
 
         NetworkClient.RegisterHandler<ServerCollectionEntryMessage>(OnClientGotSCE);
-
-        if (!NetworkServer.active) CoEmitServer = StartCoroutine(
-            EmitServerCollectionCoroutine(EmitToServer, false));
     }
 
     /// <summary>
@@ -401,6 +401,9 @@ public class ArteranosNetworkManager : NetworkManager
         yield return new WaitForSeconds(5.0f);
 
         (string address, int _, int mdport) = SettingsManager.GetServerConnectionData();
+
+        if (address == null) yield break;
+
         ServerPublicData selfEntry = new(SettingsManager.Server, address, mdport, true);
 
         while(true)
