@@ -152,10 +152,11 @@ namespace Arteranos.Avatar
 
             ResyncInitialValues();
 
-            DownloadClientSettings();
 
             if (isOwned)
             {
+                DownloadClientSettings();
+
                 // That's me, set aside from the unwashed crowd. :)
                 XRControl.Me = this;
 

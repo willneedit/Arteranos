@@ -23,14 +23,17 @@ namespace Arteranos.Avatar
         private IAvatarLoader m_AvatarData = null;
         private NetworkPose m_Poser = null;
 
-        public void Awake() => syncDirection = SyncDirection.ServerToClient;
+        public void Awake()
+        {
+            m_AvatarData = GetComponent<IAvatarLoader>();
+            m_Poser = GetComponent<NetworkPose>();
+
+            syncDirection = SyncDirection.ServerToClient;
+        }
 
         public override void OnStartClient()
         {
             base.OnStartClient();
-
-            m_AvatarData = GetComponent<IAvatarLoader>();
-            m_Poser = GetComponent<NetworkPose>();
 
             if(isOwned)
             {
@@ -76,7 +79,8 @@ namespace Arteranos.Avatar
         /// </summary>
         /// <param name="rootTransform"></param>
         /// <param name="names">Array of the joint (aka bone) names</param>
-        public void UploadJointNames(Transform rootTransform, string[] names) => m_Poser.UploadJointNames(rootTransform, names);
+        public void UploadJointNames(Transform rootTransform, string[] names) 
+            => m_Poser.UploadJointNames(rootTransform, names);
 
         // --------------------------------------------------------------------
         #region Pose updating
