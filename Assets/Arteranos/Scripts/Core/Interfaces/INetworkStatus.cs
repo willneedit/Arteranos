@@ -41,6 +41,7 @@ namespace Arteranos.Services
         Action<bool, string> OnClientConnectionResponse { get; set; }
         IPAddress PublicIPAddress { get; }
         string ServerHost { get; }
+        int ServerPort { get; }
 
         event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 

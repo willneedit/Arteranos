@@ -113,7 +113,7 @@ namespace Arteranos.Core
             return ol switch
             {
                 OnlineLevel.Offline => (null, 0, 0),
-                OnlineLevel.Client => (NetworkStatus.ServerHost, CurrentServer.ServerPort, CurrentServer.MetadataPort),
+                OnlineLevel.Client => (NetworkStatus.ServerHost, NetworkStatus.ServerPort, CurrentServer?.MetadataPort ?? 0),
                 OnlineLevel.Server => (NetworkStatus.PublicIPAddress.ToString(), Server.ServerPort, Server.MetadataPort),
                 OnlineLevel.Host => (NetworkStatus.PublicIPAddress.ToString(), Server.ServerPort, Server.MetadataPort),
                 _ => throw new NotImplementedException()

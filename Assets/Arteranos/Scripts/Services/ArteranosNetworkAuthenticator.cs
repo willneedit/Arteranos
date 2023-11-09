@@ -396,17 +396,20 @@ namespace Arteranos.Services
         /// <param name="msg">Self explanatory</param>
         private void OnAuthGreetingMessage(AuthGreetingMessage msg)
         {
-            string address = NetworkClient.connection.address;
-            Debug.Log($"[Client] Server address: {address}");
+            (string address, int port, int mdport) = SettingsManager.GetServerConnectionData();
+
+            string key = $"{address}:{port}";
+
+            Debug.Log($"[Client] Server address: {key}");
             Debug.Log($"[Client] Server name   : {msg.ServerName}");
             Debug.Log($"[Client] Server version: {msg.ServerVersion.Full}");
 
             Client cs = SettingsManager.Client;
 
-            if(!cs.ServerKeys.TryGetValue(address, out byte[] pubKey))
+            if(!cs.ServerKeys.TryGetValue(key, out byte[] pubKey))
             {
                 // New server encountered. Yay!
-                cs.ServerKeys.Add(address, msg.ServerPublicKey);
+                cs.ServerKeys.Add(key, msg.ServerPublicKey);
                 SubmitAuthRequest(msg);
                 cs.Save();
                 return;

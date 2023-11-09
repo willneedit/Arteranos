@@ -114,6 +114,8 @@ namespace Arteranos.Services
 
         public static string ServerHost { get => Instance.ServerHost; }
 
+        public static int ServerPort { get => Instance.ServerPort; }
+
         public static bool OpenPorts
         {
             get => Instance.OpenPorts;

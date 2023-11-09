@@ -34,6 +34,8 @@ namespace Arteranos.Services
 
         public string ServerHost { get; internal set; } = null;
 
+        public int ServerPort { get; internal set; } = 0;
+
         public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 
         public Action<bool, string> OnClientConnectionResponse { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
@@ -332,6 +334,7 @@ namespace Arteranos.Services
 
             // It's preliminary, sure...
             ServerHost = connectionUri.Host;
+            ServerPort = connectionUri.Port;
         }
 
         public void StopHost(bool loadOfflineScene)
