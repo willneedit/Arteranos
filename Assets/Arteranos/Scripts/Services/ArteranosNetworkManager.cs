@@ -6,6 +6,7 @@ using Arteranos.Avatar;
 using System.Collections.Generic;
 using System;
 using System.Collections;
+using System.Linq;
 
 using DERSerializer;
 
@@ -404,7 +405,11 @@ public class ArteranosNetworkManager : NetworkManager
 
         if (address == null) yield break;
 
-        ServerPublicData selfEntry = new(SettingsManager.Server, address, mdport, true);
+        IEnumerable<string> q = from entry in SettingsManager.ServerUsers.Base
+                where UserState.IsSAdmin(entry.userState)
+                select ((string) entry.userID);
+
+        ServerPublicData selfEntry = new(SettingsManager.Server, address, mdport, true, q.ToList());
 
         while(true)
         {

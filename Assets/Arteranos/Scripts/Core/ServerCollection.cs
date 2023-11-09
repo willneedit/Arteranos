@@ -35,8 +35,9 @@ namespace Arteranos.Core
         public ServerPermissions Permissions;
         public DateTime LastOnline;
         public DateTime LastUpdated;
+        public List<string> AdminNames;
 
-        public ServerPublicData(ServerJSON settings, string address, int port, bool online)
+        public ServerPublicData(ServerJSON settings, string address, int port, bool online, List<string> adminNames)
         {
             Name = settings.Name;
             Port = port;
@@ -45,6 +46,7 @@ namespace Arteranos.Core
             Permissions = settings.Permissions;
             LastUpdated = DateTime.Now;
             LastOnline = (online ? DateTime.Now : DateTime.MinValue);
+            AdminNames = adminNames;
         }
 
         public ServerPublicData(string address, int port)
@@ -56,6 +58,7 @@ namespace Arteranos.Core
             Permissions = new();
             LastOnline = DateTime.UnixEpoch;
             LastUpdated = DateTime.Now;
+            AdminNames = new();
         }
 
         public readonly string Key() => Key(Address, Port);

@@ -36,6 +36,7 @@ namespace Arteranos.UI
         [SerializeField] private TMP_Text lbl_LastUpdated;
         [SerializeField] private TMP_Text lbl_LastOnline;
         [SerializeField] private TMP_Text lbl_MatchIndex;
+        [SerializeField] private TMP_Text lbl_AdminList;
         [SerializeField] private TMP_Text lbl_World;
         [SerializeField] private TMP_Text lbl_Description;
 
@@ -68,6 +69,8 @@ namespace Arteranos.UI
                     SettingsManager.Client.ContentFilterPreferences
                     ).ToString();
                 lbl_Description.text = spd.Value.Description.ToString();
+
+                lbl_AdminList.text = string.Join(", ", spd.Value.AdminNames);
             }
 
             if (sod != null)
