@@ -142,7 +142,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1889180529585697682}
   - component: {fileID: 1889180529585697683}
-  - component: {fileID: 1889180529585697681}
   - component: {fileID: 1889180529585697686}
   - component: {fileID: 1943824474716096331}
   - component: {fileID: 8001599642481973709}
@@ -197,23 +196,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &1889180529585697681
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1889180529585697687}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &1889180529585697686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1682,7 +1664,7 @@ PrefabInstance:
     - target: {fileID: 1054943575592786897, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1054943576046784928, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
@@ -1732,7 +1714,7 @@ PrefabInstance:
     - target: {fileID: 1054943576046784930, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.0016352029
+      value: 0.003035656
       objectReference: {fileID: 0}
     - target: {fileID: 1054943576046784931, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
