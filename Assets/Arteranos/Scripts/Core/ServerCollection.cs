@@ -26,7 +26,7 @@ namespace Arteranos.Core
         public string CurrentWorld;
     }
 
-    public struct ServerPublicData
+    public struct ServerPublicData : IEquatable<ServerPublicData>
     {
         public string Name;
         public string Address;
@@ -86,7 +86,6 @@ namespace Arteranos.Core
 
             bool success = uwr.result == UnityWebRequest.Result.Success;
 
-            LastUpdated = DateTime.Now;
             if (success) LastOnline = DateTime.Now;
             return (this, success);
         }
@@ -117,12 +116,14 @@ namespace Arteranos.Core
 
             bool success = uwr.result == UnityWebRequest.Result.Success;
 
-            LastUpdated = DateTime.Now;
-
             if (success)
             {
                 LastOnline = DateTime.Now;
+                LastUpdated = DateTime.Now;
+
                 smdj = Serializer.Deserialize<ServerMetadataJSON>(dh.data);
+
+                ServerPublicData old = this;
 
                 Name = smdj.Settings.Name;
                 Description = smdj.Settings.Description;
@@ -165,6 +166,39 @@ namespace Arteranos.Core
                 );
 
             return GetServerDataAsync(uri.Host, uri.Port, timeout);
+        }
+
+        // Last Updated timestamp is irrelevant for the data comparison and updating.
+        public override bool Equals(object obj)
+        {
+            return obj is ServerPublicData data && Equals(data);
+        }
+
+        public bool Equals(ServerPublicData other)
+        {
+            return Name == other.Name &&
+                   Address == other.Address &&
+                   Port == other.Port &&
+                   Description == other.Description &&
+                   Permissions == other.Permissions &&
+                   LastOnline == other.LastOnline &&
+                   // LastUpdated == other.LastUpdated &&
+                   AdminNames.SequenceEqual(other.AdminNames);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Address, Port, Description, Permissions, LastOnline, AdminNames);
+        }
+
+        public static bool operator ==(ServerPublicData left, ServerPublicData right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ServerPublicData left, ServerPublicData right)
+        {
+            return !(left == right);
         }
     }
 

@@ -11,11 +11,12 @@ using System.IO;
 using UnityEngine;
 
 using DERSerializer;
+using System.Collections.Generic;
 
 namespace Arteranos.Core
 {
 
-    public class ServerPermissions
+    public class ServerPermissions : IEquatable<ServerPermissions>
     {
         // Allow avatars from a URL outside of the avatar generator's scope.
         [ASN1Tag( 1, true)] public bool? CustomAvatars = false;
@@ -139,6 +140,38 @@ namespace Arteranos.Core
             return $"{index} ({str})";
         }
 
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ServerPermissions);
+        }
+
+        public bool Equals(ServerPermissions other)
+        {
+            return other is not null &&
+                   CustomAvatars == other.CustomAvatars &&
+                   Flying == other.Flying &&
+                   Guests == other.Guests &&
+                   ExplicitNudes == other.ExplicitNudes &&
+                   Nudity == other.Nudity &&
+                   Suggestive == other.Suggestive &&
+                   Violence == other.Violence &&
+                   ExcessiveViolence == other.ExcessiveViolence;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(CustomAvatars, Flying, Guests, ExplicitNudes, Nudity, Suggestive, Violence, ExcessiveViolence);
+        }
+
+        public static bool operator ==(ServerPermissions left, ServerPermissions right)
+        {
+            return EqualityComparer<ServerPermissions>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(ServerPermissions left, ServerPermissions right)
+        {
+            return !(left == right);
+        }
     }
 
     /// <summary>

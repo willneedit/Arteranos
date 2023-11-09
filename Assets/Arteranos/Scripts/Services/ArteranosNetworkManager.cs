@@ -409,11 +409,20 @@ public class ArteranosNetworkManager : NetworkManager
                 where UserState.IsSAdmin(entry.userState)
                 select ((string) entry.userID);
 
-        ServerPublicData selfEntry = new(SettingsManager.Server, address, mdport, true, q.ToList());
+        ServerPublicData? oldSelfEntry = SettingsManager.ServerCollection.Get(address, mdport);
+        ServerPublicData tmp = new(SettingsManager.Server, address, mdport, true, q.ToList());
 
-        while(true)
+        // Only seed the own server's record if there isn't in the server collection or there
+        // are changes.
+        if (oldSelfEntry != null)
         {
-            if (self) emitter(selfEntry);
+            tmp.LastOnline = oldSelfEntry.Value.LastOnline;
+            if (oldSelfEntry == tmp) self = false;
+        }
+
+        while (true)
+        {
+            if (self) emitter(tmp);
 
             List<ServerPublicData> snapshot = SettingsManager.ServerCollection.Dump(SCSnapshotCutoff);
 
