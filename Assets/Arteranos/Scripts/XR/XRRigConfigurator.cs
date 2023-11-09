@@ -59,7 +59,7 @@ namespace Arteranos.XR
         private void OnDestroy() => SettingsManager.Client.OnXRControllerChanged -= DownloadControlSettings;
 
 
-        private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs)
+        private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs, ServerPermissions sp)
         {
             if (ccs == null) return;
 
@@ -109,7 +109,7 @@ namespace Arteranos.XR
                     : 9.8f;
             }
 
-            MoveProvider.useGravity = !(mcs.Flying                                       // User preferences
+            MoveProvider.useGravity = !(sp.Flying ?? false                               // User preferences
                 && (Utils.IsAbleTo(Social.UserCapabilities.CanEnableFly, null)));        // Server restrictions (no server = true)
 
             TurnType turnType = mcs.Turn;

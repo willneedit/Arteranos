@@ -69,7 +69,7 @@ namespace Arteranos.XR
             if (FaderVolume != null) FaderVolume.weight = FadeStrength;
         }
 
-        private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs)
+        private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs, ServerPermissions sp)
         {
             if(mcs == null) return;
 

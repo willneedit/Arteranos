@@ -199,8 +199,6 @@ namespace Arteranos.Core
 
     public class MovementSettingsJSON
     {
-        public virtual bool Flying { get; set; } = false;
-
         public virtual TurnType Turn { get; set; } = TurnType.Snap45;
 
         public virtual float SmoothTurnSpeed { get; set; } = 60.0f;
@@ -330,7 +328,7 @@ namespace Arteranos.Core
         public event Action<string, float> OnAvatarChanged;
         public event Action<bool> OnVRModeChanged;
         public event Action<float, float> OnPrivacyBubbleChanged;
-        public event Action<ControlSettingsJSON, MovementSettingsJSON> OnXRControllerChanged;
+        public event Action<ControlSettingsJSON, MovementSettingsJSON, ServerPermissions> OnXRControllerChanged;
         public event Action<UserHUDSettingsJSON> OnUserHUDSettingsChanged;
         public event Action<UserPrivacy> OnUserPrivacyChanged;
 
@@ -407,7 +405,7 @@ namespace Arteranos.Core
             }
         }
 
-        public void PingXRControllersChanged() => OnXRControllerChanged?.Invoke(Controls, Movement);
+        public void PingXRControllersChanged() => OnXRControllerChanged?.Invoke(Controls, Movement, ContentFilterPreferences);
 
         public void PingUserHUDChanged() => OnUserHUDSettingsChanged?.Invoke(UserHUD);
 

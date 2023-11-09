@@ -78,9 +78,12 @@ namespace Arteranos.Core
         /// </summary>
         /// <param name="user">The user's server filter preferences</param>
         /// <returns>The match score, higher is better</returns>
-        public int MatchIndex(ServerPermissions user)
+        public (int, int) MatchRatio(ServerPermissions user)
         {
+            static int possibleScore(bool? b1) => b1 == null ? 2 : 5;
+
             int index = 0;
+            int possible = 10;
 
             bool usesGuest = SettingsManager.Client?.Me.Login.IsGuest ?? true;
 
@@ -89,10 +92,10 @@ namespace Arteranos.Core
             // The 'Big Three' are true booleans - either true or false, no inbetweens.
 
             // Trying to use a guest login would be a disqualification criterium.
-            if(usesGuest && !(Guests ?? true)) return 0;
+            if(usesGuest && !(Guests ?? true)) return (0, 100);
 
             // Same as with custom avatars.
-            if(usesCustomAvatar && !(CustomAvatars ?? true)) return 0;
+            if(usesCustomAvatar && !(CustomAvatars ?? true)) return (0, 100);
 
             // Double weight for one of the 'Big Three'
             index += Flying.FuzzyEq(user.Flying) * 2;
@@ -100,17 +103,40 @@ namespace Arteranos.Core
 
             // Aggregate the matches of the permission settings against the user's
             // filter settings.
-            index += ExplicitNudes.FuzzyEq(user.ExplicitNudes);
-
+            possible += possibleScore(Nudity);
             index += Nudity.FuzzyEq(user.Nudity);
 
+            possible += possibleScore(Suggestive);
             index += Suggestive.FuzzyEq(user.Suggestive);
 
+            possible += possibleScore(Violence);
             index += Violence.FuzzyEq(user.Violence);
 
+            possible += possibleScore(ExcessiveViolence);
             index += ExcessiveViolence.FuzzyEq(user.ExcessiveViolence);
 
-            return index;
+            possible += possibleScore(ExplicitNudes);
+            index += ExplicitNudes.FuzzyEq(user.ExplicitNudes);
+
+            return (index, possible);
+        }
+
+        public string HumanReadableMI(ServerPermissions user)
+        {
+            (int index, int possible) = MatchRatio(user);
+            float ratio = (float) index / (float) possible;
+
+            string str = ratio switch
+            {
+               >= 1.0f => "perfect",
+                > 0.8f => "very good",
+                > 0.6f => "good",
+                > 0.4f => "mediocre",
+                > 0.2f => "poor",
+                     _ => "very poor"
+            };
+
+            return $"{index} ({str})";
         }
 
     }
