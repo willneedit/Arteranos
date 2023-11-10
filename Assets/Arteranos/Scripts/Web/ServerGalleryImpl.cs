@@ -6,14 +6,10 @@
  */
 
 using Arteranos.Core;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.Networking;
-using Utils = Arteranos.Core.Utils;
-
 using DERSerializer;
+using System.IO;
+using UnityEngine;
+using Utils = Arteranos.Core.Utils;
 
 namespace Arteranos.Web
 {
