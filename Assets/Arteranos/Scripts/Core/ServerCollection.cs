@@ -169,12 +169,12 @@ namespace Arteranos.Core
         }
 
         // Last Updated timestamp is irrelevant for the data comparison and updating.
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is ServerPublicData data && Equals(data);
         }
 
-        public bool Equals(ServerPublicData other)
+        public readonly bool Equals(ServerPublicData other)
         {
             return Name == other.Name &&
                    Address == other.Address &&
@@ -186,7 +186,7 @@ namespace Arteranos.Core
                    AdminNames.SequenceEqual(other.AdminNames);
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(Name, Address, Port, Description, Permissions, LastOnline, AdminNames);
         }
@@ -255,6 +255,18 @@ namespace Arteranos.Core
             }
         }
 
+        public int Prune(int cutoffDays = 30)
+        {
+            DateTime cutoff = DateTime.Now.AddDays(-cutoffDays);
+
+            string[] q = (from entry in entries
+                          where entry.Value.LastOnline < cutoff
+                          select entry.Key).ToArray();
+
+            foreach (string s in q) entries.Remove(s);
+            return q.Length;
+        }
+
         public List<ServerPublicData> Dump(DateTime increment)
         {
             IEnumerable<ServerPublicData> q = from entry in entries
@@ -295,6 +307,7 @@ namespace Arteranos.Core
             // Critical Section Gate
             using (Guard guard = new(() => SCMutex.WaitOne(), () => SCMutex.ReleaseMutex()))
             {
+                Prune();
                 List<ServerPublicData> obj = Dump(DateTime.MinValue);
                 dataDER = Serializer.Serialize(obj);
             }
