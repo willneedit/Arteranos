@@ -49,14 +49,14 @@ namespace Arteranos.Core
             Interlocked.Decrement(ref InProgress);
         }
 
-        public Task Run()
+        public Task Run(CancellationToken? token = null)
         {
             if (!Idle) return null;
             Idle = false;
-            return GetToWorkAsync();
+            return GetToWorkAsync(token);
         }
 
-        internal async Task GetToWorkAsync()
+        internal async Task GetToWorkAsync(CancellationToken? token)
         {
 
             while(InProgress > 0 || ToDos.Count > 0)
@@ -71,6 +71,7 @@ namespace Arteranos.Core
                     else break;
                 }
 
+                if (token?.IsCancellationRequested ?? false) break;
                 await Task.Yield();
             }
 

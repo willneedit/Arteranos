@@ -120,6 +120,13 @@ namespace Arteranos.UI
             }
         }
 
+        public void SetupAsyncOperations(Func<(AsyncOperationExecutor<Context>, Context)> setupFunc, bool cancelable = true, string tip = null)
+        {
+            (Executor, Context) = setupFunc();
+            AllowCancel = cancelable;
+            Tip = tip;
+        }
+
         private void OnProgressChanged(float progress, string caption)
         {
             sld_progress.value= progress;

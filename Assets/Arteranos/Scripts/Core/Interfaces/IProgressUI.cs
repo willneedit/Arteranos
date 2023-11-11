@@ -18,5 +18,7 @@ namespace Arteranos.UI
 
         event Action<Context> Completed;
         event Action<Exception, Context> Faulted;
+
+        void SetupAsyncOperations(Func<(AsyncOperationExecutor<Context>, Context)> setupFunc, bool cancelable = true, string tip = null);
     }
 }
