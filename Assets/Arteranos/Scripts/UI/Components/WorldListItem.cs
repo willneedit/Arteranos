@@ -126,7 +126,9 @@ namespace Arteranos.UI
         {
             if(!string.IsNullOrEmpty(worldURL))
             {
-                WorldTransition.InitiateTransition(worldURL);
+                // WorldTransition.InitiateTransition(worldURL);
+
+                ServerSearcher.InitiateServerTransition(worldURL);
 
                 WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
                 md.Updated = DateTime.Now;

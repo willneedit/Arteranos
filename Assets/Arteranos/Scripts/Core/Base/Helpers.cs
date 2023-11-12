@@ -247,15 +247,29 @@ namespace Arteranos.Web
             => Instance?.StoreServerSettings(url, onlineData);
     }
 
+    public static class ServerSearcher
+    {
+        public static IServerSearcher Instance { get; set; }
+
+        public static void InitiateServerTransition(string worldURL) 
+            => Instance.InitiateServerTransition(worldURL);
+        public static void InitiateServerTransition(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback) 
+            => Instance.InitiateServerTransition(worldURL, OnSuccessCallback, OnFailureCallback);
+    }
     public static class WorldGallery
     {
         public static IWorldGallery Instance { get; set; }
 
-        public static void DeleteWorld(string url) => Instance.DeleteWorld(url);
-        public static (string, string) RetrieveWorld(string url, bool cached = false) => Instance.RetrieveWorld(url, cached);
-        public static WorldMetaData RetrieveWorldMetaData(string url) => Instance.RetrieveWorldMetaData(url);
-        public static bool StoreWorld(string url) => Instance.StoreWorld(url);
-        public static void StoreWorldMetaData(string url, WorldMetaData worldMetaData) => Instance.StoreWorldMetaData(url, worldMetaData);
+        public static void DeleteWorld(string url) 
+            => Instance.DeleteWorld(url);
+        public static (string, string) RetrieveWorld(string url, bool cached = false)
+            => Instance.RetrieveWorld(url, cached);
+        public static WorldMetaData RetrieveWorldMetaData(string url)
+            => Instance.RetrieveWorldMetaData(url);
+        public static bool StoreWorld(string url)
+            => Instance.StoreWorld(url);
+        public static void StoreWorldMetaData(string url, WorldMetaData worldMetaData) 
+            => Instance.StoreWorldMetaData(url, worldMetaData);
     }
 
     public static class WorldTransition

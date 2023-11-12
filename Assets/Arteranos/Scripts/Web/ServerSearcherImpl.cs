@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 using Arteranos.UI;
+using Arteranos.Services;
 
 namespace Arteranos.Web
 {
@@ -126,9 +127,9 @@ namespace Arteranos.Web
 
             async Task UpdateOne(ServerInfo info)
             {
-                await info.Update(10);
-                actualServer++;
                 ProgressChanged?.Invoke(actualServer / serverCount);
+                await info.Update(1);
+                actualServer++;
             }
 
             serverCount = context.serverInfos.Count;
@@ -166,7 +167,7 @@ namespace Arteranos.Web
             }
 
             int CompareServers(ServerInfo x, ServerInfo y)
-                => ScoreServer(x) - ScoreServer(y);
+                => ScoreServer(y) - ScoreServer(x);
 
             Context Execute(ServerSearcherContext context, CancellationToken token)
             {
@@ -187,8 +188,11 @@ namespace Arteranos.Web
 
     }
 
-    public class ServerSearcherImpl : MonoBehaviour
+    public class ServerSearcherImpl : MonoBehaviour, IServerSearcher
     {
+        private void Awake() => ServerSearcher.Instance = this;
+        private void OnDestroy() => ServerSearcher.Instance = null;
+
         public static (AsyncOperationExecutor<Context>, Context) PrepareSearchServers(string desiredWorld)
         {
             ServerSearcherContext context = new()
@@ -206,14 +210,36 @@ namespace Arteranos.Web
             return (executor, context);
         }
 
-        public static void InitiateServerTransition(string worldURL, Action<string> OnSuccessCallback, Action OnFailureCallback)
+        public void InitiateServerTransition(string worldURL)
+        {
+            InitiateServerTransition(worldURL, OnGotSearchResult, null);
+        }
+
+        public void InitiateServerTransition(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback)
         {
             IProgressUI pui = ProgressUIFactory.New();
 
             pui.SetupAsyncOperations(() => PrepareSearchServers(worldURL));
 
-            pui.Completed += context => OnSuccessCallback((context as ServerSearcherContext).resultServerURL);
+            pui.Completed += context => OnSuccessCallback(worldURL, (context as ServerSearcherContext).resultServerURL);
             pui.Faulted += (ex, context) => OnFailureCallback();
+        }
+
+        private static void OnGotSearchResult(string worldURL, string serverURL)
+        {
+            // No matching server, initiate Start Host with loading the world on entering
+            if (!string.IsNullOrEmpty(worldURL) && serverURL == null)
+            {
+                SettingsManager.Server.WorldURL = worldURL;
+                NetworkStatus.StartHost();
+                return;
+            }
+
+            // No matching server, leave it be
+            if (serverURL == null) return;
+
+            // Matching server (with matching world, if needed), initiate remote connection
+            ConnectionManager.ConnectToServer(serverURL);
         }
     }
 }
