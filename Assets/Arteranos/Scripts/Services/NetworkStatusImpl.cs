@@ -389,6 +389,9 @@ namespace Arteranos.Services
             }
 
             NetworkStatus.OpenPorts = true;
+
+            // Custom server port -- Transport specific!
+            FindObjectOfType<TelepathyTransport>().port = (ushort)SettingsManager.Server.ServerPort;
             manager.StartServer();
         }
 

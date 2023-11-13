@@ -62,6 +62,11 @@ namespace Arteranos.Services
             // ... and raise the curtains. Though, keep waiting if we have to load the world.
             if(string.IsNullOrEmpty(DesiredWorld))
                 XR.ScreenFader.StartFading(0.0f, 2.0f);
+
+#if UNITY_SERVER
+            // Manually start the server, including with the initialization.
+            NetworkStatus.StartServer();
+#endif
         }
 
         protected void Update()
