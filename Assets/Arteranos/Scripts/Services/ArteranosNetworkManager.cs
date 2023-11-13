@@ -9,6 +9,8 @@ using System.Collections;
 using System.Linq;
 
 using DERSerializer;
+using System.Threading.Tasks;
+using Arteranos.Web;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -28,6 +30,14 @@ public class ArteranosNetworkManager : NetworkManager
         public byte[] sceDER;
     }
 
+    internal struct WorldChangeAnnounceMessage : NetworkMessage
+    {
+        public string Invoker;
+        public string WorldURL;
+        public string WorldName;
+        public string WorldZipFile;
+    }
+
     // Overrides the base singleton so we don't
     // have to cast to this type everywhere.
     public static ArteranosNetworkManager Instance { get; private set; }
@@ -35,6 +45,8 @@ public class ArteranosNetworkManager : NetworkManager
     private readonly Dictionary<int, AuthSequence> ResponseMessages = new();
 
     private readonly Dictionary<int, DateTime> SCLastUpdatedToClient = new();
+
+    private string CurrentWorld = null;
 
     private DateTime SCSnapshotCutoff = DateTime.MinValue;
 
@@ -214,6 +226,7 @@ public class ArteranosNetworkManager : NetworkManager
             brain.UserID = new UserID(seq.request.ClientPublicKey, seq.request.Nickname);
             brain.Address = conn.address;
             brain.DeviceID = seq.request.deviceUID;
+            brain.CurrentWorld = CurrentWorld;
         }
         else conn.Disconnect();  // No discussion, there'd be something fishy...
     }
@@ -258,7 +271,7 @@ public class ArteranosNetworkManager : NetworkManager
         NetworkStatus.OnClientConnectionResponse?.Invoke(true, null);
 
         if (!NetworkServer.active) CoEmitServer = StartCoroutine(
-            EmitServerCollectionCoroutine(EmitToServer, false));
+            EmitServerCollectionCoroutine(EmitToServerSPD, false));
     }
 
     /// <summary>
@@ -315,7 +328,7 @@ public class ArteranosNetworkManager : NetworkManager
         NetworkServer.RegisterHandler<ServerCollectionEntryMessage>(OnServerGotSCE);
 
         CoEmitServer = StartCoroutine(
-            EmitServerCollectionCoroutine(EmitToClients, SettingsManager.Server.Public));
+            EmitServerCollectionCoroutine(EmitToClientsSPD, SettingsManager.Server.Public));
     }
 
     /// <summary>
@@ -328,6 +341,7 @@ public class ArteranosNetworkManager : NetworkManager
         SCSnapshotCutoff = DateTime.MinValue;
 
         NetworkClient.RegisterHandler<ServerCollectionEntryMessage>(OnClientGotSCE);
+        NetworkClient.RegisterHandler<WorldChangeAnnounceMessage>(OnClientGotWCA);
     }
 
     /// <summary>
@@ -347,6 +361,7 @@ public class ArteranosNetworkManager : NetworkManager
             StopCoroutine(CoEmitServer);
             CoEmitServer = null;
         }
+
         NetworkServer.UnregisterHandler<ServerCollectionEntryMessage>();
     }
 
@@ -363,6 +378,8 @@ public class ArteranosNetworkManager : NetworkManager
             CoEmitServer = null;
         }
         NetworkClient.UnregisterHandler<ServerCollectionEntryMessage>();
+        NetworkClient.UnregisterHandler<WorldChangeAnnounceMessage>();
+
     }
 
     #endregion
@@ -442,7 +459,7 @@ public class ArteranosNetworkManager : NetworkManager
         }
     }
 
-    private void EmitToClients(ServerPublicData entry)
+    private void EmitToClientsSPD(ServerPublicData entry)
     {
         ServerCollectionEntryMessage scm;
         scm.sceDER = Serializer.Serialize(entry);
@@ -459,12 +476,50 @@ public class ArteranosNetworkManager : NetworkManager
         }
     }
 
-    private void EmitToServer(ServerPublicData entry)
+    private void EmitToServerSPD(ServerPublicData entry)
     {
         ServerCollectionEntryMessage scm;
         scm.sceDER = Serializer.Serialize(entry);
         NetworkClient.Send(scm);
         Debug.Log($"[Client] Sending entry of {entry.Name} to server");
+    }
+
+
+    #endregion
+
+    #region World Change Announcements
+
+    public async Task EmitToClientsWCA(string invoker, string worldURL)
+    {
+        bool done = false;
+        void OnWorldLoadFaulted(Exception exception, Context context)
+        {
+            done = true;
+        }
+
+        void OnWorldLoadSuccess(Context context)
+        {
+            done = true;
+        }
+
+        WorldTransition.InitiateTransition(worldURL, OnWorldLoadFaulted, OnWorldLoadSuccess);
+
+        while(!done) await Task.Yield();
+
+        WorldChangeAnnounceMessage wca = new()
+        { 
+            Invoker = invoker, 
+            WorldURL = worldURL 
+        };
+
+        NetworkServer.SendToAll(wca);
+    }
+
+
+    private void OnClientGotWCA(WorldChangeAnnounceMessage message)
+    {
+
+        throw new NotImplementedException();
     }
 
 

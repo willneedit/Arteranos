@@ -16,7 +16,7 @@ namespace Arteranos.Web
         private void Awake() => WorldTransition.Instance = this;
         private void OnDestroy() => WorldTransition.Instance = null;
 
-        public void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null)
+        public void InitiateTransition(string url, Action<Exception, Context> failureCallback = null, Action<Context> successCallback = null)
         {
             IProgressUI pui = ProgressUIFactory.New();
 
@@ -29,10 +29,10 @@ namespace Arteranos.Web
             pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(url, false));
 
             pui.Completed += (context) => OnLoadWorldComplete(url, context, successCallback);
-            pui.Faulted += (ex, context) => OnLoadWorldFaulted(ex, failureCallback);
+            pui.Faulted += (ex, context) => OnLoadWorldFaulted(ex, context, failureCallback);
         }
 
-        private static void OnLoadWorldComplete(string worldURL, Context _context, Action successCallback)
+        private static void OnLoadWorldComplete(string worldURL, Context _context, Action<Context> successCallback)
         {
             Server ss = SettingsManager.Server;
 
@@ -45,14 +45,14 @@ namespace Arteranos.Web
             ss.WorldURL = null;
             ss.WorldURL = worldURL;
 
-            successCallback?.Invoke();
+            successCallback?.Invoke(_context);
         }
 
-        private static void OnLoadWorldFaulted(Exception ex, Action failureCallback)
+        private static void OnLoadWorldFaulted(Exception ex, Context _context, Action<Exception, Context> failureCallback)
         {
             Debug.LogWarning($"Error in loading world: {ex.Message}");
 
-            failureCallback?.Invoke();
+            failureCallback?.Invoke(ex, _context);
         }
     }
 }

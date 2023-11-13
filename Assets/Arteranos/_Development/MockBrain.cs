@@ -55,6 +55,7 @@ namespace Arteranos.Avatar
         public string DeviceID { get; set; } = string.Empty;
 
         public float AvatarHeight { get; set; } = 175;
+        public string CurrentWorld { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event Action<int> OnAppearanceStatusChanged;
 

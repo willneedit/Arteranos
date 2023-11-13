@@ -52,6 +52,8 @@ namespace Arteranos.Avatar
 
         public string DeviceID { get => m_DeviceID; set => m_DeviceID = value; }
 
+        public string CurrentWorld { get; set; } = null;
+
         public int AppearanceStatus
         {
             get

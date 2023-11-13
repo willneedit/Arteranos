@@ -276,7 +276,7 @@ namespace Arteranos.Web
     {
         public static IWorldTransition Instance { get; set; }
 
-        public static void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null) 
+        public static void InitiateTransition(string url, Action<Exception, Context> failureCallback = null, Action<Context> successCallback = null)
             => Instance.InitiateTransition(url, failureCallback, successCallback);
     }
 

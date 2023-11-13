@@ -5,12 +5,13 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using System;
 
 namespace Arteranos.Web
 {
     public interface IWorldTransition
     {
-        void InitiateTransition(string url, Action failureCallback = null, Action successCallback = null);
+        void InitiateTransition(string url, Action<Exception, Context> failureCallback = null, Action<Context> successCallback = null);
     }
 }
