@@ -331,7 +331,7 @@ namespace Arteranos.Editor
                     {
                         IProgressUI pui = ProgressUIFactory.New();
 
-                        (pui.Executor, pui.Context) = WorldDownloader.PrepareDownloadWorld(testWorldZip, true);
+                        pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(testWorldZip, true));
 
                         pui.Completed += (context) => OnLoadWorldComplete(context);
                         pui.Faulted += OnLoadWorldFaulted;

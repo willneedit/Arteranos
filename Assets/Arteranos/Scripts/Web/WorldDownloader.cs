@@ -6,7 +6,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
@@ -231,10 +230,13 @@ namespace Arteranos.Web
 
         public static void EnterDownloadedWorld(Context _context)
         {
-            WorldDownloaderContext context = _context as WorldDownloaderContext;
+            string worldABF = GetWorldABF(_context);
 
-            string worldABF = context.worldAssetBundleFile;
+            EnterDownloadedWorld(worldABF);
+        }
 
+        public static void EnterDownloadedWorld(string worldABF)
+        {
             Debug.Log($"Download complete, world={worldABF}");
 
             // Deploy the scene loader.
@@ -244,6 +246,9 @@ namespace Arteranos.Web
             sl.OnFinishingSceneChange += WorldDownloaderLow.MoveToDownloadedWorld;
             sl.Name = worldABF;
         }
+
+        public static string GetWorldABF(Context _context) 
+            => (_context as WorldDownloaderContext).worldAssetBundleFile;
 
 
 
