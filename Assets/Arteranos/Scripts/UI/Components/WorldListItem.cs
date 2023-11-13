@@ -27,13 +27,15 @@ namespace Arteranos.UI
         public string worldURL = null;
         public Image img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
+        public WorldListUI parentUI = null;
 
-        public static WorldListItem New(Transform parent, string url)
+        public static WorldListItem New(Transform parent, string url, WorldListUI parentUI)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/WorldListItem"));
             go.transform.SetParent(parent, false);
             WorldListItem worldListItem = go.GetComponent<WorldListItem>();
             worldListItem.worldURL = url;
+            worldListItem.parentUI = parentUI;
             return worldListItem;
         }
 
@@ -126,13 +128,16 @@ namespace Arteranos.UI
         {
             if(!string.IsNullOrEmpty(worldURL))
             {
-                // WorldTransition.InitiateTransition(worldURL);
+                if(parentUI.InPlaceWorldTransition)
+                    WorldTransition.InitiateTransition(worldURL);
+                else
+                {
+                    ServerSearcher.InitiateServerTransition(worldURL);
 
-                ServerSearcher.InitiateServerTransition(worldURL);
-
-                WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
-                md.Updated = DateTime.Now;
-                WorldGallery.StoreWorldMetaData(worldURL, md);
+                    WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
+                    md.Updated = DateTime.Now;
+                    WorldGallery.StoreWorldMetaData(worldURL, md);
+                }
             }
         }
 

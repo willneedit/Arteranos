@@ -43,8 +43,6 @@ namespace Arteranos.UI
         protected override void OnEnable()
         {
             base.OnEnable();
-
-            btn_WorldGallery.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null));
         }
 
         protected override void OnDisable()
