@@ -324,6 +324,9 @@ namespace Arteranos.Services
         #endregion
         // -------------------------------------------------------------------
         #region Connections
+
+        private bool transitionDisconnect = false;
+
         public void StartClient(Uri connectionUri)
         {
             NetworkManager manager = FindObjectOfType<NetworkManager>();
@@ -364,41 +367,49 @@ namespace Arteranos.Services
             StartCoroutine(StopHostCoroutine(loadOfflineScene));
         }
 
-        public void StartHost()
+        public async void StartHost(bool resetConnection = false)
         {
-            NetworkManager manager = FindObjectOfType<NetworkManager>();
+            if (resetConnection)
+                await SmoothServerTransition();
 
             NetworkStatus.OpenPorts = true;
-            
             ConnectionManager.Instance.ExpectConnectionResponse();
 
             // Custom server port -- Transport specific!
             FindObjectOfType<TelepathyTransport>().port = (ushort) SettingsManager.Server.ServerPort;
-            manager.StartHost();
+            FindObjectOfType<NetworkManager>().StartHost();
         }
 
         public async void StartServer()
         {
-            NetworkManager manager = FindObjectOfType<NetworkManager>();
-
-            if(manager.isNetworkActive)
-            {
-                manager.StopHost();
-
-                await Task.Delay(1000);
-            }
+            await SmoothServerTransition();
 
             NetworkStatus.OpenPorts = true;
 
             // Custom server port -- Transport specific!
             FindObjectOfType<TelepathyTransport>().port = (ushort)SettingsManager.Server.ServerPort;
-            manager.StartServer();
+            FindObjectOfType<NetworkManager>().StartServer();
         }
 
-        public void OnRemoteDisconnected()
+        private async Task SmoothServerTransition()
         {
-            // Client to offline.
-            StopHost(true);
+            NetworkManager manager = FindObjectOfType<NetworkManager>();
+
+            if (manager.isNetworkActive)
+            {
+                transitionDisconnect = true;
+                manager.StopHost();
+
+                await Task.Delay(1000);
+            }
+        }
+
+        private void OnRemoteDisconnected()
+        {
+            // Client to offline. It it's planned to switch servers,
+            // skip the offline scene.
+            if(!transitionDisconnect) StopHost(true);
+            transitionDisconnect = false;
         }
         #endregion
         // -------------------------------------------------------------------

@@ -48,7 +48,7 @@ namespace Arteranos.Services
         ConnectivityLevel GetConnectivityLevel();
         OnlineLevel GetOnlineLevel();
         void StartClient(Uri connectionUri);
-        void StartHost();
+        void StartHost(bool resetConnection = false);
         void StartServer();
         void StopHost(bool loadOfflineScene);
     }

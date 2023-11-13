@@ -230,9 +230,23 @@ namespace Arteranos.Web
             // No matching server, initiate Start Host with loading the world on entering
             if (!string.IsNullOrEmpty(worldURL) && serverURL == null)
             {
-                SettingsManager.Server.WorldURL = worldURL;
-                NetworkStatus.StartHost();
-                return;
+                switch(NetworkStatus.GetOnlineLevel())
+                {
+                    case OnlineLevel.Host:
+                    case OnlineLevel.Server:
+                        // Host mode. It's the own server.
+                        WorldTransition.InitiateTransition(worldURL);
+                        break;
+                    case OnlineLevel.Offline:
+                        // Offline mode, start up the host mode and feed it with the startup world
+                    case OnlineLevel.Client:
+                        // Client mode. It's time to part ways...
+                        SettingsManager.Server.WorldURL = worldURL;
+                        NetworkStatus.StartHost(true);
+                        break;
+
+                    default: throw new NotImplementedException();
+                }
             }
 
             // No matching server, leave it be
