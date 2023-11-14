@@ -12,8 +12,20 @@ using UnityEngine;
 
 namespace Arteranos.Core
 {
-    internal static class FileUtils
+    public static class FileUtils
     {
+        // Learned from work:
+        // It's better to not to condition out the code, because it still always checks for errors
+        // in compilation time, and those errors won't only pop up in the full release builds.
+        //
+        // Additionally you can switch the switch in runtime for debugging...
+#if UNITY_SERVER
+        public static bool Unity_Server = true;
+#else
+        public static bool Unity_Server = false;
+
+#endif
+
         private static readonly string _persistentDataPath = Application.persistentDataPath;
         private static readonly string _temporaryCachePath = Application.temporaryCachePath;
 
@@ -22,7 +34,7 @@ namespace Arteranos.Core
         { 
             get 
             {
-                return Utils.Unity_Server
+                return Unity_Server
                     ? _persistentDataPath + "_DedicatedServer"
                     : _persistentDataPath;
             } 
@@ -32,7 +44,7 @@ namespace Arteranos.Core
         {
             get
             {
-                return Utils.Unity_Server
+                return Unity_Server
                     ? _temporaryCachePath + "_DedicatedServer"
                     : _temporaryCachePath;
             }
@@ -40,7 +52,7 @@ namespace Arteranos.Core
 #pragma warning restore IDE1006 // Benennungsstile
 
         public static bool NeedsFallback(string path) 
-            => Utils.Unity_Server && !File.Exists($"{persistentDataPath}/{path}");
+            => Unity_Server && !File.Exists($"{persistentDataPath}/{path}");
 
         public static byte[] ReadBytesConfig(string path) => ReadConfig(path, File.ReadAllBytes);
 
@@ -64,7 +76,7 @@ namespace Arteranos.Core
         {
             string fullPath = $"{persistentDataPath}/{path}";
 
-            if (Utils.Unity_Server)
+            if (Unity_Server)
             {
                 if (File.Exists(fullPath)) return reader(fullPath);
                 Debug.LogWarning($"{fullPath} doesn't exist - falling back to regular file.");
@@ -77,7 +89,7 @@ namespace Arteranos.Core
         private static void WriteConfig<T>(string path, Action<string, T> writer, T data)
         {
             string fullPath = $"{persistentDataPath}/{path}";
-            if (Utils.Unity_Server && !Directory.Exists(persistentDataPath))
+            if (Unity_Server && !Directory.Exists(persistentDataPath))
                 Directory.CreateDirectory(persistentDataPath);
 
             writer(fullPath, data);
@@ -86,7 +98,7 @@ namespace Arteranos.Core
         private static Task WriteConfigAsync<T>(string path, Func<string, T, Task> writer, T data)
         {
             string fullPath = $"{persistentDataPath}/{path}";
-            if (Utils.Unity_Server && !Directory.Exists(persistentDataPath))
+            if (Unity_Server && !Directory.Exists(persistentDataPath))
                 Directory.CreateDirectory(persistentDataPath);
 
             return writer(fullPath, data);

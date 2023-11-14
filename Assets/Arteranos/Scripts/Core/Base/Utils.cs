@@ -297,16 +297,5 @@ namespace Arteranos.Core
                 Vector2.zero);
         }
 
-// Learned from work:
-// It's better to not to condition out the code, because it still always checks for errors
-// in compilation time, and those errors won't only pop up in the full release builds.
-//
-// Additionally you can switch the switch in runtime for debugging...
-#if UNITY_SERVER
-        public static bool Unity_Server = true;
-#else
-        public static bool Unity_Server = false;
-
-#endif
     }
 }

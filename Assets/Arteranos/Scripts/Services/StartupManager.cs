@@ -63,7 +63,7 @@ namespace Arteranos.Services
             if(string.IsNullOrEmpty(DesiredWorld))
                 XR.ScreenFader.StartFading(0.0f, 2.0f);
 
-            if(Utils.Unity_Server)
+            if(FileUtils.Unity_Server)
                 // Manually start the server, including with the initialization.
                 NetworkStatus.StartServer();
         }

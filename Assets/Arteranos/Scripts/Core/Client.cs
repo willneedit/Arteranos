@@ -363,7 +363,7 @@ namespace Arteranos.Core
 
         public override bool VRMode
         {
-            get => !Utils.Unity_Server && base.VRMode;
+            get => !FileUtils.Unity_Server && base.VRMode;
             set {
                 bool old = VRMode;
                 base.VRMode = value;
