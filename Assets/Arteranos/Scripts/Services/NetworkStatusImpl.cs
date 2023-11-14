@@ -19,7 +19,6 @@ using Arteranos.Web;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Linq;
 using System.Threading;
 using System.Text.RegularExpressions;
 
@@ -103,7 +102,7 @@ namespace Arteranos.Services
             void FoundPublicIPAddress(IPAddress address)
             {
                 PublicIPAddress = address;
-                Debug.Log($"    Public IP: {PublicIPAddress}");
+                Debug.Log($"    Public IP: {PublicIPAddress?.ToString() ?? "Unknown!"}");
             }
 
             IEnumerator RefreshDiscovery()
@@ -284,24 +283,29 @@ namespace Arteranos.Services
 
             s_cts = new CancellationTokenSource();
 
-            int index = 0;
-            List<Task<IPAddress>> runners = services.Select(service => GetMyIPAsync(service, index++)).ToList();
+            IPAddress result = null;
 
-            // winner takes all ...
-            Task<IPAddress> winner = await Task.WhenAny(runners);
-            IPAddress result = await winner;
+            async Task GetOneMyIP(string service)
+            {
+                if (result != null || s_cts.Token.IsCancellationRequested) return;
+                result = await GetMyIPAsync(service);
+            }
 
-            // ... losers get nothing.
-            s_cts.Cancel();
+            TaskPool<string> pool = new(1);
+
+            foreach(string service in services)
+                pool.Schedule(service, GetOneMyIP);
+
+            await pool.Run(s_cts.Token);
 
             return result;
         }
 
-        public static async Task<IPAddress> GetMyIPAsync(string service, int index)
+
+        public static async Task<IPAddress> GetMyIPAsync(string service)
         {
             try
             {
-                await Task.Delay(index * 250, s_cts.Token);
                 using HttpClient webclient = new();
 
                 HttpResponseMessage response = await webclient.GetAsync(service, s_cts.Token);
