@@ -361,20 +361,16 @@ namespace Arteranos.Core
         [JsonIgnore]
         public byte[] UserPublicKey => Crypto.PublicKey;
 
-
-#if UNITY_SERVER
-        public override bool VRMode => false;
-#else
         public override bool VRMode
         {
-            get => base.VRMode;
+            get => !Utils.Unity_Server && base.VRMode;
             set {
-                bool old = base.VRMode;
+                bool old = VRMode;
                 base.VRMode = value;
-                if(old != base.VRMode) OnVRModeChanged?.Invoke(base.VRMode);
+                if(old != VRMode) OnVRModeChanged?.Invoke(VRMode);
             }
         }
-#endif
+
         public override float SizeBubbleFriends
         {
             get => base.SizeBubbleFriends;

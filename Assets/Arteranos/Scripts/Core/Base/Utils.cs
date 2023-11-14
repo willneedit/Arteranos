@@ -16,6 +16,7 @@ using Arteranos.Social;
 using Arteranos.XR;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.IO;
 
 namespace Arteranos.Core
 {
@@ -293,6 +294,55 @@ namespace Arteranos.Core
             image.sprite = Sprite.Create(icon,
                 new Rect(0, 0, icon.width, icon.height),
                 Vector2.zero);
+        }
+
+// Learned from work:
+// It's better to not to condition out the code, because it still always checks for errors
+// in compilation time, and those errors won't only pop up in the full release builds.
+//
+// Additionally you can switch the switch in runtime for debugging...
+#if UNITY_SERVER
+        public static readonly bool Unity_Server = true;
+#else
+        public static readonly bool Unity_Server = false;
+#endif
+
+        public static string persistentDataPath
+        { 
+            get 
+            {
+                return Unity_Server
+                    ? Application.persistentDataPath + "_DedicatedServer"
+                    : Application.persistentDataPath;
+            } 
+        }
+
+        public static string ReadTextConfig(string path) => ReadConfig(path, File.ReadAllText);
+
+        public static byte[] ReadBytesConfig(string path) => ReadConfig(path, File.ReadAllBytes);
+
+        private static T ReadConfig<T>(string path, Func<string, T> reader)
+        {
+            string fullPath = $"{persistentDataPath}/{path}";
+
+            if (Unity_Server)
+            {
+                if (File.Exists(fullPath)) return reader(fullPath);
+                Debug.LogWarning($"{fullPath} doesn't exist - falling back to regular file.");
+            }
+
+            fullPath = $"{Application.persistentDataPath}/{path}";
+            return reader(fullPath);
+        }
+
+        public static void WriteTextConfig(string path, string data) => WriteConfig(path, File.WriteAllText, data);
+
+        public static void WriteBytesConfig(string path, byte[] data) => WriteConfig(path, File.WriteAllBytes, data);
+
+        private static void WriteConfig<T>(string path, Action<string, T> writer, T data)
+        {
+            string fullPath = $"{persistentDataPath}/{path}";
+            writer(path, data);
         }
     }
 }
