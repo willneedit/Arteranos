@@ -284,8 +284,8 @@ namespace Arteranos.Core
 
         public const string PATH_SERVER_COLLECTION = "ServerCollection.asn1";
 
-        private readonly string oldFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}.old";
-        private readonly string currentFileName = $"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}";
+        private readonly string oldFileName = $"{FileUtils.persistentDataPath}/{PATH_SERVER_COLLECTION}.old";
+        private readonly string currentFileName = $"{FileUtils.persistentDataPath}/{PATH_SERVER_COLLECTION}";
 
         public async void SaveAsync()
         {
@@ -315,7 +315,7 @@ namespace Arteranos.Core
 
             try
             {
-                await File.WriteAllBytesAsync(currentFileName, dataDER);
+                await FileUtils.WriteBytesConfigAsync(PATH_SERVER_COLLECTION, dataDER);
                 nextSave = DateTime.Now + TimeSpan.FromSeconds(60);
             }
             catch (Exception e)
@@ -333,7 +333,7 @@ namespace Arteranos.Core
 
             try
             {
-                byte[] dataDER = File.ReadAllBytes($"{Application.persistentDataPath}/{PATH_SERVER_COLLECTION}");
+                byte[] dataDER = FileUtils.ReadBytesConfig(PATH_SERVER_COLLECTION);
                 sc.Restore(Serializer.Deserialize<List<ServerPublicData>>(dataDER));
                 sc.nextSave = DateTime.Now + TimeSpan.FromSeconds(60);
             }

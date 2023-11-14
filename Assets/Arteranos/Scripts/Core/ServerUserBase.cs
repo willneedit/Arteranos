@@ -276,7 +276,7 @@ namespace Arteranos.Core
 
             try
             {
-                string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_SERVER_USERBASE}");
+                string json = FileUtils.ReadTextConfig(PATH_SERVER_USERBASE);
                 sub = JsonConvert.DeserializeObject<ServerUserBase>(json);
             }
             catch(Exception e)
@@ -295,7 +295,7 @@ namespace Arteranos.Core
             try
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                File.WriteAllText($"{Application.persistentDataPath}/{PATH_SERVER_USERBASE}", json);
+                FileUtils.WriteTextConfig(PATH_SERVER_USERBASE, json);
             }
             catch(Exception e)
             {

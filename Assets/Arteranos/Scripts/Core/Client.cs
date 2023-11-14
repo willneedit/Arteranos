@@ -513,7 +513,7 @@ namespace Arteranos.Core
             try
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                File.WriteAllText($"{Application.persistentDataPath}/{PATH_CLIENT_SETTINGS}", json);
+                FileUtils.WriteTextConfig(PATH_CLIENT_SETTINGS, json);
             }
             catch(Exception e)
             {
@@ -527,7 +527,7 @@ namespace Arteranos.Core
 
             try
             {
-                string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_CLIENT_SETTINGS}");
+                string json = FileUtils.ReadTextConfig(PATH_CLIENT_SETTINGS);
                 cs = JsonConvert.DeserializeObject<Client>(json);
             }
             catch(Exception e)

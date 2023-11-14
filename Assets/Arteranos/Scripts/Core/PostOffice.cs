@@ -42,7 +42,7 @@ namespace Arteranos.Core
             try
             {
                 string json = JsonConvert.SerializeObject(stash, Formatting.Indented);
-                File.WriteAllText($"{Application.persistentDataPath}/{PATH_POST_OFFICE}", json);
+                FileUtils.WriteTextConfig(PATH_POST_OFFICE, json);
                 dirty = false;
             }
             catch(Exception e)
@@ -55,7 +55,7 @@ namespace Arteranos.Core
         {
             try
             {
-                string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_POST_OFFICE}");
+                string json = FileUtils.ReadTextConfig(PATH_POST_OFFICE);
                 stash = JsonConvert.DeserializeObject<MessageStashJSON>(json);
             }
             catch(Exception e)

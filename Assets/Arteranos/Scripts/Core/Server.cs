@@ -289,7 +289,7 @@ namespace Arteranos.Core
             try
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                File.WriteAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}", json);
+                FileUtils.WriteTextConfig(PATH_SERVER_SETTINGS, json);
             }
             catch(Exception e)
             {
@@ -303,8 +303,17 @@ namespace Arteranos.Core
 
             try
             {
-                string json = File.ReadAllText($"{Application.persistentDataPath}/{PATH_SERVER_SETTINGS}");
+                string json = FileUtils.ReadTextConfig(PATH_SERVER_SETTINGS);
                 ss = JsonConvert.DeserializeObject<Server>(json);
+
+                if(FileUtils.NeedsFallback(PATH_SERVER_SETTINGS))
+                {
+                    Debug.LogWarning("Modifying server settings: Ports, Name, Server Key");
+                    ss.ServerPort -= 100;
+                    ss.MetadataPort -= 100;
+                    ss.Name += " DS";
+                    ss.ServerKey = null;
+                }
             }
             catch(Exception e)
             {

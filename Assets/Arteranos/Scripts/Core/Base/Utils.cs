@@ -17,6 +17,7 @@ using Arteranos.XR;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Arteranos.Core
 {
@@ -53,7 +54,7 @@ namespace Arteranos.Core
         /// <summary>
         /// The world cache directory. Safe to delete, and deleting force reloads.
         /// </summary>
-        public static readonly string WorldCacheRootDir = $"{Application.temporaryCachePath}/WorldCache";
+        public static readonly string WorldCacheRootDir = $"{FileUtils.temporaryCachePath}/WorldCache";
 
         /// <summary>
         /// The avatar cache directory.
@@ -61,7 +62,7 @@ namespace Arteranos.Core
         /// </summary>
         public static string RPMAvatarCache => ReadyPlayerMe.Core.DirectoryUtility.GetAvatarsDirectoryPath();
 
-        public static readonly string WorldStorageDir = $"{Application.persistentDataPath}/WorldGallery";
+        public static readonly string WorldStorageDir = $"{FileUtils.persistentDataPath}/WorldGallery";
 
 
         /// <summary>
@@ -302,47 +303,10 @@ namespace Arteranos.Core
 //
 // Additionally you can switch the switch in runtime for debugging...
 #if UNITY_SERVER
-        public static readonly bool Unity_Server = true;
+        public static bool Unity_Server = true;
 #else
-        public static readonly bool Unity_Server = false;
+        public static bool Unity_Server = false;
+
 #endif
-
-        public static string persistentDataPath
-        { 
-            get 
-            {
-                return Unity_Server
-                    ? Application.persistentDataPath + "_DedicatedServer"
-                    : Application.persistentDataPath;
-            } 
-        }
-
-        public static string ReadTextConfig(string path) => ReadConfig(path, File.ReadAllText);
-
-        public static byte[] ReadBytesConfig(string path) => ReadConfig(path, File.ReadAllBytes);
-
-        private static T ReadConfig<T>(string path, Func<string, T> reader)
-        {
-            string fullPath = $"{persistentDataPath}/{path}";
-
-            if (Unity_Server)
-            {
-                if (File.Exists(fullPath)) return reader(fullPath);
-                Debug.LogWarning($"{fullPath} doesn't exist - falling back to regular file.");
-            }
-
-            fullPath = $"{Application.persistentDataPath}/{path}";
-            return reader(fullPath);
-        }
-
-        public static void WriteTextConfig(string path, string data) => WriteConfig(path, File.WriteAllText, data);
-
-        public static void WriteBytesConfig(string path, byte[] data) => WriteConfig(path, File.WriteAllBytes, data);
-
-        private static void WriteConfig<T>(string path, Action<string, T> writer, T data)
-        {
-            string fullPath = $"{persistentDataPath}/{path}";
-            writer(path, data);
-        }
     }
 }
