@@ -233,7 +233,8 @@ namespace Arteranos.Services
                 brain.UserID = new UserID(seq.request.ClientPublicKey, seq.request.Nickname);
                 brain.Address = conn.address;
                 brain.DeviceID = seq.request.deviceUID;
-                brain.CurrentWorld = CurrentWorld;
+
+                EmitToClientCurrentWorld(conn);
             }
             else conn.Disconnect();  // No discussion, there'd be something fishy...
         }
@@ -362,6 +363,8 @@ namespace Arteranos.Services
         public override void OnStopServer()
         {
             base.OnStopServer();
+
+            CurrentWorld = null;
 
             if (CoEmitServer != null)
             {
@@ -526,11 +529,22 @@ namespace Arteranos.Services
             NetworkServer.SendToAll(wca);
         }
 
+        [Server]
+        public void EmitToClientCurrentWorld(NetworkConnectionToClient conn)
+        {
+            WorldChangeAnnounceMessage wca = new()
+            {
+                Invoker = null,
+                WorldURL = CurrentWorld
+            };
+
+            Debug.Log($"[Server] sending worldURL '{CurrentWorld}' to latecoming conn {conn.connectionId}");
+            conn.Send(wca);
+        }
+
         [Client]
         private async void OnClientGotWCA(WorldChangeAnnounceMessage message)
         {
-            XRControl.Me.CurrentWorld = CurrentWorld;
-
             Debug.Log($"[Client] Server announce: Changed world to {message.WorldURL} by {message.Invoker}");
 
             // We've already moved to the target world as the server, so no need to

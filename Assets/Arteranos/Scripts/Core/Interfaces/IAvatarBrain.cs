@@ -30,7 +30,6 @@ namespace Arteranos.Avatar
         string Address { get; set; }
         string DeviceID { get; set; }
         float AvatarHeight { get; }
-        string CurrentWorld { get; set; }
 
         event Action<int> OnAppearanceStatusChanged;
 

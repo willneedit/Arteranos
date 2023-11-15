@@ -292,12 +292,6 @@ namespace Arteranos.Web
             => Instance.EnterWorldAsync(worldURL, forceReload);
         public static void EnterDownloadedWorld(string worldABF)
             => Instance.EnterDownloadedWorld(worldABF);
-
-        [Obsolete("No longer supported")]
-        public static void InitiateTransition(string worldURL)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public static class WorldDownloaderLow

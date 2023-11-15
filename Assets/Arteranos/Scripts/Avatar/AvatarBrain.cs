@@ -18,7 +18,6 @@ namespace Arteranos.Avatar
     internal enum AVKeys : byte
     {
         _Invalid = 0,
-        CurrentWorld,
         NetAppearanceStatus
     }
 
@@ -51,8 +50,6 @@ namespace Arteranos.Avatar
         public string Address { get => m_Address; set => m_Address = value; }
 
         public string DeviceID { get => m_DeviceID; set => m_DeviceID = value; }
-
-        public string CurrentWorld { get; set; } = null;
 
         public int AppearanceStatus
         {
@@ -136,8 +133,6 @@ namespace Arteranos.Avatar
         public override void OnStartServer()
         {
             base.OnStartServer();
-
-            m_strings[AVKeys.CurrentWorld] = SettingsManager.Server.WorldURL;
         }
 
         public override void OnStartClient()
@@ -162,13 +157,6 @@ namespace Arteranos.Avatar
                 XRControl.Me = this;
 
                 _ = BubbleCoordinatorFactory.New(this);
-
-                if (CurrentWorld != null)
-                {
-                    Debug.Log($"Invoking startup world '{CurrentWorld}'");
-                    _ = WorldTransition.VisitWorldAsync(CurrentWorld);
-                }
-
 
                 PostOffice.Load();
             }
@@ -235,7 +223,6 @@ namespace Arteranos.Avatar
         #region Networking
 
         private readonly SyncDictionary<AVKeys, int> m_ints = new();
-        private readonly SyncDictionary<AVKeys, string> m_strings = new();
 
         [SyncVar(hook = nameof(OnUserIDChanged))]
         private UserID m_userID = null;
@@ -446,7 +433,6 @@ namespace Arteranos.Avatar
         private void CmdMakeWorldToChange(string worldURL, bool _ /* forceReload */)
         {
             if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
-
 
             SettingsManager.PingServerChangeWorld(UserID, worldURL);
         }
