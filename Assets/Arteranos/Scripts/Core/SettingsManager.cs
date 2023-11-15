@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Arteranos.Core
 {
-    public class SettingsManager : MonoBehaviour
+    public abstract class SettingsManager : MonoBehaviour
     {
         private CommandLine Command;
 
@@ -118,6 +118,13 @@ namespace Arteranos.Core
                 OnlineLevel.Host => (NetworkStatus.PublicIPAddress.ToString(), Server.ServerPort, Server.MetadataPort),
                 _ => throw new NotImplementedException()
             };
+        }
+
+        protected abstract void PingServerChangeWorld_(string invoker, string worldURL);
+
+        public static void PingServerChangeWorld(string invoker, string worldURL)
+        {
+            FindObjectOfType<SettingsManager>().PingServerChangeWorld_(invoker, worldURL);
         }
     }
 }

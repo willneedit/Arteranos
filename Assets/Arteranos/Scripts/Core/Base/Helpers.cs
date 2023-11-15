@@ -272,12 +272,30 @@ namespace Arteranos.Web
             => Instance.StoreWorldMetaData(url, worldMetaData);
     }
 
-    public static class WorldTransition
+    public class WorldTransition
     {
         public static IWorldTransition Instance { get; set; }
 
-        public static void InitiateTransition(string url, Action<Exception, Context> failureCallback = null, Action<Context> successCallback = null)
-            => Instance.InitiateTransition(url, failureCallback, successCallback);
+        public static Task<(Exception, WorldData)> GetWorldDataAsync(string worldURL) 
+            => Instance.GetWorldDataAsync(worldURL);
+        public static bool IsWorldPreloaded(string worldURL) 
+            => Instance.IsWorldPreloaded(worldURL);
+        public static Task MoveToOfflineWorld() 
+            => Instance.MoveToOfflineWorld();
+        public static Task MoveToOnlineWorld(string worldURL) 
+            => Instance.MoveToOnlineWorld(worldURL);
+        public static Task<(Exception, Context)> PreloadWorldDataAsync(string worldURL, bool forceReload = false) 
+            => Instance.PreloadWorldDataAsync(worldURL, forceReload);
+        public static Task<Exception> VisitWorldAsync(string worldURL, bool forceReload = false) 
+            => Instance.VisitWorldAsync(worldURL, forceReload);
+        public static Task EnterWorldAsync(string worldURL, bool forceReload = false) 
+            => Instance.EnterWorldAsync(worldURL, forceReload);
+
+        [Obsolete("No longer supported")]
+        public static void InitiateTransition(string worldURL)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public static class WorldDownloaderLow

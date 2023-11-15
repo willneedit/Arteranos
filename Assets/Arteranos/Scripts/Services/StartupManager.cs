@@ -9,6 +9,7 @@ using Arteranos.Core;
 using Arteranos.Web;
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -21,20 +22,14 @@ namespace Arteranos.Services
 
         IEnumerator StartupCoroutine()
         {
-            if(string.IsNullOrEmpty(DesiredWorld))
-            {
-                AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
-
-                if(!ao.isDone)
-                    yield return new WaitForEndOfFrame();
-            }
-
             // Startup of dependent services...
             AudioManager.Instance.enabled = true;
             GetComponent<MetaDataService>().enabled = true;
             NetworkStatus.Instance.enabled = true;
 
-            if(!string.IsNullOrEmpty(TargetedServerPort))
+            XR.XRControl.Instance.enabled = true;
+
+            if (!string.IsNullOrEmpty(TargetedServerPort))
             {
                 Uri uri = Utils.ProcessUriString(TargetedServerPort,
                     scheme: "http",
@@ -43,18 +38,13 @@ namespace Arteranos.Services
 
                 ConnectionManager.ConnectToServer(uri.ToString());
             }
-            else if(!string.IsNullOrEmpty(DesiredWorld))
+            else
             {
-                NetworkStatus.StartHost();
+                Task t = WorldTransition.EnterWorldAsync(DesiredWorld);
+                while(!t.IsCompleted && !t.IsFaulted) yield return null;
             }
 
-            XR.XRControl.Instance.enabled = true;
-
             yield return new WaitForEndOfFrame();
-
-            // Enter the initial world, if we're not starting up with a startup trigger
-            if(string.IsNullOrEmpty(DesiredWorld))
-                WorldDownloaderLow.MoveToDownloadedWorld();
 
             // Finish the startup...
             enabled = false;
@@ -78,6 +68,11 @@ namespace Arteranos.Services
             XR.ScreenFader.StartFading(1.0f, 0.0f);
 
             StartCoroutine(StartupCoroutine());
+        }
+
+        protected override void PingServerChangeWorld_(string invoker, string worldURL)
+        {
+             _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, worldURL);
         }
     }
 }
