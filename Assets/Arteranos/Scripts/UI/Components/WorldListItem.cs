@@ -129,7 +129,7 @@ namespace Arteranos.UI
             if(!string.IsNullOrEmpty(worldURL))
             {
                 if(parentUI.InPlaceWorldTransition)
-                    WorldTransition.InitiateTransition(worldURL);
+                    WorldTransition.EnterWorldAsync(worldURL);
                 else
                 {
                     ServerSearcher.InitiateServerTransition(worldURL);

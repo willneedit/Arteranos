@@ -290,6 +290,8 @@ namespace Arteranos.Web
             => Instance.VisitWorldAsync(worldURL, forceReload);
         public static Task EnterWorldAsync(string worldURL, bool forceReload = false) 
             => Instance.EnterWorldAsync(worldURL, forceReload);
+        public static void EnterDownloadedWorld(string worldABF)
+            => Instance.EnterDownloadedWorld(worldABF);
 
         [Obsolete("No longer supported")]
         public static void InitiateTransition(string worldURL)

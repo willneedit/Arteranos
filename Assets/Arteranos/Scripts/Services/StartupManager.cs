@@ -72,7 +72,7 @@ namespace Arteranos.Services
 
         protected override void PingServerChangeWorld_(string invoker, string worldURL)
         {
-             _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, worldURL);
+             _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, worldURL, false);
         }
     }
 }

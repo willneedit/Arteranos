@@ -129,6 +129,11 @@ namespace Arteranos.Avatar
         {
             throw new NotImplementedException();
         }
+
+        public void MakeWorkdToChange(string worldURL, bool forceReload = false)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

@@ -150,7 +150,6 @@ namespace Arteranos.Avatar
 
             SettingsManager.Client.OnAvatarChanged += CommitAvatarChanged;
             SettingsManager.Client.OnUserPrivacyChanged += (x) => { if (isOwned) UserPrivacy = x; };
-            SettingsManager.Server.OnWorldURLChanged += CommitWorldChanged;
 
             ResyncInitialValues();
 
@@ -162,35 +161,14 @@ namespace Arteranos.Avatar
                 // That's me, set aside from the unwashed crowd. :)
                 XRControl.Me = this;
 
-                // Invoked by command line - only once
-                if (SettingsManager.StartupTrigger)
-                {
-                    string world = SettingsManager.ResetStartupTrigger();
-
-                    m_strings.TryGetValue(AVKeys.CurrentWorld, out string serversworld);
-
-                    // Only an 'empty' server regards the startup world URL.
-                    if (!string.IsNullOrEmpty(serversworld))
-                        world = serversworld;
-
-                    if (!string.IsNullOrEmpty(world))
-                    {
-                        Debug.Log($"Invoking startup world '{world}'");
-                        WorldTransition.InitiateTransition(world);
-                    }
-                    else
-                    {
-                        Debug.Log("Connected to a server at startup, neither server has a world nor the commandline URL.");
-                    }
-                }
-
-                // The server already uses a world, so download and transition into the targeted world immediately.
-                else if (!string.IsNullOrEmpty(m_strings[AVKeys.CurrentWorld]))
-                {
-                    WorldTransition.InitiateTransition(m_strings[AVKeys.CurrentWorld]);
-                }
-
                 _ = BubbleCoordinatorFactory.New(this);
+
+                if (CurrentWorld != null)
+                {
+                    Debug.Log($"Invoking startup world '{CurrentWorld}'");
+                    _ = WorldTransition.VisitWorldAsync(CurrentWorld);
+                }
+
 
                 PostOffice.Load();
             }
@@ -219,7 +197,6 @@ namespace Arteranos.Avatar
             // Maybe it isn't owned anymore, but it would be worse the other way round.
             if(isOwned) XRControl.Me = null;
 
-            SettingsManager.Server.OnWorldURLChanged -= CommitWorldChanged;
             SettingsManager.Client.OnAvatarChanged -= CommitAvatarChanged;
 
             m_ints.Callback -= OnMIntsChanged;
@@ -460,6 +437,21 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region World change event handling
 
+        public void MakeWorkdToChange(string worldURL, bool forceReload = false)
+        {
+            CmdMakeWorldToChange(worldURL, forceReload);
+        }
+
+        [Command]
+        private void CmdMakeWorldToChange(string worldURL, bool _ /* forceReload */)
+        {
+            if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
+
+
+            SettingsManager.PingServerChangeWorld(UserID, worldURL);
+        }
+
+#if false
         [ClientRpc]
         private void ReceiveWorldTransition(string worldURL)
         {
@@ -551,7 +543,7 @@ namespace Arteranos.Avatar
             if(isOwned)
                 PropagateWorldTransition(worldURL);
         }
-
+#endif
         #endregion
         // ---------------------------------------------------------------
         #region Social state negotiation

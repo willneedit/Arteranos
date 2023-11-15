@@ -220,19 +220,7 @@ namespace Arteranos.Web
         {
             string worldABF = GetWorldABF(_context);
 
-            EnterDownloadedWorld(worldABF);
-        }
-
-        public static void EnterDownloadedWorld(string worldABF)
-        {
-            Debug.Log($"Download complete, world={worldABF}");
-
-            // Deploy the scene loader.
-            GameObject go = new("_SceneLoader");
-            go.AddComponent<Persistence>();
-            SceneLoader sl = go.AddComponent<SceneLoader>();
-            sl.OnFinishingSceneChange += WorldDownloaderLow.MoveToDownloadedWorld;
-            sl.Name = worldABF;
+            WorldTransition.EnterDownloadedWorld(worldABF);
         }
 
         public static string GetWorldABF(Context _context) 

@@ -212,7 +212,10 @@ namespace Arteranos.Web
 
         public void InitiateServerTransition(string worldURL)
         {
-            InitiateServerTransition(worldURL, OnGotSearchResult, null);
+            static void GotResult(string worldURL, string serverURL) 
+                => _ = OnGotSearchResult(worldURL, serverURL);
+
+            InitiateServerTransition(worldURL, GotResult, null);
         }
 
         public void InitiateServerTransition(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback)
@@ -225,35 +228,31 @@ namespace Arteranos.Web
             pui.Faulted += (ex, context) => OnFailureCallback();
         }
 
-        private static void OnGotSearchResult(string worldURL, string serverURL)
+        private static async Task OnGotSearchResult(string worldURL, string serverURL)
         {
             // No matching server, initiate Start Host with loading the world on entering
             if (!string.IsNullOrEmpty(worldURL) && serverURL == null)
             {
-                switch(NetworkStatus.GetOnlineLevel())
+                // It's time to part ways...
+                if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
                 {
-                    case OnlineLevel.Host:
-                    case OnlineLevel.Server:
-                        // Host mode. It's the own server.
-                        WorldTransition.InitiateTransition(worldURL);
-                        break;
-                    case OnlineLevel.Offline:
-                        // Offline mode, start up the host mode and feed it with the startup world
-                    case OnlineLevel.Client:
-                        // Client mode. It's time to part ways...
-                        SettingsManager.Server.WorldURL = worldURL;
-                        NetworkStatus.StartHost(true);
-                        break;
+                    NetworkStatus.StopHost(false);
 
-                    default: throw new NotImplementedException();
+                    await Task.Delay(1000);
                 }
+
+                await WorldTransition.EnterWorldAsync(worldURL);
+
+                // If we haven't a server (or, just left one), start up.
+                if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
+                    NetworkStatus.StartHost();
             }
 
             // No matching server, leave it be
             if (serverURL == null) return;
 
             // Matching server (with matching world, if needed), initiate remote connection
-            ConnectionManager.ConnectToServer(serverURL);
+            await ConnectionManager.ConnectToServer(serverURL);
         }
     }
 }

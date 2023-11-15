@@ -36,5 +36,6 @@ namespace Arteranos.Web
 
         public Task MoveToOnlineWorld(string worldURL);
         Task EnterWorldAsync(string worldURL, bool forceReload = false);
+        void EnterDownloadedWorld(string worldABF);
     }
 }
