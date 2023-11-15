@@ -7,6 +7,7 @@
 
 using Arteranos.Core;
 using System;
+using System.Threading.Tasks;
 
 namespace Arteranos.UI
 {
@@ -19,6 +20,7 @@ namespace Arteranos.UI
         event Action<Context> Completed;
         event Action<Exception, Context> Faulted;
 
+        Task<(Exception, Context)> RunProgressAsync();
         void SetupAsyncOperations(Func<(AsyncOperationExecutor<Context>, Context)> setupFunc, bool cancelable = true, string tip = null);
     }
 }

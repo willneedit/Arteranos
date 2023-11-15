@@ -14,6 +14,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
+using System.Threading.Tasks;
 
 namespace Arteranos.UI
 {
@@ -154,6 +155,34 @@ namespace Arteranos.UI
             Destroy(gameObject);
         }
 
+        public async Task<(Exception, Context)> RunProgressAsync()
+        {
+            Completed += OnCompletion;
+            Faulted += OnFaulted;
+
+            bool completed = false;
+            Context context = null;
+            Exception exception = null;
+
+            void OnCompletion(Context _context)
+            {
+                completed = true;
+                context = _context;
+                exception = null; // No news are good news.
+            }
+
+            void OnFaulted(Exception _exception, Context _context)
+            {
+                completed = true;
+                context = _context;
+                exception = _exception;
+            }
+
+            while (!completed) await Task.Yield();
+
+            return (exception, context);
+
+        }
 
     }
 }
