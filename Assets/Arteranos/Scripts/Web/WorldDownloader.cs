@@ -21,7 +21,6 @@ namespace Arteranos.Web
     internal class WorldDownloaderContext : Context
     {
         public string url = null;
-        public string hashed = null;
         public string targetfile = null;
         public bool reload = false;
         public string cachedir = null;
@@ -47,31 +46,18 @@ namespace Arteranos.Web
             {
                 string path = Path.ChangeExtension(context.worldZipFile, "dir");
 
-                if(Directory.Exists(path))
+                if (Directory.Exists(path))
                     Directory.Delete(path, true);
 
                 ZipFile.ExtractToDirectory(context.worldZipFile, path);
 
-                string archPath = "AssetBundles";
-                RuntimePlatform p = Application.platform;
-                if(p == RuntimePlatform.OSXEditor || p == RuntimePlatform.OSXPlayer)
-                    archPath = "Mac";
-                if(p == RuntimePlatform.Android)
-                    archPath = "Android";
+                string worldABF = WorldDownloader.GetWorldABFfromWD(path);
 
-                path += "/" + archPath;
+                context.worldAssetBundleFile = worldABF;
 
-                if(!Directory.Exists(path))
-                    throw new FileNotFoundException($"No {archPath} directory in {context.worldZipFile}");
+                File.WriteAllText(WorldDownloader.GetTouchFile(context.url), "Completed.");
+                return context;
 
-
-                foreach(string file in Directory.EnumerateFiles(path, "*.unity"))
-                {
-                    context.worldAssetBundleFile = file;
-                    return context;
-                }
-
-                throw new FileNotFoundException("No suitable AssetBundle found in the zipfile.");
             });
         }
     }
@@ -144,9 +130,11 @@ namespace Arteranos.Web
         {
             WorldDownloaderContext context = _context as WorldDownloaderContext;
 
-            context.hashed = Utils.GetURLHash(context.url);
-            context.cachedir = $"{Utils.WorldCacheRootDir}/{context.hashed}";
+            context.cachedir = $"{WorldDownloader.GetWorldCacheDir(context.url)}";
             context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
+
+            string touchfile = WorldDownloader.GetTouchFile(context.url);
+            if(File.Exists(touchfile)) File.Delete(touchfile);
 
             if(context.reload)
             {
@@ -250,6 +238,40 @@ namespace Arteranos.Web
         public static string GetWorldABF(Context _context) 
             => (_context as WorldDownloaderContext).worldAssetBundleFile;
 
+        public static string GetWorldABF(string worldURL) 
+            => GetWorldABFfromWD($"{GetWorldCacheDir(worldURL)}/world.dir");
+
+        public static string GetWorldCacheDir(string worldURL) 
+            => $"{Utils.WorldCacheRootDir}/{Utils.GetURLHash(worldURL)}";
+
+        public static string GetTouchFile(string worldURL) 
+            => $"{GetWorldCacheDir(worldURL)}/_completed.txt";
+
+        public static string GetWorldABFfromWD(string path)
+        {
+            string archPath = "AssetBundles";
+            RuntimePlatform p = Application.platform;
+            if (p == RuntimePlatform.OSXEditor || p == RuntimePlatform.OSXPlayer)
+                archPath = "Mac";
+            if (p == RuntimePlatform.Android)
+                archPath = "Android";
+
+            path += "/" + archPath;
+
+            if (!Directory.Exists(path))
+                throw new FileNotFoundException($"No {archPath} directory in the world zip file");
+
+            string worldABF = null;
+            foreach (string file in Directory.EnumerateFiles(path, "*.unity"))
+            {
+                worldABF = file;
+                break;
+            }
+
+            if (worldABF == null)
+                throw new FileNotFoundException("No suitable AssetBundle found in the zipfile.");
+            return worldABF;
+        }
 
 
         //private void OnEnable()
