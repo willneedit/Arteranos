@@ -9,9 +9,9 @@ using Arteranos.Core;
 using Arteranos.Web;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Arteranos.Services
 {
@@ -19,6 +19,17 @@ namespace Arteranos.Services
     {
         private bool initialized = false;
 
+        private ConcurrentQueue<Func<IEnumerator>> QueuedCoroutine = new();
+
+
+        protected override void Awake()
+        {
+            Instance = this;
+
+            base.Awake();
+        }
+
+        protected override void OnDestroy() => Instance = null;
 
         IEnumerator StartupCoroutine()
         {
@@ -46,9 +57,6 @@ namespace Arteranos.Services
 
             yield return new WaitForEndOfFrame();
 
-            // Finish the startup...
-            enabled = false;
-
             // ... and raise the curtains. Though, keep waiting if we have to load the world.
             if(string.IsNullOrEmpty(DesiredWorld))
                 XR.ScreenFader.StartFading(0.0f, 2.0f);
@@ -60,6 +68,9 @@ namespace Arteranos.Services
 
         protected void Update()
         {
+            if(QueuedCoroutine.TryDequeue(out Func<IEnumerator> action))
+                StartCoroutine(action());
+
             if(initialized) return;
 
             initialized = true;
@@ -70,10 +81,11 @@ namespace Arteranos.Services
             StartCoroutine(StartupCoroutine());
         }
 
-        protected override void PingServerChangeWorld_(string invoker, string worldURL)
-        {
-             _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, worldURL, false);
-        }
+        protected override void PingServerChangeWorld_(string invoker, string worldURL) 
+            => _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, worldURL, false);
+
+        protected override void StartCoroutineAsync_(Func<IEnumerator> action) 
+            => QueuedCoroutine.Enqueue(action);
     }
 }
 

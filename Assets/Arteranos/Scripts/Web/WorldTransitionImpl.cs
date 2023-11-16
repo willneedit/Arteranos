@@ -62,8 +62,6 @@ namespace Arteranos.Web
             failureCallback?.Invoke(ex, _context);
         }
 #endif
-        private string WaitingForWorldChange = null;
-
         private IEnumerator EnterDownloadedWorldCoroutine(string worldABF)
         {
             Debug.Log($"Download complete, world={worldABF}");
@@ -76,14 +74,6 @@ namespace Arteranos.Web
             SceneLoader sl = go.AddComponent<SceneLoader>();
             sl.OnFinishingSceneChange += WorldDownloaderLow.MoveToDownloadedWorld;
             sl.Name = worldABF;
-        }
-        private void Update()
-        {
-            if(WaitingForWorldChange != null)
-            {
-                StartCoroutine(EnterDownloadedWorldCoroutine(WaitingForWorldChange));
-                WaitingForWorldChange = null;
-            }
         }
 
         public async Task<(Exception, WorldData)> GetWorldDataAsync(string worldURL)
@@ -184,8 +174,7 @@ namespace Arteranos.Web
 
         public void EnterDownloadedWorld(string worldABF)
         {
-            // Wait for the Coroutine to pop up.
-            WaitingForWorldChange = worldABF;
+            SettingsManager.StartCoroutineAsync(() => EnterDownloadedWorldCoroutine(worldABF));
         }
     }
 }

@@ -7,24 +7,21 @@
 
 using Arteranos.Services;
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace Arteranos.Core
 {
     public abstract class SettingsManager : MonoBehaviour
     {
+        public static SettingsManager Instance;
+
         private CommandLine Command;
 
         protected static string TargetedServerPort = null;
         protected static string DesiredWorld = null;
 
         public static bool StartupTrigger { get; private set; } = false;
-
-        public static string ResetStartupTrigger()
-        {
-            StartupTrigger = false;
-            return DesiredWorld;
-        }
 
         public static ServerJSON CurrentServer { get; set; } = null;
 
@@ -35,12 +32,14 @@ namespace Arteranos.Core
 
         public static ServerUserBase ServerUsers { get; internal set; }
 
-        private void Awake()
+        protected virtual void Awake()
         {
             SetupPurgatory();
 
             ParseSettingsAndCmdLine();
         }
+
+        protected abstract void OnDestroy();
 
         private void ParseSettingsAndCmdLine()
         {
@@ -122,9 +121,12 @@ namespace Arteranos.Core
 
         protected abstract void PingServerChangeWorld_(string invoker, string worldURL);
 
+        protected abstract void StartCoroutineAsync_(Func<IEnumerator> action);
+
         public static void PingServerChangeWorld(string invoker, string worldURL)
-        {
-            FindObjectOfType<SettingsManager>().PingServerChangeWorld_(invoker, worldURL);
-        }
+            => Instance.PingServerChangeWorld_(invoker, worldURL);
+
+        public static void StartCoroutineAsync(Func<IEnumerator> action) 
+            => Instance.StartCoroutineAsync_(action);
     }
 }
