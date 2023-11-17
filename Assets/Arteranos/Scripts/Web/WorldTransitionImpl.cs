@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 /*
 * Copyright (c) 2023, willneedit
 * 
@@ -176,6 +177,9 @@ namespace Arteranos.Web
         {
             if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
             {
+                // Just in case...
+                SettingsManager.CurrentWorld = worldURL;
+
                 // In the offline mode, directly change the scene.
                 await VisitWorldAsync(worldURL, forceReload);
             }

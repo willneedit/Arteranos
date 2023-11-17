@@ -79,6 +79,12 @@ namespace Arteranos.Services
         protected override void PingServerChangeWorld_(string invoker, string worldURL) 
             => _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, worldURL, false);
 
+        protected override string CurrentWorld_ 
+        {
+            get => ArteranosNetworkManager.Instance.CurrentWorld;
+            set => ArteranosNetworkManager.Instance.CurrentWorld = value; 
+        }
+
         protected override void StartCoroutineAsync_(Func<IEnumerator> action) 
             => QueuedCoroutine.Enqueue(action);
     }

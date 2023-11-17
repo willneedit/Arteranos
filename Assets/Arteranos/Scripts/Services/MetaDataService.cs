@@ -129,7 +129,7 @@ namespace Arteranos.Services
             ServerMetadataJSON mdj = new()
             {
                 Settings = SettingsManager.Server,
-                CurrentWorld = SettingsManager.Server.WorldURL,
+                CurrentWorld = SettingsManager.CurrentWorld,
 
                 CurrentUsers = (from user in NetworkStatus.GetOnlineUsers()
                                 where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible

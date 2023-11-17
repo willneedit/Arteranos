@@ -259,22 +259,6 @@ namespace Arteranos.Core
     {
         public event Action<string> OnWorldURLChanged;
 
-        // The world URL to load
-        [JsonIgnore]
-        private string m_WorldURL = string.Empty;
-
-        [JsonIgnore]
-        public string WorldURL
-        {
-            get => m_WorldURL;
-            set
-            {
-                string old = m_WorldURL;
-                m_WorldURL = value;
-                if(old != m_WorldURL) OnWorldURLChanged?.Invoke(m_WorldURL);
-            }
-        }
-
         [JsonIgnore]
         private Crypto Crypto = null;
 

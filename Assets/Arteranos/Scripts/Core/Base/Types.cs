@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.IO;
 
+using DERSerializer;
+
 namespace Arteranos.Core
 {
 
@@ -20,7 +22,7 @@ namespace Arteranos.Core
     public class ServerMetadataJSON
     {
         public ServerJSON Settings = null;
-        public string CurrentWorld = null;
+        [ASN1Tag(true)] public string CurrentWorld = null;
         public List<byte []> CurrentUsers = new();
     }
 

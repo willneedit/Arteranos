@@ -24,7 +24,6 @@ namespace Arteranos.UI
         [SerializeField] private Spinner spn_TransitionMode;
 
         private Client cs = null;
-        private Server ss = null;
 
         public static WorldListUI New()
         {
@@ -44,17 +43,16 @@ namespace Arteranos.UI
             base.Start();
 
             cs = SettingsManager.Client;
-            ss = SettingsManager.Server;
 
             grp_TransitionMode.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null));
 
             // Current one on top...
-            if(!string.IsNullOrEmpty(ss.WorldURL))
-                WorldListItem.New(lvc_WorldList.transform, ss.WorldURL, this);
+            if(!string.IsNullOrEmpty(SettingsManager.CurrentWorld))
+                WorldListItem.New(lvc_WorldList.transform, SettingsManager.CurrentWorld, this);
 
             // ... and the rest.
             foreach(string url in cs.WorldList)
-                if(url != ss.WorldURL) WorldListItem.New(lvc_WorldList.transform, url, this);
+                if(url != SettingsManager.CurrentWorld) WorldListItem.New(lvc_WorldList.transform, url, this);
         }
 
         // true if we incite a world transition in the specific server
