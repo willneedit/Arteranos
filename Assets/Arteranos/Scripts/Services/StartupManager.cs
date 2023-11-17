@@ -19,7 +19,7 @@ namespace Arteranos.Services
     {
         private bool initialized = false;
 
-        private ConcurrentQueue<Func<IEnumerator>> QueuedCoroutine = new();
+        private readonly ConcurrentQueue<Func<IEnumerator>> QueuedCoroutine = new();
 
 
         protected override void Awake()

@@ -13,6 +13,7 @@ using UnityEngine.UI;
 using Arteranos.Core;
 using Arteranos.Web;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace Arteranos.UI
 {
@@ -30,6 +31,7 @@ namespace Arteranos.UI
 
         private ServerPublicData? spd = null;
         private ServerOnlineData? sod = null;
+        private bool? IsOnline = null;
 
         public static ServerListItem New(Transform parent, string url)
         {
@@ -69,7 +71,7 @@ namespace Arteranos.UI
             if(btn_Add == null) return;
 
             btn_Add.gameObject.SetActive(false);
-            btn_Visit.gameObject.SetActive(true);
+            btn_Visit.gameObject.SetActive(IsOnline ?? true);
             btn_Delete.gameObject.SetActive(false);
 
             spd ??= SettingsManager.ServerCollection.Get(new Uri(serverURL));
@@ -102,12 +104,19 @@ namespace Arteranos.UI
 
         private void VisualizeServerData()
         {
+            if (!(IsOnline ?? false))
+            {
+                string offlstr = (IsOnline == null) ? "Unknown" : "Offline";
+                lbl_Caption.text = $"{spd?.Name} ({offlstr})";
+
+                // TODO Replace with a "Unknown state" and a "Server offline" icon.
+                if(sod != null) Utils.ShowImage(sod.Value.Icon, img_Icon);
+                return;
+            }
+
             if (sod == null) return;
 
-            byte[] imageData = sod.Value.Icon;
-            Image image = img_Icon;
-
-            Utils.ShowImage(imageData, image);
+            Utils.ShowImage(sod.Value.Icon, img_Icon);
 
             string CurrentWorld = sod?.CurrentWorld;
             int CurrentUsers = sod.Value.UserPublicKeys.Count;
@@ -192,9 +201,27 @@ namespace Arteranos.UI
         {
             (ServerPublicData? spd, ServerOnlineData? sod) = await ServerPublicData.GetServerDataAsync(serverURL, timeout);
             this.spd = spd;
-            this.sod = sod;
+
+            // ServerOnlineData could be saved, retain them.
+            if (sod == null)
+                IsOnline = false;
+            else
+            {
+                IsOnline = true;
+                this.sod = sod;
+            }
 
             if (sod != null) StoreUpdatedServerListItem();
+
+            IEnumerator UpdateServerStateCoroutine()
+            {
+                yield return null;
+                VisualizeServerData();
+
+                btn_Visit.gameObject.SetActive(IsOnline ?? true);
+            };
+
+            SettingsManager.StartCoroutineAsync(UpdateServerStateCoroutine);
         }
     }
 }

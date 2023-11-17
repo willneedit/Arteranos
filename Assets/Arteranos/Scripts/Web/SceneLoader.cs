@@ -74,7 +74,7 @@ namespace Arteranos.Web
 
         public bool CheckComponent(Component component)
         {
-            System.Type type = component.GetType();
+            Type type = component.GetType();
             if(type == null) return false;
 
             if(!MatchWith(type.FullName, TNWhitelist)) return false;
@@ -98,7 +98,7 @@ namespace Arteranos.Web
                 }
                 else if(!CheckComponent(component))
                 {
-                    System.Type type = component.GetType();
+                    Type type = component.GetType();
                     Assembly asm = type.Assembly;
 
                     Debug.LogWarning($"Removing {component.GetType().FullName} ({asm.GetName().Name}) in {transform.name}");
