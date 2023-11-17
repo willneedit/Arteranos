@@ -63,7 +63,16 @@ namespace Arteranos.Services
         private OnlineLevel CurrentOnlineLevel = OnlineLevel.Offline;
         private bool m_OpenPorts = false;
 
-        private void Awake() => NetworkStatus.Instance = this;
+        private NetworkManager manager = null;
+        private TelepathyTransport transport = null;
+        private void Awake()
+        {
+            manager = FindObjectOfType<NetworkManager>(true);
+            transport = FindObjectOfType<TelepathyTransport>(true);
+
+            NetworkStatus.Instance = this;
+        }
+
         private void OnDestroy()
         {
             ClosePortsAsync();
@@ -328,7 +337,6 @@ namespace Arteranos.Services
 
         public void StartClient(Uri connectionUri)
         {
-            NetworkManager manager = FindObjectOfType<NetworkManager>();
 
             Debug.Log($"Attempting to connect to {connectionUri}...");
 
@@ -339,34 +347,30 @@ namespace Arteranos.Services
             ServerPort = connectionUri.Port;
         }
 
-        public void StopHost(bool loadOfflineScene)
+        public async Task StopHost(bool loadOfflineScene)
         {
-            static IEnumerator StopHostCoroutine(bool loadOfflineScene)
-            {
-                if (loadOfflineScene)
-                {
-                    XR.ScreenFader.StartFading(1.0f);
-
-                    yield return new WaitForSeconds(1.0f);
-                    AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
-
-                    if (!ao.isDone)
-                        yield return new WaitForEndOfFrame();
-                }
-
-                NetworkManager manager = FindObjectOfType<NetworkManager>();
-                manager.StopHost();
-                NetworkStatus.OpenPorts = false;
-
-                if (loadOfflineScene)
-                    WorldDownloaderLow.MoveToDownloadedWorld();
-            }
+            manager.StopHost();
+            NetworkStatus.OpenPorts = false;
 
             ServerHost = null;
-            StartCoroutine(StopHostCoroutine(loadOfflineScene));
+
+            if (loadOfflineScene)
+            {
+                XR.ScreenFader.StartFading(1.0f);
+                await Task.Run(async () =>
+                {
+                    await Task.Delay(1000);
+                    await WorldTransition.MoveToOfflineWorld();
+                });
+
+                XR.ScreenFader.StartFading(0.0f);
+            }
+
+            // And, wait for the network to really be shut down.
+            while (manager.isNetworkActive) await Task.Yield();
         }
 
-        public async void StartHost(bool resetConnection = false)
+        public async Task StartHost(bool resetConnection = false)
         {
             if (resetConnection)
                 await SmoothServerTransition();
@@ -375,8 +379,11 @@ namespace Arteranos.Services
             ConnectionManager.Instance.ExpectConnectionResponse();
 
             // Custom server port -- Transport specific!
-            FindObjectOfType<TelepathyTransport>().port = (ushort) SettingsManager.Server.ServerPort;
-            FindObjectOfType<NetworkManager>().StartHost();
+            transport.port = (ushort) SettingsManager.Server.ServerPort;
+            manager.StartHost();
+
+            // And, wait for the network to really be started up.
+            while (manager.isNetworkActive) await Task.Yield();
         }
 
         public async void StartServer()
@@ -386,20 +393,19 @@ namespace Arteranos.Services
             NetworkStatus.OpenPorts = true;
 
             // Custom server port -- Transport specific!
-            FindObjectOfType<TelepathyTransport>().port = (ushort)SettingsManager.Server.ServerPort;
-            FindObjectOfType<NetworkManager>().StartServer();
+            transport.port = (ushort)SettingsManager.Server.ServerPort;
+            manager.StartServer();
+
+            // And, wait for the network to really be started up.
+            while (manager.isNetworkActive) await Task.Yield();
         }
 
         private async Task SmoothServerTransition()
         {
-            NetworkManager manager = FindObjectOfType<NetworkManager>();
-
             if (manager.isNetworkActive)
             {
                 transitionDisconnect = true;
-                manager.StopHost();
-
-                await Task.Delay(1000);
+                await StopHost(false);
             }
         }
 
@@ -407,7 +413,7 @@ namespace Arteranos.Services
         {
             // Client to offline. It it's planned to switch servers,
             // skip the offline scene.
-            if(!transitionDisconnect) StopHost(true);
+            if(!transitionDisconnect) _ = StopHost(true);
             transitionDisconnect = false;
         }
         #endregion

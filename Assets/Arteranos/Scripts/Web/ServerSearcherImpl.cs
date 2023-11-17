@@ -235,17 +235,13 @@ namespace Arteranos.Web
             {
                 // It's time to part ways...
                 if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
-                {
-                    NetworkStatus.StopHost(false);
-
-                    await Task.Delay(1000);
-                }
+                    await NetworkStatus.StopHost(false);
 
                 await WorldTransition.EnterWorldAsync(worldURL);
 
                 // If we haven't a server (or, just left one), start up.
                 if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
-                    NetworkStatus.StartHost();
+                    await NetworkStatus.StartHost();
             }
 
             // No matching server, leave it be

@@ -72,7 +72,7 @@ namespace Arteranos.Web
             GameObject go = new("_SceneLoader");
             go.AddComponent<Persistence>();
             SceneLoader sl = go.AddComponent<SceneLoader>();
-            sl.OnFinishingSceneChange += WorldDownloaderLow.MoveToDownloadedWorld;
+            sl.OnFinishingSceneChange += () => XRControl.Instance.MoveRig();
             sl.Name = worldABF;
         }
 
@@ -88,10 +88,24 @@ namespace Arteranos.Web
 
         public async Task MoveToOfflineWorld()
         {
-            AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
-            while(!ao.isDone) await Task.Yield();
+            bool done = false;
+            IEnumerator OfflineScene()
+            {
+                AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
+                while (!ao.isDone) yield return null;
 
-            XRControl.Instance.MoveRig();
+                yield return new WaitForEndOfFrame();
+                yield return new WaitForEndOfFrame();
+
+                ScreenFader.StartFading(0.0f);
+
+                XRControl.Instance.MoveRig();
+
+                done = true;
+            }
+            
+            SettingsManager.StartCoroutineAsync(OfflineScene);
+            while(!done) await Task.Yield();
         }
 
         public Task MoveToOnlineWorld(string worldURL)

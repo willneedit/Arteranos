@@ -8,6 +8,7 @@
 using System;
 using System.ComponentModel;
 using System.Net;
+using System.Threading.Tasks;
 
 #pragma warning disable IDE1006 // Because Unity's more relaxed naming convention
 
@@ -48,8 +49,8 @@ namespace Arteranos.Services
         ConnectivityLevel GetConnectivityLevel();
         OnlineLevel GetOnlineLevel();
         void StartClient(Uri connectionUri);
-        void StartHost(bool resetConnection = false);
+        Task StartHost(bool resetConnection = false);
         void StartServer();
-        void StopHost(bool loadOfflineScene);
+        Task StopHost(bool loadOfflineScene);
     }
 }

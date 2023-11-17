@@ -55,11 +55,6 @@ namespace Arteranos.Services
                 while(!t.IsCompleted && !t.IsFaulted) yield return null;
             }
 
-            yield return new WaitForEndOfFrame();
-
-            // ... and raise the curtains. Though, keep waiting if we have to load the world.
-            if(string.IsNullOrEmpty(DesiredWorld))
-                XR.ScreenFader.StartFading(0.0f, 2.0f);
 
             if(FileUtils.Unity_Server)
                 // Manually start the server, including with the initialization.
