@@ -13,6 +13,7 @@ using UnityEngine.UI;
 using Arteranos.Core;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace Arteranos.UI
 {
@@ -46,10 +47,26 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            cs = SettingsManager.Client;
+            IEnumerator PopulateCoroutine()
+            {
+                yield return null;
 
-            foreach(string url in cs.ServerList)
-                ServerList[url] = ServerListItem.New(lvc_ServerList.transform, url);
+                cs = SettingsManager.Client;
+
+                foreach (string url in cs.ServerList)
+                    ServerList[url] = ServerListItem.New(lvc_ServerList.transform, url);
+
+                foreach (ServerPublicData spd in SettingsManager.ServerCollection.Dump(System.DateTime.MinValue))
+                {
+                    string url = $"http://{spd.Address}:{spd.Port}/";
+                    if (!ServerList.ContainsKey(url))
+                        ServerList[url] = ServerListItem.New(lvc_ServerList.transform, url);
+
+                    yield return null;
+                }
+            }
+
+            StartCoroutine(PopulateCoroutine());
         }
 
         private void OnAddWorldClicked()
@@ -61,7 +78,7 @@ namespace Arteranos.UI
         private async void OnReloadClicked()
         {
             static Task DoUpdate(ServerListItem server) 
-                => server.RefreshServerDataAsync();
+                => server.RefreshServerDataAsync(saveOnlineData: false);
 
             btn_Reload.interactable = false;
 

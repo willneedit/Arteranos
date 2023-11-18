@@ -191,13 +191,13 @@ namespace Arteranos.UI
         private async void OnInfoClicked()
         {
             btn_Info.interactable = false;
-            await RefreshServerDataAsync(1);
+            await RefreshServerDataAsync(1, false);
             btn_Info.interactable = true;
 
-            ServerInfoUI.New(serverURL);
+            ServerInfoUI.New(spd, sod);
         }
 
-        public async Task RefreshServerDataAsync(int timeout = 1)
+        public async Task RefreshServerDataAsync(int timeout = 1, bool saveOnlineData = true)
         {
             (ServerPublicData? spd, ServerOnlineData? sod) = await ServerPublicData.GetServerDataAsync(serverURL, timeout);
             this.spd = spd;
@@ -211,7 +211,7 @@ namespace Arteranos.UI
                 this.sod = sod;
             }
 
-            if (sod != null) StoreUpdatedServerListItem();
+            if (sod != null && saveOnlineData) StoreUpdatedServerListItem();
 
             IEnumerator UpdateServerStateCoroutine()
             {
