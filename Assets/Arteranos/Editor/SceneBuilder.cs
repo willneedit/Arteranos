@@ -346,17 +346,5 @@ namespace Arteranos.Editor
                 WorldDownloader.EnterDownloadedWorld(_context);
             }
         }
-#if false
-        static IEnumerator InstantiateObject()
-        {
-            string url = "file:///" + Common.OpenFileDialog("", false, false, ".unity");
-            UnityEngine.Networking.UnityWebRequest request
-                = UnityEngine.Networking.UnityWebRequestAssetBundle.GetAssetBundle(url, 0);
-            yield return request.Send();
-            AssetBundle bundle = UnityEngine.Networking.DownloadHandlerAssetBundle.GetContent(request);
-            GameObject cube = bundle.LoadAsset<GameObject>("Sphere");
-            Instantiate(cube);
-        }
-#endif
     }
 }
