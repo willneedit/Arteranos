@@ -43,17 +43,10 @@ namespace Arteranos.Services
         // Overrides the base singleton so we don't
         // have to cast to this type everywhere.
         public static ArteranosNetworkManager Instance { get; private set; }
-        public string CurrentWorld 
-        { 
-            get => currentWorld; 
-            set => currentWorld = value; 
-        }
 
         private readonly Dictionary<int, AuthSequence> ResponseMessages = new();
 
         private readonly Dictionary<int, DateTime> SCLastUpdatedToClient = new();
-
-        private string currentWorld = null;
 
         private DateTime SCSnapshotCutoff = DateTime.MinValue;
 
@@ -215,7 +208,7 @@ namespace Arteranos.Services
         /// <param name="conn">Connection from client.</param>
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
-            Transform startPos = GetStartPosition();
+            Transform startPos = User.SpawnManager.GetStartPosition();
             GameObject player = startPos != null
                 ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
                 : Instantiate(playerPrefab);
@@ -364,7 +357,7 @@ namespace Arteranos.Services
         {
             base.OnStopServer();
 
-            CurrentWorld = null;
+            SettingsManager.CurrentWorld = null;
 
             if (CoEmitServer != null)
             {
@@ -505,7 +498,6 @@ namespace Arteranos.Services
             // First, download, do the consistency checks and set up the server's idea
             // of the world.
             Exception ex = await WorldTransition.VisitWorldAsync(worldURL, forceReload);
-            CurrentWorld = worldURL;
 
             string message = null;
 
@@ -535,17 +527,17 @@ namespace Arteranos.Services
             WorldChangeAnnounceMessage wca = new()
             {
                 Invoker = null,
-                WorldURL = CurrentWorld
+                WorldURL = SettingsManager.CurrentWorld
             };
 
-            Debug.Log($"[Server] sending worldURL '{CurrentWorld}' to latecoming conn {conn.connectionId}");
+            Debug.Log($"[Server] sending worldURL '{SettingsManager.CurrentWorld}' to latecoming conn {conn.connectionId}");
             conn.Send(wca);
         }
 
         [Client]
         private async void OnClientGotWCA(WorldChangeAnnounceMessage message)
         {
-            Debug.Log($"[Client] Server announce: Changed world to {message.WorldURL} by {message.Invoker}");
+            Debug.Log($"[Client] Server announce: Changed world from {SettingsManager.CurrentWorld} to {message.WorldURL} by {message.Invoker}");
 
             // We've already moved to the target world as the server, so no need to
             // hassle ourselves.

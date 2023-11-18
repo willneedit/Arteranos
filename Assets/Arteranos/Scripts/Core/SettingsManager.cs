@@ -29,8 +29,8 @@ namespace Arteranos.Core
         public static Client Client { get; internal set; }
         public static Server Server { get; internal set; }
         public static ServerCollection ServerCollection { get; internal set; }
-
         public static ServerUserBase ServerUsers { get; internal set; }
+        public static string CurrentWorld { get; set; }
 
         protected virtual void Awake()
         {
@@ -119,11 +119,9 @@ namespace Arteranos.Core
             };
         }
 
-        protected abstract string CurrentWorld_ { get; set; }
         protected abstract void PingServerChangeWorld_(string invoker, string worldURL);
         protected abstract void StartCoroutineAsync_(Func<IEnumerator> action);
 
-        public static string CurrentWorld { get => Instance.CurrentWorld_; set => Instance.CurrentWorld_ = value; }
         public static void PingServerChangeWorld(string invoker, string worldURL)
             => Instance.PingServerChangeWorld_(invoker, worldURL);
         public static void StartCoroutineAsync(Func<IEnumerator> action) 

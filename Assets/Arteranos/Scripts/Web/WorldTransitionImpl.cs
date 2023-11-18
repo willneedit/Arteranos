@@ -98,10 +98,10 @@ namespace Arteranos.Web
                 yield return new WaitForEndOfFrame();
                 yield return new WaitForEndOfFrame();
 
-                ScreenFader.StartFading(0.0f);
-
                 XRControl.Instance.MoveRig();
 
+                SettingsManager.CurrentWorld = null;
+                ScreenFader.StartFading(0.0f);
                 done = true;
             }
             
@@ -116,6 +116,7 @@ namespace Arteranos.Web
                 string worldABF = WorldDownloader.GetWorldABF(worldURL);
 
                 EnterDownloadedWorld(worldABF);
+                SettingsManager.CurrentWorld = worldURL;
             }
 
             return Task.Run(Enter_);
@@ -177,9 +178,6 @@ namespace Arteranos.Web
         {
             if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
             {
-                // Just in case...
-                SettingsManager.CurrentWorld = worldURL;
-
                 // In the offline mode, directly change the scene.
                 await VisitWorldAsync(worldURL, forceReload);
             }
