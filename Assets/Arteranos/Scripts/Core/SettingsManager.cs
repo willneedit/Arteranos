@@ -119,6 +119,13 @@ namespace Arteranos.Core
             };
         }
 
+        public static bool IsSelf(Uri uri)
+        {
+            (string address, int _, int mdport) = GetServerConnectionData();
+
+            return (address == uri.Host && mdport == uri.Port);
+        }
+
         protected abstract void PingServerChangeWorld_(string invoker, string worldURL);
         protected abstract void StartCoroutineAsync_(Func<IEnumerator> action);
 

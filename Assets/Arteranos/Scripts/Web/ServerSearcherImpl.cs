@@ -255,6 +255,12 @@ namespace Arteranos.Web
             // No matching server, leave it be
             if (serverURL == null) return;
 
+            if(SettingsManager.IsSelf(new Uri(serverURL)))
+            {
+                Debug.Log("...It's us! :O");
+                return;
+            }
+
             // Matching server (with matching world, if needed), initiate remote connection
             await ConnectionManager.ConnectToServer(serverURL);
         }
