@@ -44,6 +44,7 @@ namespace Arteranos.Web
         }
 
         public bool IsValid => PublicData != null;
+        public bool IsOnline => OnlineData != null;
         public string Name => PublicData?.Name;
         public string Address => PublicData?.Address;
         public int Port => PublicData?.Port ?? 0;
@@ -161,7 +162,8 @@ namespace Arteranos.Web
             int ScoreServer(ServerInfo x)
             {
                 int xScore = x.MatchScore;
-                if (context.desiredWorldURL != null 
+                if (!x.IsOnline) xScore = -20000;
+                else if (context.desiredWorldURL != null 
                     && x.CurrentWorld != context.desiredWorldURL) xScore = -10000;
                 return xScore;
             }
@@ -175,8 +177,14 @@ namespace Arteranos.Web
 
                 ServerInfo leader = context.serverInfos.Count > 0 ? context.serverInfos[0] : null;
 
+                int score = ScoreServer(leader);
+
+                if (leader == null)
+                    Debug.Log("Server search result: None at all.");
+                else
+                    Debug.Log($"Server search winner: {leader.Name}, Score: {score}");
                 // Even the leader is disqualified, there's no winner.
-                if (leader != null && ScoreServer(leader) < 0) leader = null;
+                if (leader != null && score < 0) leader = null;
 
                 // ... And the winner is... *drumroll*
                 if (leader != null) context.resultServerURL = leader.URL;
