@@ -7,11 +7,13 @@
 
 using Arteranos.Core;
 using Arteranos.Web;
+using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using UnityEngine;
+using Utils = Arteranos.Core.Utils;
 
 namespace Arteranos.Services
 {
@@ -40,7 +42,13 @@ namespace Arteranos.Services
 
             XR.XRControl.Instance.enabled = true;
 
-            if (!string.IsNullOrEmpty(TargetedServerPort))
+            yield return new WaitForEndOfFrame();
+
+            if (TargetedServerPort == $"anyhost:{ServerJSON.DefaultMetadataPort}")
+            {
+                ServerSearcher.InitiateServerTransition(DesiredWorld);
+            }
+            else if (!string.IsNullOrEmpty(TargetedServerPort))
             {
                 Uri uri = Utils.ProcessUriString(TargetedServerPort,
                     scheme: "http",
@@ -48,6 +56,12 @@ namespace Arteranos.Services
                 );
 
                 ConnectionManager.ConnectToServer(uri.ToString());
+
+                // https://www.youtube.com/watch?v=dQw4w9WgXcQ
+                while (NetworkClient.isConnecting) yield return null;
+
+                if (!NetworkClient.isConnected)
+                    _ = WorldTransition.EnterWorldAsync(null);
             }
             else
             {

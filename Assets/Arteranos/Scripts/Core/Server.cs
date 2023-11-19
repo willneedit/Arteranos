@@ -257,8 +257,6 @@ namespace Arteranos.Core
 
     public class Server : ServerJSON
     {
-        public event Action<string> OnWorldURLChanged;
-
         [JsonIgnore]
         private Crypto Crypto = null;
 
