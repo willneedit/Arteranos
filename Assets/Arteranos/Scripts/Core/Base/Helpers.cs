@@ -139,33 +139,12 @@ namespace Arteranos.Services
         public static Task StartHost(bool resetConnection = false) => Instance.StartHost(resetConnection);
         public static void StartServer() => Instance.StartServer();
         public static Task StopHost(bool loadOfflineScene) => Instance.StopHost(loadOfflineScene);
+        public static IAvatarBrain GetOnlineUser(UserID userID) => Instance.GetOnlineUser(userID);
+        public static IAvatarBrain GetOnlineUser(uint netId) => Instance.GetOnlineUser(netId);
+        public static IEnumerable<IAvatarBrain> GetOnlineUsers() => Instance.GetOnlineUsers();
+        public static bool IsVerifiedUser(UserID claimant) => Instance.IsVerifiedUser(claimant);
 
-        public static IAvatarBrain GetOnlineUser(UserID userID)
-        {
-            IEnumerable<IAvatarBrain> q =
-                from entry in GameObject.FindGameObjectsWithTag("Player")
-                where entry.GetComponent<IAvatarBrain>().UserID == userID
-                select entry.GetComponent<IAvatarBrain>();
 
-            return q.Count() > 0 ? q.First() : null;
-        }
-
-        public static IAvatarBrain GetOnlineUser(uint netId)
-        {
-            IEnumerable<IAvatarBrain> q =
-                from entry in GameObject.FindGameObjectsWithTag("Player")
-                where entry.GetComponent<IAvatarBrain>().NetID == netId
-                select entry.GetComponent<IAvatarBrain>();
-
-            return q.Count() > 0 ? q.First() : null;
-        }
-
-        public static IEnumerable<IAvatarBrain> GetOnlineUsers()
-        {
-            return from entry in GameObject.FindGameObjectsWithTag("Player")
-                   select entry.GetComponent<IAvatarBrain>();
-
-        }
     }
 
     public static class AudioManager

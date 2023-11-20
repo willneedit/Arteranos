@@ -16,11 +16,12 @@ using Mirror;
 
 using System.Net;
 using Arteranos.Web;
-using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Text.RegularExpressions;
+using Arteranos.Avatar;
+using System.Linq;
 
 namespace Arteranos.Services
 {
@@ -416,6 +417,50 @@ namespace Arteranos.Services
             if(!transitionDisconnect) _ = StopHost(true);
             transitionDisconnect = false;
         }
+        #endregion
+        // -------------------------------------------------------------------
+        #region User Data queries
+        public IAvatarBrain GetOnlineUser(UserID userID)
+        {
+            IEnumerable<IAvatarBrain> q =
+                from entry in GameObject.FindGameObjectsWithTag("Player")
+                where entry.GetComponent<IAvatarBrain>().UserID == userID
+                select entry.GetComponent<IAvatarBrain>();
+
+            return q.Count() > 0 ? q.First() : null;
+        }
+
+        public IAvatarBrain GetOnlineUser(uint netId)
+        {
+            IEnumerable<IAvatarBrain> q =
+                from entry in GameObject.FindGameObjectsWithTag("Player")
+                where entry.GetComponent<IAvatarBrain>().NetID == netId
+                select entry.GetComponent<IAvatarBrain>();
+
+            return q.Count() > 0 ? q.First() : null;
+        }
+
+        public IEnumerable<IAvatarBrain> GetOnlineUsers()
+        {
+            return from entry in GameObject.FindGameObjectsWithTag("Player")
+                   select entry.GetComponent<IAvatarBrain>();
+
+        }
+
+        public bool IsVerifiedUser(UserID claimant)
+        {
+            // If it's online, his Public Key has to be already verified in the login.
+            if (GetOnlineUser(claimant) != null) return true;
+
+            // Or, the claimant could have been noticed by you, in any case.
+            IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetSocialList(claimant);
+
+            if (q.Count() > 0) return true;
+
+            return false;
+        }
+
+        // TODO implement ServerUserBase database lookup (see UserPanel_ServerUserList)
         #endregion
         // -------------------------------------------------------------------
     }

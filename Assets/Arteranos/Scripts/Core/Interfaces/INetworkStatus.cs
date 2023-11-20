@@ -5,7 +5,10 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Avatar;
+using Arteranos.Core;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
 using System.Threading.Tasks;
@@ -48,6 +51,10 @@ namespace Arteranos.Services
 
         ConnectivityLevel GetConnectivityLevel();
         OnlineLevel GetOnlineLevel();
+        IAvatarBrain GetOnlineUser(UserID userID);
+        IAvatarBrain GetOnlineUser(uint netId);
+        IEnumerable<IAvatarBrain> GetOnlineUsers();
+        bool IsVerifiedUser(UserID claimant);
         void StartClient(Uri connectionUri);
         Task StartHost(bool resetConnection = false);
         void StartServer();
