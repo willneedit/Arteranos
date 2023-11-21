@@ -24,16 +24,27 @@ namespace Arteranos.Editor
 {
     public class SceneBuilderGUI : EditorWindow
     {
-        public WorldMetaData metadata = null;
+        public static WorldMetaData metadata = null;
+        public static Client client = null;
+
         public string targetFile = string.Empty;
         public string screenshotFile = string.Empty;
 
-        public bool inProgress = false;
+        private bool inProgress = false;
+        private bool contentRatingFoldout = true;
+
 
 
         [MenuItem("Arteranos/Build scene as world", false, 10)]
         public static void ShowScenebuilderGUI()
         {
+            client = Client.Load();
+            metadata = WorldMetaData.LoadDefaults();
+
+            metadata.AuthorID = new(client.Me.UserKey, client.Me.Nickname);
+            metadata.ContentRating = client.ContentFilterPreferences;
+            metadata.RequiresPassword = false;
+
             SceneBuilderGUI window = GetWindow<SceneBuilderGUI>("World building");
             window.Show();
         }
@@ -54,14 +65,29 @@ namespace Arteranos.Editor
                 return;
             }
 
-            metadata ??= WorldMetaData.LoadDefaults();
+            
 
             EditorGUILayout.BeginVertical(new GUIStyle { padding = new RectOffset(10, 10, 10, 10) });
 
+            EditorGUILayout.LabelField("Author Name", metadata.AuthorID);
+
+            // metadata.Author = EditorGUILayout.TextField("Author Name", metadata.Author);
+
             metadata.WorldName = EditorGUILayout.TextField("World Name", metadata.WorldName);
 
-            metadata.Author = EditorGUILayout.TextField("Author Name", metadata.Author);
+            EditorGUILayout.LabelField("World description:");
+            metadata.WorldDescription = EditorGUILayout.TextArea(metadata.WorldDescription);
 
+            if(contentRatingFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(contentRatingFoldout, "Content rating"))
+            {
+                metadata.ContentRating.Violence = EditorGUILayout.Toggle("  Violence", metadata.ContentRating.Violence ?? false);
+                metadata.ContentRating.Nudity = EditorGUILayout.Toggle("  Nudity", metadata.ContentRating.Nudity ?? false);
+                metadata.ContentRating.Suggestive = EditorGUILayout.Toggle("  Suggestive", metadata.ContentRating.Suggestive ?? false);
+                metadata.ContentRating.ExcessiveViolence = EditorGUILayout.Toggle("  Excessive Violence", metadata.ContentRating.ExcessiveViolence ?? false);
+                metadata.ContentRating.ExplicitNudes = EditorGUILayout.Toggle("  Explicit Nudity", metadata.ContentRating.ExplicitNudes ?? false);
+            }
+
+            EditorGUILayout.EndFoldoutHeaderGroup();
             screenshotFile = Common.FileSelectionField(
                 new GUIContent("Screenshot"),
                 false,

@@ -70,7 +70,7 @@ namespace Arteranos.Web
                 (metadatafile, _) = RetrieveWorld(url, true);
 
             if(metadatafile == null)
-                throw new FileNotFoundException("Unknown worls URL for the given data");
+                throw new FileNotFoundException("Unknown world URL for the given data");
 
             string json = worldMetaData.Serialize();
             File.WriteAllText(metadatafile, json);

@@ -235,7 +235,7 @@ namespace Arteranos.Core
         }
 
         // The display name of the user. Generate if null
-        public virtual string Nickname { get; set; } = null;
+        public virtual string Nickname { get; set; } = "Anonymous";
 
         // The user's login data
         public virtual LoginDataJSON Login { get; set; } = new();
