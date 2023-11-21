@@ -19,6 +19,10 @@ using System.Collections;
 using Unity.EditorCoroutines.Editor;
 using Arteranos.UI;
 using Arteranos.Web;
+using System;
+using UnityEngine.Experimental.Rendering;
+using Object = UnityEngine.Object;
+using System.Threading.Tasks;
 
 namespace Arteranos.Editor
 {
@@ -41,7 +45,7 @@ namespace Arteranos.Editor
             client = Client.Load();
             metadata = WorldMetaData.LoadDefaults();
 
-            metadata.AuthorID = new(client.Me.UserKey, client.Me.Nickname);
+            metadata.AuthorID = new(client.UserPublicKey, client.Me.Nickname);
             metadata.ContentRating = client.ContentFilterPreferences;
             metadata.RequiresPassword = false;
 
@@ -65,7 +69,11 @@ namespace Arteranos.Editor
                 return;
             }
 
-            
+            if(metadata?.AuthorID == null)
+            {
+                Close();
+                return;
+            }
 
             EditorGUILayout.BeginVertical(new GUIStyle { padding = new RectOffset(10, 10, 10, 10) });
 
@@ -93,6 +101,11 @@ namespace Arteranos.Editor
                 false,
                 false,
                 screenshotFile);
+
+            if(GUILayout.Button("Take Screenshot"))
+            {
+                TakeScreenshot();
+            }
 
             targetFile = Common.FileSelectionField(
                 new GUIContent("Target Zip File"),
@@ -144,6 +157,59 @@ namespace Arteranos.Editor
 
             SceneBuilder.BuildSceneAsWorld();
         }
+
+        IEnumerator TakePhotoCoroutine()
+        {
+            static void WriteScreenshot(string path, byte[] imgBytes, GraphicsFormat graphicsFormat, uint width, uint height)
+            {
+                byte[] Bytes = ImageConversion.EncodeArrayToPNG(imgBytes, graphicsFormat, width, height);
+                Debug.Log($"Writing screenshot to {path}");
+                File.WriteAllBytes(path, Bytes);
+            }
+
+            yield return null;
+
+            string name = $"Arteranos-Photo-{DateTime.Now:yyyyMMddHHmmss}.png";
+            // FIXME Windows only?
+            string picpath = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+
+            string path = Path.Combine(picpath, name);
+
+            Camera DroneCamera = FindObjectOfType<Camera>();
+
+            RenderTexture rt = new RenderTexture(1920, 1080, 0, RenderTextureFormat.ARGB32);
+            DroneCamera.targetTexture = rt;
+            RenderTexture.active = rt;
+
+            Texture2D tex = new(rt.width, rt.height, TextureFormat.ARGB32, false);
+            DroneCamera.Render();
+
+            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            tex.Apply();
+
+            byte[] imgBytes = tex.GetRawTextureData();
+            GraphicsFormat graphicsFormat = tex.graphicsFormat;
+            uint width = (uint)rt.width;
+            uint height = (uint)rt.height;
+
+            Task.Run(() => WriteScreenshot(path, imgBytes, graphicsFormat, width, height));
+
+            DestroyImmediate(tex);
+
+            screenshotFile = path;
+            DroneCamera.targetTexture = null;
+            RenderTexture.active = null;
+
+            DestroyImmediate(rt);
+
+        }
+
+        private void TakeScreenshot()
+        {
+            EditorCoroutineUtility.StartCoroutineOwnerless(TakePhotoCoroutine());
+        }
+
+
     }
 
     public class SceneBuilder : ScriptableObject
