@@ -140,6 +140,35 @@ namespace Arteranos.Core
             return $"{index} ({str})";
         }
 
+        public bool IsInViolation(ServerPermissions serverPerms)
+        {
+            int points = 0;
+
+            int penalty(bool world, bool? server, int unclear = 1, int clear = 5)
+            {
+                // The world has the warning label unset, so it's okay.
+                if (!world) return 0;
+
+                // And, the world's warning label _is_ set, so....
+                // The server's permissions are unclear.
+                if (server == null) return unclear;
+
+                // The server okays the warning label.
+                if (server.Value) return 0;
+
+                // The world is in clear violation of the server's permissions.
+                return clear;
+            }
+
+            points += penalty(Violence ?? true, serverPerms.Violence);
+            points += penalty(Nudity ?? true, serverPerms.Nudity);
+            points += penalty(Suggestive ?? true, serverPerms.Suggestive);
+            points += penalty(ExcessiveViolence ?? true, serverPerms.ExcessiveViolence, 2);
+            points += penalty(ExplicitNudes ?? true, serverPerms.ExplicitNudes, 2);
+
+            return points > 2;
+        }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as ServerPermissions);

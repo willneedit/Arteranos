@@ -118,6 +118,23 @@ namespace Arteranos.Web
 
             (Exception ex, Context _) = await PreloadWorldDataAsync(worldURL, forceReload);
 
+            WorldMetaData wmd = WorldGallery.RetrieveWorldMetaData(worldURL);
+
+            if (wmd?.ContentRating != null)
+            {
+                // Remotely connected user tries to sneak in something gross or raunchy?
+                if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Server || NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
+                {
+                    if (wmd.ContentRating.IsInViolation(SettingsManager.Server.Permissions))
+                    {
+                        Debug.Log("World is in violation of the server's content permission");
+                        ex = new AccessViolationException("The world is in violation of the server's content permissions.");
+                    }
+                    else
+                        Debug.Log("Server greenlighted this world.");
+                }
+            }
+
             // The server says it's the new world, jump in or ship out.
             if (ex != null)
                 await MoveToOfflineWorld();
