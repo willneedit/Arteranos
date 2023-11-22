@@ -15,6 +15,7 @@ using Arteranos.Web;
 using System.IO;
 using UnityEngine.Networking;
 using Arteranos.Core;
+using Arteranos.Services;
 
 namespace Arteranos.UI
 {
@@ -23,6 +24,7 @@ namespace Arteranos.UI
         private HoverButton btn_Add = null;
         private HoverButton btn_Visit = null;
         private HoverButton btn_Delete = null;
+        private HoverButton btn_ChangeWorld = null;
 
         public string worldURL = null;
         public Image img_Screenshot = null;
@@ -46,10 +48,12 @@ namespace Arteranos.UI
             btn_Add = btns_ItemButton[0];
             btn_Visit= btns_ItemButton[1];
             btn_Delete= btns_ItemButton[2];
+            btn_ChangeWorld = btns_ItemButton[3];
 
             btn_Add.onClick.AddListener(OnAddClicked);
-            btn_Visit.onClick.AddListener(OnVisitClicked);
+            btn_Visit.onClick.AddListener(() => OnVisitClicked(false));
             btn_Delete.onClick.AddListener(OnDeleteClicked);
+            btn_ChangeWorld.onClick.AddListener(() => OnVisitClicked(true));
         }
 
         protected override void Start()
@@ -66,6 +70,11 @@ namespace Arteranos.UI
 
             btn_Add.gameObject.SetActive(true);
             btn_Delete.gameObject.SetActive(true);
+
+            // If we're in Host mode, you're the admin of your own server, so we're able to
+            // change the world. And you still have the great responsibility...
+            btn_Visit.gameObject.SetActive(NetworkStatus.GetOnlineLevel() != OnlineLevel.Host);
+            btn_ChangeWorld.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null));
 
             // It's stored in the persistent storage?
             (metadataFile, screenshotFile) = WorldGallery.RetrieveWorld(worldURL, false);
@@ -124,17 +133,20 @@ namespace Arteranos.UI
             StartCoroutine(GetTexture(screenshotFile));
         }
 
-        private void OnVisitClicked()
+        private void OnVisitClicked(bool inPlace)
         {
             if(!string.IsNullOrEmpty(worldURL))
             {
-                if(parentUI.InPlaceWorldTransition)
+                if(inPlace)
                     WorldTransition.EnterWorldAsync(worldURL);
                 else
-                {
                     ServerSearcher.InitiateServerTransition(worldURL);
 
-                    WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
+                WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
+
+                // Only if it's not an ad-hoc entry
+                if (md != null)
+                {
                     md.Updated = DateTime.Now;
                     WorldGallery.StoreWorldMetaData(worldURL, md);
                 }

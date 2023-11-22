@@ -20,8 +20,6 @@ namespace Arteranos.UI
         [SerializeField] private RectTransform lvc_WorldList;
         [SerializeField] private TMP_InputField txt_AddWorldURL;
         [SerializeField] private Button btn_AddWorld;
-        [SerializeField] private GameObject grp_TransitionMode;
-        [SerializeField] private Spinner spn_TransitionMode;
 
         private Client cs = null;
 
@@ -44,7 +42,7 @@ namespace Arteranos.UI
 
             cs = SettingsManager.Client;
 
-            grp_TransitionMode.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null));
+            // grp_TransitionMode.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null));
 
             // Current one on top...
             if(!string.IsNullOrEmpty(SettingsManager.CurrentWorld))
@@ -54,10 +52,6 @@ namespace Arteranos.UI
             foreach(string url in cs.WorldList)
                 if(url != SettingsManager.CurrentWorld) WorldListItem.New(lvc_WorldList.transform, url, this);
         }
-
-        // true if we incite a world transition in the specific server
-        public bool InPlaceWorldTransition =>
-            grp_TransitionMode.activeSelf && spn_TransitionMode.value != 0;
 
         private void OnAddWorldClicked() => WorldListItem.New(lvc_WorldList.transform, txt_AddWorldURL.text, this);
     }
