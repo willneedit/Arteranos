@@ -148,6 +148,10 @@ namespace Arteranos.Web
         /// <returns>Task completed, or the server has been notified</returns>
         public async Task EnterWorldAsync(string worldURL, bool forceReload = false)
         {
+            ScreenFader.StartFading(1.0f);
+
+            await Task.Delay(1000);
+
             if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
             {
                 // In the offline mode, directly change the scene.

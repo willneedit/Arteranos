@@ -144,7 +144,7 @@ namespace Arteranos.Core
         {
             int points = 0;
 
-            int penalty(bool world, bool? server, int unclear = 1, int clear = 5)
+            static int penalty(bool world, bool? server, int unclear = 1, int clear = 5)
             {
                 // The world has the warning label unset, so it's okay.
                 if (!world) return 0;

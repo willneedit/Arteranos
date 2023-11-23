@@ -14,6 +14,7 @@ using UnityEngine;
 using System.Threading;
 using Arteranos.UI;
 using Arteranos.Services;
+using System.Xml.XPath;
 
 namespace Arteranos.Web
 {
@@ -83,6 +84,7 @@ namespace Arteranos.Web
     {
         public List<ServerInfo> serverInfos = null;
         public string desiredWorldURL = null;
+        public ServerPermissions desiredWorldPermissions = null;
         public string resultServerURL = null;
     }
 
@@ -162,9 +164,22 @@ namespace Arteranos.Web
             int ScoreServer(ServerInfo x)
             {
                 int xScore = x.MatchScore;
-                if (!x.IsOnline) xScore = -20000;
-                else if (context.desiredWorldURL != null 
-                    && x.CurrentWorld != context.desiredWorldURL) xScore = -10000;
+                if (!x.IsOnline)
+                {
+                    //Debug.Log($"{x.URL} is offline");
+                    xScore = -20000;
+                }
+                else if (context.desiredWorldPermissions != null && context.desiredWorldPermissions.IsInViolation(x.Permissions))
+                {
+                    //Debug.Log($"{x.URL} is too restrictive for the desired world");
+                    xScore = -10000;
+                }
+                else if (context.desiredWorldURL != null && x.CurrentWorld != context.desiredWorldURL)
+                {
+                    //Debug.Log($"{x.URL} loaded a different world");
+                    xScore = -10000;
+                }
+
                 return xScore;
             }
 
@@ -205,7 +220,8 @@ namespace Arteranos.Web
         {
             ServerSearcherContext context = new()
             {
-                desiredWorldURL = desiredWorld
+                desiredWorldURL = desiredWorld,
+                desiredWorldPermissions = (WorldGallery.RetrieveWorldMetaData(desiredWorld)?.ContentRating)
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
@@ -243,7 +259,7 @@ namespace Arteranos.Web
             {
                 // It's time to part ways...
                 if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
-                    await NetworkStatus.StopHost(false);
+                    await NetworkStatus.StopHost(true);
 
                 await WorldTransition.EnterWorldAsync(worldURL);
 
@@ -260,6 +276,10 @@ namespace Arteranos.Web
                 Debug.Log("...It's us! :O");
                 return;
             }
+
+            XR.ScreenFader.StartFading(1.0f);
+
+            await Task.Delay(1000);
 
             // Matching server (with matching world, if needed), initiate remote connection
             await ConnectionManager.ConnectToServer(serverURL);
