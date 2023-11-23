@@ -11,6 +11,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
+using Arteranos.Web;
 
 namespace Arteranos.UI
 {
@@ -50,7 +51,16 @@ namespace Arteranos.UI
 
             // ... and the rest.
             foreach(string url in cs.WorldList)
-                if(url != SettingsManager.CurrentWorld) WorldListItem.New(lvc_WorldList.transform, url, this);
+                if(url != SettingsManager.CurrentWorld)
+                {
+                    WorldMetaData wmd = WorldGallery.RetrieveWorldMetaData(url);
+
+                    // Filter out the worlds which go against to _your_ preferences.
+                    if (wmd?.ContentRating == null || !wmd.ContentRating.IsInViolation(SettingsManager.Client.ContentFilterPreferences))
+                    {
+                        WorldListItem.New(lvc_WorldList.transform, url, this);
+                    }
+                }
         }
 
         private void OnAddWorldClicked() => WorldListItem.New(lvc_WorldList.transform, txt_AddWorldURL.text, this);

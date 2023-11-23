@@ -10,13 +10,11 @@ using Arteranos.Core;
 using Arteranos.XR;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 
 namespace Arteranos.Avatar
 {
@@ -273,17 +271,6 @@ namespace Arteranos.Web
             => Instance.EnterDownloadedWorld(worldABF);
     }
 
-    public static class WorldDownloaderLow
-    {
-        public static void EnterEmbeddedWorld(string path)
-        {
-            SceneManager.LoadScene(path);
-            MoveToDownloadedWorld();
-        }
-
-        public static void MoveToDownloadedWorld() => XRControl.Instance.MoveRig();
-
-    }
 
     #endregion
     // -------------------------------------------------------------------
