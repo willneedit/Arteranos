@@ -11,6 +11,7 @@ using DERSerializer;
 using System.Threading.Tasks;
 using Arteranos.Web;
 using Arteranos.XR;
+using Arteranos.UI;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -538,6 +539,13 @@ namespace Arteranos.Services
         private async void OnClientGotWCA(WorldChangeAnnounceMessage message)
         {
             Debug.Log($"[Client] Server announce: Changed world from {SettingsManager.CurrentWorld} to {message.WorldURL} by {message.Invoker}");
+            
+            if(!string.IsNullOrEmpty(message.Message))
+            {
+                IDialogUI dialog = DialogUIFactory.New();
+                dialog.Text = message.Message;
+                dialog.Buttons = new string[] { "OK" };
+            }
 
             // We've already moved to the target world as the server, so no need to
             // hassle ourselves.

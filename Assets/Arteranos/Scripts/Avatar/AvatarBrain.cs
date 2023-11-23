@@ -426,6 +426,23 @@ namespace Arteranos.Avatar
 
         public void MakeWorkdToChange(string worldURL, bool forceReload = false)
         {
+            WorldMetaData wmd = WorldGallery.RetrieveWorldMetaData(worldURL);
+
+            if (wmd?.ContentRating != null)
+            {
+                ServerPermissions perms = NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
+                    ? SettingsManager.CurrentServer.Permissions
+                    : SettingsManager.Server.Permissions;
+
+                // Remotely connected user tries to sneak in something gross or raunchy?
+                if (wmd.ContentRating.IsInViolation(perms))
+                {
+                    IDialogUI dialog = DialogUIFactory.New();
+                    dialog.Text = "Rejected world: Content permission violation";
+                    dialog.Buttons = new string[] { "Got it" };
+                }
+            }
+
             CmdMakeWorldToChange(worldURL, forceReload);
         }
 
@@ -433,6 +450,9 @@ namespace Arteranos.Avatar
         private void CmdMakeWorldToChange(string worldURL, bool _ /* forceReload */)
         {
             if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
+
+            WorldMetaData wmd = WorldGallery.RetrieveWorldMetaData(worldURL);
+            if (wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.Server.Permissions)) return;
 
             SettingsManager.PingServerChangeWorld(UserID, worldURL);
         }
