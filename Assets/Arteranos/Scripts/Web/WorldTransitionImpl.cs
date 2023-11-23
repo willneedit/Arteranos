@@ -122,12 +122,8 @@ namespace Arteranos.Web
 
             if (wmd?.ContentRating != null)
             {
-                ServerPermissions perms = NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
-                    ? SettingsManager.CurrentServer.Permissions
-                    : SettingsManager.Server.Permissions;
-
                 // Remotely connected user tries to sneak in something gross or raunchy?
-                if (wmd.ContentRating.IsInViolation(perms))
+                if (wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions))
                 {
                     Debug.Log("World is in violation of the server's content permission");
                     ex = new AccessViolationException("The world is in violation of the server's content permissions.");

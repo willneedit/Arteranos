@@ -43,7 +43,7 @@ namespace Arteranos.Core
                 // Sign, encrypt and transmit.
                 Client.TransmitMessage(
                     user,
-                    SettingsManager.CurrentServer.ServerPublicKey,
+                    SettingsManager.ActiveServerData.ServerPublicKey,
                     out CMSPacket p);
 
                 // Use Network Behavior to contact the remote server
@@ -74,7 +74,7 @@ namespace Arteranos.Core
                 // Sign, encrypt and transmit.
                 Client.TransmitMessage(
                     kp, 
-                    SettingsManager.CurrentServer.ServerPublicKey, 
+                    SettingsManager.ActiveServerData.ServerPublicKey, 
                     out CMSPacket p);
 
                 // Use Network Behavior to contact the remote server
@@ -152,7 +152,7 @@ namespace Arteranos.Core
         {
             try
             {
-                byte[] serverPublicKey = SettingsManager.CurrentServer.ServerPublicKey;
+                byte[] serverPublicKey = SettingsManager.ActiveServerData.ServerPublicKey;
                 Client.ReceiveMessage(packet, ref serverPublicKey, out List<T> packets);
 
                 if (packets.Count == 0) callback = null;

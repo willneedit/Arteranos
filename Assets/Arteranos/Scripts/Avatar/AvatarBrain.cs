@@ -430,12 +430,8 @@ namespace Arteranos.Avatar
 
             if (wmd?.ContentRating != null)
             {
-                ServerPermissions perms = NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
-                    ? SettingsManager.CurrentServer.Permissions
-                    : SettingsManager.Server.Permissions;
-
                 // Remotely connected user tries to sneak in something gross or raunchy?
-                if (wmd.ContentRating.IsInViolation(perms))
+                if (wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions))
                 {
                     IDialogUI dialog = DialogUIFactory.New();
                     dialog.Text = "Rejected world: Content permission violation";
@@ -709,7 +705,7 @@ namespace Arteranos.Avatar
                 // TODO - maybe world restrictions.
                 // Maybe add SettingsManager.Client.PingXRControllersChanged();
                 // in the world transition, too.
-                UserCapabilities.CanEnableFly => isAnyAdmin || (SettingsManager.CurrentServer?.Permissions.Flying ?? true),
+                UserCapabilities.CanEnableFly => isAnyAdmin || (SettingsManager.ActiveServerData?.Permissions.Flying ?? true),
 
                 // Maybe some accesss restriction for requesting friendships...?
                 UserCapabilities.CanFriendUser => !friends,

@@ -105,6 +105,12 @@ namespace Arteranos.UI
 
         private void VisualizeWorldData(string metadataFile, string screenshotFile)
         {
+            WorldMetaData wmd = WorldGallery.RetrieveWorldMetaData(worldURL);
+            if(wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions))
+            {
+                btn_ChangeWorld.gameObject.SetActive(false);
+            }
+
             IEnumerator GetTexture(string screenshotFile)
             {
                 UnityWebRequest www = UnityWebRequestTexture.GetTexture($"file://{screenshotFile}");

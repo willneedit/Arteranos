@@ -32,6 +32,11 @@ namespace Arteranos.Core
         public static ServerUserBase ServerUsers { get; internal set; }
         public static string CurrentWorld { get; set; }
 
+        public static ServerJSON ActiveServerData =>
+            NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
+            ? CurrentServer
+            : Server;
+
         protected virtual void Awake()
         {
             SetupPurgatory();
