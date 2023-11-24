@@ -230,8 +230,6 @@ MonoBehaviour:
   lvc_WorldList: {fileID: 1482913777636466994}
   txt_AddWorldURL: {fileID: 1889180529782393170}
   btn_AddWorld: {fileID: 1889180529675457230}
-  grp_TransitionMode: {fileID: 8863126164322774421}
-  spn_TransitionMode: {fileID: 963403958988120504}
 --- !u!114 &8001599642481973709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1632,7 +1630,7 @@ PrefabInstance:
     - target: {fileID: 1054943576046784930, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.002721347
+      value: -0.0001875473
       objectReference: {fileID: 0}
     - target: {fileID: 1054943576046784931, guid: 56cbf0290f4529b44b98f2095baa8d5c,
         type: 3}
@@ -1833,18 +1831,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: de5e0a57164cb56478e36110bdfa5e74, type: 3}
---- !u!114 &963403958988120504 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2832715246127269007, guid: de5e0a57164cb56478e36110bdfa5e74,
-    type: 3}
-  m_PrefabInstance: {fileID: 3031310993940473143}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62557b8a1c285c54a801acd8447351c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &963403958988120505 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2832715246127269006, guid: de5e0a57164cb56478e36110bdfa5e74,
