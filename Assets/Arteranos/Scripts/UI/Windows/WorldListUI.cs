@@ -47,7 +47,7 @@ namespace Arteranos.UI
 
             // Current one on top...
             if(!string.IsNullOrEmpty(SettingsManager.CurrentWorld))
-                WorldListItem.New(lvc_WorldList.transform, SettingsManager.CurrentWorld, this);
+                WorldListItem.New(lvc_WorldList.transform, SettingsManager.CurrentWorld);
 
             // ... and the rest.
             foreach(string url in cs.WorldList)
@@ -58,11 +58,11 @@ namespace Arteranos.UI
                     // Filter out the worlds which go against to _your_ preferences.
                     if (wmd?.ContentRating == null || !wmd.ContentRating.IsInViolation(SettingsManager.Client.ContentFilterPreferences))
                     {
-                        WorldListItem.New(lvc_WorldList.transform, url, this);
+                        WorldListItem.New(lvc_WorldList.transform, url);
                     }
                 }
         }
 
-        private void OnAddWorldClicked() => WorldListItem.New(lvc_WorldList.transform, txt_AddWorldURL.text, this);
+        private void OnAddWorldClicked() => WorldListItem.New(lvc_WorldList.transform, txt_AddWorldURL.text);
     }
 }

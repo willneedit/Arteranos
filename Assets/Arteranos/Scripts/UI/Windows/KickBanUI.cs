@@ -28,9 +28,6 @@ namespace Arteranos.UI
         [SerializeField] private Toggle chk_Ban_UID = null;
         [SerializeField] private Toggle chk_Ban_Address = null;
         [SerializeField] private Toggle chk_Ban_DID = null;
-        [SerializeField] private TMP_Text lbl_Ban_UID = null;
-        [SerializeField] private TMP_Text lbl_Ban_Address = null;
-        [SerializeField] private TMP_Text lbl_Ban_DID = null;
         [SerializeField] private Button btn_Cancel = null;
         [SerializeField] private Button btn_Commit = null;
         [SerializeField] private TMP_Text btn_Commit_txt = null;

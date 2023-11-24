@@ -26,18 +26,17 @@ namespace Arteranos.UI
         private HoverButton btn_Delete = null;
         private HoverButton btn_ChangeWorld = null;
 
-        public string worldURL = null;
         public Image img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
-        public WorldListUI parentUI = null;
 
-        public static WorldListItem New(Transform parent, string url, WorldListUI parentUI)
+        private string worldURL = null;
+
+        public static WorldListItem New(Transform parent, string url)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/WorldListItem"));
             go.transform.SetParent(parent, false);
             WorldListItem worldListItem = go.GetComponent<WorldListItem>();
             worldListItem.worldURL = url;
-            worldListItem.parentUI = parentUI;
             return worldListItem;
         }
 
