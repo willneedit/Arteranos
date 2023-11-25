@@ -26,6 +26,19 @@ namespace Arteranos.Core
         public List<byte []> CurrentUsers = new();
     }
 
+    public struct WorldInfo
+    {
+        public WorldMetaData metaData;
+        
+        [ASN1Tag(1, true)] 
+        public byte[] signature;
+
+        [ASN1Tag(2, true)]
+        public byte[] screenshotPNG;
+
+        public DateTime updated;
+    }
+
     public class WorldMetaData
     {
         public const string PATH_METADATA_DEFAULTS = "MetadataDefaults.json";
@@ -36,7 +49,6 @@ namespace Arteranos.Core
         public ServerPermissions ContentRating = null;
         public bool RequiresPassword = false;
         public DateTime Created = DateTime.MinValue;
-        public DateTime Updated = DateTime.MinValue;
 
         public void SaveDefaults()
         {

@@ -53,7 +53,7 @@ namespace Arteranos.UI
             foreach(string url in cs.WorldList)
                 if(url != SettingsManager.CurrentWorld)
                 {
-                    WorldMetaData wmd = WorldGallery.RetrieveWorldMetaData(url);
+                    WorldMetaData wmd = WorldGallery.GetWorldInfo(url)?.metaData;
 
                     // Filter out the worlds which go against to _your_ preferences.
                     if (wmd?.ContentRating == null || !wmd.ContentRating.IsInViolation(SettingsManager.Client.ContentFilterPreferences))

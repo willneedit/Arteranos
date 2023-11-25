@@ -218,10 +218,13 @@ namespace Arteranos.Web
 
         public static (AsyncOperationExecutor<Context>, Context) PrepareSearchServers(string desiredWorld)
         {
+            WorldInfo? wi = WorldGallery.GetWorldInfo(desiredWorld) 
+                ?? throw new ArgumentException("No world info available.");
+
             ServerSearcherContext context = new()
             {
                 desiredWorldURL = desiredWorld,
-                desiredWorldPermissions = (WorldGallery.RetrieveWorldMetaData(desiredWorld)?.ContentRating)
+                desiredWorldPermissions = wi?.metaData.ContentRating
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]

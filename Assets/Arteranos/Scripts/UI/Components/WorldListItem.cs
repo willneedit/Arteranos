@@ -64,9 +64,6 @@ namespace Arteranos.UI
 
         private void PopulateWorldData(string worldURL)
         {
-            string metadataFile;
-            string screenshotFile;
-
             btn_Add.gameObject.SetActive(true);
             btn_Delete.gameObject.SetActive(true);
 
@@ -75,67 +72,35 @@ namespace Arteranos.UI
             btn_Visit.gameObject.SetActive(NetworkStatus.GetOnlineLevel() != OnlineLevel.Host);
             btn_ChangeWorld.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null));
 
-            // It's stored in the persistent storage?
-            (metadataFile, screenshotFile) = WorldGallery.RetrieveWorld(worldURL, false);
+            WorldInfo? wi = WorldGallery.GetWorldInfo(worldURL);
 
-            if(metadataFile != null)
-            {
-                btn_Add.gameObject.SetActive(false);
-                VisualizeWorldData(metadataFile, screenshotFile);
-                return;
-            }
+            btn_Add.gameObject.SetActive(!WorldGallery.IsWorldFavourited(worldURL));
+            btn_Delete.gameObject.SetActive(WorldGallery.IsWorldFavourited(worldURL));
 
-            // Then, it has to be stored in the cache, right?
-            (metadataFile, screenshotFile) = WorldGallery.RetrieveWorld(worldURL, true);
+            if (wi != null)
+                VisualizeWorldData(wi.Value);
+            else
+                lbl_Caption.text = $"({worldURL})";
 
-            if(metadataFile != null)
-            {
-                btn_Delete.gameObject.SetActive(false);
-                VisualizeWorldData(metadataFile, screenshotFile);
-                return;
-            }
-
-            // ... right...?
-            lbl_Caption.text = $"({worldURL})";
-
-            btn_Add.gameObject.SetActive(true);
-            btn_Delete.gameObject.SetActive(true);
         }
 
-        private void VisualizeWorldData(string metadataFile, string screenshotFile)
+        private void VisualizeWorldData(WorldInfo wi)
         {
-            WorldMetaData wmd = WorldGallery.RetrieveWorldMetaData(worldURL);
+            WorldMetaData wmd = wi.metaData;
             if(wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions))
             {
                 btn_ChangeWorld.gameObject.SetActive(false);
             }
 
-            IEnumerator GetTexture(string screenshotFile)
-            {
-                UnityWebRequest www = UnityWebRequestTexture.GetTexture($"file://{screenshotFile}");
-                yield return www.SendWebRequest();
+            if(wi.screenshotPNG != null)
+                Utils.ShowImage(wi.screenshotPNG, img_Screenshot);
 
-                if(www.result == UnityWebRequest.Result.Success)
-                {
-                    Utils.ShowImage(((DownloadHandlerTexture)www.downloadHandler).texture,
-                        img_Screenshot);
-                }
-                else
-                {
-                    Debug.Log(www.error);
-                }
-            }
 
-            string json = File.ReadAllText(metadataFile);
-            WorldMetaData md = WorldMetaData.Deserialize(json);
-
-            string lvstr = (md.Updated == DateTime.MinValue)
+            string lvstr = (wi.updated == DateTime.MinValue)
                 ? "Never"
-                : md.Updated.ToShortDateString();
+                : wi.updated.ToShortDateString();
 
-            lbl_Caption.text = $"{md.WorldName}\nLast visited: {lvstr}";
-
-            StartCoroutine(GetTexture(screenshotFile));
+            lbl_Caption.text = $"{wmd.WorldName}\nLast visited: {lvstr}";
         }
 
         private void OnVisitClicked(bool inPlace)
@@ -147,51 +112,20 @@ namespace Arteranos.UI
                 else
                     ServerSearcher.InitiateServerTransition(worldURL);
 
-                WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
-
-                // Only if it's not an ad-hoc entry
-                if (md != null)
-                {
-                    md.Updated = DateTime.Now;
-                    WorldGallery.StoreWorldMetaData(worldURL, md);
-                }
+                WorldGallery.BumpWorldInfo(worldURL);
             }
         }
 
         private void OnAddClicked()
         {
-            Client cs = SettingsManager.Client;
-
-            // Transfer the metadata in our persistent storage.
-            WorldGallery.StoreWorld(worldURL);
-
-            // Then, put it down into our bookmark list.
-            if(!cs.WorldList.Contains(worldURL))
-            {
-                cs.WorldList.Add(worldURL);
-                cs.Save();
-            }
-
-            // And lastly, visualize the changed state.
+            WorldGallery.FavouriteWorld(worldURL);
             PopulateWorldData(worldURL);
         }
 
         private void OnDeleteClicked()
         {
-            Client cs = SettingsManager.Client;
-
-            // Remove the metadata from the persistent storage.
-            WorldGallery.DeleteWorld(worldURL);
-
-            // Then, strike it from our list
-            if(cs.WorldList.Contains(worldURL))
-            {
-                cs.WorldList.Remove(worldURL);
-                cs.Save();
-            }
-
-            // And, zip, gone.
-            Destroy(gameObject);
+            WorldGallery.UnfavoriteWorld(worldURL);
+            // And, zip, gone.);
         }
     }
 }

@@ -233,20 +233,31 @@ namespace Arteranos.Web
         public static void InitiateServerTransition(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback) 
             => Instance.InitiateServerTransition(worldURL, OnSuccessCallback, OnFailureCallback);
     }
-    public static class WorldGallery
+    public abstract class WorldGallery : MonoBehaviour
     {
-        public static IWorldGallery Instance { get; set; }
+        public static WorldGallery Instance { get; set; }
 
-        public static void DeleteWorld(string url) 
-            => Instance.DeleteWorld(url);
-        public static (string, string) RetrieveWorld(string url, bool cached = false)
-            => Instance.RetrieveWorld(url, cached);
-        public static WorldMetaData RetrieveWorldMetaData(string url)
-            => Instance.RetrieveWorldMetaData(url);
-        public static bool StoreWorld(string url)
-            => Instance.StoreWorld(url);
-        public static void StoreWorldMetaData(string url, WorldMetaData worldMetaData) 
-            => Instance.StoreWorldMetaData(url, worldMetaData);
+        public abstract WorldInfo? GetWorldInfo_(string url);
+        public abstract void PutWorldInfo_(string url, WorldInfo info);
+        public abstract void FavouriteWorld_(string url);
+        public abstract void UnfavoriteWorld_(string url);
+        public abstract bool IsWorldFavourited_(string url);
+        public abstract void BumpWorldInfo_(string url);
+
+        public static WorldInfo? GetWorldInfo(string url)
+            => Instance.GetWorldInfo_(url);
+        public static void PutWorldInfo(string url, WorldInfo info)
+            => Instance.PutWorldInfo_(url, info);
+        public static void FavouriteWorld(string url)
+            => Instance.FavouriteWorld_(url);
+        public static void UnfavoriteWorld(string url)
+            => Instance.UnfavoriteWorld_(url);
+        public static bool IsWorldFavourited(string url)
+            => Instance.IsWorldFavourited_(url);
+        public static void BumpWorldInfo(string url)
+            => Instance.BumpWorldInfo_(url);
+
+
     }
 
     public class WorldTransition

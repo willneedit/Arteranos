@@ -6,108 +6,55 @@
  */
 
 using Arteranos.Core;
-using System.IO;
-using UnityEngine;
 
 namespace Arteranos.Web
 {
-    public class WorldGalleryImpl : MonoBehaviour, IWorldGallery
+    public class WorldGalleryImpl : WorldGallery
     {
-        private static string GetRootPath(string url, bool cached)
+        private void Awake() => Instance = this;
+        private void OnDestroy() => Instance = null;
+
+        public override WorldInfo? GetWorldInfo_(string url)
+            => WorldDownloader.GetWorldInfo(url);
+
+        public override void PutWorldInfo_(string url, WorldInfo info)
+            => WorldDownloader.PutWorldInfo(url, info);
+
+        public override void FavouriteWorld_(string url)
         {
-            return cached
-                ? $"{Utils.WorldCacheRootDir}/{Utils.GetURLHash(url)}/world.dir"
-                : $"{Utils.WorldStorageDir}/{Utils.GetURLHash(url)}";
-        }
+            Client c = SettingsManager.Client;
 
-        private void Awake() => WorldGallery.Instance = this;
-        private void OnDestroy() => WorldGallery.Instance = null;
-
-        public (string, string) RetrieveWorld(string url, bool cached = false)
-        {
-            string rootPath = GetRootPath(url, cached);
-
-            if(!Directory.Exists(rootPath)) return (null, null);
-
-            string metadataFile = $"{rootPath}/Metadata.json";
-
-            if(!File.Exists(metadataFile)) metadataFile = null;
-
-            string screenshotFile = null;
-            foreach(string file in Directory.EnumerateFiles(rootPath, "Screenshot.*"))
+            if(!c.WorldList.Contains(url))
             {
-                // In Unity, we use forward slash.
-                screenshotFile = $"{rootPath}/{Path.GetFileName(file)}";
-                break;
-            }    
-
-            return (metadataFile, screenshotFile);
+                c.WorldList.Add(url);
+                c.Save();
+            }
         }
 
-        public WorldMetaData RetrieveWorldMetaData(string url)
+        public override void UnfavoriteWorld_(string url)
         {
-            string metadatafile;
+            Client c = SettingsManager.Client;
 
-            (metadatafile, _) = RetrieveWorld(url, false);
-
-            if(metadatafile == null)
-                (metadatafile, _) = RetrieveWorld(url, true);
-
-            if(metadatafile == null)
-                return null;
-
-            string json = File.ReadAllText(metadatafile);
-            return WorldMetaData.Deserialize(json);
+            if (c.WorldList.Contains(url))
+            {
+                c.WorldList.Remove(url);
+                c.Save();
+            }
         }
 
-        public void StoreWorldMetaData(string url, WorldMetaData worldMetaData)
+        public override bool IsWorldFavourited_(string url)
+            => SettingsManager.Client.WorldList.Contains(url);
+
+        public override void BumpWorldInfo_(string url)
         {
-            string metadatafile;
-
-            (metadatafile, _) = RetrieveWorld(url, false);
-
-            if(metadatafile == null)
-                (metadatafile, _) = RetrieveWorld(url, true);
-
-            if(metadatafile == null)
-                throw new FileNotFoundException("Unknown world URL for the given data");
-
-            string json = worldMetaData.Serialize();
-            File.WriteAllText(metadatafile, json);
+            WorldInfo? wi = WorldDownloader.GetWorldInfo(url);
+            if (wi != null)
+            {
+                WorldInfo wiv = wi.Value;
+                wiv.updated = System.DateTime.Now;
+                WorldDownloader.PutWorldInfo(url, wiv);
+            }
         }
 
-        public bool StoreWorld(string url)
-        {
-            string metadataFile;
-            string screenshotFile;
-
-            (metadataFile, screenshotFile) = RetrieveWorld(url, true);
-
-            // Nothing at all?
-            if(string.IsNullOrEmpty(metadataFile) && string.IsNullOrEmpty(screenshotFile)) return false;
-
-            string rootPath = GetRootPath(url, false);
-
-            Directory.CreateDirectory(rootPath);
-
-            if(metadataFile != null)
-                File.Copy(metadataFile, $"{rootPath}/Metadata.json");
-
-            if(screenshotFile != null)
-                File.Copy(screenshotFile, $"{rootPath}/{Path.GetFileName(screenshotFile)}");
-
-            return true;
-        }
-
-        public void DeleteWorld(string url)
-        {
-            string rootPath = GetRootPath(url, false);
-
-            if(Directory.Exists(rootPath)) Directory.Delete(rootPath, true);
-
-            rootPath = GetRootPath(url, true);
-
-            if(Directory.Exists(rootPath)) Directory.Delete(rootPath, true);
-        }
     }
 }

@@ -31,6 +31,52 @@ namespace Arteranos.Web
         public string worldAssetBundleFile = null;
     }
 
+    internal class BuildWorldInfoOp : IAsyncOperation<Context>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 0.5f;
+        public string Caption => "Caching...";
+        public Action<float> ProgressChanged { get; set; }
+
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            WorldDownloaderContext context = _context as WorldDownloaderContext;
+
+
+            Context Execute()
+            {
+                string url = context.url;
+                string wcd = WorldDownloader.GetWorldCacheDir(url);
+                string rootPath = $"{wcd}/world.dir";
+                string metadataFile = $"{rootPath}/Metadata.json";
+                string screenshotFile = null;
+                foreach (string file in Directory.EnumerateFiles(rootPath, "Screenshot.*"))
+                {
+                    screenshotFile = $"{rootPath}/{Path.GetFileName(file)}";
+                    break;
+                }
+
+                string json = File.ReadAllText(metadataFile);
+                byte[] screenshotBytes = File.ReadAllBytes(screenshotFile);
+
+                WorldInfo wi = new()
+                {
+                    metaData = WorldMetaData.Deserialize(json),
+                    signature = null,
+                    screenshotPNG = screenshotBytes,
+                    updated = DateTime.Now
+                };
+
+                byte[] worldInfoDER = DERSerializer.Serializer.Serialize(wi);
+                string worldInfoFile = $"{wcd}/world.info";
+                File.WriteAllBytes(worldInfoFile, worldInfoDER);
+
+                return context;
+            }
+
+            return await Task.Run(Execute);
+        }
+    }
     internal class UnzipWorldFileOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
@@ -206,7 +252,8 @@ namespace Arteranos.Web
             {
                 new CheckCacheOp(),
                 new DownloadOp(),
-                new UnzipWorldFileOp()
+                new UnzipWorldFileOp(),
+                new BuildWorldInfoOp(),
             })
             {
                 Timeout = timeout
@@ -234,6 +281,30 @@ namespace Arteranos.Web
 
         public static string GetTouchFile(string worldURL) 
             => $"{GetWorldCacheDir(worldURL)}/_completed.txt";
+
+        public static WorldInfo? GetWorldInfo(string worldURL)
+        {
+            try
+            {
+                byte[] wiDER = File.ReadAllBytes($"{GetWorldCacheDir(worldURL)}/world.info");
+                return DERSerializer.Serializer.Deserialize<WorldInfo>(wiDER);
+            }
+            catch
+            {
+                // But... okay. Maybe as little as a typo in the URL.
+                return null;
+            }
+        }
+
+        public static void PutWorldInfo(string worldURL, WorldInfo worldInfo)
+        {
+            try
+            {
+                byte[] wiDER = DERSerializer.Serializer.Serialize(worldInfo);
+                File.WriteAllBytes($"{GetWorldCacheDir(worldURL)}/world.info", wiDER);
+            }
+            catch { }
+        }
 
         public static string GetWorldABFfromWD(string path)
         {

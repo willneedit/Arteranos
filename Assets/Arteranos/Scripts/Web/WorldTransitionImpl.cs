@@ -118,7 +118,8 @@ namespace Arteranos.Web
 
             (Exception ex, Context _) = await PreloadWorldDataAsync(worldURL, forceReload);
 
-            WorldMetaData wmd = WorldGallery.RetrieveWorldMetaData(worldURL);
+            WorldInfo? wi = WorldGallery.GetWorldInfo(worldURL);
+            WorldMetaData wmd = wi?.metaData;
 
             if (wmd?.ContentRating != null)
             {
