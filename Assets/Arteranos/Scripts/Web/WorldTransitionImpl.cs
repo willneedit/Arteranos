@@ -45,7 +45,7 @@ namespace Arteranos.Web
         }
 
         public bool IsWorldPreloaded(string worldURL) 
-            => File.Exists(WorldDownloader.GetTouchFile(worldURL));
+            => File.Exists(WorldDownloader.GetWIFile(worldURL));
 
         public async Task MoveToOfflineWorld()
         {

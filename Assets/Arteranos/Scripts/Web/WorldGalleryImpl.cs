@@ -6,6 +6,10 @@
  */
 
 using Arteranos.Core;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using UnityEngine.Networking;
 
 namespace Arteranos.Web
 {
@@ -16,6 +20,34 @@ namespace Arteranos.Web
 
         public override WorldInfo? GetWorldInfo_(string url)
             => WorldDownloader.GetWorldInfo(url);
+
+        public override async Task<WorldInfo?> LoadWorldInfoAsync_(string url)
+        {
+            WorldInfo? wi = WorldDownloader.GetWorldInfo(url);
+            if (wi != null) return wi;
+
+            UriBuilder uriBuilder = new(url);
+            string infoPath = Path.ChangeExtension(uriBuilder.Path, "info");
+            uriBuilder.Path = infoPath;
+
+            using UnityWebRequest uwr = new(uriBuilder.ToString(), UnityWebRequest.kHttpVerbGET);
+            uwr.downloadHandler = new DownloadHandlerBuffer();
+
+            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
+
+            while (!uwr_ao.isDone) await Task.Yield();
+
+            if (uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.ConnectionError)
+                return null;
+
+            try
+            {
+                wi = DERSerializer.Serializer.Deserialize<WorldInfo>(uwr.downloadHandler.data);
+            }
+            catch { }
+
+            return wi;
+        }
 
         public override void PutWorldInfo_(string url, WorldInfo info)
             => WorldDownloader.PutWorldInfo(url, info);
@@ -51,7 +83,7 @@ namespace Arteranos.Web
             if (wi != null)
             {
                 WorldInfo wiv = wi.Value;
-                wiv.updated = System.DateTime.Now;
+                wiv.updated = DateTime.Now;
                 WorldDownloader.PutWorldInfo(url, wiv);
             }
         }

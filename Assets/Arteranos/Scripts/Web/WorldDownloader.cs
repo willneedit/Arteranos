@@ -48,6 +48,10 @@ namespace Arteranos.Web
                 string url = context.url;
                 string wcd = WorldDownloader.GetWorldCacheDir(url);
                 string rootPath = $"{wcd}/world.dir";
+                string worldInfoFile = $"{wcd}/world.info";
+
+                if (File.Exists(worldInfoFile)) return context;
+
                 string metadataFile = $"{rootPath}/Metadata.json";
                 string screenshotFile = null;
                 foreach (string file in Directory.EnumerateFiles(rootPath, "Screenshot.*"))
@@ -68,7 +72,6 @@ namespace Arteranos.Web
                 };
 
                 byte[] worldInfoDER = DERSerializer.Serializer.Serialize(wi);
-                string worldInfoFile = $"{wcd}/world.info";
                 File.WriteAllBytes(worldInfoFile, worldInfoDER);
 
                 return context;
@@ -92,8 +95,7 @@ namespace Arteranos.Web
             {
                 string path = Path.ChangeExtension(context.worldZipFile, "dir");
 
-                if (Directory.Exists(path))
-                    Directory.Delete(path, true);
+                if (Directory.Exists(path)) Directory.Delete(path, true);
 
                 ZipFile.ExtractToDirectory(context.worldZipFile, path);
 
@@ -101,7 +103,6 @@ namespace Arteranos.Web
 
                 context.worldAssetBundleFile = worldABF;
 
-                File.WriteAllText(WorldDownloader.GetTouchFile(context.url), "Completed.");
                 return context;
 
             });
@@ -179,7 +180,7 @@ namespace Arteranos.Web
             context.cachedir = $"{WorldDownloader.GetWorldCacheDir(context.url)}";
             context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
 
-            string touchfile = WorldDownloader.GetTouchFile(context.url);
+            string touchfile = WorldDownloader.GetWIFile(context.url);
             if(File.Exists(touchfile)) File.Delete(touchfile);
 
             if(context.reload)
@@ -279,14 +280,14 @@ namespace Arteranos.Web
         public static string GetWorldCacheDir(string worldURL) 
             => $"{Utils.WorldCacheRootDir}/{Utils.GetURLHash(worldURL)}";
 
-        public static string GetTouchFile(string worldURL) 
-            => $"{GetWorldCacheDir(worldURL)}/_completed.txt";
+        public static string GetWIFile(string worldURL) 
+            => $"{GetWorldCacheDir(worldURL)}/world.info";
 
         public static WorldInfo? GetWorldInfo(string worldURL)
         {
             try
             {
-                byte[] wiDER = File.ReadAllBytes($"{GetWorldCacheDir(worldURL)}/world.info");
+                byte[] wiDER = File.ReadAllBytes(GetWIFile(worldURL));
                 return DERSerializer.Serializer.Deserialize<WorldInfo>(wiDER);
             }
             catch
@@ -301,7 +302,7 @@ namespace Arteranos.Web
             try
             {
                 byte[] wiDER = DERSerializer.Serializer.Serialize(worldInfo);
-                File.WriteAllBytes($"{GetWorldCacheDir(worldURL)}/world.info", wiDER);
+                File.WriteAllBytes(GetWIFile(worldURL), wiDER);
             }
             catch { }
         }

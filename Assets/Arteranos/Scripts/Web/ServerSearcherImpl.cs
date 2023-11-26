@@ -14,7 +14,6 @@ using UnityEngine;
 using System.Threading;
 using Arteranos.UI;
 using Arteranos.Services;
-using System.Xml.XPath;
 
 namespace Arteranos.Web
 {
@@ -86,6 +85,25 @@ namespace Arteranos.Web
         public string desiredWorldURL = null;
         public ServerPermissions desiredWorldPermissions = null;
         public string resultServerURL = null;
+    }
+
+    internal class PreloadServerRequirementsOp : IAsyncOperation<Context>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 0.1f;
+        public string Caption => "Preloading";
+        public Action<float> ProgressChanged { get; set; }
+
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            ServerSearcherContext context = _context as ServerSearcherContext;
+
+            WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(context.desiredWorldURL);
+
+            context.desiredWorldPermissions = wi?.metaData.ContentRating;
+
+            return context;
+        }
     }
 
     internal class FetchServersOp : IAsyncOperation<Context>
@@ -218,17 +236,14 @@ namespace Arteranos.Web
 
         public static (AsyncOperationExecutor<Context>, Context) PrepareSearchServers(string desiredWorld)
         {
-            WorldInfo? wi = WorldGallery.GetWorldInfo(desiredWorld) 
-                ?? throw new ArgumentException("No world info available.");
-
             ServerSearcherContext context = new()
             {
-                desiredWorldURL = desiredWorld,
-                desiredWorldPermissions = wi?.metaData.ContentRating
+                desiredWorldURL = desiredWorld
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
             {
+                new PreloadServerRequirementsOp(),
                 new FetchServersOp(),
                 new UpdateServersOp(),
                 new SortServersOp()

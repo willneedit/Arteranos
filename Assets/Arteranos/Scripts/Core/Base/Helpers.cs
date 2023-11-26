@@ -238,6 +238,7 @@ namespace Arteranos.Web
         public static WorldGallery Instance { get; set; }
 
         public abstract WorldInfo? GetWorldInfo_(string url);
+        public abstract Task<WorldInfo?> LoadWorldInfoAsync_(string url);
         public abstract void PutWorldInfo_(string url, WorldInfo info);
         public abstract void FavouriteWorld_(string url);
         public abstract void UnfavoriteWorld_(string url);
@@ -246,6 +247,8 @@ namespace Arteranos.Web
 
         public static WorldInfo? GetWorldInfo(string url)
             => Instance.GetWorldInfo_(url);
+        public static Task<WorldInfo?> LoadWorldInfoAsync(string url)
+            => Instance.LoadWorldInfoAsync_(url);
         public static void PutWorldInfo(string url, WorldInfo info)
             => Instance.PutWorldInfo_(url, info);
         public static void FavouriteWorld(string url)
