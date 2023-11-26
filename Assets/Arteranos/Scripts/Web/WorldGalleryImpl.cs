@@ -8,6 +8,7 @@
 using Arteranos.Core;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.Networking;
 
@@ -21,7 +22,7 @@ namespace Arteranos.Web
         public override WorldInfo? GetWorldInfo_(string url)
             => WorldDownloader.GetWorldInfo(url);
 
-        public override async Task<WorldInfo?> LoadWorldInfoAsync_(string url)
+        public override async Task<WorldInfo?> LoadWorldInfoAsync_(string url, CancellationToken token)
         {
             WorldInfo? wi = WorldDownloader.GetWorldInfo(url);
             if (wi != null) return wi;
@@ -35,7 +36,7 @@ namespace Arteranos.Web
 
             UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
 
-            while (!uwr_ao.isDone) await Task.Yield();
+            while (!uwr_ao.isDone && !token.IsCancellationRequested) await Task.Yield();
 
             if (uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.ConnectionError)
                 return null;
@@ -44,7 +45,11 @@ namespace Arteranos.Web
             {
                 wi = DERSerializer.Serializer.Deserialize<WorldInfo>(uwr.downloadHandler.data);
             }
-            catch { }
+            catch 
+            {
+                // Invalid ASN.1 DER coding for WorldInfo.
+                wi = null;
+            }
 
             return wi;
         }

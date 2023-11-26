@@ -98,7 +98,7 @@ namespace Arteranos.Web
         {
             ServerSearcherContext context = _context as ServerSearcherContext;
 
-            WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(context.desiredWorldURL);
+            WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(context.desiredWorldURL, token);
 
             context.desiredWorldPermissions = wi?.metaData.ContentRating;
 
