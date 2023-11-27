@@ -16,6 +16,8 @@ using System.IO;
 using UnityEngine.Networking;
 using Arteranos.Core;
 using Arteranos.Services;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Arteranos.UI
 {
@@ -59,33 +61,39 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            if(!string.IsNullOrEmpty(worldURL)) PopulateWorldData(worldURL);
+            lbl_Caption.text = "Loading...";
+
+            _ = PopulateWorldData(worldURL);
         }
 
-        private void PopulateWorldData(string worldURL)
+        private async Task PopulateWorldData(string worldURL)
         {
-            btn_Add.gameObject.SetActive(true);
-            btn_Delete.gameObject.SetActive(true);
+            using CancellationTokenSource cts = new();
+            WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(worldURL, cts.Token);
 
+            IEnumerator VisCoroutine()
+            {
+                yield return null;
+
+                if (wi != null)
+                    VisualizeWorldData(wi.Value);
+                else
+                    lbl_Caption.text = $"({worldURL})";
+            }
+
+            SettingsManager.StartCoroutineAsync(VisCoroutine);
+        }
+
+        private void VisualizeWorldData(WorldInfo wi)
+        {
             // If we're in Host mode, you're the admin of your own server, so we're able to
             // change the world. And you still have the great responsibility...
             btn_Visit.gameObject.SetActive(NetworkStatus.GetOnlineLevel() != OnlineLevel.Host);
             btn_ChangeWorld.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null));
 
-            WorldInfo? wi = WorldGallery.GetWorldInfo(worldURL);
-
             btn_Add.gameObject.SetActive(!WorldGallery.IsWorldFavourited(worldURL));
             btn_Delete.gameObject.SetActive(WorldGallery.IsWorldFavourited(worldURL));
 
-            if (wi != null)
-                VisualizeWorldData(wi.Value);
-            else
-                lbl_Caption.text = $"({worldURL})";
-
-        }
-
-        private void VisualizeWorldData(WorldInfo wi)
-        {
             WorldMetaData wmd = wi.metaData;
             if(wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions))
             {
@@ -119,13 +127,13 @@ namespace Arteranos.UI
         private void OnAddClicked()
         {
             WorldGallery.FavouriteWorld(worldURL);
-            PopulateWorldData(worldURL);
+            _ = PopulateWorldData(worldURL);
         }
 
         private void OnDeleteClicked()
         {
             WorldGallery.UnfavoriteWorld(worldURL);
-            // And, zip, gone.);
+            _ = PopulateWorldData(worldURL);
         }
     }
 }
