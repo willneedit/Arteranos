@@ -302,7 +302,10 @@ namespace Arteranos.Web
             try
             {
                 byte[] wiDER = DERSerializer.Serializer.Serialize(worldInfo);
-                File.WriteAllBytes(GetWIFile(worldURL), wiDER);
+                string wifile = GetWIFile(worldURL);
+                string widir = Path.GetDirectoryName(wifile);
+                if(!Directory.Exists(widir)) Directory.CreateDirectory(widir);
+                File.WriteAllBytes(wifile, wiDER);
             }
             catch { }
         }
