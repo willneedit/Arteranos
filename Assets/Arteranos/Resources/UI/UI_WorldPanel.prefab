@@ -574,7 +574,7 @@ GameObject:
   - component: {fileID: 1889180529585697682}
   - component: {fileID: 1889180529585697683}
   - component: {fileID: 1889180529585697686}
-  - component: {fileID: 1889180529585697677}
+  - component: {fileID: 3973834586187625388}
   - component: {fileID: 8001599642481973709}
   - component: {fileID: 2383748473476550683}
   - component: {fileID: -3480630777290480473}
@@ -649,7 +649,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RaycastTriggerInteraction: 1
---- !u!114 &1889180529585697677
+--- !u!114 &3973834586187625388
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -658,12 +658,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 1889180529585697687}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8dc2b8c05294414587a7f33af43d0bb, type: 3}
+  m_Script: {fileID: 11500000, guid: 095b2eb3b8a625e459fa53e461d29a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lvc_WorldList: {fileID: 0}
+  grp_WorldPanelSample: {fileID: 1827819663243970402}
+  lbl_PageCount: {fileID: 6906994644341737680}
+  btn_First: {fileID: 7573685681658609974}
+  btn_FRev: {fileID: 7306686166810181447}
+  btn_Previous: {fileID: 1986285978282487545}
+  btn_Next: {fileID: 9197791197957118211}
+  btn_FFwd: {fileID: 5240168705432354815}
+  btn_Last: {fileID: 3024532392165282353}
   txt_AddWorldURL: {fileID: 1889180529782393170}
   btn_AddWorld: {fileID: 1889180529675457230}
+  pageCountPattern: 
 --- !u!114 &8001599642481973709
 MonoBehaviour:
   m_ObjectHideFlags: 0

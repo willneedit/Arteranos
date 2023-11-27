@@ -31,14 +31,14 @@ namespace Arteranos.UI
         public Image img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
 
-        private string worldURL = null;
+        public string WorldURL { get; internal set; } = null;
 
         public static WorldListItem New(Transform parent, string url)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/WorldListItem"));
             go.transform.SetParent(parent, false);
             WorldListItem worldListItem = go.GetComponent<WorldListItem>();
-            worldListItem.worldURL = url;
+            worldListItem.WorldURL = url;
             return worldListItem;
         }
 
@@ -63,7 +63,7 @@ namespace Arteranos.UI
 
             lbl_Caption.text = "Loading...";
 
-            _ = PopulateWorldData(worldURL);
+            _ = PopulateWorldData(WorldURL);
         }
 
         private async Task PopulateWorldData(string worldURL)
@@ -91,8 +91,8 @@ namespace Arteranos.UI
             btn_Visit.gameObject.SetActive(NetworkStatus.GetOnlineLevel() != OnlineLevel.Host);
             btn_ChangeWorld.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null));
 
-            btn_Add.gameObject.SetActive(!WorldGallery.IsWorldFavourited(worldURL));
-            btn_Delete.gameObject.SetActive(WorldGallery.IsWorldFavourited(worldURL));
+            btn_Add.gameObject.SetActive(!WorldGallery.IsWorldFavourited(WorldURL));
+            btn_Delete.gameObject.SetActive(WorldGallery.IsWorldFavourited(WorldURL));
 
             WorldMetaData wmd = wi.metaData;
             if(wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions))
@@ -113,27 +113,27 @@ namespace Arteranos.UI
 
         private void OnVisitClicked(bool inPlace)
         {
-            if(!string.IsNullOrEmpty(worldURL))
+            if(!string.IsNullOrEmpty(WorldURL))
             {
                 if(inPlace)
-                    WorldTransition.EnterWorldAsync(worldURL);
+                    WorldTransition.EnterWorldAsync(WorldURL);
                 else
-                    ServerSearcher.InitiateServerTransition(worldURL);
+                    ServerSearcher.InitiateServerTransition(WorldURL);
 
-                WorldGallery.BumpWorldInfo(worldURL);
+                WorldGallery.BumpWorldInfo(WorldURL);
             }
         }
 
         private void OnAddClicked()
         {
-            WorldGallery.FavouriteWorld(worldURL);
-            _ = PopulateWorldData(worldURL);
+            WorldGallery.FavouriteWorld(WorldURL);
+            _ = PopulateWorldData(WorldURL);
         }
 
         private void OnDeleteClicked()
         {
-            WorldGallery.UnfavoriteWorld(worldURL);
-            _ = PopulateWorldData(worldURL);
+            WorldGallery.UnfavoriteWorld(WorldURL);
+            _ = PopulateWorldData(WorldURL);
         }
     }
 }

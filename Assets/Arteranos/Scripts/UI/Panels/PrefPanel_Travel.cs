@@ -58,7 +58,7 @@ namespace Arteranos.UI
         {
             SysMenu.CloseSysMenus();
 
-            WorldListUI.New();
+            WorldPanelUI.New();
         }
 
         private void OnServerGalleryClicked()
