@@ -12,9 +12,71 @@ using Newtonsoft.Json;
 using System.IO;
 
 using DERSerializer;
+using System.Threading.Tasks;
 
 namespace Arteranos.Core
 {
+    public class ServerInfo
+    {
+        private ServerPublicData? PublicData;
+        private ServerOnlineData? OnlineData;
+
+        public ServerInfo(string address, int port)
+        {
+            PublicData = SettingsManager.ServerCollection.Get(address, port);
+            OnlineData = null;
+        }
+
+        public ServerInfo(string url)
+        {
+            Uri uri = new(url);
+
+            PublicData = SettingsManager.ServerCollection.Get(uri.Host, uri.Port);
+            OnlineData = null;
+        }
+
+        public async Task Update(int timeout = 1)
+        {
+            // Server's last sign of life is fresh, no need to poke it again.
+            if (LastOnline <= DateTime.Now.AddMinutes(-2) || OnlineData == null)
+                (PublicData, OnlineData) = await PublicData?.GetServerDataAsync(timeout);
+        }
+
+        public bool IsValid => PublicData != null;
+        public bool IsOnline => OnlineData != null;
+        public string Name => PublicData?.Name;
+        public string Address => PublicData?.Address;
+        public int Port => PublicData?.Port ?? 0;
+        public string URL => $"http://{Address}:{Port}/";
+        public byte[] Icon => OnlineData?.Icon;
+        public ServerPermissions Permissions => PublicData?.Permissions;
+        public DateTime LastOnline => PublicData?.LastOnline ?? DateTime.UnixEpoch;
+        public string CurrentWorld => OnlineData?.CurrentWorld ?? string.Empty;
+        public int UserCount => OnlineData?.UserPublicKeys.Count ?? 0;
+        public int FriendCount
+        {
+            get
+            {
+                if (OnlineData == null) return 0;
+
+                int friend = 0;
+                IEnumerable<SocialListEntryJSON> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.State));
+
+                foreach (SocialListEntryJSON entry in friends)
+                    if (OnlineData.Value.UserPublicKeys.Contains(entry.UserID)) friend++;
+
+                return friend;
+            }
+        }
+        public int MatchScore
+        {
+            get
+            {
+                (int ms, int _) = Permissions.MatchRatio(SettingsManager.Client.ContentFilterPreferences);
+                return ms + FriendCount * 3;
+            }
+        }
+    }
 
     /// <summary>
     /// Public server meta data with the connection data and the privileges
