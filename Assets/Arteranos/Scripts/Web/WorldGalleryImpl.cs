@@ -44,6 +44,7 @@ namespace Arteranos.Web
             try
             {
                 wi = DERSerializer.Serializer.Deserialize<WorldInfo>(uwr.downloadHandler.data);
+                PutWorldInfo(url, wi.Value);
             }
             catch 
             {
