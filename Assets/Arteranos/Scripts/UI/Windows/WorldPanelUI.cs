@@ -17,6 +17,7 @@ using System;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections;
+using System.Linq;
 
 namespace Arteranos.UI
 {
@@ -26,6 +27,8 @@ namespace Arteranos.UI
         public int serversCount;
         public int usersCount;
         public int friendsMax;
+        public WorldInfo? worldInfo;
+        public bool favourited;
     }
 
     public class WorldPanelUI : UIBehaviour
@@ -100,8 +103,30 @@ namespace Arteranos.UI
         {
             if (sortedWorldList.Contains(url)) return;
 
-            WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(url, token);
-            WorldMetaData wmd = wi?.metaData;
+            if (worldlist.TryGetValue(url, out Collection list))
+            {
+                if(list.worldInfo == null)
+                {
+                    WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(url, token);
+                    list.worldInfo = wi;
+                    worldlist[url] = list;
+                }
+            }
+            else // Manually edited?
+            {
+                WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(url, token);
+                worldlist[url] = new()
+                {
+                    worldURL = url,
+                    friendsMax = 0,
+                    serversCount = 0,
+                    usersCount = 0,
+                    worldInfo = wi,
+                    favourited = false
+                };
+            }
+
+            WorldMetaData wmd = list.worldInfo?.metaData;
 
             // Filter out the worlds which go against to _your_ preferences.
             if (wmd?.ContentRating == null || !wmd.ContentRating.IsInViolation(SettingsManager.Client.ContentFilterPreferences))
@@ -112,6 +137,23 @@ namespace Arteranos.UI
                 
         }
 
+        private int ScoreWorld(string url) 
+        {
+            if(!worldlist.TryGetValue(url, out Collection list)) return -10000;
+
+            int score = 0;
+
+            score += list.serversCount; // Servers get one point.
+
+            score += list.usersCount * 5; // Users get five points.
+
+            score += list.friendsMax * 20; // Friends get twenty points.
+
+            score += list.favourited ? 100000 : 0; // A class for its own.
+
+            return score;
+        }
+
         private async Task CollateServersData()
         {
             async Task UpdateOne(ServerInfo serverInfo)
@@ -119,24 +161,25 @@ namespace Arteranos.UI
                 await serverInfo.Update(1);
 
                 // Server offline or has no world loaded?
-                if(!serverInfo.IsOnline || string.IsNullOrEmpty(serverInfo.CurrentWorld)) return;
+                string url = serverInfo.CurrentWorld;
+                if (!serverInfo.IsOnline || string.IsNullOrEmpty(url)) return;
 
                 int friends = serverInfo.FriendCount;
 
                 DictMutex.WaitOne();
 
-                if(worldlist.TryGetValue(serverInfo.CurrentWorld, out Collection list))
+                if(worldlist.TryGetValue(url, out Collection list))
                 {
                     list.serversCount++;
                     list.usersCount += serverInfo.UserCount;
                     if(friends > list.friendsMax) list.friendsMax = friends;
-                    worldlist[serverInfo.CurrentWorld] = list;
+                    worldlist[url] = list;
                 }
                 else
                 {
-                    worldlist[serverInfo.CurrentWorld] = new()
+                    worldlist[url] = new()
                     {
-                        worldURL = serverInfo.CurrentWorld,
+                        worldURL = url,
                         friendsMax = friends,
                         serversCount = 1,
                         usersCount = serverInfo.UserCount
@@ -160,13 +203,21 @@ namespace Arteranos.UI
             sortedWorldList.Clear();
 
             if (!string.IsNullOrEmpty(SettingsManager.CurrentWorld))
-                _ = AddListEntry(SettingsManager.CurrentWorld, cts.Token);
+                await AddListEntry(SettingsManager.CurrentWorld, cts.Token);
 
             foreach (string url in cs.WorldList)
-                _ = AddListEntry(url, cts.Token);
+            {
+                await AddListEntry(url, cts.Token);
+                Collection list = worldlist[url];
+                list.favourited = true;
+                worldlist[url] = list;
+            }
 
-            foreach (string url in worldlist.Keys)
-                _ = AddListEntry(url, cts.Token);
+            string[] keys = worldlist.Keys.ToArray();
+            foreach (string url in keys)
+                await AddListEntry(url, cts.Token);
+
+            sortedWorldList.Sort((x, y) => ScoreWorld(y) - ScoreWorld(x));
 
             SettingsManager.StartCoroutineAsync(() => ShowPage(0));
         }
@@ -192,6 +243,18 @@ namespace Arteranos.UI
                 GameObject go = Instantiate(grp_WorldPanelSample, panels);
                 WorldListItem wli = go.GetComponentInChildren<WorldListItem>();
                 wli.WorldURL = sortedWorldList[i];
+                if (worldlist.TryGetValue(wli.WorldURL, out Collection list))
+                {
+                    wli.WorldName = list.worldInfo?.metaData.WorldName;
+                    wli.ScreenshotPNG = list.worldInfo?.screenshotPNG;
+                    wli.LastAccessed = list.worldInfo?.updated ?? DateTime.MinValue;
+                    wli.ServersCount = list.serversCount;
+                    wli.UsersCount = list.usersCount;
+                    wli.FriendsMax = list.friendsMax;
+
+                    WorldMetaData wmd = list.worldInfo?.metaData;
+                    wli.AllowedForThis = !(wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions));
+                }
                 go.SetActive(true);
             }
 

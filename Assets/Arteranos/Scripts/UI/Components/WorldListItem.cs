@@ -32,6 +32,15 @@ namespace Arteranos.UI
         public TMP_Text lbl_Caption = null;
 
         public string WorldURL { get; internal set; } = null;
+        public string WorldName { get; internal set; } = null;
+        public byte[] ScreenshotPNG { get; internal set; } = null;
+        public DateTime LastAccessed { get; internal set; } = DateTime.MinValue;
+        public int ServersCount { get; internal set; } = 0;
+        public int UsersCount { get; internal set; } = 0;
+        public int FriendsMax { get; internal set; } = 0;
+        public bool AllowedForThis {  get; internal set; } = true;
+
+        private string patternCaption = null;
 
         public static WorldListItem New(Transform parent, string url)
         {
@@ -45,6 +54,8 @@ namespace Arteranos.UI
         protected override void Awake()
         {
             base.Awake();
+
+            patternCaption = lbl_Caption.text;
 
             btn_Add = btns_ItemButton[0];
             btn_Visit= btns_ItemButton[1];
@@ -63,52 +74,51 @@ namespace Arteranos.UI
 
             lbl_Caption.text = "Loading...";
 
-            _ = PopulateWorldData(WorldURL);
+            PopulateWorldData(WorldURL);
         }
 
-        private async Task PopulateWorldData(string worldURL)
+        private void PopulateWorldData(string worldURL)
         {
-            using CancellationTokenSource cts = new();
-            WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(worldURL, cts.Token);
-
             IEnumerator VisCoroutine()
             {
                 yield return null;
 
-                if (wi != null)
-                    VisualizeWorldData(wi.Value);
+                if (!string.IsNullOrEmpty(WorldName))
+                    VisualizeWorldData();
                 else
                     lbl_Caption.text = $"({worldURL})";
             }
 
-            SettingsManager.StartCoroutineAsync(VisCoroutine);
+            StartCoroutine(VisCoroutine());
         }
 
-        private void VisualizeWorldData(WorldInfo wi)
+        private void VisualizeWorldData()
         {
             // If we're in Host mode, you're the admin of your own server, so we're able to
             // change the world. And you still have the great responsibility...
             btn_Visit.gameObject.SetActive(NetworkStatus.GetOnlineLevel() != OnlineLevel.Host);
-            btn_ChangeWorld.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null));
+            btn_ChangeWorld.gameObject.SetActive(
+                Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null)
+                && AllowedForThis);
 
             btn_Add.gameObject.SetActive(!WorldGallery.IsWorldFavourited(WorldURL));
             btn_Delete.gameObject.SetActive(WorldGallery.IsWorldFavourited(WorldURL));
 
-            WorldMetaData wmd = wi.metaData;
-            if(wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions))
-            {
-                btn_ChangeWorld.gameObject.SetActive(false);
-            }
 
-            if(wi.screenshotPNG != null)
-                Utils.ShowImage(wi.screenshotPNG, img_Screenshot);
+            if(ScreenshotPNG != null)
+                Utils.ShowImage(ScreenshotPNG, img_Screenshot);
 
 
-            string lvstr = (wi.updated == DateTime.MinValue)
+            string lvstr = (LastAccessed == DateTime.MinValue)
                 ? "Never"
-                : wi.updated.ToShortDateString();
+                : LastAccessed.ToShortDateString();
 
-            lbl_Caption.text = $"{wmd.WorldName}\nLast visited: {lvstr}";
+            lbl_Caption.text = string.Format(patternCaption,
+                WorldName,
+                lvstr,
+                ServersCount,
+                UsersCount,
+                FriendsMax);
         }
 
         private void OnVisitClicked(bool inPlace)
@@ -127,13 +137,13 @@ namespace Arteranos.UI
         private void OnAddClicked()
         {
             WorldGallery.FavouriteWorld(WorldURL);
-            _ = PopulateWorldData(WorldURL);
+            PopulateWorldData(WorldURL);
         }
 
         private void OnDeleteClicked()
         {
             WorldGallery.UnfavoriteWorld(WorldURL);
-            _ = PopulateWorldData(WorldURL);
+            PopulateWorldData(WorldURL);
         }
     }
 }
