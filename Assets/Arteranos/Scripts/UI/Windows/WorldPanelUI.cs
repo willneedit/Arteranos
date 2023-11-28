@@ -16,8 +16,6 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Collections.Concurrent;
-using System.Linq;
 using System.Collections;
 
 namespace Arteranos.UI
@@ -45,7 +43,7 @@ namespace Arteranos.UI
         [SerializeField] private TMP_InputField txt_AddWorldURL;
         [SerializeField] private Button btn_AddWorld;
 
-        public string pageCountPattern = null;
+        private string pageCountPattern = null;
 
         private Client cs = null;
 
@@ -71,6 +69,13 @@ namespace Arteranos.UI
 
             DictMutex = new();
             btn_AddWorld.onClick.AddListener(OnAddWorldClicked);
+
+            btn_First.onClick.AddListener(() => SwitchToPage(0, -1));
+            btn_FRev.onClick.AddListener(() => SwitchToPage(-10, 0));
+            btn_Previous.onClick.AddListener(() => SwitchToPage(-1, 0));
+            btn_Next.onClick.AddListener(() => SwitchToPage(1, 0));
+            btn_FFwd.onClick.AddListener(() => SwitchToPage(10, 0));
+            btn_Last.onClick.AddListener(() => SwitchToPage(0, 1));
         }
 
         protected override void OnDestroy()
@@ -91,7 +96,7 @@ namespace Arteranos.UI
             _ = CollateServersData();
         }
 
-        private async void AddListEntry(string url, CancellationToken token)
+        private async Task AddListEntry(string url, CancellationToken token, bool front = false)
         {
             if (sortedWorldList.Contains(url)) return;
 
@@ -100,7 +105,11 @@ namespace Arteranos.UI
 
             // Filter out the worlds which go against to _your_ preferences.
             if (wmd?.ContentRating == null || !wmd.ContentRating.IsInViolation(SettingsManager.Client.ContentFilterPreferences))
-                sortedWorldList.Add(url);
+            {
+                if(!front) sortedWorldList.Add(url);
+                else sortedWorldList.Insert(0, url);
+            }
+                
         }
 
         private async Task CollateServersData()
@@ -139,7 +148,7 @@ namespace Arteranos.UI
 
             CancellationTokenSource cts = new();
 
-            TaskPool<ServerInfo> pool = new(10);
+            TaskPool<ServerInfo> pool = new(20);
 
             foreach (var entry in SettingsManager.ServerCollection.Dump(DateTime.MinValue))
                 serverInfos.Add(new(entry.Address, entry.Port));
@@ -151,13 +160,13 @@ namespace Arteranos.UI
             sortedWorldList.Clear();
 
             if (!string.IsNullOrEmpty(SettingsManager.CurrentWorld))
-                AddListEntry(SettingsManager.CurrentWorld, cts.Token);
+                _ = AddListEntry(SettingsManager.CurrentWorld, cts.Token);
 
             foreach (string url in cs.WorldList)
-                AddListEntry(url, cts.Token);
+                _ = AddListEntry(url, cts.Token);
 
             foreach (string url in worldlist.Keys)
-                AddListEntry(url, cts.Token);
+                _ = AddListEntry(url, cts.Token);
 
             SettingsManager.StartCoroutineAsync(() => ShowPage(0));
         }
@@ -175,7 +184,7 @@ namespace Arteranos.UI
                 Destroy(panels.GetChild(i).gameObject);
 
             int startIndex = currentPage * 6;
-            int endIndex = startIndex + 6;
+            int endIndex = startIndex + 5;
             if(endIndex > sortedWorldList.Count) endIndex = sortedWorldList.Count;
 
             for(int i = startIndex; i < endIndex; i++)
@@ -189,6 +198,28 @@ namespace Arteranos.UI
             lbl_PageCount.text = string.Format(pageCountPattern, currentPage + 1, maxPage);
         }
 
-        private void OnAddWorldClicked() => throw new NotImplementedException();
+        private void SwitchToPage(int difference, int location)
+        {
+            int newPage = location switch
+            {
+                < 0 => difference,
+                  0 => currentPage + difference,
+                > 0 => maxPage - 1 - difference
+            };
+
+            if(newPage >= maxPage) newPage = maxPage - 1;
+            else if(newPage < 0) newPage = 0;
+
+            StartCoroutine(ShowPage(newPage));
+        }
+        
+        private async void OnAddWorldClicked()
+        {
+            CancellationTokenSource cts = new();
+
+            await AddListEntry(txt_AddWorldURL.text, cts.Token, true);
+
+            SettingsManager.StartCoroutineAsync(() => ShowPage(0));
+        }
     }
 }

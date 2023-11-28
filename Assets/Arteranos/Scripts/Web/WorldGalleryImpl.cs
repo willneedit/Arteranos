@@ -28,8 +28,7 @@ namespace Arteranos.Web
             if (wi != null) return wi;
 
             UriBuilder uriBuilder = new(url);
-            string infoPath = Path.ChangeExtension(uriBuilder.Path, "info");
-            uriBuilder.Path = infoPath;
+            uriBuilder.Path = Path.ChangeExtension(uriBuilder.Path, "info");
 
             using UnityWebRequest uwr = new(uriBuilder.ToString(), UnityWebRequest.kHttpVerbGET);
             uwr.downloadHandler = new DownloadHandlerBuffer();
