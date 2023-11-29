@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.IO;
 using System.Threading.Tasks;
+using UnityEngine.Networking;
 
 namespace Arteranos.Core
 {
@@ -297,5 +298,59 @@ namespace Arteranos.Core
                 Vector2.zero);
         }
 
+        public static async Task<byte[]> DownloadWebData(string url, int timeout = 20, Action<float> progressCallback = null)
+        {
+            DownloadHandlerBuffer dh = new();
+            using UnityWebRequest uwr = new(
+                url,
+                UnityWebRequest.kHttpVerbGET,
+                dh,
+                null);
+
+            uwr.timeout = timeout;
+
+            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
+
+            while(!uwr_ao.isDone)
+            {
+                progressCallback?.Invoke(uwr_ao.progress);
+                await Task.Yield();
+            }
+
+            if (uwr.result != UnityWebRequest.Result.Success) return null;
+            return dh.data;
+        }
+
+        public static async Task<byte[]> CachedDownloadWebData(string url, string cachePattern, int cacheLivetime = 600, int timeout = 20, Action<float> progressCallback = null)
+        {
+            string cacheFile = string.Format(cachePattern, GetURLHash(url));
+
+            // Fresh enough, immediately return cached data
+            FileInfo cache = new FileInfo(cacheFile);
+            if (cache.Exists &&
+                cache.LastWriteTime + TimeSpan.FromSeconds(cacheLivetime) >= DateTime.Now)
+                return await File.ReadAllBytesAsync(cacheFile);
+
+            byte[] data = await DownloadWebData(url, timeout, progressCallback);
+
+            string cachedir = Path.GetDirectoryName(cacheFile);
+            if(data != null)
+            {
+                if (Directory.Exists(cachedir)) Directory.CreateDirectory(cachedir);
+                await File.WriteAllBytesAsync(cachedir, data);
+            }
+            else
+            {
+                if(File.Exists(cacheFile)) File.Delete(cacheFile);
+            }
+
+            return data;
+        }
+
+        public static void InvalidateWebData(string url, string cachePattern)
+        {
+            string cacheFile = string.Format(cachePattern, GetURLHash(url));
+            if (File.Exists(cacheFile)) File.Delete(cacheFile);
+        }
     }
 }

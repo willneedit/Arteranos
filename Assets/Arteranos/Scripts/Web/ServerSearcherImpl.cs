@@ -88,7 +88,7 @@ namespace Arteranos.Web
             async Task UpdateOne(ServerInfo info)
             {
                 ProgressChanged?.Invoke(actualServer / serverCount);
-                await info.Update(1);
+                await info.Update();
                 actualServer++;
             }
 

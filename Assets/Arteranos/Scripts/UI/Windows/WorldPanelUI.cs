@@ -158,7 +158,7 @@ namespace Arteranos.UI
         {
             async Task UpdateOne(ServerInfo serverInfo)
             {
-                await serverInfo.Update(1);
+                await serverInfo.Update();
 
                 // Server offline or has no world loaded?
                 string url = serverInfo.CurrentWorld;

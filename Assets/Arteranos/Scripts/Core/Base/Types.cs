@@ -29,8 +29,24 @@ namespace Arteranos.Core
 
         public string Description;
 
-
         public List<string> AdminMames;
+
+        public static readonly string patternServerDescription = $"{Application.persistentDataPath}/Servers/{{0}}/description.asn1";
+        public static async Task<ServerDescription?> Retrieve(string url, bool forceReload = false)
+        {
+            byte[] data = await Utils.CachedDownloadWebData(url, patternServerDescription, forceReload ? -1 : 86400, 1); // One day
+            if (data == null) return null;
+
+            try
+            {
+                return Serializer.Deserialize<ServerDescription>(data);
+            }
+            catch
+            {
+                Utils.InvalidateWebData(url, patternServerDescription);
+                return null; 
+            }
+        }
     }
 
     public struct ServerOnlineData
@@ -39,6 +55,23 @@ namespace Arteranos.Core
 
         [ASN1Tag(true)]
         public string CurrentWorld;
+
+        public static readonly string patternServerDescription = $"{Application.persistentDataPath}/Servers/{{0}}/online.asn1";
+        public static async Task<ServerOnlineData?> Retrieve(string url, bool forceReload = false)
+        {
+            byte[] data = await Utils.CachedDownloadWebData(url, patternServerDescription, forceReload ? -1 : 30, 1); // Half a minute
+            if (data == null) return null;
+
+            try
+            {
+                return Serializer.Deserialize<ServerOnlineData>(data);
+            }
+            catch
+            {
+                Utils.InvalidateWebData(url, patternServerDescription);
+                return null;
+            }
+        }
     }
 
     public class ServerInfo
@@ -51,6 +84,7 @@ namespace Arteranos.Core
         {
             PublicData = SettingsManager.ServerCollection.Get(address, port);
             Description = null;
+            OnlineData = null;
         }
 
         public ServerInfo(string url)
@@ -59,13 +93,30 @@ namespace Arteranos.Core
 
             PublicData = SettingsManager.ServerCollection.Get(uri.Host, uri.Port);
             Description = null;
+            OnlineData = null;
         }
 
-        public async Task Update(int timeout = 1)
+        public Task Update()
         {
-            // Server's last sign of life is fresh, no need to poke it again.
-            if (LastOnline <= DateTime.Now.AddMinutes(-2) || Description == null)
-                (PublicData, Description) = await PublicData?.GetServerDataAsync(timeout);
+            // UNDONE path parts!!
+            // In Retrieve(), add a URL stem and path suffix. or override the GetURLHash result?
+            async Task t1()
+            {
+                Description = await ServerDescription.Retrieve(URL);
+            }
+
+            async Task t2()
+            {
+                OnlineData = await ServerOnlineData.Retrieve(URL);
+            }
+
+            Task[] tasks = new Task[]
+            {
+                t1(),
+                t2()
+            };
+
+            return Task.WhenAll(tasks);
         }
 
         public bool IsValid => Description != null;
