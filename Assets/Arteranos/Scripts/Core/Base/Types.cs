@@ -16,12 +16,28 @@ using System.Threading.Tasks;
 
 namespace Arteranos.Core
 {
-    public struct ServerOnlineData
+    public struct ServerDescription
     {
         public int ServerPort;
+
         public byte[] ServerPublicKey;
+
+        public string Name;
+
+        [ASN1Tag(true)]
         public byte[] Icon;
+
+        public string Description;
+
+
+        public List<string> AdminMames;
+    }
+
+    public struct ServerOnlineData
+    {
         public List<byte[]> UserPublicKeys;
+
+        [ASN1Tag(true)]
         public string CurrentWorld;
     }
 
@@ -29,11 +45,12 @@ namespace Arteranos.Core
     {
         private ServerPublicData? PublicData;
         private ServerOnlineData? OnlineData;
+        private ServerDescription? Description;
 
         public ServerInfo(string address, int port)
         {
             PublicData = SettingsManager.ServerCollection.Get(address, port);
-            OnlineData = null;
+            Description = null;
         }
 
         public ServerInfo(string url)
@@ -41,32 +58,33 @@ namespace Arteranos.Core
             Uri uri = new(url);
 
             PublicData = SettingsManager.ServerCollection.Get(uri.Host, uri.Port);
-            OnlineData = null;
+            Description = null;
         }
 
         public async Task Update(int timeout = 1)
         {
             // Server's last sign of life is fresh, no need to poke it again.
-            if (LastOnline <= DateTime.Now.AddMinutes(-2) || OnlineData == null)
-                (PublicData, OnlineData) = await PublicData?.GetServerDataAsync(timeout);
+            if (LastOnline <= DateTime.Now.AddMinutes(-2) || Description == null)
+                (PublicData, Description) = await PublicData?.GetServerDataAsync(timeout);
         }
 
-        public bool IsValid => PublicData != null;
+        public bool IsValid => Description != null;
         public bool IsOnline => OnlineData != null;
-        public string Name => string.Empty; // UNDONE PublicData?.Name;
+        public string Name => Description?.Name;
+        public List<string> AdminNames => Description?.AdminMames;
         public string Address => PublicData?.Address;
-        public int Port => PublicData?.MDPort ?? 0;
-        public string URL => $"http://{Address}:{Port}/";
-        public byte[] Icon => OnlineData?.Icon;
+        public int MDPort => PublicData?.MDPort ?? 0;
+        public string URL => $"http://{Address}:{MDPort}/";
+        public byte[] Icon => Description?.Icon;
         public ServerPermissions Permissions => PublicData?.Permissions;
         public DateTime LastOnline => PublicData?.LastOnline ?? DateTime.UnixEpoch;
-        public string CurrentWorld => OnlineData?.CurrentWorld ?? string.Empty;
+        public string CurrentWorld => OnlineData?.CurrentWorld;
         public int UserCount => OnlineData?.UserPublicKeys.Count ?? 0;
         public int FriendCount
         {
             get
             {
-                if (OnlineData == null) return 0;
+                if (Description == null) return 0;
 
                 int friend = 0;
                 IEnumerable<SocialListEntryJSON> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.State));

@@ -77,7 +77,7 @@ namespace Arteranos.Core
         /// </summary>
         /// <param name="timeout">Timeout in seconds</param>
         /// <returns>The updated public data, the online data</returns>
-        public async Task<(ServerPublicData, ServerOnlineData?)> GetServerDataAsync(int timeout = 20)
+        public async Task<(ServerPublicData, ServerDescription?)> GetServerDataAsync(int timeout = 20)
         {
             Uri uri = new($"http://{Address}:{MDPort}{ServerJSON.DefaultMetadataPath}");
 
@@ -109,19 +109,17 @@ namespace Arteranos.Core
 
                 Permissions = smdj.Settings.Permissions;
 
-                return (this, new ServerOnlineData()
+                return (this, new ServerDescription()
                 {
                     ServerPort = smdj.Settings.ServerPort,
                     ServerPublicKey = smdj.Settings.ServerPublicKey,
-                    Icon = smdj.Settings.Icon,
-                    CurrentWorld = smdj.CurrentWorld,
-                    UserPublicKeys = smdj.CurrentUsers
+                    Icon = smdj.Settings.Icon
                 });
             }
             else return (this, null);
         }
 
-        public static async Task<(ServerPublicData?, ServerOnlineData?)> GetServerDataAsync(string address, int port, int timeout = 20)
+        public static async Task<(ServerPublicData?, ServerDescription?)> GetServerDataAsync(string address, int port, int timeout = 20)
         {
             ServerCollection sc = SettingsManager.ServerCollection;
 
@@ -129,7 +127,7 @@ namespace Arteranos.Core
 
             ServerPublicData work = stored ?? new(address, port);
 
-            ServerOnlineData? result;
+            ServerDescription? result;
             (work, result) = await work.GetServerDataAsync(timeout);
 
             if(stored != null) _ = sc.UpdateAsync(work); 
@@ -137,7 +135,7 @@ namespace Arteranos.Core
             return (stored, result);
         }
 
-        public static Task<(ServerPublicData?, ServerOnlineData?)> GetServerDataAsync(string url, int timeout = 20)
+        public static Task<(ServerPublicData?, ServerDescription?)> GetServerDataAsync(string url, int timeout = 20)
         {
             Uri uri = Utils.ProcessUriString(url,
                 scheme: "http",

@@ -20,28 +20,24 @@ namespace Arteranos.Web
 
         private static string GetMDFile(string url) => $"{Application.persistentDataPath}/ServerGallery/{Utils.GetURLHash(url)}.asn1";
 
-        public ServerOnlineData? RetrieveServerSettings(string url)
+        public ServerDescription? RetrieveServerSettings(string url)
         {
             try
             {
                 byte[] der = File.ReadAllBytes(GetMDFile(url));
-                return Serializer.Deserialize<ServerOnlineData>(der);
+                return Serializer.Deserialize<ServerDescription>(der);
             }
             catch { }
 
             return null;
         }
 
-        public void StoreServerSettings(string url, ServerOnlineData onlineData)
+        public void StoreServerSettings(string url, ServerDescription onlineData)
         {
 
             string metadataFile = GetMDFile(url);
             try
             {
-                // Remove the transient data before storage
-                onlineData.CurrentWorld = string.Empty;
-                onlineData.UserPublicKeys = new();
-
                 Directory.CreateDirectory(Path.GetDirectoryName(metadataFile));
                 byte[] der = Serializer.Serialize(onlineData);
                 File.WriteAllBytes(metadataFile, der);

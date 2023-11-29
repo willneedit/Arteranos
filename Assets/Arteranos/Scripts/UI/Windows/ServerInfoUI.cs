@@ -20,7 +20,7 @@ namespace Arteranos.UI
 {
     public class ServerInfoUI : UIBehaviour
     {
-        public static ServerInfoUI New(ServerPublicData? spd, ServerOnlineData? sod)
+        public static ServerInfoUI New(ServerPublicData? spd, ServerDescription? sod)
         {
             GameObject blueprint = Resources.Load<GameObject>("UI/UI_ServerInfo");
             blueprint.SetActive(false);
@@ -44,7 +44,7 @@ namespace Arteranos.UI
         [SerializeField] private TMP_Text lbl_Description;
 
         private ServerPublicData? spd = null;
-        private ServerOnlineData? sod = null;
+        private ServerDescription? sod = null;
 
         protected override void Awake()
         {
@@ -82,7 +82,7 @@ namespace Arteranos.UI
 
                 if (sod != null)
                 {
-                    string currentWorld = sod.Value.CurrentWorld;
+                    string currentWorld = null; // UNDONE sod.Value.CurrentWorld;
 
                     Utils.ShowImage(sod.Value.Icon, img_Icon);
                     lbl_World.text = string.IsNullOrEmpty(currentWorld) ? "Unknown" : currentWorld;

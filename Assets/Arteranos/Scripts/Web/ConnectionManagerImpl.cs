@@ -28,7 +28,7 @@ namespace Arteranos.Web
                 await NetworkStatus.StopHost(false);
             }
 
-            ServerOnlineData? sod = ServerGallery.RetrieveServerSettings(serverURL);
+            ServerDescription? sod = ServerGallery.RetrieveServerSettings(serverURL);
 
             if (sod == null)
             {

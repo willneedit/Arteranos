@@ -219,9 +219,9 @@ namespace Arteranos.Web
 
         public static void DeleteServerSettings(string url)
             => Instance?.DeleteServerSettings(url);
-        public static ServerOnlineData? RetrieveServerSettings(string url)
+        public static ServerDescription? RetrieveServerSettings(string url)
             => Instance?.RetrieveServerSettings(url);
-        public static void StoreServerSettings(string url, ServerOnlineData onlineData)
+        public static void StoreServerSettings(string url, ServerDescription onlineData)
             => Instance?.StoreServerSettings(url, onlineData);
     }
 

@@ -14,7 +14,7 @@ namespace Arteranos.Web
     public interface IServerGallery
     {
         void DeleteServerSettings(string url);
-        ServerOnlineData? RetrieveServerSettings(string url);
-        void StoreServerSettings(string url, ServerOnlineData onlineData);
+        ServerDescription? RetrieveServerSettings(string url);
+        void StoreServerSettings(string url, ServerDescription onlineData);
     }
 }

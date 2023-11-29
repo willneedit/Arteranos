@@ -30,7 +30,7 @@ namespace Arteranos.UI
 
 
         private ServerPublicData? spd = null;
-        private ServerOnlineData? sod = null;
+        private ServerDescription? sod = null;
         private bool? IsOnline = null;
 
         public static ServerListItem New(Transform parent, string url)
@@ -118,8 +118,8 @@ namespace Arteranos.UI
 
             Utils.ShowImage(sod.Value.Icon, img_Icon);
 
-            string CurrentWorld = sod?.CurrentWorld;
-            int CurrentUsers = sod.Value.UserPublicKeys.Count;
+            string CurrentWorld = string.Empty; // UNDONE sod?.CurrentWorld;
+            int CurrentUsers = 0; // UNDONE sod.Value.UserPublicKeys.Count;
 
             if (string.IsNullOrEmpty(CurrentWorld)) CurrentWorld = null;
 
@@ -199,7 +199,7 @@ namespace Arteranos.UI
 
         public async Task RefreshServerDataAsync(int timeout = 1, bool saveOnlineData = true)
         {
-            (ServerPublicData? spd, ServerOnlineData? sod) = await ServerPublicData.GetServerDataAsync(serverURL, timeout);
+            (ServerPublicData? spd, ServerDescription? sod) = await ServerPublicData.GetServerDataAsync(serverURL, timeout);
             this.spd = spd;
 
             // ServerOnlineData could be saved, retain them.
