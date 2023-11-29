@@ -64,7 +64,7 @@ namespace Arteranos.Web
                 context.resultServerURL = null;
 
                 foreach (var entry in SettingsManager.ServerCollection.Dump(DateTime.MinValue))
-                    context.serverInfos.Add(new(entry.Address, entry.Port));
+                    context.serverInfos.Add(new(entry.Address, entry.MDPort));
 
                 return context;
             }

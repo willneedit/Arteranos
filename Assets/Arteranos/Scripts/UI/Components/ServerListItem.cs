@@ -107,7 +107,7 @@ namespace Arteranos.UI
             if (!(IsOnline ?? false))
             {
                 string offlstr = (IsOnline == null) ? "Unknown" : "Offline";
-                lbl_Caption.text = $"{spd?.Name} ({offlstr})";
+                lbl_Caption.text = $"{spd?.Key()} ({offlstr})";
 
                 // TODO Replace with a "Unknown state" and a "Server offline" icon.
                 if(sod != null) Utils.ShowImage(sod.Value.Icon, img_Icon);
@@ -123,7 +123,7 @@ namespace Arteranos.UI
 
             if (string.IsNullOrEmpty(CurrentWorld)) CurrentWorld = null;
 
-            string serverstr = $"{spd?.Name} (Users: {CurrentUsers})";
+            string serverstr = $"{spd?.Key()} (Users: {CurrentUsers})";
 
             lbl_Caption.text = $"Server: {serverstr}\nCurrent World: {CurrentWorld ?? "Unknown"}";
         }

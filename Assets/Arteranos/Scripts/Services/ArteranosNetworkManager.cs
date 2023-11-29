@@ -426,12 +426,8 @@ namespace Arteranos.Services
 
             if (address == null) yield break;
 
-            IEnumerable<string> q = from entry in SettingsManager.ServerUsers.Base
-                                    where UserState.IsSAdmin(entry.userState)
-                                    select ((string)entry.userID);
-
             ServerPublicData? oldSelfEntry = SettingsManager.ServerCollection.Get(address, mdport);
-            ServerPublicData tmp = new(SettingsManager.Server, address, mdport, true, q.ToList());
+            ServerPublicData tmp = new(SettingsManager.Server, address, mdport, true);
 
             // Only seed the own server's record if there isn't in the server collection or there
             // are changes.
@@ -474,7 +470,7 @@ namespace Arteranos.Services
                 if (SCLastUpdatedToClient[cid] < entry.LastUpdated)
                 {
                     conn.Send(scm);
-                    Debug.Log($"[Server] Sending entry of {entry.Name} to conn {cid}");
+                    Debug.Log($"[Server] Sending entry of {entry.Key()} to conn {cid}");
                 }
                 SCLastUpdatedToClient[cid] = SCSnapshotCutoff;
             }
@@ -485,7 +481,7 @@ namespace Arteranos.Services
             ServerCollectionEntryMessage scm;
             scm.sceDER = Serializer.Serialize(entry);
             NetworkClient.Send(scm);
-            Debug.Log($"[Client] Sending entry of {entry.Name} to server");
+            Debug.Log($"[Client] Sending entry of {entry.Key()} to server");
         }
 
 

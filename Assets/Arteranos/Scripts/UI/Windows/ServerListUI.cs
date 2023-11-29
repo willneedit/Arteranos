@@ -58,7 +58,7 @@ namespace Arteranos.UI
 
                 foreach (ServerPublicData spd in SettingsManager.ServerCollection.Dump(System.DateTime.MinValue))
                 {
-                    string url = $"http://{spd.Address}:{spd.Port}/";
+                    string url = $"http://{spd.Address}:{spd.MDPort}/";
                     if (!ServerList.ContainsKey(url))
                         ServerList[url] = ServerListItem.New(lvc_ServerList.transform, url);
 

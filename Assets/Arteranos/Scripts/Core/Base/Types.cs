@@ -16,6 +16,15 @@ using System.Threading.Tasks;
 
 namespace Arteranos.Core
 {
+    public struct ServerOnlineData
+    {
+        public int ServerPort;
+        public byte[] ServerPublicKey;
+        public byte[] Icon;
+        public List<byte[]> UserPublicKeys;
+        public string CurrentWorld;
+    }
+
     public class ServerInfo
     {
         private ServerPublicData? PublicData;
@@ -44,9 +53,9 @@ namespace Arteranos.Core
 
         public bool IsValid => PublicData != null;
         public bool IsOnline => OnlineData != null;
-        public string Name => PublicData?.Name;
+        public string Name => string.Empty; // UNDONE PublicData?.Name;
         public string Address => PublicData?.Address;
-        public int Port => PublicData?.Port ?? 0;
+        public int Port => PublicData?.MDPort ?? 0;
         public string URL => $"http://{Address}:{Port}/";
         public byte[] Icon => OnlineData?.Icon;
         public ServerPermissions Permissions => PublicData?.Permissions;

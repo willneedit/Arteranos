@@ -68,16 +68,16 @@ namespace Arteranos.UI
 
                 if (spd != null)
                 {
-                    lbl_Name.text = spd.Value.Name;
+                    // UNDONE lbl_Name.text = spd.Value.Name;
                     lbl_Address.text = spd.Value.Address;
                     lbl_LastUpdated.text = spd.Value.LastUpdated.HumanReadable();
                     lbl_LastOnline.text = spd.Value.LastOnline.HumanReadable();
                     lbl_MatchIndex.text = spd.Value.Permissions.HumanReadableMI(
                         SettingsManager.Client.ContentFilterPreferences
                         ).ToString();
-                    lbl_Description.text = spd.Value.Description.ToString();
+                    // UNDONE lbl_Description.text = spd.Value.Description.ToString();
 
-                    lbl_AdminList.text = string.Join(", ", spd.Value.AdminNames);
+                    // UNDONE lbl_AdminList.text = string.Join(", ", spd.Value.AdminNames);
                 }
 
                 if (sod != null)

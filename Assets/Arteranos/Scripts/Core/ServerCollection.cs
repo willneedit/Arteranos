@@ -17,51 +17,33 @@ using UnityEngine.Networking;
 
 namespace Arteranos.Core
 {
-    public struct ServerOnlineData
-    {
-        public int ServerPort;
-        public byte[] ServerPublicKey;
-        public byte[] Icon;
-        public List<byte[]> UserPublicKeys;
-        public string CurrentWorld;
-    }
-
     public struct ServerPublicData : IEquatable<ServerPublicData>
     {
-        public string Name;
         public string Address;
-        public int Port;
-        public string Description;
+        public int MDPort;
         public ServerPermissions Permissions;
         public DateTime LastOnline;
         public DateTime LastUpdated;
-        public List<string> AdminNames;
 
-        public ServerPublicData(ServerJSON settings, string address, int port, bool online, List<string> adminNames)
+        public ServerPublicData(ServerJSON settings, string address, int port, bool online)
         {
-            Name = settings.Name;
-            Port = port;
+            MDPort = port;
             Address = address;
-            Description = settings.Description;
             Permissions = settings.Permissions;
             LastUpdated = DateTime.Now;
             LastOnline = (online ? DateTime.Now : DateTime.MinValue);
-            AdminNames = adminNames;
         }
 
         public ServerPublicData(string address, int port)
         {
-            Name = string.Empty;
             Address = address;
-            Port = port;
-            Description = string.Empty;
+            MDPort = port;
             Permissions = new();
             LastOnline = DateTime.UnixEpoch;
             LastUpdated = DateTime.Now;
-            AdminNames = new();
         }
 
-        public readonly string Key() => Key(Address, Port);
+        public readonly string Key() => Key(Address, MDPort);
 
         public static string Key(string address, int port) => $"{address}:{port}";
 
@@ -71,7 +53,7 @@ namespace Arteranos.Core
         /// <returns>true if it seems to be alive</returns>
         public async Task<(ServerPublicData, bool)> PingServer()
         {
-            Uri uri = new($"http://{Address}:{Port}/");
+            Uri uri = new($"http://{Address}:{MDPort}/");
 
             DownloadHandlerBuffer dh = new();
             using UnityWebRequest uwr = new(
@@ -97,7 +79,7 @@ namespace Arteranos.Core
         /// <returns>The updated public data, the online data</returns>
         public async Task<(ServerPublicData, ServerOnlineData?)> GetServerDataAsync(int timeout = 20)
         {
-            Uri uri = new($"http://{Address}:{Port}{ServerJSON.DefaultMetadataPath}");
+            Uri uri = new($"http://{Address}:{MDPort}{ServerJSON.DefaultMetadataPath}");
 
             DownloadHandlerBuffer dh = new();
             using UnityWebRequest uwr = new(
@@ -125,8 +107,6 @@ namespace Arteranos.Core
 
                 ServerPublicData old = this;
 
-                Name = smdj.Settings.Name;
-                Description = smdj.Settings.Description;
                 Permissions = smdj.Settings.Permissions;
 
                 return (this, new ServerOnlineData()
@@ -176,19 +156,15 @@ namespace Arteranos.Core
 
         public readonly bool Equals(ServerPublicData other)
         {
-            return Name == other.Name &&
-                   Address == other.Address &&
-                   Port == other.Port &&
-                   Description == other.Description &&
+            return Address == other.Address &&
+                   MDPort == other.MDPort &&
                    Permissions == other.Permissions &&
-                   LastOnline == other.LastOnline &&
-                   // LastUpdated == other.LastUpdated &&
-                   AdminNames.SequenceEqual(other.AdminNames);
+                   LastOnline == other.LastOnline;
         }
 
         public override readonly int GetHashCode()
         {
-            return HashCode.Combine(Name, Address, Port, Description, Permissions, LastOnline, AdminNames);
+            return HashCode.Combine(Address, MDPort, Permissions, LastOnline);
         }
 
         public static bool operator ==(ServerPublicData left, ServerPublicData right)
