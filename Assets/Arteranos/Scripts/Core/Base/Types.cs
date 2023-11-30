@@ -13,64 +13,75 @@ using System.IO;
 
 using DERSerializer;
 using System.Threading.Tasks;
+using System.Net;
+using System.Text;
 
 namespace Arteranos.Core
 {
-    public struct ServerDescription
+    public static partial class Utils
     {
-        public int ServerPort;
-
-        public byte[] ServerPublicKey;
-
-        public string Name;
-
-        [ASN1Tag(true)]
-        public byte[] Icon;
-
-        public string Description;
-
-        public List<string> AdminMames;
-
-        public static readonly string patternServerDescription = $"{Application.persistentDataPath}/Servers/{{0}}/description.asn1";
-        public static async Task<ServerDescription?> Retrieve(string url, bool forceReload = false)
+        public async static Task<(bool, T)> WebRetrieve<T>(string url, string pathPart, string patternServerDescription, int expirySeconds, int timeout = 1)
         {
-            byte[] data = await Utils.CachedDownloadWebData(url, patternServerDescription, forceReload ? -1 : 86400, 1); // One day
-            if (data == null) return null;
+            UriBuilder builder = new(url) { Path = pathPart };
+
+            byte[] data = await CachedDownloadWebData(builder.ToString(), url, patternServerDescription, expirySeconds, timeout);
+            if (data == null) return (false, default(T));
 
             try
             {
-                return Serializer.Deserialize<ServerDescription>(data);
+                return (true, Serializer.Deserialize<T>(data));
             }
             catch
             {
-                Utils.InvalidateWebData(url, patternServerDescription);
-                return null; 
+                InvalidateWebData(builder.ToString(), url, patternServerDescription);
+                return (false, default(T));
             }
+        }
+
+        public async static Task WebEmit<T>(T payload, HttpListenerResponse response)
+        {
+            byte[] data = Serializer.Serialize(payload);
+            response.ContentType = "application/octet-stream";
+            response.ContentEncoding = Encoding.UTF8;
+            response.ContentLength64 = data.LongLength;
+            response.StatusCode = (int)HttpStatusCode.OK;
+
+            await response.OutputStream.WriteAsync(data, 0, data.Length);
+            response.Close();
+        }
+
+    }
+    public struct ServerDescription
+    {
+        public int ServerPort;
+        public byte[] ServerPublicKey;
+        public string Name;
+        [ASN1Tag(true)] public byte[] Icon;
+        [ASN1Tag(true)] public string Description;
+        public List<string> AdminMames;
+
+
+        public static readonly string cacheFilePattern = $"{Application.persistentDataPath}/Servers/{{0}}/description.asn1";
+        public static readonly string urlPathPart = "/ServerDescription.asn1";
+        public static async Task<ServerDescription?> Retrieve(string url, bool forceReload = false)
+        {
+            (bool success, ServerDescription result) = await Utils.WebRetrieve<ServerDescription>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 86400, 1);
+            return success ? result : null;
         }
     }
 
     public struct ServerOnlineData
     {
         public List<byte[]> UserPublicKeys;
+        [ASN1Tag(true)] public string CurrentWorld;
 
-        [ASN1Tag(true)]
-        public string CurrentWorld;
 
-        public static readonly string patternServerDescription = $"{Application.persistentDataPath}/Servers/{{0}}/online.asn1";
+        public static readonly string cacheFilePattern = $"{Application.persistentDataPath}/Servers/{{0}}/online.asn1";
+        public static readonly string urlPathPart = "/ServerOnline.asn1";
         public static async Task<ServerOnlineData?> Retrieve(string url, bool forceReload = false)
         {
-            byte[] data = await Utils.CachedDownloadWebData(url, patternServerDescription, forceReload ? -1 : 30, 1); // Half a minute
-            if (data == null) return null;
-
-            try
-            {
-                return Serializer.Deserialize<ServerOnlineData>(data);
-            }
-            catch
-            {
-                Utils.InvalidateWebData(url, patternServerDescription);
-                return null;
-            }
+            (bool success, ServerOnlineData result) = await Utils.WebRetrieve<ServerOnlineData>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 30, 1);
+            return success ? result : null;
         }
     }
 

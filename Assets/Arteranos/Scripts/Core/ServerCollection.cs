@@ -47,6 +47,7 @@ namespace Arteranos.Core
 
         public static string Key(string address, int port) => $"{address}:{port}";
 
+#if true
         /// <summary>
         /// Ping and update the server
         /// </summary>
@@ -146,6 +147,7 @@ namespace Arteranos.Core
             return GetServerDataAsync(uri.Host, uri.Port, timeout);
         }
 
+#endif
         // Last Updated timestamp is irrelevant for the data comparison and updating.
         public override readonly bool Equals(object obj)
         {

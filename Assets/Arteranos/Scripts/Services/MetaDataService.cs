@@ -7,8 +7,8 @@
 
 using Arteranos.Core;
 using Mirror;
-using Newtonsoft.Json;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -96,21 +96,21 @@ namespace Arteranos.Services
                 HttpListenerRequest request = ctx.Request;
                 HttpListenerResponse response = ctx.Response;
 
-                //Debug.Log($"[{nameof(MetaDataServer)}] [{request.HttpMethod}] {request.Url.AbsolutePath}");
+                Debug.Log($"[{nameof(MetaDataServer)}] [{request.HttpMethod}] {request.Url.AbsolutePath}");
 
-                //if(request.HttpMethod == "GET" && request.Url.AbsolutePath == "/favicon.ico")
-                //{
-                //    // Ignore.
-                //}
-                //else 
-                if(request.HttpMethod == "GET" && request.Url.AbsolutePath == ServerJSON.DefaultMetadataPath)
+                if(request.HttpMethod != "GET")
                 {
-                    YieldMetadata(response);
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    response.Close();
+                    continue;
                 }
-                else if (request.HttpMethod == "GET" && request.Url.AbsolutePath == "/")
-                {
+
+                if (request.Url.AbsolutePath == ServerDescription.urlPathPart)
+                    YieldServerDescription(response);
+                else if (request.Url.AbsolutePath == ServerOnlineData.urlPathPart)
+                    YieldServerOnlineData(response);
+                else if (request.Url.AbsolutePath == "/")
                     YieldLaunchPage(request.Url.Host, response);
-                }
                 else
                 {
                     // Debug.LogWarning($"[{nameof(MetaDataServer)}] Invalid request.");
@@ -124,27 +124,37 @@ namespace Arteranos.Services
             Debug.Log($"[{nameof(MetaDataServer)}] Exiting md server loop");
         }
 
-        private static async void YieldMetadata(HttpListenerResponse response)
+        private static async void YieldServerDescription(HttpListenerResponse response)
         {
-            ServerMetadataJSON mdj = new()
-            {
-                Settings = SettingsManager.Server,
-                CurrentWorld = SettingsManager.CurrentWorld,
+            Server s = SettingsManager.Server;
+            IEnumerable<string> q = from entry in SettingsManager.ServerUsers.Base
+                                    where UserState.IsSAdmin(entry.userState)
+                                    select ((string)entry.userID);
 
-                CurrentUsers = (from user in NetworkStatus.GetOnlineUsers()
-                                where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
-                                select (byte[])user.UserID).ToList(),
+            ServerDescription description = new()
+            {
+                Name = s.Name,
+                ServerPort = s.ServerPort,
+                Description = s.Description,
+                Icon = s.Icon,
+                ServerPublicKey = s.ServerPublicKey,
+                AdminMames = q.ToList(),
             };
 
-            byte[] data = DERSerializer.Serializer.Serialize(mdj);
-            response.ContentType = "application/octet-stream";
-            response.ContentEncoding = Encoding.UTF8;
-            response.ContentLength64 = data.LongLength;
-            response.StatusCode = (int) HttpStatusCode.OK;
+            await Core.Utils.WebEmit(description, response);
+        }
 
-            await response.OutputStream.WriteAsync(data, 0, data.Length);
-            response.Close();
+        private static async void YieldServerOnlineData(HttpListenerResponse response)
+        {
+            ServerOnlineData serverOnlineData = new()
+            {
+                CurrentWorld = SettingsManager.CurrentWorld,
+                UserPublicKeys = (from user in NetworkStatus.GetOnlineUsers()
+                                  where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
+                                  select (byte[])user.UserID).ToList(),
+            };
 
+            await Core.Utils.WebEmit(serverOnlineData, response);
         }
 
         private  static async void YieldLaunchPage(string hostname, HttpListenerResponse response)

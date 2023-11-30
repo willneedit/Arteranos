@@ -22,7 +22,7 @@ using UnityEngine.Networking;
 
 namespace Arteranos.Core
 {
-    public static class Utils
+    public static partial class Utils
     {
         /// <summary>
         /// Allows to tack on a Description attribute to enum values, e.g. a display name.
@@ -321,12 +321,12 @@ namespace Arteranos.Core
             return dh.data;
         }
 
-        public static async Task<byte[]> CachedDownloadWebData(string url, string cachePattern, int cacheLivetime = 600, int timeout = 20, Action<float> progressCallback = null)
+        public static async Task<byte[]> CachedDownloadWebData(string url, string baseurl, string cachePattern, int cacheLivetime = 600, int timeout = 20, Action<float> progressCallback = null)
         {
-            string cacheFile = string.Format(cachePattern, GetURLHash(url));
+            string cacheFile = string.Format(cachePattern, GetURLHash(baseurl));
 
             // Fresh enough, immediately return cached data
-            FileInfo cache = new FileInfo(cacheFile);
+            FileInfo cache = new(cacheFile);
             if (cache.Exists &&
                 cache.LastWriteTime + TimeSpan.FromSeconds(cacheLivetime) >= DateTime.Now)
                 return await File.ReadAllBytesAsync(cacheFile);
@@ -347,10 +347,16 @@ namespace Arteranos.Core
             return data;
         }
 
-        public static void InvalidateWebData(string url, string cachePattern)
+        public static Task<byte[]> CachedDownloadWebData(string url, string cachePattern, int cacheLivetime = 600, int timeout = 20, Action<float> progressCallback = null)
+            => CachedDownloadWebData(url, url, cachePattern, cacheLivetime, timeout, progressCallback);
+
+        public static void InvalidateWebData(string _, string baseurl, string cachePattern)
         {
-            string cacheFile = string.Format(cachePattern, GetURLHash(url));
+            string cacheFile = string.Format(cachePattern, GetURLHash(baseurl));
             if (File.Exists(cacheFile)) File.Delete(cacheFile);
         }
+
+        public static void InvalidateWebData(string url, string cachePattern)
+            => InvalidateWebData(url, cachePattern);
     }
 }
