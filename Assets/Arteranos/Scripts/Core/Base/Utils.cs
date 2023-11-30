@@ -333,15 +333,22 @@ namespace Arteranos.Core
 
             byte[] data = await DownloadWebData(url, timeout, progressCallback);
 
-            string cachedir = Path.GetDirectoryName(cacheFile);
-            if(data != null)
+            try
             {
-                if (Directory.Exists(cachedir)) Directory.CreateDirectory(cachedir);
-                await File.WriteAllBytesAsync(cachedir, data);
+                string cachedir = Path.GetDirectoryName(cacheFile);
+                if (data != null)
+                {
+                    if (!Directory.Exists(cachedir)) Directory.CreateDirectory(cachedir);
+                    await File.WriteAllBytesAsync(cacheFile, data);
+                }
+                else
+                {
+                    if (File.Exists(cacheFile)) File.Delete(cacheFile);
+                }
             }
-            else
+            catch (Exception e)
             {
-                if(File.Exists(cacheFile)) File.Delete(cacheFile);
+                Debug.LogException(e);
             }
 
             return data;

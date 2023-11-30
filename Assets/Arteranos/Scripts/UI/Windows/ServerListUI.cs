@@ -87,10 +87,7 @@ namespace Arteranos.UI
             Debug.Log($"Reload started, queued {ServerList.Count} servers");
 
             foreach (ServerListItem server in ServerList.Values)
-            {
-                server.UpdateServerData();
                 pool.Schedule(server, DoUpdate);
-            }
 
             await pool.Run();
 

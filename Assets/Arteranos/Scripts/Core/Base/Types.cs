@@ -61,7 +61,7 @@ namespace Arteranos.Core
         public List<string> AdminMames;
 
 
-        public static readonly string cacheFilePattern = $"{Application.persistentDataPath}/Servers/{{0}}/description.asn1";
+        public static readonly string cacheFilePattern = $"{Application.persistentDataPath}/KnownServers/{{0}}/description.asn1";
         public static readonly string urlPathPart = "/ServerDescription.asn1";
         public static async Task<ServerDescription?> Retrieve(string url, bool forceReload = false)
         {
@@ -76,7 +76,7 @@ namespace Arteranos.Core
         [ASN1Tag(true)] public string CurrentWorld;
 
 
-        public static readonly string cacheFilePattern = $"{Application.persistentDataPath}/Servers/{{0}}/online.asn1";
+        public static readonly string cacheFilePattern = $"{Application.persistentDataPath}/KnownServers/{{0}}/online.asn1";
         public static readonly string urlPathPart = "/ServerOnline.asn1";
         public static async Task<ServerOnlineData?> Retrieve(string url, bool forceReload = false)
         {

@@ -84,7 +84,7 @@ namespace Arteranos.UI
 
 
             // No data for that server's URL, maybe the manually entered URL is not added yet.
-            lbl_Caption.text = $"({serverURL})";
+            lbl_Caption.text = $"({serverURL}) (Unknown)";
 
             // Either try to add an unconfirmed URL, or to undo that attempt, or
             // try to retrieve the probably offline server.
@@ -106,14 +106,9 @@ namespace Arteranos.UI
         private void VisualizeServerData()
         {
             Utils.ShowImage(si.Icon, img_Icon);
-            if (!si.IsValid)
+            if(!si.IsOnline)
             {
-                lbl_Caption.text = $"{si.URL} (Unknown)";
-                return;
-            }
-            else if(!si.IsOnline)
-            {
-                lbl_Caption.text = $"{si.URL} (Offline)";
+                lbl_Caption.text = $"{si.Name} (Offline)";
                 return;
             }
 
