@@ -28,10 +28,7 @@ namespace Arteranos.UI
         private HoverButton btn_Visit = null;
         private HoverButton btn_Delete = null;
 
-
-        private ServerPublicData? spd = null;
-        private ServerDescription? sod = null;
-        private bool? IsOnline = null;
+        private ServerInfo si = null;
 
         public static ServerListItem New(Transform parent, string url)
         {
@@ -61,7 +58,9 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            PopulateServerData();
+            si = new(serverURL);
+
+            _ = UpdateServerData();
         }
 
         public void PopulateServerData()
@@ -71,13 +70,11 @@ namespace Arteranos.UI
             if(btn_Add == null) return;
 
             btn_Add.gameObject.SetActive(false);
-            btn_Visit.gameObject.SetActive(IsOnline ?? true);
+            btn_Visit.gameObject.SetActive(si.IsOnline);
             btn_Delete.gameObject.SetActive(false);
 
-            spd ??= SettingsManager.ServerCollection.Get(new Uri(serverURL));
-            sod ??= ServerGallery.RetrieveServerSettings(serverURL);
 
-            if(sod != null)
+            if(si.IsValid)
             {
                 VisualizeServerData();
                 btn_Add.gameObject.SetActive(false);
@@ -95,35 +92,37 @@ namespace Arteranos.UI
             btn_Delete.gameObject.SetActive(true);
         }
 
-        public void InvalidateServerData()
+        public async Task UpdateServerData()
         {
-            sod = null;
-            spd = null;
-            PopulateServerData();
+            IEnumerator PSDCoroutine()
+            {
+                yield return null;
+                PopulateServerData();
+            }
+            await si.Update();
+            SettingsManager.StartCoroutineAsync(PSDCoroutine);
         }
 
         private void VisualizeServerData()
         {
-            if (!(IsOnline ?? false))
+            Utils.ShowImage(si.Icon, img_Icon);
+            if (!si.IsValid)
             {
-                string offlstr = (IsOnline == null) ? "Unknown" : "Offline";
-                lbl_Caption.text = $"{spd?.Key()} ({offlstr})";
-
-                // TODO Replace with a "Unknown state" and a "Server offline" icon.
-                if(sod != null) Utils.ShowImage(sod.Value.Icon, img_Icon);
+                lbl_Caption.text = $"{si.URL} (Unknown)";
+                return;
+            }
+            else if(!si.IsOnline)
+            {
+                lbl_Caption.text = $"{si.URL} (Offline)";
                 return;
             }
 
-            if (sod == null) return;
-
-            Utils.ShowImage(sod.Value.Icon, img_Icon);
-
-            string CurrentWorld = string.Empty; // UNDONE sod?.CurrentWorld;
-            int CurrentUsers = 0; // UNDONE sod.Value.UserPublicKeys.Count;
+            string CurrentWorld = si.CurrentWorld;
+            int CurrentUsers = si.UserCount;
 
             if (string.IsNullOrEmpty(CurrentWorld)) CurrentWorld = null;
 
-            string serverstr = $"{spd?.Key()} (Users: {CurrentUsers})";
+            string serverstr = $"{si.Name} (Users: {CurrentUsers})";
 
             lbl_Caption.text = $"Server: {serverstr}\nCurrent World: {CurrentWorld ?? "Unknown"}";
         }
@@ -136,24 +135,6 @@ namespace Arteranos.UI
                 await ConnectionManager.ConnectToServer(serverURL);
 
             btn_Visit.interactable = true;
-        }
-
-        private void StoreUpdatedServerListItem()
-        {
-            // Transfer the metadata in our persistent storage.
-            ServerGallery.StoreServerSettings(serverURL, sod.Value);
-
-            Client cs = SettingsManager.Client;
-
-            // Put it down into our bookmark list.
-            if(!cs.ServerList.Contains(serverURL))
-            {
-                cs.ServerList.Add(serverURL);
-                cs.Save();
-            }
-
-            // Visualize the changed state.
-            PopulateServerData();
         }
 
         private async void OnAddClicked()
@@ -194,34 +175,12 @@ namespace Arteranos.UI
             await RefreshServerDataAsync(1, false);
             btn_Info.interactable = true;
 
-            ServerInfoUI.New(spd, sod);
+            ServerInfoUI.New(si.PublicData, si.Description);
         }
 
         public async Task RefreshServerDataAsync(int timeout = 1, bool saveOnlineData = true)
         {
-            (ServerPublicData? spd, ServerDescription? sod) = await ServerPublicData.GetServerDataAsync(serverURL, timeout);
-            this.spd = spd;
-
-            // ServerOnlineData could be saved, retain them.
-            if (sod == null)
-                IsOnline = false;
-            else
-            {
-                IsOnline = true;
-                this.sod = sod;
-            }
-
-            if (sod != null && saveOnlineData) StoreUpdatedServerListItem();
-
-            IEnumerator UpdateServerStateCoroutine()
-            {
-                yield return null;
-                VisualizeServerData();
-
-                btn_Visit.gameObject.SetActive(IsOnline ?? true);
-            };
-
-            SettingsManager.StartCoroutineAsync(UpdateServerStateCoroutine);
+            await UpdateServerData();
         }
     }
 }

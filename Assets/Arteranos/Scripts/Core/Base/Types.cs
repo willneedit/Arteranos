@@ -87,9 +87,10 @@ namespace Arteranos.Core
 
     public class ServerInfo
     {
-        private ServerPublicData? PublicData;
-        private ServerOnlineData? OnlineData;
-        private ServerDescription? Description;
+        // UNDONE Make private
+        public ServerPublicData? PublicData;
+        public ServerOnlineData? OnlineData;
+        public ServerDescription? Description;
 
         public ServerInfo(string address, int port)
         {
@@ -136,6 +137,7 @@ namespace Arteranos.Core
         public List<string> AdminNames => Description?.AdminMames;
         public string Address => PublicData?.Address;
         public int MDPort => PublicData?.MDPort ?? 0;
+        public int ServerPort => Description?.ServerPort ?? 0;
         public string URL => $"http://{Address}:{MDPort}/";
         public byte[] Icon => Description?.Icon;
         public ServerPermissions Permissions => PublicData?.Permissions;
@@ -165,16 +167,6 @@ namespace Arteranos.Core
                 return ms + FriendCount * 3;
             }
         }
-    }
-
-    /// <summary>
-    /// Public server meta data with the connection data and the privileges
-    /// </summary>
-    public class ServerMetadataJSON
-    {
-        public ServerJSON Settings = null;
-        [ASN1Tag(true)] public string CurrentWorld = null;
-        public List<byte []> CurrentUsers = new();
     }
 
     public struct WorldInfo

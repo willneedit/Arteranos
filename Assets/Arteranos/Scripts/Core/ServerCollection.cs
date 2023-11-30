@@ -13,7 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DERSerializer;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace Arteranos.Core
 {
@@ -47,7 +46,7 @@ namespace Arteranos.Core
 
         public static string Key(string address, int port) => $"{address}:{port}";
 
-#if true
+#if false
         /// <summary>
         /// Ping and update the server
         /// </summary>

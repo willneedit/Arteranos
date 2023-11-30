@@ -88,7 +88,7 @@ namespace Arteranos.UI
 
             foreach (ServerListItem server in ServerList.Values)
             {
-                server.InvalidateServerData();
+                server.UpdateServerData();
                 pool.Schedule(server, DoUpdate);
             }
 

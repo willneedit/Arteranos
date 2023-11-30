@@ -28,32 +28,11 @@ namespace Arteranos.Web
                 await NetworkStatus.StopHost(false);
             }
 
-            ServerDescription? sod = ServerGallery.RetrieveServerSettings(serverURL);
-
-            if (sod == null)
-            {
-                Debug.Log($"{serverURL} has no meta data, downloading...");
-                (_, sod) = await ServerPublicData.GetServerDataAsync(serverURL);
-
-                Debug.Log($"Metadata download: {sod != null}");
-
-                if (sod == null)
-                {
-                    Debug.Log("Still no viable metadata, giving up.");
-                    ConnectionResponse(false, null);
-                    return false;
-                }
-                else ServerGallery.StoreServerSettings(serverURL, sod.Value);
-            }
-
-            Uri serverURI = Utils.ProcessUriString(serverURL,
-                scheme: "http",
-                port: ServerJSON.DefaultMetadataPort,
-                path: ServerJSON.DefaultMetadataPath
-                );
+            ServerInfo si = new(serverURL);
+            await si.Update();
 
             // FIXME Telepathy Transport specific.
-            Uri connectionUri = new($"tcp4://{serverURI.Host}:{sod?.ServerPort}");
+            Uri connectionUri = new($"tcp4://{si.Address}:{si.ServerPort}");
             ExpectConnectionResponse();
             NetworkStatus.StartClient(connectionUri);
 
