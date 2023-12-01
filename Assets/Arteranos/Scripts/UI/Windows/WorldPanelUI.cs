@@ -194,7 +194,7 @@ namespace Arteranos.UI
             TaskPool<ServerInfo> pool = new(20);
 
             foreach (var entry in SettingsManager.ServerCollection.Dump(DateTime.MinValue))
-                serverInfos.Add(new(entry.Address, entry.MDPort));
+                serverInfos.Add(new(entry));
 
             foreach (ServerInfo info in serverInfos) pool.Schedule(info, UpdateOne);
 

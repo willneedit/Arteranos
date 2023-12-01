@@ -104,9 +104,9 @@ namespace Arteranos.Core
         private ServerOnlineData? OnlineData;
         private ServerDescription? DescriptionStruct;
 
-        public ServerInfo(string address, int port)
+        public ServerInfo(ServerPublicData data)
         {
-            PublicData = SettingsManager.ServerCollection.Get(address, port);
+            PublicData = data;
             DescriptionStruct = null;
             OnlineData = null;
         }
@@ -116,6 +116,16 @@ namespace Arteranos.Core
             Uri uri = new(url);
 
             PublicData = SettingsManager.ServerCollection.Get(uri.Host, uri.Port);
+            if(PublicData == null) 
+            {
+                // Completely unknown, or manually added. Create the 'lean' struct
+                // to hold the contact data.
+                PublicData = new()
+                {
+                    Address = uri.Host,
+                    MDPort = uri.Port,
+                };
+            }
             DescriptionStruct = null;
             OnlineData = null;
         }
