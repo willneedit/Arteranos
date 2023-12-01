@@ -164,13 +164,13 @@ namespace Arteranos.Core
         public string Name => DescriptionStruct?.Name;
         public string Description => DescriptionStruct?.Description ?? string.Empty;
         public byte[] Icon => DescriptionStruct?.Icon;
-        public List<string> AdminNames => DescriptionStruct?.AdminMames;
+        public List<string> AdminNames => DescriptionStruct?.AdminMames ?? new();
         public string Address => PublicData?.Address;
         public int MDPort => PublicData?.MDPort ?? 0;
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
         public string URL => $"http://{Address}:{MDPort}/";
         public string SPKDBKey => $"{Address}:{ServerPort}";
-        public ServerPermissions Permissions => PublicData?.Permissions;
+        public ServerPermissions Permissions => PublicData?.Permissions ?? new();
         public DateTime LastUpdated => PublicData?.LastUpdated ?? DateTime.UnixEpoch;
         public DateTime LastOnline => PublicData?.LastOnline ?? DateTime.UnixEpoch;
         public string CurrentWorld => OnlineData?.CurrentWorld;
