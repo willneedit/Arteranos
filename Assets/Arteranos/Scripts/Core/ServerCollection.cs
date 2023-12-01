@@ -24,130 +24,19 @@ namespace Arteranos.Core
         public DateTime LastOnline;
         public DateTime LastUpdated;
 
-        public ServerPublicData(ServerJSON settings, string address, int port, bool online)
+        public ServerPublicData(ServerJSON settings, string address, int MDport, bool online)
         {
-            MDPort = port;
+            MDPort = MDport;
             Address = address;
             Permissions = settings.Permissions;
             LastUpdated = DateTime.Now;
             LastOnline = (online ? DateTime.Now : DateTime.MinValue);
         }
 
-        public ServerPublicData(string address, int port)
-        {
-            Address = address;
-            MDPort = port;
-            Permissions = new();
-            LastOnline = DateTime.UnixEpoch;
-            LastUpdated = DateTime.Now;
-        }
-
         public readonly string Key() => Key(Address, MDPort);
 
         public static string Key(string address, int port) => $"{address}:{port}";
 
-#if false
-        /// <summary>
-        /// Ping and update the server
-        /// </summary>
-        /// <returns>true if it seems to be alive</returns>
-        public async Task<(ServerPublicData, bool)> PingServer()
-        {
-            Uri uri = new($"http://{Address}:{MDPort}/");
-
-            DownloadHandlerBuffer dh = new();
-            using UnityWebRequest uwr = new(
-                uri,
-                UnityWebRequest.kHttpVerbHEAD,
-                dh,
-                null);
-            uwr.timeout = 1;
-
-            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
-            while (!uwr_ao.isDone) await Task.Yield();
-
-            bool success = uwr.result == UnityWebRequest.Result.Success;
-
-            if (success) LastOnline = DateTime.Now;
-            return (this, success);
-        }
-
-        /// <summary>
-        /// Retrieve the essential server data
-        /// </summary>
-        /// <param name="timeout">Timeout in seconds</param>
-        /// <returns>The updated public data, the online data</returns>
-        public async Task<(ServerPublicData, ServerDescription?)> GetServerDataAsync(int timeout = 20)
-        {
-            Uri uri = new($"http://{Address}:{MDPort}{ServerJSON.DefaultMetadataPath}");
-
-            DownloadHandlerBuffer dh = new();
-            using UnityWebRequest uwr = new(
-                uri,
-                UnityWebRequest.kHttpVerbGET,
-                dh,
-                null);
-
-            uwr.timeout = timeout;
-
-            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
-
-            while (!uwr_ao.isDone) await Task.Yield();
-
-            ServerMetadataJSON smdj = null;
-
-            bool success = uwr.result == UnityWebRequest.Result.Success;
-
-            if (success)
-            {
-                LastOnline = DateTime.Now;
-                LastUpdated = DateTime.Now;
-
-                smdj = Serializer.Deserialize<ServerMetadataJSON>(dh.data);
-
-                ServerPublicData old = this;
-
-                Permissions = smdj.Settings.Permissions;
-
-                return (this, new ServerDescription()
-                {
-                    ServerPort = smdj.Settings.ServerPort,
-                    ServerPublicKey = smdj.Settings.ServerPublicKey,
-                    Icon = smdj.Settings.Icon
-                });
-            }
-            else return (this, null);
-        }
-
-        public static async Task<(ServerPublicData?, ServerDescription?)> GetServerDataAsync(string address, int port, int timeout = 20)
-        {
-            ServerCollection sc = SettingsManager.ServerCollection;
-
-            ServerPublicData? stored = sc.Get(address, port);
-
-            ServerPublicData work = stored ?? new(address, port);
-
-            ServerDescription? result;
-            (work, result) = await work.GetServerDataAsync(timeout);
-
-            if(stored != null) _ = sc.UpdateAsync(work); 
-            
-            return (stored, result);
-        }
-
-        public static Task<(ServerPublicData?, ServerDescription?)> GetServerDataAsync(string url, int timeout = 20)
-        {
-            Uri uri = Utils.ProcessUriString(url,
-                scheme: "http",
-                port: ServerJSON.DefaultMetadataPort,
-                path: ServerJSON.DefaultMetadataPath
-                );
-
-            return GetServerDataAsync(uri.Host, uri.Port, timeout);
-        }
-
-#endif
-        // Last Updated timestamp is irrelevant for the data comparison and updating.
         public override readonly bool Equals(object obj)
         {
             return obj is ServerPublicData data && Equals(data);

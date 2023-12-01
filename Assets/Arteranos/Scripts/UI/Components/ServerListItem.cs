@@ -143,15 +143,15 @@ namespace Arteranos.UI
                 cs.Save();
             }
 
-            await RefreshServerDataAsync();
+            await UpdateServerData();
         }
 
         private void OnDeleteClicked()
         {
             Client cs = SettingsManager.Client;
 
-            // Remove the metadata from the persistent storage.
-            ServerGallery.DeleteServerSettings(serverURL);
+            // Delete the online and public data
+            si.Delete();
 
             // Then, strike it from our list
             if(cs.ServerList.Contains(serverURL))
@@ -167,15 +167,10 @@ namespace Arteranos.UI
         private async void OnInfoClicked()
         {
             btn_Info.interactable = false;
-            await RefreshServerDataAsync(1, false);
+            await UpdateServerData();
             btn_Info.interactable = true;
 
             ServerInfoUI.New(si.PublicData, si.Description);
-        }
-
-        public async Task RefreshServerDataAsync(int timeout = 1, bool saveOnlineData = true)
-        {
-            await UpdateServerData();
         }
     }
 }

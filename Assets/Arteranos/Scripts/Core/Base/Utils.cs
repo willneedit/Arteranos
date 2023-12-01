@@ -343,6 +343,7 @@ namespace Arteranos.Core
                 }
                 else
                 {
+                    // It's already expired, so we have to dump it anyway.
                     if (File.Exists(cacheFile)) File.Delete(cacheFile);
                 }
             }

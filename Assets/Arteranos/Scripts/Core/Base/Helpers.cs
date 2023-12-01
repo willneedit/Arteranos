@@ -213,18 +213,6 @@ namespace Arteranos.Web
         public static void DeliverDisconnectReason(string reason) => Instance.DeliverDisconnectReason(reason);
     }
 
-    public static class ServerGallery
-    {
-        public static IServerGallery Instance { get; set; }
-
-        public static void DeleteServerSettings(string url)
-            => Instance?.DeleteServerSettings(url);
-        public static ServerDescription? RetrieveServerSettings(string url)
-            => Instance?.RetrieveServerSettings(url);
-        public static void StoreServerSettings(string url, ServerDescription onlineData)
-            => Instance?.StoreServerSettings(url, onlineData);
-    }
-
     public static class ServerSearcher
     {
         public static IServerSearcher Instance { get; set; }

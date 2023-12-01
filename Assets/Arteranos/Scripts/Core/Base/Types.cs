@@ -38,6 +38,13 @@ namespace Arteranos.Core
             }
         }
 
+        public static void WebDelete(string url, string pathPart, string patternServerDescription)
+        {
+            UriBuilder builder = new(url) { Path = pathPart };
+            InvalidateWebData(builder.ToString(), url, patternServerDescription);
+        }
+
+
         public async static Task WebEmit<T>(T payload, HttpListenerResponse response)
         {
             byte[] data = Serializer.Serialize(payload);
@@ -68,6 +75,9 @@ namespace Arteranos.Core
             (bool success, ServerDescription result) = await Utils.WebRetrieve<ServerDescription>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 86400, 1);
             return success ? result : null;
         }
+
+        public static void Delete(string url) 
+            => Utils.WebDelete(url, urlPathPart, cacheFilePattern);
     }
 
     public struct ServerOnlineData
@@ -83,6 +93,9 @@ namespace Arteranos.Core
             (bool success, ServerOnlineData result) = await Utils.WebRetrieve<ServerOnlineData>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 30, 1);
             return success ? result : null;
         }
+
+        public static void Delete(string url)
+            => Utils.WebDelete(url, urlPathPart, cacheFilePattern);
     }
 
     public class ServerInfo
@@ -129,6 +142,14 @@ namespace Arteranos.Core
             };
 
             return Task.WhenAll(tasks);
+        }
+
+        public void Delete()
+        {
+            ServerDescription.Delete(URL);
+            ServerOnlineData.Delete(URL);
+            Description = null;
+            OnlineData = null;
         }
 
         public bool IsValid => Description != null;
