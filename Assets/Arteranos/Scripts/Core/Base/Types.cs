@@ -83,7 +83,8 @@ namespace Arteranos.Core
     public struct ServerOnlineData
     {
         public List<byte[]> UserPublicKeys;
-        [ASN1Tag(true)] public string CurrentWorld;
+        [ASN1Tag(1, true)] public string CurrentWorld;
+        [ASN1Tag(2, true)] public string CurrentWorldName;
 
 
         public static readonly string cacheFilePattern = $"{Application.persistentDataPath}/KnownServers/{{0}}/online.asn1";
@@ -174,6 +175,7 @@ namespace Arteranos.Core
         public DateTime LastUpdated => PublicData?.LastUpdated ?? DateTime.UnixEpoch;
         public DateTime LastOnline => PublicData?.LastOnline ?? DateTime.UnixEpoch;
         public string CurrentWorld => OnlineData?.CurrentWorld;
+        public string CurrentWorldName => (OnlineData?.CurrentWorld != null) ? OnlineData?.CurrentWorldName : "Nexus";
         public int UserCount => OnlineData?.UserPublicKeys.Count ?? 0;
         public int FriendCount
         {

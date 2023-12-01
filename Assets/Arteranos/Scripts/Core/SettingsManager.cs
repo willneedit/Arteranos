@@ -31,6 +31,7 @@ namespace Arteranos.Core
         public static ServerCollection ServerCollection { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
         public static string CurrentWorld { get; set; }
+        public static string CurrentWorldName { get; set; }
 
         public static ServerJSON ActiveServerData =>
             NetworkStatus.GetOnlineLevel() == OnlineLevel.Client

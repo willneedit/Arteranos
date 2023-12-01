@@ -75,8 +75,11 @@ namespace Arteranos.Web
             {
                 string worldABF = WorldDownloader.GetWorldABF(worldURL);
 
+                WorldInfo? wi = WorldDownloader.GetWorldInfo(worldURL);
+
                 EnterDownloadedWorld(worldABF);
                 SettingsManager.CurrentWorld = worldURL;
+                SettingsManager.CurrentWorldName = wi?.metaData?.WorldName;
             }
 
             return Task.Run(Enter_);

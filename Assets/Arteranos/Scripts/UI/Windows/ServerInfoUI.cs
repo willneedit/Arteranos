@@ -72,10 +72,8 @@ namespace Arteranos.UI
 
                 lbl_AdminList.text = string.Join(", ", si.AdminNames);
 
-                string currentWorld = si.CurrentWorld;
-
                 Utils.ShowImage(si.Icon, img_Icon);
-                lbl_World.text = string.IsNullOrEmpty(currentWorld) ? "Unknown" : currentWorld;
+                lbl_World.text = si.CurrentWorldName;
             }
 
             SettingsManager.StartCoroutineAsync(Visualize);

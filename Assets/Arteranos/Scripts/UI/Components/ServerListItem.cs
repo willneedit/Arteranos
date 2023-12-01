@@ -116,7 +116,7 @@ namespace Arteranos.UI
 
             lbl_Caption.text = 
                 $"Server: {$"{si.Name}"} (Users: {si.UserCount}, Friends: {si.FriendCount})\n" +
-                $"Current World: {si.CurrentWorld ?? "Unknown"}";
+                $"Current World: {si.CurrentWorldName}";
         }
 
         private async void OnVisitClicked()
