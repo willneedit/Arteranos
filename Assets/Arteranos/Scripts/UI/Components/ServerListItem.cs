@@ -52,6 +52,8 @@ namespace Arteranos.UI
             btn_Info.onClick.AddListener(OnInfoClicked);
             btn_Visit.onClick.AddListener(OnVisitClicked);
             btn_Delete.onClick.AddListener(OnDeleteClicked);
+
+            lbl_Caption.text = "Loading...";
         }
 
         protected override void Start()
@@ -60,7 +62,7 @@ namespace Arteranos.UI
 
             si = new(serverURL);
 
-            _ = UpdateServerData();
+            PopulateServerData();
         }
 
         public void PopulateServerData()
@@ -112,23 +114,15 @@ namespace Arteranos.UI
                 return;
             }
 
-            string CurrentWorld = si.CurrentWorld;
-            int CurrentUsers = si.UserCount;
-
-            if (string.IsNullOrEmpty(CurrentWorld)) CurrentWorld = null;
-
-            string serverstr = $"{si.Name} (Users: {CurrentUsers})";
-
-            lbl_Caption.text = $"Server: {serverstr}\nCurrent World: {CurrentWorld ?? "Unknown"}";
+            lbl_Caption.text = 
+                $"Server: {$"{si.Name}"} (Users: {si.UserCount}, Friends: {si.FriendCount})\n" +
+                $"Current World: {si.CurrentWorld ?? "Unknown"}";
         }
 
         private async void OnVisitClicked()
         {
-            btn_Visit.interactable = false;
-
-            if(!string.IsNullOrEmpty(serverURL))
-                await ConnectionManager.ConnectToServer(serverURL);
-
+            btn_Visit.interactable = false;                
+            await ConnectionManager.ConnectToServer(serverURL);
             btn_Visit.interactable = true;
         }
 

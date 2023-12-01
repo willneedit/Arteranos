@@ -64,6 +64,8 @@ namespace Arteranos.UI
 
                     yield return null;
                 }
+
+                OnReloadClicked();
             }
 
             StartCoroutine(PopulateCoroutine());
