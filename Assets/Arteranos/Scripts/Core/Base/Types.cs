@@ -100,15 +100,14 @@ namespace Arteranos.Core
 
     public class ServerInfo
     {
-        // UNDONE Make private
-        public ServerPublicData? PublicData;
-        public ServerOnlineData? OnlineData;
-        public ServerDescription? Description;
+        private ServerPublicData? PublicData;
+        private ServerOnlineData? OnlineData;
+        private ServerDescription? DescriptionStruct;
 
         public ServerInfo(string address, int port)
         {
             PublicData = SettingsManager.ServerCollection.Get(address, port);
-            Description = null;
+            DescriptionStruct = null;
             OnlineData = null;
         }
 
@@ -117,17 +116,15 @@ namespace Arteranos.Core
             Uri uri = new(url);
 
             PublicData = SettingsManager.ServerCollection.Get(uri.Host, uri.Port);
-            Description = null;
+            DescriptionStruct = null;
             OnlineData = null;
         }
 
         public Task Update()
         {
-            // UNDONE path parts!!
-            // In Retrieve(), add a URL stem and path suffix. or override the GetURLHash result?
             async Task t1()
             {
-                Description = await ServerDescription.Retrieve(URL);
+                DescriptionStruct = await ServerDescription.Retrieve(URL);
             }
 
             async Task t2()
@@ -148,20 +145,22 @@ namespace Arteranos.Core
         {
             ServerDescription.Delete(URL);
             ServerOnlineData.Delete(URL);
-            Description = null;
+            DescriptionStruct = null;
             OnlineData = null;
         }
 
-        public bool IsValid => Description != null;
+        public bool IsValid => DescriptionStruct != null;
         public bool IsOnline => OnlineData != null;
-        public string Name => Description?.Name;
-        public List<string> AdminNames => Description?.AdminMames;
+        public string Name => DescriptionStruct?.Name;
+        public string Description => DescriptionStruct?.Description;
+        public byte[] Icon => DescriptionStruct?.Icon;
+        public List<string> AdminNames => DescriptionStruct?.AdminMames;
         public string Address => PublicData?.Address;
         public int MDPort => PublicData?.MDPort ?? 0;
-        public int ServerPort => Description?.ServerPort ?? 0;
+        public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
         public string URL => $"http://{Address}:{MDPort}/";
-        public byte[] Icon => Description?.Icon;
         public ServerPermissions Permissions => PublicData?.Permissions;
+        public DateTime LastUpdated => PublicData?.LastUpdated ?? DateTime.UnixEpoch;
         public DateTime LastOnline => PublicData?.LastOnline ?? DateTime.UnixEpoch;
         public string CurrentWorld => OnlineData?.CurrentWorld;
         public int UserCount => OnlineData?.UserPublicKeys.Count ?? 0;
@@ -169,7 +168,7 @@ namespace Arteranos.Core
         {
             get
             {
-                if (Description == null) return 0;
+                if (DescriptionStruct == null) return 0;
 
                 int friend = 0;
                 IEnumerable<SocialListEntryJSON> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.State));

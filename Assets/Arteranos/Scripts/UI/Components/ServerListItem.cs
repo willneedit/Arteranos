@@ -170,7 +170,7 @@ namespace Arteranos.UI
             await UpdateServerData();
             btn_Info.interactable = true;
 
-            ServerInfoUI.New(si.PublicData, si.Description);
+            ServerInfoUI.New(si);
         }
     }
 }

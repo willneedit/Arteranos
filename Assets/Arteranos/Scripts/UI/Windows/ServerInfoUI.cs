@@ -7,10 +7,7 @@
 
 
 using Arteranos.Core;
-using Arteranos.Web;
-using System;
 using System.Collections;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,14 +17,13 @@ namespace Arteranos.UI
 {
     public class ServerInfoUI : UIBehaviour
     {
-        public static ServerInfoUI New(ServerPublicData? spd, ServerDescription? sod)
+        public static ServerInfoUI New(ServerInfo si)
         {
             GameObject blueprint = Resources.Load<GameObject>("UI/UI_ServerInfo");
             blueprint.SetActive(false);
             GameObject go = Instantiate(blueprint);
             ServerInfoUI serverInfoUI = go.GetComponent<ServerInfoUI>();
-            serverInfoUI.spd = spd;
-            serverInfoUI.sod = sod;
+            serverInfoUI.si = si;
             go.SetActive(true);
             return serverInfoUI;
         }
@@ -43,8 +39,7 @@ namespace Arteranos.UI
         [SerializeField] private TMP_Text lbl_World;
         [SerializeField] private TMP_Text lbl_Description;
 
-        private ServerPublicData? spd = null;
-        private ServerDescription? sod = null;
+        private ServerInfo si = null;
 
         protected override void Awake()
         {
@@ -66,27 +61,21 @@ namespace Arteranos.UI
             {
                 yield return null;
 
-                if (spd != null)
-                {
-                    // UNDONE lbl_Name.text = spd.Value.Name;
-                    lbl_Address.text = spd.Value.Address;
-                    lbl_LastUpdated.text = spd.Value.LastUpdated.HumanReadable();
-                    lbl_LastOnline.text = spd.Value.LastOnline.HumanReadable();
-                    lbl_MatchIndex.text = spd.Value.Permissions.HumanReadableMI(
-                        SettingsManager.Client.ContentFilterPreferences
-                        ).ToString();
-                    // UNDONE lbl_Description.text = spd.Value.Description.ToString();
+                lbl_Name.text = si.Name;
+                lbl_Address.text = si.Address;
+                lbl_LastUpdated.text = si.LastUpdated.HumanReadable();
+                lbl_LastOnline.text = si.LastOnline.HumanReadable();
+                lbl_MatchIndex.text = si.Permissions.HumanReadableMI(
+                    SettingsManager.Client.ContentFilterPreferences
+                    ).ToString();
+                lbl_Description.text = si.Description.ToString();
 
-                    // UNDONE lbl_AdminList.text = string.Join(", ", spd.Value.AdminNames);
-                }
+                lbl_AdminList.text = string.Join(", ", si.AdminNames);
 
-                if (sod != null)
-                {
-                    string currentWorld = null; // UNDONE sod.Value.CurrentWorld;
+                string currentWorld = si.CurrentWorld;
 
-                    Utils.ShowImage(sod.Value.Icon, img_Icon);
-                    lbl_World.text = string.IsNullOrEmpty(currentWorld) ? "Unknown" : currentWorld;
-                }
+                Utils.ShowImage(si.Icon, img_Icon);
+                lbl_World.text = string.IsNullOrEmpty(currentWorld) ? "Unknown" : currentWorld;
             }
 
             SettingsManager.StartCoroutineAsync(Visualize);
