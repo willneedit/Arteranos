@@ -179,7 +179,7 @@ namespace Arteranos.Core
         {
             get
             {
-                if (DescriptionStruct == null) return 0;
+                if (OnlineData == null) return 0;
 
                 int friend = 0;
                 IEnumerable<SocialListEntryJSON> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.State));
