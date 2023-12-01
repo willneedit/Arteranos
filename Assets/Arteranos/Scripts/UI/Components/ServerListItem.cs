@@ -144,15 +144,19 @@ namespace Arteranos.UI
         {
             Client cs = SettingsManager.Client;
 
+            // Strike it from our list
+            if(cs.ServerList.Contains(serverURL))
+                cs.ServerList.Remove(serverURL);
+
+            // The server public is entered with the server port, not the MD port.
+            string key = si.SPKDBKey;
+            if(cs.ServerKeys.ContainsKey(key))
+                cs.ServerKeys.Remove(key);
+
+            cs.Save();
+
             // Delete the online and public data
             si.Delete();
-
-            // Then, strike it from our list
-            if(cs.ServerList.Contains(serverURL))
-            {
-                cs.ServerList.Remove(serverURL);
-                cs.Save();
-            }
 
             // And, zip, gone.
             Destroy(gameObject);
