@@ -312,6 +312,9 @@ namespace Arteranos.Core
         // The server collection
         public virtual List<string> ServerList { get; set; } = new();
 
+        // The known privacy and TOS agreements.
+        public virtual List<string> KnownAgreements { get; set; } = new();
+
         // Server keys we've encountered (host ip/name => Public Key)
         public virtual Dictionary<string, byte[]> ServerKeys { get; set; } = new();
 
