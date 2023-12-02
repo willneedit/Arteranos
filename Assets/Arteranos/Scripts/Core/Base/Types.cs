@@ -15,6 +15,7 @@ using DERSerializer;
 using System.Threading.Tasks;
 using System.Net;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace Arteranos.Core
 {
@@ -64,7 +65,8 @@ namespace Arteranos.Core
         public byte[] ServerPublicKey;
         public string Name;
         [ASN1Tag(true)] public byte[] Icon;
-        [ASN1Tag(true)] public string Description;
+        [ASN1Tag(1, true)] public string Description;
+        [ASN1Tag(2, true)] public string PrivacyTOSNotice;
         public List<string> AdminMames;
 
 
@@ -164,6 +166,7 @@ namespace Arteranos.Core
         public bool IsOnline => OnlineData != null;
         public string Name => DescriptionStruct?.Name;
         public string Description => DescriptionStruct?.Description ?? string.Empty;
+        public string PrivacyTOSNotice => DescriptionStruct?.PrivacyTOSNotice;
         public byte[] Icon => DescriptionStruct?.Icon;
         public List<string> AdminNames => DescriptionStruct?.AdminMames ?? new();
         public string Address => PublicData?.Address;
@@ -198,6 +201,21 @@ namespace Arteranos.Core
             {
                 (int ms, int _) = Permissions.MatchRatio(SettingsManager.Client.ContentFilterPreferences);
                 return ms + FriendCount * 3;
+            }
+        }
+
+        public string PrivacyTOSNoticeHash
+        {
+            get
+            {
+                if (PrivacyTOSNotice == null) return null;
+
+                // This is serious enough to warrant a cryptographically strong hash algorithm.
+                byte[] bytes = Encoding.UTF8.GetBytes(PrivacyTOSNotice);
+                using IncrementalHash myHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+                myHash.AppendData(bytes);
+                return Convert.ToBase64String(myHash.GetHashAndReset());
+
             }
         }
     }

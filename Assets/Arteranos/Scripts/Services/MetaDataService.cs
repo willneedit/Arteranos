@@ -23,8 +23,14 @@ namespace Arteranos.Services
 
         private IEnumerator MDServiceCoroutine = null;
 
+        public static string CachedPTOSNotice { get; private set; } = null;
+
         void Start()
         {
+            // UNDONE Copying template to the settings directory
+            TextAsset ta = Resources.Load<TextAsset>("Templates/PrivacyTOSNotice");
+            CachedPTOSNotice = ta.text;
+
             MDServiceCoroutine = ManageMetaDataServer();
             StartCoroutine(MDServiceCoroutine);
         }
@@ -136,6 +142,7 @@ namespace Arteranos.Services
                 Name = s.Name,
                 ServerPort = s.ServerPort,
                 Description = s.Description,
+                PrivacyTOSNotice = MetaDataService.CachedPTOSNotice,
                 Icon = s.Icon,
                 ServerPublicKey = s.ServerPublicKey,
                 AdminMames = q.ToList(),
