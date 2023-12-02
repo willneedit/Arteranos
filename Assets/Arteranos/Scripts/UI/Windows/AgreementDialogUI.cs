@@ -15,6 +15,7 @@ using UnityEngine.UI;
 
 using Arteranos.Core;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace Arteranos.UI
 {
@@ -60,11 +61,11 @@ namespace Arteranos.UI
 
         private static string HashText(string text)
         {
-            Hash128 hash = new();
+            // This is serious enough to warrant a cryptographically strong hash algorithm.
             byte[] bytes = Encoding.UTF8.GetBytes(text);
-            hash.Append(bytes);
-            string hashstr = hash.ToString();
-            return hashstr;
+            using IncrementalHash myHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+            myHash.AppendData(bytes);
+            return Convert.ToBase64String(myHash.GetHashAndReset());
         }
 
         private static string MD2RichText(string text)
