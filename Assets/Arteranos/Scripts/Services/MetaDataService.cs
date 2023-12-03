@@ -9,6 +9,7 @@ using Arteranos.Core;
 using Mirror;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -19,6 +20,7 @@ namespace Arteranos.Services
 {
     public class MetaDataService : MonoBehaviour
     {
+        private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
         private bool serverActive = false;
 
         private IEnumerator MDServiceCoroutine = null;
@@ -27,9 +29,15 @@ namespace Arteranos.Services
 
         void Start()
         {
-            // UNDONE Copying template to the settings directory
-            TextAsset ta = Resources.Load<TextAsset>("Templates/PrivacyTOSNotice");
-            CachedPTOSNotice = ta.text;
+            // If it doesn't exist, write down the template in the config directory.
+            if(!FileUtils.ReadConfig(PATH_USER_PRIVACY_NOTICE, File.Exists))
+            {
+                TextAsset ta = Resources.Load<TextAsset>("Templates/PrivacyTOSNotice");
+                FileUtils.WriteTextConfig(PATH_USER_PRIVACY_NOTICE, ta.text);
+                Debug.LogWarning("Privacy notice and Terms Of Service template written down - Read (and modify) according to your use case!");
+            }
+
+            CachedPTOSNotice = FileUtils.ReadTextConfig(PATH_USER_PRIVACY_NOTICE);
 
             MDServiceCoroutine = ManageMetaDataServer();
             StartCoroutine(MDServiceCoroutine);

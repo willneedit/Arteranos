@@ -72,7 +72,7 @@ namespace Arteranos.Core
             return WriteConfigAsync(path, (path, data) => File.WriteAllTextAsync(path, data), data);
         }
 
-        private static T ReadConfig<T>(string path, Func<string, T> reader)
+        public static T ReadConfig<T>(string path, Func<string, T> reader)
         {
             string fullPath = $"{persistentDataPath}/{path}";
 
