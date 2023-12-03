@@ -206,9 +206,9 @@ namespace Arteranos.Web
     #region Web helpers
     public abstract class ConnectionManager : MonoBehaviour
     {
-        public abstract Task<bool> ConnectToServer_(string serverURL);
-        public abstract void DeliverDisconnectReason_(string reason);
-        public abstract void ExpectConnectionResponse_();
+        protected abstract Task<bool> ConnectToServer_(string serverURL);
+        protected abstract void DeliverDisconnectReason_(string reason);
+        protected abstract void ExpectConnectionResponse_();
 
         public static ConnectionManager Instance { get; protected set; }
 
@@ -220,26 +220,29 @@ namespace Arteranos.Web
             => Instance.ExpectConnectionResponse_();
     }
 
-    public static class ServerSearcher
+    public abstract class ServerSearcher : MonoBehaviour
     {
-        public static IServerSearcher Instance { get; set; }
+        protected abstract void InitiateServerTransition_(string worldURL);
+        protected abstract void InitiateServerTransition_(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback);
 
-        public static void InitiateServerTransition(string worldURL) 
-            => Instance.InitiateServerTransition(worldURL);
-        public static void InitiateServerTransition(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback) 
-            => Instance.InitiateServerTransition(worldURL, OnSuccessCallback, OnFailureCallback);
+        public static ServerSearcher Instance { get; protected set; }
+
+        public static void InitiateServerTransition(string worldURL)
+            => Instance.InitiateServerTransition_(worldURL);
+        public static void InitiateServerTransition(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback)
+            => Instance.InitiateServerTransition_(worldURL, OnSuccessCallback, OnFailureCallback);
     }
     public abstract class WorldGallery : MonoBehaviour
     {
         public static WorldGallery Instance { get; protected set; }
 
-        public abstract WorldInfo? GetWorldInfo_(string url);
-        public abstract Task<WorldInfo?> LoadWorldInfoAsync_(string url, CancellationToken token);
-        public abstract void PutWorldInfo_(string url, WorldInfo info);
-        public abstract void FavouriteWorld_(string url);
-        public abstract void UnfavoriteWorld_(string url);
-        public abstract bool IsWorldFavourited_(string url);
-        public abstract void BumpWorldInfo_(string url);
+        protected abstract WorldInfo? GetWorldInfo_(string url);
+        protected abstract Task<WorldInfo?> LoadWorldInfoAsync_(string url, CancellationToken token);
+        protected abstract void PutWorldInfo_(string url, WorldInfo info);
+        protected abstract void FavouriteWorld_(string url);
+        protected abstract void UnfavoriteWorld_(string url);
+        protected abstract bool IsWorldFavourited_(string url);
+        protected abstract void BumpWorldInfo_(string url);
 
         public static WorldInfo? GetWorldInfo(string url)
             => Instance.GetWorldInfo_(url);
@@ -255,30 +258,47 @@ namespace Arteranos.Web
             => Instance.IsWorldFavourited_(url);
         public static void BumpWorldInfo(string url)
             => Instance.BumpWorldInfo_(url);
-
-
     }
 
-    public class WorldTransition
+    public struct WorldData
     {
-        public static IWorldTransition Instance { get; set; }
+        public string worldURL;
+        public string name;
+        public UserID authorID;
+        public byte[] icon;
+        public ServerPermissions permissions;
+    }
 
-        public static Task<(Exception, WorldData)> GetWorldDataAsync(string worldURL) 
-            => Instance.GetWorldDataAsync(worldURL);
-        public static bool IsWorldPreloaded(string worldURL) 
-            => Instance.IsWorldPreloaded(worldURL);
-        public static Task MoveToOfflineWorld() 
-            => Instance.MoveToOfflineWorld();
-        public static Task MoveToOnlineWorld(string worldURL) 
-            => Instance.MoveToOnlineWorld(worldURL);
-        public static Task<(Exception, Context)> PreloadWorldDataAsync(string worldURL, bool forceReload = false) 
-            => Instance.PreloadWorldDataAsync(worldURL, forceReload);
-        public static Task<Exception> VisitWorldAsync(string worldURL, bool forceReload = false) 
-            => Instance.VisitWorldAsync(worldURL, forceReload);
-        public static Task EnterWorldAsync(string worldURL, bool forceReload = false) 
-            => Instance.EnterWorldAsync(worldURL, forceReload);
+
+    public abstract class WorldTransition : MonoBehaviour
+    {
+        protected abstract Task<(Exception, Context)> PreloadWorldDataAsync_(string worldURL, bool forceReload = false);
+        protected abstract bool IsWorldPreloaded_(string worldURL);
+        protected abstract Task<(Exception, WorldData)> GetWorldDataAsync_(string worldURL);
+        protected abstract Task<Exception> VisitWorldAsync_(string worldURL, bool forceReload = false);
+        protected abstract Task MoveToOfflineWorld_();
+        protected abstract Task MoveToOnlineWorld_(string worldURL);
+        protected abstract Task EnterWorldAsync_(string worldURL, bool forceReload = false);
+        protected abstract void EnterDownloadedWorld_(string worldABF);
+
+        public static WorldTransition Instance { get; set; }
+
+        public static Task<(Exception, WorldData)> GetWorldDataAsync(string worldURL)
+            => Instance.GetWorldDataAsync_(worldURL);
+        public static bool IsWorldPreloaded(string worldURL)
+            => Instance.IsWorldPreloaded_(worldURL);
+        public static Task MoveToOfflineWorld()
+            => Instance.MoveToOfflineWorld_();
+        public static Task MoveToOnlineWorld(string worldURL)
+            => Instance.MoveToOnlineWorld_(worldURL);
+        public static Task<(Exception, Context)> PreloadWorldDataAsync(string worldURL, bool forceReload = false)
+            => Instance.PreloadWorldDataAsync_(worldURL, forceReload);
+        public static Task<Exception> VisitWorldAsync(string worldURL, bool forceReload = false)
+            => Instance.VisitWorldAsync_(worldURL, forceReload);
+        public static Task EnterWorldAsync(string worldURL, bool forceReload = false)
+            => Instance.EnterWorldAsync_(worldURL, forceReload);
         public static void EnterDownloadedWorld(string worldABF)
-            => Instance.EnterDownloadedWorld(worldABF);
+            => Instance.EnterDownloadedWorld_(worldABF);
     }
 
 

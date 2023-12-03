@@ -18,10 +18,10 @@ using UnityEngine.SceneManagement;
 
 namespace Arteranos.Web
 {
-    public class WorldTransitionImpl : MonoBehaviour, IWorldTransition
+    public class WorldTransitionImpl : WorldTransition
     {
-        private void Awake() => WorldTransition.Instance = this;
-        private void OnDestroy() => WorldTransition.Instance = null;
+        private void Awake() => Instance = this;
+        private void OnDestroy() => Instance = null;
 
         private IEnumerator EnterDownloadedWorldCoroutine(string worldABF)
         {
@@ -37,17 +37,17 @@ namespace Arteranos.Web
             sl.Name = worldABF;
         }
 
-        public async Task<(Exception, WorldData)> GetWorldDataAsync(string worldURL)
+        protected override async Task<(Exception, WorldData)> GetWorldDataAsync_(string worldURL)
         {
             static (Exception, WorldData) _GetWorldData() => (null, new WorldData());
 
             return await Task.Run(_GetWorldData);
         }
 
-        public bool IsWorldPreloaded(string worldURL) 
+        protected override bool IsWorldPreloaded_(string worldURL) 
             => File.Exists(WorldDownloader.GetWIFile(worldURL));
 
-        public async Task MoveToOfflineWorld()
+        protected override async Task MoveToOfflineWorld_()
         {
             bool done = false;
             IEnumerator OfflineScene()
@@ -69,7 +69,7 @@ namespace Arteranos.Web
             while(!done) await Task.Yield();
         }
 
-        public Task MoveToOnlineWorld(string worldURL)
+        protected override Task MoveToOnlineWorld_(string worldURL)
         {
             void Enter_()
             {
@@ -77,7 +77,7 @@ namespace Arteranos.Web
 
                 WorldInfo? wi = WorldDownloader.GetWorldInfo(worldURL);
 
-                EnterDownloadedWorld(worldABF);
+                EnterDownloadedWorld_(worldABF);
                 SettingsManager.CurrentWorld = worldURL;
                 SettingsManager.CurrentWorldName = wi?.metaData?.WorldName;
             }
@@ -85,7 +85,7 @@ namespace Arteranos.Web
             return Task.Run(Enter_);
         }
 
-        public async Task<(Exception, Context)> PreloadWorldDataAsync(string worldURL, bool forceReload = false)
+        protected override async Task<(Exception, Context)> PreloadWorldDataAsync_(string worldURL, bool forceReload = false)
         {
             IProgressUI pui = ProgressUIFactory.New();
 
@@ -110,16 +110,16 @@ namespace Arteranos.Web
             return (ex, co);
         }
 
-        public async Task<Exception> VisitWorldAsync(string worldURL, bool forceReload = false)
+        protected override async Task<Exception> VisitWorldAsync_(string worldURL, bool forceReload = false)
         {
             // Offline world. Always a safe space.
             if(worldURL == null)
             {
-                await MoveToOfflineWorld();
+                await MoveToOfflineWorld_();
                 return null;
             }
 
-            (Exception ex, Context _) = await PreloadWorldDataAsync(worldURL, forceReload);
+            (Exception ex, Context _) = await PreloadWorldDataAsync_(worldURL, forceReload);
 
             WorldInfo? wi = WorldGallery.GetWorldInfo(worldURL);
             WorldMetaData wmd = wi?.metaData;
@@ -136,9 +136,9 @@ namespace Arteranos.Web
 
             // The server says it's the new world, jump in or ship out.
             if (ex != null)
-                await MoveToOfflineWorld();
+                await MoveToOfflineWorld_();
             else
-                await MoveToOnlineWorld(worldURL);
+                await MoveToOnlineWorld_(worldURL);
 
             return ex;
         }
@@ -150,7 +150,7 @@ namespace Arteranos.Web
         /// <param name="worldURL"></param>
         /// <param name="forceReload"></param>
         /// <returns>Task completed, or the server has been notified</returns>
-        public async Task EnterWorldAsync(string worldURL, bool forceReload = false)
+        protected override async Task EnterWorldAsync_(string worldURL, bool forceReload = false)
         {
             ScreenFader.StartFading(1.0f);
 
@@ -159,7 +159,7 @@ namespace Arteranos.Web
             if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
             {
                 // In the offline mode, directly change the scene.
-                await VisitWorldAsync(worldURL, forceReload);
+                await VisitWorldAsync_(worldURL, forceReload);
             }
             else
             {
@@ -168,7 +168,7 @@ namespace Arteranos.Web
             }
         }
 
-        public void EnterDownloadedWorld(string worldABF)
+        protected override void EnterDownloadedWorld_(string worldABF)
         {
             SettingsManager.StartCoroutineAsync(() => EnterDownloadedWorldCoroutine(worldABF));
         }

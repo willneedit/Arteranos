@@ -168,10 +168,10 @@ namespace Arteranos.Web
 
     }
 
-    public class ServerSearcherImpl : MonoBehaviour, IServerSearcher
+    public class ServerSearcherImpl : ServerSearcher
     {
-        private void Awake() => ServerSearcher.Instance = this;
-        private void OnDestroy() => ServerSearcher.Instance = null;
+        private void Awake() => Instance = this;
+        private void OnDestroy() => Instance = null;
 
         public static (AsyncOperationExecutor<Context>, Context) PrepareSearchServers(string desiredWorld)
         {
@@ -191,15 +191,15 @@ namespace Arteranos.Web
             return (executor, context);
         }
 
-        public void InitiateServerTransition(string worldURL)
+        protected override void InitiateServerTransition_(string worldURL)
         {
             static void GotResult(string worldURL, string serverURL) 
                 => _ = OnGotSearchResult(worldURL, serverURL);
 
-            InitiateServerTransition(worldURL, GotResult, null);
+            InitiateServerTransition_(worldURL, GotResult, null);
         }
 
-        public void InitiateServerTransition(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback)
+        protected override void InitiateServerTransition_(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback)
         {
             IProgressUI pui = ProgressUIFactory.New();
 

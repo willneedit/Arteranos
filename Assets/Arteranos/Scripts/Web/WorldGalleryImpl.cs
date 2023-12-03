@@ -19,10 +19,10 @@ namespace Arteranos.Web
         private void Awake() => Instance = this;
         private void OnDestroy() => Instance = null;
 
-        public override WorldInfo? GetWorldInfo_(string url)
+        protected override WorldInfo? GetWorldInfo_(string url)
             => WorldDownloader.GetWorldInfo(url);
 
-        public override async Task<WorldInfo?> LoadWorldInfoAsync_(string url, CancellationToken token)
+        protected override async Task<WorldInfo?> LoadWorldInfoAsync_(string url, CancellationToken token)
         {
             WorldInfo? wi = WorldDownloader.GetWorldInfo(url);
             if (wi != null) return wi;
@@ -54,10 +54,10 @@ namespace Arteranos.Web
             return wi;
         }
 
-        public override void PutWorldInfo_(string url, WorldInfo info)
+        protected override void PutWorldInfo_(string url, WorldInfo info)
             => WorldDownloader.PutWorldInfo(url, info);
 
-        public override void FavouriteWorld_(string url)
+        protected override void FavouriteWorld_(string url)
         {
             Client c = SettingsManager.Client;
 
@@ -68,7 +68,7 @@ namespace Arteranos.Web
             }
         }
 
-        public override void UnfavoriteWorld_(string url)
+        protected override void UnfavoriteWorld_(string url)
         {
             Client c = SettingsManager.Client;
 
@@ -79,10 +79,10 @@ namespace Arteranos.Web
             }
         }
 
-        public override bool IsWorldFavourited_(string url)
+        protected override bool IsWorldFavourited_(string url)
             => SettingsManager.Client.WorldList.Contains(url);
 
-        public override void BumpWorldInfo_(string url)
+        protected override void BumpWorldInfo_(string url)
         {
             WorldInfo? wi = WorldDownloader.GetWorldInfo(url);
             if (wi != null)

@@ -17,10 +17,10 @@ namespace Arteranos.Web
 
     public class ConnectionManagerImpl : ConnectionManager
     {
-        public void Awake() => ConnectionManager.Instance = this;
-        public void OnDestroy() => ConnectionManager.Instance = null;
+        private void Awake() => Instance = this;
+        private void OnDestroy() => Instance = null;
 
-        public override async Task<bool> ConnectToServer_(string serverURL)
+        protected override async Task<bool> ConnectToServer_(string serverURL)
         {
             if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
             {
@@ -40,7 +40,7 @@ namespace Arteranos.Web
             return true;
         }
 
-        public override void ExpectConnectionResponse_()
+        protected override void ExpectConnectionResponse_()
         {
             NetworkStatus.OnClientConnectionResponse = ConnectionResponse;
         }
@@ -80,6 +80,6 @@ namespace Arteranos.Web
             dialog.Text = message;
         }
 
-        public override void DeliverDisconnectReason_(string reason) => this.reason = reason;
+        protected override void DeliverDisconnectReason_(string reason) => this.reason = reason;
     }
 }
