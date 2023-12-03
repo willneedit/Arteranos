@@ -15,12 +15,12 @@ using Arteranos.Services;
 namespace Arteranos.Web
 {
 
-    public class ConnectionManagerImpl : MonoBehaviour, IConnectionManager
+    public class ConnectionManagerImpl : ConnectionManager
     {
         public void Awake() => ConnectionManager.Instance = this;
         public void OnDestroy() => ConnectionManager.Instance = null;
 
-        public async Task<bool> ConnectToServer(string serverURL)
+        public override async Task<bool> ConnectToServer_(string serverURL)
         {
             if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
             {
@@ -33,14 +33,14 @@ namespace Arteranos.Web
 
             // FIXME Telepathy Transport specific.
             Uri connectionUri = new($"tcp4://{si.Address}:{si.ServerPort}");
-            ExpectConnectionResponse();
+            ExpectConnectionResponse_();
             NetworkStatus.StartClient(connectionUri);
 
             // Here goes nothing...
             return true;
         }
 
-        public void ExpectConnectionResponse()
+        public override void ExpectConnectionResponse_()
         {
             NetworkStatus.OnClientConnectionResponse = ConnectionResponse;
         }
@@ -80,6 +80,6 @@ namespace Arteranos.Web
             dialog.Text = message;
         }
 
-        public void DeliverDisconnectReason(string reason) => this.reason = reason;
+        public override void DeliverDisconnectReason_(string reason) => this.reason = reason;
     }
 }

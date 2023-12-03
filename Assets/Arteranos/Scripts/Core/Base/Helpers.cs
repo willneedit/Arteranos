@@ -204,13 +204,20 @@ namespace Arteranos.Web
 {
     // -------------------------------------------------------------------
     #region Web helpers
-    public static class ConnectionManager
+    public abstract class ConnectionManager : MonoBehaviour
     {
-        public static IConnectionManager Instance { get; set; }
+        public abstract Task<bool> ConnectToServer_(string serverURL);
+        public abstract void DeliverDisconnectReason_(string reason);
+        public abstract void ExpectConnectionResponse_();
 
-        public static Task<bool> ConnectToServer(string serverURL) => Instance.ConnectToServer(serverURL);
+        public static ConnectionManager Instance { get; protected set; }
 
-        public static void DeliverDisconnectReason(string reason) => Instance.DeliverDisconnectReason(reason);
+        public static Task<bool> ConnectToServer(string serverURL) 
+            => Instance.ConnectToServer_(serverURL);
+        public static void DeliverDisconnectReason(string reason) 
+            => Instance.DeliverDisconnectReason_(reason);
+        public static void ExpectConnectionResponse()
+            => Instance.ExpectConnectionResponse_();
     }
 
     public static class ServerSearcher
@@ -224,7 +231,7 @@ namespace Arteranos.Web
     }
     public abstract class WorldGallery : MonoBehaviour
     {
-        public static WorldGallery Instance { get; set; }
+        public static WorldGallery Instance { get; protected set; }
 
         public abstract WorldInfo? GetWorldInfo_(string url);
         public abstract Task<WorldInfo?> LoadWorldInfoAsync_(string url, CancellationToken token);
