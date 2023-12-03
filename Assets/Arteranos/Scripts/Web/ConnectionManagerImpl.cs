@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 using Arteranos.Services;
+using System.Collections;
+using Arteranos.UI;
 
 namespace Arteranos.Web
 {
@@ -31,6 +33,38 @@ namespace Arteranos.Web
             ServerInfo si = new(serverURL);
             await si.Update();
 
+            bool? result = null;
+            IEnumerator AskForAgreement()
+            {
+                yield return null;
+
+                AgreementDialogUIFactory.New(si, 
+                    () => 
+                    { 
+                        result = false; 
+                    }, 
+                    () =>
+                    {
+                        _ = CommenceConnection(si);
+                        result = true;
+                    });
+            }
+
+            // Ask for the privacy notice agreement, or silently agree if it's already known:
+            SettingsManager.StartCoroutineAsync(AskForAgreement);
+
+            // Aim....  hold.... hold.... 
+            while(result == null) await Task.Yield();
+
+            // ... Fire!
+            if(result == true) return CommenceConnection(si);
+
+            // Drat. Hangfire.
+            return false;
+        }
+
+        private bool CommenceConnection(ServerInfo si)
+        {
             // FIXME Telepathy Transport specific.
             Uri connectionUri = new($"tcp4://{si.Address}:{si.ServerPort}");
             ExpectConnectionResponse_();
@@ -75,7 +109,7 @@ namespace Arteranos.Web
 
             if(message == null) return;
             
-            UI.IDialogUI dialog = UI.DialogUIFactory.New();
+            IDialogUI dialog = DialogUIFactory.New();
             dialog.Buttons = new[] { "Okay" };
             dialog.Text = message;
         }

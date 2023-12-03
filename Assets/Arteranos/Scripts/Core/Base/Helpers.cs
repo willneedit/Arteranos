@@ -310,6 +310,39 @@ namespace Arteranos.UI
 {
     // -------------------------------------------------------------------
     #region UI factories
+
+    public class AgreementDialogUIFactory : UIBehaviour
+    {
+        public static IAgreementDialogUI New(ServerInfo serverInfo, Action disagree, Action agree)
+        {
+            // Unavailable?! We couldn't connect to it anyway, or it doesn't provide a notice. 
+            string text = serverInfo?.PrivacyTOSNotice;
+            if (text == null)
+            {
+                agree?.Invoke();
+                return null;
+            }
+
+            // Seems to be known, skip it.
+            Client client = SettingsManager.Client;
+            if (client.KnownAgreements.Contains(serverInfo.PrivacyTOSNoticeHash))
+            {
+                agree?.Invoke();
+                return null;
+            }
+
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_AgreementDialogUI"));
+            IAgreementDialogUI AgreementDialogUI = go.GetComponent<IAgreementDialogUI>();
+            AgreementDialogUI.OnDisagree += disagree;
+            AgreementDialogUI.OnAgree += agree;
+            AgreementDialogUI.rtText = AgreementDialogUI.MD2RichText(text);
+            AgreementDialogUI.TextHash = serverInfo.PrivacyTOSNoticeHash;
+            return AgreementDialogUI;
+        }
+
+
+    }
+
     public class DialogUIFactory : UIBehaviour
     {
         public static IDialogUI New()

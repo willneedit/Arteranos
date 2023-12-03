@@ -19,56 +19,19 @@ using System.Security.Cryptography;
 
 namespace Arteranos.UI
 {
-    public class AgreementDialogUI : UIBehaviour
+    public class AgreementDialogUI : UIBehaviour, IAgreementDialogUI
     {
         [SerializeField] private TMP_Text lbl_LicenseText = null;
         [SerializeField] private Button btn_Disagree = null;
         [SerializeField] private Button btn_Agree = null;
         [SerializeField] private Scrollbar scrl_Vertical = null;
 
-        private Action OnDisagree = null;
-        private Action OnAgree = null;
-        private string rtText = null;
+        public Action OnDisagree { get; set; } = null;
+        public Action OnAgree { get; set; } = null;
+        public string rtText { get; set; } = null;
+        public string TextHash { get; set; } = null;
 
-        public static AgreementDialogUI New(string text, Action disagree, Action agree)
-        {
-            string rtText = LoadLicenseText(text);
-
-            if(rtText == null)
-            {
-                // Known text, just skip it.
-                agree?.Invoke();
-                return null;
-            }
-
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_AgreementDialogUI"));
-            AgreementDialogUI AgreementDialogUI = go.GetComponent<AgreementDialogUI>();
-            AgreementDialogUI.OnDisagree += disagree;
-            AgreementDialogUI.OnAgree += agree;
-            AgreementDialogUI.rtText = rtText;
-            return AgreementDialogUI;
-        }
-
-        private static string LoadLicenseText(string text)
-        {
-            string hashstr = HashText(MD2RichText(text));
-
-            Client client = SettingsManager.Client;
-
-            // Could be already known.
-            return client.KnownAgreements.Contains(hashstr) ? null : MD2RichText(text);
-        }
-
-        private static string HashText(string text)
-        {
-            // This is serious enough to warrant a cryptographically strong hash algorithm.
-            byte[] bytes = Encoding.UTF8.GetBytes(text);
-            using IncrementalHash myHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-            myHash.AppendData(bytes);
-            return Convert.ToBase64String(myHash.GetHashAndReset());
-        }
-
-        private static string MD2RichText(string text)
+        public string MD2RichText(string text)
         {
             bool monospaced = false;
 
@@ -120,11 +83,9 @@ namespace Arteranos.UI
         {
             if (agree)
             {
-                string hashstr = HashText(rtText);
-
                 Client client = SettingsManager.Client;
 
-                client.KnownAgreements.Add(hashstr);
+                client.KnownAgreements.Add(TextHash);
                 client.Save();
 
                 OnAgree?.Invoke();
