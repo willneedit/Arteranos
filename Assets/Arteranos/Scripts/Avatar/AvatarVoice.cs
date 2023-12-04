@@ -35,7 +35,7 @@ namespace Arteranos.Avatar
     {
         private IAvatarBrain Brain => gameObject.GetComponent<AvatarBrain>();
         private bool IsMuted => AppearanceStatus.IsSilent(Brain.AppearanceStatus);
-        private bool IsMutedTo(uint netID) => IsMutedTo(NetworkStatus.GetOnlineUser(netID));
+        // private bool IsMutedTo(uint netID) => IsMutedTo(NetworkStatus.GetOnlineUser(netID));
         private bool IsMutedTo(IAvatarBrain other) => 
             (other != null) && AppearanceStatus.IsSilent(other.AppearanceStatus);
         private IVoiceOutput AudioOutput { get; set; } = null;
@@ -69,8 +69,8 @@ namespace Arteranos.Avatar
                 receiverNetID = null, // Everyone available
                 data = new VoiceSegment()
                 {
-                    channelCount = AudioManager.Instance.ChannelCount,
-                    sampleRate = AudioManager.Instance.SampleRate,
+                    channelCount = AudioManager.ChannelCount,
+                    sampleRate = AudioManager.SampleRate,
                     index = index,
                     samples = samples
                 }
@@ -84,10 +84,10 @@ namespace Arteranos.Avatar
             if(AudioOutput == null)
             {
                 // FIXME what with channel count and sample rate mismatch?
-                AudioOutput = AudioManager.Instance.GetVoiceOutput(
+                AudioOutput = AudioManager.GetVoiceOutput(
                     voicePacket.data.sampleRate, voicePacket.data.channelCount);
 
-                IAvatarBrain sender = NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
+                IAvatarBrain _ = NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
 
                 AudioOutput.transform.SetParent(transform, false);
             }

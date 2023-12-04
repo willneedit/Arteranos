@@ -13,66 +13,60 @@ using UnityEngine.Audio;
 
 namespace Arteranos.Services
 {
-    public class AudioManagerImpl : MonoBehaviour, IAudioManager
+    public class AudioManagerImpl : AudioManager
     {
-        public IVoiceInput MicInput { get; private set; }
+        protected override IVoiceInput MicInput_ { get; set; }
 
-        public event Action<int, byte[]> OnSegmentReady
+        protected override event Action<int, byte[]> OnSegmentReady_
         {
-            add => MicInput.OnSegmentReady += value;
-            remove => MicInput.OnSegmentReady -= value;
+            add => MicInput_.OnSegmentReady += value;
+            remove => MicInput_.OnSegmentReady -= value;
         }
 
-        public event Action<float[]> OnSampleReady
+        protected override event Action<float[]> OnSampleReady_
         {
-            add => MicInput.OnSampleReady += value;
-            remove => MicInput.OnSampleReady -= value;
+            add => MicInput_.OnSampleReady += value;
+            remove => MicInput_.OnSampleReady -= value;
         }
 
-        public AudioMixerGroup MixerGroupVoice => mixer.FindMatchingGroups("Master/Voice")[0];
-        public AudioMixerGroup MixerGroupEnv => mixer.FindMatchingGroups("Master/Environment")[0];
+        protected override AudioMixerGroup MixerGroupVoice_ => mixer.FindMatchingGroups("Master/Voice")[0];
+        protected override AudioMixerGroup MixerGroupEnv_ => mixer.FindMatchingGroups("Master/Environment")[0];
 
-        public float VolumeMaster
+        protected override float VolumeMaster_
         {
             get => GetVolume("Master");
             set => SetVolume("Master", value);
         }
-        public float VolumeVoice
+        protected override float VolumeVoice_
         {
             get => GetVolume("Voice");
             set => SetVolume("Voice", value);
         }
-        public float VolumeEnv
+        protected override float VolumeEnv_
         {
             get => GetVolume("Env");
             set => SetVolume("Env", value);
         }
 
-        public new bool enabled
-        { 
-            get => base.enabled;
-            set => base.enabled = value; 
-        }
-
-        public float MicGain
+        protected override float MicGain_
         {
-            get => MicInput.Gain;
-            set => MicInput.Gain = value;
+            get => MicInput_.Gain;
+            set => MicInput_.Gain = value;
         }
 
-        public int MicAGCLevel
+        protected override int MicAGCLevel_
         {
             get => micAGCLevel;
             set
             {
                 micAGCLevel = value;
-                MicInput.SetAGCLevel(value);
+                MicInput_.SetAGCLevel(value);
             }
         }
 
-        public int ChannelCount => MicInput.ChannelCount;
+        protected override int ChannelCount_ => MicInput_.ChannelCount;
 
-        public int SampleRate => MicInput.SampleRate;
+        protected override int SampleRate_ => MicInput_.SampleRate;
 
         private int micAGCLevel;
 
@@ -80,22 +74,22 @@ namespace Arteranos.Services
 
         private void Awake()
         {
-            AudioManager.Instance = this;
+            Instance = this;
             mixer = Resources.Load<AudioMixer>("Audio/AudioMixer");
         }
 
-        private void OnDestroy() => AudioManager.Instance = null;
+        private void OnDestroy() => Instance = null;
 
         private void Start()
         {
-            MicInput = Audio.MicInput.New(GetDeviceId(), 24000);
+            MicInput_ = MicInput.New(GetDeviceId_(), 24000);
 
             PullVolumeSettings();
         }
 
-        public void RenewMic() => Audio.MicInput.Renew(GetDeviceId(), 24000);
+        protected override void RenewMic_() => MicInput.Renew(GetDeviceId_(), 24000);
 
-        public int? GetDeviceId()
+        protected override int? GetDeviceId_()
         {
             string device = SettingsManager.Client.AudioSettings.InputDevice;
             int? deviceId = Array.IndexOf(Microphone.devices, device);
@@ -113,24 +107,24 @@ namespace Arteranos.Services
         public void PullVolumeSettings()
         {
             ClientAudioSettingsJSON audioSettings = SettingsManager.Client.AudioSettings;
-            VolumeEnv = audioSettings.EnvVolume;
-            VolumeMaster = audioSettings.MasterVolume;
-            VolumeVoice = audioSettings.VoiceVolume;
+            VolumeEnv_ = audioSettings.EnvVolume;
+            VolumeMaster_ = audioSettings.MasterVolume;
+            VolumeVoice_ = audioSettings.VoiceVolume;
 
-            MicInput.Gain = Core.Utils.LoudnessToFactor(audioSettings.MicInputGain);
-            MicInput.SetAGCLevel(audioSettings.AGCLevel);
+            MicInput_.Gain = Utils.LoudnessToFactor(audioSettings.MicInputGain);
+            MicInput_.SetAGCLevel(audioSettings.AGCLevel);
         }
 
-        public void PushVolumeSettings()
+        protected override void PushVolumeSettings_()
         {
             ClientAudioSettingsJSON audioSettings = SettingsManager.Client.AudioSettings;
-            audioSettings.MasterVolume = VolumeMaster;
-            audioSettings.VoiceVolume= VolumeVoice;
-            audioSettings.EnvVolume = VolumeEnv;
+            audioSettings.MasterVolume = VolumeMaster_;
+            audioSettings.VoiceVolume= VolumeVoice_;
+            audioSettings.EnvVolume = VolumeEnv_;
         }
 
-        public IVoiceOutput GetVoiceOutput(int SampleRate, int ChannelCount) 
-            => AudioOutput.New(SampleRate, ChannelCount, MixerGroupVoice);
+        protected override IVoiceOutput GetVoiceOutput_(int SampleRate, int ChannelCount) 
+            => AudioOutput.New(SampleRate, ChannelCount, MixerGroupVoice_);
     }
 }
 

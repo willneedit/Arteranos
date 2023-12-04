@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Audio;
 using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.XR;
@@ -199,54 +200,77 @@ namespace Arteranos.Services
 
     }
 
-    public static class AudioManager
+    public abstract class AudioManager : MonoBehaviour
     {
-        public static IAudioManager Instance { get; set; }
+        protected abstract AudioMixerGroup MixerGroupEnv_ { get; }
+        protected abstract AudioMixerGroup MixerGroupVoice_ { get; }
+        protected abstract float VolumeEnv_ { get; set; }
+        protected abstract float VolumeMaster_ { get; set; }
+        protected abstract float VolumeVoice_ { get; set; }
+        protected abstract float MicGain_ { get; set; }
+        protected abstract int MicAGCLevel_ { get; set; }
+        protected abstract IVoiceInput MicInput_ { get; set; }
+        protected abstract int ChannelCount_ { get; }
+        protected abstract int SampleRate_ { get; }
+        protected abstract event Action<float[]> OnSampleReady_;
+        protected abstract event Action<int, byte[]> OnSegmentReady_;
+        protected abstract int? GetDeviceId_();
+        protected abstract IVoiceOutput GetVoiceOutput_(int SampleRate, int ChannelCount);
+        protected abstract void PushVolumeSettings_();
+        protected abstract void RenewMic_();
 
-        public static AudioMixerGroup MixerGroupEnv { get => Instance.MixerGroupEnv; }
-        public static AudioMixerGroup MixerGroupVoice { get => Instance.MixerGroupVoice; }
-        public static float VolumeEnv 
+        public static AudioManager Instance { get; set; }
+
+        public static AudioMixerGroup MixerGroupEnv { get => Instance.MixerGroupEnv_; }
+        public static AudioMixerGroup MixerGroupVoice { get => Instance.MixerGroupVoice_; }
+        public static float VolumeEnv
         {
-            get => Instance.VolumeEnv;
-            set => Instance.VolumeEnv = value;
+            get => Instance.VolumeEnv_;
+            set => Instance.VolumeEnv_ = value;
         }
-        public static float VolumeMaster 
+        public static float VolumeMaster
         {
-            get => Instance.VolumeMaster;
-            set => Instance.VolumeMaster = value;
+            get => Instance.VolumeMaster_;
+            set => Instance.VolumeMaster_ = value;
         }
         public static float VolumeVoice
         {
-            get => Instance.VolumeVoice;
-            set => Instance.VolumeVoice = value;
+            get => Instance.VolumeVoice_;
+            set => Instance.VolumeVoice_ = value;
         }
         public static float MicGain
         {
-            get => Instance.MicGain;
-            set => Instance.MicGain = value;
+            get => Instance.MicGain_;
+            set => Instance.MicGain_ = value;
         }
-        public static int MicAGCLevel 
+        public static int MicAGCLevel
         {
-            get => Instance.MicAGCLevel;
-            set => Instance.MicAGCLevel = value;
+            get => Instance.MicAGCLevel_;
+            set => Instance.MicAGCLevel_ = value;
         }
+
+        public static int ChannelCount { get => Instance.ChannelCount_; }
+        public static int SampleRate { get => Instance.SampleRate_; }
 
         public static event Action<float[]> OnSampleReady
         {
-            add => Instance.OnSampleReady += value;
-            remove { if(Instance != null) Instance.OnSampleReady -= value; }
+            add => Instance.OnSampleReady_ += value;
+            remove { if (Instance != null) Instance.OnSampleReady_ -= value; }
         }
 
         public static event Action<int, byte[]> OnSegmentReady
         {
-            add => Instance.OnSegmentReady += value;
-            remove { if(Instance != null) Instance.OnSegmentReady -= value; }
+            add => Instance.OnSegmentReady_ += value;
+            remove { if (Instance != null) Instance.OnSegmentReady_ -= value; }
         }
 
 
-        public static int? GetDeviceId() => Instance.GetDeviceId();
-        public static void PushVolumeSettings() => Instance.PushVolumeSettings();
-        public static void RenewMic() => Instance.RenewMic();
+        public static int? GetDeviceId() => Instance.GetDeviceId_();
+        public static IVoiceOutput GetVoiceOutput(int SampleRate, int ChannelCount)
+            => Instance.GetVoiceOutput_(SampleRate, ChannelCount);
+
+        public static void PushVolumeSettings() => Instance.PushVolumeSettings_();
+        public static void RenewMic() => Instance.RenewMic_();
 
     }
     #endregion
