@@ -10,6 +10,7 @@ using Arteranos.Core;
 using Arteranos.XR;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,7 +70,7 @@ namespace Arteranos.Avatar
 
     #endregion
     // -------------------------------------------------------------------
-    #region Avatar helpers
+    #region Avatar factories
 
     public class AvatarHitBoxFactory : MonoBehaviour
     {
@@ -102,46 +103,98 @@ namespace Arteranos.Avatar
 namespace Arteranos.Services
 {
     // -------------------------------------------------------------------
-    #region Services helpers
-    public static class NetworkStatus
+    #region Services constants
+    public enum ConnectivityLevel
     {
-        public static INetworkStatus Instance { get; set; }
+        [Description("Unconnected")]
+        Unconnected = 0,
+        [Description("Firewalled")]
+        Restricted,
+        [Description("Public")]
+        Unrestricted
+    }
+    public enum OnlineLevel
+    {
+        [Description("Offline")]
+        Offline = 0,
+        [Description("Client")]
+        Client,
+        [Description("Server")]
+        Server,
+        [Description("Host")]
+        Host
+    }
 
-        public static IPAddress ExternalAddress { get => Instance.ExternalAddress; }
+    #endregion
+    // -------------------------------------------------------------------
+    #region Services helpers
+    public abstract class NetworkStatus : MonoBehaviour
+    {
+        protected abstract IPAddress ExternalAddress_ { get; set; }
+        protected abstract bool OpenPorts_ { get; set; }
+        protected abstract Action<bool, string> OnClientConnectionResponse_ { get; set; }
+        protected abstract IPAddress PublicIPAddress_ { get; set; }
+        protected abstract string ServerHost_ { get; set; }
+        protected abstract int ServerPort_ { get; set; }
+        protected abstract event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
+        protected abstract ConnectivityLevel GetConnectivityLevel_();
+        protected abstract OnlineLevel GetOnlineLevel_();
+        protected abstract IAvatarBrain GetOnlineUser_(UserID userID);
+        protected abstract IAvatarBrain GetOnlineUser_(uint netId);
+        protected abstract IEnumerable<IAvatarBrain> GetOnlineUsers_();
+        protected abstract bool IsVerifiedUser_(UserID claimant);
+        protected abstract void StartClient_(Uri connectionUri);
+        protected abstract Task StartHost_(bool resetConnection = false);
+        protected abstract void StartServer_();
+        protected abstract Task StopHost_(bool loadOfflineScene);
 
-        public static IPAddress PublicIPAddress { get => Instance.PublicIPAddress; }
+        public static NetworkStatus Instance { get; set; }
 
-        public static string ServerHost { get => Instance.ServerHost; }
+        public static IPAddress ExternalAddress { get => Instance.ExternalAddress_; }
 
-        public static int ServerPort { get => Instance.ServerPort; }
+        public static IPAddress PublicIPAddress { get => Instance.PublicIPAddress_; }
+
+        public static string ServerHost { get => Instance.ServerHost_; }
+
+        public static int ServerPort { get => Instance.ServerPort_; }
 
         public static bool OpenPorts
         {
-            get => Instance.OpenPorts;
-            set => Instance.OpenPorts = value;
+            get => Instance.OpenPorts_;
+            set => Instance.OpenPorts_ = value;
         }
-        public static Action<bool, string> OnClientConnectionResponse 
+        public static Action<bool, string> OnClientConnectionResponse
         {
-            get => Instance?.OnClientConnectionResponse;
-            set => Instance.OnClientConnectionResponse = value;
+            get => Instance?.OnClientConnectionResponse_;
+            set => Instance.OnClientConnectionResponse_ = value;
         }
 
         public static event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged
         {
-            add => Instance.OnNetworkStatusChanged += value;
-            remove { if(Instance != null) Instance.OnNetworkStatusChanged -= value; }
+            add => Instance.OnNetworkStatusChanged_ += value;
+            remove { if (Instance != null) Instance.OnNetworkStatusChanged_ -= value; }
         }
 
-        public static ConnectivityLevel GetConnectivityLevel() => Instance.GetConnectivityLevel();
-        public static OnlineLevel GetOnlineLevel() => Instance?.GetOnlineLevel() ?? OnlineLevel.Offline;
-        public static void StartClient(Uri connectionUri) => Instance.StartClient(connectionUri);
-        public static Task StartHost(bool resetConnection = false) => Instance.StartHost(resetConnection);
-        public static void StartServer() => Instance.StartServer();
-        public static Task StopHost(bool loadOfflineScene) => Instance.StopHost(loadOfflineScene);
-        public static IAvatarBrain GetOnlineUser(UserID userID) => Instance.GetOnlineUser(userID);
-        public static IAvatarBrain GetOnlineUser(uint netId) => Instance.GetOnlineUser(netId);
-        public static IEnumerable<IAvatarBrain> GetOnlineUsers() => Instance.GetOnlineUsers();
-        public static bool IsVerifiedUser(UserID claimant) => Instance.IsVerifiedUser(claimant);
+        public static ConnectivityLevel GetConnectivityLevel() 
+            => Instance.GetConnectivityLevel_();
+        public static OnlineLevel GetOnlineLevel() 
+            => Instance?.GetOnlineLevel_() ?? OnlineLevel.Offline;
+        public static void StartClient(Uri connectionUri) 
+            => Instance.StartClient_(connectionUri);
+        public static Task StartHost(bool resetConnection = false) 
+            => Instance.StartHost_(resetConnection);
+        public static void StartServer() 
+            => Instance.StartServer_();
+        public static Task StopHost(bool loadOfflineScene) 
+            => Instance.StopHost_(loadOfflineScene);
+        public static IAvatarBrain GetOnlineUser(UserID userID)
+            => Instance.GetOnlineUser_(userID);
+        public static IAvatarBrain GetOnlineUser(uint netId) 
+            => Instance.GetOnlineUser_(netId);
+        public static IEnumerable<IAvatarBrain> GetOnlineUsers() 
+            => Instance.GetOnlineUsers_();
+        public static bool IsVerifiedUser(UserID claimant) 
+            => Instance.IsVerifiedUser_(claimant);
 
 
     }

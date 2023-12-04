@@ -25,22 +25,22 @@ using System.Linq;
 
 namespace Arteranos.Services
 {
-    public partial class NetworkStatusImpl : MonoBehaviour, INetworkStatus
+    public partial class NetworkStatusImpl : NetworkStatus
     {
         private INatDevice device = null;
-        public IPAddress ExternalAddress { get; internal set; } = null;
+        protected override IPAddress ExternalAddress_ { get; set; } = null;
 
-        public IPAddress PublicIPAddress { get; internal set; } = null;
+        protected override IPAddress PublicIPAddress_ { get; set; } = null;
 
-        public string ServerHost { get; internal set; } = null;
+        protected override string ServerHost_ { get; set; } = null;
 
-        public int ServerPort { get; internal set; } = 0;
+        protected override int ServerPort_ { get; set; } = 0;
 
-        public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
+        protected override event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
 
-        public Action<bool, string> OnClientConnectionResponse { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
+        protected override Action<bool, string> OnClientConnectionResponse_ { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
 
-        public bool OpenPorts
+        protected override bool OpenPorts_
         {
             get => m_OpenPorts;
             set
@@ -71,18 +71,18 @@ namespace Arteranos.Services
             manager = FindObjectOfType<NetworkManager>(true);
             transport = FindObjectOfType<TelepathyTransport>(true);
 
-            NetworkStatus.Instance = this;
+            Instance = this;
         }
 
         private void OnDestroy()
         {
             ClosePortsAsync();
-            NetworkStatus.Instance = null;
+            Instance = null;
         }
 
         // -------------------------------------------------------------------
         #region Running
-        public ConnectivityLevel GetConnectivityLevel()
+        protected override ConnectivityLevel GetConnectivityLevel_()
         {
             if(Application.internetReachability == NetworkReachability.NotReachable)
                 return ConnectivityLevel.Unconnected;
@@ -92,7 +92,7 @@ namespace Arteranos.Services
                 : ConnectivityLevel.Restricted;
         }
 
-        public OnlineLevel GetOnlineLevel()
+        protected override OnlineLevel GetOnlineLevel_()
         {
             if(!NetworkClient.active && !NetworkServer.active)
                 return OnlineLevel.Offline;
@@ -111,8 +111,8 @@ namespace Arteranos.Services
 
             void FoundPublicIPAddress(IPAddress address)
             {
-                PublicIPAddress = address;
-                Debug.Log($"    Public IP: {PublicIPAddress?.ToString() ?? "Unknown!"}");
+                PublicIPAddress_ = address;
+                Debug.Log($"    Public IP: {PublicIPAddress_?.ToString() ?? "Unknown!"}");
             }
 
             IEnumerator RefreshDiscovery()
@@ -121,9 +121,9 @@ namespace Arteranos.Services
                 {
                     // No sense for router and IP detection if the computer's network cable is unplugged
                     // and in its airplane mode.
-                    if (GetConnectivityLevel() == ConnectivityLevel.Unconnected)
+                    if (GetConnectivityLevel_() == ConnectivityLevel.Unconnected)
                     {
-                        PublicIPAddress = null;
+                        PublicIPAddress_ = null;
                         yield return new WaitForSeconds(10);
                     }
                     else
@@ -133,7 +133,7 @@ namespace Arteranos.Services
                         NatUtility.StartDiscovery();
 
                         // Only lean on the remote services if we don't have the public IP determined yet.
-                        if (PublicIPAddress == null) GetMyIP(FoundPublicIPAddress);
+                        if (PublicIPAddress_ == null) GetMyIP(FoundPublicIPAddress);
 
                         // Wait for refresh...
                         yield return new WaitForSeconds(500);
@@ -164,11 +164,11 @@ namespace Arteranos.Services
 
         private void Update()
         {
-            ConnectivityLevel c1 = GetConnectivityLevel();
-            OnlineLevel c2 = GetOnlineLevel();
+            ConnectivityLevel c1 = GetConnectivityLevel_();
+            OnlineLevel c2 = GetOnlineLevel_();
 
             if(CurrentConnectivityLevel != c1 || CurrentOnlineLevel != c2)
-                OnNetworkStatusChanged?.Invoke(c1, c2);
+                OnNetworkStatusChanged_?.Invoke(c1, c2);
 
             if(CurrentOnlineLevel == OnlineLevel.Client && c2 == OnlineLevel.Offline)
                 OnRemoteDisconnected();
@@ -189,11 +189,11 @@ namespace Arteranos.Services
 
             device = e.Device;
 
-            ExternalAddress = await device.GetExternalIPAsync();
+            ExternalAddress_ = await device.GetExternalIPAsync();
 
             Debug.Log($"Device found : {device.NatProtocol}");
             Debug.Log($"  Type       : {device.GetType().Name}");
-            Debug.Log($"  External IP: {ExternalAddress}");
+            Debug.Log($"  External IP: {ExternalAddress_}");
 
             OpenPortsAsync();
         }
@@ -234,10 +234,10 @@ namespace Arteranos.Services
         public async void OpenPortsAsync()
         {
             // No NAT router at all? Lucky you! ;-)
-            if(ExternalAddress == null) return;
+            if(ExternalAddress_ == null) return;
 
             // No point to open the ports if we're not supposed to.
-            if(!OpenPorts) return;
+            if(!OpenPorts_) return;
 
             Debug.Log("Opening ports in the router");
 
@@ -250,7 +250,7 @@ namespace Arteranos.Services
         public void ClosePortsAsync()
         {
             // No NAT router at all? Lucky you! ;-)
-            if(ExternalAddress == null) return;
+            if(ExternalAddress_ == null) return;
 
             Debug.Log("Closing ports in the router, if there's need to do.");
 
@@ -336,7 +336,7 @@ namespace Arteranos.Services
 
         private bool transitionDisconnect = false;
 
-        public void StartClient(Uri connectionUri)
+        protected override void StartClient_(Uri connectionUri)
         {
 
             Debug.Log($"Attempting to connect to {connectionUri}...");
@@ -344,16 +344,16 @@ namespace Arteranos.Services
             manager.StartClient(connectionUri);
 
             // It's preliminary, sure...
-            ServerHost = connectionUri.Host;
-            ServerPort = connectionUri.Port;
+            ServerHost_ = connectionUri.Host;
+            ServerPort_ = connectionUri.Port;
         }
 
-        public async Task StopHost(bool loadOfflineScene)
+        protected override async Task StopHost_(bool loadOfflineScene)
         {
             manager.StopHost();
-            NetworkStatus.OpenPorts = false;
+            OpenPorts = false;
 
-            ServerHost = null;
+            ServerHost_ = null;
 
             if (loadOfflineScene)
             {
@@ -371,12 +371,12 @@ namespace Arteranos.Services
             while (manager.isNetworkActive) await Task.Yield();
         }
 
-        public async Task StartHost(bool resetConnection = false)
+        protected override async Task StartHost_(bool resetConnection = false)
         {
             if (resetConnection)
                 await SmoothServerTransition();
 
-            NetworkStatus.OpenPorts = true;
+            OpenPorts = true;
             ConnectionManager.ExpectConnectionResponse();
 
             // Custom server port -- Transport specific!
@@ -387,11 +387,11 @@ namespace Arteranos.Services
             while (manager.isNetworkActive) await Task.Yield();
         }
 
-        public async void StartServer()
+        protected override async void StartServer_()
         {
             await SmoothServerTransition();
 
-            NetworkStatus.OpenPorts = true;
+            OpenPorts = true;
 
             // Custom server port -- Transport specific!
             transport.port = (ushort)SettingsManager.Server.ServerPort;
@@ -406,7 +406,7 @@ namespace Arteranos.Services
             if (manager.isNetworkActive)
             {
                 transitionDisconnect = true;
-                await StopHost(false);
+                await StopHost_(false);
             }
         }
 
@@ -414,13 +414,13 @@ namespace Arteranos.Services
         {
             // Client to offline. It it's planned to switch servers,
             // skip the offline scene.
-            if(!transitionDisconnect) _ = StopHost(true);
+            if(!transitionDisconnect) _ = StopHost_(true);
             transitionDisconnect = false;
         }
         #endregion
         // -------------------------------------------------------------------
         #region User Data queries
-        public IAvatarBrain GetOnlineUser(UserID userID)
+        protected override IAvatarBrain GetOnlineUser_(UserID userID)
         {
             IEnumerable<IAvatarBrain> q =
                 from entry in GameObject.FindGameObjectsWithTag("Player")
@@ -430,7 +430,7 @@ namespace Arteranos.Services
             return q.Count() > 0 ? q.First() : null;
         }
 
-        public IAvatarBrain GetOnlineUser(uint netId)
+        protected override IAvatarBrain GetOnlineUser_(uint netId)
         {
             IEnumerable<IAvatarBrain> q =
                 from entry in GameObject.FindGameObjectsWithTag("Player")
@@ -440,17 +440,17 @@ namespace Arteranos.Services
             return q.Count() > 0 ? q.First() : null;
         }
 
-        public IEnumerable<IAvatarBrain> GetOnlineUsers()
+        protected override IEnumerable<IAvatarBrain> GetOnlineUsers_()
         {
             return from entry in GameObject.FindGameObjectsWithTag("Player")
                    select entry.GetComponent<IAvatarBrain>();
 
         }
 
-        public bool IsVerifiedUser(UserID claimant)
+        protected override bool IsVerifiedUser_(UserID claimant)
         {
             // If it's online, his Public Key has to be already verified in the login.
-            if (GetOnlineUser(claimant) != null) return true;
+            if (GetOnlineUser_(claimant) != null) return true;
 
             // Or, the claimant could have been noticed by you, in any case.
             IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetSocialList(claimant);
