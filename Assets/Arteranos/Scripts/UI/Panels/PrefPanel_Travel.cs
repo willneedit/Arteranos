@@ -5,18 +5,21 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
+using System;
 
 namespace Arteranos.UI
 {
     public class PrefPanel_Travel : UIBehaviour
     {
-        public Button btn_WorldGallery = null;
-        public Button btn_ServerGallery = null;
-        public Button btn_SetContent = null;
+        [SerializeField] private Button btn_WorldGallery = null;
+        [SerializeField] private Button btn_ServerGallery = null;
+        [SerializeField] private Button btn_SetContent = null;
+        [SerializeField] private Toggle chk_AllowCustomTOS = null;
 
         private Client cs = null;
         private bool dirty = false;
@@ -28,6 +31,12 @@ namespace Arteranos.UI
             btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
             btn_ServerGallery.onClick.AddListener(OnServerGalleryClicked);
             btn_SetContent.onClick.AddListener(OnSetContentClicked);
+            chk_AllowCustomTOS.onValueChanged.AddListener(OnCustomTOSToggled);
+        }
+
+        private void OnCustomTOSToggled(bool arg0)
+        {
+            throw new NotImplementedException();
         }
 
         protected override void Start()

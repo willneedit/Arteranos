@@ -12,6 +12,7 @@ using Arteranos.XR;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -390,20 +391,37 @@ namespace Arteranos.UI
 
     public class AgreementDialogUIFactory : UIBehaviour
     {
-        public static IAgreementDialogUI New(ServerInfo serverInfo, Action disagree, Action agree)
+        private static bool CanSkipAgreement(ServerInfo si)
         {
-            // Unavailable?! We couldn't connect to it anyway, or it doesn't provide a notice. 
-            string text = serverInfo?.PrivacyTOSNotice;
-            if (text == null)
+            Client client = SettingsManager.Client;
+            byte[] serverTOSHash = si.PrivacyTOSNoticeHash;
+            if (serverTOSHash == null) return true;
+
+            if(client.ServerPasses.TryGetValue(si.SPKDBKey, out ServerPass sp))
             {
-                agree?.Invoke();
-                return null;
+                // Server's agreement is unchanged.
+                if(serverTOSHash.SequenceEqual(sp.PrivacyTOSHash)) return true;
             }
 
-            // Seems to be known, skip it.
-            Client client = SettingsManager.Client;
-            if (client.KnownAgreements.Contains(serverInfo.PrivacyTOSNoticeHash))
+            // Server uses an unknown TOS deviating from the standard TOS, needs to ask.
+            if (si.UsesCustomTOS) return false;
+
+            byte[] currentTOSHash = Crypto.SHA256(Utils.LoadDefaultTOS());
+
+            // Only if the user's knowledge of the default TOS is up to date.
+            return currentTOSHash.SequenceEqual(client.KnowsDefaultTOS);
+
+        }
+
+
+        public static IAgreementDialogUI New(ServerInfo serverInfo, Action disagree, Action agree)
+        {
+            string text = serverInfo?.PrivacyTOSNotice;
+
+            // Can we skip it? Pleeeease..?
+            if (text == null || CanSkipAgreement(serverInfo))
             {
+                Client.UpdateServerPass(serverInfo, true, null);
                 agree?.Invoke();
                 return null;
             }
@@ -412,12 +430,9 @@ namespace Arteranos.UI
             IAgreementDialogUI AgreementDialogUI = go.GetComponent<IAgreementDialogUI>();
             AgreementDialogUI.OnDisagree += disagree;
             AgreementDialogUI.OnAgree += agree;
-            AgreementDialogUI.rtText = AgreementDialogUI.MD2RichText(text);
-            AgreementDialogUI.TextHash = serverInfo.PrivacyTOSNoticeHash;
+            AgreementDialogUI.ServerInfo = serverInfo;
             return AgreementDialogUI;
         }
-
-
     }
 
     public class DialogUIFactory : UIBehaviour

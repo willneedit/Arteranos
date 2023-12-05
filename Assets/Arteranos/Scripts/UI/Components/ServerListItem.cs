@@ -150,8 +150,9 @@ namespace Arteranos.UI
 
             // The server public is entered with the server port, not the MD port.
             string key = si.SPKDBKey;
-            if(cs.ServerKeys.ContainsKey(key))
-                cs.ServerKeys.Remove(key);
+
+            if(cs.ServerPasses.ContainsKey(key))
+                cs.ServerPasses.Remove(key);
 
             cs.Save();
 

@@ -103,6 +103,15 @@ namespace Arteranos.Core
         High,
     }
 
+    public struct ServerPass
+    {
+        // The server's public key. Differing keys could mean an attack.
+        public byte[] ServerPublicKey;
+
+        // Hash of the privacy and TOS agreement. Same as with KnownDefaultTOS.
+        public byte[] PrivacyTOSHash;
+    }
+
     public class LoginDataJSON
     {
         // The login provider the user logs in to
@@ -315,8 +324,16 @@ namespace Arteranos.Core
         // The known privacy and TOS agreements.
         public virtual List<string> KnownAgreements { get; set; } = new();
 
-        // Server keys we've encountered (host ip/name => Public Key)
-        public virtual Dictionary<string, byte[]> ServerKeys { get; set; } = new();
+        // Server keys we've encountered (host ip/name => ServerPass)
+        public virtual Dictionary<string, ServerPass> ServerPasses { get; set; } = new();
+
+        // Should we allow connecting to servers which bear custom privacy agreements?
+        public virtual bool AllowCustomTOS { get; set; } = false;
+
+        // Null: User doesn't know.
+        // Same hash: User does know.
+        // Inequal hash: User does know outdated default TOS.
+        public virtual byte[] KnowsDefaultTOS { get; set; } = null;
 
         // The text message templates
         public virtual List<string> PresetStrings { get; set; } = new();
@@ -573,6 +590,19 @@ namespace Arteranos.Core
             }
 
             return cs;
+        }
+
+        public static void UpdateServerPass(ServerInfo serverInfo, bool TOS, byte[] serverKey)
+        {
+            Client client = SettingsManager.Client;
+
+            client.ServerPasses.TryGetValue(serverInfo.SPKDBKey, out ServerPass sp);
+
+            if (TOS) sp.PrivacyTOSHash = serverInfo.PrivacyTOSNoticeHash;
+            if (serverKey != null) sp.ServerPublicKey = serverKey;
+
+            client.ServerPasses[serverInfo.SPKDBKey] = sp;
+            client.Save();
         }
 
         #endregion

@@ -355,6 +355,9 @@ namespace Arteranos.Core
             return data;
         }
 
+        public static string LoadDefaultTOS() 
+            => Resources.Load<TextAsset>("Templates/PrivacyTOSNotice")?.text;
+
         public static Task<byte[]> CachedDownloadWebData(string url, string cachePattern, int cacheLivetime = 600, int timeout = 20, Action<float> progressCallback = null)
             => CachedDownloadWebData(url, url, cachePattern, cacheLivetime, timeout, progressCallback);
 

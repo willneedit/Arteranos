@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Text;
 using System.Security.Cryptography;
+using System.Linq;
 
 namespace Arteranos.Core
 {
@@ -204,18 +205,22 @@ namespace Arteranos.Core
             }
         }
 
-        public string PrivacyTOSNoticeHash
+        public byte[] PrivacyTOSNoticeHash
         {
             get
             {
                 if (PrivacyTOSNotice == null) return null;
 
-                // This is serious enough to warrant a cryptographically strong hash algorithm.
-                byte[] bytes = Encoding.UTF8.GetBytes(PrivacyTOSNotice);
-                using IncrementalHash myHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-                myHash.AppendData(bytes);
-                return Convert.ToBase64String(myHash.GetHashAndReset());
+                return Crypto.SHA256(PrivacyTOSNotice);
+            }
+        }
 
+        public bool UsesCustomTOS
+        {
+            get 
+            {
+                if (PrivacyTOSNotice == null) return false; 
+                return !PrivacyTOSNoticeHash.SequenceEqual(Crypto.SHA256(Utils.LoadDefaultTOS()));
             }
         }
     }

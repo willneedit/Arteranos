@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using DERSerializer;
 
 namespace Arteranos.Core
@@ -71,6 +72,20 @@ namespace Arteranos.Core
         #region Public Key Fingerprint
 
         public byte[] Fingerprint { get => CryptoHelpers.GetFingerprint(Key.PublicKey); }
+        #endregion
+
+        #region Hashes
+
+        public static byte[] SHA256(byte[] data)
+        {
+            using IncrementalHash myHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+            myHash.AppendData(data);
+            return myHash.GetHashAndReset();
+        }
+
+        public static byte[] SHA256(string data) 
+            => SHA256(Encoding.UTF8.GetBytes(data));
+
         #endregion
 
         #region Encrypt and decrypt

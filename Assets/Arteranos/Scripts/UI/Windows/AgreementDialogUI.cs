@@ -28,8 +28,7 @@ namespace Arteranos.UI
 
         public Action OnDisagree { get; set; } = null;
         public Action OnAgree { get; set; } = null;
-        public string rtText { get; set; } = null;
-        public string TextHash { get; set; } = null;
+        public ServerInfo ServerInfo { get; set; }
 
         public string MD2RichText(string text)
         {
@@ -63,7 +62,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            lbl_LicenseText.text = rtText;
+            lbl_LicenseText.text = MD2RichText(ServerInfo.PrivacyTOSNotice);
 
             btn_Disagree.onClick.AddListener(() => OnReaction(false));
             btn_Agree.onClick.AddListener(() => OnReaction(true));
@@ -83,11 +82,7 @@ namespace Arteranos.UI
         {
             if (agree)
             {
-                Client client = SettingsManager.Client;
-
-                client.KnownAgreements.Add(TextHash);
-                client.Save();
-
+                Client.UpdateServerPass(ServerInfo, true, null);
                 OnAgree?.Invoke();
             }
             else
@@ -95,5 +90,6 @@ namespace Arteranos.UI
 
             Destroy(gameObject);
         }
+
     }
 }

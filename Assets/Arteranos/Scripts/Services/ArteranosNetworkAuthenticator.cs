@@ -396,7 +396,7 @@ namespace Arteranos.Services
         /// <param name="msg">Self explanatory</param>
         private void OnAuthGreetingMessage(AuthGreetingMessage msg)
         {
-            (string address, int port, int mdport) = SettingsManager.GetServerConnectionData();
+            (string address, int port, int _) = SettingsManager.GetServerConnectionData();
 
             string key = $"{address}:{port}";
 
@@ -406,15 +406,19 @@ namespace Arteranos.Services
 
             Client cs = SettingsManager.Client;
 
-            if(!cs.ServerKeys.TryGetValue(key, out byte[] pubKey))
+            if(!cs.ServerPasses.TryGetValue(key, out ServerPass sp))
             {
                 // New server encountered. Yay!
-                cs.ServerKeys.Add(key, msg.ServerPublicKey);
+                cs.ServerPasses.Add(key, new()
+                {
+                    PrivacyTOSHash = null,
+                    ServerPublicKey = msg.ServerPublicKey
+                });
                 SubmitAuthRequest(msg);
                 cs.Save();
                 return;
             }
-            else if(msg.ServerPublicKey.SequenceEqual(pubKey))
+            else if(msg.ServerPublicKey.SequenceEqual(sp.ServerPublicKey))
             {
                 // Known server, everything is okay.
                 SubmitAuthRequest(msg);
@@ -453,10 +457,15 @@ namespace Arteranos.Services
             }
 
             Client cs = SettingsManager.Client;
-            string address = NetworkClient.connection.address;
+            (string address, int port, int _) = SettingsManager.GetServerConnectionData();
 
-            cs.ServerKeys.Remove(address);
-            cs.ServerKeys.Add(address, msg.ServerPublicKey);
+            string key = $"{address}:{port}";
+
+            cs.ServerPasses.TryGetValue(key, out ServerPass sp);
+
+            sp.ServerPublicKey = msg.ServerPublicKey;
+
+            cs.ServerPasses[key] = sp;
             cs.Save();
 
             SubmitAuthRequest(msg);

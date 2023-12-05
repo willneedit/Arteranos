@@ -6,6 +6,7 @@
  */
 
 
+using Arteranos.Core;
 using System;
 
 namespace Arteranos.UI
@@ -14,8 +15,7 @@ namespace Arteranos.UI
     {
         Action OnAgree { get; set; }
         Action OnDisagree { get; set; }
-        string rtText { get; set; }
-        string TextHash { get; set; }
+        ServerInfo ServerInfo { get; set; }
 
         string MD2RichText(string text);
     }
