@@ -418,6 +418,15 @@ namespace Arteranos.Services
                 cs.Save();
                 return;
             }
+            else if(sp.ServerPublicKey == null)
+            {
+                // Somewhat known, because we dealt with the custom TOS, and never connected to it yet.
+                sp.ServerPublicKey = msg.ServerPublicKey;
+                cs.ServerPasses[key] = sp;
+                SubmitAuthRequest(msg);
+                cs.Save();
+                return;
+            }
             else if(msg.ServerPublicKey.SequenceEqual(sp.ServerPublicKey))
             {
                 // Known server, everything is okay.

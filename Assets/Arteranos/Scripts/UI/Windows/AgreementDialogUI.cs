@@ -62,6 +62,8 @@ namespace Arteranos.UI
         {
             base.Start();
 
+            SysMenu.CloseSysMenus();
+
             lbl_LicenseText.text = MD2RichText(ServerInfo.PrivacyTOSNotice);
 
             btn_Disagree.onClick.AddListener(() => OnReaction(false));
@@ -75,14 +77,22 @@ namespace Arteranos.UI
         private void OnScrollbarMoved(float arg0)
         {
             // Enable the Agree button if you moved the text down.
-            btn_Agree.interactable = (arg0 > 0.9f);
+            btn_Agree.interactable = (arg0 < 0.05f);
         }
 
         private void OnReaction(bool agree)
         {
+            Client client = SettingsManager.Client;
+
             if (agree)
             {
-                Client.UpdateServerPass(ServerInfo, true, null);
+                if(ServerInfo.UsesCustomTOS)
+                    Client.UpdateServerPass(ServerInfo, true, null);
+                else
+                    // We needed to deal with the default TOS.
+                    client.KnowsDefaultTOS = Crypto.SHA256(Utils.LoadDefaultTOS());
+                client.Save();
+
                 OnAgree?.Invoke();
             }
             else

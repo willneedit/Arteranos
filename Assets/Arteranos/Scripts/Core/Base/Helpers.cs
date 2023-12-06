@@ -426,7 +426,7 @@ namespace Arteranos.UI
                 return null;
             }
 
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_AgreementDialogUI"));
+            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_AgreementDialog"));
             IAgreementDialogUI AgreementDialogUI = go.GetComponent<IAgreementDialogUI>();
             AgreementDialogUI.OnDisagree += disagree;
             AgreementDialogUI.OnAgree += agree;
