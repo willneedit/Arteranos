@@ -39,11 +39,13 @@ namespace Arteranos.UI
             foreach(string line in text.Split('\n'))
             {
                 string new_line = line;
-                if(line.Length > 2 && line[0..3] == "## ")
-                {
-                    newLines.Add($"<b>{line[3..]}</b>");
-                }
-                else if(line.Length > 2 && line[0..3] == "```")
+                if (line.Length > 3 && line[0..4] == "### ")
+                    newLines.Add($"<b>{line[4..]}</b>");
+                else if (line.Length > 2 && line[0..3] == "## ")
+                    newLines.Add($"<font size=+5><b>{line[3..]}</b></font>");
+                else if (line.Length > 1 && line[0..2] == "# ")
+                    newLines.Add($"<font size=+10><b>{line[2..]}</b></font>");
+                else if (line.Length > 2 && line[0..3] == "```")
                 {
                     monospaced = !monospaced;
                     // Seems to be unsupported.

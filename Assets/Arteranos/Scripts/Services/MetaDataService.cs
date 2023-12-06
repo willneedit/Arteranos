@@ -109,7 +109,7 @@ namespace Arteranos.Services
                 HttpListenerRequest request = ctx.Request;
                 HttpListenerResponse response = ctx.Response;
 
-                Debug.Log($"[{nameof(MetaDataServer)}] [{request.HttpMethod}] {request.Url.AbsolutePath}");
+                // Debug.Log($"[{nameof(MetaDataServer)}] [{request.HttpMethod}] {request.Url.AbsolutePath}");
 
                 if(request.HttpMethod != "GET")
                 {
