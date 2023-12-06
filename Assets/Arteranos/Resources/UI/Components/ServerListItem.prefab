@@ -830,6 +830,8 @@ MonoBehaviour:
   serverURL: 
   img_Icon: {fileID: 7778222521864700034}
   lbl_Caption: {fileID: 7778222522103766469}
+  BgndRegular: {r: 0.2509804, g: 0.2509804, b: 0.2509804, a: 1}
+  BgndWarning: {r: 0.8784314, g: 0.2509804, b: 0.2509804, a: 1}
 --- !u!1 &7778222521765463615
 GameObject:
   m_ObjectHideFlags: 0

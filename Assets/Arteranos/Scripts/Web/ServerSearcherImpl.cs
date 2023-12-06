@@ -121,7 +121,12 @@ namespace Arteranos.Web
             int ScoreServer(ServerInfo x)
             {
                 int xScore = x.MatchScore;
-                if (!x.IsOnline)
+                if(x.UsesCustomTOS && !SettingsManager.Client.AllowCustomTOS)
+                {
+                    Debug.Log($"{x.URL} uses a custom TOS, which is disallowed.");
+                    xScore = -20000;
+                }
+                else if (!x.IsOnline)
                 {
                     //Debug.Log($"{x.URL} is offline");
                     xScore = -20000;

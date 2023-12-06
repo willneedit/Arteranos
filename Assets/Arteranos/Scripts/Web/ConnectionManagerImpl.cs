@@ -45,7 +45,6 @@ namespace Arteranos.Web
                     }, 
                     () =>
                     {
-                        _ = CommenceConnection(si);
                         result = true;
                     });
             }
@@ -53,7 +52,7 @@ namespace Arteranos.Web
             // Ask for the privacy notice agreement, or silently agree if it's already known:
             SettingsManager.StartCoroutineAsync(AskForAgreement);
 
-            // Aim....  hold.... hold.... 
+            // Take aim....  hold.... hold.... 
             while(result == null) await Task.Yield();
 
             // ... Fire!

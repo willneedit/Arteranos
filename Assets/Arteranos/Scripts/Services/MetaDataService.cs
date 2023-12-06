@@ -32,8 +32,7 @@ namespace Arteranos.Services
             // If it doesn't exist, write down the template in the config directory.
             if(!FileUtils.ReadConfig(PATH_USER_PRIVACY_NOTICE, File.Exists))
             {
-                TextAsset ta = Resources.Load<TextAsset>("Templates/PrivacyTOSNotice");
-                FileUtils.WriteTextConfig(PATH_USER_PRIVACY_NOTICE, ta.text);
+                FileUtils.WriteTextConfig(PATH_USER_PRIVACY_NOTICE, Core.Utils.LoadDefaultTOS());
                 Debug.LogWarning("Privacy notice and Terms Of Service template written down - Read (and modify) according to your use case!");
             }
 

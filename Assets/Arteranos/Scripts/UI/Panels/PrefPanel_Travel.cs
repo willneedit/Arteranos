@@ -34,11 +34,6 @@ namespace Arteranos.UI
             chk_AllowCustomTOS.onValueChanged.AddListener(OnCustomTOSToggled);
         }
 
-        private void OnCustomTOSToggled(bool arg0)
-        {
-            throw new NotImplementedException();
-        }
-
         protected override void Start()
         {
             base.Start();
@@ -61,6 +56,12 @@ namespace Arteranos.UI
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty) cs?.Save();
             dirty = false;
+        }
+
+        private void OnCustomTOSToggled(bool arg0)
+        {
+            cs.AllowCustomTOS = chk_AllowCustomTOS.isOn;
+            dirty = true;
         }
 
         private void OnWorldGalleryClicked()

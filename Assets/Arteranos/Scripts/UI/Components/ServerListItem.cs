@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +21,9 @@ namespace Arteranos.UI
         public string serverURL = null;
         public Image img_Icon = null;
         public TMP_Text lbl_Caption = null;
+
+        public Color BgndRegular;
+        public Color BgndWarning;
 
         private HoverButton btn_Add = null;
         private HoverButton btn_Info = null;
@@ -75,6 +77,9 @@ namespace Arteranos.UI
             btn_Visit.gameObject.SetActive(si.IsOnline);
             btn_Delete.gameObject.SetActive(false);
 
+            btn_Background.image.color = (si.UsesCustomTOS && !SettingsManager.Client.AllowCustomTOS)
+                ? BgndWarning
+                : BgndRegular;
 
             if(si.IsValid)
             {
