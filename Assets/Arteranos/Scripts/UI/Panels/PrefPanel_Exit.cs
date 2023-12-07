@@ -17,7 +17,7 @@ namespace Arteranos.UI
 {
     public class PrefPanel_Exit : UIBehaviour
     {
-        public Button btn_ModeSwitch = null;
+        public Toggle chk_DesiredVRMode = null;
         public Button btn_LoginUI = null;
         public Button btn_Exit = null;
 
@@ -28,7 +28,7 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            btn_ModeSwitch.onClick.AddListener(OnModeSwitchClick);
+            chk_DesiredVRMode.onValueChanged.AddListener(OnModeSwitchClick);
             btn_LoginUI.onClick.AddListener(OnLoginUIClick);
             btn_Exit.onClick.AddListener(OnExitClick);
         }
@@ -39,8 +39,7 @@ namespace Arteranos.UI
 
             cs = SettingsManager.Client;
 
-            cs.OnVRModeChanged += OnVRModeChanged;
-            OnVRModeChanged(cs.VRMode);
+            chk_DesiredVRMode.isOn = cs.DesiredVRMode;
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
@@ -55,28 +54,11 @@ namespace Arteranos.UI
             dirty = false;
         }
 
-        private void OnVRModeChanged(bool current)
+
+        private void OnModeSwitchClick(bool isOn)
         {
-            if (btn_ModeSwitch != null)
-                btn_ModeSwitch.GetComponentInChildren<TextMeshProUGUI>().text = 
-                    current ? "Switch to Desktop" : "Switch to VR";
-        }
-
-        private void OnModeSwitchClick()
-        {
-            IEnumerator SwitchVRMode()
-            {
-                yield return null;
-                cs.VRMode = !cs.VRMode;
-                btn_ModeSwitch.interactable = true;
-
-                // Unconditionally save the desktop mode, the VR mode is another problem to
-                // deal with.
-                if(!cs.VRMode) cs.Save();
-            }
-
-            btn_ModeSwitch.interactable = false;
-            StartCoroutine(SwitchVRMode());
+            cs.DesiredVRMode = isOn;
+            dirty = true;
         }
 
         private async void OnLoginUIClick()

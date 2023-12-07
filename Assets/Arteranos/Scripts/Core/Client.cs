@@ -289,8 +289,11 @@ namespace Arteranos.Core
         // Guides the online and availability state
         // public virtual Visibility Visibility { get; set; } = Visibility.Online;
 
-        // VR mode, if available
-        public virtual bool VRMode { get; set; } = true;
+        // Current VR mode
+        public virtual bool VRMode { get; set; } = false;
+
+        // Desired VR mode
+        public virtual bool DesiredVRMode { get; set; } = false;
 
         // Friends bubble size
         public virtual float SizeBubbleFriends { get; set; } = 1.0f;
@@ -381,6 +384,7 @@ namespace Arteranos.Core
         [JsonIgnore]
         public byte[] UserPublicKey => Crypto.PublicKey;
 
+        [JsonIgnore]
         public override bool VRMode
         {
             get => !FileUtils.Unity_Server && base.VRMode;

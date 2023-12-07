@@ -17,7 +17,6 @@ namespace Arteranos.XR
     {
         IAvatarBrain Me { get; set; }
         Vector3 CameraLocalOffset { get; }
-        bool UsingXR { get; }
         bool enabled { get; set; }
         public float EyeHeight { get; set; }
         public float BodyHeight { get; set; }
@@ -29,7 +28,5 @@ namespace Arteranos.XR
         public void ReconfigureXRRig();
         void FreezeControls(bool value);
         void MoveRig();
-
-        event Action<bool> XRSwitchEvent;
     }
 }

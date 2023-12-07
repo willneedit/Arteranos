@@ -37,8 +37,8 @@ namespace Arteranos.Avatar
 
             if(isOwned)
             {
-                XRControl.Instance.XRSwitchEvent += OnXRChanged;
-                OnXRChanged(XRControl.Instance.UsingXR);
+                SettingsManager.Client.OnVRModeChanged += OnXRChanged;
+                OnXRChanged(SettingsManager.Client.VRMode);
             }
 
         }
@@ -46,7 +46,7 @@ namespace Arteranos.Avatar
         public override void OnStopClient()
         {
             if(isOwned)
-                XRControl.Instance.XRSwitchEvent -= OnXRChanged;
+                SettingsManager.Client.OnVRModeChanged -= OnXRChanged;
 
             base.OnStopClient();
         }
@@ -105,7 +105,7 @@ namespace Arteranos.Avatar
         public void UpdateOwnPose()
         {
             // VR: Hand and head tracking
-            if(XRControl.Instance.UsingXR)
+            if(SettingsManager.Client.VRMode)
             {
                 if(m_AvatarData.CenterEye == null) return;
 

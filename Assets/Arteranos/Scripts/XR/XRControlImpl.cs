@@ -6,6 +6,7 @@
  */
 
 using Arteranos.Avatar;
+using Arteranos.Core;
 using System;
 using System.Collections;
 using Unity.XR.CoreUtils;
@@ -20,16 +21,13 @@ namespace Arteranos.XR
         public XROrigin VRRig;
 
         public IAvatarBrain Me { get; set; }
-        public bool UsingXR { get; private set; }
         public Vector3 CameraLocalOffset { get; private set; }
         public float EyeHeight { get; set; } = 1.75f;
         public float BodyHeight { get; set; } = 1.85f;
-        public event Action<bool> XRSwitchEvent;
 
         public Vector3 heightAdjustment => CurrentVRRig.Origin.transform.up * CurrentVRRig.CameraInOriginSpaceHeight;
 
         private XROrigin CurrentVRRig { get; set; }
-        private bool VRRunning = false;
 
         public new bool enabled
         {
@@ -60,33 +58,57 @@ namespace Arteranos.XR
 
         public void OnDestroy() => XRControl.Instance = null;
 
-        public IEnumerator StartXRCoroutine()
+        bool quitting = false;
+        public IEnumerator VRLoopCoroutine()
         {
-            Debug.Log("Initializing XR...");
-            yield return XRGeneralSettings.Instance.Manager.InitializeLoader();
+            bool loaderInitialized = false;
 
-            if (XRGeneralSettings.Instance.Manager.activeLoader == null)
+            while(true)
             {
-                Debug.Log("Initializing XR Failed. Maybe there's no VR device available.");
+                if((SettingsManager.Client.DesiredVRMode && !quitting) != loaderInitialized)
+                {
 
-                // die, Die, DIE, blast you....!
-                var go = GameObject.Find("~oxrestarter");
-                Destroy(go);
+                    if (!loaderInitialized)
+                    {
+                        Debug.Log("Initializing XR loader...");
+                        yield return XRGeneralSettings.Instance.Manager.InitializeLoader();
+                        loaderInitialized = true;
+                    }
+                    else if(!(SettingsManager.Client.DesiredVRMode && !quitting))
+                    {
+                        Debug.Log("Stopping OXR restarter, if it's still around.");
 
-                Core.SettingsManager.Client.VRMode = false;
-                UpdateXROrigin(false);
+                        var go = GameObject.Find("~oxrestarter");
+                        if (go != null) Destroy(go);
+
+                        Debug.Log("Deinitialising XR loasder...");
+                        XRGeneralSettings.Instance.Manager.DeinitializeLoader();
+                        loaderInitialized = false;
+                    }
+                }
+
+                if (loaderInitialized != SettingsManager.Client.VRMode)
+                {
+                    if(loaderInitialized && XRGeneralSettings.Instance.Manager.activeLoader != null)
+                    {
+                        Debug.Log("Starting XR subsystems.");
+                        XRGeneralSettings.Instance.Manager.StartSubsystems();
+                        SettingsManager.Client.VRMode = true;
+                        UpdateXROrigin(true);
+                    }
+                    else if(SettingsManager.Client.VRMode)
+                    {
+                        Debug.Log("Stopping XR subsystems.");
+                        XRGeneralSettings.Instance.Manager.StopSubsystems();
+                        SettingsManager.Client.VRMode = false;
+                        UpdateXROrigin(false);
+                    }
+                }
+
+                yield return new WaitForSeconds(4);
             }
-            else
-            {
-                Debug.Log("Starting XR...");
-                XRGeneralSettings.Instance.Manager.StartSubsystems();
-                VRRunning = true;
-                UpdateXROrigin(true);
-            }
-
-            // Fall back to the desktop mode for future attempts only if it's explicitely wanted
-            Core.SettingsManager.Client.Save();
         }
+
 
         void StopXR()
         {
@@ -95,29 +117,15 @@ namespace Arteranos.XR
             XRGeneralSettings.Instance.Manager.StopSubsystems();
             XRGeneralSettings.Instance.Manager.DeinitializeLoader();
             Debug.Log("XR stopped completely.");
-            VRRunning = false;
-            UpdateXROrigin(false);
         }
         
         // Start is called before the first frame update
         void Start()
         {
-            Core.SettingsManager.Client.OnVRModeChanged += OnVRModeChanged;
-            if(Core.SettingsManager.Client.VRMode != VRRunning)
-                OnVRModeChanged(true);
-            else
-                UpdateXROrigin(false);
+            UpdateXROrigin(false);
+            StartCoroutine(VRLoopCoroutine());
         }
 
-        void OnVRModeChanged(bool current)
-        {
-            if(current == VRRunning) return;
-
-            if(current)
-                StartCoroutine(StartXRCoroutine());
-            else
-                StopXR();
-        }
 
         void UpdateXROrigin(bool useVR)
         {
@@ -142,16 +150,14 @@ namespace Arteranos.XR
 
             CurrentVRRig = Instantiate(VRRig, position, rotation);
             StartCoroutine(ReconfigureCR());
-            XRSwitchEvent?.Invoke(useVR);
-            UsingXR = useVR;
         }
 
         // Cleanly shut down XR on exit.
         void OnApplicationQuit()
         {
-            // Debug.Log("Bye!");
-            if(Core.SettingsManager.Client.VRMode)
-                StopXR();
+            quitting = true;
+            StopAllCoroutines();
+            StopXR();
         }
 
         /// <summary>
