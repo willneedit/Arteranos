@@ -164,9 +164,9 @@ namespace Arteranos.Services
             {
                 CurrentWorld = SettingsManager.CurrentWorld,
                 CurrentWorldName = SettingsManager.CurrentWorldName,
-                UserPublicKeys = (from user in NetworkStatus.GetOnlineUsers()
-                                  where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
-                                  select (byte[])user.UserID).ToList(),
+                UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
+                                   where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
+                                   select CryptoHelpers.GetFingerprint(user.UserID)).ToList(),
             };
 
             await Core.Utils.WebEmit(serverOnlineData, response);

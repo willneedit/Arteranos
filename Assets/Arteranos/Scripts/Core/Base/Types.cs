@@ -84,7 +84,7 @@ namespace Arteranos.Core
 
     public struct ServerOnlineData
     {
-        public List<byte[]> UserPublicKeys;
+        public List<byte[]> UserFingerprints;
         [ASN1Tag(1, true)] public string CurrentWorld;
         [ASN1Tag(2, true)] public string CurrentWorldName;
 
@@ -179,7 +179,7 @@ namespace Arteranos.Core
         public DateTime LastOnline => PublicData?.LastOnline ?? DateTime.UnixEpoch;
         public string CurrentWorld => OnlineData?.CurrentWorld;
         public string CurrentWorldName => (OnlineData?.CurrentWorld != null) ? OnlineData?.CurrentWorldName : "Nexus";
-        public int UserCount => OnlineData?.UserPublicKeys.Count ?? 0;
+        public int UserCount => OnlineData?.UserFingerprints.Count ?? 0;
         public int FriendCount
         {
             get
@@ -190,7 +190,10 @@ namespace Arteranos.Core
                 IEnumerable<SocialListEntryJSON> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.State));
 
                 foreach (SocialListEntryJSON entry in friends)
-                    if (OnlineData.Value.UserPublicKeys.Contains(entry.UserID)) friend++;
+                {
+                    byte[] fingerprint = CryptoHelpers.GetFingerprint(entry.UserID);
+                    if (OnlineData.Value.UserFingerprints.Contains(fingerprint)) friend++;
+                }
 
                 return friend;
             }

@@ -5,7 +5,10 @@
 First of all, NO user identifiable data would be monetized or sold out to third party entities or companies for any purposes. Private data, as detailed below, are to be used for ensuring this server's smooth operation and providing this application's features.
 
 ### User ID
-It's in two parts: The public key and the private (aka secret) key. The secret key resides in Your device, nowhere else. The public key identifies you in front of your friends and be saved in your friend's lists or your server operator's list if you're being banned and be visible in the server's user list, unless you set your online status as 'invisible'. Just deleting the settings folder on your computer makes you be forgotten.
+It's in two parts: The public key and the private (aka secret) key. The secret key resides in Your device, nowhere else. The public key identifies you in front of your friends and be saved in your friend's lists or your server operator's list if you're being banned. Both this and the user fingerprint (see below) can be deleted by wiping your settings data on your device. Old public keys saved on other people's lists will turn out as useless.
+
+### User fingerprint
+Represented in the 'other name' besides the nickname. It's derived from the User ID, but it's (nearly) impossible to get the User ID back from the fingerprint. Unless a user sets his online setting as 'invisible', the fingerprints are to be publicly seen because for the means of looking for friends across servers.
 
 ### IP Address
 It's essential to connect to the server. IP addresses are being logged for the sole purpose to maintain the smooth operation, and only to be saved for user banning purposes.
