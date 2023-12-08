@@ -61,51 +61,41 @@ namespace Arteranos.XR
         bool quitting = false;
         public IEnumerator VRLoopCoroutine()
         {
-            bool loaderInitialized = false;
-
             while(true)
             {
-                if((SettingsManager.Client.DesiredVRMode && !quitting) != loaderInitialized)
-                {
+                bool desiredVRMode = SettingsManager.Client.DesiredVRMode && !quitting;
+                bool actualVRMode = SettingsManager.Client.VRMode;
 
-                    if (!loaderInitialized)
+
+                if(desiredVRMode && !actualVRMode)
+                {
+                    if (XRGeneralSettings.Instance.Manager.activeLoader == null)
                     {
                         Debug.Log("Initializing XR loader...");
-                        yield return XRGeneralSettings.Instance.Manager.InitializeLoader();
-                        loaderInitialized = true;
+                        XRGeneralSettings.Instance.Manager.InitializeLoaderSync();
                     }
-                    else if(!(SettingsManager.Client.DesiredVRMode && !quitting))
-                    {
-                        Debug.Log("Stopping OXR restarter, if it's still around.");
+                    // OpenXR restarter world be a good idea, but its implementation leaves a lot to be desired.
+                    GameObject go = GameObject.Find("~oxrestarter");
+                    if (go != null) Destroy(go);
 
-                        var go = GameObject.Find("~oxrestarter");
-                        if (go != null) Destroy(go);
 
-                        Debug.Log("Deinitialising XR loasder...");
-                        XRGeneralSettings.Instance.Manager.DeinitializeLoader();
-                        loaderInitialized = false;
-                    }
-                }
-
-                if (loaderInitialized != SettingsManager.Client.VRMode)
-                {
-                    if(loaderInitialized && XRGeneralSettings.Instance.Manager.activeLoader != null)
+                    // Successful, now?
+                    if (XRGeneralSettings.Instance.Manager.activeLoader != null)
                     {
                         Debug.Log("Starting XR subsystems.");
                         XRGeneralSettings.Instance.Manager.StartSubsystems();
-                        SettingsManager.Client.VRMode = true;
                         UpdateXROrigin(true);
                     }
-                    else if(SettingsManager.Client.VRMode)
-                    {
-                        Debug.Log("Stopping XR subsystems.");
-                        XRGeneralSettings.Instance.Manager.StopSubsystems();
-                        SettingsManager.Client.VRMode = false;
-                        UpdateXROrigin(false);
-                    }
+                    else // Doesn't work now, switch off for now.
+                        SettingsManager.Client.DesiredVRMode = false;
+                }
+                if(!desiredVRMode && actualVRMode)
+                {
+                    StopXR();
+                    UpdateXROrigin(false);
                 }
 
-                yield return new WaitForSeconds(4);
+                yield return new WaitForSeconds(2);
             }
         }
 
@@ -114,7 +104,7 @@ namespace Arteranos.XR
         {
             Debug.Log("Stopping XR...");
 
-            XRGeneralSettings.Instance.Manager.StopSubsystems();
+            // Implies StopSubsystems()
             XRGeneralSettings.Instance.Manager.DeinitializeLoader();
             Debug.Log("XR stopped completely.");
         }
@@ -134,6 +124,8 @@ namespace Arteranos.XR
                 yield return new WaitForSeconds(0.5f);
                 ReconfigureXRRig();
             };
+
+            SettingsManager.Client.VRMode = useVR;
 
             CurrentVRRig = FindObjectOfType<XROrigin>();
 
