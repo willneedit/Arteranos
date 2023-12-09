@@ -321,7 +321,7 @@ namespace Arteranos.Core
             return dh.data;
         }
 
-        public static async Task<byte[]> CachedDownloadWebData(string url, string baseurl, string cachePattern, int cacheLivetime = 600, int timeout = 20, Action<float> progressCallback = null)
+        public static async Task<byte[]> CachedDownloadWebData(string url, string baseurl, string cachePattern, int cacheLivetime = 600, int timeout = 20, bool keepExpired = false, Action<float> progressCallback = null)
         {
             string cacheFile = string.Format(cachePattern, GetURLHash(baseurl));
 
@@ -341,10 +341,14 @@ namespace Arteranos.Core
                     if (!Directory.Exists(cachedir)) Directory.CreateDirectory(cachedir);
                     await File.WriteAllBytesAsync(cacheFile, data);
                 }
-                else
+                else if(File.Exists(cacheFile))
                 {
-                    // It's already expired, so we have to dump it anyway.
-                    if (File.Exists(cacheFile)) File.Delete(cacheFile);
+                    if(keepExpired)
+                        // Keep the antiquity.
+                        data = await File.ReadAllBytesAsync(cacheFile);
+                    else
+                        // It's already expired, so we have to dump it anyway.
+                        File.Delete(cacheFile);
                 }
             }
             catch (Exception e)
@@ -357,9 +361,6 @@ namespace Arteranos.Core
 
         public static string LoadDefaultTOS() 
             => Resources.Load<TextAsset>("Templates/PrivacyTOSNotice")?.text;
-
-        public static Task<byte[]> CachedDownloadWebData(string url, string cachePattern, int cacheLivetime = 600, int timeout = 20, Action<float> progressCallback = null)
-            => CachedDownloadWebData(url, url, cachePattern, cacheLivetime, timeout, progressCallback);
 
         public static void InvalidateWebData(string _, string baseurl, string cachePattern)
         {

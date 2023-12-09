@@ -21,11 +21,11 @@ namespace Arteranos.Core
 {
     public static partial class Utils
     {
-        public async static Task<(bool, T)> WebRetrieve<T>(string url, string pathPart, string patternServerDescription, int expirySeconds, int timeout = 1)
+        public async static Task<(bool, T)> WebRetrieve<T>(string url, string pathPart, string patternServerDescription, int expirySeconds, int timeout = 1, bool keepExpired = false)
         {
             UriBuilder builder = new(url) { Path = pathPart };
 
-            byte[] data = await CachedDownloadWebData(builder.ToString(), url, patternServerDescription, expirySeconds, timeout);
+            byte[] data = await CachedDownloadWebData(builder.ToString(), url, patternServerDescription, expirySeconds, timeout, keepExpired);
             if (data == null) return (false, default(T));
 
             try
@@ -74,7 +74,7 @@ namespace Arteranos.Core
         public static readonly string urlPathPart = "/ServerDescription.asn1";
         public static async Task<ServerDescription?> Retrieve(string url, bool forceReload = false)
         {
-            (bool success, ServerDescription result) = await Utils.WebRetrieve<ServerDescription>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 86400, 1);
+            (bool success, ServerDescription result) = await Utils.WebRetrieve<ServerDescription>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 86400, 1, true);
             return success ? result : null;
         }
 
@@ -93,7 +93,7 @@ namespace Arteranos.Core
         public static readonly string urlPathPart = "/ServerOnline.asn1";
         public static async Task<ServerOnlineData?> Retrieve(string url, bool forceReload = false)
         {
-            (bool success, ServerOnlineData result) = await Utils.WebRetrieve<ServerOnlineData>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 30, 1);
+            (bool success, ServerOnlineData result) = await Utils.WebRetrieve<ServerOnlineData>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 30, 1, false);
             return success ? result : null;
         }
 
