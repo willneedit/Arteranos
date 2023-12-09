@@ -1232,6 +1232,8 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 1010738217276881514, guid: 2fa17d14f9fd10d4cb243ab38776f236,
       type: 3}
+  m_EnableTurnLeft: 1
+  m_EnableTurnRight: 1
 --- !u!114 &-8349098519950017063
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1285,6 +1287,8 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 1010738217276881514, guid: 2fa17d14f9fd10d4cb243ab38776f236,
       type: 3}
+  m_EnableTurnLeft: 1
+  m_EnableTurnRight: 1
 --- !u!114 &9026550181651742556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1342,6 +1346,8 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 6972639530819350904, guid: 2fa17d14f9fd10d4cb243ab38776f236,
       type: 3}
+  m_EnableStrafeLeft: 0
+  m_EnableStrafeRight: 0
 --- !u!114 &6826848587015489429
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -26,6 +26,24 @@ namespace Arteranos.XR
             set => SetInputActionProperty(ref m_KeyboardMouseTurnAction, value);
         }
 
+        [SerializeField]
+        [Tooltip("Enable turning with the left controller")]
+        bool m_EnableTurnLeft;
+        public bool EnableTurnLeft
+        {
+            get => m_EnableTurnLeft;
+            set => m_EnableTurnLeft = value;
+        }
+
+        [SerializeField]
+        [Tooltip("Enable turning with the right controller")]
+        bool m_EnableTurnRight;
+        public bool EnableTurnRight
+        {
+            get => m_EnableTurnRight;
+            set => m_EnableTurnRight = value;
+        }
+
         void SetInputActionProperty(ref InputActionProperty property, InputActionProperty value)
         {
             if (Application.isPlaying)
@@ -53,8 +71,14 @@ namespace Arteranos.XR
 
         protected override Vector2 ReadInput()
         {
-            return base.ReadInput() +
-                m_KeyboardMouseTurnAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+            Vector2 leftHandValue = leftHandTurnAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+            Vector2 rightHandValue = rightHandTurnAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+            Vector2 kmValue = m_KeyboardMouseTurnAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+
+            if (!EnableTurnLeft) leftHandValue = Vector2.zero;
+            if (!EnableTurnRight) rightHandValue = Vector2.zero;
+
+            return leftHandValue + rightHandValue + kmValue;
         }
     }
 }

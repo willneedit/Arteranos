@@ -21,10 +21,31 @@ namespace Arteranos.XR
         /// <summary>
         /// The Input System Action that Unity uses to read Move data from the right hand controller. Must be a <see cref="InputActionType.Value"/> <see cref="Vector2Control"/> Control.
         /// </summary>
+        /// 
+
         public InputActionProperty KeyboardMouseMoveAction
         {
             get => m_KeyboardMouseMoveAction;
             set => SetInputActionProperty(ref m_KeyboardMouseMoveAction, value);
+        }
+        [SerializeField]
+        [Tooltip("Enable strafing with the left controller")]
+        bool m_EnableStrafeLeft;
+
+        public bool EnableStrafeLeft
+        {
+            get => m_EnableStrafeLeft;
+            set => m_EnableStrafeLeft = value; 
+        }
+
+        [SerializeField]
+        [Tooltip("Enable strafing with the right controller")]
+        bool m_EnableStrafeRight;
+
+        public bool EnableStrafeRight
+        {
+            get => m_EnableStrafeRight;
+            set => m_EnableStrafeRight = value; 
         }
 
         void SetInputActionProperty(ref InputActionProperty property, InputActionProperty value)
@@ -54,8 +75,15 @@ namespace Arteranos.XR
 
         protected override Vector2 ReadInput()
         {
-            return base.ReadInput() +
-                m_KeyboardMouseMoveAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+            Vector2 leftHandValue = leftHandMoveAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+            Vector2 rightHandValue = rightHandMoveAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+            Vector2 kmValue = m_KeyboardMouseMoveAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+
+            // Filter out the strafing if they're switched off
+            if (!m_EnableStrafeLeft) leftHandValue.x = 0;
+            if (!m_EnableStrafeRight) rightHandValue.x = 0;
+
+            return leftHandValue + rightHandValue + kmValue;
         }
 
         protected override Vector3 ComputeDesiredMove(Vector2 input)
@@ -70,7 +98,7 @@ namespace Arteranos.XR
             // Assumes that the input axes are in the range [-1, 1].
             // Clamps the magnitude of the input direction to prevent faster speed when moving diagonally,
             // while still allowing for analog input to move slower (which would be lost if simply normalizing).
-            var inputMove = Vector3.ClampMagnitude(new Vector3(0f, 0f, input.y), 1f);
+            var inputMove = Vector3.ClampMagnitude(new Vector3(input.x, 0f, input.y), 1f);
 
             var originTransform = xrOrigin.Origin.transform;
             var originUp = originTransform.up;
