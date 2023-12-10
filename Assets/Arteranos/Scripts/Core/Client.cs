@@ -67,6 +67,13 @@ namespace Arteranos.Core
         HighArc
     }
 
+    public enum StickType
+    {
+        Off = 0,
+        Turn,
+        Strafe
+    }
+
     public enum TurnType
     {
         [Description("Smooth")]
@@ -200,6 +207,10 @@ namespace Arteranos.Core
         public virtual bool Controller_active_left { get; set; } = true;
 
         public virtual bool Controller_active_right { get; set; } = true;
+
+        public virtual StickType StickType_Left { get; set; } = StickType.Strafe;
+
+        public virtual StickType StickType_Right { get; set; } = StickType.Turn;
 
         public virtual RayType Controller_Type_left { get; set; } = RayType.Straight;
 

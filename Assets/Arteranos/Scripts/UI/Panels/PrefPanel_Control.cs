@@ -29,6 +29,8 @@ namespace Arteranos.UI
         [SerializeField] private Toggle chk_ctrl_right = null;
         [SerializeField] private Toggle chk_active_left = null;
         [SerializeField] private Toggle chk_active_right = null;
+        [SerializeField] private Spinner spn_stickuse_left = null;
+        [SerializeField] private Spinner spn_stickuse_right = null;
         [SerializeField] private Spinner spn_type_left = null;
         [SerializeField] private Spinner spn_type_right = null;
 
@@ -59,6 +61,8 @@ namespace Arteranos.UI
             chk_active_left.onValueChanged.AddListener(OnLeftControllerAlwaysSeen);
             chk_active_right.onValueChanged.AddListener(OnRightControllerAlwaysSeen);
 
+            spn_stickuse_left.OnChanged += Spn_stickuse_left_OnChanged;
+            spn_stickuse_right.OnChanged += Spn_stickuse_right_OnChanged;
             spn_type_left.OnChanged += OnLeftControllerTypeChanged;
             spn_type_right.OnChanged += OnRightControllerTypeChanged;
         }
@@ -123,9 +127,22 @@ namespace Arteranos.UI
             OnControllersChanged();
         }
 
+        private void Spn_stickuse_left_OnChanged(int arg1, bool arg2)
+        {
+            controls.StickType_Left = (StickType)arg1;
+            OnControllersChanged();
+        }
+
+        private void Spn_stickuse_right_OnChanged(int arg1, bool arg2)
+        {
+            controls.StickType_Right = (StickType)arg1;
+            OnControllersChanged();
+        }
+
+
         private void OnControllersChanged()
         {
-            // Keep at least one controller on, given you're in VR.
+            // Keep at least one controller on if you're in VR.
             if (!chk_ctrl_left.isOn && !chk_ctrl_right.isOn && cs.VRMode)
                 chk_ctrl_right.isOn = true;
 
@@ -151,7 +168,7 @@ namespace Arteranos.UI
             sldn_NameplateIn.value = controls.NameplateIn;
             sldn_NameplateOut.value = controls.NameplateOut;
 
-            grp_Ray_Controls.SetActive(cs.VRMode);
+            // grp_Ray_Controls.SetActive(cs.VRMode);
 
             chk_ctrl_left.isOn = controls.Controller_left;
             chk_ctrl_right.isOn = controls.Controller_right;
@@ -159,8 +176,11 @@ namespace Arteranos.UI
             chk_active_left.isOn = controls.Controller_active_left;
             chk_active_right.isOn = controls.Controller_active_right;
 
-            spn_type_left.SetEnumValue(controls.Controller_Type_left);
-            spn_type_right.SetEnumValue(controls.Controller_Type_right);
+            spn_stickuse_left.value = (int) controls.StickType_Left;
+            spn_stickuse_right.value = (int) controls.StickType_Right;
+
+            spn_type_left.value = (int) controls.Controller_Type_left;
+            spn_type_right.value = (int) controls.Controller_Type_right;
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;

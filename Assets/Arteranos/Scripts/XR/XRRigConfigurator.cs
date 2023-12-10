@@ -23,9 +23,9 @@ namespace Arteranos.XR
         [SerializeField] private XRRayInteractor RightInteractor = null;
         [SerializeField] private XRInteractorLineVisual RightLineVisual = null;
 
-        private ActionBasedSnapTurnProvider SnapTurnProvider = null;
-        private ActionBasedContinuousTurnProvider ContTurnProvider = null;
-        private ActionBasedContinuousMoveProvider MoveProvider = null;
+        private AvatarSnapTurnProvider SnapTurnProvider = null;
+        private AvatarContinuousTurnProvider ContTurnProvider = null;
+        private AvatarMoveProvider MoveProvider = null;
         private CTeleProvider CTeleProvider = null;
         private InputActionManager InputActionManager = null;
 
@@ -43,9 +43,9 @@ namespace Arteranos.XR
 
         private void Awake()
         {
-            SnapTurnProvider = GetComponent<ActionBasedSnapTurnProvider>();
-            ContTurnProvider = GetComponent<ActionBasedContinuousTurnProvider>();
-            MoveProvider     = GetComponent<ActionBasedContinuousMoveProvider>();
+            SnapTurnProvider = GetComponent<AvatarSnapTurnProvider>();
+            ContTurnProvider = GetComponent<AvatarContinuousTurnProvider>();
+            MoveProvider     = GetComponent<AvatarMoveProvider>();
             CTeleProvider    = GetComponent<CTeleProvider>();
             InputActionManager = GetComponent<InputActionManager>();
         }
@@ -122,6 +122,15 @@ namespace Arteranos.XR
                 : mcs.ZipLineDuration;
 
             CTeleProvider.TeleportType = mcs.Teleport;
+
+            // Set turning/strafing options.
+            MoveProvider.EnableStrafeLeft = ccs.StickType_Left == StickType.Strafe;
+            MoveProvider.EnableStrafeRight = ccs.StickType_Right == StickType.Strafe;
+
+            SnapTurnProvider.EnableTurnLeft = ccs.StickType_Left == StickType.Turn;
+            SnapTurnProvider.EnableTurnRight = ccs.StickType_Right == StickType.Turn;
+            ContTurnProvider.EnableTurnLeft = ccs.StickType_Left == StickType.Turn;
+            ContTurnProvider.EnableTurnRight = ccs.StickType_Right == StickType.Turn;
         }
 
         private IEnumerator ReconfigureTurnType(TurnType turnType)

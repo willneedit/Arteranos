@@ -75,8 +75,8 @@ namespace Arteranos.XR
             Vector2 rightHandValue = rightHandTurnAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
             Vector2 kmValue = m_KeyboardMouseTurnAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
 
-            if (!EnableTurnLeft) leftHandValue = Vector2.zero;
-            if (!EnableTurnRight) rightHandValue = Vector2.zero;
+            if (!EnableTurnLeft) leftHandValue.x = 0;
+            if (!EnableTurnRight) rightHandValue.x = 0;
 
             return leftHandValue + rightHandValue + kmValue;
         }
