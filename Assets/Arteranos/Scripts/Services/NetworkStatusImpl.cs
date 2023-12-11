@@ -384,10 +384,10 @@ namespace Arteranos.Services
             manager.StartHost();
 
             // And, wait for the network to really be started up.
-            while (manager.isNetworkActive) await Task.Yield();
+            while (!manager.isNetworkActive) await Task.Yield();
         }
 
-        protected override async void StartServer_()
+        protected override async Task StartServer_()
         {
             await SmoothServerTransition();
 
@@ -398,7 +398,7 @@ namespace Arteranos.Services
             manager.StartServer();
 
             // And, wait for the network to really be started up.
-            while (manager.isNetworkActive) await Task.Yield();
+            while (!manager.isNetworkActive) await Task.Yield();
         }
 
         private async Task SmoothServerTransition()

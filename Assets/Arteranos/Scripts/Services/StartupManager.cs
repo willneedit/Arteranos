@@ -70,9 +70,15 @@ namespace Arteranos.Services
             }
 
 
-            if(FileUtils.Unity_Server)
+            if (FileUtils.Unity_Server)
+            {
                 // Manually start the server, including with the initialization.
-                NetworkStatus.StartServer();
+                Task t = NetworkStatus.StartServer();
+                while (!t.IsCompleted && !t.IsFaulted) yield return null;
+                yield return new WaitForSeconds(5);
+                (string address, int _, int mdport) = GetServerConnectionData();
+                Debug.Log($"Server is running, launcher link is: http://{address}:{mdport}/");
+            }
         }
 
         protected void Update()

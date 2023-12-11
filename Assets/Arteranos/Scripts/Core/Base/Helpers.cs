@@ -147,7 +147,7 @@ namespace Arteranos.Services
         protected abstract bool IsVerifiedUser_(UserID claimant);
         protected abstract void StartClient_(Uri connectionUri);
         protected abstract Task StartHost_(bool resetConnection = false);
-        protected abstract void StartServer_();
+        protected abstract Task StartServer_();
         protected abstract Task StopHost_(bool loadOfflineScene);
 
         public static NetworkStatus Instance { get; set; }
@@ -185,7 +185,7 @@ namespace Arteranos.Services
             => Instance.StartClient_(connectionUri);
         public static Task StartHost(bool resetConnection = false) 
             => Instance.StartHost_(resetConnection);
-        public static void StartServer() 
+        public static Task StartServer() 
             => Instance.StartServer_();
         public static Task StopHost(bool loadOfflineScene) 
             => Instance.StopHost_(loadOfflineScene);
