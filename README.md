@@ -14,6 +14,7 @@ This is intended to be a VR social app - To meet and greet people in the metaver
 - OpenXR-supported tethered headset, _if applicable_<sup>*</sup>
   - ~~Oculus~~ Meta Quest 2, using Oculus Link (both Air and cable)
   - Meta Quest 2, Virtual Desktop
+  - Meta Quest 2, Steam Link
   
 - For building you need:
   - **Unity 2021.3.15f1** with the installed modules for the desired target platform

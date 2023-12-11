@@ -1,3 +1,25 @@
+# Version 1.4.0
+
+## New Features
+
+- Configurable body height
+- Server collection and propagation - public servers say: Spread the word!
+- Server search and discovery: Travel to the world you want - any suitable server!
+- World list UI: Larger panels, more info. Popular? Where are your friends? There they are!
+- Dedicated server gets a dedicated configuration directory.
+- VR: Movement - Turn/Strafe separately for the left and right controller
+- VR: Controller - On/Off. No 'zombie' arms, no hands right in your face just because of idle controllers.
+
+## Fixes and improvements
+
+- Info panel: Displaying the launcher link and providing copy&paste (e.g. for Discord)
+- Grabbable virtual keyboard
+- Better download progress indicator
+- More compact server data transfer: Less bandwidth use
+- World metadata improvements
+- Better handling of VR mode
+- Legalese window, only when necessary. Bleargh...
+
 # Version 1.0.0
 
 ## New Features
