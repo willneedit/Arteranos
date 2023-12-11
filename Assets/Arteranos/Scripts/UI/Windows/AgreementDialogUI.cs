@@ -6,7 +6,6 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -14,8 +13,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using System.Text;
-using System.Security.Cryptography;
 
 namespace Arteranos.UI
 {
@@ -42,9 +39,9 @@ namespace Arteranos.UI
                 if (line.Length > 3 && line[0..4] == "### ")
                     newLines.Add($"<b>{line[4..]}</b>");
                 else if (line.Length > 2 && line[0..3] == "## ")
-                    newLines.Add($"<font size=+5><b>{line[3..]}</b></font>");
+                    newLines.Add($"<size=+5><b>{line[3..]}</b></size>");
                 else if (line.Length > 1 && line[0..2] == "# ")
-                    newLines.Add($"<font size=+10><b>{line[2..]}</b></font>");
+                    newLines.Add($"<size=+10><b>{line[2..]}</b></size>");
                 else if (line.Length > 2 && line[0..3] == "```")
                 {
                     monospaced = !monospaced;
@@ -88,11 +85,11 @@ namespace Arteranos.UI
 
             if (agree)
             {
-                if(ServerInfo.UsesCustomTOS)
-                    Client.UpdateServerPass(ServerInfo, true, null);
-                else
-                    // We needed to deal with the default TOS.
+                // We needed to deal with the default TOS.
+                if (!ServerInfo.UsesCustomTOS)
                     client.KnowsDefaultTOS = Crypto.SHA256(Utils.LoadDefaultTOS());
+
+                Client.UpdateServerPass(ServerInfo, true, null);
                 client.Save();
 
                 OnAgree?.Invoke();

@@ -399,8 +399,8 @@ namespace Arteranos.UI
 
             if(client.ServerPasses.TryGetValue(si.SPKDBKey, out ServerPass sp))
             {
-                // Server's agreement is unchanged.
-                if(serverTOSHash.SequenceEqual(sp.PrivacyTOSHash)) return true;
+                // Server's [custom] agreement is unchanged.
+                if(sp.PrivacyTOSHash != null && serverTOSHash.SequenceEqual(sp.PrivacyTOSHash)) return true;
             }
 
             // Server uses an unknown TOS deviating from the standard TOS, needs to ask.
@@ -409,7 +409,7 @@ namespace Arteranos.UI
             byte[] currentTOSHash = Crypto.SHA256(Utils.LoadDefaultTOS());
 
             // Only if the user's knowledge of the default TOS is up to date.
-            return currentTOSHash.SequenceEqual(client.KnowsDefaultTOS);
+            return client.KnowsDefaultTOS != null && currentTOSHash.SequenceEqual(client.KnowsDefaultTOS);
 
         }
 

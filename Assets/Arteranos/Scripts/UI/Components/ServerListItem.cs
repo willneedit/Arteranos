@@ -128,7 +128,9 @@ namespace Arteranos.UI
         {
             btn_Visit.interactable = false;                
             await ConnectionManager.ConnectToServer(serverURL);
-            btn_Visit.interactable = true;
+
+            // Can be removed because of the TOS afreement window, ot other things.
+            if(btn_Visit != null) btn_Visit.interactable = true;
         }
 
         private async void OnAddClicked()
