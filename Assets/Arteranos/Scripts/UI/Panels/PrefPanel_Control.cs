@@ -12,8 +12,6 @@ using UnityEngine.UI;
 using Arteranos.Core;
 using System.Collections.Generic;
 using System.Linq;
-using System;
-using Arteranos.XR;
 
 namespace Arteranos.UI
 {
@@ -168,7 +166,7 @@ namespace Arteranos.UI
             sldn_NameplateIn.value = controls.NameplateIn;
             sldn_NameplateOut.value = controls.NameplateOut;
 
-            // grp_Ray_Controls.SetActive(cs.VRMode);
+            grp_Ray_Controls.SetActive(cs.VRMode);
 
             chk_ctrl_left.isOn = controls.Controller_left;
             chk_ctrl_right.isOn = controls.Controller_right;
