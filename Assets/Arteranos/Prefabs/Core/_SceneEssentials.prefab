@@ -347,6 +347,7 @@ GameObject:
   - component: {fileID: 6986303095082102228}
   - component: {fileID: 3248231206936911695}
   - component: {fileID: 7512317098316174466}
+  - component: {fileID: 8713646139101012672}
   m_Layer: 0
   m_Name: _SceneEssentials
   m_TagString: Untagged
@@ -567,6 +568,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   VelocityMax: 2
   BlinderDuration: 0.25
+--- !u!114 &8713646139101012672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3840780144436917897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca3febc06a5ee0a40aafa4587a017e8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7448129529993753624
 GameObject:
   m_ObjectHideFlags: 0
