@@ -1,0 +1,6 @@
+{
+    "name": "Arteranos_PlayTest",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

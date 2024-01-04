@@ -14,6 +14,11 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using Debug = UnityEngine.Debug;
+using Arteranos.Services;
+using Ipfs.Engine;
+using UnityEngine.TestTools;
+using UnityEngine;
+using System.Collections;
 
 namespace Arteranos.Test
 {
@@ -107,7 +112,7 @@ namespace Arteranos.Test
         }
 
         /// <summary>
-        /// Ind
+        /// Find the server only with its ID
         /// </summary>
         [Test]
         public void FindServerByIdAsync()
@@ -149,9 +154,43 @@ namespace Arteranos.Test
             Assert.IsTrue(servercontact.Addresses.Count() > 0);
 
             foreach(MultiAddress addr in servercontact.Addresses)
-            {
                 Debug.Log($"{addr}");
-            }
+        }
+
+        [Test]
+        public void ConnectFromOutsideAsync()
+        {
+            Task.Run(ConnectFromOutside).Wait();
+        }
+
+        public async Task ConnectFromOutside()
+        {
+            using TempNode server = new(12345); // Fixed port, no hole punching as of yet
+            await server.StartAsync();
+
+            using TempNode outsider = new();
+            await outsider.StartAsync();
+
+            Peer self = await server.LocalPeer;
+            Peer other = await outsider.LocalPeer;
+
+            // External IP and port, beyond the NAT
+            string outsideAddress = $"/ip4/10.72.172.2/tcp/12345/ipfs/{self.Id}";
+
+            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
+
+            await outsider.Swarm.ConnectAsync(outsideAddress, cts.Token);
+
+            Peer[] serverspeers = (await server.Swarm.PeersAsync()).ToArray();
+
+            Assert.AreEqual(1, serverspeers.Length);
+            Assert.AreEqual(serverspeers[0].Id, other.Id);
+
+            foreach (MultiAddress address in serverspeers[0].Addresses)
+                Debug.Log($"Outsider's addresses, as seen by server: {address}");
+
+            foreach (MultiAddress address in other.Addresses)
+                Debug.Log($"Outsider's addresses, as seen by itself: {address}");
         }
     }
 }

@@ -5,15 +5,19 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Services;
 using Ipfs.Engine;
 using Newtonsoft.Json.Linq;
-
+using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
 
 
 namespace Arteranos.Test
 {
-    public class TestFixture
+    public class TestFixture : MonoBehaviour
     {
     }
 
@@ -21,7 +25,7 @@ namespace Arteranos.Test
     {
         static int nodeNumber;
 
-        public TempNode()
+        public TempNode(int port = 0)
             : base("xyzzy".ToCharArray())
         {
             Options.Repository.Folder = Path.Combine(Path.GetTempPath(), $"ipfs-{nodeNumber++}");
@@ -29,7 +33,7 @@ namespace Arteranos.Test
 
             Config.SetAsync(
                 "Addresses.Swarm",
-                JToken.FromObject(new string[] { "/ip4/0.0.0.0/tcp/0" })
+                JToken.FromObject(new string[] { $"/ip4/0.0.0.0/tcp/{port}" })
             ).Wait();
 
             Options.Discovery.DisableMdns = true;

@@ -33,26 +33,29 @@ namespace Arteranos.Services
         {
             cts = new();
 
-            ipfs = new(passphrase.ToCharArray());
+            IpfsEngine ipfsTmp;
+            ipfsTmp = new(passphrase.ToCharArray());
 
-            ipfs.Options.Repository.Folder = Path.Combine(FileUtils.persistentDataPath, "IPFS");
-            ipfs.Options.KeyChain.DefaultKeyType = "ed25519";
-            ipfs.Options.KeyChain.DefaultKeySize = 2048;
-            await ipfs.Config.SetAsync(
+            ipfsTmp.Options.Repository.Folder = Path.Combine(FileUtils.persistentDataPath, "IPFS");
+            ipfsTmp.Options.KeyChain.DefaultKeyType = "ed25519";
+            ipfsTmp.Options.KeyChain.DefaultKeySize = 2048;
+            await ipfsTmp.Config.SetAsync(
                 "Addresses.Swarm",
                 JToken.FromObject(new string[] { "/ip4/0.0.0.0/tcp/12345" })
             );
 
-            await ipfs.StartAsync().ConfigureAwait(false);
+            await ipfsTmp.StartAsync().ConfigureAwait(false);
+
+            ipfs = ipfsTmp;
         }
 
         private async void OnDestroy()
         {
             await ipfs.StopAsync().ConfigureAwait(false);
 
-            cts.Cancel();
+            cts?.Cancel();
 
-            cts.Dispose();
+            cts?.Dispose();
         }
     }
 }
