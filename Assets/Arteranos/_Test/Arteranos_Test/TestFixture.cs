@@ -17,7 +17,7 @@ using UnityEngine;
 
 namespace Arteranos.Test
 {
-    public class TestFixture : MonoBehaviour
+    public class TestFixture
     {
     }
 

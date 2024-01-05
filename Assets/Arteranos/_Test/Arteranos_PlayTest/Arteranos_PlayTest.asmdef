@@ -1,6 +1,29 @@
 {
     "name": "Arteranos_PlayTest",
-    "optionalUnityReferences": [
-        "TestAssemblies"
-    ]
+    "rootNamespace": "",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "ipfs.core",
+        "ipfs.engine",
+        "ipfs.peertalk",
+        "Arteranos.Services",
+        "Arteranos.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "Nito.AsyncEx.Coordination.dll",
+        "Newtonsoft.Json.dll",
+        "BouncyCastle.Crypto.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

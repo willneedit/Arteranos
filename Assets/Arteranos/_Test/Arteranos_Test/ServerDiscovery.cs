@@ -158,6 +158,7 @@ namespace Arteranos.Test
         }
 
         [Test]
+        [Ignore("Place the external IP to your site's environment")]
         public void ConnectFromOutsideAsync()
         {
             Task.Run(ConnectFromOutside).Wait();

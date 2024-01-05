@@ -14,18 +14,28 @@ using Ipfs.Engine;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Arteranos.Core;
-using System.Threading.Tasks;
 using System.Threading;
+using System;
+using System.Threading.Tasks;
 
 namespace Arteranos.Services
 {
     public class IPFSService : MonoBehaviour
     {
-        const string passphrase = "this is not a secure pass phrase";
+        private const string passphrase = "this is not a secure pass phrase";
+
+        private const string topic_hello = "/X-Arteranos/Server-Hello";
+        private const string topic_sdm = "/X-Arteranos/ToYou";
 
         public IpfsEngine Ipfs { get => ipfs; }
+        public Peer Self { get => self; }
+
+
+        public event Action<IPublishedMessage> OnReceivedHello;
+        public event Action<IPublishedMessage> OnReceivedServerDirectMessage;
 
         private IpfsEngine ipfs = null;
+        private Peer self = null;
 
         private CancellationTokenSource cts = null;
 
@@ -46,6 +56,16 @@ namespace Arteranos.Services
 
             await ipfsTmp.StartAsync().ConfigureAwait(false);
 
+            Peer self = await ipfsTmp.LocalPeer;
+
+            await ipfsTmp.PubSub.SubscribeAsync(topic_hello, 
+                msg => OnReceivedHello?.Invoke(msg), 
+                cts.Token);
+
+            await ipfsTmp.PubSub.SubscribeAsync($"{topic_sdm}/{self.Id}",
+                msg => OnReceivedServerDirectMessage?.Invoke(msg), 
+                cts.Token);
+
             ipfs = ipfsTmp;
         }
 
@@ -56,6 +76,18 @@ namespace Arteranos.Services
             cts?.Cancel();
 
             cts?.Dispose();
+        }
+
+        public async Task SendServerHello()
+        {
+            using CancellationTokenSource cts = new(100);
+            await ipfs.PubSub.PublishAsync(topic_hello, "hi", cts.Token);
+        }
+
+        public async Task SendServerDirectMessage(string peerId)
+        {
+            using CancellationTokenSource cts = new(100);
+            await ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", "hello", cts.Token);
         }
     }
 }
