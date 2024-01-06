@@ -24,24 +24,24 @@ namespace Arteranos.PlayTest
         [Test]
         public void CreateSignKey()
         {
-            Crypto crypto = new Crypto();
+            SignKey crypto = SignKey.Generate();
 
-            Assert.IsNotNull(crypto.SignKeyPair);
-            Assert.IsNotNull(crypto.SignKeyPair.PublicKey);
+            Assert.IsNotNull(crypto.KeyPair);
+            Assert.IsNotNull(crypto.PublicKey);
         }
 
         [Test]
         public void ExportSignKey()
         {
-            Crypto crypto = new Crypto();
+            SignKey crypto = SignKey.Generate();
 
             crypto.ExportPrivateKey(out byte[] exported);
             Assert.IsNotNull(exported);
             Assert.IsTrue(exported.Length > 0);
 
-            Crypto clone = new Crypto(exported);
+            SignKey clone = SignKey.ImportPrivateKey(exported);
 
-            Assert.AreEqual(crypto.SignKeyPair.PublicKey, clone.SignKeyPair.PublicKey);
+            Assert.AreEqual(crypto.PublicKey, clone.PublicKey);
         }
 
         [Test]
@@ -49,15 +49,15 @@ namespace Arteranos.PlayTest
         {
             byte[] toSign = Encoding.UTF8.GetBytes("This is a text to be signed.");
 
-            Crypto alice = new Crypto();
+            SignKey alice = SignKey.Generate();
 
             alice.Sign(toSign, out byte[] signature);
-            alice.ExportSignPublicKey(out byte[] alicePubKey);
+            alice.ExportPublicKey(out byte[] alicePubKey);
 
             // Bob gets Alice's Public Key and the document's signature.
             Assert.DoesNotThrow(() =>
             {
-                Crypto.Verify(alicePubKey, toSign, signature);
+                SignKey.Verify(alicePubKey, toSign, signature);
             });
         }
 
@@ -66,21 +66,76 @@ namespace Arteranos.PlayTest
         {
             byte[] toSign = Encoding.UTF8.GetBytes("This is a text to be signed.");
 
-            Crypto alice = new Crypto();
-            alice.ExportSignPublicKey(out byte[] alicePubKey);
+            SignKey alice = SignKey.Generate();
+            alice.ExportPublicKey(out byte[] alicePubKey);
 
             // Alice saves her session and restores it later.
             alice.ExportPrivateKey(out byte[] exported);
-            Crypto clone = new Crypto(exported);
+            SignKey clone = SignKey.ImportPrivateKey(exported);
 
             clone.Sign(toSign, out byte[] signature);
 
             // Bob gets Alice's Public Key and the document's signature.
             Assert.DoesNotThrow(() =>
             {
-                Crypto.Verify(alicePubKey, toSign, signature);
+                SignKey.Verify(alicePubKey, toSign, signature);
             });
         }
 
+        [Test]
+        public void CreateEncryptionKey() 
+        {
+            EncryptionKey crypto = EncryptionKey.Generate();
+
+            Assert.IsNotNull(crypto.KeyPair);
+            Assert.IsNotNull(crypto.PublicKey);
+        }
+
+        [Test]
+        public void ExportDecryptionKey() 
+        {
+            EncryptionKey crypto = EncryptionKey.Generate();
+
+            crypto.ExportPrivateKey(out byte[] exported);
+            Assert.IsNotNull(exported);
+            Assert.IsTrue(exported.Length > 0);
+
+            EncryptionKey clone = EncryptionKey.ImportPrivateKey(exported);
+
+            Assert.AreEqual(crypto.PublicKey, clone.PublicKey);
+        }
+
+        [Test]
+        public void EncryptDecrypt() 
+        {
+            byte[] toEncrypt = Encoding.UTF8.GetBytes("This is a text to be signed.");
+
+            EncryptionKey bob = EncryptionKey.Generate();
+            bob.ExportPublicKey(out byte[] exported);
+
+            AsymmetricKey.Encrypt(exported, toEncrypt, out byte[] cipher);
+
+            bob.Decrypt(cipher, out byte[] returned);
+
+            Assert.AreEqual(toEncrypt, returned);
+        }
+
+        [Test]
+        public void EncryptEncryptWithSerialized() 
+        {
+            byte[] toEncrypt = Encoding.UTF8.GetBytes("This is a text to be signed.");
+
+            EncryptionKey bob = EncryptionKey.Generate();
+            bob.ExportPublicKey(out byte[] exported);
+
+            bob.ExportPrivateKey(out byte[] exportedkp);
+            EncryptionKey clone = EncryptionKey.ImportPrivateKey(exportedkp);
+
+            AsymmetricKey.Encrypt(exported, toEncrypt, out byte[] cipher);
+
+            clone.Decrypt(cipher, out byte[] returned);
+
+            Assert.AreEqual(toEncrypt, returned);
+        }
     }
 }
