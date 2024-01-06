@@ -15,6 +15,7 @@ using DERSerializer;
 
 namespace Arteranos.Core
 {
+    [Obsolete("Migrating to BouncyCastle")]
     public struct CryptPacket
     {
         public byte[] iv;
@@ -22,6 +23,7 @@ namespace Arteranos.Core
         public byte[] encryptedMessage;
     }
 
+    [Obsolete("Migrating to BouncyCastle")]
     public struct CMSPacket
     {
         public byte[] iv;
@@ -29,12 +31,14 @@ namespace Arteranos.Core
         public List<ESKEntry> encryptedSessionKeys;
     }
 
+    [Obsolete("Migrating to BouncyCastle")]
     public struct ESKEntry
     {
         public byte[] fingerprint;
         public byte[] encryptedSessionKey;
     }
 
+    [Obsolete("Migrating to BouncyCastle")]
     internal struct CMSPayload
     {
         public byte[] messageDER;
@@ -42,6 +46,7 @@ namespace Arteranos.Core
         public byte[] signature;
     }
 
+    [Obsolete("Migrating to BouncyCastle")]
     public class Crypto : IDisposable, IEquatable<Crypto>
     {
         public byte[] PublicKey => Key.PublicKey;
@@ -90,6 +95,7 @@ namespace Arteranos.Core
 
         #region Encrypt and decrypt
 
+        [Obsolete("Migrating to BouncyCastle")]
         public static void Encrypt(byte[] payload, byte[] otherPublicKey, out CryptPacket p)
         {
             using Aes aes = new AesCryptoServiceProvider();
@@ -106,6 +112,7 @@ namespace Arteranos.Core
             p.encryptedMessage = ciphertext.ToArray();
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         public void Decrypt(CryptPacket p, out byte[] payload)
         {
 
@@ -123,11 +130,13 @@ namespace Arteranos.Core
             payload = plaintext.ToArray();
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         public static void Encrypt<T>(T payload, byte[] otherPublicKey, out CryptPacket p)
         {
             Encrypt(Serializer.Serialize(payload), otherPublicKey, out p);
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         public void Decrypt<T>(CryptPacket p, out T payload)
         {
             Decrypt(p, out byte[] json);
@@ -138,6 +147,7 @@ namespace Arteranos.Core
 
         #region Sign and verify
 
+        [Obsolete("Migrating to BouncyCastle")]
         public static bool Verify(byte[] data, byte[] signature, byte[] otherPublicKey)
         {
             using ISignKey otherKey = CreateKey(otherPublicKey);
@@ -145,12 +155,15 @@ namespace Arteranos.Core
             return otherKey.Verify(data, signature);
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         public void Sign(byte[] data, out byte[] signature)
             => Key.Sign(data, out signature);
 
+        [Obsolete("Migrating to BouncyCastle")]
         public static bool Verify<T>(T data, byte[] signature, byte[] otherPublicKey)
             => Verify(Serializer.Serialize(data), signature, otherPublicKey);
 
+        [Obsolete("Migrating to BouncyCastle")]
         public void Sign<T>(T data, out byte[] signature)
             => Sign(Serializer.Serialize(data), out signature);
 
@@ -158,6 +171,7 @@ namespace Arteranos.Core
 
         #region Encapsulating
 
+        [Obsolete("Migrating to BouncyCastle")]
         private void EncapsulateMessage<T>(T message, out CMSPayload payload)
         {
             payload = new()
@@ -170,9 +184,11 @@ namespace Arteranos.Core
             Sign(payload.messageDER, out payload.signature);
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         private static void DecapsulateMessage<T>(CMSPayload payload, out T message) 
             => message = Serializer.Deserialize<T>(payload.messageDER);
 
+        [Obsolete("Migrating to BouncyCastle")]
         private static Aes CreateSessionKeys(byte[][] receiverPublicKeys, out List<ESKEntry> entries)
         {
             Aes aes = new AesCryptoServiceProvider();
@@ -194,6 +210,7 @@ namespace Arteranos.Core
             return aes;
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         private Aes FindSessionKey(List<ESKEntry> entries)
         {
             foreach(ESKEntry entry in entries)
@@ -209,6 +226,7 @@ namespace Arteranos.Core
             throw new CryptographicException("Cannot find encrypted session key");
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         private static CMSPacket EncryptMessage(byte[][] receiverPublicKeys, CMSPayload payload)
         {
             using Aes aes = CreateSessionKeys(receiverPublicKeys, out List<ESKEntry> entries);
@@ -230,6 +248,7 @@ namespace Arteranos.Core
             return packet;
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         private static void CheckMessageConsistency(ref byte[] expectedSignatureKey, CMSPayload payload)
         {
             byte[] signatureKey = payload.signatureKey;
@@ -249,6 +268,7 @@ namespace Arteranos.Core
                 throw new CryptographicException("Signature verification failed");
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         private CMSPayload DecryptMessage(CMSPacket packet)
         {
             using Aes aes = FindSessionKey(packet.encryptedSessionKeys);
@@ -262,15 +282,18 @@ namespace Arteranos.Core
             return Serializer.Deserialize<CMSPayload>(plaintext.ToArray());
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         public void TransmitMessage<T>(T data, byte[][] receiverPublicKeys, out CMSPacket packet)
         {
             EncapsulateMessage(data, out CMSPayload payload);
             packet = EncryptMessage(receiverPublicKeys, payload);
         }
 
+        [Obsolete("Migrating to BouncyCastle")]
         public void TransmitMessage<T>(T data, byte[] receiverPublicKey, out CMSPacket packet) 
             => TransmitMessage(data, new byte[][] { receiverPublicKey }, out packet);
 
+        [Obsolete("Migrating to BouncyCastle")]
         public void ReceiveMessage<T>(CMSPacket packet, ref byte[] expectedSignatureKey, out T data)
         {
             CMSPayload payload = DecryptMessage(packet);
