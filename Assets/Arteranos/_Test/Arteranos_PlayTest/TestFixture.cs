@@ -26,6 +26,9 @@ namespace Arteranos.PlayTest
             ipfs = null;
             iPFSService = null;
 
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
             IPFSService old = GameObject.FindObjectOfType<IPFSService>();
             if(old != null && old.Ipfs != null)
             {
@@ -50,6 +53,9 @@ namespace Arteranos.PlayTest
 
         public static IEnumerator EnsureIPFSStopped()
         {
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
             IPFSService old = GameObject.FindObjectOfType<IPFSService>();
             if (old != null) GameObject.Destroy(old.gameObject);
             yield return new WaitForSeconds(1);
