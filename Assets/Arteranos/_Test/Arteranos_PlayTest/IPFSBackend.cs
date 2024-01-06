@@ -41,6 +41,10 @@ namespace Arteranos.PlayTest
         {
             yield return TestFixture.SetupIPFS();
             Assert.IsNotNull(TestFixture.Ipfs);
+
+            Assert.IsNotNull(TestFixture.IPFSService.ServerKeyPair);
+            Assert.IsNotNull(TestFixture.IPFSService.Self);
+            Assert.AreEqual(TestFixture.IPFSService.Self.Id, TestFixture.IPFSService.ServerKeyPair.PublicKey.ToId());
         }
 
         [UnityTest]
@@ -54,7 +58,7 @@ namespace Arteranos.PlayTest
             bool moved = false;
             try
             {
-                if(Directory.Exists(IPFSRootFolder))
+                if (Directory.Exists(IPFSRootFolder))
                 {
                     moved = true;
                     Directory.Move(IPFSRootFolder, IPFSBackupFolder);
@@ -149,6 +153,39 @@ namespace Arteranos.PlayTest
             {
                 TestFixture.IPFSService.OnReceivedHello -= Receiver;
             }
+        }
+
+        [UnityTest]
+        public IEnumerator SendServerHello()
+        {
+            yield return TestFixture.SetupIPFS();
+            Assert.IsNotNull(TestFixture.Ipfs);
+
+            Task.Run(SendServerHelloAsync).Wait();
+        }
+
+        public async Task SendServerHelloAsync()
+        {
+            Peer sender = null;
+
+            using TempNode otherNode = new TempNode();
+            await otherNode.StartAsync();
+
+            Peer self = await TestFixture.Ipfs.LocalPeer;
+            Peer other = await otherNode.LocalPeer;
+
+            MultiAddress[] addresses = other.Addresses.ToArray();
+            await TestFixture.Ipfs.Swarm.ConnectAsync(addresses[0]);
+
+            using CancellationTokenSource cts = new(100);
+
+            await otherNode.PubSub.SubscribeAsync("/X-Arteranos/Server-Hello", msg => sender = msg.Sender, cts.Token);
+
+            await TestFixture.IPFSService.SendServerHello();
+
+            await TestFixture.WaitForConditionAsync(5, () => (sender != null), "Message was not received");
+
+            Assert.AreEqual(sender.Id, self.Id);
         }
     }
 }

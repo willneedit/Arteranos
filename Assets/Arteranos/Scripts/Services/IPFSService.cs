@@ -17,6 +17,8 @@ using Arteranos.Core;
 using System.Threading;
 using System;
 using System.Threading.Tasks;
+using Ipfs.Core.Cryptography;
+using Ipfs.Engine.Cryptography;
 
 namespace Arteranos.Services
 {
@@ -29,6 +31,7 @@ namespace Arteranos.Services
 
         public IpfsEngine Ipfs { get => ipfs; }
         public Peer Self { get => self; }
+        public KeyPair ServerKeyPair { get => serverKeyPair; }
 
 
         public event Action<IPublishedMessage> OnReceivedHello;
@@ -36,6 +39,7 @@ namespace Arteranos.Services
 
         private IpfsEngine ipfs = null;
         private Peer self = null;
+        private KeyPair serverKeyPair = null;
 
         private CancellationTokenSource cts = null;
 
@@ -56,7 +60,7 @@ namespace Arteranos.Services
 
             await ipfsTmp.StartAsync().ConfigureAwait(false);
 
-            Peer self = await ipfsTmp.LocalPeer;
+            self = await ipfsTmp.LocalPeer;
 
             await ipfsTmp.PubSub.SubscribeAsync(topic_hello, 
                 msg => OnReceivedHello?.Invoke(msg), 
@@ -65,6 +69,10 @@ namespace Arteranos.Services
             await ipfsTmp.PubSub.SubscribeAsync($"{topic_sdm}/{self.Id}",
                 msg => OnReceivedServerDirectMessage?.Invoke(msg), 
                 cts.Token);
+
+            KeyChain kc = await ipfsTmp.KeyChainAsync();
+            var kcp = await kc.GetPrivateKeyAsync("self");
+            serverKeyPair = KeyPair.Import(kcp);
 
             ipfs = ipfsTmp;
         }
@@ -88,6 +96,18 @@ namespace Arteranos.Services
         {
             using CancellationTokenSource cts = new(100);
             await ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", "hello", cts.Token);
+        }
+
+        public async Task WaitForIPFSAsync()
+        {
+            while(Ipfs == null)
+                await Task.Delay(100);
+        }
+
+        public IEnumerator WaitForIPFSCoRo()
+        {
+            while (ipfs == null)
+                yield return new WaitForEndOfFrame();
         }
     }
 }
