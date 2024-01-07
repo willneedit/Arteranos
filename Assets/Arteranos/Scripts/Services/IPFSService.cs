@@ -47,6 +47,9 @@ namespace Arteranos.Services
         {
             cts = new();
 
+            int port = SettingsManager.Server.MetadataPort;
+            port = 12345; // DEBUG
+
             IpfsEngine ipfsTmp;
             ipfsTmp = new(passphrase.ToCharArray());
 
@@ -55,7 +58,7 @@ namespace Arteranos.Services
             ipfsTmp.Options.KeyChain.DefaultKeySize = 2048;
             await ipfsTmp.Config.SetAsync(
                 "Addresses.Swarm",
-                JToken.FromObject(new string[] { "/ip4/0.0.0.0/tcp/12345" })
+                JToken.FromObject(new string[] { $"/ip4/0.0.0.0/tcp/{port}" })
             );
 
             await ipfsTmp.StartAsync().ConfigureAwait(false);

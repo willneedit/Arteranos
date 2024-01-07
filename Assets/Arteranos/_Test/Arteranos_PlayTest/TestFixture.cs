@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using Arteranos.Core;
 
 namespace Arteranos.PlayTest
 {
@@ -86,6 +87,30 @@ namespace Arteranos.PlayTest
         }
     }
 
+    public class StartupManagerMock : SettingsManager
+    {
+        protected override void Awake()
+        {
+            Instance = this;
+
+            base.Awake();
+        }
+
+        protected override void OnDestroy()
+        {
+            Instance = null;
+        }
+
+        protected override void PingServerChangeWorld_(string invoker, string worldURL)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void StartCoroutineAsync_(Func<IEnumerator> action)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     class TempNode : IpfsEngine
     {
