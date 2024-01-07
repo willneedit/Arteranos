@@ -18,6 +18,8 @@ using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Crypto.Agreement;
+using System;
+using System.Collections.Generic;
 
 namespace Arteranos.Core.Cryptography
 {
@@ -46,8 +48,10 @@ namespace Arteranos.Core.Cryptography
         void Agree(byte[] otherPublicKey, out byte[] sharedSecret);
     }
 
-    public abstract class AsymmetricKey
+    public class AsymmetricKey : IDisposable, IEquatable<AsymmetricKey>
     {
+        protected AsymmetricKey() { }
+
         public KeyPair KeyPair { get => keyPair; }
         public PublicKey PublicKey { get => keyPair.PublicKey; }
         public byte[] Fingerprint
@@ -115,6 +119,47 @@ namespace Arteranos.Core.Cryptography
 
         public override string ToString() => ToString(CryptoHelpers.FP_SHA256);
         public string ToString(string v) => CryptoHelpers.ToString(v, PublicKey.Serialize());
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                keyPair = null;
+                PrivateKey = null;
+            }
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AsymmetricKey);
+        }
+
+        public bool Equals(AsymmetricKey other)
+        {
+            return other is not null &&
+                   EqualityComparer<PublicKey>.Default.Equals(PublicKey, other.PublicKey);
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hc = new();
+            foreach(byte b in Fingerprint) hc.Add(b);
+            return hc.ToHashCode();
+        }
+
+        public static bool operator ==(AsymmetricKey left, AsymmetricKey right)
+        {
+            return EqualityComparer<AsymmetricKey>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(AsymmetricKey left, AsymmetricKey right)
+        {
+            return !(left == right);
+        }
     }
 
     public class SignKey : AsymmetricKey, IAsymmetricKey, ISignKey
@@ -160,7 +205,7 @@ namespace Arteranos.Core.Cryptography
         }
     }
 
-    public class AgreeKey : AsymmetricKey, IAsymmetricKey, IAgreeKey, ISignKey
+    public class AgreeKey : AsymmetricKey, IAsymmetricKey, IAgreeKey
     {
         private AgreeKey() { }
 
@@ -175,8 +220,10 @@ namespace Arteranos.Core.Cryptography
         public static AgreeKey ImportPrivateKey(AsymmetricKeyParameter decryptPrivateKey) => ImportPrivateKey(new AgreeKey(), decryptPrivateKey);
         public static AgreeKey ImportPrivateKey(byte[] keyBytes) => ImportPrivateKey(new AgreeKey(), keyBytes);
 
+#if false // currently unsupported with IPFS's Secp256k1 keys.
         public void Sign(byte[] data, out byte[] signature)
             => signature = keyPair.Sign(data);
+#endif
 
         public void Agree(byte[] otherPublicKey, out byte[] sharedSecret)
         {
@@ -189,6 +236,5 @@ namespace Arteranos.Core.Cryptography
             BigInteger secret = agreement.CalculateAgreement(publicKey);
             sharedSecret = secret.ToByteArrayUnsigned();
         }
-
     }
 }

@@ -17,10 +17,30 @@ using System.Linq;
 using Arteranos.Core.Cryptography;
 using System.Text;
 
-namespace Arteranos.PlayTest
+namespace Arteranos.PlayTest.Cryptography
 {
-    public class Cryptography
+    public class AsymmetricKeys
     {
+        [Test]
+        public void Equality()
+        {
+            SignKey crypto = SignKey.Generate();
+            crypto.ExportPrivateKey(out byte[] exported);
+            SignKey clone = SignKey.ImportPrivateKey(exported);
+
+            Assert.IsTrue(crypto == clone);
+            Assert.IsFalse(crypto != clone);
+            Assert.AreEqual(crypto.GetHashCode(), clone.GetHashCode());
+            Assert.AreNotSame(crypto, clone); // But we're two copies of this one key.
+
+            SignKey crypto2 = SignKey.Generate();
+
+            Assert.IsTrue(crypto != crypto2);
+            Assert.IsFalse(crypto == crypto2);
+            Assert.AreNotEqual(crypto.GetHashCode(), crypto2.GetHashCode());
+            Assert.AreNotSame(crypto, crypto2);
+        }
+
         [Test]
         public void CreateSignKey()
         {
