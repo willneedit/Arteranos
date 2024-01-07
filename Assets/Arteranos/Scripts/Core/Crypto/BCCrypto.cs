@@ -17,6 +17,7 @@ using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Math;
+using Org.BouncyCastle.Crypto.Agreement;
 
 namespace Arteranos.Core.Cryptography
 {
@@ -38,6 +39,11 @@ namespace Arteranos.Core.Cryptography
     public interface IEncryptionKey
     {
         void Decrypt(byte[] cipher, out byte[] data);
+    }
+
+    public interface IAgreeKey
+    {
+        void Agree(byte[] otherPublicKey, out byte[] sharedSecret);
     }
 
     public abstract class AsymmetricKey
@@ -152,5 +158,37 @@ namespace Arteranos.Core.Cryptography
             encryptEngine.Init(false, PrivateKey);
             data = encryptEngine.ProcessBlock(cipher, 0, cipher.Length);
         }
+    }
+
+    public class AgreeKey : AsymmetricKey, IAsymmetricKey, IAgreeKey, ISignKey
+    {
+        private AgreeKey() { }
+
+        public static AgreeKey Generate()
+        {
+            IAsymmetricCipherKeyPairGenerator g = GeneratorUtilities.GetKeyPairGenerator("ECDH");
+            g.Init(new ECKeyGenerationParameters(SecObjectIdentifiers.SecP256k1, new SecureRandom()));
+
+            return Generate(new AgreeKey(), g);
+        }
+
+        public static AgreeKey ImportPrivateKey(AsymmetricKeyParameter decryptPrivateKey) => ImportPrivateKey(new AgreeKey(), decryptPrivateKey);
+        public static AgreeKey ImportPrivateKey(byte[] keyBytes) => ImportPrivateKey(new AgreeKey(), keyBytes);
+
+        public void Sign(byte[] data, out byte[] signature)
+            => signature = keyPair.Sign(data);
+
+        public void Agree(byte[] otherPublicKey, out byte[] sharedSecret)
+        {
+            IBasicAgreement agreement = new ECDHBasicAgreement();
+
+            agreement.Init(PrivateKey);
+            PublicKey key = PublicKey.Deserialize(otherPublicKey);
+            AsymmetricKeyParameter publicKey = PublicKeyFactory.CreateKey(key.Data);
+
+            BigInteger secret = agreement.CalculateAgreement(publicKey);
+            sharedSecret = secret.ToByteArrayUnsigned();
+        }
+
     }
 }

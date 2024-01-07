@@ -137,5 +137,47 @@ namespace Arteranos.PlayTest
 
             Assert.AreEqual(toEncrypt, returned);
         }
+
+        [Test]
+        public void DoKeyAgreement()
+        {
+            AgreeKey alice = AgreeKey.Generate();
+            AgreeKey bob = AgreeKey.Generate();
+
+            alice.ExportPublicKey(out byte[] aliceExported);
+            bob.ExportPublicKey(out byte[] bobExported);
+
+            alice.Agree(bobExported, out byte[] aliceSecret);
+            bob.Agree(aliceExported, out byte[] bobSecret);
+
+            Assert.IsTrue(aliceSecret.Length > 0);
+            Assert.AreEqual(aliceSecret, bobSecret);
+
+            Debug.Log($"Shared Secret length: {aliceSecret.Length}");
+        }
+
+#if false
+        /// <summary>
+        /// libp2p's specs demand the standard Bitcoin encoding (BIP-340) for the public key,
+        /// and requires the Schnorr signing algorithm, which are unsupported in BouncyCastle.
+        /// </summary>
+        [Test]
+        [Ignore("Secp256k1 in libp2p uses the Bitcoin encoding")]
+        public void SignVerifyWithAgreeKey()
+        {
+            byte[] toSign = Encoding.UTF8.GetBytes("This is a text to be signed.");
+
+            AgreeKey alice = AgreeKey.Generate();
+
+            alice.Sign(toSign, out byte[] signature);
+            alice.ExportPublicKey(out byte[] alicePubKey);
+
+            // Bob gets Alice's Public Key and the document's signature.
+            Assert.DoesNotThrow(() =>
+            {
+                AsymmetricKey.Verify(alicePubKey, toSign, signature);
+            });
+        }
+#endif
     }
 }
