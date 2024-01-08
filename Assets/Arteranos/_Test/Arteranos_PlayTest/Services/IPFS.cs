@@ -8,12 +8,13 @@ using Ipfs.Engine;
 using Arteranos.Services;
 using System;
 using System.IO;
-using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using Arteranos.Core;
 using Ipfs;
 using System.Linq;
 using System.Threading;
+using System.Text;
+using Ipfs.Core.Cryptography.Proto;
 
 namespace Arteranos.PlayTest.Services
 {
@@ -82,10 +83,11 @@ namespace Arteranos.PlayTest.Services
                 sender = message.Sender;
             }
 
+            using TempNode otherNode = new TempNode();
+
             try
             {
                 srv.OnReceivedHello += Receiver;
-                using TempNode otherNode = new TempNode();
                 await otherNode.StartAsync();
                 Peer other = await otherNode.LocalPeer;
 
@@ -103,6 +105,63 @@ namespace Arteranos.PlayTest.Services
             finally
             {
                 srv.OnReceivedHello -= Receiver;
+
+                await otherNode.StopAsync();
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator ClientGetsServerInfo() 
+        { 
+            Task.Run(ClientGetsServerInfoAsync).Wait();
+
+            yield return null;
+        }
+
+        public async Task ClientGetsServerInfoAsync()
+        {
+            Peer sender = null;
+            ServerHello hello = null;
+
+            void Receiver(IPublishedMessage message)
+            {
+                sender = message.Sender;
+
+                hello = ServerHello.Deserialize(message.DataStream);
+            }
+
+            using TempNode otherNode = new TempNode();
+
+            try
+            {
+                await otherNode.StartAsync();
+
+                using CancellationTokenSource subscriber = new();
+
+                await otherNode.PubSub.SubscribeAsync("/X-Arteranos/Server-Hello", Receiver, subscriber.Token);
+
+                await otherNode.Swarm.ConnectAsync(self.Addresses.First());
+
+                await srv.SendServerHello();
+
+                await TestFixture.WaitForConditionAsync(5, () => (hello != null), "Message was not received");
+
+                Assert.IsNotNull(hello);
+
+                using CancellationTokenSource cts = new(1000);
+
+                Stream s = await otherNode.FileSystem.ReadFileAsync(hello.ServerDescriptionCid, cts.Token);
+
+                PublicKey pk = PublicKey.FromId(sender.Id);
+                _ServerDescription sd = _ServerDescription.Deserialize(pk, s);
+
+                Assert.IsNotNull(sd);
+                Debug.Log(sd.Name);
+                Debug.Log(hello.LastModified);
+            }
+            finally
+            {
+                await otherNode.StopAsync();
             }
         }
     }

@@ -16,69 +16,8 @@ using System.Collections.Generic;
 namespace Arteranos.Core
 {
 
-    public class ServerPermissions : IEquatable<ServerPermissions>
+    public partial class ServerPermissions : IEquatable<ServerPermissions>
     {
-        // Allow avatars from a URL outside of the avatar generator's scope.
-        [ASN1Tag( 1, true)] public bool? CustomAvatars = false;
-
-        // Allow flying
-        [ASN1Tag( 2, true)] public bool? Flying = false;
-
-        // Allow connections of unverified users
-        [ASN1Tag( 3, true)] public bool? Guests = true;
-
-        // CONTENT MODERATION / FILTERING
-        // null allowed, and the user's filter could yield an inexact match, second only
-        // to an exact one, like....
-        //
-        //  Setting     User        Priority
-        //  false       false           1
-        //  false       true            --
-        //  false       null            1 (because the user says 'don't care')
-        //  true        false           --
-        //  true        true            1
-        //  true        null            1 (because the user says 'don't care')
-        //  null        false           2
-        //  null        true            2
-        //  null        null            2 (see below)
-        //
-        // as a side effect, server adminitrators get their servers a better ranking if they
-        // put down a definite answer, in opposite being wishy-washy.
-        //
-        // ref. https://www.techdirt.com/2023/04/20/bluesky-plans-decentralized-composable-moderation/
-        //      Defaults to Bluesky in the aforementioned website, with modifications
-
-        // Explicit Sexual Images
-        [ASN1Tag(11, true)] public bool? ExplicitNudes = null;
-
-        // Other Nudity (eg. non-sexual or artistic)
-        [ASN1Tag(12, true)] public bool? Nudity = true;
-
-        // Sexually suggestive (does not include nudity)
-        [ASN1Tag(13, true)] public bool? Suggestive = true;
-
-        // Violence (Cartoon / "Clean" violence)
-        [ASN1Tag(14, true)] public bool? Violence = null;
-
-        // NEW
-        //
-        // Excessive Violence / Blood (Gore, self-harm, torture)
-        [ASN1Tag(15, true)] public bool? ExcessiveViolence = false;
-
-        // OMITTED
-        //
-        // (Political) Hate Groups - FALSE - Conflicts the law in many occasions
-        // (eg. Germany, §1 GG, §130 StGB)
-        //
-        // Spam - FALSE - Self-explanatory
-        //
-        // Impersonation - FALSE - Self-explanatory
-
-        /// <summary>
-        /// Compute a match index for the server's settings against the user's filter preferences
-        /// </summary>
-        /// <param name="user">The user's server filter preferences</param>
-        /// <returns>The match score, higher is better</returns>
         public (int, int) MatchRatio(ServerPermissions user)
         {
             static int possibleScore(bool? b1) => b1 == null ? 2 : 5;
@@ -91,12 +30,6 @@ namespace Arteranos.Core
             bool usesCustomAvatar = SettingsManager.Client?.Me.CurrentAvatar.IsCustom ?? true;
 
             // The 'Big Three' are true booleans - either true or false, no inbetweens.
-
-            // Trying to use a guest login would be a disqualification criterium.
-            if(usesGuest && !(Guests ?? true)) return (0, 100);
-
-            // Same as with custom avatars.
-            if(usesCustomAvatar && !(CustomAvatars ?? true)) return (0, 100);
 
             // Double weight for one of the 'Big Three'
             index += Flying.FuzzyEq(user.Flying) * 2;
@@ -177,9 +110,7 @@ namespace Arteranos.Core
         public bool Equals(ServerPermissions other)
         {
             return other is not null &&
-                   CustomAvatars == other.CustomAvatars &&
                    Flying == other.Flying &&
-                   Guests == other.Guests &&
                    ExplicitNudes == other.ExplicitNudes &&
                    Nudity == other.Nudity &&
                    Suggestive == other.Suggestive &&
@@ -189,7 +120,7 @@ namespace Arteranos.Core
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(CustomAvatars, Flying, Guests, ExplicitNudes, Nudity, Suggestive, Violence, ExcessiveViolence);
+            return HashCode.Combine(Flying, ExplicitNudes, Nudity, Suggestive, Violence, ExcessiveViolence);
         }
 
         public static bool operator ==(ServerPermissions left, ServerPermissions right)
@@ -287,6 +218,9 @@ namespace Arteranos.Core
     public class Server : ServerJSON
     {
         [JsonIgnore]
+        public DateTime ConfigTimestamp { get; private set; }
+
+        [JsonIgnore]
         private Crypto Crypto = null;
 
         public const string PATH_SERVER_SETTINGS = "ServerSettings.json";
@@ -301,6 +235,8 @@ namespace Arteranos.Core
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
                 FileUtils.WriteTextConfig(PATH_SERVER_SETTINGS, json);
+
+                ConfigTimestamp = DateTime.Now;
             }
             catch(Exception e)
             {
@@ -325,14 +261,17 @@ namespace Arteranos.Core
                     ss.Name += " DS";
                     ss.ServerKey = null;
                 }
+
+                ss.ConfigTimestamp = FileUtils.ReadConfig(PATH_SERVER_SETTINGS, File.GetLastWriteTime);
             }
             catch(Exception e)
             {
                 Debug.LogWarning($"Failed to load server settings: {e.Message}");
                 ss = new();
+                ss.ConfigTimestamp = DateTime.UnixEpoch;
             }
 
-            using(Guard guard = new(
+            using (Guard guard = new(
                 () => ss.IncludeCompleteKey = true,
                 () => ss.IncludeCompleteKey = false))
             {

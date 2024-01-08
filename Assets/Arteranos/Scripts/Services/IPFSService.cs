@@ -17,8 +17,8 @@ using Arteranos.Core;
 using System.Threading;
 using System;
 using System.Threading.Tasks;
-using Ipfs.Core.Cryptography;
 using Ipfs.Engine.Cryptography;
+using Arteranos.Core.Cryptography;
 
 namespace Arteranos.Services
 {
@@ -31,7 +31,7 @@ namespace Arteranos.Services
 
         public IpfsEngine Ipfs { get => ipfs; }
         public Peer Self { get => self; }
-        public KeyPair ServerKeyPair { get => serverKeyPair; }
+        public SignKey ServerKeyPair { get => serverKeyPair; }
 
 
         public event Action<IPublishedMessage> OnReceivedHello;
@@ -39,13 +39,22 @@ namespace Arteranos.Services
 
         private IpfsEngine ipfs = null;
         private Peer self = null;
-        private KeyPair serverKeyPair = null;
+        private SignKey serverKeyPair = null;
+
+        private string versionString = null;
+        private string minVersionString = null;
+
+        _ServerDescription sd = null;
+        private Cid currentSDCid = null;
 
         private CancellationTokenSource cts = null;
 
         private async void Start()
         {
             cts = new();
+
+            versionString = Core.Version.Load().MMP;
+            minVersionString = Core.Version.VERSION_MIN;
 
             int port = SettingsManager.Server.MetadataPort;
             port = 12345; // DEBUG
@@ -75,13 +84,17 @@ namespace Arteranos.Services
 
             KeyChain kc = await ipfsTmp.KeyChainAsync();
             var kcp = await kc.GetPrivateKeyAsync("self");
-            serverKeyPair = KeyPair.Import(kcp);
+            serverKeyPair = SignKey.ImportPrivateKey(kcp);
 
             ipfs = ipfsTmp;
+
+            await FlipServerDescription(true);
         }
 
         private async void OnDestroy()
         {
+            await FlipServerDescription(false);
+
             await ipfs.StopAsync().ConfigureAwait(false);
 
             cts?.Cancel();
@@ -89,10 +102,47 @@ namespace Arteranos.Services
             cts?.Dispose();
         }
 
+        public async Task FlipServerDescription(bool reload)
+        {
+            if(currentSDCid != null)
+                await Ipfs.Block.RemoveAsync(currentSDCid);
+
+            if (!reload) return;
+
+            Server server = SettingsManager.Server;
+
+            sd = new()
+            {
+                Name = server.Name,
+                ServerPort = server.ServerPort,
+                MetadataPort = server.MetadataPort,
+                Description = server.Description,
+                Icon = server.Icon,
+                Version = versionString,
+                MinVersion = minVersionString,
+                Permissions = server.Permissions,
+                PrivacyTOSNotice = "TODO",      // TODO
+                AdminNames = new string[0],     // TODO
+            };
+
+            using (MemoryStream ms = new())
+            {
+                sd.Serialize(serverKeyPair, ms);
+                ms.Position = 0;
+                var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerDescription");
+                currentSDCid = fsn.Id;
+            }
+        }
         public async Task SendServerHello()
         {
-            using CancellationTokenSource cts = new(100);
-            await ipfs.PubSub.PublishAsync(topic_hello, "hi", cts.Token);
+            ServerHello hello = new()
+            {
+                ServerDescriptionCid = currentSDCid,
+                LastModified = SettingsManager.Server.ConfigTimestamp
+            };
+
+            hello.Serialize(out byte[] bytes);
+            await ipfs.PubSub.PublishAsync(topic_hello, bytes);
         }
 
         public async Task SendServerDirectMessage(string peerId)

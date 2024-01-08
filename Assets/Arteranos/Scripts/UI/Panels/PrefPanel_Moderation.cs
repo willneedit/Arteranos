@@ -95,8 +95,6 @@ namespace Arteranos.UI
             if(ss.Icon != null && ss.Icon.Length != 0)
                 UpdateIcon(ss.Icon);
 
-            chk_Guests.isOn = ss.Permissions.Guests ?? false;
-            chk_CustomAvatars.isOn = ss.Permissions.CustomAvatars ?? false;
             chk_Flying.isOn = ss.Permissions.Flying ?? true;
 
             chk_Public.isOn = ss.Public;
@@ -121,8 +119,6 @@ namespace Arteranos.UI
                 ss.Description = txt_Description.text;
 
                 ss.Permissions.Flying = chk_Flying.isOn;
-                ss.Permissions.CustomAvatars = chk_CustomAvatars.isOn;
-                ss.Permissions.Guests = chk_Guests.isOn;
 
                 ss.Public = chk_Public.isOn;
             }
