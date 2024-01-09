@@ -166,7 +166,8 @@ namespace Arteranos.Services
             ServerHello.SDLink selflink = new()
             {
                 ServerDescriptionCid = currentSDCid,
-                LastModified = SettingsManager.Server.ConfigTimestamp
+                LastModified = SettingsManager.Server.ConfigTimestamp,
+                PeerID = self.Id.ToString(),
             };
 
             ServerHello hello = new()
@@ -208,7 +209,7 @@ namespace Arteranos.Services
                 PeerMessage peerMessage = PeerMessage.Deserialize(publishedMessage.DataStream);
 
                 if (peerMessage is ServerHello sh)
-                    return await ParseServerHelloAsync(sh, publishedMessage);
+                    return await ParseServerHelloAsync(sh);
                 else
                     throw new ArgumentException($"Unknown message from Peer {publishedMessage.Sender.Id}");
             }
@@ -219,25 +220,35 @@ namespace Arteranos.Services
             }
         }
 
-        private async Task<bool> ParseServerHelloAsync(ServerHello hello, IPublishedMessage publishedMessage)
+        private async Task<bool> ParseServerHelloAsync(ServerHello hello)
         {
             int enteredCount = 20;
 
-            foreach(var link in hello.Links)
+            foreach (ServerHello.SDLink link in hello.Links)
             {
                 // Too many...
                 if (enteredCount <= 0) break;
 
                 try
                 {
-                    using CancellationTokenSource cts = new(1000);
+                    _ServerDescription old = _ServerDescription.DBLookup(link.PeerID);
 
-                    Stream s = await ipfs.FileSystem.ReadFileAsync(link.ServerDescriptionCid, cts.Token);
+                    if (old != null && old.PeerID != link.PeerID)
+                        throw new ArgumentException($"{old.PeerID} mismatches {link.PeerID}");
 
-                    PublicKey pk = PublicKey.FromId(publishedMessage.Sender.Id);
-                    _ServerDescription sd = _ServerDescription.Deserialize(pk, s);
+                    // Skip data retrieval if we see if it's already outdated data
+                    if (old == null || link.LastModified > old.LastModified)
+                    {
+                        using CancellationTokenSource cts = new(500);
 
-                    if (sd.DBUpdate()) enteredCount--;
+                        Stream s = await ipfs.FileSystem.ReadFileAsync(link.ServerDescriptionCid, cts.Token);
+
+                        PublicKey pk = PublicKey.FromId(link.PeerID);
+                        _ServerDescription sd = _ServerDescription.Deserialize(pk, s);
+
+                        if (sd.DBUpdate()) enteredCount--;
+                    }
+                    // else Debug.LogWarning($"Skipping outdated {link.PeerID}");
                 }
                 catch(Exception ex) { Debug.LogException(ex); }
 

@@ -60,7 +60,8 @@ namespace Arteranos.PlayTest.Services
             ServerHello.SDLink selflink = new()
             {
                 ServerDescriptionCid = currentSDCid,
-                LastModified = unixEpoch
+                LastModified = unixEpoch,
+                PeerID = self.Id.ToString(),
             };
 
             ServerHello hello = new()

@@ -24,6 +24,9 @@ namespace Arteranos.Core
 
             [ProtoMember(2)]
             public DateTime LastModified;
+
+            [ProtoMember(4)]
+            public string PeerID;
         }
 
         [ProtoMember(3)]
