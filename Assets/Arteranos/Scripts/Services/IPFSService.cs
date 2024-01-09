@@ -19,23 +19,27 @@ using System;
 using System.Threading.Tasks;
 using Ipfs.Engine.Cryptography;
 using Arteranos.Core.Cryptography;
+using System.Linq;
+using Ipfs.Core.Cryptography.Proto;
 
 namespace Arteranos.Services
 {
     public class IPFSService : MonoBehaviour
     {
+        public IpfsEngine Ipfs { get => ipfs; }
+        public Peer Self { get => self; }
+        public SignKey ServerKeyPair { get => serverKeyPair; }
+        public static string CachedPTOSNotice { get; private set; } = null;
+
+        public event Action<IPublishedMessage> OnReceivedHello;
+        public event Action<IPublishedMessage> OnReceivedServerDirectMessage;
+
+        private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
+
         private const string passphrase = "this is not a secure pass phrase";
 
         private const string topic_hello = "/X-Arteranos/Server-Hello";
         private const string topic_sdm = "/X-Arteranos/ToYou";
-
-        public IpfsEngine Ipfs { get => ipfs; }
-        public Peer Self { get => self; }
-        public SignKey ServerKeyPair { get => serverKeyPair; }
-
-
-        public event Action<IPublishedMessage> OnReceivedHello;
-        public event Action<IPublishedMessage> OnReceivedServerDirectMessage;
 
         private IpfsEngine ipfs = null;
         private Peer self = null;
@@ -52,6 +56,15 @@ namespace Arteranos.Services
         private async void Start()
         {
             cts = new();
+
+            // If it doesn't exist, write down the template in the config directory.
+            if (!FileUtils.ReadConfig(PATH_USER_PRIVACY_NOTICE, File.Exists))
+            {
+                FileUtils.WriteTextConfig(PATH_USER_PRIVACY_NOTICE, Core.Utils.LoadDefaultTOS());
+                Debug.LogWarning("Privacy notice and Terms Of Service template written down - Read (and modify) according to your use case!");
+            }
+
+            CachedPTOSNotice = FileUtils.ReadTextConfig(PATH_USER_PRIVACY_NOTICE);
 
             versionString = Core.Version.Load().MMP;
             minVersionString = Core.Version.VERSION_MIN;
@@ -74,12 +87,22 @@ namespace Arteranos.Services
 
             self = await ipfsTmp.LocalPeer;
 
-            await ipfsTmp.PubSub.SubscribeAsync(topic_hello, 
-                msg => OnReceivedHello?.Invoke(msg), 
+            await ipfsTmp.PubSub.SubscribeAsync(topic_hello,
+                async msg =>
+                {
+                    if (msg.Sender.Id == self.Id) return;
+                    bool success = await ParseIncomingIPFSMessageAsync(msg);
+                    if(success) OnReceivedHello?.Invoke(msg);
+                }, 
                 cts.Token);
 
             await ipfsTmp.PubSub.SubscribeAsync($"{topic_sdm}/{self.Id}",
-                msg => OnReceivedServerDirectMessage?.Invoke(msg), 
+                async msg =>
+                {
+                    if (msg.Sender.Id == self.Id) return;
+                    bool success = await ParseIncomingIPFSMessageAsync(msg);
+                    if (success) OnReceivedServerDirectMessage?.Invoke(msg);
+                }, 
                 cts.Token);
 
             KeyChain kc = await ipfsTmp.KeyChainAsync();
@@ -110,6 +133,9 @@ namespace Arteranos.Services
             if (!reload) return;
 
             Server server = SettingsManager.Server;
+            IEnumerable<string> q = from entry in SettingsManager.ServerUsers.Base
+                                    where UserState.IsSAdmin(entry.userState)
+                                    select ((string)entry.userID);
 
             sd = new()
             {
@@ -121,8 +147,10 @@ namespace Arteranos.Services
                 Version = versionString,
                 MinVersion = minVersionString,
                 Permissions = server.Permissions,
-                PrivacyTOSNotice = "TODO",      // TODO
-                AdminNames = new string[0],     // TODO
+                PrivacyTOSNotice = CachedPTOSNotice,
+                AdminNames = q.ToArray(),
+                PeerID = self.Id.ToString(),
+                LastModified = server.ConfigTimestamp
             };
 
             using (MemoryStream ms = new())
@@ -135,14 +163,24 @@ namespace Arteranos.Services
         }
         public async Task SendServerHello()
         {
-            ServerHello hello = new()
+            ServerHello.SDLink selflink = new()
             {
                 ServerDescriptionCid = currentSDCid,
                 LastModified = SettingsManager.Server.ConfigTimestamp
             };
 
-            hello.Serialize(out byte[] bytes);
-            await ipfs.PubSub.PublishAsync(topic_hello, bytes);
+            ServerHello hello = new()
+            {
+                Links = new() { selflink }
+            };
+
+            // TODO Add additional server descriptions to broadcast
+
+            using MemoryStream ms = new();
+
+            hello.Serialize(ms);
+            ms.Position = 0;
+            await ipfs.PubSub.PublishAsync(topic_hello, ms);
         }
 
         public async Task SendServerDirectMessage(string peerId)
@@ -161,6 +199,51 @@ namespace Arteranos.Services
         {
             while (ipfs == null)
                 yield return new WaitForEndOfFrame();
+        }
+
+        public async Task<bool> ParseIncomingIPFSMessageAsync(IPublishedMessage publishedMessage)
+        {
+            try
+            {
+                PeerMessage peerMessage = PeerMessage.Deserialize(publishedMessage.DataStream);
+
+                if (peerMessage is ServerHello sh)
+                    return await ParseServerHelloAsync(sh, publishedMessage);
+                else
+                    throw new ArgumentException($"Unknown message from Peer {publishedMessage.Sender.Id}");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+                return false;
+            }
+        }
+
+        private async Task<bool> ParseServerHelloAsync(ServerHello hello, IPublishedMessage publishedMessage)
+        {
+            int enteredCount = 20;
+
+            foreach(var link in hello.Links)
+            {
+                // Too many...
+                if (enteredCount <= 0) break;
+
+                try
+                {
+                    using CancellationTokenSource cts = new(1000);
+
+                    Stream s = await ipfs.FileSystem.ReadFileAsync(link.ServerDescriptionCid, cts.Token);
+
+                    PublicKey pk = PublicKey.FromId(publishedMessage.Sender.Id);
+                    _ServerDescription sd = _ServerDescription.Deserialize(pk, s);
+
+                    if (sd.DBUpdate()) enteredCount--;
+                }
+                catch(Exception ex) { Debug.LogException(ex); }
+
+            }
+
+            return true;
         }
     }
 }

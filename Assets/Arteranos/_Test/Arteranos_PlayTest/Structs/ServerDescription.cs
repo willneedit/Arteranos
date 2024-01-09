@@ -26,21 +26,20 @@ namespace Arteranos.PlayTest.Structs
         [SetUp]
         public void Setup()
         {
-            sample = new _ServerDescription()
+            sample = new()
             {
-                Name = "Test",
-                ServerPort = 7777,
-                MetadataPort = 7778,
-                Permissions = new()
-                {
-                    Flying = true,
-                    ExcessiveViolence = true,
-                    ExplicitNudes = null,
-                },
-                AdminNames = new string[]
-                {
-                    "willneedit"
-                }
+                Name = "Snake Oil",
+                ServerPort = 1,
+                MetadataPort = 2,
+                Description = "Snake Oil Inc.",
+                Icon = new byte[0],
+                Version = "0.0.1",
+                MinVersion = "0.0.1",
+                Permissions = new(),
+                PrivacyTOSNotice = "TODO",      // TODO
+                AdminNames = new string[0],     // TODO
+                PeerID = "1DfooId",
+                LastModified = DateTime.UnixEpoch
             };
         }
 
@@ -133,5 +132,108 @@ namespace Arteranos.PlayTest.Structs
             }
         }
 
+        [Test]
+        public void DBStore()
+        {
+            try
+            {
+                Assert.IsTrue(sample.DBUpdate());
+            }
+            finally
+            {
+                _ServerDescription.DBDelete(sample.PeerID);
+            }
+        }
+
+        [Test]
+        public void DBLookup1()
+        {
+            try
+            {
+                Assert.IsNull(_ServerDescription.DBLookup(sample.PeerID));
+
+                Assert.IsTrue(sample.DBUpdate());
+
+                _ServerDescription anObject = _ServerDescription.DBLookup(sample.PeerID);
+                Assert.IsNotNull(anObject);
+                Assert.AreEqual(sample, anObject);
+            }
+            finally
+            {
+                _ServerDescription.DBDelete(sample.PeerID);
+            }
+        }
+
+        [Test]
+        public void DBLookup2()
+        {
+            _ServerDescription sample2 = null;
+
+            try
+            {
+                Assert.IsNull(_ServerDescription.DBLookup(sample.PeerID));
+
+                Assert.IsTrue(sample.DBUpdate());
+
+                sample2 = _ServerDescription.DBLookup(sample.PeerID);
+                Assert.IsNotNull(sample2);
+
+                sample2.PeerID = "1DBar";
+
+                Assert.IsNull(_ServerDescription.DBLookup(sample2.PeerID));
+
+                Assert.IsTrue(sample2.DBUpdate());
+
+                Assert.IsNotNull(_ServerDescription.DBLookup(sample2.PeerID));
+            }
+            finally
+            {
+                _ServerDescription.DBDelete(sample.PeerID);
+
+                if(sample2 != null) _ServerDescription.DBDelete(sample2.PeerID);
+            }
+        }
+
+        [Test]
+        public void DBUpdateExpired()
+        {
+            try
+            {
+                Assert.IsTrue(sample.DBUpdate());
+
+                sample.LastModified = DateTime.MinValue;
+
+                Assert.IsFalse(sample.DBUpdate());
+
+                _ServerDescription probe = _ServerDescription.DBLookup(sample.PeerID);
+
+                Assert.AreNotEqual(probe, sample);
+            }
+            finally
+            {
+                _ServerDescription.DBDelete(sample.PeerID);
+            }
+        }
+
+        [Test]
+        public void DBUpdateNotExpired()
+        {
+            try
+            {
+                Assert.IsTrue(sample.DBUpdate());
+
+                sample.LastModified = DateTime.MaxValue;
+
+                Assert.IsTrue(sample.DBUpdate());
+
+                _ServerDescription probe = _ServerDescription.DBLookup(sample.PeerID);
+
+                Assert.AreEqual(sample, probe);
+            }
+            finally
+            {
+                _ServerDescription.DBDelete(sample.PeerID);
+            }
+        }
     }
 }

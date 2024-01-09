@@ -6,33 +6,30 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using Ipfs;
 using ProtoBuf;
 
 namespace Arteranos.Core
 {
-    [ProtoContract]
-    public partial class ServerHello
-    {
-        [ProtoMember(1)]
-        public string ServerDescriptionCid;
 
-        [ProtoMember(2)]
-        public DateTime LastModified;
+    [ProtoContract]
+    public partial class ServerHello : PeerMessage
+    {
+        [ProtoContract]
+        public partial class SDLink
+        {
+            [ProtoMember(1)]
+            public string ServerDescriptionCid;
+
+            [ProtoMember(2)]
+            public DateTime LastModified;
+        }
+
+        [ProtoMember(3)]
+        public List<SDLink> Links;
 
         public void Serialize(Stream stream) 
             => Serializer.Serialize(stream, this);
-
-        public void Serialize(out byte[] bytes)
-        {
-            using MemoryStream ms = new();
-            Serialize(ms);
-            ms.Position = 0;
-            bytes = ms.ToArray();
-        }
-
-        public static ServerHello Deserialize(Stream stream) 
-            => Serializer.Deserialize<ServerHello>(stream);
     }
 }

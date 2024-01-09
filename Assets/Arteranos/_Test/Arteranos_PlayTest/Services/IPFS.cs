@@ -15,6 +15,8 @@ using System.Linq;
 using System.Threading;
 using System.Text;
 using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Engine.Cryptography;
+using Arteranos.Core.Cryptography;
 
 namespace Arteranos.PlayTest.Services
 {
@@ -23,6 +25,51 @@ namespace Arteranos.PlayTest.Services
         IPFSService srv = null;
         IpfsEngine ipfs = null;
         Peer self = null;
+
+        public async Task<(_ServerDescription, ServerHello)> CreateServerHello(IpfsEngine node)
+        {
+            DateTime unixEpoch = DateTime.UnixEpoch;
+            _ServerDescription sd = new()
+            {
+                Name = "Snake Oil",
+                ServerPort = 1,
+                MetadataPort = 2,
+                Description = "Snake Oil Inc.",
+                Icon = new byte[0],
+                Version = "0.0.1",
+                MinVersion = "0.0.1",
+                Permissions = new(),
+                PrivacyTOSNotice = "TODO",      // TODO
+                AdminNames = new string[0],     // TODO
+                PeerID = self.Id.ToString(),
+                LastModified = unixEpoch
+            };
+            KeyChain kc = await node.KeyChainAsync();
+            var kcp = await kc.GetPrivateKeyAsync("self");
+            SignKey serverKeyPair = SignKey.ImportPrivateKey(kcp);
+
+            Cid currentSDCid;
+            using (MemoryStream ms = new())
+            {
+                sd.Serialize(serverKeyPair, ms);
+                ms.Position = 0;
+                var fsn = await node.FileSystem.AddAsync(ms, "ServerDescription");
+                currentSDCid = fsn.Id;
+            }
+
+            ServerHello.SDLink selflink = new()
+            {
+                ServerDescriptionCid = currentSDCid,
+                LastModified = unixEpoch
+            };
+
+            ServerHello hello = new()
+            {
+                Links = new() { selflink }
+            };
+
+            return (sd, hello);
+        }
 
         [UnitySetUp]
         public IEnumerator SetupIPFS()
@@ -127,7 +174,11 @@ namespace Arteranos.PlayTest.Services
             {
                 sender = message.Sender;
 
-                hello = ServerHello.Deserialize(message.DataStream);
+                PeerMessage msg = PeerMessage.Deserialize(message.DataStream);
+
+                Assert.IsInstanceOf<ServerHello>(msg);
+
+                hello = msg as ServerHello;
             }
 
             using TempNode otherNode = new TempNode();
@@ -146,23 +197,63 @@ namespace Arteranos.PlayTest.Services
 
                 await TestFixture.WaitForConditionAsync(5, () => (hello != null), "Message was not received");
 
-                Assert.IsNotNull(hello);
+                Assert.IsNotNull(hello.Links);
+                Assert.IsTrue(hello.Links.Any());
+
+                ServerHello.SDLink link = hello.Links.First();
 
                 using CancellationTokenSource cts = new(1000);
 
-                Stream s = await otherNode.FileSystem.ReadFileAsync(hello.ServerDescriptionCid, cts.Token);
+                Stream s = await otherNode.FileSystem.ReadFileAsync(link.ServerDescriptionCid, cts.Token);
 
                 PublicKey pk = PublicKey.FromId(sender.Id);
                 _ServerDescription sd = _ServerDescription.Deserialize(pk, s);
 
                 Assert.IsNotNull(sd);
+                Assert.AreEqual(sd.LastModified, link.LastModified);
                 Debug.Log(sd.Name);
-                Debug.Log(hello.LastModified);
+                Debug.Log(link.LastModified);
             }
             finally
             {
                 await otherNode.StopAsync();
             }
+        }
+
+        [UnityTest]
+        public IEnumerator ReceiveServerHello()
+        {
+            Task.Run(ReceiveServerHelloAsync).Wait();
+
+            yield return null;
+        }
+
+        public async Task ReceiveServerHelloAsync()
+        {
+            using TempNode otherNode = new TempNode();
+
+            try
+            {
+                await otherNode.StartAsync();
+
+                Peer other = await otherNode.LocalPeer;
+
+                await otherNode.Swarm.ConnectAsync(self.Addresses.First());
+
+                using CancellationTokenSource cts = new(2000);
+
+                (_ServerDescription sd, ServerHello hello) = await CreateServerHello(otherNode);
+
+                using MemoryStream ms = new();
+
+                hello.Serialize(ms);
+                ms.Position = 0;
+                await otherNode.PubSub.PublishAsync("/X-Arteranos/Server-Hello", ms.ToArray(), cts.Token);
+
+                await Task.Delay(5000);
+
+            }
+            finally { await otherNode.StopAsync(); }
         }
     }
 }

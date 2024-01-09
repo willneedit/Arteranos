@@ -9,9 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Arteranos.Core.Cryptography;
-using Ipfs;
-using Ipfs.Core.Cryptography.Proto;
 using ProtoBuf;
 
 namespace Arteranos.Core
@@ -50,37 +47,20 @@ namespace Arteranos.Core
         public string[] AdminNames;
 
         [ProtoMember(12)]
+        public string PeerID;
+
+        [ProtoMember(13)]
+        public DateTime LastModified;
+
+        [ProtoMember(14)]
         public byte[] signature;
 
-        public void Serialize(SignKey serverPrivateKey, Stream stream)
-        {
-            // Sign the structure with the empty signature field
-            using (MemoryStream ms = new())
-            {
-                signature = null;
-                Serializer.Serialize(ms, this);
-                ms.Position = 0;
-                serverPrivateKey.Sign(ms.ToArray(), out signature);
-            }
 
-            Serializer.Serialize(stream, this);
-            stream.Flush();
-        }
+        public void Serialize(Stream stream)
+            => Serializer.Serialize(stream, this);
 
-        public static _ServerDescription Deserialize(PublicKey serverPublicKey, Stream stream)
-        {   
-            _ServerDescription d = Serializer.Deserialize<_ServerDescription>(stream);
-            byte[] signature = d.signature;
-            using (MemoryStream ms = new())
-            {
-                d.signature = null;
-                Serializer.Serialize(ms, d);
-                ms.Position = 0;
-                serverPublicKey.Verify(ms.ToArray(), signature);
-            }
-
-            return d;
-        }
+        public static _ServerDescription Deserialize(Stream stream)
+            => Serializer.Deserialize<_ServerDescription>(stream);
 
         public override bool Equals(object obj)
         {
@@ -94,12 +74,14 @@ namespace Arteranos.Core
                    ServerPort == other.ServerPort &&
                    MetadataPort == other.MetadataPort &&
                    Description == other.Description &&
-                   EqualityComparer<byte[]>.Default.Equals(Icon, other.Icon) &&
+                   Icon.SequenceEqual(other.Icon) &&
                    Version == other.Version &&
                    MinVersion == other.MinVersion &&
                    EqualityComparer<ServerPermissions>.Default.Equals(Permissions, other.Permissions) &&
                    PrivacyTOSNotice == other.PrivacyTOSNotice &&
-                   AdminNames.SequenceEqual(other.AdminNames);
+                   PeerID == other.PeerID &&
+                   LastModified == other.LastModified &&
+                   true; //AdminNames.SequenceEqual(other.AdminNames);
         }
 
         public override int GetHashCode()
@@ -114,7 +96,9 @@ namespace Arteranos.Core
             hash.Add(MinVersion);
             hash.Add(Permissions);
             hash.Add(PrivacyTOSNotice);
-            hash.Add(AdminNames);
+            // hash.Add(AdminNames);
+            hash.Add(PeerID);
+            hash.Add(LastModified);
             return hash.ToHashCode();
         }
 
