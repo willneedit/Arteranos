@@ -84,6 +84,9 @@ namespace Arteranos.Core
                 Serializer.Serialize(ms, d);
                 ms.Position = 0;
                 serverPublicKey.Verify(ms.ToArray(), signature);
+
+                // Restore the signature, to re-serialize without PeerID's private key.
+                d.signature = signature;
             }
 
             return d;

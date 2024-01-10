@@ -106,6 +106,50 @@ namespace Arteranos.PlayTest.Structs
         }
 
         [Test]
+        public void Reserialize()
+        {
+            SignKey serverKey = SignKey.Generate();
+
+            byte[] bytes = null;
+            using (MemoryStream ms = new())
+            {
+                sample.Serialize(serverKey, ms);
+                ms.Position = 0;
+                bytes = ms.ToArray();
+            }
+
+            _ServerDescription d = null;
+            using (MemoryStream ms = new())
+            {
+                ms.Write(bytes, 0, bytes.Length);
+                ms.Position = 0;
+                d = _ServerDescription.Deserialize(serverKey.PublicKey, ms);
+            }
+
+            // Try to save the other's server description for posterity.
+            byte[] bytes2 = null;
+            using (MemoryStream ms = new())
+            {
+                d.Serialize(ms);
+                ms.Position = 0;
+                bytes2 = ms.ToArray();
+            }
+
+            // Check the authenticity of the redistributed server description
+            _ServerDescription d2 = null;
+            using (MemoryStream ms = new())
+            {
+                ms.Write(bytes, 0, bytes2.Length);
+                ms.Position = 0;
+                d2 = _ServerDescription.Deserialize(serverKey.PublicKey, ms);
+            }
+
+            Assert.AreEqual (bytes, bytes2);
+            Assert.AreEqual (sample, d2);
+            Assert.AreEqual (d, d2);
+        }
+
+        [Test]
         public void Deserialize_Negative()
         {
             SignKey serverKey = SignKey.Generate();
