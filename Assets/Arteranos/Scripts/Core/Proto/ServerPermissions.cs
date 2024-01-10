@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.IO;
 using ProtoBuf;
 
 namespace Arteranos.Core
@@ -69,14 +68,5 @@ namespace Arteranos.Core
         // Excessive Violence / Blood (Gore, self-harm, torture)
         [ProtoMember(6)]
         public bool? ExcessiveViolence = false;
-
-        public void Serialize(Stream stream)
-        {
-            Serializer.Serialize(stream, this);
-            stream.Flush();
-        }
-
-        public static ServerPermissions Deserialize(Stream stream) 
-            => Serializer.Deserialize<ServerPermissions>(stream);
     }
 }
