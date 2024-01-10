@@ -21,7 +21,7 @@ namespace Arteranos.PlayTest.Structs
 {
     public class ServerDescription
     {
-        public _ServerDescription sample = null;
+        public Core.ServerDescription sample = null;
 
         [SetUp]
         public void Setup()
@@ -87,12 +87,12 @@ namespace Arteranos.PlayTest.Structs
                 bytes = ms.ToArray();
             }
 
-            _ServerDescription d = null;
+            Core.ServerDescription d = null;
             using (MemoryStream ms = new())
             {
                 ms.Write(bytes, 0, bytes.Length);
                 ms.Position = 0;
-                d = _ServerDescription.Deserialize(serverKey.PublicKey, ms);
+                d = Core.ServerDescription.Deserialize(serverKey.PublicKey, ms);
             }
 
             Assert.AreEqual(sample, d);
@@ -118,12 +118,12 @@ namespace Arteranos.PlayTest.Structs
                 bytes = ms.ToArray();
             }
 
-            _ServerDescription d = null;
+            Core.ServerDescription d = null;
             using (MemoryStream ms = new())
             {
                 ms.Write(bytes, 0, bytes.Length);
                 ms.Position = 0;
-                d = _ServerDescription.Deserialize(serverKey.PublicKey, ms);
+                d = Core.ServerDescription.Deserialize(serverKey.PublicKey, ms);
             }
 
             // Try to save the other's server description for posterity.
@@ -136,12 +136,12 @@ namespace Arteranos.PlayTest.Structs
             }
 
             // Check the authenticity of the redistributed server description
-            _ServerDescription d2 = null;
+            Core.ServerDescription d2 = null;
             using (MemoryStream ms = new())
             {
                 ms.Write(bytes, 0, bytes2.Length);
                 ms.Position = 0;
-                d2 = _ServerDescription.Deserialize(serverKey.PublicKey, ms);
+                d2 = Core.ServerDescription.Deserialize(serverKey.PublicKey, ms);
             }
 
             Assert.AreEqual (bytes, bytes2);
@@ -171,7 +171,7 @@ namespace Arteranos.PlayTest.Structs
                 ms.Position = 0;
                 Assert.Throws<InvalidDataException>(() =>
                 {
-                    _ServerDescription d = _ServerDescription.Deserialize(wrongKey.PublicKey, ms);
+                    Core.ServerDescription d = Core.ServerDescription.Deserialize(wrongKey.PublicKey, ms);
                 });
             }
         }
@@ -185,7 +185,7 @@ namespace Arteranos.PlayTest.Structs
             }
             finally
             {
-                _ServerDescription.DBDelete(sample.PeerID);
+                Core.ServerDescription.DBDelete(sample.PeerID);
             }
         }
 
@@ -194,47 +194,47 @@ namespace Arteranos.PlayTest.Structs
         {
             try
             {
-                Assert.IsNull(_ServerDescription.DBLookup(sample.PeerID));
+                Assert.IsNull(Core.ServerDescription.DBLookup(sample.PeerID));
 
                 Assert.IsTrue(sample.DBUpdate());
 
-                _ServerDescription anObject = _ServerDescription.DBLookup(sample.PeerID);
+                Core.ServerDescription anObject = Core.ServerDescription.DBLookup(sample.PeerID);
                 Assert.IsNotNull(anObject);
                 Assert.AreEqual(sample, anObject);
             }
             finally
             {
-                _ServerDescription.DBDelete(sample.PeerID);
+                Core.ServerDescription.DBDelete(sample.PeerID);
             }
         }
 
         [Test]
         public void DBLookup2()
         {
-            _ServerDescription sample2 = null;
+            Core.ServerDescription sample2 = null;
 
             try
             {
-                Assert.IsNull(_ServerDescription.DBLookup(sample.PeerID));
+                Assert.IsNull(Core.ServerDescription.DBLookup(sample.PeerID));
 
                 Assert.IsTrue(sample.DBUpdate());
 
-                sample2 = _ServerDescription.DBLookup(sample.PeerID);
+                sample2 = Core.ServerDescription.DBLookup(sample.PeerID);
                 Assert.IsNotNull(sample2);
 
                 sample2.PeerID = "1DBar";
 
-                Assert.IsNull(_ServerDescription.DBLookup(sample2.PeerID));
+                Assert.IsNull(Core.ServerDescription.DBLookup(sample2.PeerID));
 
                 Assert.IsTrue(sample2.DBUpdate());
 
-                Assert.IsNotNull(_ServerDescription.DBLookup(sample2.PeerID));
+                Assert.IsNotNull(Core.ServerDescription.DBLookup(sample2.PeerID));
             }
             finally
             {
-                _ServerDescription.DBDelete(sample.PeerID);
+                Core.ServerDescription.DBDelete(sample.PeerID);
 
-                if(sample2 != null) _ServerDescription.DBDelete(sample2.PeerID);
+                if(sample2 != null) Core.ServerDescription.DBDelete(sample2.PeerID);
             }
         }
 
@@ -249,13 +249,13 @@ namespace Arteranos.PlayTest.Structs
 
                 Assert.IsFalse(sample.DBUpdate());
 
-                _ServerDescription probe = _ServerDescription.DBLookup(sample.PeerID);
+                Core.ServerDescription probe = Core.ServerDescription.DBLookup(sample.PeerID);
 
                 Assert.AreNotEqual(probe, sample);
             }
             finally
             {
-                _ServerDescription.DBDelete(sample.PeerID);
+                Core.ServerDescription.DBDelete(sample.PeerID);
             }
         }
 
@@ -270,13 +270,13 @@ namespace Arteranos.PlayTest.Structs
 
                 Assert.IsTrue(sample.DBUpdate());
 
-                _ServerDescription probe = _ServerDescription.DBLookup(sample.PeerID);
+                Core.ServerDescription probe = Core.ServerDescription.DBLookup(sample.PeerID);
 
                 Assert.AreEqual(sample, probe);
             }
             finally
             {
-                _ServerDescription.DBDelete(sample.PeerID);
+                Core.ServerDescription.DBDelete(sample.PeerID);
             }
         }
 
@@ -285,27 +285,27 @@ namespace Arteranos.PlayTest.Structs
         {
             try
             {
-                Assert.IsNull(_ServerDescription.DBLookup(sample.PeerID));
+                Assert.IsNull(Core.ServerDescription.DBLookup(sample.PeerID));
 
-                var list1 = _ServerDescription.DBList();
+                var list1 = Core.ServerDescription.DBList();
 
                 Assert.IsFalse(list1.Contains(sample));
 
                 Assert.IsTrue(sample.DBUpdate());
 
-                var list2 = _ServerDescription.DBList();
+                var list2 = Core.ServerDescription.DBList();
 
                 Assert.IsTrue(list2.Contains(sample));
 
-                var list3 = _ServerDescription.DBList();
+                var list3 = Core.ServerDescription.DBList();
 
-                _ServerDescription.DBDelete(sample.PeerID);
+                Core.ServerDescription.DBDelete(sample.PeerID);
 
                 Assert.IsFalse(list3.Contains(sample));
             }
             finally
             {
-                _ServerDescription.DBDelete(sample.PeerID);
+                Core.ServerDescription.DBDelete(sample.PeerID);
             }
         }
 

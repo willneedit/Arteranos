@@ -59,28 +59,6 @@ namespace Arteranos.Core
         }
 
     }
-    public struct ServerDescription
-    {
-        public int ServerPort;
-        public byte[] ServerPublicKey;
-        public string Name;
-        [ASN1Tag(true)] public byte[] Icon;
-        [ASN1Tag(1, true)] public string Description;
-        [ASN1Tag(2, true)] public string PrivacyTOSNotice;
-        public List<string> AdminMames;
-
-
-        public static readonly string cacheFilePattern = $"{Application.persistentDataPath}/KnownServers/{{0}}/description.asn1";
-        public static readonly string urlPathPart = "/ServerDescription.asn1";
-        public static async Task<ServerDescription?> Retrieve(string url, bool forceReload = false)
-        {
-            (bool success, ServerDescription result) = await Utils.WebRetrieve<ServerDescription>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 86400, 1, true);
-            return success ? result : null;
-        }
-
-        public static void Delete(string url) 
-            => Utils.WebDelete(url, urlPathPart, cacheFilePattern);
-    }
 
     public struct ServerOnlineData
     {
@@ -105,7 +83,7 @@ namespace Arteranos.Core
     {
         private ServerPublicData? PublicData;
         private ServerOnlineData? OnlineData;
-        private ServerDescription? DescriptionStruct;
+        private ServerDescription DescriptionStruct;
 
         public ServerInfo(ServerPublicData data)
         {
@@ -135,10 +113,7 @@ namespace Arteranos.Core
 
         public Task Update()
         {
-            async Task t1()
-            {
-                DescriptionStruct = await ServerDescription.Retrieve(URL);
-            }
+            // Maybe an ayt? query for the server description...
 
             async Task t2()
             {
@@ -147,7 +122,6 @@ namespace Arteranos.Core
 
             Task[] tasks = new Task[]
             {
-                t1(),
                 t2()
             };
 
@@ -156,7 +130,7 @@ namespace Arteranos.Core
 
         public void Delete()
         {
-            ServerDescription.Delete(URL);
+            if(DescriptionStruct != null) ServerDescription.DBDelete(DescriptionStruct.PeerID);
             ServerOnlineData.Delete(URL);
             DescriptionStruct = null;
             OnlineData = null;
@@ -168,7 +142,7 @@ namespace Arteranos.Core
         public string Description => DescriptionStruct?.Description ?? string.Empty;
         public string PrivacyTOSNotice => DescriptionStruct?.PrivacyTOSNotice;
         public byte[] Icon => DescriptionStruct?.Icon;
-        public List<string> AdminNames => DescriptionStruct?.AdminMames ?? new();
+        public string[] AdminNames => DescriptionStruct?.AdminNames ?? new string[0];
         public string Address => PublicData?.Address;
         public int MDPort => PublicData?.MDPort ?? 0;
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;

@@ -118,8 +118,6 @@ namespace Arteranos.Services
                     continue;
                 }
 
-                if (request.Url.AbsolutePath == ServerDescription.urlPathPart)
-                    YieldServerDescription(response);
                 else if (request.Url.AbsolutePath == ServerOnlineData.urlPathPart)
                     YieldServerOnlineData(response);
                 else if (request.Url.AbsolutePath == "/")
@@ -135,27 +133,6 @@ namespace Arteranos.Services
 
             // NOTREACHED
             Debug.Log($"[{nameof(MetaDataServer)}] Exiting md server loop");
-        }
-
-        private static async void YieldServerDescription(HttpListenerResponse response)
-        {
-            Server s = SettingsManager.Server;
-            IEnumerable<string> q = from entry in SettingsManager.ServerUsers.Base
-                                    where UserState.IsSAdmin(entry.userState)
-                                    select ((string)entry.userID);
-
-            ServerDescription description = new()
-            {
-                Name = s.Name,
-                ServerPort = s.ServerPort,
-                Description = s.Description,
-                PrivacyTOSNotice = MetaDataService.CachedPTOSNotice,
-                Icon = s.Icon,
-                ServerPublicKey = s.ServerPublicKey,
-                AdminMames = q.ToList(),
-            };
-
-            await Core.Utils.WebEmit(description, response);
         }
 
         private static async void YieldServerOnlineData(HttpListenerResponse response)

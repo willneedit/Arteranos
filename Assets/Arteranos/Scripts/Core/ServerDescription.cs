@@ -14,7 +14,7 @@ using ProtoBuf;
 
 namespace Arteranos.Core
 {
-    public partial class _ServerDescription
+    public partial class ServerDescription
     {
         private static string KnownPeersRoot => $"{FileUtils.persistentDataPath}/KnownPeers";
         public static string GetFileName(string id) 
@@ -26,7 +26,7 @@ namespace Arteranos.Core
             string fn = GetFileName(PeerID);
             string dir = Path.GetDirectoryName(fn);
 
-            _ServerDescription old = DBLookup(PeerID);
+            ServerDescription old = DBLookup(PeerID);
 
             // The stored entry is more recent than that we just got.
             if (old != null && old.LastModified > LastModified) return false;
@@ -41,7 +41,7 @@ namespace Arteranos.Core
             return true;
         }
 
-        public static _ServerDescription DBLookup(string id)
+        public static ServerDescription DBLookup(string id)
         {
             string fn = GetFileName(id);
 
@@ -60,13 +60,13 @@ namespace Arteranos.Core
             File.Delete(fn);
         }
 
-        public static IEnumerable<_ServerDescription> DBList()
+        public static IEnumerable<ServerDescription> DBList()
         {
             IEnumerable<string> files = Directory.EnumerateFiles(KnownPeersRoot, "*.description", SearchOption.AllDirectories);
 
             foreach (string file in files)
             {
-                _ServerDescription sd = null;
+                ServerDescription sd = null;
                 using Stream stream = File.OpenRead(file);
                 sd = Deserialize(stream);
 
@@ -89,9 +89,9 @@ namespace Arteranos.Core
             stream.Flush();
         }
 
-        public static _ServerDescription Deserialize(PublicKey serverPublicKey, Stream stream)
+        public static ServerDescription Deserialize(PublicKey serverPublicKey, Stream stream)
         {
-            _ServerDescription d = Serializer.Deserialize<_ServerDescription>(stream);
+            ServerDescription d = Serializer.Deserialize<ServerDescription>(stream);
             byte[] signature = d.signature;
             using (MemoryStream ms = new())
             {

@@ -14,7 +14,7 @@ using ProtoBuf;
 namespace Arteranos.Core
 {
     [ProtoContract]
-    public partial class _ServerDescription : IEquatable<_ServerDescription>
+    public partial class ServerDescription : IEquatable<ServerDescription>
     {
         [ProtoMember(1)]
         public string Name;
@@ -59,15 +59,15 @@ namespace Arteranos.Core
         public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
 
-        public static _ServerDescription Deserialize(Stream stream)
-            => Serializer.Deserialize<_ServerDescription>(stream);
+        public static ServerDescription Deserialize(Stream stream)
+            => Serializer.Deserialize<ServerDescription>(stream);
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as _ServerDescription);
+            return Equals(obj as ServerDescription);
         }
 
-        public bool Equals(_ServerDescription other)
+        public bool Equals(ServerDescription other)
         {
             return other is not null &&
                    Name == other.Name &&
@@ -102,12 +102,12 @@ namespace Arteranos.Core
             return hash.ToHashCode();
         }
 
-        public static bool operator ==(_ServerDescription left, _ServerDescription right)
+        public static bool operator ==(ServerDescription left, ServerDescription right)
         {
-            return EqualityComparer<_ServerDescription>.Default.Equals(left, right);
+            return EqualityComparer<ServerDescription>.Default.Equals(left, right);
         }
 
-        public static bool operator !=(_ServerDescription left, _ServerDescription right)
+        public static bool operator !=(ServerDescription left, ServerDescription right)
         {
             return !(left == right);
         }

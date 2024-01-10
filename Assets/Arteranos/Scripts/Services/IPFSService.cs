@@ -48,7 +48,7 @@ namespace Arteranos.Services
         private string versionString = null;
         private string minVersionString = null;
 
-        _ServerDescription sd = null;
+        ServerDescription sd = null;
         private Cid currentSDCid = null;
 
         private CancellationTokenSource cts = null;
@@ -231,7 +231,7 @@ namespace Arteranos.Services
 
                 try
                 {
-                    _ServerDescription old = _ServerDescription.DBLookup(link.PeerID);
+                    ServerDescription old = ServerDescription.DBLookup(link.PeerID);
 
                     if (old != null && old.PeerID != link.PeerID)
                         throw new ArgumentException($"{old.PeerID} mismatches {link.PeerID}");
@@ -244,7 +244,7 @@ namespace Arteranos.Services
                         Stream s = await ipfs.FileSystem.ReadFileAsync(link.ServerDescriptionCid, cts.Token);
 
                         PublicKey pk = PublicKey.FromId(link.PeerID);
-                        _ServerDescription sd = _ServerDescription.Deserialize(pk, s);
+                        ServerDescription sd = ServerDescription.Deserialize(pk, s);
 
                         if (sd.DBUpdate()) enteredCount--;
                     }

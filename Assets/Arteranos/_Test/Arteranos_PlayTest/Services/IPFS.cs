@@ -26,10 +26,12 @@ namespace Arteranos.PlayTest.Services
         IpfsEngine ipfs = null;
         Peer self = null;
 
-        public async Task<(_ServerDescription, ServerHello)> CreateServerHello(IpfsEngine node)
+        public async Task<(ServerDescription, ServerHello)> CreateServerHello(IpfsEngine node)
         {
+            Peer nodeself = await node.LocalPeer;
+
             DateTime unixEpoch = DateTime.UnixEpoch;
-            _ServerDescription sd = new()
+            ServerDescription sd = new()
             {
                 Name = "Snake Oil",
                 ServerPort = 1,
@@ -41,7 +43,7 @@ namespace Arteranos.PlayTest.Services
                 Permissions = new(),
                 PrivacyTOSNotice = "TODO",      // TODO
                 AdminNames = new string[0],     // TODO
-                PeerID = self.Id.ToString(),
+                PeerID = nodeself.Id.ToString(),
                 LastModified = unixEpoch
             };
             KeyChain kc = await node.KeyChainAsync();
@@ -61,7 +63,7 @@ namespace Arteranos.PlayTest.Services
             {
                 ServerDescriptionCid = currentSDCid,
                 LastModified = unixEpoch,
-                PeerID = self.Id.ToString(),
+                PeerID = nodeself.Id.ToString(),
             };
 
             ServerHello hello = new()
@@ -208,7 +210,7 @@ namespace Arteranos.PlayTest.Services
                 Stream s = await otherNode.FileSystem.ReadFileAsync(link.ServerDescriptionCid, cts.Token);
 
                 PublicKey pk = PublicKey.FromId(sender.Id);
-                _ServerDescription sd = _ServerDescription.Deserialize(pk, s);
+                ServerDescription sd = ServerDescription.Deserialize(pk, s);
 
                 Assert.IsNotNull(sd);
                 Assert.AreEqual(sd.LastModified, link.LastModified);
@@ -243,7 +245,7 @@ namespace Arteranos.PlayTest.Services
 
                 using CancellationTokenSource cts = new(2000);
 
-                (_ServerDescription sd, ServerHello hello) = await CreateServerHello(otherNode);
+                (ServerDescription sd, ServerHello hello) = await CreateServerHello(otherNode);
 
                 using MemoryStream ms = new();
 
