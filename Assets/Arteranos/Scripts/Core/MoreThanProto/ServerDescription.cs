@@ -14,65 +14,28 @@ using ProtoBuf;
 
 namespace Arteranos.Core
 {
-    public partial class ServerDescription
+    public partial class ServerDescription : FlatFileDB<ServerDescription>
     {
-        private static string KnownPeersRoot => $"{FileUtils.persistentDataPath}/KnownPeers";
-        public static string GetFileName(string id) 
-            => $"{KnownPeersRoot}/{Utils.GetURLHash(id)}.description";
-
-
-        public bool DBUpdate()
+        public ServerDescription() 
         {
-            string fn = GetFileName(PeerID);
-            string dir = Path.GetDirectoryName(fn);
-
-            ServerDescription old = DBLookup(PeerID);
-
-            // The stored entry is more recent than that we just got.
-            if (old != null && old.LastModified > LastModified) return false;
-            
-            if (!Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
-
-            if(old != null) File.Delete(fn);
-
-            using Stream stream = File.Create(fn);
-            Serialize(stream);
-
-            return true;
+            _KnownPeersRoot = $"{FileUtils.persistentDataPath}/KnownPeers";
+            _GetFileName = id => $"{FileUtils.persistentDataPath}/KnownPeers/{Utils.GetURLHash(id)}.description";
+            _SearchPattern = "*.description";
+            _Deserialize = Deserialize;
+            _Serialize = Serialize;
         }
 
-        public static ServerDescription DBLookup(string id)
-        {
-            string fn = GetFileName(id);
+        public bool DBUpdate() 
+            => _DBUpdate(PeerID, old => old.LastModified <= LastModified);
 
-            if (!File.Exists(fn)) return null;
+        public static ServerDescription DBLookup(string id) 
+            => _DBLookup(id);
 
-            using Stream stream = File.OpenRead(fn);
-            return Deserialize(stream);
-        }
+        public static void DBDelete(string id) 
+            => _DBDelete(id);
 
-        public static void DBDelete(string id)
-        {
-            string fn = GetFileName(id);
-
-            if (!File.Exists(fn)) return;
-
-            File.Delete(fn);
-        }
-
-        public static IEnumerable<ServerDescription> DBList()
-        {
-            IEnumerable<string> files = Directory.EnumerateFiles(KnownPeersRoot, "*.description", SearchOption.AllDirectories);
-
-            foreach (string file in files)
-            {
-                ServerDescription sd = null;
-                using Stream stream = File.OpenRead(file);
-                sd = Deserialize(stream);
-
-                if (sd != null) yield return sd;
-            }
-        }
+        public static IEnumerable<ServerDescription> DBList() 
+            => _DBList();
 
         public void Serialize(SignKey serverPrivateKey, Stream stream)
         {
