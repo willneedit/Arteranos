@@ -144,12 +144,12 @@ namespace Arteranos.Core
         public byte[] Icon => DescriptionStruct?.Icon;
         public string[] AdminNames => DescriptionStruct?.AdminNames ?? new string[0];
         public string Address => PublicData?.Address;
-        public int MDPort => PublicData?.MDPort ?? 0;
+        public int MDPort => DescriptionStruct?.MetadataPort ?? 0;
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
         public string URL => $"http://{Address}:{MDPort}/";
         public string SPKDBKey => $"{Address}:{ServerPort}";
-        public ServerPermissions Permissions => PublicData?.Permissions ?? new();
-        public DateTime LastUpdated => PublicData?.LastUpdated ?? DateTime.UnixEpoch;
+        public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new();
+        public DateTime LastUpdated => DescriptionStruct?.LastModified ?? DateTime.UnixEpoch;
         public DateTime LastOnline => PublicData?.LastOnline ?? DateTime.UnixEpoch;
         public string CurrentWorld => OnlineData?.CurrentWorld;
         public string CurrentWorldName => (OnlineData?.CurrentWorld != null) ? OnlineData?.CurrentWorldName : "Nexus";
