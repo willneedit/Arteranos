@@ -279,5 +279,36 @@ namespace Arteranos.PlayTest.Structs
                 _ServerDescription.DBDelete(sample.PeerID);
             }
         }
+
+        [Test]
+        public void DBList()
+        {
+            try
+            {
+                Assert.IsNull(_ServerDescription.DBLookup(sample.PeerID));
+
+                var list1 = _ServerDescription.DBList();
+
+                Assert.IsFalse(list1.Contains(sample));
+
+                Assert.IsTrue(sample.DBUpdate());
+
+                var list2 = _ServerDescription.DBList();
+
+                Assert.IsTrue(list2.Contains(sample));
+
+                var list3 = _ServerDescription.DBList();
+
+                _ServerDescription.DBDelete(sample.PeerID);
+
+                Assert.IsFalse(list3.Contains(sample));
+            }
+            finally
+            {
+                _ServerDescription.DBDelete(sample.PeerID);
+            }
+        }
+
+
     }
 }

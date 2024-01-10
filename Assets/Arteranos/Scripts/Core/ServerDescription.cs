@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Arteranos.Core.Cryptography;
 using Ipfs.Core.Cryptography.Proto;
@@ -13,11 +14,11 @@ using ProtoBuf;
 
 namespace Arteranos.Core
 {
-    public partial class _ServerDescription : IEquatable<_ServerDescription>
+    public partial class _ServerDescription
     {
         private static string KnownPeersRoot => $"{FileUtils.persistentDataPath}/KnownPeers";
         public static string GetFileName(string id) 
-            => $"{KnownPeersRoot}/{Utils.GetURLHash(id)}";
+            => $"{KnownPeersRoot}/{Utils.GetURLHash(id)}.description";
 
 
         public bool DBUpdate()
@@ -57,6 +58,20 @@ namespace Arteranos.Core
             if (!File.Exists(fn)) return;
 
             File.Delete(fn);
+        }
+
+        public static IEnumerable<_ServerDescription> DBList()
+        {
+            IEnumerable<string> files = Directory.EnumerateFiles(KnownPeersRoot, "*.description", SearchOption.AllDirectories);
+
+            foreach (string file in files)
+            {
+                _ServerDescription sd = null;
+                using Stream stream = File.OpenRead(file);
+                sd = Deserialize(stream);
+
+                if (sd != null) yield return sd;
+            }
         }
 
         public void Serialize(SignKey serverPrivateKey, Stream stream)
