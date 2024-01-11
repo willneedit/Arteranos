@@ -17,6 +17,7 @@ using System.Text;
 using Ipfs.Core.Cryptography.Proto;
 using Ipfs.Engine.Cryptography;
 using Arteranos.Core.Cryptography;
+using System.Net;
 
 namespace Arteranos.PlayTest.Services
 {
@@ -257,6 +258,57 @@ namespace Arteranos.PlayTest.Services
 
             }
             finally { await otherNode.StopAsync(); }
+        }
+
+        [UnityTest]
+        public IEnumerator GetPeerIPAddress()
+        {
+            Task.Run(GetPeerIPAddressAsync).Wait();
+
+            yield return null;
+        }
+
+        public async Task GetPeerIPAddressAsync()
+        {
+            // Found in the log of Unity-IPFS-Engine, ReadFileFromNetwork test, searched for 'Alive'
+            // QmS4ustL54uo8FzR9455qaxZwuMiUhyvMcX9Ba8nUH4uVv ('About IPFS' file)
+            string peerID = "12D3KooWJXJedrSscwoMZEWcRqCtZJgvdEvWPT7BT9x8UEugRDqQ";
+            // string peerID = "QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt";
+
+            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(20));
+
+            IPAddress addr = await srv.GetPeerIPAddress(peerID, cts.Token);
+
+            Debug.Log($"Peer's address is {addr}");
+        }
+
+        [UnityTest]
+        public IEnumerator GetPeerIPAddress_Negative()
+        {
+            Task.Run(GetPeerIPAddress_NegativeAsync).Wait();
+
+            yield return null;
+        }
+
+        public async Task GetPeerIPAddress_NegativeAsync()
+        {
+            string wrongPeerID = "12D3KooWJXJedrSscwoMZEWcRqCtZJgvownedT7BT9x8UEugRDqQ";
+            // string peerID = "QmcZf59bWwK5XFi76CZX8cbJ4BhTzzA3gU1ZjYZcYW3dwt";
+
+            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(20));
+
+            try
+            {
+                IPAddress addr = await srv.GetPeerIPAddress(wrongPeerID, cts.Token);
+
+                Debug.Log($"Peer's address is {addr}");
+
+                Assert.Fail("Didn't throw");
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"Expected exception: {ex.Message}");
+            }
         }
     }
 }

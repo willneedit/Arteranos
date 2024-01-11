@@ -21,6 +21,7 @@ using Ipfs.Engine.Cryptography;
 using Arteranos.Core.Cryptography;
 using System.Linq;
 using Ipfs.Core.Cryptography.Proto;
+using System.Net;
 
 namespace Arteranos.Services
 {
@@ -123,6 +124,25 @@ namespace Arteranos.Services
             cts?.Cancel();
 
             cts?.Dispose();
+        }
+
+        public async Task<IPAddress> GetPeerIPAddress(string PeerID, CancellationToken token = default)
+        {
+            Peer found = await ipfs.Dht.FindPeerAsync(PeerID, token).ConfigureAwait(false);
+
+            if (found.ConnectedAddress == null)
+                await ipfs.Swarm.ConnectAsync(found.Addresses.First(), token);
+
+            string[] parts = found.ConnectedAddress.ToString().Split('/');
+            if(parts.Length < 3)
+                throw new Exception($"Cannot work with {found.Id}'s address of {found.ConnectedAddress}");
+
+            switch(parts[1])
+            {
+                case "ip6":
+                case "ip4": return IPAddress.Parse(parts[2]);
+                default: throw new Exception($"Peer address {found.ConnectedAddress} is unworkable");
+            }
         }
 
         public async Task FlipServerDescription(bool reload)
