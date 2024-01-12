@@ -147,7 +147,7 @@ namespace Arteranos.Services
             while(true)
             {
                 byte[][] UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
-                                             where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
+                                             where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
                                              select CryptoHelpers.GetFingerprint(user.UserID)).ToArray();
 
                 yield return new WaitForSeconds(20);
@@ -182,12 +182,11 @@ namespace Arteranos.Services
             if(parts.Length < 3)
                 throw new Exception($"Cannot work with {found.Id}'s address of {found.ConnectedAddress}");
 
-            switch(parts[1])
+            return parts[1] switch
             {
-                case "ip6":
-                case "ip4": return IPAddress.Parse(parts[2]);
-                default: throw new Exception($"Peer address {found.ConnectedAddress} is unworkable");
-            }
+                "ip6" or "ip4" => IPAddress.Parse(parts[2]),
+                _ => throw new Exception($"Peer address {found.ConnectedAddress} is unworkable"),
+            };
         }
 
         public override async Task _FlipServerDescription(bool reload)
@@ -218,13 +217,11 @@ namespace Arteranos.Services
                 LastModified = server.ConfigTimestamp
             };
 
-            using (MemoryStream ms = new())
-            {
-                sd.Serialize(serverKeyPair, ms);
-                ms.Position = 0;
-                var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerDescription");
-                currentSDCid = fsn.Id;
-            }
+            using MemoryStream ms = new();
+            sd.Serialize(serverKeyPair, ms);
+            ms.Position = 0;
+            var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerDescription");
+            currentSDCid = fsn.Id;
         }
 
         public override Task _SendServerOnlineData()
@@ -359,6 +356,9 @@ namespace Arteranos.Services
             // Set on receive, no sense to transmit the actual time.
             // In this context, latencies don't matter.
             sod.LastOnline = DateTime.Now;
+
+            // Put it in the memory mapping.
+            sod.DBInsert(SenderPeerID);
 
             return true;
         }
