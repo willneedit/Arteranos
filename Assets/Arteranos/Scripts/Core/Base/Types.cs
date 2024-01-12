@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Text;
 using System.Linq;
+using Ipfs;
 
 namespace Arteranos.Core
 {
@@ -60,80 +61,51 @@ namespace Arteranos.Core
 
     }
 
-    public struct ServerOnlineData
-    {
-        public List<byte[]> UserFingerprints;
-        [ASN1Tag(1, true)] public string CurrentWorld;
-        [ASN1Tag(2, true)] public string CurrentWorldName;
-
-
-        public static readonly string cacheFilePattern = $"{Application.persistentDataPath}/KnownServers/{{0}}/online.asn1";
-        public static readonly string urlPathPart = "/ServerOnline.asn1";
-        public static async Task<ServerOnlineData?> Retrieve(string url, bool forceReload = false)
-        {
-            (bool success, ServerOnlineData result) = await Utils.WebRetrieve<ServerOnlineData>(url, urlPathPart, cacheFilePattern, forceReload ? -1 : 30, 1, false);
-            return success ? result : null;
-        }
-
-        public static void Delete(string url)
-            => Utils.WebDelete(url, urlPathPart, cacheFilePattern);
-    }
-
     public class ServerInfo
     {
-        private ServerPublicData? PublicData;
-        private ServerOnlineData? OnlineData;
-        private ServerDescription DescriptionStruct;
+        private _ServerOnlineData OnlineData = null;
+        private ServerDescription DescriptionStruct = null;
 
-        public ServerInfo(ServerPublicData data)
+        public MultiHash PeerID { get; private set; } = null;
+
+        private ServerInfo()
         {
-            PublicData = data;
-            DescriptionStruct = null;
-            OnlineData = null;
+
         }
 
-        public ServerInfo(string url)
+        public ServerInfo(MultiHash PeerID)
         {
-            Uri uri = new(url);
-
-            PublicData = SettingsManager.ServerCollection.Get(uri.Host, uri.Port);
-            if(PublicData == null) 
-            {
-                // Completely unknown, or manually added. Create the 'lean' struct
-                // to hold the contact data.
-                PublicData = new()
-                {
-                    Address = uri.Host,
-                    MDPort = uri.Port,
-                };
-            }
-            DescriptionStruct = null;
-            OnlineData = null;
+            OnlineData = null; // TODO
+            DescriptionStruct = ServerDescription.DBLookup(PeerID.ToString());
+            this.PeerID = PeerID;
         }
 
-        public Task Update()
+        public async Task Update()
         {
-            // Maybe an ayt? query for the server description...
-
-            async Task t2()
-            {
-                OnlineData = await ServerOnlineData.Retrieve(URL);
-            }
-
-            Task[] tasks = new Task[]
-            {
-                t2()
-            };
-
-            return Task.WhenAll(tasks);
+            await Task.Run(() => {
+                OnlineData = null; // TODO
+                DescriptionStruct = ServerDescription.DBLookup(PeerID.ToString());
+            });
         }
 
         public void Delete()
         {
-            if(DescriptionStruct != null) ServerDescription.DBDelete(DescriptionStruct.PeerID);
-            ServerOnlineData.Delete(URL);
-            DescriptionStruct = null;
-            OnlineData = null;
+            // TODO
+            ServerDescription.DBDelete(PeerID.ToString());
+        }
+        public static IEnumerable<ServerInfo> Dump(DateTime cutoff)
+        {
+            foreach(ServerDescription sd in ServerDescription.DBList())
+            {
+                if (sd.LastModified < cutoff) continue;
+
+                yield return new ServerInfo()
+                {
+                    OnlineData = null, // TODO
+                    DescriptionStruct = sd,
+                    PeerID = sd.PeerID,
+                };
+            }
         }
 
         public bool IsValid => DescriptionStruct != null;
@@ -143,17 +115,17 @@ namespace Arteranos.Core
         public string PrivacyTOSNotice => DescriptionStruct?.PrivacyTOSNotice;
         public byte[] Icon => DescriptionStruct?.Icon;
         public string[] AdminNames => DescriptionStruct?.AdminNames ?? new string[0];
-        public string Address => PublicData?.Address;
+        // public string Address => PublicData?.Address;
         public int MDPort => DescriptionStruct?.MetadataPort ?? 0;
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
-        public string URL => $"http://{Address}:{MDPort}/";
-        public string SPKDBKey => $"{Address}:{ServerPort}";
+        //public string URL => $"http://{Address}:{MDPort}/";
+        public string SPKDBKey => DescriptionStruct.PeerID;
         public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new();
         public DateTime LastUpdated => DescriptionStruct?.LastModified ?? DateTime.UnixEpoch;
-        public DateTime LastOnline => PublicData?.LastOnline ?? DateTime.UnixEpoch;
-        public string CurrentWorld => OnlineData?.CurrentWorld;
-        public string CurrentWorldName => (OnlineData?.CurrentWorld != null) ? OnlineData?.CurrentWorldName : "Nexus";
-        public int UserCount => OnlineData?.UserFingerprints.Count ?? 0;
+        public DateTime LastOnline => OnlineData?.LastOnline ?? DateTime.UnixEpoch;
+        public string CurrentWorldCid => OnlineData?.CurrentWorldCid;
+        public string CurrentWorldName => (OnlineData?.CurrentWorldName != null) ? OnlineData?.CurrentWorldName : "Nexus";
+        public int UserCount => OnlineData?.UserFingerprints.Length ?? 0;
         public int FriendCount
         {
             get
@@ -166,7 +138,7 @@ namespace Arteranos.Core
                 foreach (SocialListEntryJSON entry in friends)
                 {
                     byte[] fingerprint = CryptoHelpers.GetFingerprint(entry.UserID);
-                    if (OnlineData.Value.UserFingerprints.Contains(fingerprint)) friend++;
+                    if (OnlineData.UserFingerprints.Contains(fingerprint)) friend++;
                 }
 
                 return friend;

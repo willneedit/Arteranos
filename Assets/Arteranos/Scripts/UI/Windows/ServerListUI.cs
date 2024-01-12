@@ -14,6 +14,7 @@ using Arteranos.Core;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Collections;
+using System;
 
 namespace Arteranos.UI
 {
@@ -53,14 +54,14 @@ namespace Arteranos.UI
 
                 cs = SettingsManager.Client;
 
-                foreach (string url in cs.ServerList)
-                    ServerList[url] = ServerListItem.New(lvc_ServerList.transform, url);
+                foreach (string PeerIDString in cs.ServerList)
+                    ServerList[PeerIDString] = ServerListItem.New(lvc_ServerList.transform, PeerIDString);
 
-                foreach (ServerPublicData spd in SettingsManager.ServerCollection.Dump(System.DateTime.MinValue))
+                foreach (ServerInfo si in ServerInfo.Dump(System.DateTime.MinValue))
                 {
-                    string url = $"http://{spd.Address}:{spd.MDPort}/";
-                    if (!ServerList.ContainsKey(url))
-                        ServerList[url] = ServerListItem.New(lvc_ServerList.transform, url);
+                    string PeerIDString = si.PeerID.ToString();
+                    if (!ServerList.ContainsKey(PeerIDString))
+                        ServerList[PeerIDString] = ServerListItem.New(lvc_ServerList.transform, PeerIDString);
 
                     yield return null;
                 }
@@ -73,6 +74,7 @@ namespace Arteranos.UI
 
         private void OnAddWorldClicked()
         {
+            throw new NotImplementedException();
             string url = txt_AddServerURL.text;
             ServerList[url] = ServerListItem.New(lvc_ServerList.transform, url);
         }

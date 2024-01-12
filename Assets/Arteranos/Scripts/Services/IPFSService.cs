@@ -230,6 +230,8 @@ namespace Arteranos.Services
 
                 if (peerMessage is ServerHello sh)
                     return await ParseServerHelloAsync(sh);
+                else if (peerMessage is _ServerOnlineData sod)
+                    return await ParseServerOnlineData(sod, publishedMessage.Sender);
                 else
                     throw new ArgumentException($"Unknown message from Peer {publishedMessage.Sender.Id}");
             }
@@ -273,6 +275,30 @@ namespace Arteranos.Services
                 catch(Exception ex) { Debug.LogException(ex); }
 
             }
+
+            return true;
+        }
+
+        private async Task<bool> ParseServerOnlineData(_ServerOnlineData sod, Peer SenderPeer)
+        {
+            string SenderPeerID = SenderPeer.Id.ToString();
+
+            // Maybe it's the first time where we've met. Need to check the background.
+            if(ServerDescription.DBLookup(SenderPeerID) == null)
+            {
+                using CancellationTokenSource cts = new(500);
+
+                Stream s = await ipfs.FileSystem.ReadFileAsync(sod.ServerDescriptionCid, cts.Token);
+
+                PublicKey pk = PublicKey.FromId(SenderPeerID);
+                ServerDescription sd = ServerDescription.Deserialize(pk, s);
+
+                sd.DBUpdate();
+            }
+
+            // Set on receive, no sense to transmit theactual time.
+            // In this context, latencies don't matter.
+            sod.LastOnline = DateTime.Now;
 
             return true;
         }

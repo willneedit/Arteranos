@@ -118,8 +118,6 @@ namespace Arteranos.Services
                     continue;
                 }
 
-                else if (request.Url.AbsolutePath == ServerOnlineData.urlPathPart)
-                    YieldServerOnlineData(response);
                 else if (request.Url.AbsolutePath == "/")
                     YieldLaunchPage(request.Url.Host, response);
                 else
@@ -133,20 +131,6 @@ namespace Arteranos.Services
 
             // NOTREACHED
             Debug.Log($"[{nameof(MetaDataServer)}] Exiting md server loop");
-        }
-
-        private static async void YieldServerOnlineData(HttpListenerResponse response)
-        {
-            ServerOnlineData serverOnlineData = new()
-            {
-                CurrentWorld = SettingsManager.CurrentWorld,
-                CurrentWorldName = SettingsManager.CurrentWorldName,
-                UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
-                                   where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
-                                   select CryptoHelpers.GetFingerprint(user.UserID)).ToList(),
-            };
-
-            await Core.Utils.WebEmit(serverOnlineData, response);
         }
 
         private  static async void YieldLaunchPage(string hostname, HttpListenerResponse response)

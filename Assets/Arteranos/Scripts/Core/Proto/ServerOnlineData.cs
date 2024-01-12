@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
 using System.IO;
 using ProtoBuf;
 
@@ -15,13 +14,13 @@ namespace Arteranos.Core
     public partial class _ServerOnlineData : PeerMessage
     {
         [ProtoMember(1)]
-        public string CurrentWorldCID;
+        public string CurrentWorldCid;
 
         [ProtoMember(2)]
         public string CurrentWorldName;
 
         [ProtoMember(3)]
-        public string ServerDescriptionCID; // Just in case if we don't have the SD at all.
+        public string ServerDescriptionCid; // Just in case if we don't have the SD at all.
 
         [ProtoMember(4)]
         public byte[][] UserFingerprints;

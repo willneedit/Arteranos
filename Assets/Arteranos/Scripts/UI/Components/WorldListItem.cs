@@ -121,6 +121,7 @@ namespace Arteranos.UI
                 FriendsMax);
         }
 
+        [Obsolete("URL -> Cid conversion")]
         private void OnVisitClicked(bool inPlace)
         {
             if(!string.IsNullOrEmpty(WorldURL))

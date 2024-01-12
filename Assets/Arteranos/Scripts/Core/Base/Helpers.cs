@@ -9,6 +9,7 @@ using Arteranos.Audio;
 using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.XR;
+using Ipfs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -284,14 +285,14 @@ namespace Arteranos.Web
     #region Web helpers
     public abstract class ConnectionManager : MonoBehaviour
     {
-        protected abstract Task<bool> ConnectToServer_(string serverURL);
+        protected abstract Task<bool> ConnectToServer_(MultiHash PeerID);
         protected abstract void DeliverDisconnectReason_(string reason);
         protected abstract void ExpectConnectionResponse_();
 
         public static ConnectionManager Instance { get; protected set; }
 
-        public static Task<bool> ConnectToServer(string serverURL) 
-            => Instance.ConnectToServer_(serverURL);
+        public static Task<bool> ConnectToServer(MultiHash PeerID) 
+            => Instance.ConnectToServer_(PeerID);
         public static void DeliverDisconnectReason(string reason) 
             => Instance.DeliverDisconnectReason_(reason);
         public static void ExpectConnectionResponse()
@@ -300,15 +301,16 @@ namespace Arteranos.Web
 
     public abstract class ServerSearcher : MonoBehaviour
     {
-        protected abstract void InitiateServerTransition_(string worldURL);
-        protected abstract void InitiateServerTransition_(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback);
+        protected abstract void InitiateServerTransition_(Cid WorldCid);
+        protected abstract void InitiateServerTransition_(Cid WorldCid, Action<Cid, MultiHash> OnSuccessCallback, Action OnFailureCallback);
 
         public static ServerSearcher Instance { get; protected set; }
 
-        public static void InitiateServerTransition(string worldURL)
-            => Instance.InitiateServerTransition_(worldURL);
-        public static void InitiateServerTransition(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback)
-            => Instance.InitiateServerTransition_(worldURL, OnSuccessCallback, OnFailureCallback);
+        public static void InitiateServerTransition(Cid WorldCid)
+            => Instance.InitiateServerTransition_(WorldCid);
+
+        public static void InitiateServerTransition(Cid worldCid, Action<Cid, MultiHash> OnSuccessCallback, Action OnFailureCallback)
+            => Instance.InitiateServerTransition_(worldCid, OnSuccessCallback, OnFailureCallback);
     }
     public abstract class WorldGallery : MonoBehaviour
     {
@@ -340,7 +342,7 @@ namespace Arteranos.Web
 
     public struct WorldData
     {
-        public string worldURL;
+        public Cid worldCid;
         public string name;
         public UserID authorID;
         public byte[] icon;
@@ -350,31 +352,31 @@ namespace Arteranos.Web
 
     public abstract class WorldTransition : MonoBehaviour
     {
-        protected abstract Task<(Exception, Context)> PreloadWorldDataAsync_(string worldURL, bool forceReload = false);
-        protected abstract bool IsWorldPreloaded_(string worldURL);
-        protected abstract Task<(Exception, WorldData)> GetWorldDataAsync_(string worldURL);
-        protected abstract Task<Exception> VisitWorldAsync_(string worldURL, bool forceReload = false);
+        protected abstract Task<(Exception, Context)> PreloadWorldDataAsync_(Cid WorldCid, bool forceReload = false);
+        protected abstract bool IsWorldPreloaded_(Cid WorldCid);
+        protected abstract Task<(Exception, WorldData)> GetWorldDataAsync_(Cid WorldCid);
+        protected abstract Task<Exception> VisitWorldAsync_(Cid WorldCid, bool forceReload = false);
         protected abstract Task MoveToOfflineWorld_();
-        protected abstract Task MoveToOnlineWorld_(string worldURL);
-        protected abstract Task EnterWorldAsync_(string worldURL, bool forceReload = false);
+        protected abstract Task MoveToOnlineWorld_(Cid WorldCid);
+        protected abstract Task EnterWorldAsync_(Cid WorldCid, bool forceReload = false);
         protected abstract void EnterDownloadedWorld_(string worldABF);
 
         public static WorldTransition Instance { get; set; }
 
-        public static Task<(Exception, WorldData)> GetWorldDataAsync(string worldURL)
-            => Instance.GetWorldDataAsync_(worldURL);
-        public static bool IsWorldPreloaded(string worldURL)
-            => Instance.IsWorldPreloaded_(worldURL);
+        public static Task<(Exception, WorldData)> GetWorldDataAsync(Cid WorldCid)
+            => Instance.GetWorldDataAsync_(WorldCid);
+        public static bool IsWorldPreloaded(Cid WorldCid)
+            => Instance.IsWorldPreloaded_(WorldCid);
         public static Task MoveToOfflineWorld()
             => Instance.MoveToOfflineWorld_();
-        public static Task MoveToOnlineWorld(string worldURL)
-            => Instance.MoveToOnlineWorld_(worldURL);
-        public static Task<(Exception, Context)> PreloadWorldDataAsync(string worldURL, bool forceReload = false)
-            => Instance.PreloadWorldDataAsync_(worldURL, forceReload);
-        public static Task<Exception> VisitWorldAsync(string worldURL, bool forceReload = false)
-            => Instance.VisitWorldAsync_(worldURL, forceReload);
-        public static Task EnterWorldAsync(string worldURL, bool forceReload = false)
-            => Instance.EnterWorldAsync_(worldURL, forceReload);
+        public static Task MoveToOnlineWorld(Cid WorldCid)
+            => Instance.MoveToOnlineWorld_(WorldCid);
+        public static Task<(Exception, Context)> PreloadWorldDataAsync(Cid WorldCid, bool forceReload = false)
+            => Instance.PreloadWorldDataAsync_(WorldCid, forceReload);
+        public static Task<Exception> VisitWorldAsync(Cid WorldCid, bool forceReload = false)
+            => Instance.VisitWorldAsync_(WorldCid, forceReload);
+        public static Task EnterWorldAsync(Cid WorldCid, bool forceReload = false)
+            => Instance.EnterWorldAsync_(WorldCid, forceReload);
         public static void EnterDownloadedWorld(string worldABF)
             => Instance.EnterDownloadedWorld_(worldABF);
     }

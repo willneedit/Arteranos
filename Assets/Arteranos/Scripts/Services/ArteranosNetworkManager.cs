@@ -28,11 +28,6 @@ namespace Arteranos.Services
             public ArteranosNetworkAuthenticator.AuthResponseMessage response;
         }
 
-        internal struct ServerCollectionEntryMessage : NetworkMessage
-        {
-            public byte[] sceDER;
-        }
-
         internal struct WorldChangeAnnounceMessage : NetworkMessage
         {
             public string Invoker;
@@ -271,9 +266,6 @@ namespace Arteranos.Services
             base.OnClientConnect();
 
             NetworkStatus.OnClientConnectionResponse?.Invoke(true, null);
-
-            if (!NetworkServer.active) CoEmitServer = StartCoroutine(
-                EmitServerCollectionCoroutine(EmitToServerSPD, false));
         }
 
         /// <summary>
@@ -326,11 +318,6 @@ namespace Arteranos.Services
 
             ResponseMessages.Clear();
             SCLastUpdatedToClient.Clear();
-
-            NetworkServer.RegisterHandler<ServerCollectionEntryMessage>(OnServerGotSCE);
-
-            CoEmitServer = StartCoroutine(
-                EmitServerCollectionCoroutine(EmitToClientsSPD, SettingsManager.Server.Public));
         }
 
         /// <summary>
@@ -342,7 +329,6 @@ namespace Arteranos.Services
 
             SCSnapshotCutoff = DateTime.MinValue;
 
-            NetworkClient.RegisterHandler<ServerCollectionEntryMessage>(OnClientGotSCE);
             NetworkClient.RegisterHandler<WorldChangeAnnounceMessage>(OnClientGotWCA);
         }
 
@@ -359,14 +345,6 @@ namespace Arteranos.Services
             base.OnStopServer();
 
             SettingsManager.CurrentWorld = null;
-
-            if (CoEmitServer != null)
-            {
-                StopCoroutine(CoEmitServer);
-                CoEmitServer = null;
-            }
-
-            NetworkServer.UnregisterHandler<ServerCollectionEntryMessage>();
         }
 
         /// <summary>
@@ -376,114 +354,9 @@ namespace Arteranos.Services
         {
             base.OnStopClient();
 
-            if (CoEmitServer != null)
-            {
-                StopCoroutine(CoEmitServer);
-                CoEmitServer = null;
-            }
-            NetworkClient.UnregisterHandler<ServerCollectionEntryMessage>();
             NetworkClient.UnregisterHandler<WorldChangeAnnounceMessage>();
 
         }
-
-        #endregion
-
-        #region Server Collection Synchronization
-
-        private void OnServerGotSCE(NetworkConnectionToClient client, ServerCollectionEntryMessage message)
-            => ParseSCEMessage(message);
-
-        private void OnClientGotSCE(ServerCollectionEntryMessage message)
-        {
-            // No point to deal with the loopback
-            // DEBUG: if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host) return;
-
-            ParseSCEMessage(message);
-        }
-
-        private static void ParseSCEMessage(ServerCollectionEntryMessage message)
-        {
-            ServerPublicData entry = Serializer.Deserialize<ServerPublicData>(message.sceDER);
-
-            // That's me....! :-O
-            // DEBUG: if (entry.Address == NetworkStatus.PublicIPAddress.ToString()) return;
-
-            ServerCollection sc = SettingsManager.ServerCollection;
-
-            // If it's more recent, add or update it to the list.
-            _ = sc.UpdateAsync(entry);
-
-            return;
-        }
-
-        private Coroutine CoEmitServer = null;
-
-        private IEnumerator EmitServerCollectionCoroutine(Action<ServerPublicData> emitter, bool self)
-        {
-            yield return new WaitForSeconds(5.0f);
-
-            (string address, int _, int mdport) = SettingsManager.GetServerConnectionData();
-
-            if (address == null) yield break;
-
-            ServerPublicData? oldSelfEntry = SettingsManager.ServerCollection.Get(address, mdport);
-            ServerPublicData tmp = new(SettingsManager.Server, address, mdport, true);
-
-            // Only seed the own server's record if there isn't in the server collection or there
-            // are changes.
-            if (oldSelfEntry != null)
-            {
-                tmp.LastOnline = oldSelfEntry.Value.LastOnline;
-                if (oldSelfEntry == tmp) self = false;
-            }
-
-            while (true)
-            {
-                if (self) emitter(tmp);
-
-                List<ServerPublicData> snapshot = SettingsManager.ServerCollection.Dump(SCSnapshotCutoff);
-
-                SCSnapshotCutoff = DateTime.Now;
-
-                foreach (ServerPublicData entry in snapshot)
-                {
-                    emitter(entry);
-
-                    // Rate throttling
-                    yield return new WaitForSeconds(0.2f);
-                }
-
-
-                // Update interval
-                yield return new WaitForSeconds(10.0f);
-            }
-        }
-
-        private void EmitToClientsSPD(ServerPublicData entry)
-        {
-            ServerCollectionEntryMessage scm;
-            scm.sceDER = Serializer.Serialize(entry);
-
-            foreach (NetworkConnectionToClient conn in NetworkServer.connections.Values)
-            {
-                int cid = conn.connectionId;
-                if (SCLastUpdatedToClient[cid] < entry.LastUpdated)
-                {
-                    conn.Send(scm);
-                    Debug.Log($"[Server] Sending entry of {entry.Key()} to conn {cid}");
-                }
-                SCLastUpdatedToClient[cid] = SCSnapshotCutoff;
-            }
-        }
-
-        private void EmitToServerSPD(ServerPublicData entry)
-        {
-            ServerCollectionEntryMessage scm;
-            scm.sceDER = Serializer.Serialize(entry);
-            NetworkClient.Send(scm);
-            Debug.Log($"[Client] Sending entry of {entry.Key()} to server");
-        }
-
 
         #endregion
 

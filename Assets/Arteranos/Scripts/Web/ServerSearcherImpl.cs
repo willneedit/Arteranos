@@ -14,6 +14,7 @@ using UnityEngine;
 using System.Threading;
 using Arteranos.UI;
 using Arteranos.Services;
+using Ipfs;
 
 namespace Arteranos.Web
 {
@@ -21,9 +22,9 @@ namespace Arteranos.Web
     internal class ServerSearcherContext : Context
     {
         public List<ServerInfo> serverInfos = null;
-        public string desiredWorldURL = null;
+        public Cid desiredWorldCid = null;
         public ServerPermissions desiredWorldPermissions = null;
-        public string resultServerURL = null;
+        public MultiHash resultPeerID = null;
     }
 
     internal class PreloadServerRequirementsOp : IAsyncOperation<Context>
@@ -37,7 +38,7 @@ namespace Arteranos.Web
         {
             ServerSearcherContext context = _context as ServerSearcherContext;
 
-            WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(context.desiredWorldURL, token);
+            WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(context.desiredWorldCid, token);
 
             context.desiredWorldPermissions = wi?.metaData.ContentRating;
 
@@ -61,10 +62,10 @@ namespace Arteranos.Web
             static Context Execute(ServerSearcherContext context, CancellationToken token)
             {
                 context.serverInfos = new();
-                context.resultServerURL = null;
+                context.resultPeerID = null;
 
-                foreach (var entry in SettingsManager.ServerCollection.Dump(DateTime.MinValue))
-                    context.serverInfos.Add(new(entry));
+                foreach (ServerInfo entry in ServerInfo.Dump(DateTime.MinValue))
+                    context.serverInfos.Add(entry);
 
                 return context;
             }
@@ -123,7 +124,7 @@ namespace Arteranos.Web
                 int xScore = x.MatchScore;
                 if(x.UsesCustomTOS && !SettingsManager.Client.AllowCustomTOS)
                 {
-                    Debug.Log($"{x.URL} uses a custom TOS, which is disallowed.");
+                    Debug.Log($"{x.PeerID} uses a custom TOS, which is disallowed.");
                     xScore = -20000;
                 }
                 else if (!x.IsOnline)
@@ -136,7 +137,7 @@ namespace Arteranos.Web
                     //Debug.Log($"{x.URL} is too restrictive for the desired world");
                     xScore = -10000;
                 }
-                else if (context.desiredWorldURL != null && x.CurrentWorld != context.desiredWorldURL)
+                else if (context.desiredWorldCid != null && x.CurrentWorldCid != context.desiredWorldCid)
                 {
                     //Debug.Log($"{x.URL} loaded a different world");
                     xScore = -10000;
@@ -164,7 +165,7 @@ namespace Arteranos.Web
                 if (leader != null && score < 0) leader = null;
 
                 // ... And the winner is... *drumroll*
-                if (leader != null) context.resultServerURL = leader.URL;
+                if (leader != null) context.resultPeerID = leader.PeerID;
 
                 return context;
             }
@@ -182,7 +183,7 @@ namespace Arteranos.Web
         {
             ServerSearcherContext context = new()
             {
-                desiredWorldURL = desiredWorld
+                desiredWorldCid = desiredWorld
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
@@ -196,34 +197,34 @@ namespace Arteranos.Web
             return (executor, context);
         }
 
-        protected override void InitiateServerTransition_(string worldURL)
+        protected override void InitiateServerTransition_(Cid WorldCid)
         {
-            static void GotResult(string worldURL, string serverURL) 
-                => _ = OnGotSearchResult(worldURL, serverURL);
+            static void GotResult(Cid WorldCid, MultiHash ServerPeerID) 
+                => _ = OnGotSearchResult(WorldCid, ServerPeerID);
 
-            InitiateServerTransition_(worldURL, GotResult, null);
+            InitiateServerTransition_(WorldCid, GotResult, null);
         }
 
-        protected override void InitiateServerTransition_(string worldURL, Action<string, string> OnSuccessCallback, Action OnFailureCallback)
+        protected override void InitiateServerTransition_(Cid WorldCid, Action<Cid, MultiHash> OnSuccessCallback, Action OnFailureCallback)
         {
             IProgressUI pui = ProgressUIFactory.New();
 
-            pui.SetupAsyncOperations(() => PrepareSearchServers(worldURL));
+            pui.SetupAsyncOperations(() => PrepareSearchServers(WorldCid));
 
-            pui.Completed += context => OnSuccessCallback(worldURL, (context as ServerSearcherContext).resultServerURL);
+            pui.Completed += context => OnSuccessCallback(WorldCid, (context as ServerSearcherContext).resultPeerID);
             pui.Faulted += (ex, context) => OnFailureCallback();
         }
 
-        private static async Task OnGotSearchResult(string worldURL, string serverURL)
+        private static async Task OnGotSearchResult(Cid WorldCid, MultiHash ServerPeerID)
         {
             // No matching server, initiate Start Host with loading the world on entering
-            if (!string.IsNullOrEmpty(worldURL) && serverURL == null)
+            if (!string.IsNullOrEmpty(WorldCid) && ServerPeerID == null)
             {
                 // It's time to part ways...
                 if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
                     await NetworkStatus.StopHost(true);
 
-                await WorldTransition.EnterWorldAsync(worldURL);
+                await WorldTransition.EnterWorldAsync(WorldCid);
 
                 // If we haven't a server (or, just left one), start up.
                 if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
@@ -231,9 +232,9 @@ namespace Arteranos.Web
             }
 
             // No matching server, leave it be
-            if (serverURL == null) return;
+            if (ServerPeerID == null) return;
 
-            if(SettingsManager.IsSelf(new Uri(serverURL)))
+            if(SettingsManager.IsSelf(ServerPeerID))
             {
                 Debug.Log("...It's us! :O");
                 return;
@@ -244,7 +245,7 @@ namespace Arteranos.Web
             await Task.Delay(1000);
 
             // Matching server (with matching world, if needed), initiate remote connection
-            await ConnectionManager.ConnectToServer(serverURL);
+            await ConnectionManager.ConnectToServer(ServerPeerID);
         }
     }
 }

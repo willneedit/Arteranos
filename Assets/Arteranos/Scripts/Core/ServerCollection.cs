@@ -16,6 +16,7 @@ using UnityEngine;
 
 namespace Arteranos.Core
 {
+#if false
     public struct ServerPublicData : IEquatable<ServerPublicData>
     {
         public string Address;
@@ -210,4 +211,6 @@ namespace Arteranos.Core
             return sc;
         }
     }
+
+#endif
 }

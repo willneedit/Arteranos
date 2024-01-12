@@ -11,6 +11,7 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using Arteranos.Core;
+using Ipfs;
 
 namespace Arteranos.PlayTest
 {
@@ -94,6 +95,11 @@ namespace Arteranos.PlayTest
             Instance = this;
 
             base.Awake();
+        }
+
+        protected override bool IsSelf_(MultiHash ServerPeerID)
+        {
+            throw new NotImplementedException();
         }
 
         protected override void OnDestroy()

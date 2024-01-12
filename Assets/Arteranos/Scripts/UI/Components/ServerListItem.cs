@@ -13,12 +13,13 @@ using Arteranos.Core;
 using Arteranos.Web;
 using System.Threading.Tasks;
 using System.Collections;
+using System;
 
 namespace Arteranos.UI
 {
     public class ServerListItem : ListItemBase
     {
-        public string serverURL = null;
+        public string PeerID = null;
         public Image img_Icon = null;
         public TMP_Text lbl_Caption = null;
 
@@ -32,12 +33,12 @@ namespace Arteranos.UI
 
         private ServerInfo si = null;
 
-        public static ServerListItem New(Transform parent, string url)
+        public static ServerListItem New(Transform parent, string PeerID)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/ServerListItem"));
             go.transform.SetParent(parent, false);
             ServerListItem serverListItem = go.GetComponent<ServerListItem>();
-            serverListItem.serverURL = url;
+            serverListItem.PeerID = PeerID;
             return serverListItem;
         }
 
@@ -62,7 +63,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            si = new(serverURL);
+            si = new(PeerID);
 
             PopulateServerData();
         }
@@ -91,7 +92,7 @@ namespace Arteranos.UI
 
 
             // No data for that server's URL, maybe the manually entered URL is not added yet.
-            lbl_Caption.text = $"({serverURL}) (Unknown)";
+            lbl_Caption.text = $"({PeerID}) (Unknown)";
 
             // Either try to add an unconfirmed URL, or to undo that attempt, or
             // try to retrieve the probably offline server.
@@ -127,7 +128,7 @@ namespace Arteranos.UI
         private async void OnVisitClicked()
         {
             btn_Visit.interactable = false;                
-            await ConnectionManager.ConnectToServer(serverURL);
+            await ConnectionManager.ConnectToServer(PeerID);
 
             // Can be removed because of the TOS afreement window, ot other things.
             if(btn_Visit != null) btn_Visit.interactable = true;
@@ -138,9 +139,9 @@ namespace Arteranos.UI
             Client cs = SettingsManager.Client;
 
             // Put it down into our bookmark list.
-            if(!cs.ServerList.Contains(serverURL))
+            if(!cs.ServerList.Contains(PeerID))
             {
-                cs.ServerList.Add(serverURL);
+                cs.ServerList.Add(PeerID);
                 cs.Save();
             }
 
@@ -152,8 +153,8 @@ namespace Arteranos.UI
             Client cs = SettingsManager.Client;
 
             // Strike it from our list
-            if(cs.ServerList.Contains(serverURL))
-                cs.ServerList.Remove(serverURL);
+            if(cs.ServerList.Contains(PeerID))
+                cs.ServerList.Remove(PeerID);
 
             // The server public is entered with the server port, not the MD port.
             string key = si.SPKDBKey;

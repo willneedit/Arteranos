@@ -7,6 +7,7 @@
 
 using Arteranos.Core;
 using Arteranos.Web;
+using Ipfs;
 using Mirror;
 using System;
 using System.Collections;
@@ -44,18 +45,13 @@ namespace Arteranos.Services
 
             yield return new WaitForEndOfFrame();
 
-            if (TargetedServerPort == $"anyhost:{ServerJSON.DefaultMetadataPort}")
+            if (TargetedPeerID == $"anyhost:{ServerJSON.DefaultMetadataPort}")
             {
-                ServerSearcher.InitiateServerTransition(DesiredWorld);
+                ServerSearcher.InitiateServerTransition(DesiredWorldCid);
             }
-            else if (!string.IsNullOrEmpty(TargetedServerPort))
+            else if (TargetedPeerID != null)
             {
-                Uri uri = Utils.ProcessUriString(TargetedServerPort,
-                    scheme: "http",
-                    port: ServerJSON.DefaultMetadataPort
-                );
-
-                ConnectionManager.ConnectToServer(uri.ToString());
+                ConnectionManager.ConnectToServer(TargetedPeerID);
 
                 // https://www.youtube.com/watch?v=dQw4w9WgXcQ
                 while (NetworkClient.isConnecting) yield return null;
@@ -65,7 +61,7 @@ namespace Arteranos.Services
             }
             else
             {
-                Task t = WorldTransition.EnterWorldAsync(DesiredWorld);
+                Task t = WorldTransition.EnterWorldAsync(DesiredWorldCid);
                 while(!t.IsCompleted && !t.IsFaulted) yield return null;
             }
 
@@ -101,6 +97,9 @@ namespace Arteranos.Services
 
         protected override void StartCoroutineAsync_(Func<IEnumerator> action) 
             => QueuedCoroutine.Enqueue(action);
+
+        protected override bool IsSelf_(MultiHash ServerPeerID) 
+            => FindObjectOfType<IPFSService>().Self.Id == ServerPeerID;
     }
 }
 

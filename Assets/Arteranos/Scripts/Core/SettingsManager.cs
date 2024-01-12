@@ -6,6 +6,7 @@
  */
 
 using Arteranos.Services;
+using Ipfs;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -18,8 +19,8 @@ namespace Arteranos.Core
 
         private CommandLine Command;
 
-        protected static string TargetedServerPort = null;
-        protected static string DesiredWorld = null;
+        protected static MultiHash TargetedPeerID = null;
+        protected static Cid DesiredWorldCid = null;
 
         public static bool StartupTrigger { get; private set; } = false;
 
@@ -28,7 +29,6 @@ namespace Arteranos.Core
         public static Transform Purgatory { get; private set; }
         public static Client Client { get; internal set; }
         public static Server Server { get; internal set; }
-        public static ServerCollection ServerCollection { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
         public static string CurrentWorld { get; set; }
         public static string CurrentWorldName { get; set; }
@@ -68,31 +68,23 @@ namespace Arteranos.Core
             Client = Client.Load();
             Server = Server.Load();
             ServerUsers = ServerUserBase.Load();
-            ServerCollection = ServerCollection.Load();
             Command = ScriptableObject.CreateInstance<CommandLine>();
 
             Command.GetCommandlineArgs();
 
             if(Command.PlainArgs.Count > 0)
             {
+                // arteranos:/[<PeerID>]/[<WorldCid>]
 
-                Uri uri = Utils.ProcessUriString(
-                    Command.PlainArgs[0],
-           
-                    scheme: "arteranos",
-                    port: ServerJSON.DefaultMetadataPort
-                );
+                string[] parts = Command.PlainArgs[0].Split('/');
+                if(parts.Length == 2 && parts[0] == "arteranos:")
+                {
+                    TargetedPeerID = string.IsNullOrEmpty(parts[1]) ? parts[1] : null;
+                    DesiredWorldCid = string.IsNullOrEmpty(parts[2]) ? parts[2] : null;
 
-                Command.PlainArgs.RemoveAt(0);
-
-                if(!string.IsNullOrEmpty(uri.Host))
-                    TargetedServerPort = $"{uri.Host}:{uri.Port}";
-
-                if(uri.AbsolutePath != "/")
-                    DesiredWorld = uri.AbsolutePath[1..];
-
-                StartupTrigger = true;
-
+                    if(TargetedPeerID != null || DesiredWorldCid != null) 
+                        StartupTrigger = true;
+                }
             }
 
             Client.VRMode = GetBoolArg("-vr", Client.VRMode);
@@ -125,19 +117,16 @@ namespace Arteranos.Core
             };
         }
 
-        public static bool IsSelf(Uri uri)
-        {
-            (string address, int _, int mdport) = GetServerConnectionData();
-
-            return (address == uri.Host && mdport == uri.Port);
-        }
-
+        protected abstract bool IsSelf_(MultiHash ServerPeerID);
         protected abstract void PingServerChangeWorld_(string invoker, string worldURL);
         protected abstract void StartCoroutineAsync_(Func<IEnumerator> action);
 
         public static void PingServerChangeWorld(string invoker, string worldURL)
             => Instance.PingServerChangeWorld_(invoker, worldURL);
-        public static void StartCoroutineAsync(Func<IEnumerator> action) 
+        public static void StartCoroutineAsync(Func<IEnumerator> action)
             => Instance.StartCoroutineAsync_(action);
+
+        public static bool IsSelf(MultiHash ServerPeerID)
+            => Instance.IsSelf_(ServerPeerID);
     }
 }

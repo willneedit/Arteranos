@@ -18,12 +18,13 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Collections;
 using System.Linq;
+using Ipfs;
 
 namespace Arteranos.UI
 {
     internal struct Collection
     {
-        public string worldURL;
+        public Cid worldCid;
         public int serversCount;
         public int usersCount;
         public int friendsMax;
@@ -117,7 +118,7 @@ namespace Arteranos.UI
                 WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(url, token);
                 worldlist[url] = new()
                 {
-                    worldURL = url,
+                    worldCid = url,
                     friendsMax = 0,
                     serversCount = 0,
                     usersCount = 0,
@@ -161,25 +162,25 @@ namespace Arteranos.UI
                 await serverInfo.Update();
 
                 // Server offline or has no world loaded?
-                string url = serverInfo.CurrentWorld;
-                if (!serverInfo.IsOnline || string.IsNullOrEmpty(url)) return;
+                Cid Cid = serverInfo.CurrentWorldCid;
+                if (!serverInfo.IsOnline || Cid == null) return;
 
                 int friends = serverInfo.FriendCount;
 
                 DictMutex.WaitOne();
 
-                if(worldlist.TryGetValue(url, out Collection list))
+                if(worldlist.TryGetValue(Cid, out Collection list))
                 {
                     list.serversCount++;
                     list.usersCount += serverInfo.UserCount;
                     if(friends > list.friendsMax) list.friendsMax = friends;
-                    worldlist[url] = list;
+                    worldlist[Cid] = list;
                 }
                 else
                 {
-                    worldlist[url] = new()
+                    worldlist[Cid] = new()
                     {
-                        worldURL = url,
+                        worldCid = Cid,
                         friendsMax = friends,
                         serversCount = 1,
                         usersCount = serverInfo.UserCount
@@ -193,8 +194,8 @@ namespace Arteranos.UI
 
             TaskPool<ServerInfo> pool = new(20);
 
-            foreach (var entry in SettingsManager.ServerCollection.Dump(DateTime.MinValue))
-                serverInfos.Add(new(entry));
+            foreach (var entry in ServerInfo.Dump(DateTime.MinValue))
+                serverInfos.Add(entry);
 
             foreach (ServerInfo info in serverInfos) pool.Schedule(info, UpdateOne);
 

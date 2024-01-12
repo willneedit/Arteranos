@@ -62,7 +62,7 @@ namespace Arteranos.UI
                 yield return null;
 
                 lbl_Name.text = si.Name;
-                lbl_Address.text = si.Address;
+                lbl_Address.text = ""; // Maybe an abbreviated PeerID?
                 lbl_LastUpdated.text = si.LastUpdated.HumanReadable();
                 lbl_LastOnline.text = si.LastOnline.HumanReadable();
                 lbl_MatchIndex.text = si.Permissions.HumanReadableMI(

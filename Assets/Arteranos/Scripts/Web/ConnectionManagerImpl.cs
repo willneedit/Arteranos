@@ -13,6 +13,8 @@ using UnityEngine;
 using Arteranos.Services;
 using System.Collections;
 using Arteranos.UI;
+using Ipfs;
+using System.Net;
 
 namespace Arteranos.Web
 {
@@ -22,7 +24,7 @@ namespace Arteranos.Web
         private void Awake() => Instance = this;
         private void OnDestroy() => Instance = null;
 
-        protected override async Task<bool> ConnectToServer_(string serverURL)
+        protected override async Task<bool> ConnectToServer_(MultiHash PeerID)
         {
             if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
             {
@@ -30,7 +32,7 @@ namespace Arteranos.Web
                 await NetworkStatus.StopHost(false);
             }
 
-            ServerInfo si = new(serverURL);
+            ServerInfo si = new(PeerID);
             await si.Update();
 
             bool? result = null;
@@ -56,16 +58,19 @@ namespace Arteranos.Web
             while(result == null) await Task.Yield();
 
             // ... Fire!
-            if(result == true) return CommenceConnection(si);
+            if(result == true) return await CommenceConnection(si);
 
             // Drat. Hangfire.
             return false;
         }
 
-        private bool CommenceConnection(ServerInfo si)
+        [Obsolete("TODO PeerID to IPAddress lookup")]
+        private async Task<bool> CommenceConnection(ServerInfo si)
         {
             // FIXME Telepathy Transport specific.
-            Uri connectionUri = new($"tcp4://{si.Address}:{si.ServerPort}");
+            IPAddress addr = IPAddress.IPv6Any;
+
+            Uri connectionUri = new($"tcp4://{addr}:{si.ServerPort}");
             ExpectConnectionResponse_();
             NetworkStatus.StartClient(connectionUri);
 
