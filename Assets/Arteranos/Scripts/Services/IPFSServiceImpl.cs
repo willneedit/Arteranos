@@ -56,6 +56,8 @@ namespace Arteranos.Services
 
         private CancellationTokenSource cts = null;
 
+        private byte[][] UserFingerprints = null;
+
         private async void Start()
         {
             Instance = this;
@@ -67,7 +69,7 @@ namespace Arteranos.Services
             // If it doesn't exist, write down the template in the config directory.
             if (!FileUtils.ReadConfig(PATH_USER_PRIVACY_NOTICE, File.Exists))
             {
-                FileUtils.WriteTextConfig(PATH_USER_PRIVACY_NOTICE, Core.Utils.LoadDefaultTOS());
+                FileUtils.WriteTextConfig(PATH_USER_PRIVACY_NOTICE, Utils.LoadDefaultTOS());
                 Debug.LogWarning("Privacy notice and Terms Of Service template written down - Read (and modify) according to your use case!");
             }
 
@@ -119,6 +121,12 @@ namespace Arteranos.Services
             ipfs = ipfsTmp;
 
             await _FlipServerDescription(true);
+
+            UserFingerprints = new byte[0][];
+
+            _ = EmitServerHeartbeat(cts.Token);
+
+            SettingsManager.StartCoroutineAsync(GetUserListCoroutine);
         }
 
         private async void OnDestroy()
@@ -132,6 +140,35 @@ namespace Arteranos.Services
             cts?.Dispose();
 
             Instance = null;
+        }
+
+        private IEnumerator GetUserListCoroutine()
+        {
+            while(true)
+            {
+                byte[][] UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
+                                             where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
+                                             select CryptoHelpers.GetFingerprint(user.UserID)).ToArray();
+
+                yield return new WaitForSeconds(20);
+            }
+        }
+
+        private async Task EmitServerHeartbeat(CancellationToken cancel)
+        {
+            while(!cancel.IsCancellationRequested)
+            {
+                try
+                {
+                    await _SendServerOnlineData();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+
+                await Task.Delay(TimeSpan.FromMinutes(5), cancel);
+            }
         }
 
         public override async Task<IPAddress> _GetPeerIPAddress(string PeerID, CancellationToken token = default)
@@ -196,10 +233,6 @@ namespace Arteranos.Services
             if(last > DateTime.Now - TimeSpan.FromMinutes(2)) return Task.CompletedTask;
             last = DateTime.Now;
 
-            byte[][] UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
-                                    where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
-                                    select CryptoHelpers.GetFingerprint(user.UserID)).ToArray();
-
             _ServerOnlineData sod = new()
             {
                 CurrentWorldCid = SettingsManager.CurrentWorld,
@@ -247,18 +280,6 @@ namespace Arteranos.Services
             message.Serialize(ms);
             ms.Position = 0;
             await ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", ms, cts.Token);
-        }
-
-        public async Task WaitForIPFSAsync()
-        {
-            while(Ipfs == null)
-                await Task.Delay(100);
-        }
-
-        public IEnumerator WaitForIPFSCoRo()
-        {
-            while (ipfs == null)
-                yield return new WaitForEndOfFrame();
         }
 
         public async Task<bool> ParseIncomingIPFSMessageAsync(IPublishedMessage publishedMessage)
