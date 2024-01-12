@@ -8,6 +8,7 @@
 using Arteranos.Audio;
 using Arteranos.Avatar;
 using Arteranos.Core;
+using Arteranos.Core.Cryptography;
 using Arteranos.XR;
 using Ipfs;
 using System;
@@ -275,11 +276,39 @@ namespace Arteranos.Services
         public static void RenewMic() => Instance.RenewMic_();
 
     }
+
+    public abstract class IPFSService : MonoBehaviour
+    {
+        public abstract Peer _Self { get; }
+        public abstract SignKey _ServerKeyPair { get; }
+
+        public abstract event Action<IPublishedMessage> _OnReceivedHello;
+        public abstract event Action<IPublishedMessage> _OnReceivedServerDirectMessage;
+
+        public abstract Task<IPAddress> _GetPeerIPAddress(string PeerID, CancellationToken token = default);
+        public abstract Task _FlipServerDescription(bool reload);
+        public abstract Task _SendServerHello();
+        public abstract Task _SendServerDirectMessage(string peerId);
+
+        public static IPFSService Instance { get; protected set; }
+
+        public static Peer Self 
+            => Instance._Self;
+        public static Task<IPAddress> GetPeerIPAddress(string PeerID, CancellationToken token = default)
+            => Instance._GetPeerIPAddress(PeerID, token);
+        public static Task FlipServerDescription(bool reload)
+            => Instance._FlipServerDescription(reload);
+        public static Task SendServerHello()
+            => Instance._SendServerHello();
+        public static Task SendServerDirectMessage(string peerId)
+            => Instance._SendServerDirectMessage(peerId);
+
+    }
     #endregion
     // -------------------------------------------------------------------
 }
 
-namespace Arteranos.Web
+    namespace Arteranos.Web
 {
     // -------------------------------------------------------------------
     #region Web helpers

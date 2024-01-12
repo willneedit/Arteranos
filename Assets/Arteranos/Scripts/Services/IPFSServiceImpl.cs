@@ -25,15 +25,15 @@ using System.Net;
 
 namespace Arteranos.Services
 {
-    public class IPFSService : MonoBehaviour
+    public class IPFSServiceImpl : IPFSService
     {
         public IpfsEngine Ipfs { get => ipfs; }
-        public Peer Self { get => self; }
-        public SignKey ServerKeyPair { get => serverKeyPair; }
+        public override Peer _Self { get => self; }
+        public override SignKey _ServerKeyPair { get => serverKeyPair; }
         public static string CachedPTOSNotice { get; private set; } = null;
 
-        public event Action<IPublishedMessage> OnReceivedHello;
-        public event Action<IPublishedMessage> OnReceivedServerDirectMessage;
+        public override event Action<IPublishedMessage> _OnReceivedHello;
+        public override event Action<IPublishedMessage> _OnReceivedServerDirectMessage;
 
         private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
 
@@ -56,6 +56,8 @@ namespace Arteranos.Services
 
         private async void Start()
         {
+            Instance = this;
+
             cts = new();
 
             // If it doesn't exist, write down the template in the config directory.
@@ -93,7 +95,7 @@ namespace Arteranos.Services
                 {
                     if (msg.Sender.Id == self.Id) return;
                     bool success = await ParseIncomingIPFSMessageAsync(msg);
-                    if(success) OnReceivedHello?.Invoke(msg);
+                    if(success) _OnReceivedHello?.Invoke(msg);
                 }, 
                 cts.Token);
 
@@ -102,7 +104,7 @@ namespace Arteranos.Services
                 {
                     if (msg.Sender.Id == self.Id) return;
                     bool success = await ParseIncomingIPFSMessageAsync(msg);
-                    if (success) OnReceivedServerDirectMessage?.Invoke(msg);
+                    if (success) _OnReceivedServerDirectMessage?.Invoke(msg);
                 }, 
                 cts.Token);
 
@@ -112,21 +114,23 @@ namespace Arteranos.Services
 
             ipfs = ipfsTmp;
 
-            await FlipServerDescription(true);
+            await _FlipServerDescription(true);
         }
 
         private async void OnDestroy()
         {
-            await FlipServerDescription(false);
+            await _FlipServerDescription(false);
 
             await ipfs.StopAsync().ConfigureAwait(false);
 
             cts?.Cancel();
 
             cts?.Dispose();
+
+            Instance = null;
         }
 
-        public async Task<IPAddress> GetPeerIPAddress(string PeerID, CancellationToken token = default)
+        public override async Task<IPAddress> _GetPeerIPAddress(string PeerID, CancellationToken token = default)
         {
             Peer found = await ipfs.Dht.FindPeerAsync(PeerID, token).ConfigureAwait(false);
 
@@ -145,7 +149,7 @@ namespace Arteranos.Services
             }
         }
 
-        public async Task FlipServerDescription(bool reload)
+        public override async Task _FlipServerDescription(bool reload)
         {
             if(currentSDCid != null)
                 await Ipfs.Block.RemoveAsync(currentSDCid);
@@ -181,7 +185,7 @@ namespace Arteranos.Services
                 currentSDCid = fsn.Id;
             }
         }
-        public async Task SendServerHello()
+        public override async Task _SendServerHello()
         {
             ServerHello.SDLink selflink = new()
             {
@@ -204,7 +208,7 @@ namespace Arteranos.Services
             await ipfs.PubSub.PublishAsync(topic_hello, ms);
         }
 
-        public async Task SendServerDirectMessage(string peerId)
+        public override async Task _SendServerDirectMessage(string peerId)
         {
             using CancellationTokenSource cts = new(100);
             await ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", "hello", cts.Token);

@@ -18,10 +18,10 @@ namespace Arteranos.PlayTest
     public class TestFixture
     {
         private static IpfsEngine ipfs = null;
-        private static IPFSService iPFSService = null;
+        private static IPFSServiceImpl iPFSService = null;
 
         public static IpfsEngine Ipfs { get => ipfs; }
-        public static IPFSService IPFSService { get => iPFSService; }
+        public static IPFSServiceImpl IPFSService { get => iPFSService; }
 
         public static IEnumerator SetupIPFS()
         {
@@ -31,7 +31,7 @@ namespace Arteranos.PlayTest
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
 
-            IPFSService old = GameObject.FindObjectOfType<IPFSService>();
+            IPFSServiceImpl old = GameObject.FindObjectOfType<IPFSServiceImpl>();
             if(old != null && old.Ipfs != null)
             {
                 ipfs = old.Ipfs;
@@ -40,7 +40,7 @@ namespace Arteranos.PlayTest
             }
 
             GameObject go = new GameObject("IPFS Service");
-            IPFSService srv = go.AddComponent<IPFSService>();
+            IPFSServiceImpl srv = go.AddComponent<IPFSServiceImpl>();
 
             DateTime expiry = DateTime.Now + TimeSpan.FromSeconds(5);
             while (srv.Ipfs == null)
@@ -58,7 +58,7 @@ namespace Arteranos.PlayTest
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
 
-            IPFSService old = GameObject.FindObjectOfType<IPFSService>();
+            IPFSServiceImpl old = GameObject.FindObjectOfType<IPFSServiceImpl>();
             if (old != null) GameObject.Destroy(old.gameObject);
             yield return new WaitForSeconds(1);
         }

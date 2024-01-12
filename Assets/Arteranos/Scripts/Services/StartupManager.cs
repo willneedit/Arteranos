@@ -99,7 +99,7 @@ namespace Arteranos.Services
             => QueuedCoroutine.Enqueue(action);
 
         protected override bool IsSelf_(MultiHash ServerPeerID) 
-            => FindObjectOfType<IPFSService>().Self.Id == ServerPeerID;
+            => IPFSService.Self.Id == ServerPeerID;
     }
 }
 

@@ -23,7 +23,7 @@ namespace Arteranos.PlayTest.Services
 {
     public class IPFS
     {
-        IPFSService srv = null;
+        IPFSServiceImpl srv = null;
         IpfsEngine ipfs = null;
         Peer self = null;
 
@@ -84,7 +84,7 @@ namespace Arteranos.PlayTest.Services
             yield return null;
 
             GameObject go2 = new GameObject("IPFS Service");
-            srv = go2.AddComponent<IPFSService>();
+            srv = go2.AddComponent<IPFSServiceImpl>();
 
             yield return null;
 
@@ -105,7 +105,7 @@ namespace Arteranos.PlayTest.Services
             var go1 = GameObject.FindObjectOfType<StartupManagerMock>();
             GameObject.Destroy(go1.gameObject);
 
-            var go2 = GameObject.FindObjectOfType<IPFSService>();
+            var go2 = GameObject.FindObjectOfType<IPFSServiceImpl>();
             GameObject.Destroy(go2.gameObject);
 
             yield return null;
@@ -138,7 +138,7 @@ namespace Arteranos.PlayTest.Services
 
             try
             {
-                srv.OnReceivedHello += Receiver;
+                srv._OnReceivedHello += Receiver;
                 await otherNode.StartAsync();
                 Peer other = await otherNode.LocalPeer;
 
@@ -155,7 +155,7 @@ namespace Arteranos.PlayTest.Services
             }
             finally
             {
-                srv.OnReceivedHello -= Receiver;
+                srv._OnReceivedHello -= Receiver;
 
                 await otherNode.StopAsync();
             }
@@ -197,7 +197,7 @@ namespace Arteranos.PlayTest.Services
 
                 await otherNode.Swarm.ConnectAsync(self.Addresses.First());
 
-                await srv.SendServerHello();
+                await srv._SendServerHello();
 
                 await TestFixture.WaitForConditionAsync(5, () => (hello != null), "Message was not received");
 
@@ -277,7 +277,7 @@ namespace Arteranos.PlayTest.Services
 
             using CancellationTokenSource cts = new(TimeSpan.FromSeconds(20));
 
-            IPAddress addr = await srv.GetPeerIPAddress(peerID, cts.Token);
+            IPAddress addr = await srv._GetPeerIPAddress(peerID, cts.Token);
 
             Debug.Log($"Peer's address is {addr}");
         }
@@ -299,7 +299,7 @@ namespace Arteranos.PlayTest.Services
 
             try
             {
-                IPAddress addr = await srv.GetPeerIPAddress(wrongPeerID, cts.Token);
+                IPAddress addr = await srv._GetPeerIPAddress(wrongPeerID, cts.Token);
 
                 Debug.Log($"Peer's address is {addr}");
 
