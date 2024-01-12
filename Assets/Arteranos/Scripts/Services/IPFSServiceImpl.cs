@@ -46,6 +46,8 @@ namespace Arteranos.Services
         private Peer self = null;
         private SignKey serverKeyPair = null;
 
+        private DateTime last = DateTime.MinValue;
+
         private string versionString = null;
         private string minVersionString = null;
 
@@ -57,6 +59,8 @@ namespace Arteranos.Services
         private async void Start()
         {
             Instance = this;
+
+            last = DateTime.MinValue;
 
             cts = new();
 
@@ -73,7 +77,7 @@ namespace Arteranos.Services
             minVersionString = Core.Version.VERSION_MIN;
 
             int port = SettingsManager.Server.MetadataPort;
-            port = 12345; // DEBUG
+            port = 0; // DEBUG - Possible to leave it to a random port?
 
             IpfsEngine ipfsTmp;
             ipfsTmp = new(passphrase.ToCharArray());
@@ -185,7 +189,34 @@ namespace Arteranos.Services
                 currentSDCid = fsn.Id;
             }
         }
-        public override async Task _SendServerHello()
+
+        public override Task _SendServerOnlineData()
+        {
+            // Flood mitigation
+            if(last > DateTime.Now - TimeSpan.FromMinutes(2)) return Task.CompletedTask;
+            last = DateTime.Now;
+
+            byte[][] UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
+                                    where user.UserPrivacy != null && user.UserPrivacy.Visibility != Core.Visibility.Invisible
+                                    select CryptoHelpers.GetFingerprint(user.UserID)).ToArray();
+
+            _ServerOnlineData sod = new()
+            {
+                CurrentWorldCid = SettingsManager.CurrentWorld,
+                CurrentWorldName = SettingsManager.CurrentWorldName,
+                ServerDescriptionCid = currentSDCid,
+                UserFingerprints = UserFingerprints,
+                LastOnline = last
+            };
+
+            using MemoryStream ms = new();
+
+            sod.Serialize(ms);
+            ms.Position = 0;
+            return ipfs.PubSub.PublishAsync(topic_hello, ms);
+        }
+
+        public override Task _SendServerHello()
         {
             ServerHello.SDLink selflink = new()
             {
@@ -205,13 +236,17 @@ namespace Arteranos.Services
 
             hello.Serialize(ms);
             ms.Position = 0;
-            await ipfs.PubSub.PublishAsync(topic_hello, ms);
+            return ipfs.PubSub.PublishAsync(topic_hello, ms);
         }
 
-        public override async Task _SendServerDirectMessage(string peerId)
+        public override async Task _SendServerDirectMessage(string peerId, PeerMessage message)
         {
             using CancellationTokenSource cts = new(100);
-            await ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", "hello", cts.Token);
+            using MemoryStream ms = new();
+
+            message.Serialize(ms);
+            ms.Position = 0;
+            await ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", ms, cts.Token);
         }
 
         public async Task WaitForIPFSAsync()
@@ -300,7 +335,7 @@ namespace Arteranos.Services
                 sd.DBUpdate();
             }
 
-            // Set on receive, no sense to transmit theactual time.
+            // Set on receive, no sense to transmit the actual time.
             // In this context, latencies don't matter.
             sod.LastOnline = DateTime.Now;
 

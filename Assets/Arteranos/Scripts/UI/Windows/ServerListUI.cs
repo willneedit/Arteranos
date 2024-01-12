@@ -75,8 +75,8 @@ namespace Arteranos.UI
         private void OnAddWorldClicked()
         {
             throw new NotImplementedException();
-            string url = txt_AddServerURL.text;
-            ServerList[url] = ServerListItem.New(lvc_ServerList.transform, url);
+            string PeerIDString = txt_AddServerURL.text;
+            ServerList[PeerIDString] = ServerListItem.New(lvc_ServerList.transform, PeerIDString);
         }
 
         private async void OnReloadClicked()

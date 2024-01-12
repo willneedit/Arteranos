@@ -25,7 +25,7 @@ namespace Arteranos.Core
         [ProtoMember(4)]
         public byte[][] UserFingerprints;
 
-        public void Serialize(Stream stream)
+        public override void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
     }
 }

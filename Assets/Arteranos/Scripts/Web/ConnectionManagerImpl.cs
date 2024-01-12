@@ -15,6 +15,7 @@ using System.Collections;
 using Arteranos.UI;
 using Ipfs;
 using System.Net;
+using System.Threading;
 
 namespace Arteranos.Web
 {
@@ -64,12 +65,22 @@ namespace Arteranos.Web
             return false;
         }
 
-        [Obsolete("TODO PeerID to IPAddress lookup")]
         private async Task<bool> CommenceConnection(ServerInfo si)
         {
-            // FIXME Telepathy Transport specific.
-            IPAddress addr = IPAddress.IPv6Any;
+            IPAddress addr = IPAddress.Any;
 
+            try
+            {
+                using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
+                addr = await IPFSService.GetPeerIPAddress(si.PeerID.ToString(), cts.Token);
+            }
+            catch
+            {
+                Debug.Log($"{si.PeerID} is unreachable.");
+                return false;
+            }
+
+            // FIXME Telepathy Transport specific.
             Uri connectionUri = new($"tcp4://{addr}:{si.ServerPort}");
             ExpectConnectionResponse_();
             NetworkStatus.StartClient(connectionUri);

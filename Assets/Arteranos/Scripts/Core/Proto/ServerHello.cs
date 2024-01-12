@@ -32,7 +32,7 @@ namespace Arteranos.Core
         [ProtoMember(3)]
         public List<SDLink> Links;
 
-        public void Serialize(Stream stream) 
+        public override void Serialize(Stream stream) 
             => Serializer.Serialize(stream, this);
     }
 }

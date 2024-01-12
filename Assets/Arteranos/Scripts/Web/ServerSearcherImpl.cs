@@ -123,25 +123,13 @@ namespace Arteranos.Web
             {
                 int xScore = x.MatchScore;
                 if(x.UsesCustomTOS && !SettingsManager.Client.AllowCustomTOS)
-                {
-                    Debug.Log($"{x.PeerID} uses a custom TOS, which is disallowed.");
                     xScore = -20000;
-                }
                 else if (!x.IsOnline)
-                {
-                    //Debug.Log($"{x.URL} is offline");
                     xScore = -20000;
-                }
                 else if (context.desiredWorldPermissions != null && context.desiredWorldPermissions.IsInViolation(x.Permissions))
-                {
-                    //Debug.Log($"{x.URL} is too restrictive for the desired world");
                     xScore = -10000;
-                }
                 else if (context.desiredWorldCid != null && x.CurrentWorldCid != context.desiredWorldCid)
-                {
-                    //Debug.Log($"{x.URL} loaded a different world");
                     xScore = -10000;
-                }
 
                 return xScore;
             }

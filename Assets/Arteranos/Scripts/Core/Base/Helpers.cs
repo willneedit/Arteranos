@@ -288,7 +288,8 @@ namespace Arteranos.Services
         public abstract Task<IPAddress> _GetPeerIPAddress(string PeerID, CancellationToken token = default);
         public abstract Task _FlipServerDescription(bool reload);
         public abstract Task _SendServerHello();
-        public abstract Task _SendServerDirectMessage(string peerId);
+        public abstract Task _SendServerOnlineData();
+        public abstract Task _SendServerDirectMessage(string peerId, PeerMessage message);
 
         public static IPFSService Instance { get; protected set; }
 
@@ -300,8 +301,10 @@ namespace Arteranos.Services
             => Instance._FlipServerDescription(reload);
         public static Task SendServerHello()
             => Instance._SendServerHello();
-        public static Task SendServerDirectMessage(string peerId)
-            => Instance._SendServerDirectMessage(peerId);
+        public static Task SendServerOnlineData()
+            => Instance._SendServerOnlineData();
+        public static Task SendServerDirectMessage(string peerId, PeerMessage message)
+            => Instance._SendServerDirectMessage(peerId, message);
 
     }
     #endregion

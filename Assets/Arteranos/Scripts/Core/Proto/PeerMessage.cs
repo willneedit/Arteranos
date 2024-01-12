@@ -22,6 +22,9 @@ namespace Arteranos.Core
     [ProtoInclude(65538, typeof(_ServerOnlineData))]
     public class PeerMessage
     {
+        public virtual void Serialize(Stream stream)
+            => Serializer.Serialize(stream, this);
+
         public static PeerMessage Deserialize(Stream stream)
             => Serializer.Deserialize<PeerMessage>(stream);
     }

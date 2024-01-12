@@ -9,7 +9,7 @@ using System;
 
 namespace Arteranos.Core
 {
-    public partial class _ServerOnlineData : PeerMessage
+    public partial class _ServerOnlineData
     {
         // Set on receive in Services.IPFSService
         public DateTime LastOnline;

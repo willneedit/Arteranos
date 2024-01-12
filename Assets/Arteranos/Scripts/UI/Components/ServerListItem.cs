@@ -91,11 +91,8 @@ namespace Arteranos.UI
             }
 
 
-            // No data for that server's URL, maybe the manually entered URL is not added yet.
             lbl_Caption.text = $"({PeerID}) (Unknown)";
 
-            // Either try to add an unconfirmed URL, or to undo that attempt, or
-            // try to retrieve the probably offline server.
             btn_Add.gameObject.SetActive(true);
             btn_Delete.gameObject.SetActive(true);
         }

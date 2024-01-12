@@ -45,7 +45,7 @@ namespace Arteranos.Services
 
             yield return new WaitForEndOfFrame();
 
-            if (TargetedPeerID == $"anyhost:{ServerJSON.DefaultMetadataPort}")
+            if (TargetedPeerID == null && DesiredWorldCid != null)
             {
                 ServerSearcher.InitiateServerTransition(DesiredWorldCid);
             }
