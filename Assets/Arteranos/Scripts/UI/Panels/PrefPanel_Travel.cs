@@ -40,6 +40,8 @@ namespace Arteranos.UI
 
             cs = SettingsManager.Client;
 
+            chk_AllowCustomTOS.isOn = cs.AllowCustomTOS;
+
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
         }
