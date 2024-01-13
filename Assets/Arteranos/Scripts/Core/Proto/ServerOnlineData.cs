@@ -13,7 +13,7 @@ using ProtoBuf;
 namespace Arteranos.Core
 {
     [ProtoContract]
-    public partial class _ServerOnlineData : PeerMessage
+    public partial class ServerOnlineData : PeerMessage
     {
         [ProtoMember(1)]
         public string CurrentWorldCid;

@@ -19,7 +19,7 @@ namespace Arteranos.Core
 
     [ProtoContract]
     [ProtoInclude(65537, typeof(ServerHello))]
-    [ProtoInclude(65538, typeof(_ServerOnlineData))]
+    [ProtoInclude(65538, typeof(ServerOnlineData))]
     public class PeerMessage
     {
         public virtual void Serialize(Stream stream)

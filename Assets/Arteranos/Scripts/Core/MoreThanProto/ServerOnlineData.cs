@@ -10,15 +10,15 @@ using System.Collections.Concurrent;
 
 namespace Arteranos.Core
 {
-    public partial class _ServerOnlineData
+    public partial class ServerOnlineData
     {
         // Set on receive in Services.IPFSService
         public DateTime LastOnline;
 
-        private static ConcurrentDictionary<string, _ServerOnlineData> _OnlineData = new();
+        private static ConcurrentDictionary<string, ServerOnlineData> _OnlineData = new();
 
-        public static _ServerOnlineData DBLookup(string key) 
-            => _OnlineData.TryGetValue(key, out _ServerOnlineData sod) ? sod : null;
+        public static ServerOnlineData DBLookup(string key) 
+            => _OnlineData.TryGetValue(key, out ServerOnlineData sod) ? sod : null;
 
         public static void DBDelete(string key) 
             => _OnlineData.TryRemove(key, out _);

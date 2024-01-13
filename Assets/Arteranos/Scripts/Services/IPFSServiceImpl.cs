@@ -236,7 +236,7 @@ namespace Arteranos.Services
             if(last > DateTime.Now - TimeSpan.FromSeconds(30)) return Task.CompletedTask;
             last = DateTime.Now;
 
-            _ServerOnlineData sod = new()
+            ServerOnlineData sod = new()
             {
                 CurrentWorldCid = SettingsManager.CurrentWorld,
                 CurrentWorldName = SettingsManager.CurrentWorldName,
@@ -294,7 +294,7 @@ namespace Arteranos.Services
 
                 if (peerMessage is ServerHello sh)
                     return await ParseServerHelloAsync(sh);
-                else if (peerMessage is _ServerOnlineData sod)
+                else if (peerMessage is ServerOnlineData sod)
                     return await ParseServerOnlineData(sod, publishedMessage.Sender);
                 else
                     throw new ArgumentException($"Unknown message from Peer {publishedMessage.Sender.Id}");
@@ -343,7 +343,7 @@ namespace Arteranos.Services
             return true;
         }
 
-        private async Task<bool> ParseServerOnlineData(_ServerOnlineData sod, Peer SenderPeer)
+        private async Task<bool> ParseServerOnlineData(ServerOnlineData sod, Peer SenderPeer)
         {
             string SenderPeerID = SenderPeer.Id.ToString();
 
