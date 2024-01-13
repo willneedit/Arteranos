@@ -348,20 +348,20 @@ namespace Arteranos.Services
     {
         public static WorldGallery Instance { get; protected set; }
 
-        protected abstract WorldInfo? GetWorldInfo_(string url);
-        protected abstract Task<WorldInfo?> LoadWorldInfoAsync_(string url, CancellationToken token);
-        protected abstract void PutWorldInfo_(string url, WorldInfo info);
+        protected abstract WorldInfo GetWorldInfo_(string url);
+        protected abstract Task<WorldInfo> LoadWorldInfoAsync_(string url, CancellationToken token);
+        protected abstract void PutWorldInfo_(WorldInfo info);
         protected abstract void FavouriteWorld_(string url);
         protected abstract void UnfavoriteWorld_(string url);
         protected abstract bool IsWorldFavourited_(string url);
         protected abstract void BumpWorldInfo_(string url);
 
-        public static WorldInfo? GetWorldInfo(string url)
+        public static WorldInfo GetWorldInfo(string url)
             => Instance.GetWorldInfo_(url);
-        public static Task<WorldInfo?> LoadWorldInfoAsync(string url, CancellationToken token)
+        public static Task<WorldInfo> LoadWorldInfoAsync(string url, CancellationToken token)
             => Instance.LoadWorldInfoAsync_(url, token);
-        public static void PutWorldInfo(string url, WorldInfo info)
-            => Instance.PutWorldInfo_(url, info);
+        public static void PutWorldInfo(WorldInfo info)
+            => Instance.PutWorldInfo_(info);
         public static void FavouriteWorld(string url)
             => Instance.FavouriteWorld_(url);
         public static void UnfavoriteWorld(string url)

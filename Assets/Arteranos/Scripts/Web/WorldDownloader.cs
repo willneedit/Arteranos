@@ -80,9 +80,7 @@ namespace Arteranos.Web
                     Updated = DateTime.Now
                 };
 
-                if(File.Exists(worldInfoFile)) File.Delete(worldInfoFile);
-                Stream stream = File.Create(worldInfoFile);
-                wi.Serialize(stream);
+                wi.DBUpdate();
 
                 return context;
             }
@@ -298,8 +296,7 @@ namespace Arteranos.Web
         {
             try
             {
-                Stream stream = File.OpenRead(GetWIFile(worldURL));
-                return WorldInfo.Deserialize(stream);
+                return WorldInfo.DBLookup(worldURL);
             }
             catch
             {
@@ -308,16 +305,11 @@ namespace Arteranos.Web
             }
         }
 
-        public static void PutWorldInfo(string worldURL, WorldInfo worldInfo)
+        public static void PutWorldInfo(WorldInfo worldInfo)
         {
             try
             {
-                string wifile = GetWIFile(worldURL);
-                string widir = Path.GetDirectoryName(wifile);
-                if(!Directory.Exists(widir)) Directory.CreateDirectory(widir);
-                if(File.Exists(wifile)) File.Delete(wifile);
-                Stream stream = File.Create(wifile);
-                worldInfo.Serialize(stream);
+                worldInfo.DBUpdate();
             }
             catch { }
         }

@@ -43,7 +43,7 @@ namespace Arteranos.Web
             try
             {
                 wi = DERSerializer.Serializer.Deserialize<WorldInfo>(uwr.downloadHandler.data);
-                PutWorldInfo(url, wi);
+                PutWorldInfo(wi);
             }
             catch 
             {
@@ -54,8 +54,8 @@ namespace Arteranos.Web
             return wi;
         }
 
-        protected override void PutWorldInfo_(string url, WorldInfo info)
-            => WorldDownloader.PutWorldInfo(url, info);
+        protected override void PutWorldInfo_(WorldInfo info)
+            => WorldDownloader.PutWorldInfo(info);
 
         protected override void FavouriteWorld_(string url)
         {
@@ -88,7 +88,7 @@ namespace Arteranos.Web
             if (wi != null)
             {
                 wi.Updated = DateTime.Now;
-                WorldDownloader.PutWorldInfo(url, wi);
+                WorldDownloader.PutWorldInfo(wi);
             }
         }
 
