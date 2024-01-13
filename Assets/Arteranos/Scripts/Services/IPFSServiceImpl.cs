@@ -42,6 +42,8 @@ namespace Arteranos.Services
         private const string topic_hello = "/X-Arteranos/Server-Hello";
         private const string topic_sdm = "/X-Arteranos/ToYou";
 
+        private const int heartbeatSeconds = 60;
+
         private IpfsEngine ipfs = null;
         private Peer self = null;
         private SignKey serverKeyPair = null;
@@ -56,7 +58,7 @@ namespace Arteranos.Services
 
         private CancellationTokenSource cts = null;
 
-        private byte[][] UserFingerprints = null;
+        private List<byte[]> UserFingerprints = new();
 
         private async void Start()
         {
@@ -122,7 +124,7 @@ namespace Arteranos.Services
 
             await _FlipServerDescription(true);
 
-            UserFingerprints = new byte[0][];
+            UserFingerprints = new List<byte[]>();
 
             _ = EmitServerHeartbeat(cts.Token);
 
@@ -146,11 +148,11 @@ namespace Arteranos.Services
         {
             while(true)
             {
-                byte[][] UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
+                UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
                                              where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
-                                             select CryptoHelpers.GetFingerprint(user.UserID)).ToArray();
+                                             select CryptoHelpers.GetFingerprint(user.UserID)).ToList();
 
-                yield return new WaitForSeconds(20);
+                yield return new WaitForSeconds(heartbeatSeconds / 2);
             }
         }
 
@@ -158,16 +160,20 @@ namespace Arteranos.Services
         {
             while(!cancel.IsCancellationRequested)
             {
-                try
+                if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Server || 
+                    NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
                 {
-                    await _SendServerOnlineData();
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogException(ex);
+                    try
+                    {
+                        await _SendServerOnlineData();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogException(ex);
+                    }
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(5), cancel);
+                await Task.Delay(TimeSpan.FromSeconds(heartbeatSeconds), cancel);
             }
         }
 
@@ -227,7 +233,7 @@ namespace Arteranos.Services
         public override Task _SendServerOnlineData()
         {
             // Flood mitigation
-            if(last > DateTime.Now - TimeSpan.FromMinutes(2)) return Task.CompletedTask;
+            if(last > DateTime.Now - TimeSpan.FromSeconds(30)) return Task.CompletedTask;
             last = DateTime.Now;
 
             _ServerOnlineData sod = new()
@@ -236,7 +242,8 @@ namespace Arteranos.Services
                 CurrentWorldName = SettingsManager.CurrentWorldName,
                 ServerDescriptionCid = currentSDCid,
                 UserFingerprints = UserFingerprints,
-                LastOnline = last
+                LastOnline = last,
+                OnlineLevel = NetworkStatus.GetOnlineLevel()
             };
 
             using MemoryStream ms = new();

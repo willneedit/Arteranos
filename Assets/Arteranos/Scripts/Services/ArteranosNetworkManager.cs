@@ -28,6 +28,7 @@ namespace Arteranos.Services
             public ArteranosNetworkAuthenticator.AuthResponseMessage response;
         }
 
+        [Obsolete("Needs transition from URL to Cid(string)")]
         internal struct WorldChangeAnnounceMessage : NetworkMessage
         {
             public string Invoker;

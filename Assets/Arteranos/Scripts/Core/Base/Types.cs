@@ -115,30 +115,32 @@ namespace Arteranos.Core
         public string PrivacyTOSNotice => DescriptionStruct?.PrivacyTOSNotice;
         public byte[] Icon => DescriptionStruct?.Icon;
         public string[] AdminNames => DescriptionStruct?.AdminNames ?? new string[0];
-        // public string Address => PublicData?.Address;
         public int MDPort => DescriptionStruct?.MetadataPort ?? 0;
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
-        //public string URL => $"http://{Address}:{MDPort}/";
         public string SPKDBKey => DescriptionStruct.PeerID;
         public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new();
         public DateTime LastUpdated => DescriptionStruct?.LastModified ?? DateTime.UnixEpoch;
         public DateTime LastOnline => OnlineData?.LastOnline ?? DateTime.UnixEpoch;
         public string CurrentWorldCid => OnlineData?.CurrentWorldCid;
         public string CurrentWorldName => (OnlineData?.CurrentWorldName) ?? "Nexus";
-        public int UserCount => OnlineData?.UserFingerprints.Length ?? 0;
+        public int UserCount => OnlineData?.UserFingerprints?.Count ?? 0;
         public int FriendCount
         {
             get
             {
-                if (OnlineData == null) return 0;
+                if (OnlineData?.UserFingerprints == null) return 0;
 
                 int friend = 0;
                 IEnumerable<SocialListEntryJSON> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.State));
 
                 foreach (SocialListEntryJSON entry in friends)
                 {
-                    byte[] fingerprint = CryptoHelpers.GetFingerprint(entry.UserID);
-                    if (OnlineData.UserFingerprints.Contains(fingerprint)) friend++;
+                    var q = from fpentry in OnlineData.UserFingerprints
+                            where Convert.ToBase64String(fpentry) == 
+                            CryptoHelpers.ToString(CryptoHelpers.FP_Base64, entry.UserID)
+                            select fpentry;
+
+                    if (q.Any()) friend++;
                 }
 
                 return friend;
