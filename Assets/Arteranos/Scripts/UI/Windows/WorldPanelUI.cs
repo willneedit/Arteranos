@@ -28,7 +28,7 @@ namespace Arteranos.UI
         public int serversCount;
         public int usersCount;
         public int friendsMax;
-        public WorldInfo? worldInfo;
+        public WorldInfo worldInfo;
         public bool favourited;
     }
 
@@ -108,14 +108,14 @@ namespace Arteranos.UI
             {
                 if(list.worldInfo == null)
                 {
-                    WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(url, token);
+                    WorldInfo wi = await WorldGallery.LoadWorldInfoAsync(url, token);
                     list.worldInfo = wi;
                     worldlist[url] = list;
                 }
             }
             else // Manually edited?
             {
-                WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(url, token);
+                WorldInfo wi = await WorldGallery.LoadWorldInfoAsync(url, token);
                 worldlist[url] = new()
                 {
                     worldCid = url,
@@ -127,7 +127,7 @@ namespace Arteranos.UI
                 };
             }
 
-            WorldMetaData wmd = list.worldInfo?.metaData;
+            WorldInfo wmd = list.worldInfo;
 
             // Filter out the worlds which go against to _your_ preferences.
             if (wmd?.ContentRating == null || !wmd.ContentRating.IsInViolation(SettingsManager.Client.ContentFilterPreferences))
@@ -246,14 +246,14 @@ namespace Arteranos.UI
                 wli.WorldURL = sortedWorldList[i];
                 if (worldlist.TryGetValue(wli.WorldURL, out Collection list))
                 {
-                    wli.WorldName = list.worldInfo?.metaData.WorldName;
-                    wli.ScreenshotPNG = list.worldInfo?.screenshotPNG;
-                    wli.LastAccessed = list.worldInfo?.updated ?? DateTime.MinValue;
+                    wli.WorldName = list.worldInfo?.WorldName;
+                    wli.ScreenshotPNG = list.worldInfo?.ScreenshotPNG;
+                    wli.LastAccessed = list.worldInfo?.Updated ?? DateTime.MinValue;
                     wli.ServersCount = list.serversCount;
                     wli.UsersCount = list.usersCount;
                     wli.FriendsMax = list.friendsMax;
 
-                    WorldMetaData wmd = list.worldInfo?.metaData;
+                    WorldInfo wmd = list.worldInfo;
                     wli.AllowedForThis = !(wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions));
                 }
                 go.SetActive(true);

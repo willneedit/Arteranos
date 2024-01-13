@@ -15,7 +15,6 @@ using DERSerializer;
 
 namespace Arteranos.Core
 {
-    [Obsolete("Migrating to BouncyCastle")]
     public struct CryptPacket
     {
         public byte[] iv;
@@ -23,7 +22,6 @@ namespace Arteranos.Core
         public byte[] encryptedMessage;
     }
 
-    [Obsolete("Migrating to BouncyCastle")]
     public struct CMSPacket
     {
         public byte[] iv;
@@ -31,14 +29,12 @@ namespace Arteranos.Core
         public List<ESKEntry> encryptedSessionKeys;
     }
 
-    [Obsolete("Migrating to BouncyCastle")]
     public struct ESKEntry
     {
         public byte[] fingerprint;
         public byte[] encryptedSessionKey;
     }
 
-    [Obsolete("Migrating to BouncyCastle")]
     internal struct CMSPayload
     {
         public byte[] messageDER;
@@ -46,7 +42,6 @@ namespace Arteranos.Core
         public byte[] signature;
     }
 
-    [Obsolete("Migrating to BouncyCastle")]
     public class Crypto : IDisposable, IEquatable<Crypto>
     {
         public byte[] PublicKey => Key.PublicKey;

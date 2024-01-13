@@ -38,9 +38,9 @@ namespace Arteranos.Web
         {
             ServerSearcherContext context = _context as ServerSearcherContext;
 
-            WorldInfo? wi = await WorldGallery.LoadWorldInfoAsync(context.desiredWorldCid, token);
+            WorldInfo wi = await WorldGallery.LoadWorldInfoAsync(context.desiredWorldCid, token);
 
-            context.desiredWorldPermissions = wi?.metaData.ContentRating;
+            context.desiredWorldPermissions = wi.ContentRating;
 
             return context;
         }

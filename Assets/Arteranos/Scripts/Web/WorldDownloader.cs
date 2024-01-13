@@ -18,6 +18,7 @@ using Utils = Arteranos.Core.Utils;
 
 namespace Arteranos.Web
 {
+    [Obsolete("URL -> Cid transition")]
     internal class WorldDownloaderContext : Context
     {
         public string url = null;
@@ -63,16 +64,25 @@ namespace Arteranos.Web
                 string json = File.ReadAllText(metadataFile);
                 byte[] screenshotBytes = File.ReadAllBytes(screenshotFile);
 
+                WorldMetaData metaData = WorldMetaData.Deserialize(json);
+
                 WorldInfo wi = new()
                 {
-                    metaData = WorldMetaData.Deserialize(json),
-                    signature = null,
-                    screenshotPNG = screenshotBytes,
-                    updated = DateTime.Now
+                    WorldCid = context.url,
+                    WorldName = metaData.WorldName,
+                    WorldDescription = metaData.WorldDescription,
+                    AuthorNickname = (string) metaData.AuthorID,
+                    AuthorPublicKey = (byte[]) metaData.AuthorID,
+                    ContentRating = metaData.ContentRating,
+                    Signature = null,
+                    ScreenshotPNG = screenshotBytes,
+                    Created = metaData.Created,
+                    Updated = DateTime.Now
                 };
 
-                byte[] worldInfoDER = DERSerializer.Serializer.Serialize(wi);
-                File.WriteAllBytes(worldInfoFile, worldInfoDER);
+                if(File.Exists(worldInfoFile)) File.Delete(worldInfoFile);
+                Stream stream = File.Create(worldInfoFile);
+                wi.Serialize(stream);
 
                 return context;
             }
@@ -239,6 +249,7 @@ namespace Arteranos.Web
     
     public static class WorldDownloader
     {
+        [Obsolete("URL -> Cid transition")]
         public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(string url, bool reload = false, int timeout = 600)
         {
             WorldDownloaderContext context = new()
@@ -283,12 +294,12 @@ namespace Arteranos.Web
         public static string GetWIFile(string worldURL) 
             => $"{GetWorldCacheDir(worldURL)}/world.info";
 
-        public static WorldInfo? GetWorldInfo(string worldURL)
+        public static WorldInfo GetWorldInfo(string worldURL)
         {
             try
             {
-                byte[] wiDER = File.ReadAllBytes(GetWIFile(worldURL));
-                return DERSerializer.Serializer.Deserialize<WorldInfo>(wiDER);
+                Stream stream = File.OpenRead(GetWIFile(worldURL));
+                return WorldInfo.Deserialize(stream);
             }
             catch
             {
@@ -301,11 +312,12 @@ namespace Arteranos.Web
         {
             try
             {
-                byte[] wiDER = DERSerializer.Serializer.Serialize(worldInfo);
                 string wifile = GetWIFile(worldURL);
                 string widir = Path.GetDirectoryName(wifile);
                 if(!Directory.Exists(widir)) Directory.CreateDirectory(widir);
-                File.WriteAllBytes(wifile, wiDER);
+                if(File.Exists(wifile)) File.Delete(wifile);
+                Stream stream = File.Create(wifile);
+                worldInfo.Serialize(stream);
             }
             catch { }
         }

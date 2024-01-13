@@ -10,67 +10,8 @@ using System;
 using Newtonsoft.Json;
 using System.IO;
 
-using DERSerializer;
-using System.Threading.Tasks;
-using System.Net;
-using System.Text;
-
 namespace Arteranos.Core
 {
-    public static partial class Utils
-    {
-        public async static Task<(bool, T)> WebRetrieve<T>(string url, string pathPart, string patternServerDescription, int expirySeconds, int timeout = 1, bool keepExpired = false)
-        {
-            UriBuilder builder = new(url) { Path = pathPart };
-
-            byte[] data = await CachedDownloadWebData(builder.ToString(), url, patternServerDescription, expirySeconds, timeout, keepExpired);
-            if (data == null) return (false, default(T));
-
-            try
-            {
-                return (true, Serializer.Deserialize<T>(data));
-            }
-            catch
-            {
-                InvalidateWebData(builder.ToString(), url, patternServerDescription);
-                return (false, default(T));
-            }
-        }
-
-        public static void WebDelete(string url, string pathPart, string patternServerDescription)
-        {
-            UriBuilder builder = new(url) { Path = pathPart };
-            InvalidateWebData(builder.ToString(), url, patternServerDescription);
-        }
-
-
-        public async static Task WebEmit<T>(T payload, HttpListenerResponse response)
-        {
-            byte[] data = Serializer.Serialize(payload);
-            response.ContentType = "application/octet-stream";
-            response.ContentEncoding = Encoding.UTF8;
-            response.ContentLength64 = data.LongLength;
-            response.StatusCode = (int)HttpStatusCode.OK;
-
-            await response.OutputStream.WriteAsync(data, 0, data.Length);
-            response.Close();
-        }
-
-    }
-
-    public struct WorldInfo
-    {
-        public WorldMetaData metaData;
-        
-        [ASN1Tag(1, true)] 
-        public byte[] signature;
-
-        [ASN1Tag(2, true)]
-        public byte[] screenshotPNG;
-
-        public DateTime updated;
-    }
-
     public class WorldMetaData
     {
         public const string PATH_METADATA_DEFAULTS = "MetadataDefaults.json";

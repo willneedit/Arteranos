@@ -19,12 +19,12 @@ namespace Arteranos.Web
         private void Awake() => Instance = this;
         private void OnDestroy() => Instance = null;
 
-        protected override WorldInfo? GetWorldInfo_(string url)
+        protected override WorldInfo GetWorldInfo_(string url)
             => WorldDownloader.GetWorldInfo(url);
 
-        protected override async Task<WorldInfo?> LoadWorldInfoAsync_(string url, CancellationToken token)
+        protected override async Task<WorldInfo> LoadWorldInfoAsync_(string url, CancellationToken token)
         {
-            WorldInfo? wi = WorldDownloader.GetWorldInfo(url);
+            WorldInfo wi = WorldDownloader.GetWorldInfo(url);
             if (wi != null) return wi;
 
             UriBuilder uriBuilder = new(url);
@@ -43,7 +43,7 @@ namespace Arteranos.Web
             try
             {
                 wi = DERSerializer.Serializer.Deserialize<WorldInfo>(uwr.downloadHandler.data);
-                PutWorldInfo(url, wi.Value);
+                PutWorldInfo(url, wi);
             }
             catch 
             {
@@ -84,12 +84,11 @@ namespace Arteranos.Web
 
         protected override void BumpWorldInfo_(string url)
         {
-            WorldInfo? wi = WorldDownloader.GetWorldInfo(url);
+            WorldInfo wi = WorldDownloader.GetWorldInfo(url);
             if (wi != null)
             {
-                WorldInfo wiv = wi.Value;
-                wiv.updated = DateTime.Now;
-                WorldDownloader.PutWorldInfo(url, wiv);
+                wi.Updated = DateTime.Now;
+                WorldDownloader.PutWorldInfo(url, wi);
             }
         }
 

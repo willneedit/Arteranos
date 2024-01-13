@@ -426,7 +426,7 @@ namespace Arteranos.Avatar
 
         public void MakeWorkdToChange(string worldURL, bool forceReload = false)
         {
-            WorldMetaData wmd = WorldGallery.GetWorldInfo(worldURL)?.metaData;
+            WorldInfo wmd = WorldGallery.GetWorldInfo(worldURL);
 
             if (wmd?.ContentRating != null)
             {
@@ -447,7 +447,7 @@ namespace Arteranos.Avatar
         {
             if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
 
-            WorldMetaData wmd = WorldGallery.GetWorldInfo(worldURL)?.metaData;
+            WorldInfo wmd = WorldGallery.GetWorldInfo(worldURL);
             if (wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.Server.Permissions)) return;
 
             SettingsManager.PingServerChangeWorld(UserID, worldURL);

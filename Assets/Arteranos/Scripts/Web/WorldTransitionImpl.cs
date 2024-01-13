@@ -76,11 +76,11 @@ namespace Arteranos.Web
             {
                 string worldABF = WorldDownloader.GetWorldABF(WorldCid);
 
-                WorldInfo? wi = WorldDownloader.GetWorldInfo(WorldCid);
+                WorldInfo wi = WorldDownloader.GetWorldInfo(WorldCid);
 
                 EnterDownloadedWorld_(worldABF);
                 SettingsManager.CurrentWorld = WorldCid;
-                SettingsManager.CurrentWorldName = wi?.metaData?.WorldName;
+                SettingsManager.CurrentWorldName = wi?.WorldName;
             }
 
             return Task.Run(Enter_);
@@ -122,13 +122,13 @@ namespace Arteranos.Web
 
             (Exception ex, Context _) = await PreloadWorldDataAsync_(WorldCid, forceReload);
 
-            WorldInfo? wi = WorldGallery.GetWorldInfo(WorldCid);
-            WorldMetaData wmd = wi?.metaData;
+            WorldInfo wi = WorldGallery.GetWorldInfo(WorldCid);
+            ServerPermissions wmd = wi?.ContentRating;
 
-            if (wmd?.ContentRating != null)
+            if (wmd != null)
             {
                 // Remotely connected user tries to sneak in something gross or raunchy?
-                if (wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions))
+                if (wmd.IsInViolation(SettingsManager.ActiveServerData.Permissions))
                 {
                     Debug.Log("World is in violation of the server's content permission");
                     ex = new AccessViolationException("The world is in violation of the server's content permissions.");
