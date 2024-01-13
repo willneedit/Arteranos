@@ -18,14 +18,22 @@ using Utils = Arteranos.Core.Utils;
 
 namespace Arteranos.Web
 {
-    [Obsolete("URL -> Cid transition")]
     internal class WorldDownloaderContext : Context
     {
+        [Obsolete("URL -> Cid transition")]
         public string url = null;
+
         public string targetfile = null;
+
+        [Obsolete("Contents pointing to Cids are immutable")]
         public bool reload = false;
+
         public string cachedir = null;
+
+        [Obsolete("IPFS node backend doubles as the cache")]
         public bool cacheHit = false;
+
+        [Obsolete("Contents pointing to Cids are immutable")]
         public DateTime lastModified = DateTime.MinValue;
         public long size = -1;
         public string worldZipFile = null;
