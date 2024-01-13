@@ -86,7 +86,7 @@ namespace Arteranos.Web
             return Task.Run(Enter_);
         }
 
-        protected override async Task<(Exception, Context)> PreloadWorldDataAsync_(Cid WorldCid, bool forceReload = false)
+        protected override async Task<(Exception, Context)> PreloadWorldDataAsync_(Cid WorldCid)
         {
             IProgressUI pui = ProgressUIFactory.New();
 
@@ -96,7 +96,7 @@ namespace Arteranos.Web
             pui.AllowCancel = true;
 
             // FIXME See #71
-            pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(WorldCid, forceReload));
+            pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(WorldCid));
 
             (Exception ex, Context co) = await pui.RunProgressAsync();
 
@@ -111,7 +111,7 @@ namespace Arteranos.Web
             return (ex, co);
         }
 
-        protected override async Task<Exception> VisitWorldAsync_(Cid WorldCid, bool forceReload = false)
+        protected override async Task<Exception> VisitWorldAsync_(Cid WorldCid)
         {
             // Offline world. Always a safe space.
             if(WorldCid == null)
@@ -120,7 +120,7 @@ namespace Arteranos.Web
                 return null;
             }
 
-            (Exception ex, Context _) = await PreloadWorldDataAsync_(WorldCid, forceReload);
+            (Exception ex, Context _) = await PreloadWorldDataAsync_(WorldCid);
 
             WorldInfo wi = WorldGallery.GetWorldInfo(WorldCid);
             ServerPermissions wmd = wi?.ContentRating;
@@ -149,9 +149,9 @@ namespace Arteranos.Web
         /// server to do the transition.
         /// </summary>
         /// <param name="WorldCid"></param>
-        /// <param name="forceReload"></param>
+        /// 
         /// <returns>Task completed, or the server has been notified</returns>
-        protected override async Task EnterWorldAsync_(Cid WorldCid, bool forceReload = false)
+        protected override async Task EnterWorldAsync_(Cid WorldCid)
         {
             ScreenFader.StartFading(1.0f);
 
@@ -160,12 +160,12 @@ namespace Arteranos.Web
             if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
             {
                 // In the offline mode, directly change the scene.
-                await VisitWorldAsync_(WorldCid, forceReload);
+                await VisitWorldAsync_(WorldCid);
             }
             else
             {
                 // In the online mode, let the own avatar ask the server to initiate transition.
-                XRControl.Me.MakeWorkdToChange(WorldCid, forceReload);
+                XRControl.Me.MakeWorkdToChange(WorldCid);
             }
         }
 

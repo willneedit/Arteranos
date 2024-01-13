@@ -424,7 +424,7 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region World change event handling
 
-        public void MakeWorkdToChange(string worldURL, bool forceReload = false)
+        public void MakeWorkdToChange(string worldURL)
         {
             WorldInfo wmd = WorldGallery.GetWorldInfo(worldURL);
 
@@ -439,11 +439,11 @@ namespace Arteranos.Avatar
                 }
             }
 
-            CmdMakeWorldToChange(worldURL, forceReload);
+            CmdMakeWorldToChange(worldURL);
         }
 
         [Command]
-        private void CmdMakeWorldToChange(string worldURL, bool _ /* forceReload */)
+        private void CmdMakeWorldToChange(string worldURL)
         {
             if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
 

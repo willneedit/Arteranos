@@ -49,6 +49,8 @@ namespace Arteranos.Avatar
         void PerformServerPacket(SCMType type, CMSPacket p);
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
         void ServerKickUser(string reason);
-        void MakeWorkdToChange(string worldURL, bool forceReload = false);
+
+        [Obsolete("URL -> Cid transition")]
+        void MakeWorkdToChange(string worldURL);
     }
 }

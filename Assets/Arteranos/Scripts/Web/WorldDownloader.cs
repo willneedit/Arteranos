@@ -25,16 +25,8 @@ namespace Arteranos.Web
 
         public string targetfile = null;
 
-        [Obsolete("Contents pointing to Cids are immutable")]
-        public bool reload = false;
-
         public string cachedir = null;
 
-        [Obsolete("IPFS node backend doubles as the cache")]
-        public bool cacheHit = false;
-
-        [Obsolete("Contents pointing to Cids are immutable")]
-        public DateTime lastModified = DateTime.MinValue;
         public long size = -1;
         public string worldZipFile = null;
         public string worldAssetBundleFile = null;
@@ -154,8 +146,6 @@ namespace Arteranos.Web
             totalBytes = context.size;
             totalBytesMag = Utils.Magnitude(totalBytes);
 
-            if (context.cacheHit) return context;
-
             using UnityWebRequest uwr = new(context.url, UnityWebRequest.kHttpVerbGET);
 
             uwr.timeout = Timeout;
@@ -176,99 +166,21 @@ namespace Arteranos.Web
             return context;
         }
     }
-
-    internal class CheckCacheOp : IAsyncOperation<Context>
-    {
-        public int Timeout { get; set; }
-        public float Weight { get; set; } = 1.0f;
-        public string Caption
-        {
-            get => "Connecting";
-            set { }
-        }
-
-        public Action<float> ProgressChanged { get; set; }
-
-        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
-        {
-            WorldDownloaderContext context = _context as WorldDownloaderContext;
-
-            context.cachedir = $"{WorldDownloader.GetWorldCacheDir(context.url)}";
-            context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
-
-            string touchfile = WorldDownloader.GetWIFile(context.url);
-            if(File.Exists(touchfile)) File.Delete(touchfile);
-
-            if(context.reload)
-            {
-                context.cacheHit = false;
-                return context;
-            }
-
-            if(!File.Exists(context.worldZipFile))
-            {
-                context.cacheHit = false;
-                return context;
-            }
-
-            FileInfo fi = new(context.worldZipFile);
-
-            DateTime locDT = fi.LastWriteTime;
-            long locSize = fi.Length;
-
-            // Last write time is younger than 10 minutes; reduce network load
-            // and require a forced cache flush.
-            if((DateTime.Now - locDT) < TimeSpan.FromMinutes(10))
-            {
-                context.cacheHit = true;
-                return context;
-            }
-
-            using UnityWebRequest uwr = new(context.url, UnityWebRequest.kHttpVerbHEAD);
-            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
-
-            while(!uwr_ao.isDone && !token.IsCancellationRequested)
-            {
-                await Task.Yield();
-                ProgressChanged?.Invoke(uwr.downloadProgress);
-            }
-
-            // No network response, but we have a local file to work with it.
-            if(uwr.result != UnityWebRequest.Result.Success)
-            {
-                context.cacheHit = true;
-                return context;
-            }
-
-            string lmstr = uwr.GetResponseHeader("Last-Modified");
-            context.lastModified = (lmstr != null) ? DateTime.Parse(lmstr) : DateTime.UnixEpoch;
-
-            string sizestr = uwr.GetResponseHeader("Content-Length");
-            context.size = (sizestr != null) ? long.Parse(sizestr) : -1;
-
-            // It's outdated if it's newer in the net, or the reported size differs.
-            context.cacheHit = !((context.lastModified > locDT) || (context.size != locSize));
-            return context;
-        }
-
-    }
     
     public static class WorldDownloader
     {
         [Obsolete("URL -> Cid transition")]
-        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(string url, bool reload = false, int timeout = 600)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(string url, int timeout = 600)
         {
             WorldDownloaderContext context = new()
             {
                 url = url,
-                reload = reload,
                 targetfile = "world.zip"
             };
 
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
             {
-                new CheckCacheOp(),
                 new DownloadOp(),
                 new UnzipWorldFileOp(),
                 new BuildWorldInfoOp(),

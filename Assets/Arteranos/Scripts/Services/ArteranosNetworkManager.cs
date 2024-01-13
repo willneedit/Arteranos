@@ -368,7 +368,7 @@ namespace Arteranos.Services
         {
             // First, download, do the consistency checks and set up the server's idea
             // of the world.
-            Exception ex = await WorldTransition.VisitWorldAsync(worldURL, forceReload);
+            Exception ex = await WorldTransition.VisitWorldAsync(worldURL);
 
             string message = null;
 
@@ -431,7 +431,7 @@ namespace Arteranos.Services
             //  - Open the host mode with the old world on their own.
             // Now drag the client along.
             Debug.Log("[Client] Dragging your client along.");
-            _ = await WorldTransition.VisitWorldAsync(message.WorldURL, message.ForceReload);
+            _ = await WorldTransition.VisitWorldAsync(message.WorldURL);
         }
 
 

@@ -344,6 +344,8 @@ namespace Arteranos.Services
         public static void InitiateServerTransition(Cid worldCid, Action<Cid, MultiHash> OnSuccessCallback, Action OnFailureCallback)
             => Instance.InitiateServerTransition_(worldCid, OnSuccessCallback, OnFailureCallback);
     }
+
+    [Obsolete("URL -> Cid transition")]
     public abstract class WorldGallery : MonoBehaviour
     {
         public static WorldGallery Instance { get; protected set; }
@@ -384,13 +386,13 @@ namespace Arteranos.Services
 
     public abstract class WorldTransition : MonoBehaviour
     {
-        protected abstract Task<(Exception, Context)> PreloadWorldDataAsync_(Cid WorldCid, bool forceReload = false);
+        protected abstract Task<(Exception, Context)> PreloadWorldDataAsync_(Cid WorldCid);
         protected abstract bool IsWorldPreloaded_(Cid WorldCid);
         protected abstract Task<(Exception, WorldData)> GetWorldDataAsync_(Cid WorldCid);
-        protected abstract Task<Exception> VisitWorldAsync_(Cid WorldCid, bool forceReload = false);
+        protected abstract Task<Exception> VisitWorldAsync_(Cid WorldCid);
         protected abstract Task MoveToOfflineWorld_();
         protected abstract Task MoveToOnlineWorld_(Cid WorldCid);
-        protected abstract Task EnterWorldAsync_(Cid WorldCid, bool forceReload = false);
+        protected abstract Task EnterWorldAsync_(Cid WorldCid);
         protected abstract void EnterDownloadedWorld_(string worldABF);
 
         public static WorldTransition Instance { get; set; }
@@ -403,12 +405,12 @@ namespace Arteranos.Services
             => Instance.MoveToOfflineWorld_();
         public static Task MoveToOnlineWorld(Cid WorldCid)
             => Instance.MoveToOnlineWorld_(WorldCid);
-        public static Task<(Exception, Context)> PreloadWorldDataAsync(Cid WorldCid, bool forceReload = false)
-            => Instance.PreloadWorldDataAsync_(WorldCid, forceReload);
-        public static Task<Exception> VisitWorldAsync(Cid WorldCid, bool forceReload = false)
-            => Instance.VisitWorldAsync_(WorldCid, forceReload);
-        public static Task EnterWorldAsync(Cid WorldCid, bool forceReload = false)
-            => Instance.EnterWorldAsync_(WorldCid, forceReload);
+        public static Task<(Exception, Context)> PreloadWorldDataAsync(Cid WorldCid)
+            => Instance.PreloadWorldDataAsync_(WorldCid);
+        public static Task<Exception> VisitWorldAsync(Cid WorldCid)
+            => Instance.VisitWorldAsync_(WorldCid);
+        public static Task EnterWorldAsync(Cid WorldCid)
+            => Instance.EnterWorldAsync_(WorldCid);
         public static void EnterDownloadedWorld(string worldABF)
             => Instance.EnterDownloadedWorld_(worldABF);
     }
