@@ -242,7 +242,7 @@ namespace Arteranos.UI
             for(int i = startIndex; i < endIndex; i++)
             {
                 GameObject go = Instantiate(grp_WorldPanelSample, panels);
-                WorldListItem wli = go.GetComponentInChildren<WorldListItem>();
+                WorldPaneltem wli = go.GetComponentInChildren<WorldPaneltem>();
                 wli.WorldURL = sortedWorldList[i];
                 if (worldlist.TryGetValue(wli.WorldURL, out Collection list))
                 {

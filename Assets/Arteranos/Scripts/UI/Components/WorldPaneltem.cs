@@ -12,16 +12,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Arteranos.Web;
-using System.IO;
-using UnityEngine.Networking;
 using Arteranos.Core;
 using Arteranos.Services;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace Arteranos.UI
 {
-    public class WorldListItem : ListItemBase
+    public class WorldPaneltem : ListItemBase
     {
         private HoverButton btn_Add = null;
         private HoverButton btn_Visit = null;
@@ -42,11 +38,11 @@ namespace Arteranos.UI
 
         private string patternCaption = null;
 
-        public static WorldListItem New(Transform parent, string url)
+        public static WorldPaneltem New(Transform parent, string url)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/WorldListItem"));
             go.transform.SetParent(parent, false);
-            WorldListItem worldListItem = go.GetComponent<WorldListItem>();
+            WorldPaneltem worldListItem = go.GetComponent<WorldPaneltem>();
             worldListItem.WorldURL = url;
             return worldListItem;
         }
