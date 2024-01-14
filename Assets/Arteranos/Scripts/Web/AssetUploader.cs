@@ -39,6 +39,7 @@ namespace Arteranos.Web
         // TransferProgress lastProgress = null;
         public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
+            // TODO Upload progress indicator
             AssetUploaderContext context = _context as AssetUploaderContext;
 
             AddFileOptions ao = new()

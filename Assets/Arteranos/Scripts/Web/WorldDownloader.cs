@@ -16,6 +16,7 @@ using Arteranos.Core;
 using System.Threading;
 using Utils = Arteranos.Core.Utils;
 using Ipfs;
+using Arteranos.Services;
 
 namespace Arteranos.Web
 {
@@ -140,27 +141,18 @@ namespace Arteranos.Web
 
         public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
+            // TODO Progress indicator
             WorldDownloaderContext context = _context as WorldDownloaderContext;
 
-            totalBytes = context.size;
-            totalBytesMag = Utils.Magnitude(totalBytes);
+            context.cachedir = $"{WorldDownloader.GetWorldCacheDir(context.Cid)}";
+            context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
 
-            using UnityWebRequest uwr = new(context.Cid, UnityWebRequest.kHttpVerbGET);
-
-            uwr.timeout = Timeout;
-            uwr.downloadHandler = new DownloadHandlerFile(context.worldZipFile);
-
-            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
-
-            while(!uwr_ao.isDone && !token.IsCancellationRequested)
+            using (FileStream fs = File.Create(context.worldZipFile))
             {
-                await Task.Yield();
-                normalizedProgress = uwr.downloadProgress;
-                ProgressChanged?.Invoke(uwr.downloadProgress);
+                Stream s = await IPFSService.Ipfs.FileSystem.GetAsync(context.Cid, cancel: token);
+                s.Position = 0;
+                s.CopyTo(fs);
             }
-
-            if(uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.ConnectionError)
-                throw new FileNotFoundException(uwr.error, context.worldZipFile);
 
             return context;
         }
