@@ -45,8 +45,8 @@ namespace Arteranos.Web
             return await Task.Run(_GetWorldData);
         }
 
-        protected override bool IsWorldPreloaded_(Cid WorldCid) 
-            => File.Exists(WorldDownloader.GetWIFile(WorldCid));
+        protected override bool IsWorldPreloaded_(Cid WorldCid)
+            => WorldInfo.DBLookup(WorldCid) != null;
 
         protected override async Task MoveToOfflineWorld_()
         {
@@ -61,7 +61,7 @@ namespace Arteranos.Web
 
                 XRControl.Instance.MoveRig();
 
-                SettingsManager.CurrentWorld = null;
+                SettingsManager.CurrentWorldCid = null;
                 ScreenFader.StartFading(0.0f);
                 done = true;
             }
@@ -76,10 +76,10 @@ namespace Arteranos.Web
             {
                 string worldABF = WorldDownloader.GetWorldABF(WorldCid);
 
-                WorldInfo wi = WorldDownloader.GetWorldInfo(WorldCid);
+                WorldInfo wi = WorldInfo.DBLookup(WorldCid);
 
                 EnterDownloadedWorld_(worldABF);
-                SettingsManager.CurrentWorld = WorldCid;
+                SettingsManager.CurrentWorldCid = WorldCid;
                 SettingsManager.CurrentWorldName = wi?.WorldName;
             }
 
@@ -122,7 +122,7 @@ namespace Arteranos.Web
 
             (Exception ex, Context _) = await PreloadWorldDataAsync_(WorldCid);
 
-            WorldInfo wi = WorldGallery.GetWorldInfo(WorldCid);
+            WorldInfo wi = WorldInfo.DBLookup(WorldCid);
             ServerPermissions wmd = wi?.ContentRating;
 
             if (wmd != null)

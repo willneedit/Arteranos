@@ -14,6 +14,7 @@ using UnityEngine.UI;
 using Arteranos.Web;
 using Arteranos.Core;
 using Arteranos.Services;
+using Ipfs;
 
 namespace Arteranos.UI
 {
@@ -27,7 +28,7 @@ namespace Arteranos.UI
         public Image img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
 
-        public string WorldURL { get; internal set; } = null;
+        public Cid WorldCid{ get; internal set; } = null;
         public string WorldName { get; internal set; } = null;
         public byte[] ScreenshotPNG { get; internal set; } = null;
         public DateTime LastAccessed { get; internal set; } = DateTime.MinValue;
@@ -38,12 +39,13 @@ namespace Arteranos.UI
 
         private string patternCaption = null;
 
+        [Obsolete("URL -> Cid conversion")]
         public static WorldPaneltem New(Transform parent, string url)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/WorldListItem"));
             go.transform.SetParent(parent, false);
             WorldPaneltem worldListItem = go.GetComponent<WorldPaneltem>();
-            worldListItem.WorldURL = url;
+            worldListItem.WorldCid = url;
             return worldListItem;
         }
 
@@ -70,10 +72,10 @@ namespace Arteranos.UI
 
             lbl_Caption.text = "Loading...";
 
-            PopulateWorldData(WorldURL);
+            PopulateWorldData(WorldCid);
         }
 
-        private void PopulateWorldData(string worldURL)
+        private void PopulateWorldData(Cid cid)
         {
             IEnumerator VisCoroutine()
             {
@@ -82,7 +84,7 @@ namespace Arteranos.UI
                 if (!string.IsNullOrEmpty(WorldName))
                     VisualizeWorldData();
                 else
-                    lbl_Caption.text = $"({worldURL})";
+                    lbl_Caption.text = $"({cid})";
             }
 
             StartCoroutine(VisCoroutine());
@@ -97,8 +99,8 @@ namespace Arteranos.UI
                 Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null)
                 && AllowedForThis);
 
-            btn_Add.gameObject.SetActive(!WorldGallery.IsWorldFavourited(WorldURL));
-            btn_Delete.gameObject.SetActive(WorldGallery.IsWorldFavourited(WorldURL));
+            btn_Add.gameObject.SetActive(!WorldGallery.IsWorldFavourited(WorldCid));
+            btn_Delete.gameObject.SetActive(WorldGallery.IsWorldFavourited(WorldCid));
 
 
             if(ScreenshotPNG != null)
@@ -117,30 +119,29 @@ namespace Arteranos.UI
                 FriendsMax);
         }
 
-        [Obsolete("URL -> Cid conversion")]
         private void OnVisitClicked(bool inPlace)
         {
-            if(!string.IsNullOrEmpty(WorldURL))
+            if(!string.IsNullOrEmpty(WorldCid))
             {
                 if(inPlace)
-                    WorldTransition.EnterWorldAsync(WorldURL);
+                    WorldTransition.EnterWorldAsync(WorldCid);
                 else
-                    ServerSearcher.InitiateServerTransition(WorldURL);
+                    ServerSearcher.InitiateServerTransition(WorldCid);
 
-                WorldGallery.BumpWorldInfo(WorldURL);
+                WorldGallery.BumpWorldInfo(WorldCid);
             }
         }
 
         private void OnAddClicked()
         {
-            WorldGallery.FavouriteWorld(WorldURL);
-            PopulateWorldData(WorldURL);
+            WorldGallery.FavouriteWorld(WorldCid);
+            PopulateWorldData(WorldCid);
         }
 
         private void OnDeleteClicked()
         {
-            WorldGallery.UnfavoriteWorld(WorldURL);
-            PopulateWorldData(WorldURL);
+            WorldGallery.UnfavoriteWorld(WorldCid);
+            PopulateWorldData(WorldCid);
         }
     }
 }

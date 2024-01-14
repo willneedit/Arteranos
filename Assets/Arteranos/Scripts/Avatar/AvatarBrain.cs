@@ -12,6 +12,7 @@ using Arteranos.UI;
 using Arteranos.XR;
 using Arteranos.Social;
 using System.Linq;
+using Ipfs;
 
 namespace Arteranos.Avatar
 {
@@ -424,9 +425,10 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region World change event handling
 
-        public void MakeWorkdToChange(string worldURL)
+        [Obsolete("URL -> Cid transition")]
+        public void MakeWorkdToChange(Cid Cid)
         {
-            WorldInfo wmd = WorldGallery.GetWorldInfo(worldURL);
+            WorldInfo wmd = WorldInfo.DBLookup(Cid);
 
             if (wmd?.ContentRating != null)
             {
@@ -439,18 +441,19 @@ namespace Arteranos.Avatar
                 }
             }
 
-            CmdMakeWorldToChange(worldURL);
+            CmdMakeWorldToChange(Cid);
         }
 
         [Command]
-        private void CmdMakeWorldToChange(string worldURL)
+        [Obsolete("URL -> Cid transition")]
+        private void CmdMakeWorldToChange(string CidString)
         {
             if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
 
-            WorldInfo wmd = WorldGallery.GetWorldInfo(worldURL);
+            WorldInfo wmd = WorldInfo.DBLookup(CidString);
             if (wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.Server.Permissions)) return;
 
-            SettingsManager.PingServerChangeWorld(UserID, worldURL);
+            SettingsManager.PingServerChangeWorld(UserID, CidString);
         }
 
 #if false

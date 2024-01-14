@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Arteranos.Web;
 using Arteranos.XR;
 using Arteranos.UI;
+using Ipfs;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -28,13 +29,11 @@ namespace Arteranos.Services
             public ArteranosNetworkAuthenticator.AuthResponseMessage response;
         }
 
-        [Obsolete("Needs transition from URL to Cid(string)")]
         internal struct WorldChangeAnnounceMessage : NetworkMessage
         {
             public string Invoker;
-            public string WorldURL;
+            public string WorldCidString;
             public string Message;
-            public bool ForceReload;
         }
 
         // Overrides the base singleton so we don't
@@ -345,7 +344,7 @@ namespace Arteranos.Services
         {
             base.OnStopServer();
 
-            SettingsManager.CurrentWorld = null;
+            SettingsManager.CurrentWorldCid = null;
         }
 
         /// <summary>
@@ -364,11 +363,11 @@ namespace Arteranos.Services
         #region World Change Announcements
 
         [Server]
-        public async Task EmitToClientsWCAAsync(string invoker, string worldURL, bool forceReload)
+        public async Task EmitToClientsWCAAsync(string invoker, Cid WorldCid)
         {
             // First, download, do the consistency checks and set up the server's idea
             // of the world.
-            Exception ex = await WorldTransition.VisitWorldAsync(worldURL);
+            Exception ex = await WorldTransition.VisitWorldAsync(WorldCid);
 
             string message = null;
 
@@ -376,16 +375,15 @@ namespace Arteranos.Services
             // the clients about the changed direction.
             if (ex != null)
             {
-                worldURL = null;
+                WorldCid = null;
                 message = "Error in loading the world.";
             }
 
             WorldChangeAnnounceMessage wca = new()
             {
                 Invoker = invoker,
-                WorldURL = worldURL,
+                WorldCidString = WorldCid,
                 Message = message,
-                ForceReload = forceReload
             };
 
             Debug.Log("[Server] Announcing the clients about the changed world.");
@@ -398,17 +396,17 @@ namespace Arteranos.Services
             WorldChangeAnnounceMessage wca = new()
             {
                 Invoker = null,
-                WorldURL = SettingsManager.CurrentWorld
+                WorldCidString = SettingsManager.CurrentWorldCid
             };
 
-            Debug.Log($"[Server] sending worldURL '{SettingsManager.CurrentWorld}' to latecoming conn {conn.connectionId}");
+            Debug.Log($"[Server] sending worldURL '{SettingsManager.CurrentWorldCid}' to latecoming conn {conn.connectionId}");
             conn.Send(wca);
         }
 
         [Client]
         private async void OnClientGotWCA(WorldChangeAnnounceMessage message)
         {
-            Debug.Log($"[Client] Server announce: Changed world from {SettingsManager.CurrentWorld} to {message.WorldURL} by {message.Invoker}");
+            Debug.Log($"[Client] Server announce: Changed world from {SettingsManager.CurrentWorldCid} to {message.WorldCidString} by {message.Invoker}");
             
             if(!string.IsNullOrEmpty(message.Message))
             {
@@ -431,7 +429,7 @@ namespace Arteranos.Services
             //  - Open the host mode with the old world on their own.
             // Now drag the client along.
             Debug.Log("[Client] Dragging your client along.");
-            _ = await WorldTransition.VisitWorldAsync(message.WorldURL);
+            _ = await WorldTransition.VisitWorldAsync(message.WorldCidString);
         }
 
 

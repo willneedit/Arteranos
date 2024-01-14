@@ -345,33 +345,24 @@ namespace Arteranos.Services
             => Instance.InitiateServerTransition_(worldCid, OnSuccessCallback, OnFailureCallback);
     }
 
-    [Obsolete("URL -> Cid transition")]
     public abstract class WorldGallery : MonoBehaviour
     {
         public static WorldGallery Instance { get; protected set; }
 
-        protected abstract WorldInfo GetWorldInfo_(string url);
-        protected abstract Task<WorldInfo> LoadWorldInfoAsync_(string url, CancellationToken token);
-        protected abstract void PutWorldInfo_(WorldInfo info);
-        protected abstract void FavouriteWorld_(string url);
-        protected abstract void UnfavoriteWorld_(string url);
-        protected abstract bool IsWorldFavourited_(string url);
-        protected abstract void BumpWorldInfo_(string url);
+        protected abstract void FavouriteWorld_(Cid cid);
+        protected abstract void UnfavoriteWorld_(Cid cid);
+        protected abstract bool IsWorldFavourited_(Cid cid);
+        protected abstract void BumpWorldInfo_(Cid cid);
 
-        public static WorldInfo GetWorldInfo(string url)
-            => Instance.GetWorldInfo_(url);
-        public static Task<WorldInfo> LoadWorldInfoAsync(string url, CancellationToken token)
-            => Instance.LoadWorldInfoAsync_(url, token);
-        public static void PutWorldInfo(WorldInfo info)
-            => Instance.PutWorldInfo_(info);
-        public static void FavouriteWorld(string url)
-            => Instance.FavouriteWorld_(url);
-        public static void UnfavoriteWorld(string url)
-            => Instance.UnfavoriteWorld_(url);
-        public static bool IsWorldFavourited(string url)
-            => Instance.IsWorldFavourited_(url);
-        public static void BumpWorldInfo(string url)
-            => Instance.BumpWorldInfo_(url);
+
+        public static void FavouriteWorld(Cid cid)
+            => Instance.FavouriteWorld_(cid);
+        public static void UnfavoriteWorld(Cid cid)
+            => Instance.UnfavoriteWorld_(cid);
+        public static bool IsWorldFavourited(Cid cid)
+            => Instance.IsWorldFavourited_(cid);
+        public static void BumpWorldInfo(Cid cid)
+            => Instance.BumpWorldInfo_(cid);
     }
 
     public struct WorldData

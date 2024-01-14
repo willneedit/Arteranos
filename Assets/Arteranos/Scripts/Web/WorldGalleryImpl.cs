@@ -6,11 +6,8 @@
  */
 
 using Arteranos.Core;
+using Ipfs;
 using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using UnityEngine.Networking;
 
 namespace Arteranos.Web
 {
@@ -19,76 +16,39 @@ namespace Arteranos.Web
         private void Awake() => Instance = this;
         private void OnDestroy() => Instance = null;
 
-        protected override WorldInfo GetWorldInfo_(string url)
-            => WorldDownloader.GetWorldInfo(url);
 
-        protected override async Task<WorldInfo> LoadWorldInfoAsync_(string url, CancellationToken token)
-        {
-            WorldInfo wi = WorldDownloader.GetWorldInfo(url);
-            if (wi != null) return wi;
-
-            UriBuilder uriBuilder = new(url);
-            uriBuilder.Path = Path.ChangeExtension(uriBuilder.Path, "info");
-
-            using UnityWebRequest uwr = new(uriBuilder.ToString(), UnityWebRequest.kHttpVerbGET);
-            uwr.downloadHandler = new DownloadHandlerBuffer();
-
-            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
-
-            while (!uwr_ao.isDone && !token.IsCancellationRequested) await Task.Yield();
-
-            if (uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.ConnectionError)
-                return null;
-
-            try
-            {
-                wi = DERSerializer.Serializer.Deserialize<WorldInfo>(uwr.downloadHandler.data);
-                PutWorldInfo(wi);
-            }
-            catch 
-            {
-                // Invalid ASN.1 DER coding for WorldInfo.
-                wi = null;
-            }
-
-            return wi;
-        }
-
-        protected override void PutWorldInfo_(WorldInfo info)
-            => WorldDownloader.PutWorldInfo(info);
-
-        protected override void FavouriteWorld_(string url)
+        protected override void FavouriteWorld_(Cid cid)
         {
             Client c = SettingsManager.Client;
 
-            if(!c.WorldList.Contains(url))
+            if(!c.WorldList.Contains(cid))
             {
-                c.WorldList.Add(url);
+                c.WorldList.Add(cid);
                 c.Save();
             }
         }
 
-        protected override void UnfavoriteWorld_(string url)
+        protected override void UnfavoriteWorld_(Cid cid)
         {
             Client c = SettingsManager.Client;
 
-            if (c.WorldList.Contains(url))
+            if (c.WorldList.Contains(cid))
             {
-                c.WorldList.Remove(url);
+                c.WorldList.Remove(cid);
                 c.Save();
             }
         }
 
-        protected override bool IsWorldFavourited_(string url)
-            => SettingsManager.Client.WorldList.Contains(url);
+        protected override bool IsWorldFavourited_(Cid cid)
+            => SettingsManager.Client.WorldList.Contains(cid);
 
-        protected override void BumpWorldInfo_(string url)
+        protected override void BumpWorldInfo_(Cid cid)
         {
-            WorldInfo wi = WorldDownloader.GetWorldInfo(url);
+            WorldInfo wi = WorldInfo.DBLookup(cid);
             if (wi != null)
             {
                 wi.Updated = DateTime.Now;
-                WorldDownloader.PutWorldInfo(wi);
+                wi.DBUpdate();
             }
         }
 

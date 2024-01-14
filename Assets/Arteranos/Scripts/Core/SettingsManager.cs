@@ -30,7 +30,7 @@ namespace Arteranos.Core
         public static Client Client { get; internal set; }
         public static Server Server { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
-        public static string CurrentWorld { get; set; }
+        public static Cid CurrentWorldCid { get; set; }
         public static string CurrentWorldName { get; set; }
 
         public static ServerJSON ActiveServerData =>
@@ -118,11 +118,11 @@ namespace Arteranos.Core
         }
 
         protected abstract bool IsSelf_(MultiHash ServerPeerID);
-        protected abstract void PingServerChangeWorld_(string invoker, string worldURL);
+        protected abstract void PingServerChangeWorld_(string invoker, Cid WorldCid);
         protected abstract void StartCoroutineAsync_(Func<IEnumerator> action);
 
-        public static void PingServerChangeWorld(string invoker, string worldURL)
-            => Instance.PingServerChangeWorld_(invoker, worldURL);
+        public static void PingServerChangeWorld(string invoker, Cid WorldCid)
+            => Instance.PingServerChangeWorld_(invoker, WorldCid);
         public static void StartCoroutineAsync(Func<IEnumerator> action)
             => Instance.StartCoroutineAsync_(action);
 

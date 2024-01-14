@@ -9,6 +9,7 @@
 
 using Arteranos.Core;
 using Arteranos.Social;
+using Ipfs;
 using System;
 using UnityEngine;
 
@@ -130,7 +131,7 @@ namespace Arteranos.Avatar
             throw new NotImplementedException();
         }
 
-        public void MakeWorkdToChange(string worldURL)
+        public void MakeWorkdToChange(Cid cid)
         {
             throw new NotImplementedException();
         }

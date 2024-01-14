@@ -34,15 +34,18 @@ namespace Arteranos.Web
         public string Caption => "Preloading";
         public Action<float> ProgressChanged { get; set; }
 
-        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        public Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
-            ServerSearcherContext context = _context as ServerSearcherContext;
+            return Task.Run(() =>
+            {
+                ServerSearcherContext context = _context as ServerSearcherContext;
 
-            WorldInfo wi = await WorldGallery.LoadWorldInfoAsync(context.desiredWorldCid, token);
+                WorldInfo wi = WorldInfo.DBLookup(context.desiredWorldCid);
 
-            context.desiredWorldPermissions = wi.ContentRating;
+                context.desiredWorldPermissions = wi.ContentRating;
 
-            return context;
+                return context as Context;
+            });
         }
     }
 

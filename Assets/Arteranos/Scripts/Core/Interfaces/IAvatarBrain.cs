@@ -9,6 +9,7 @@
 
 using Arteranos.Core;
 using Arteranos.Social;
+using Ipfs;
 using System;
 using UnityEngine;
 
@@ -49,8 +50,6 @@ namespace Arteranos.Avatar
         void PerformServerPacket(SCMType type, CMSPacket p);
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
         void ServerKickUser(string reason);
-
-        [Obsolete("URL -> Cid transition")]
-        void MakeWorkdToChange(string worldURL);
+        void MakeWorkdToChange(Cid Cid);
     }
 }

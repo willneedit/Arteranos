@@ -107,7 +107,7 @@ namespace Arteranos.PlayTest
             Instance = null;
         }
 
-        protected override void PingServerChangeWorld_(string invoker, string worldURL)
+        protected override void PingServerChangeWorld_(string invoker, Cid cid)
         {
             throw new NotImplementedException();
         }

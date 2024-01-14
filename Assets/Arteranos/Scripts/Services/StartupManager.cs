@@ -92,8 +92,8 @@ namespace Arteranos.Services
             StartCoroutine(StartupCoroutine());
         }
 
-        protected override void PingServerChangeWorld_(string invoker, string worldURL) 
-            => _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, worldURL, false);
+        protected override void PingServerChangeWorld_(string invoker, Cid WorldCid) 
+            => _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, WorldCid);
 
         protected override void StartCoroutineAsync_(Func<IEnumerator> action) 
             => QueuedCoroutine.Enqueue(action);

@@ -15,13 +15,13 @@ using UnityEngine.Networking;
 using Arteranos.Core;
 using System.Threading;
 using Utils = Arteranos.Core.Utils;
+using Ipfs;
 
 namespace Arteranos.Web
 {
     internal class WorldDownloaderContext : Context
     {
-        [Obsolete("URL -> Cid transition")]
-        public string url = null;
+        public Cid Cid = null;
 
         public string targetfile = null;
 
@@ -46,8 +46,7 @@ namespace Arteranos.Web
 
             Context Execute()
             {
-                string url = context.url;
-                string wcd = WorldDownloader.GetWorldCacheDir(url);
+                string wcd = WorldDownloader.GetWorldCacheDir(context.Cid);
                 string rootPath = $"{wcd}/world.dir";
                 string worldInfoFile = $"{wcd}/world.info";
 
@@ -68,7 +67,7 @@ namespace Arteranos.Web
 
                 WorldInfo wi = new()
                 {
-                    WorldCid = context.url,
+                    WorldCid = context.Cid,
                     WorldName = metaData.WorldName,
                     WorldDescription = metaData.WorldDescription,
                     AuthorNickname = (string) metaData.AuthorID,
@@ -146,7 +145,7 @@ namespace Arteranos.Web
             totalBytes = context.size;
             totalBytesMag = Utils.Magnitude(totalBytes);
 
-            using UnityWebRequest uwr = new(context.url, UnityWebRequest.kHttpVerbGET);
+            using UnityWebRequest uwr = new(context.Cid, UnityWebRequest.kHttpVerbGET);
 
             uwr.timeout = Timeout;
             uwr.downloadHandler = new DownloadHandlerFile(context.worldZipFile);
@@ -169,12 +168,11 @@ namespace Arteranos.Web
     
     public static class WorldDownloader
     {
-        [Obsolete("URL -> Cid transition")]
-        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(string url, int timeout = 600)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(Cid cid, int timeout = 600)
         {
             WorldDownloaderContext context = new()
             {
-                url = url,
+                Cid = cid,
                 targetfile = "world.zip"
             };
 
@@ -203,27 +201,11 @@ namespace Arteranos.Web
         public static string GetWorldABF(Context _context) 
             => (_context as WorldDownloaderContext).worldAssetBundleFile;
 
-        public static string GetWorldABF(string worldURL) 
-            => GetWorldABFfromWD($"{GetWorldCacheDir(worldURL)}/world.dir");
+        public static string GetWorldABF(Cid cid) 
+            => GetWorldABFfromWD($"{GetWorldCacheDir(cid)}/world.dir");
 
-        public static string GetWorldCacheDir(string worldURL) 
-            => $"{Utils.WorldCacheRootDir}/{Utils.GetURLHash(worldURL)}";
-
-        public static string GetWIFile(string worldURL) 
-            => $"{GetWorldCacheDir(worldURL)}/world.info";
-
-        public static WorldInfo GetWorldInfo(string worldURL)
-        {
-            try
-            {
-                return WorldInfo.DBLookup(worldURL);
-            }
-            catch
-            {
-                // But... okay. Maybe as little as a typo in the URL.
-                return null;
-            }
-        }
+        public static string GetWorldCacheDir(Cid cid) 
+            => $"{Utils.WorldCacheRootDir}/{Utils.GetURLHash(cid)}";
 
         public static void PutWorldInfo(WorldInfo worldInfo)
         {

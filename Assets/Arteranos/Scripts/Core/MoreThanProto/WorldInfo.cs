@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Ipfs;
 using System.Collections.Generic;
 
 namespace Arteranos.Core
@@ -23,10 +24,10 @@ namespace Arteranos.Core
         public bool DBUpdate()
             => _DBUpdate(WorldCid, old => old.Updated <= Updated);
 
-        public static WorldInfo DBLookup(string cid)
+        public static WorldInfo DBLookup(Cid cid)
             => _DBLookup(cid);
 
-        public static void DBDelete(string cid)
+        public static void DBDelete(Cid cid)
             => _DBDelete(cid);
 
         public static IEnumerable<WorldInfo> DBList()

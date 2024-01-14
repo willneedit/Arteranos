@@ -238,7 +238,7 @@ namespace Arteranos.Services
 
             ServerOnlineData sod = new()
             {
-                CurrentWorldCid = SettingsManager.CurrentWorld,
+                CurrentWorldCid = SettingsManager.CurrentWorldCid,
                 CurrentWorldName = SettingsManager.CurrentWorldName,
                 ServerDescriptionCid = currentSDCid,
                 UserFingerprints = UserFingerprints,

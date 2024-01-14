@@ -22,7 +22,7 @@ using Ipfs;
 
 namespace Arteranos.UI
 {
-    internal struct Collection
+    internal class Collection
     {
         public Cid worldCid;
         public int serversCount;
@@ -52,8 +52,8 @@ namespace Arteranos.UI
         private Client cs = null;
 
         private readonly List<ServerInfo> serverInfos = new();
-        private readonly Dictionary<string, Collection> worldlist = new();
-        private readonly List<string> sortedWorldList = new();
+        private readonly Dictionary<Cid, Collection> worldlist = new();
+        private readonly List<Cid> sortedWorldList = new();
         private Mutex DictMutex = null;
 
         private int currentPage = 0;
@@ -100,29 +100,24 @@ namespace Arteranos.UI
             _ = CollateServersData();
         }
 
-        private async Task AddListEntry(string url, CancellationToken token, bool front = false)
+        private void AddListEntry(Cid cid, bool front = false)
         {
-            if (sortedWorldList.Contains(url)) return;
+            if (sortedWorldList.Contains(cid)) return;
 
-            if (worldlist.TryGetValue(url, out Collection list))
+            if (worldlist.TryGetValue(cid, out Collection list))
             {
                 if(list.worldInfo == null)
-                {
-                    WorldInfo wi = await WorldGallery.LoadWorldInfoAsync(url, token);
-                    list.worldInfo = wi;
-                    worldlist[url] = list;
-                }
+                    list.worldInfo = WorldInfo.DBLookup(cid);
             }
             else // Manually edited?
             {
-                WorldInfo wi = await WorldGallery.LoadWorldInfoAsync(url, token);
-                worldlist[url] = new()
+                worldlist[cid] = new()
                 {
-                    worldCid = url,
+                    worldCid = cid,
                     friendsMax = 0,
                     serversCount = 0,
                     usersCount = 0,
-                    worldInfo = wi,
+                    worldInfo = WorldInfo.DBLookup(cid),
                     favourited = false
                 };
             }
@@ -132,15 +127,15 @@ namespace Arteranos.UI
             // Filter out the worlds which go against to _your_ preferences.
             if (wmd?.ContentRating == null || !wmd.ContentRating.IsInViolation(SettingsManager.Client.ContentFilterPreferences))
             {
-                if(!front) sortedWorldList.Add(url);
-                else sortedWorldList.Insert(0, url);
+                if(!front) sortedWorldList.Add(cid);
+                else sortedWorldList.Insert(0, cid);
             }
                 
         }
 
-        private int ScoreWorld(string url) 
+        private int ScoreWorld(Cid cid) 
         {
-            if(!worldlist.TryGetValue(url, out Collection list)) return -10000;
+            if(!worldlist.TryGetValue(cid, out Collection list)) return -10000;
 
             int score = 0;
 
@@ -194,7 +189,7 @@ namespace Arteranos.UI
 
             TaskPool<ServerInfo> pool = new(20);
 
-            foreach (var entry in ServerInfo.Dump(DateTime.MinValue))
+            foreach (ServerInfo entry in ServerInfo.Dump(DateTime.MinValue))
                 serverInfos.Add(entry);
 
             foreach (ServerInfo info in serverInfos) pool.Schedule(info, UpdateOne);
@@ -203,20 +198,20 @@ namespace Arteranos.UI
 
             sortedWorldList.Clear();
 
-            if (!string.IsNullOrEmpty(SettingsManager.CurrentWorld))
-                await AddListEntry(SettingsManager.CurrentWorld, cts.Token);
+            if (!string.IsNullOrEmpty(SettingsManager.CurrentWorldCid))
+                WorldInfo.DBLookup(SettingsManager.CurrentWorldCid);
 
-            foreach (string url in cs.WorldList)
+            foreach (Cid cid in cs.WorldList)
             {
-                await AddListEntry(url, cts.Token);
-                Collection list = worldlist[url];
+                AddListEntry(cid);
+                Collection list = worldlist[cid];
                 list.favourited = true;
-                worldlist[url] = list;
+                worldlist[cid] = list;
             }
 
-            string[] keys = worldlist.Keys.ToArray();
-            foreach (string url in keys)
-                await AddListEntry(url, cts.Token);
+            Cid[] keys = worldlist.Keys.ToArray();
+            foreach (Cid cid in keys)
+                AddListEntry(cid);
 
             sortedWorldList.Sort((x, y) => ScoreWorld(y) - ScoreWorld(x));
 
@@ -243,8 +238,8 @@ namespace Arteranos.UI
             {
                 GameObject go = Instantiate(grp_WorldPanelSample, panels);
                 WorldPaneltem wli = go.GetComponentInChildren<WorldPaneltem>();
-                wli.WorldURL = sortedWorldList[i];
-                if (worldlist.TryGetValue(wli.WorldURL, out Collection list))
+                wli.WorldCid = sortedWorldList[i];
+                if (worldlist.TryGetValue(wli.WorldCid, out Collection list))
                 {
                     wli.WorldName = list.worldInfo?.WorldName;
                     wli.ScreenshotPNG = list.worldInfo?.ScreenshotPNG;
@@ -277,11 +272,11 @@ namespace Arteranos.UI
             StartCoroutine(ShowPage(newPage));
         }
         
-        private async void OnAddWorldClicked()
+        private void OnAddWorldClicked()
         {
             CancellationTokenSource cts = new();
 
-            await AddListEntry(txt_AddWorldURL.text, cts.Token, true);
+            AddListEntry(txt_AddWorldURL.text, true);
 
             SettingsManager.StartCoroutineAsync(() => ShowPage(0));
         }
