@@ -63,9 +63,6 @@ namespace Arteranos.Core
         /// </summary>
         public static string RPMAvatarCache => ReadyPlayerMe.Core.DirectoryUtility.GetAvatarsDirectoryPath();
 
-        public static readonly string WorldStorageDir = $"{FileUtils.persistentDataPath}/WorldGallery";
-
-
         /// <summary>
         /// Simulate a RC circuit (a capacitor and resistor) to measure the capacitor's charge,
         /// used in for example a VU meter. 

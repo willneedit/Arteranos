@@ -72,11 +72,13 @@ namespace Arteranos.UI
             StartCoroutine(PopulateCoroutine());
         }
 
+        [Obsolete("Manually add server is currently unsupported")]
         private void OnAddWorldClicked()
         {
-            throw new NotImplementedException();
+#if false
             string PeerIDString = txt_AddServerURL.text;
             ServerList[PeerIDString] = ServerListItem.New(lvc_ServerList.transform, PeerIDString);
+#endif
         }
 
         private async void OnReloadClicked()
