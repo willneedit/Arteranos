@@ -27,7 +27,7 @@ namespace Arteranos.Services
 {
     public class IPFSServiceImpl : IPFSService
     {
-        public IpfsEngine Ipfs { get => ipfs; }
+        public override IpfsEngine _Ipfs { get => ipfs; }
         public override Peer _Self { get => self; }
         public override SignKey _ServerKeyPair { get => serverKeyPair; }
         public static string CachedPTOSNotice { get; private set; } = null;
@@ -198,7 +198,7 @@ namespace Arteranos.Services
         public override async Task _FlipServerDescription(bool reload)
         {
             if(currentSDCid != null)
-                await Ipfs.Block.RemoveAsync(currentSDCid);
+                await _Ipfs.Block.RemoveAsync(currentSDCid);
 
             if (!reload) return;
 

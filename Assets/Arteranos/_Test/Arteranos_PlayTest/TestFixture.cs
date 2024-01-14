@@ -32,9 +32,9 @@ namespace Arteranos.PlayTest
             yield return new WaitForEndOfFrame();
 
             IPFSServiceImpl old = GameObject.FindObjectOfType<IPFSServiceImpl>();
-            if(old != null && old.Ipfs != null)
+            if(old != null && old._Ipfs != null)
             {
-                ipfs = old.Ipfs;
+                ipfs = old._Ipfs;
                 Debug.LogWarning("Reusing old service");
                 yield break;
             }
@@ -43,13 +43,13 @@ namespace Arteranos.PlayTest
             IPFSServiceImpl srv = go.AddComponent<IPFSServiceImpl>();
 
             DateTime expiry = DateTime.Now + TimeSpan.FromSeconds(5);
-            while (srv.Ipfs == null)
+            while (srv._Ipfs == null)
             {
                 if (expiry < DateTime.Now) Assert.Fail("Timeout when setting up IPFS backend");
                 yield return new WaitForEndOfFrame();
             }
 
-            ipfs = srv.Ipfs;
+            ipfs = srv._Ipfs;
             iPFSService = srv;
         }
 

@@ -11,6 +11,7 @@ using Arteranos.Core;
 using Arteranos.Core.Cryptography;
 using Arteranos.XR;
 using Ipfs;
+using Ipfs.Engine;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -279,6 +280,7 @@ namespace Arteranos.Services
 
     public abstract class IPFSService : MonoBehaviour
     {
+        public abstract IpfsEngine _Ipfs { get; }
         public abstract Peer _Self { get; }
         public abstract SignKey _ServerKeyPair { get; }
 
@@ -293,6 +295,8 @@ namespace Arteranos.Services
 
         public static IPFSService Instance { get; protected set; }
 
+        public static IpfsEngine Ipfs
+            => Instance._Ipfs;
         public static Peer Self 
             => Instance._Self;
         public static Task<IPAddress> GetPeerIPAddress(string PeerID, CancellationToken token = default)

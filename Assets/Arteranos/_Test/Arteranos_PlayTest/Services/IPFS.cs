@@ -88,9 +88,9 @@ namespace Arteranos.PlayTest.Services
 
             yield return null;
 
-            yield return TestFixture.WaitForCondition(5, () => srv?.Ipfs != null, "IPFS server timeout");
+            yield return TestFixture.WaitForCondition(5, () => srv?._Ipfs != null, "IPFS server timeout");
 
-            ipfs = srv.Ipfs;
+            ipfs = srv._Ipfs;
 
             self = Task.Run(async () => await ipfs.LocalPeer).Result;
         }
