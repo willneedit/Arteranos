@@ -9,6 +9,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using Ipfs;
 
 namespace Arteranos.Core
 {
@@ -129,6 +130,22 @@ namespace Arteranos.Core
 
             return "more than a year ago";
 
+        }
+
+        /// <summary>
+        /// Safe string-to-Cid conversion.
+        /// </summary>
+        /// <param name="s">The Cid's string representation</param>
+        /// <returns>The Cid, or null if it's invalid.</returns>
+        public static Cid SafeCID(this string s)
+        {
+            Cid cid = null;
+            try
+            {
+                cid = Cid.Decode(s);
+            }
+            catch { }
+            return cid;
         }
     }
 }

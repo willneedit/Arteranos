@@ -40,12 +40,12 @@ namespace Arteranos.UI
         private string patternCaption = null;
 
         [Obsolete("URL -> Cid conversion")]
-        public static WorldPaneltem New(Transform parent, string url)
+        public static WorldPaneltem New(Transform parent, Cid cid)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/WorldListItem"));
             go.transform.SetParent(parent, false);
             WorldPaneltem worldListItem = go.GetComponent<WorldPaneltem>();
-            worldListItem.WorldCid = url;
+            worldListItem.WorldCid = cid;
             return worldListItem;
         }
 

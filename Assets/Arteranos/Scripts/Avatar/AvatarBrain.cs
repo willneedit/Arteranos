@@ -450,10 +450,10 @@ namespace Arteranos.Avatar
         {
             if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
 
-            WorldInfo wmd = WorldInfo.DBLookup(CidString);
+            WorldInfo wmd = WorldInfo.DBLookup(CidString.SafeCID());
             if (wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.Server.Permissions)) return;
 
-            SettingsManager.PingServerChangeWorld(UserID, CidString);
+            SettingsManager.PingServerChangeWorld(UserID, CidString.SafeCID());
         }
 
 #if false

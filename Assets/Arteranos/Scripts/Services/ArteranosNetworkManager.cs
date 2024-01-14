@@ -429,7 +429,7 @@ namespace Arteranos.Services
             //  - Open the host mode with the old world on their own.
             // Now drag the client along.
             Debug.Log("[Client] Dragging your client along.");
-            _ = await WorldTransition.VisitWorldAsync(message.WorldCidString);
+            _ = await WorldTransition.VisitWorldAsync(message.WorldCidString.SafeCID());
         }
 
 

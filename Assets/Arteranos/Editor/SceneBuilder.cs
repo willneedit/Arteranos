@@ -406,6 +406,7 @@ namespace Arteranos.Editor
                 EditorApplication.playModeStateChanged += LogPlayModeState;
             }
 
+            [Obsolete("Actual URL, then upload resource into IPFS")]
             private static void LogPlayModeState(PlayModeStateChange state)
             {
                 if(state == PlayModeStateChange.EnteredEditMode)
@@ -423,7 +424,8 @@ namespace Arteranos.Editor
                     {
                         IProgressUI pui = ProgressUIFactory.New();
 
-                        pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(testWorldZip));
+                        // TODO Needs asset uploader! (testWorldZip -> Cid)
+                        pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(null));
 
                         pui.Completed += (context) => OnLoadWorldComplete(context);
                         pui.Faulted += OnLoadWorldFaulted;

@@ -80,7 +80,7 @@ namespace Arteranos.Core
                 if(parts.Length == 2 && parts[0] == "arteranos:")
                 {
                     TargetedPeerID = string.IsNullOrEmpty(parts[1]) ? parts[1] : null;
-                    DesiredWorldCid = string.IsNullOrEmpty(parts[2]) ? parts[2] : null;
+                    DesiredWorldCid = (string.IsNullOrEmpty(parts[2]) ? parts[2] : null).SafeCID();
 
                     if(TargetedPeerID != null || DesiredWorldCid != null) 
                         StartupTrigger = true;

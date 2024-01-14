@@ -106,7 +106,7 @@ namespace Arteranos.Test
 
             await client.Swarm.ConnectAsync(address2, cts.Token);
 
-            IEnumerable<Peer> peers = await client.Dht.FindProvidersAsync(V140CID, limit: 1, cancel: cts.Token);
+            IEnumerable<Peer> peers = await client.Dht.FindProvidersAsync(Cid.Decode(V140CID), limit: 1, cancel: cts.Token);
             Assert.AreEqual(1, peers.Count());
             Assert.AreEqual(peers.First(), self);
         }

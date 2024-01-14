@@ -157,7 +157,7 @@ namespace Arteranos.UI
                 await serverInfo.Update();
 
                 // Server offline or has no world loaded?
-                Cid Cid = serverInfo.CurrentWorldCid;
+                Cid Cid = serverInfo.CurrentWorldCid.SafeCID();
                 if (!serverInfo.IsOnline || Cid == null) return;
 
                 int friends = serverInfo.FriendCount;
@@ -198,11 +198,14 @@ namespace Arteranos.UI
 
             sortedWorldList.Clear();
 
-            if (!string.IsNullOrEmpty(SettingsManager.CurrentWorldCid))
+            if (SettingsManager.CurrentWorldCid != null)
                 WorldInfo.DBLookup(SettingsManager.CurrentWorldCid);
 
-            foreach (Cid cid in cs.WorldList)
+            foreach (string CidString in cs.WorldList)
             {
+                Cid cid = CidString.SafeCID();
+
+                if(cid == null) continue;
                 AddListEntry(cid);
                 Collection list = worldlist[cid];
                 list.favourited = true;
@@ -271,14 +274,17 @@ namespace Arteranos.UI
 
             StartCoroutine(ShowPage(newPage));
         }
-        
+
+        [Obsolete("Actual URL, then upload resource into IPFS")]        
         private void OnAddWorldClicked()
         {
+#if false
             CancellationTokenSource cts = new();
 
             AddListEntry(txt_AddWorldURL.text, true);
 
             SettingsManager.StartCoroutineAsync(() => ShowPage(0));
+#endif
         }
     }
 }
