@@ -114,7 +114,7 @@ namespace Arteranos.PlayTest
 
         protected override void StartCoroutineAsync_(Func<IEnumerator> action)
         {
-            throw new NotImplementedException();
+            return;
         }
     }
 
