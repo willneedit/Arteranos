@@ -19,6 +19,7 @@ using UnityEngine.UI;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine.Networking;
+using System.Threading;
 
 namespace Arteranos.Core
 {
@@ -367,5 +368,26 @@ namespace Arteranos.Core
 
         public static void InvalidateWebData(string url, string cachePattern)
             => InvalidateWebData(url, cachePattern);
+
+        public static async Task CopyWithProgress(Stream inStream, Stream outStream, Action<long> reportProgress, CancellationToken token = default)
+        {
+            long totalBytes = 0;
+            byte[] buffer = new byte[100 * 1024];
+
+            while (!token.IsCancellationRequested)
+            {
+                int bytesRead = await inStream.ReadAsync(buffer, 0, buffer.Length, token);
+
+                if (bytesRead == 0) break;
+
+                totalBytes += bytesRead;
+                reportProgress(totalBytes);
+
+                await outStream.WriteAsync(buffer, 0, bytesRead);
+                await Task.Yield();
+            }
+            outStream.Flush();
+            outStream.Close();
+        }
     }
 }

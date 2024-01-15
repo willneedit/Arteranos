@@ -7,10 +7,7 @@
 
 using System;
 using System.IO;
-using System.IO.Compression;
 using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.Networking;
 
 using Arteranos.Core;
 using System.Threading;
@@ -18,10 +15,12 @@ using Utils = Arteranos.Core.Utils;
 using Ipfs;
 using Arteranos.Services;
 using Ipfs.CoreApi;
+using System.Net.Http;
+using System.IO.Pipes;
 
 namespace Arteranos.Web
 {
-    internal class AssetUploaderContext : Context
+    public class AssetUploaderContext : Context
     {
         public string AssetURL = null;
         public string TempFile = null;
@@ -33,25 +32,53 @@ namespace Arteranos.Web
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 1.0f;
-        public string Caption => "Uploading to the IPFS...";
+        public string Caption { get => GetProgressText(); }
         public Action<float> ProgressChanged { get; set; }
 
-        // TransferProgress lastProgress = null;
+        private long actualBytes = 0;
+        private long totalBytes = -1;
+        private string totalBytesMag = null;
+
+        private string GetProgressText()
+        {
+            if (totalBytesMag == null || totalBytes <= 0) return "Uploading...";
+
+            return $"Uploading ({Utils.Magnitude(actualBytes)} of {totalBytesMag})...";
+        }
+
         public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
-            // TODO Upload progress indicator
             AssetUploaderContext context = _context as AssetUploaderContext;
 
             AddFileOptions ao = new()
             {
-                // Progress = new Progress<TransferProgress>(t => lastProgress = t),
                 Pin = context.pin
             };
 
-            IFileSystemNode fsn = await IPFSService.Ipfs.FileSystem.AddFileAsync(context.TempFile, ao);
-            context.Cid = fsn.Id;
+            try
+            {
+                FileInfo fileInfo = new FileInfo(context.TempFile);
+                totalBytes = fileInfo.Length;
+                totalBytesMag = Utils.Magnitude(totalBytes);
 
-            if(File.Exists(context.TempFile)) File.Delete(context.TempFile);
+                using Stream stream = File.OpenRead(context.TempFile);
+
+                using AnonymousPipeServerStream pipeServer = new AnonymousPipeServerStream();
+                using AnonymousPipeClientStream pipeClient =
+                  new AnonymousPipeClientStream(pipeServer.GetClientHandleAsString());
+
+                _ = Utils.CopyWithProgress(stream, pipeServer, bytes => {
+                    actualBytes = bytes;
+                    ProgressChanged((float) bytes / totalBytes);
+                }, token);
+                IFileSystemNode fsn = await IPFSService.Ipfs.FileSystem.AddAsync(pipeClient, "", ao, token);
+
+                context.Cid = fsn.Id;
+            }
+            finally
+            {
+                if (File.Exists(context.TempFile)) File.Delete(context.TempFile);
+            }
 
             return context;
         }
@@ -64,15 +91,12 @@ namespace Arteranos.Web
         public string Caption { get => GetProgressText(); }
         public Action<float> ProgressChanged { get; set; }
 
-        private float normalizedProgress = 0.0f;
+        private long actualBytes = 0;
         private long totalBytes = -1;
         private string totalBytesMag = null;
 
         private string GetProgressText()
         {
-            long actualBytes = (long)(normalizedProgress * totalBytes);
-
-            // Maybe the UI buildup was quicker than the initialization...
             if (totalBytesMag == null || totalBytes <= 0) return "Downloading...";
 
             return $"Downloading ({Utils.Magnitude(actualBytes)} of {totalBytesMag})...";
@@ -80,34 +104,41 @@ namespace Arteranos.Web
 
         public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
+            Stream inStream = null;
+
             AssetUploaderContext context = _context as AssetUploaderContext;
 
-            using UnityWebRequest uwr = new(context.AssetURL, UnityWebRequest.kHttpVerbGET);
-
-            uwr.timeout = Timeout;
-            uwr.downloadHandler = new DownloadHandlerFile(context.TempFile);
-
-            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
-
-            while (!uwr_ao.isDone && !token.IsCancellationRequested)
+            if(context.AssetURL.StartsWith("file://"))
             {
-                if (totalBytes < 0)
-                {
-                    string size = uwr.GetResponseHeader("Content-Length");
-                    if (size != null)
-                    {
-                        totalBytes = Convert.ToInt64(size);
-                        totalBytesMag = Utils.Magnitude(totalBytes);
-                    }
-                }
+                string path = context.AssetURL[8..];
+                FileInfo fileInfo = new FileInfo(path);
+                totalBytes = fileInfo.Length;
 
-                await Task.Yield();
-                normalizedProgress = uwr.downloadProgress;
-                ProgressChanged?.Invoke(uwr.downloadProgress);
+                inStream = File.OpenRead(path);
             }
+            else
+            {
+                using HttpClient client = new();
 
-            if (uwr.result == UnityWebRequest.Result.ProtocolError || uwr.result == UnityWebRequest.Result.ConnectionError)
-                throw new FileNotFoundException(uwr.error, context.TempFile);
+                client.Timeout = TimeSpan.FromSeconds(Timeout);
+
+                using HttpResponseMessage response = await client.GetAsync(context.AssetURL);
+
+                response.EnsureSuccessStatusCode();
+
+                totalBytes = response.Content.Headers.ContentLength ?? -1;
+
+                inStream = await response.Content.ReadAsStreamAsync();
+            }
+            totalBytesMag = Utils.Magnitude(totalBytes);
+
+            using FileStream outStream = File.Create(context.TempFile);
+
+            await Utils.CopyWithProgress(inStream, outStream, 
+                bytes => {
+                    actualBytes = bytes;
+                    ProgressChanged((float) bytes / totalBytes);
+                }, token);
 
             return context;
         }
@@ -120,7 +151,7 @@ namespace Arteranos.Web
             AssetUploaderContext context = new()
             {
                 AssetURL = assetURL,
-                TempFile = $"{Application.temporaryCachePath}/{Path.GetTempFileName()}",
+                TempFile = $"{Path.GetTempFileName()}",
                 pin = pin
             };
 
