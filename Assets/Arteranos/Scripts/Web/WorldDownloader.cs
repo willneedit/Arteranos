@@ -49,9 +49,6 @@ namespace Arteranos.Web
             {
                 string wcd = WorldDownloader.GetWorldCacheDir(context.Cid);
                 string rootPath = $"{wcd}/world.dir";
-                string worldInfoFile = $"{wcd}/world.info";
-
-                if (File.Exists(worldInfoFile)) return context;
 
                 string metadataFile = $"{rootPath}/Metadata.json";
                 string screenshotFile = null;
@@ -122,18 +119,14 @@ namespace Arteranos.Web
         public int Timeout { get; set; }
         public float Weight { get; set; } = 8.0f;
         public string Caption { get => GetProgressText(); }
-
         public Action<float> ProgressChanged { get; set; }
 
-        private float normalizedProgress = 0.0f;
-        private long totalBytes = 0;
+        private long actualBytes = 0;
+        private long totalBytes = -1;
         private string totalBytesMag = null;
 
         private string GetProgressText()
         {
-            long actualBytes = (long)(normalizedProgress * totalBytes);
-
-            // Maybe the UI buildup was quicker than the initialization...
             if (totalBytesMag == null || totalBytes <= 0) return "Downloading...";
 
             return $"Downloading ({Utils.Magnitude(actualBytes)} of {totalBytesMag})...";
@@ -141,18 +134,27 @@ namespace Arteranos.Web
 
         public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
-            // TODO Progress indicator
             WorldDownloaderContext context = _context as WorldDownloaderContext;
 
             context.cachedir = $"{WorldDownloader.GetWorldCacheDir(context.Cid)}";
             context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
 
-            using (FileStream fs = File.Create(context.worldZipFile))
-            {
-                Stream s = await IPFSService.Ipfs.FileSystem.GetAsync(context.Cid, cancel: token);
-                s.Position = 0;
-                s.CopyTo(fs);
-            }
+            IDataBlock fi = await IPFSService.Ipfs.FileSystem.ListFileAsync(context.Cid, token);
+
+            totalBytes = fi.Size;
+            totalBytesMag = Utils.Magnitude(totalBytes);
+
+            using Stream inStream = await IPFSService.Ipfs.FileSystem.ReadFileAsync(context.Cid, cancel: token);
+
+            string dir = Path.GetDirectoryName(context.worldZipFile);
+            if(!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            using FileStream outStream = File.Create(context.worldZipFile);
+
+            await Utils.CopyWithProgress(inStream, outStream,
+                bytes => {
+                    actualBytes = bytes;
+                    ProgressChanged((float)bytes / totalBytes);
+                }, token);
 
             return context;
         }
@@ -190,7 +192,7 @@ namespace Arteranos.Web
             WorldTransition.EnterDownloadedWorld(worldABF);
         }
 
-        public static string GetWorldABF(Context _context) 
+        private static string GetWorldABF(Context _context) 
             => (_context as WorldDownloaderContext).worldAssetBundleFile;
 
         public static string GetWorldABF(Cid cid) 
@@ -198,15 +200,6 @@ namespace Arteranos.Web
 
         public static string GetWorldCacheDir(Cid cid) 
             => $"{Utils.WorldCacheRootDir}/{Utils.GetURLHash(cid)}";
-
-        public static void PutWorldInfo(WorldInfo worldInfo)
-        {
-            try
-            {
-                worldInfo.DBUpdate();
-            }
-            catch { }
-        }
 
         public static string GetWorldABFfromWD(string path)
         {
