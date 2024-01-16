@@ -73,15 +73,15 @@ namespace Arteranos.PlayTest.Web
 
             try
             {
-                (AsyncOperationExecutor<Context> ao, Context co) = 
-                    Arteranos.Web.AssetUploader.PrepareUploadToIPFS(
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    AssetUploader.PrepareUploadToIPFS(
                         "file:///D:/Users/carsten/Documents/Sceelix_Abbey.zip");
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
                 
                 await ao.ExecuteAsync(co);
 
-                AssetCid = (co as AssetUploaderContext).Cid;
+                AssetCid = AssetUploader.GetUploadedCid(co);
 
                 Assert.IsNotNull(AssetCid);
 
@@ -117,7 +117,7 @@ namespace Arteranos.PlayTest.Web
 
                 await ao.ExecuteAsync(co);
 
-                AssetCid = (co as AssetUploaderContext).Cid;
+                AssetCid = AssetUploader.GetUploadedCid(co);
 
                 Assert.IsNotNull(AssetCid);
 
@@ -153,8 +153,8 @@ namespace Arteranos.PlayTest.Web
                 await ao.ExecuteAsync(co);
 
                 Assert.Fail("Did not throw");
-                
-                AssetCid = (co as AssetUploaderContext).Cid;
+
+                AssetCid = AssetUploader.GetUploadedCid(co);
 
                 Assert.IsNotNull(AssetCid);
 

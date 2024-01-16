@@ -43,7 +43,7 @@ namespace Arteranos.Core
         [ProtoMember(9)]
         public DateTime Created;
 
-        [ProtoMember(10)]
+        // [ProtoMember(10)] -- remains locally
         public DateTime Updated;
 
         public void Serialize(Stream stream)

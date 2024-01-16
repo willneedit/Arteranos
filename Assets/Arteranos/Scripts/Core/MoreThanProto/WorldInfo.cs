@@ -28,9 +28,11 @@ namespace Arteranos.Core
         public bool DBUpdate()
             => _DBUpdate(WorldCid, old => old.Updated <= Updated);
 
+        [Obsolete("TODO Clarify: Meta Info Cid")]
         public static WorldInfo DBLookup(Cid cid)
             => new WorldInfo()._DBLookup(cid);
 
+        [Obsolete("TODO Clarify: Meta Info Cid")]
         public static void DBDelete(Cid cid)
         {
             new WorldInfo()._DBDelete(cid);

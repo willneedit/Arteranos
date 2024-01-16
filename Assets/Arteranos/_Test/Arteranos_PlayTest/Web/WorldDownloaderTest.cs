@@ -54,12 +54,12 @@ namespace Arteranos.PlayTest.Web
         private async Task UploadTestWorld()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                Arteranos.Web.AssetUploader.PrepareUploadToIPFS(
+                AssetUploader.PrepareUploadToIPFS(
                     "file:///D:/Users/carsten/Documents/Sceelix_Abbey.zip");
 
             await ao.ExecuteAsync(co);
 
-            WorldCid = (co as AssetUploaderContext).Cid;
+            WorldCid = AssetUploader.GetUploadedCid(co);
 
             Assert.IsNotNull(WorldCid);
         }
@@ -70,7 +70,6 @@ namespace Arteranos.PlayTest.Web
             if (WorldCid != null)
             {
                 ipfs.Block.RemoveAsync(WorldCid).Wait();
-                WorldInfo.DBDelete(WorldCid);
             }
 
             srv = null;
@@ -96,8 +95,6 @@ namespace Arteranos.PlayTest.Web
         public async Task DownloadWorldAsync()
         {
             Assert.IsNotNull(WorldCid);
-            WorldInfo wi0 = WorldInfo.DBLookup(WorldCid);
-            Assert.IsNull(wi0);
 
             (AsyncOperationExecutor<Context> ao, Context co) =
                 WorldDownloader.PrepareDownloadWorld(WorldCid);
@@ -106,7 +103,7 @@ namespace Arteranos.PlayTest.Web
 
             await ao.ExecuteAsync(co);
 
-            WorldInfo wi = WorldInfo.DBLookup(WorldCid);
+            WorldInfo wi = WorldDownloader.GetWorldInfo(co);
 
             Assert.IsNotNull(wi.WorldName);
             Assert.IsNotNull(wi.AuthorNickname);
@@ -126,7 +123,8 @@ namespace Arteranos.PlayTest.Web
 
             await ao.ExecuteAsync(co);
 
-            WorldInfo wi = WorldInfo.DBLookup(WorldCid);
+            WorldInfo wi = WorldDownloader.GetWorldInfo(co);
+
             Assert.IsNotNull(wi);
             Assert.AreEqual(wi.WorldCid, WorldCid.ToString());
 
@@ -135,6 +133,19 @@ namespace Arteranos.PlayTest.Web
 
             Assert.IsNotEmpty(WorldDownloader.GetWorldABF(WorldCid));
             Assert.IsTrue(File.Exists(WorldDownloader.GetWorldABF(WorldCid)));
+
+            // WorldInfo needs to be constant, even the the world was recently accessed.
+            wi.Updated = DateTime.Now;
+
+            using MemoryStream ms = new();
+            wi.Serialize(ms);
+            ms.Position = 0;
+            IFileSystemNode fsn = await ipfs.FileSystem.AddAsync(ms, "", new() { OnlyHash = true });
+            Assert.IsNotNull(fsn);
+
+            Cid WICid = fsn.Id;
+
+            Debug.Log($"{WICid}");
         }
     }
 }

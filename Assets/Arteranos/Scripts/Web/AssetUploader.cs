@@ -20,7 +20,7 @@ using System.IO.Pipes;
 
 namespace Arteranos.Web
 {
-    public class AssetUploaderContext : Context
+    internal class AssetUploaderContext : Context
     {
         public string AssetURL = null;
         public string TempFile = null;
@@ -167,5 +167,7 @@ namespace Arteranos.Web
             return (executor, context);
         }
 
+        public static Cid GetUploadedCid(Context _context)
+            => (_context as AssetUploaderContext).Cid;
     }
 }

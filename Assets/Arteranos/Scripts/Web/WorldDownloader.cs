@@ -10,7 +10,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
 
 using Arteranos.Core;
 using System.Threading;
@@ -23,11 +22,7 @@ namespace Arteranos.Web
     internal class WorldDownloaderContext : Context
     {
         public Cid Cid = null;
-
-        public string targetfile = null;
-
-        public string cachedir = null;
-
+        public WorldInfo WorldInfo = null;
         public long size = -1;
         public string worldZipFile = null;
         public string worldAssetBundleFile = null;
@@ -63,7 +58,7 @@ namespace Arteranos.Web
 
                 WorldMetaData metaData = WorldMetaData.Deserialize(json);
 
-                WorldInfo wi = new()
+                context.WorldInfo = new()
                 {
                     WorldCid = context.Cid,
                     WorldName = metaData.WorldName,
@@ -74,10 +69,8 @@ namespace Arteranos.Web
                     Signature = null,
                     ScreenshotPNG = screenshotBytes,
                     Created = metaData.Created,
-                    Updated = DateTime.Now
+                    Updated = DateTime.MinValue
                 };
-
-                wi.DBUpdate();
 
                 return context;
             }
@@ -136,8 +129,7 @@ namespace Arteranos.Web
         {
             WorldDownloaderContext context = _context as WorldDownloaderContext;
 
-            context.cachedir = $"{WorldDownloader.GetWorldCacheDir(context.Cid)}";
-            context.worldZipFile = $"{context.cachedir}/{context.targetfile}";
+            context.worldZipFile = $"{WorldDownloader.GetWorldCacheDir(context.Cid)}/world.zip";
 
             IDataBlock fi = await IPFSService.Ipfs.FileSystem.ListFileAsync(context.Cid, token);
 
@@ -166,8 +158,7 @@ namespace Arteranos.Web
         {
             WorldDownloaderContext context = new()
             {
-                Cid = cid,
-                targetfile = "world.zip"
+                Cid = cid
             };
 
 
@@ -194,6 +185,9 @@ namespace Arteranos.Web
 
         private static string GetWorldABF(Context _context) 
             => (_context as WorldDownloaderContext).worldAssetBundleFile;
+
+        public static WorldInfo GetWorldInfo(Context _context)
+            => (_context as WorldDownloaderContext).WorldInfo;
 
         public static string GetWorldABF(Cid cid) 
             => GetWorldABFfromWD($"{GetWorldCacheDir(cid)}/world.dir");
