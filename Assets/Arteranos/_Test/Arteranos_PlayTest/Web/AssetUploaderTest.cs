@@ -1,27 +1,19 @@
 using System.Collections;
-using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
 using Ipfs.Engine;
 using Arteranos.Services;
-using System;
 using System.IO;
-using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using Arteranos.Core;
 using Ipfs;
-using System.Linq;
-using System.Threading;
-using Arteranos.Core.Cryptography;
-using System.Security.Cryptography;
-using Arteranos.UI;
 using Arteranos.Web;
 
 namespace Arteranos.PlayTest.Web
 {
-    public class AssetUploader
+    public class AssetUploaderTest
     {
         private const string AssetURL = "file:///D:/Users/carsten/Documents/Sceelix_Abbey.zip";
 
