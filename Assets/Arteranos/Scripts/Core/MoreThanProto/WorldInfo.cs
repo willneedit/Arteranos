@@ -25,12 +25,12 @@ namespace Arteranos.Core
             => _DBUpdate(WorldCid, old => old.Updated <= Updated);
 
         public static WorldInfo DBLookup(Cid cid)
-            => _DBLookup(cid);
+            => new WorldInfo()._DBLookup(cid);
 
         public static void DBDelete(Cid cid)
-            => _DBDelete(cid);
+            => new WorldInfo()._DBDelete(cid);
 
         public static IEnumerable<WorldInfo> DBList()
-            => _DBList();
+            => new WorldInfo()._DBList();
     }
 }

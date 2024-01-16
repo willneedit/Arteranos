@@ -29,13 +29,13 @@ namespace Arteranos.Core
             => _DBUpdate(PeerID, old => old.LastModified <= LastModified);
 
         public static ServerDescription DBLookup(string id) 
-            => _DBLookup(id);
+            => new ServerDescription()._DBLookup(id);
 
         public static void DBDelete(string id) 
-            => _DBDelete(id);
+            => new ServerDescription()._DBDelete(id);
 
         public static IEnumerable<ServerDescription> DBList() 
-            => _DBList();
+            => new ServerDescription()._DBList();
 
         public void Serialize(SignKey serverPrivateKey, Stream stream)
         {

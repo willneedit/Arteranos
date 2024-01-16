@@ -46,7 +46,7 @@ namespace Arteranos.Core
             _Serialize(stream);
         }
 
-        public static T _DBLookup(string key)
+        public T _DBLookup(string key)
         {
             string fn = _GetFileName(key);
 
@@ -56,7 +56,7 @@ namespace Arteranos.Core
             return _Deserialize(stream);
         }
 
-        public static void _DBDelete(string key)
+        public void _DBDelete(string key)
         {
             string fn = _GetFileName(key);
 
@@ -65,7 +65,7 @@ namespace Arteranos.Core
             File.Delete(fn);
         }
 
-        public static IEnumerable<T> _DBList()
+        public IEnumerable<T> _DBList()
         {
             IEnumerable<string> files = Directory.EnumerateFiles(_KnownPeersRoot, _SearchPattern, SearchOption.AllDirectories);
 
