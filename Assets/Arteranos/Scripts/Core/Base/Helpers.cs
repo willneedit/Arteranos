@@ -349,26 +349,6 @@ namespace Arteranos.Services
             => Instance.InitiateServerTransition_(worldCid, OnSuccessCallback, OnFailureCallback);
     }
 
-    public abstract class WorldGallery : MonoBehaviour
-    {
-        public static WorldGallery Instance { get; protected set; }
-
-        protected abstract void FavouriteWorld_(Cid cid);
-        protected abstract void UnfavoriteWorld_(Cid cid);
-        protected abstract bool IsWorldFavourited_(Cid cid);
-        protected abstract void BumpWorldInfo_(Cid cid);
-
-
-        public static void FavouriteWorld(Cid cid)
-            => Instance.FavouriteWorld_(cid);
-        public static void UnfavoriteWorld(Cid cid)
-            => Instance.UnfavoriteWorld_(cid);
-        public static bool IsWorldFavourited(Cid cid)
-            => Instance.IsWorldFavourited_(cid);
-        public static void BumpWorldInfo(Cid cid)
-            => Instance.BumpWorldInfo_(cid);
-    }
-
     public struct WorldData
     {
         public Cid worldCid;

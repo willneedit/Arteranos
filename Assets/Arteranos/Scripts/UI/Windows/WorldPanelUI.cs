@@ -100,6 +100,7 @@ namespace Arteranos.UI
             _ = CollateServersData();
         }
 
+        [Obsolete("TODO Derive WorldCid to WorldInfo")]
         private void AddListEntry(Cid cid, bool front = false)
         {
             if (sortedWorldList.Contains(cid)) return;
@@ -201,11 +202,13 @@ namespace Arteranos.UI
             if (SettingsManager.CurrentWorldCid != null)
                 WorldInfo.DBLookup(SettingsManager.CurrentWorldCid);
 
-            foreach (string CidString in cs.WorldList)
+            foreach(WorldInfo wi in WorldInfo.DBList())
             {
-                Cid cid = CidString.SafeCID();
+                if(!wi.IsFavourited()) continue;
 
-                if(cid == null) continue;
+                Cid cid = wi.WorldCid;
+                if (cid == null) continue;
+
                 AddListEntry(cid);
                 Collection list = worldlist[cid];
                 list.favourited = true;
@@ -244,9 +247,7 @@ namespace Arteranos.UI
                 wli.WorldCid = sortedWorldList[i];
                 if (worldlist.TryGetValue(wli.WorldCid, out Collection list))
                 {
-                    wli.WorldName = list.worldInfo?.WorldName;
-                    wli.ScreenshotPNG = list.worldInfo?.ScreenshotPNG;
-                    wli.LastAccessed = list.worldInfo?.Updated ?? DateTime.MinValue;
+                    wli.WorldInfo = list.worldInfo;
                     wli.ServersCount = list.serversCount;
                     wli.UsersCount = list.usersCount;
                     wli.FriendsMax = list.friendsMax;

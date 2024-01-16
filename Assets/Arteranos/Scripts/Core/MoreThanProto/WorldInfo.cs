@@ -5,8 +5,12 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Services;
 using Ipfs;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Arteranos.Core
 {
@@ -28,9 +32,38 @@ namespace Arteranos.Core
             => new WorldInfo()._DBLookup(cid);
 
         public static void DBDelete(Cid cid)
-            => new WorldInfo()._DBDelete(cid);
+        {
+            new WorldInfo()._DBDelete(cid);
+            // Remove the pin, too, just in case.
+            IPFSService.Ipfs.Pin.RemoveAsync(cid);
+        }
 
         public static IEnumerable<WorldInfo> DBList()
             => new WorldInfo()._DBList();
+
+        // ---------------------------------------------------------------
+
+        public void Favourite()
+        {
+            IPFSService.Ipfs.Pin.AddAsync(WorldCid);
+        }
+
+        public void Unfavourite()
+        {
+            IPFSService.Ipfs.Pin.RemoveAsync(WorldCid);
+        }
+
+        public bool IsFavourited()
+        {
+            List<Cid> all = Task.Run(async () => (await IPFSService.Ipfs.Pin.ListAsync()).ToList()).Result;
+            return all.Contains(WorldCid);
+        }
+
+
+        public void BumpWI()
+        {
+            Updated = DateTime.Now;
+            DBUpdate();
+        }
     }
 }

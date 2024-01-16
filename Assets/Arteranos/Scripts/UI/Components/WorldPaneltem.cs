@@ -28,10 +28,8 @@ namespace Arteranos.UI
         public Image img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
 
-        public Cid WorldCid{ get; internal set; } = null;
-        public string WorldName { get; internal set; } = null;
-        public byte[] ScreenshotPNG { get; internal set; } = null;
-        public DateTime LastAccessed { get; internal set; } = DateTime.MinValue;
+        public WorldInfo WorldInfo { get; internal set; } = null;
+        public Cid WorldCid { get; internal set; } = null;
         public int ServersCount { get; internal set; } = 0;
         public int UsersCount { get; internal set; } = 0;
         public int FriendsMax { get; internal set; } = 0;
@@ -45,7 +43,7 @@ namespace Arteranos.UI
             GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/WorldListItem"));
             go.transform.SetParent(parent, false);
             WorldPaneltem worldListItem = go.GetComponent<WorldPaneltem>();
-            worldListItem.WorldCid = cid;
+            worldListItem.WorldInfo.WorldCid = cid;
             return worldListItem;
         }
 
@@ -72,7 +70,7 @@ namespace Arteranos.UI
 
             lbl_Caption.text = "Loading...";
 
-            PopulateWorldData(WorldCid);
+            PopulateWorldData(WorldInfo.WorldCid);
         }
 
         private void PopulateWorldData(Cid cid)
@@ -81,7 +79,7 @@ namespace Arteranos.UI
             {
                 yield return null;
 
-                if (!string.IsNullOrEmpty(WorldName))
+                if (!string.IsNullOrEmpty(WorldInfo?.WorldName))
                     VisualizeWorldData();
                 else
                     lbl_Caption.text = $"({cid})";
@@ -99,20 +97,20 @@ namespace Arteranos.UI
                 Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null)
                 && AllowedForThis);
 
-            btn_Add.gameObject.SetActive(!WorldGallery.IsWorldFavourited(WorldCid));
-            btn_Delete.gameObject.SetActive(WorldGallery.IsWorldFavourited(WorldCid));
+            btn_Add.gameObject.SetActive(!WorldInfo.IsFavourited());
+            btn_Delete.gameObject.SetActive(WorldInfo.IsFavourited());
 
 
-            if(ScreenshotPNG != null)
-                Utils.ShowImage(ScreenshotPNG, img_Screenshot);
+            if(WorldInfo.ScreenshotPNG != null)
+                Utils.ShowImage(WorldInfo.ScreenshotPNG, img_Screenshot);
 
 
-            string lvstr = (LastAccessed == DateTime.MinValue)
+            string lvstr = (WorldInfo.Updated == DateTime.MinValue)
                 ? "Never"
-                : LastAccessed.ToShortDateString();
+                : WorldInfo.Updated.ToShortDateString();
 
             lbl_Caption.text = string.Format(patternCaption,
-                WorldName,
+                WorldInfo.WorldName,
                 lvstr,
                 ServersCount,
                 UsersCount,
@@ -121,27 +119,27 @@ namespace Arteranos.UI
 
         private void OnVisitClicked(bool inPlace)
         {
-            if(!string.IsNullOrEmpty(WorldCid))
+            if(!string.IsNullOrEmpty(WorldInfo.WorldCid))
             {
                 if(inPlace)
-                    WorldTransition.EnterWorldAsync(WorldCid);
+                    WorldTransition.EnterWorldAsync(WorldInfo.WorldCid);
                 else
-                    ServerSearcher.InitiateServerTransition(WorldCid);
+                    ServerSearcher.InitiateServerTransition(WorldInfo.WorldCid);
 
-                WorldGallery.BumpWorldInfo(WorldCid);
+                WorldInfo.BumpWI();
             }
         }
 
         private void OnAddClicked()
         {
-            WorldGallery.FavouriteWorld(WorldCid);
-            PopulateWorldData(WorldCid);
+            WorldInfo.Favourite();
+            PopulateWorldData(WorldInfo.WorldCid);
         }
 
         private void OnDeleteClicked()
         {
-            WorldGallery.UnfavoriteWorld(WorldCid);
-            PopulateWorldData(WorldCid);
+            WorldInfo.Unfavourite();
+            PopulateWorldData(WorldInfo.WorldCid);
         }
     }
 }
