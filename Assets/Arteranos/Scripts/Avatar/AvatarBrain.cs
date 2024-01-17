@@ -445,15 +445,14 @@ namespace Arteranos.Avatar
         }
 
         [Command]
-        [Obsolete("URL -> Cid transition")]
         private void CmdMakeWorldToChange(string CidString)
         {
             if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
 
-            WorldInfo wmd = WorldInfo.DBLookup(CidString.SafeCID());
+            WorldInfo wmd = WorldInfo.DBLookup(CidString);
             if (wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.Server.Permissions)) return;
 
-            SettingsManager.PingServerChangeWorld(UserID, CidString.SafeCID());
+            SettingsManager.PingServerChangeWorld(UserID, CidString);
         }
 
 #if false

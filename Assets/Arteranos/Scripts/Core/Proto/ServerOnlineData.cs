@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Arteranos.Services;
@@ -15,11 +16,11 @@ namespace Arteranos.Core
     [ProtoContract]
     public partial class ServerOnlineData : PeerMessage
     {
-        [ProtoMember(1)]
-        public string CurrentWorldCid;
+        //[ProtoMember(1)]
+        //public string CurrentWorldCid;
 
-        [ProtoMember(2)]
-        public string CurrentWorldName;
+        //[ProtoMember(2)]
+        //public string CurrentWorldName;
 
         [ProtoMember(3)]
         public string ServerDescriptionCid; // Just in case if we don't have the SD at all.
@@ -29,6 +30,9 @@ namespace Arteranos.Core
 
         [ProtoMember(5)]
         public OnlineLevel OnlineLevel;
+
+        [ProtoMember(6)]
+        public string WorldInfoCid;
 
         public override void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);

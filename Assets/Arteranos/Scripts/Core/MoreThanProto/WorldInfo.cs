@@ -7,16 +7,26 @@
 
 using Arteranos.Services;
 using Ipfs;
+using Ipfs.CoreApi;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Arteranos.Core
 {
     public partial class WorldInfo : FlatFileDB<WorldInfo>
     {
-        public WorldInfo() 
+        public Cid WorldInfoCid { get; internal set; } = null;
+
+        public WorldInfo()
+        {
+            Init();
+        }
+
+        private void Init()
         {
             _KnownPeersRoot = $"{FileUtils.persistentDataPath}/WorldInfos";
             _GetFileName = cid => $"{FileUtils.persistentDataPath}/WorldInfos/{Utils.GetURLHash(cid)}.info";
@@ -28,11 +38,21 @@ namespace Arteranos.Core
         public bool DBUpdate()
             => _DBUpdate(WorldCid, old => old.Updated <= Updated);
 
-        [Obsolete("TODO Clarify: Meta Info Cid")]
         public static WorldInfo DBLookup(Cid cid)
-            => new WorldInfo()._DBLookup(cid);
+        {
+            WorldInfo wi = new WorldInfo()._DBLookup(cid);
 
-        [Obsolete("TODO Clarify: Meta Info Cid")]
+            if (wi == null) return null;
+
+            if(wi.WorldInfoCid == null)
+            {
+                Cid WICid = Task.Run(async () => await wi.PublishAsync(true)).Result;
+                wi.WorldInfoCid = WICid;
+            }
+
+            return wi;
+        }
+
         public static void DBDelete(Cid cid)
         {
             new WorldInfo()._DBDelete(cid);
@@ -42,6 +62,42 @@ namespace Arteranos.Core
 
         public static IEnumerable<WorldInfo> DBList()
             => new WorldInfo()._DBList();
+
+        public static async Task<WorldInfo> RetrieveAsync(Cid WorldInfoCid, CancellationToken cancel = default)
+        {
+            if (WorldInfoCid == null) return null;
+
+            try
+            {
+                Stream s = await IPFSService.Ipfs.FileSystem.ReadFileAsync(WorldInfoCid, cancel);
+                WorldInfo wi = Deserialize(s);
+                wi.WorldInfoCid = WorldInfoCid;
+                return wi;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static WorldInfo Retrieve(Cid WorldInfoCid) 
+            => Task.Run(async () => await RetrieveAsync(WorldInfoCid)).Result;
+
+        public async Task<Cid> PublishAsync(bool dryRun = false, CancellationToken cancel = default)
+        {
+            AddFileOptions ao = null;
+            if (dryRun)
+                ao = new AddFileOptions() { OnlyHash = true };
+
+            using MemoryStream ms = new();
+            Serialize(ms);
+            ms.Position = 0;
+
+            IFileSystemNode fsn = await IPFSService.Ipfs.FileSystem.AddAsync(ms, options: ao, cancel: cancel);
+            WorldInfoCid = fsn.Id;
+            DBUpdate();
+            return WorldInfoCid;
+        }
 
         // ---------------------------------------------------------------
 

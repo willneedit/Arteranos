@@ -100,7 +100,6 @@ namespace Arteranos.UI
             _ = CollateServersData();
         }
 
-        [Obsolete("TODO Derive WorldCid to WorldInfo")]
         private void AddListEntry(Cid cid, bool front = false)
         {
             if (sortedWorldList.Contains(cid)) return;
@@ -158,7 +157,7 @@ namespace Arteranos.UI
                 await serverInfo.Update();
 
                 // Server offline or has no world loaded?
-                Cid Cid = serverInfo.CurrentWorldCid.SafeCID();
+                Cid Cid = serverInfo.CurrentWorldCid;
                 if (!serverInfo.IsOnline || Cid == null) return;
 
                 int friends = serverInfo.FriendCount;
@@ -199,8 +198,11 @@ namespace Arteranos.UI
 
             sortedWorldList.Clear();
 
-            if (SettingsManager.CurrentWorldCid != null)
-                WorldInfo.DBLookup(SettingsManager.CurrentWorldCid);
+            if (SettingsManager.WorldInfoCid != null)
+            {
+                WorldInfo wi = await WorldInfo.RetrieveAsync(SettingsManager.WorldInfoCid);
+                AddListEntry(wi.WorldCid);
+            }
 
             foreach(WorldInfo wi in WorldInfo.DBList())
             {

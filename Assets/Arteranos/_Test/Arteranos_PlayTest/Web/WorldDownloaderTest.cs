@@ -70,6 +70,7 @@ namespace Arteranos.PlayTest.Web
             if (WorldCid != null)
             {
                 ipfs.Block.RemoveAsync(WorldCid).Wait();
+                WorldInfo.DBDelete(WorldCid);
             }
 
             srv = null;
@@ -103,7 +104,7 @@ namespace Arteranos.PlayTest.Web
 
             await ao.ExecuteAsync(co);
 
-            WorldInfo wi = WorldDownloader.GetWorldInfo(co);
+            WorldInfo wi = await WorldDownloader.GetWorldInfoAsync(co);
 
             Assert.IsNotNull(wi.WorldName);
             Assert.IsNotNull(wi.AuthorNickname);
@@ -123,7 +124,7 @@ namespace Arteranos.PlayTest.Web
 
             await ao.ExecuteAsync(co);
 
-            WorldInfo wi = WorldDownloader.GetWorldInfo(co);
+            WorldInfo wi = await WorldDownloader.GetWorldInfoAsync(co);
 
             Assert.IsNotNull(wi);
             Assert.AreEqual(wi.WorldCid, WorldCid.ToString());
@@ -145,7 +146,23 @@ namespace Arteranos.PlayTest.Web
 
             Cid WICid = fsn.Id;
 
-            Debug.Log($"{WICid}");
+            Assert.AreEqual(WICid, WorldDownloader.GetWorldInfoCid(co));
+            Assert.AreEqual(WICid, wi.WorldInfoCid);
+
+            // Look with the World Cid
+            WorldInfo wi2 = WorldInfo.DBLookup(WorldCid);
+
+            Assert.IsNotNull(wi2);
+            Assert.AreEqual(wi2.WorldCid, WorldCid.ToString());
+            Assert.AreEqual(wi2.WorldInfoCid, WICid);
+
+            // Look up with the World Info Cid
+            WorldInfo wi3 = await WorldInfo.RetrieveAsync(WICid);
+
+            Assert.IsNotNull(wi3);
+            Assert.AreEqual(wi3.WorldCid, WorldCid.ToString());
+            Assert.AreEqual(wi3.WorldInfoCid, WICid);
+
         }
     }
 }

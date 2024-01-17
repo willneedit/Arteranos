@@ -32,7 +32,7 @@ namespace Arteranos.Services
         internal struct WorldChangeAnnounceMessage : NetworkMessage
         {
             public string Invoker;
-            public string WorldCidString;
+            public string WorldInfoCidString;
             public string Message;
         }
 
@@ -344,7 +344,7 @@ namespace Arteranos.Services
         {
             base.OnStopServer();
 
-            SettingsManager.CurrentWorldCid = null;
+            SettingsManager.WorldInfoCid = null;
         }
 
         /// <summary>
@@ -379,10 +379,12 @@ namespace Arteranos.Services
                 message = "Error in loading the world.";
             }
 
+            WorldInfo wi = WorldInfo.DBLookup(WorldCid);
+
             WorldChangeAnnounceMessage wca = new()
             {
                 Invoker = invoker,
-                WorldCidString = WorldCid,
+                WorldInfoCidString = wi.WorldInfoCid,
                 Message = message,
             };
 
@@ -396,17 +398,17 @@ namespace Arteranos.Services
             WorldChangeAnnounceMessage wca = new()
             {
                 Invoker = null,
-                WorldCidString = SettingsManager.CurrentWorldCid
+                WorldInfoCidString = SettingsManager.WorldInfoCid
             };
 
-            Debug.Log($"[Server] sending worldURL '{SettingsManager.CurrentWorldCid}' to latecoming conn {conn.connectionId}");
+            Debug.Log($"[Server] sending worldURL '{SettingsManager.WorldInfoCid}' to latecoming conn {conn.connectionId}");
             conn.Send(wca);
         }
 
         [Client]
         private async void OnClientGotWCA(WorldChangeAnnounceMessage message)
         {
-            Debug.Log($"[Client] Server announce: Changed world from {SettingsManager.CurrentWorldCid} to {message.WorldCidString} by {message.Invoker}");
+            Debug.Log($"[Client] Server announce: Changed world from {SettingsManager.WorldInfoCid} to {message.WorldInfoCidString} by {message.Invoker}");
             
             if(!string.IsNullOrEmpty(message.Message))
             {
@@ -423,13 +425,10 @@ namespace Arteranos.Services
                 return;
             }
 
-            // TODO Offer a choice...
-            //  - Stick with the server with the changed world
-            //  - Look for a server for the old world (Server Searcher)
-            //  - Open the host mode with the old world on their own.
-            // Now drag the client along.
-            Debug.Log("[Client] Dragging your client along.");
-            _ = await WorldTransition.VisitWorldAsync(message.WorldCidString.SafeCID());
+            WorldInfo wi = await WorldInfo.RetrieveAsync(message.WorldInfoCidString);
+
+            Debug.Log($"[Client] Info={message.WorldInfoCidString} is world {wi.WorldCid}. Dragging your client along.");
+            _ = await WorldTransition.VisitWorldAsync(wi.WorldCid);
         }
 
 

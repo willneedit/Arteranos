@@ -61,7 +61,7 @@ namespace Arteranos.Web
 
                 XRControl.Instance.MoveRig();
 
-                SettingsManager.CurrentWorldCid = null;
+                SettingsManager.WorldInfoCid = null;
                 ScreenFader.StartFading(0.0f);
                 done = true;
             }
@@ -77,10 +77,10 @@ namespace Arteranos.Web
                 string worldABF = WorldDownloader.GetWorldABF(WorldCid);
 
                 WorldInfo wi = WorldInfo.DBLookup(WorldCid);
+                Cid WICid = wi.WorldInfoCid;
 
                 EnterDownloadedWorld_(worldABF);
-                SettingsManager.CurrentWorldCid = WorldCid;
-                SettingsManager.CurrentWorldName = wi?.WorldName;
+                SettingsManager.WorldInfoCid = WICid;
             }
 
             return Task.Run(Enter_);

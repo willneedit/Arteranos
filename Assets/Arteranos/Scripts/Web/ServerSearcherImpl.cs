@@ -174,7 +174,7 @@ namespace Arteranos.Web
         {
             ServerSearcherContext context = new()
             {
-                desiredWorldCid = desiredWorld.SafeCID()
+                desiredWorldCid = desiredWorld
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]

@@ -18,6 +18,7 @@ namespace Arteranos.Core
         private ServerOnlineData OnlineData = null;
         private ServerDescription DescriptionStruct = null;
 
+        public WorldInfo WorldInfo { get; internal set; } = null;
         public MultiHash PeerID { get; private set; } = null;
 
         private ServerInfo()
@@ -29,6 +30,10 @@ namespace Arteranos.Core
         {
             OnlineData = ServerOnlineData.DBLookup(PeerID.ToString());
             DescriptionStruct = ServerDescription.DBLookup(PeerID.ToString());
+
+            if(OnlineData != null) 
+                WorldInfo = WorldInfo.Retrieve(OnlineData.WorldInfoCid);
+
             this.PeerID = PeerID;
         }
 
@@ -37,6 +42,9 @@ namespace Arteranos.Core
             await Task.Run(() => {
                 OnlineData = ServerOnlineData.DBLookup(PeerID.ToString());
                 DescriptionStruct = ServerDescription.DBLookup(PeerID.ToString());
+
+                if (OnlineData != null)
+                    WorldInfo = WorldInfo.Retrieve(OnlineData.WorldInfoCid);
             });
         }
 
@@ -73,8 +81,8 @@ namespace Arteranos.Core
         public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new();
         public DateTime LastUpdated => DescriptionStruct?.LastModified ?? DateTime.UnixEpoch;
         public DateTime LastOnline => OnlineData?.LastOnline ?? DateTime.UnixEpoch;
-        public string CurrentWorldCid => OnlineData?.CurrentWorldCid;
-        public string CurrentWorldName => (OnlineData?.CurrentWorldName) ?? "Nexus";
+        public string CurrentWorldCid => WorldInfo?.WorldCid ?? null;
+        public string CurrentWorldName => (WorldInfo?.WorldName) ?? "Nexus";
         public int UserCount => OnlineData?.UserFingerprints?.Count ?? 0;
         public int FriendCount
         {

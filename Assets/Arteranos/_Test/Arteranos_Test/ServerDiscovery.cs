@@ -19,6 +19,7 @@ using Ipfs.Engine;
 using UnityEngine.TestTools;
 using UnityEngine;
 using System.Collections;
+using Arteranos.Core;
 
 namespace Arteranos.Test
 {

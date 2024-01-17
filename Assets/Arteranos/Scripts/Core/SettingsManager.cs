@@ -30,8 +30,7 @@ namespace Arteranos.Core
         public static Client Client { get; internal set; }
         public static Server Server { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
-        public static Cid CurrentWorldCid { get; set; }
-        public static string CurrentWorldName { get; set; }
+        public static Cid WorldInfoCid { get; set; }
 
         public static ServerJSON ActiveServerData =>
             NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
@@ -80,7 +79,7 @@ namespace Arteranos.Core
                 if(parts.Length == 2 && parts[0] == "arteranos:")
                 {
                     TargetedPeerID = string.IsNullOrEmpty(parts[1]) ? parts[1] : null;
-                    DesiredWorldCid = (string.IsNullOrEmpty(parts[2]) ? parts[2] : null).SafeCID();
+                    DesiredWorldCid = (string.IsNullOrEmpty(parts[2]) ? parts[2] : null);
 
                     if(TargetedPeerID != null || DesiredWorldCid != null) 
                         StartupTrigger = true;

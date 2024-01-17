@@ -22,7 +22,7 @@ namespace Arteranos.Web
     internal class WorldDownloaderContext : Context
     {
         public Cid Cid = null;
-        public WorldInfo WorldInfo = null;
+        public Cid WorldInfoCid = null;
         public long size = -1;
         public string worldZipFile = null;
         public string worldAssetBundleFile = null;
@@ -40,7 +40,7 @@ namespace Arteranos.Web
             WorldDownloaderContext context = _context as WorldDownloaderContext;
 
 
-            Context Execute()
+            async Task<Context> Execute()
             {
                 string wcd = WorldDownloader.GetWorldCacheDir(context.Cid);
                 string rootPath = $"{wcd}/world.dir";
@@ -58,7 +58,7 @@ namespace Arteranos.Web
 
                 WorldMetaData metaData = WorldMetaData.Deserialize(json);
 
-                context.WorldInfo = new()
+                WorldInfo wi = new()
                 {
                     WorldCid = context.Cid,
                     WorldName = metaData.WorldName,
@@ -71,6 +71,8 @@ namespace Arteranos.Web
                     Created = metaData.Created,
                     Updated = DateTime.MinValue
                 };
+                context.WorldInfoCid = await wi.PublishAsync();
+                wi.DBUpdate();
 
                 return context;
             }
@@ -186,8 +188,11 @@ namespace Arteranos.Web
         private static string GetWorldABF(Context _context) 
             => (_context as WorldDownloaderContext).worldAssetBundleFile;
 
-        public static WorldInfo GetWorldInfo(Context _context)
-            => (_context as WorldDownloaderContext).WorldInfo;
+        public static Cid GetWorldInfoCid(Context _context)
+            => (_context as WorldDownloaderContext).WorldInfoCid;
+
+        public static Task<WorldInfo> GetWorldInfoAsync(Context _context) 
+            => WorldInfo.RetrieveAsync(GetWorldInfoCid(_context));
 
         public static string GetWorldABF(Cid cid) 
             => GetWorldABFfromWD($"{GetWorldCacheDir(cid)}/world.dir");

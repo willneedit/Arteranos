@@ -132,20 +132,5 @@ namespace Arteranos.Core
 
         }
 
-        /// <summary>
-        /// Safe string-to-Cid conversion.
-        /// </summary>
-        /// <param name="s">The Cid's string representation</param>
-        /// <returns>The Cid, or null if it's invalid.</returns>
-        public static Cid SafeCID(this string s)
-        {
-            Cid cid = null;
-            try
-            {
-                cid = Cid.Decode(s);
-            }
-            catch { }
-            return cid;
-        }
     }
 }
