@@ -104,7 +104,7 @@ namespace Arteranos.PlayTest.Web
             WorldInfo wi = await WorldDownloader.GetWorldInfoAsync(co);
 
             Assert.IsNotNull(wi.WorldName);
-            Assert.IsNotNull(wi.AuthorNickname);
+            Assert.IsNotNull(wi.win.AuthorNickname);
             Assert.AreEqual(WorldCid.ToString(), wi.WorldCid);
         }
 
@@ -135,15 +135,11 @@ namespace Arteranos.PlayTest.Web
             // WorldInfo needs to be constant, even the the world was recently accessed.
             wi.Updated = DateTime.Now;
 
-            using MemoryStream ms = new();
-            wi.Serialize(ms);
-            ms.Position = 0;
-            IFileSystemNode fsn = await ipfs.FileSystem.AddAsync(ms, "", new() { OnlyHash = true });
-            Assert.IsNotNull(fsn);
 
-            Cid WICid = fsn.Id;
+            string WICid = await wi.PublishAsync(true);
 
-            Assert.AreEqual(WICid, WorldDownloader.GetWorldInfoCid(co));
+            Assert.IsNotNull(WICid);
+            Assert.AreEqual(WICid, WorldDownloader.GetWorldInfoCid(co).ToString());
             Assert.AreEqual(WICid, wi.WorldInfoCid);
 
             // Look with the World Cid

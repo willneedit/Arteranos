@@ -60,15 +60,18 @@ namespace Arteranos.Web
 
                 WorldInfo wi = new()
                 {
-                    WorldCid = context.Cid,
-                    WorldName = metaData.WorldName,
-                    WorldDescription = metaData.WorldDescription,
-                    AuthorNickname = (string) metaData.AuthorID,
-                    AuthorPublicKey = (byte[]) metaData.AuthorID,
-                    ContentRating = metaData.ContentRating,
-                    Signature = null,
-                    ScreenshotPNG = screenshotBytes,
-                    Created = metaData.Created,
+                    win = new()
+                    {
+                        WorldCid = context.Cid,
+                        WorldName = metaData.WorldName,
+                        WorldDescription = metaData.WorldDescription,
+                        AuthorNickname = (string)metaData.AuthorID,
+                        AuthorPublicKey = (byte[])metaData.AuthorID,
+                        ContentRating = metaData.ContentRating,
+                        Signature = null,
+                        ScreenshotPNG = screenshotBytes,
+                        Created = metaData.Created,
+                    },
                     Updated = DateTime.MinValue
                 };
                 context.WorldInfoCid = await wi.PublishAsync();

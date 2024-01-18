@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Ipfs;
 using ProtoBuf;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ using System.IO;
 namespace Arteranos.Core
 {
     [ProtoContract]
-    public partial class WorldInfo : IEquatable<WorldInfo>
+    public class WorldInfoNetwork
     {
         [ProtoMember(1)]
         public string WorldCid;
@@ -43,8 +44,23 @@ namespace Arteranos.Core
         [ProtoMember(9)]
         public DateTime Created;
 
-        // [ProtoMember(10)] -- remains locally
+    }
+
+    [ProtoContract]
+    public partial class WorldInfo
+    {
+
+        // The WorldInfoNetwork stays immutable, because its Cid needs to remain contant.
+        [ProtoMember(1)]
+        public WorldInfoNetwork win;
+
+        // The other items are for the local use and stored in the client's FFDB.
+        [ProtoMember(2)]
+        public string WorldInfoCid;
+
+        [ProtoMember(3)]
         public DateTime Updated;
+
 
         public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
@@ -52,35 +68,5 @@ namespace Arteranos.Core
         public static WorldInfo Deserialize(Stream stream)
             => Serializer.Deserialize<WorldInfo>(stream);
 
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as WorldInfo);
-        }
-
-        public bool Equals(WorldInfo other)
-        {
-            return other is not null &&
-                   WorldCid == other.WorldCid &&
-                   WorldName == other.WorldName &&
-                   WorldDescription == other.WorldDescription &&
-                   AuthorNickname == other.AuthorNickname &&
-                   EqualityComparer<ServerPermissions>.Default.Equals(ContentRating, other.ContentRating) &&
-                   Created == other.Created;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(WorldCid, WorldName, WorldDescription, AuthorNickname, ContentRating, Created);
-        }
-
-        public static bool operator ==(WorldInfo left, WorldInfo right)
-        {
-            return EqualityComparer<WorldInfo>.Default.Equals(left, right);
-        }
-
-        public static bool operator !=(WorldInfo left, WorldInfo right)
-        {
-            return !(left == right);
-        }
     }
 }

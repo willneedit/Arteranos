@@ -37,16 +37,6 @@ namespace Arteranos.UI
 
         private string patternCaption = null;
 
-        [Obsolete("URL -> Cid conversion")]
-        public static WorldPaneltem New(Transform parent, Cid cid)
-        {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/WorldListItem"));
-            go.transform.SetParent(parent, false);
-            WorldPaneltem worldListItem = go.GetComponent<WorldPaneltem>();
-            worldListItem.WorldInfo.WorldCid = cid;
-            return worldListItem;
-        }
-
         protected override void Awake()
         {
             base.Awake();
@@ -101,8 +91,8 @@ namespace Arteranos.UI
             btn_Delete.gameObject.SetActive(WorldInfo.IsFavourited());
 
 
-            if(WorldInfo.ScreenshotPNG != null)
-                Utils.ShowImage(WorldInfo.ScreenshotPNG, img_Screenshot);
+            if(WorldInfo.win.ScreenshotPNG != null)
+                Utils.ShowImage(WorldInfo.win.ScreenshotPNG, img_Screenshot);
 
 
             string lvstr = (WorldInfo.Updated == DateTime.MinValue)

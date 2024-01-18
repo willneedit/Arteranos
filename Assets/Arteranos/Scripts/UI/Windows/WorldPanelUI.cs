@@ -109,7 +109,7 @@ namespace Arteranos.UI
                 if(list.worldInfo == null)
                     list.worldInfo = WorldInfo.DBLookup(cid);
             }
-            else // Manually edited?
+            else // Manually added?
             {
                 worldlist[cid] = new()
                 {
@@ -122,7 +122,7 @@ namespace Arteranos.UI
                 };
             }
 
-            WorldInfo wmd = list.worldInfo;
+            WorldInfo wmd = list?.worldInfo;
 
             // Filter out the worlds which go against to _your_ preferences.
             if (wmd?.ContentRating == null || !wmd.ContentRating.IsInViolation(SettingsManager.Client.ContentFilterPreferences))
@@ -278,16 +278,41 @@ namespace Arteranos.UI
             StartCoroutine(ShowPage(newPage));
         }
 
-        [Obsolete("Actual URL, then upload resource into IPFS")]        
         private void OnAddWorldClicked()
         {
-#if false
+            btn_AddWorld.interactable = false;
+
             CancellationTokenSource cts = new();
 
-            AddListEntry(txt_AddWorldURL.text, true);
 
-            SettingsManager.StartCoroutineAsync(() => ShowPage(0));
-#endif
+            IProgressUI pui = ProgressUIFactory.New();
+
+            pui.SetupAsyncOperations(() => AssetUploader.PrepareUploadToIPFS(txt_AddWorldURL.text, pin: true));
+
+            pui.Completed += context =>
+            {
+                Cid cid = AssetUploader.GetUploadedCid(context);
+                _ = ParseWorld(cid);
+            };
+
+            pui.Faulted += (ex, context) =>
+            {
+                btn_AddWorld.interactable = true;
+                SettingsManager.StartCoroutineAsync(() => ShowPage(0));
+            };
+        }
+
+        private async Task ParseWorld(Cid cid)
+        {
+            (Exception ex, Context co) = await WorldTransition.PreloadWorldDataAsync(cid);
+            btn_AddWorld.interactable = true;
+
+            if(ex == null)
+            {
+                AddListEntry(cid, true);
+
+                SettingsManager.StartCoroutineAsync(() => ShowPage(0));
+            }
         }
     }
 }

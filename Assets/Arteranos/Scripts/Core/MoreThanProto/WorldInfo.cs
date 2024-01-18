@@ -8,6 +8,7 @@
 using Arteranos.Services;
 using Ipfs;
 using Ipfs.CoreApi;
+using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +20,10 @@ namespace Arteranos.Core
 {
     public partial class WorldInfo : FlatFileDB<WorldInfo>
     {
-        public Cid WorldInfoCid { get; internal set; } = null;
+        // Convenience redirections.
+        public string WorldCid => win.WorldCid;
+        public string WorldName => win.WorldName;
+        public ServerPermissions ContentRating => win.ContentRating;
 
         public WorldInfo()
         {
@@ -36,22 +40,10 @@ namespace Arteranos.Core
         }
 
         public bool DBUpdate()
-            => _DBUpdate(WorldCid, old => old.Updated <= Updated);
+            => _DBUpdate(WorldCid, old => old.Updated < Updated);
 
-        public static WorldInfo DBLookup(Cid cid)
-        {
-            WorldInfo wi = new WorldInfo()._DBLookup(cid);
-
-            if (wi == null) return null;
-
-            if(wi.WorldInfoCid == null)
-            {
-                Cid WICid = Task.Run(async () => await wi.PublishAsync(true)).Result;
-                wi.WorldInfoCid = WICid;
-            }
-
-            return wi;
-        }
+        public static WorldInfo DBLookup(Cid cid) 
+            => new WorldInfo()._DBLookup(cid);
 
         public static void DBDelete(Cid cid)
         {
@@ -70,8 +62,14 @@ namespace Arteranos.Core
             try
             {
                 Stream s = await IPFSService.Ipfs.FileSystem.ReadFileAsync(WorldInfoCid, cancel);
-                WorldInfo wi = Deserialize(s);
-                wi.WorldInfoCid = WorldInfoCid;
+                WorldInfo wi = new()
+                {
+                    win = null,
+                    WorldInfoCid = WorldInfoCid,
+                    Updated = DateTime.MinValue
+                };
+
+                wi.win = Serializer.Deserialize<WorldInfoNetwork>(s);
                 return wi;
             }
             catch
@@ -90,12 +88,11 @@ namespace Arteranos.Core
                 ao = new AddFileOptions() { OnlyHash = true };
 
             using MemoryStream ms = new();
-            Serialize(ms);
+            Serializer.Serialize(ms, win);
             ms.Position = 0;
 
             IFileSystemNode fsn = await IPFSService.Ipfs.FileSystem.AddAsync(ms, options: ao, cancel: cancel);
             WorldInfoCid = fsn.Id;
-            DBUpdate();
             return WorldInfoCid;
         }
 

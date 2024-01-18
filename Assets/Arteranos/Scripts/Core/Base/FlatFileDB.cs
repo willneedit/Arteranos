@@ -40,8 +40,6 @@ namespace Arteranos.Core
 
             if (!Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
 
-            if (File.Exists(fn)) File.Delete(fn);
-
             using Stream stream = File.Create(fn);
             _Serialize(stream);
         }
