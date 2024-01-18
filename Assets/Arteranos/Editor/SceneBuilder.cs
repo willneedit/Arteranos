@@ -23,6 +23,7 @@ using System;
 using UnityEngine.Experimental.Rendering;
 using Object = UnityEngine.Object;
 using System.Threading.Tasks;
+using Ipfs;
 
 namespace Arteranos.Editor
 {
@@ -390,10 +391,22 @@ namespace Arteranos.Editor
             string worldZipName = Common.OpenFileDialog("", false, false, ".zip");
             if(string.IsNullOrEmpty(worldZipName)) return;
 
-            SessionState.SetString("ENTER_TEST_WORLD", $"file://{worldZipName}");
+            SessionState.SetString("ENTER_TEST_WORLD", $"file:///{worldZipName}");
 
             if(!EditorApplication.isPlaying)
                 EditorApplication.EnterPlaymode();
+
+        }
+
+        private static async Task<string> UploadWorldToIPFS(string assetURL)
+        {
+            AsyncOperationExecutor<Context> ao = null;
+            Context co = null;
+            
+            (ao, co) = AssetUploader.PrepareUploadToIPFS(assetURL);
+            await ao.ExecuteAsync(co);
+
+            return AssetUploader.GetUploadedCid(co);
 
         }
 
@@ -406,7 +419,6 @@ namespace Arteranos.Editor
                 EditorApplication.playModeStateChanged += LogPlayModeState;
             }
 
-            [Obsolete("Actual URL, then upload resource into IPFS")]
             private static void LogPlayModeState(PlayModeStateChange state)
             {
                 if(state == PlayModeStateChange.EnteredEditMode)
@@ -422,14 +434,27 @@ namespace Arteranos.Editor
 
                     if(!string.IsNullOrEmpty(testWorldZip))
                     {
+
                         IProgressUI pui = ProgressUIFactory.New();
 
-                        // TODO Needs asset uploader! (testWorldZip -> Cid)
-                        pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(null));
+                        pui.SetupAsyncOperations(() => AssetUploader.PrepareUploadToIPFS(testWorldZip));
 
-                        pui.Completed += (context) => OnLoadWorldComplete(context);
-                        pui.Faulted += OnLoadWorldFaulted;
+                        pui.Completed += context =>
+                        {
+                            Cid WorldCid = AssetUploader.GetUploadedCid(context);
+                            NewMethod(WorldCid);
+                        };
                     }
+                }
+
+                static void NewMethod(Cid WorldCid)
+                {
+                    IProgressUI pui = ProgressUIFactory.New();
+
+                    pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(WorldCid));
+
+                    pui.Completed += (context) => OnLoadWorldComplete(context);
+                    pui.Faulted += OnLoadWorldFaulted;
                 }
             }
 
