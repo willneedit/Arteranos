@@ -18,12 +18,11 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.IO;
 using System.Threading.Tasks;
-using UnityEngine.Networking;
 using System.Threading;
 
 namespace Arteranos.Core
 {
-    public static partial class Utils
+    public static class Utils
     {
         /// <summary>
         /// Allows to tack on a Description attribute to enum values, e.g. a display name.
@@ -88,62 +87,6 @@ namespace Arteranos.Core
         /// <param name="dBvalue"></param>
         /// <returns>Ife plain factor.</returns>
         public static float LoudnessToFactor(float dBvalue) => MathF.Pow(10.0f, dBvalue / 10.0f);
-
-        /// <summary>
-        /// Converts an 'url-like' string to an URI, with zero assumption of the parts likw
-        /// host and port.
-        /// </summary>
-        /// <param name="urilike">The (incomplete) URI</param>
-        /// <param name="scheme"></param>
-        /// <param name="host"></param>
-        /// <param name="port"></param>
-        /// <param name="path"></param>
-        /// <param name="query"></param>
-        /// <param name="fragment"></param>
-        /// <returns>A filled-out URI</returns>
-        /// <exception cref="ArgumentNullException">Port is unknown nor implied.</exception>
-        public static Uri ProcessUriString(string urilike,
-                        string scheme = null,
-                        string host = null,
-                        int? port = null,
-                        string path = null,
-                        string query = null,
-                        string fragment = null
-            )
-        {
-            urilike = urilike.Trim();
-
-            if(!urilike.Contains("://"))
-                urilike = "unknown://" + urilike;
-
-            Uri uri = new(urilike);
-
-            if(uri.Port >= 0)
-                port = uri.Port;
-
-            if(port == null)
-                throw new ArgumentNullException("No port");
-
-            string sb = string.IsNullOrEmpty(host ?? uri.Host)
-                ? $"{scheme ?? uri.Scheme}://"
-                : string.IsNullOrEmpty(uri.UserInfo)
-                    ? $"{scheme ?? uri.Scheme}://{host ?? uri.Host}:{port}"
-                    : $"{scheme ?? uri.Scheme}://{uri.UserInfo}@{host ?? uri.Host}:{port}";
-
-            sb += uri.AbsolutePath == "/"
-                ? path ?? "/"
-                : uri.AbsolutePath;
-
-            sb += string.IsNullOrEmpty(uri.Query)
-                ? query ?? string.Empty
-                : uri.Query;
-
-            sb += string.IsNullOrEmpty(uri.Fragment)
-                ? fragment ?? string.Empty
-                : uri.Fragment;
-
-            return new(sb);
-        }
 
         /// <summary>
         /// Get the user ID fingerprint's encoding according to visibility's User ID settings
@@ -295,79 +238,6 @@ namespace Arteranos.Core
                 new Rect(0, 0, icon.width, icon.height),
                 Vector2.zero);
         }
-
-        public static async Task<byte[]> DownloadWebData(string url, int timeout = 20, Action<float> progressCallback = null)
-        {
-            DownloadHandlerBuffer dh = new();
-            using UnityWebRequest uwr = new(
-                url,
-                UnityWebRequest.kHttpVerbGET,
-                dh,
-                null);
-
-            uwr.timeout = timeout;
-
-            UnityWebRequestAsyncOperation uwr_ao = uwr.SendWebRequest();
-
-            while(!uwr_ao.isDone)
-            {
-                progressCallback?.Invoke(uwr_ao.progress);
-                await Task.Yield();
-            }
-
-            if (uwr.result != UnityWebRequest.Result.Success) return null;
-            return dh.data;
-        }
-
-        public static async Task<byte[]> CachedDownloadWebData(string url, string baseurl, string cachePattern, int cacheLivetime = 600, int timeout = 20, bool keepExpired = false, Action<float> progressCallback = null)
-        {
-            string cacheFile = string.Format(cachePattern, GetURLHash(baseurl));
-
-            // Fresh enough, immediately return cached data
-            FileInfo cache = new(cacheFile);
-            if (cache.Exists &&
-                cache.LastWriteTime + TimeSpan.FromSeconds(cacheLivetime) >= DateTime.Now)
-                return await File.ReadAllBytesAsync(cacheFile);
-
-            byte[] data = await DownloadWebData(url, timeout, progressCallback);
-
-            try
-            {
-                string cachedir = Path.GetDirectoryName(cacheFile);
-                if (data != null)
-                {
-                    if (!Directory.Exists(cachedir)) Directory.CreateDirectory(cachedir);
-                    await File.WriteAllBytesAsync(cacheFile, data);
-                }
-                else if(File.Exists(cacheFile))
-                {
-                    if(keepExpired)
-                        // Keep the antiquity.
-                        data = await File.ReadAllBytesAsync(cacheFile);
-                    else
-                        // It's already expired, so we have to dump it anyway.
-                        File.Delete(cacheFile);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-
-            return data;
-        }
-
-        public static string LoadDefaultTOS() 
-            => Resources.Load<TextAsset>("Templates/PrivacyTOSNotice")?.text;
-
-        public static void InvalidateWebData(string _, string baseurl, string cachePattern)
-        {
-            string cacheFile = string.Format(cachePattern, GetURLHash(baseurl));
-            if (File.Exists(cacheFile)) File.Delete(cacheFile);
-        }
-
-        public static void InvalidateWebData(string url, string cachePattern)
-            => InvalidateWebData(url, cachePattern);
 
         public static async Task CopyWithProgress(Stream inStream, Stream outStream, Action<long> reportProgress, CancellationToken token = default)
         {

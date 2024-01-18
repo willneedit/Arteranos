@@ -130,7 +130,7 @@ namespace Arteranos.Core
             get 
             {
                 if (PrivacyTOSNotice == null) return false; 
-                return !PrivacyTOSNoticeHash.SequenceEqual(Crypto.SHA256(Utils.LoadDefaultTOS()));
+                return !PrivacyTOSNoticeHash.SequenceEqual(Crypto.SHA256(SettingsManager.DefaultTOStext));
             }
         }
     }

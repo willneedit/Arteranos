@@ -87,7 +87,7 @@ namespace Arteranos.UI
             {
                 // We needed to deal with the default TOS.
                 if (!ServerInfo.UsesCustomTOS)
-                    client.KnowsDefaultTOS = Crypto.SHA256(Utils.LoadDefaultTOS());
+                    client.KnowsDefaultTOS = Crypto.SHA256(SettingsManager.DefaultTOStext);
 
                 Client.UpdateServerPass(ServerInfo, true, null);
                 client.Save();

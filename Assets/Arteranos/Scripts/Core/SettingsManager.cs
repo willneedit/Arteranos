@@ -31,6 +31,7 @@ namespace Arteranos.Core
         public static Server Server { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
         public static Cid WorldInfoCid { get; set; }
+        public static string DefaultTOStext { get; internal set; } = "";
 
         public static ServerJSON ActiveServerData =>
             NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
@@ -42,6 +43,8 @@ namespace Arteranos.Core
             SetupPurgatory();
 
             ParseSettingsAndCmdLine();
+
+            DefaultTOStext = Resources.Load<TextAsset>("Templates/PrivacyTOSNotice")?.text;
         }
 
         protected abstract void OnDestroy();
