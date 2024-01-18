@@ -29,8 +29,8 @@ namespace Arteranos.PlayTest.Web
 
             yield return null;
 
-            GameObject go2 = new("IPFS Service");
-            srv = go2.AddComponent<IPFSServiceImpl>();
+            srv = go1.AddComponent<IPFSServiceImpl>();
+            _ = go1.AddComponent<AssetUploaderImpl>();
 
             yield return null;
 
@@ -50,9 +50,6 @@ namespace Arteranos.PlayTest.Web
 
             StartupManagerMock go1 = GameObject.FindObjectOfType<StartupManagerMock>();
             GameObject.Destroy(go1.gameObject);
-
-            var go2 = GameObject.FindObjectOfType<IPFSServiceImpl>();
-            GameObject.Destroy(go2.gameObject);
 
             yield return null;
         }

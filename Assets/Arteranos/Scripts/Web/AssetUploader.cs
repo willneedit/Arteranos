@@ -108,7 +108,7 @@ namespace Arteranos.Web
 
             AssetUploaderContext context = _context as AssetUploaderContext;
 
-            if(context.AssetURL.StartsWith("file://"))
+            if(context.AssetURL.StartsWith("file:///"))
             {
                 string path = context.AssetURL[8..];
                 FileInfo fileInfo = new FileInfo(path);
@@ -144,9 +144,19 @@ namespace Arteranos.Web
         }
     }
 
-    public static class AssetUploader
+    public class AssetUploaderImpl : AssetUploader
     {
-        public static (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS(string assetURL, int timeout = 600, bool pin = false)
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        private void OnDestroy()
+        {
+            Instance = null;
+        }
+
+        public override (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS_(string assetURL, int timeout = 600, bool pin = false)
         {
             AssetUploaderContext context = new()
             {
@@ -167,7 +177,7 @@ namespace Arteranos.Web
             return (executor, context);
         }
 
-        public static Cid GetUploadedCid(Context _context)
+        public override Cid GetUploadedCid_(Context _context)
             => (_context as AssetUploaderContext).Cid;
     }
 }

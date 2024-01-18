@@ -390,6 +390,20 @@ namespace Arteranos.Services
             => Instance.EnterDownloadedWorld_(worldABF);
     }
 
+    public abstract class AssetUploader : MonoBehaviour
+    {
+        public static AssetUploader Instance { get; set; }
+        public abstract (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS_(string assetURL, int timeout = 600, bool pin = false);
+        public abstract Cid GetUploadedCid_(Context _context);
+
+        public static (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS(string assetURL, int timeout = 600, bool pin = false)
+            => Instance.PrepareUploadToIPFS_(assetURL, timeout, pin);
+        public static Cid GetUploadedCid(Context _context)
+            => Instance.GetUploadedCid_(_context);
+
+
+
+    }
 
     #endregion
     // -------------------------------------------------------------------
