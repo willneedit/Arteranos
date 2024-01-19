@@ -75,7 +75,7 @@ namespace Arteranos.PlayTest.Web
                         "file:///D:/Users/carsten/Documents/Sceelix_Abbey.zip");
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
-                
+
                 await ao.ExecuteAsync(co);
 
                 AssetCid = AssetUploader.GetUploadedCid(co);
@@ -84,9 +84,81 @@ namespace Arteranos.PlayTest.Web
 
                 Debug.Log($"{AssetCid}");
             }
-            finally 
+            finally
             {
-                if(AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
+                if (AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator UploadNakedLocalFile()
+        {
+            yield return null;
+
+            Task.Run(UploadNakedLocalFileAsync).Wait();
+
+            yield return null;
+        }
+
+        public async Task UploadNakedLocalFileAsync()
+        {
+            Cid AssetCid = null;
+
+            try
+            {
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    AssetUploader.PrepareUploadToIPFS(
+                        "D:/Users/carsten/Documents/Sceelix_Abbey.zip");
+
+                ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
+
+                await ao.ExecuteAsync(co);
+
+                AssetCid = AssetUploader.GetUploadedCid(co);
+
+                Assert.IsNotNull(AssetCid);
+
+                Debug.Log($"{AssetCid}");
+            }
+            finally
+            {
+                if (AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator UploadQuotedLocalFile()
+        {
+            yield return null;
+
+            Task.Run(UploadQuotedLocalFileAsync).Wait();
+
+            yield return null;
+        }
+
+        public async Task UploadQuotedLocalFileAsync()
+        {
+            Cid AssetCid = null;
+
+            try
+            {
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    AssetUploader.PrepareUploadToIPFS(
+                        "\"D:/Users/carsten/Documents/Sceelix_Abbey.zip\"");
+
+                ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
+
+                await ao.ExecuteAsync(co);
+
+                AssetCid = AssetUploader.GetUploadedCid(co);
+
+                Assert.IsNotNull(AssetCid);
+
+                Debug.Log($"{AssetCid}");
+            }
+            finally
+            {
+                if (AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
             }
         }
 

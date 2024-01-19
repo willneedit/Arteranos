@@ -108,29 +108,35 @@ namespace Arteranos.Web
 
             AssetUploaderContext context = _context as AssetUploaderContext;
 
-            if(context.AssetURL.StartsWith("file:///"))
-            {
-                string path = context.AssetURL[8..];
-                FileInfo fileInfo = new FileInfo(path);
-                totalBytes = fileInfo.Length;
+            string assetURL = context.AssetURL;
 
-                inStream = File.OpenRead(path);
+            // Strip quotes
+            if (assetURL.StartsWith("\"") && assetURL.EndsWith("\""))
+                assetURL = assetURL[1..^1];
+
+            // Strip 'file:///' prefix
+            if (assetURL.StartsWith("file:///"))
+                assetURL = assetURL[8..];
+
+            if (assetURL.StartsWith("http://") || assetURL.StartsWith("https://"))
+            {
+                // Deal with web resources
+                using HttpClient client = new();
+                client.Timeout = TimeSpan.FromSeconds(Timeout);
+                using HttpResponseMessage response = await client.GetAsync(assetURL);
+                response.EnsureSuccessStatusCode();
+                totalBytes = response.Content.Headers.ContentLength ?? -1;
+                inStream = await response.Content.ReadAsStreamAsync();
             }
             else
             {
-                using HttpClient client = new();
-
-                client.Timeout = TimeSpan.FromSeconds(Timeout);
-
-                using HttpResponseMessage response = await client.GetAsync(context.AssetURL);
-
-                response.EnsureSuccessStatusCode();
-
-                totalBytes = response.Content.Headers.ContentLength ?? -1;
-
-                inStream = await response.Content.ReadAsStreamAsync();
+                // Deal with local (file) resources
+                FileInfo fileInfo = new FileInfo(assetURL);
+                totalBytes = fileInfo.Length;
+                inStream = File.OpenRead(assetURL);
             }
             totalBytesMag = Utils.Magnitude(totalBytes);
+
 
             using FileStream outStream = File.Create(context.TempFile);
 
