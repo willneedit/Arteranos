@@ -208,12 +208,13 @@ namespace Arteranos.Core
         public static string Magnitude(long value, string suffix = "B")
         {
             float val = value;
-            string[] prefixes = { "", "K", "M", "G", "T", "E" };
+            string[] prefixes = { "", "k", "M", "G", "T", "E" };
             for(int i = 0; i < prefixes.Length - 1; i++)
             {
                 if (val < 900) return (i > 0)
                         ? string.Format("{0:F1} {1}{2}", val, prefixes[i], suffix)
                         : string.Format("{0:F0} {1}", val, suffix);
+                // SI numbers prefixes, sorry, no powers of two...
                 val /= 1000;
             }
             return string.Format("{0:F1} {1}{2}", val, prefixes[^1], suffix);
@@ -242,7 +243,8 @@ namespace Arteranos.Core
         public static async Task CopyWithProgress(Stream inStream, Stream outStream, Action<long> reportProgress, CancellationToken token = default)
         {
             long totalBytes = 0;
-            byte[] buffer = new byte[100 * 1024];
+            // 0.5MB. Should be a compromise between of too few progress reports and bandwidth bottlenecking
+            byte[] buffer = new byte[512 * 1024];
 
             while (!token.IsCancellationRequested)
             {
