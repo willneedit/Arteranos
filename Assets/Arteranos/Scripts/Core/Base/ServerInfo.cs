@@ -69,7 +69,8 @@ namespace Arteranos.Core
         }
 
         public bool IsValid => DescriptionStruct != null;
-        public bool IsOnline => OnlineData != null;
+        public bool SeenOnline => OnlineData != null;
+        public bool IsOnline => OnlineData != null && OnlineData.LastOnline < (DateTime.Now - TimeSpan.FromMinutes(5));
         public string Name => DescriptionStruct?.Name;
         public string Description => DescriptionStruct?.Description ?? string.Empty;
         public string PrivacyTOSNotice => DescriptionStruct?.PrivacyTOSNotice;
@@ -79,8 +80,8 @@ namespace Arteranos.Core
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
         public string SPKDBKey => DescriptionStruct.PeerID;
         public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new();
-        public DateTime LastUpdated => DescriptionStruct?.LastModified ?? DateTime.UnixEpoch;
-        public DateTime LastOnline => OnlineData?.LastOnline ?? DateTime.UnixEpoch;
+        public DateTime LastUpdated => DescriptionStruct?.LastModified ?? DateTime.MinValue;
+        public DateTime LastOnline => OnlineData?.LastOnline ?? DateTime.MinValue;
         public string CurrentWorldCid => WorldInfo?.WorldCid ?? null;
         public string CurrentWorldName => (WorldInfo?.WorldName) ?? "Nexus";
         public int UserCount => OnlineData?.UserFingerprints?.Count ?? 0;

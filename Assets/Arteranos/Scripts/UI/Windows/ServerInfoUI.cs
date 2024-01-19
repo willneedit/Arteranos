@@ -64,7 +64,7 @@ namespace Arteranos.UI
                 lbl_Name.text = si.Name;
                 lbl_Address.text = ""; // Maybe an abbreviated PeerID?
                 lbl_LastUpdated.text = si.LastUpdated.HumanReadable();
-                lbl_LastOnline.text = si.LastOnline.HumanReadable();
+                lbl_LastOnline.text = si.SeenOnline ? si.LastOnline.HumanReadable() : "Never seen so far";
                 lbl_MatchIndex.text = si.Permissions.HumanReadableMI(
                     SettingsManager.Client.ContentFilterPreferences
                     ).ToString();
