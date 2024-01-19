@@ -329,10 +329,6 @@ namespace Arteranos.Core
 
         public virtual UserHUDSettingsJSON UserHUD { get; set; } = new();
 
-        // The world collection
-        [Obsolete("Retire and use Pinned/Unpinned")]
-        public virtual List<string> WorldList { get; set; } = new();
-
         // The server collection
         public virtual List<string> ServerList { get; set; } = new();
 

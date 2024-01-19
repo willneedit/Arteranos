@@ -22,8 +22,6 @@ namespace Arteranos.UI
     {
 
         public RectTransform lvc_ServerList;
-        public TMP_InputField txt_AddServerURL;
-        public Button btn_AddServer;
         public Button btn_Reload;
 
         private Client cs = null;
@@ -40,7 +38,6 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            btn_AddServer.onClick.AddListener(OnAddWorldClicked);
             btn_Reload.onClick.AddListener(OnReloadClicked);
         }
 
@@ -54,10 +51,11 @@ namespace Arteranos.UI
 
                 cs = SettingsManager.Client;
 
+                // Put these servers in this list in front
                 foreach (string PeerIDString in cs.ServerList)
                     ServerList[PeerIDString] = ServerListItem.New(lvc_ServerList.transform, PeerIDString);
 
-                foreach (ServerInfo si in ServerInfo.Dump(System.DateTime.MinValue))
+                foreach (ServerInfo si in ServerInfo.Dump(DateTime.MinValue))
                 {
                     string PeerIDString = si.PeerID.ToString();
                     if (!ServerList.ContainsKey(PeerIDString))
@@ -70,15 +68,6 @@ namespace Arteranos.UI
             }
 
             StartCoroutine(PopulateCoroutine());
-        }
-
-        [Obsolete("Manually add server is currently unsupported")]
-        private void OnAddWorldClicked()
-        {
-#if false
-            string PeerIDString = txt_AddServerURL.text;
-            ServerList[PeerIDString] = ServerListItem.New(lvc_ServerList.transform, PeerIDString);
-#endif
         }
 
         private async void OnReloadClicked()
