@@ -6,6 +6,7 @@
  */
 
 using Arteranos.Core;
+using Arteranos.Core.Operations;
 using Arteranos.Web;
 using Ipfs;
 using Mirror;

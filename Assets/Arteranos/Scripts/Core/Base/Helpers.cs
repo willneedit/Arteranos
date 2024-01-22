@@ -335,20 +335,6 @@ namespace Arteranos.Services
             => Instance.ExpectConnectionResponse_();
     }
 
-    public abstract class ServerSearcher : MonoBehaviour
-    {
-        protected abstract void InitiateServerTransition_(Cid WorldCid);
-        protected abstract void InitiateServerTransition_(Cid WorldCid, Action<Cid, MultiHash> OnSuccessCallback, Action OnFailureCallback);
-
-        public static ServerSearcher Instance { get; protected set; }
-
-        public static void InitiateServerTransition(Cid WorldCid)
-            => Instance.InitiateServerTransition_(WorldCid);
-
-        public static void InitiateServerTransition(Cid worldCid, Action<Cid, MultiHash> OnSuccessCallback, Action OnFailureCallback)
-            => Instance.InitiateServerTransition_(worldCid, OnSuccessCallback, OnFailureCallback);
-    }
-
     public struct WorldData
     {
         public Cid worldCid;

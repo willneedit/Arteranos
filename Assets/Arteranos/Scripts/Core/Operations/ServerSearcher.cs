@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Core;
 using System;
 using System.Threading.Tasks;
 
@@ -15,8 +14,9 @@ using System.Threading;
 using Arteranos.UI;
 using Arteranos.Services;
 using Ipfs;
+using Arteranos.Web;
 
-namespace Arteranos.Web
+namespace Arteranos.Core.Operations
 {
 
     internal class ServerSearcherContext : Context
@@ -165,11 +165,8 @@ namespace Arteranos.Web
 
     }
 
-    public class ServerSearcherImpl : ServerSearcher
+    public static class ServerSearcher
     {
-        private void Awake() => Instance = this;
-        private void OnDestroy() => Instance = null;
-
         public static (AsyncOperationExecutor<Context>, Context) PrepareSearchServers(string desiredWorld)
         {
             ServerSearcherContext context = new()
@@ -188,15 +185,15 @@ namespace Arteranos.Web
             return (executor, context);
         }
 
-        protected override void InitiateServerTransition_(Cid WorldCid)
+        public static void InitiateServerTransition(Cid WorldCid)
         {
             static void GotResult(Cid WorldCid, MultiHash ServerPeerID) 
                 => _ = OnGotSearchResult(WorldCid, ServerPeerID);
 
-            InitiateServerTransition_(WorldCid, GotResult, null);
+            InitiateServerTransition(WorldCid, GotResult, null);
         }
 
-        protected override void InitiateServerTransition_(Cid WorldCid, Action<Cid, MultiHash> OnSuccessCallback, Action OnFailureCallback)
+        public static void InitiateServerTransition(Cid WorldCid, Action<Cid, MultiHash> OnSuccessCallback, Action OnFailureCallback)
         {
             IProgressUI pui = ProgressUIFactory.New();
 
