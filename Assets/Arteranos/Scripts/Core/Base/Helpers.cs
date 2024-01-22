@@ -344,38 +344,6 @@ namespace Arteranos.Services
         public ServerPermissions permissions;
     }
 
-
-    public abstract class WorldTransition : MonoBehaviour
-    {
-        protected abstract Task<(Exception, Context)> PreloadWorldDataAsync_(Cid WorldCid);
-        protected abstract bool IsWorldPreloaded_(Cid WorldCid);
-        protected abstract Task<(Exception, WorldData)> GetWorldDataAsync_(Cid WorldCid);
-        protected abstract Task<Exception> VisitWorldAsync_(Cid WorldCid);
-        protected abstract Task MoveToOfflineWorld_();
-        protected abstract Task MoveToOnlineWorld_(Cid WorldCid);
-        protected abstract Task EnterWorldAsync_(Cid WorldCid);
-        protected abstract void EnterDownloadedWorld_(string worldABF);
-
-        public static WorldTransition Instance { get; set; }
-
-        public static Task<(Exception, WorldData)> GetWorldDataAsync(Cid WorldCid)
-            => Instance.GetWorldDataAsync_(WorldCid);
-        public static bool IsWorldPreloaded(Cid WorldCid)
-            => Instance.IsWorldPreloaded_(WorldCid);
-        public static Task MoveToOfflineWorld()
-            => Instance.MoveToOfflineWorld_();
-        public static Task MoveToOnlineWorld(Cid WorldCid)
-            => Instance.MoveToOnlineWorld_(WorldCid);
-        public static Task<(Exception, Context)> PreloadWorldDataAsync(Cid WorldCid)
-            => Instance.PreloadWorldDataAsync_(WorldCid);
-        public static Task<Exception> VisitWorldAsync(Cid WorldCid)
-            => Instance.VisitWorldAsync_(WorldCid);
-        public static Task EnterWorldAsync(Cid WorldCid)
-            => Instance.EnterWorldAsync_(WorldCid);
-        public static void EnterDownloadedWorld(string worldABF)
-            => Instance.EnterDownloadedWorld_(worldABF);
-    }
-
     #endregion
     // -------------------------------------------------------------------
 }

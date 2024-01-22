@@ -185,7 +185,7 @@ namespace Arteranos.Core.Operations
         {
             string worldABF = GetWorldABF(_context);
 
-            Web.WorldTransition.EnterDownloadedWorld(worldABF);
+            WorldTransition.EnterDownloadedWorld(worldABF);
         }
 
         private static string GetWorldABF(Context _context) 
