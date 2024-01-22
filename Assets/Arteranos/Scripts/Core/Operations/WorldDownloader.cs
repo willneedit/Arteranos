@@ -17,7 +17,7 @@ using Utils = Arteranos.Core.Utils;
 using Ipfs;
 using Arteranos.Services;
 
-namespace Arteranos.Web
+namespace Arteranos.Core.Operations
 {
     internal class WorldDownloaderContext : Context
     {
@@ -185,7 +185,7 @@ namespace Arteranos.Web
         {
             string worldABF = GetWorldABF(_context);
 
-            WorldTransition.EnterDownloadedWorld(worldABF);
+            Web.WorldTransition.EnterDownloadedWorld(worldABF);
         }
 
         private static string GetWorldABF(Context _context) 

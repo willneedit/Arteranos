@@ -18,6 +18,7 @@ using Arteranos.Core.Cryptography;
 using System.Security.Cryptography;
 using Arteranos.UI;
 using Arteranos.Web;
+using Arteranos.Core.Operations;
 
 namespace Arteranos.PlayTest.Web
 {
@@ -38,7 +39,6 @@ namespace Arteranos.PlayTest.Web
             yield return null;
 
             srv = go1.AddComponent<IPFSServiceImpl>();
-            _ = go1.AddComponent<AssetUploaderImpl>();
 
             yield return null;
 

@@ -19,6 +19,7 @@ using System.Threading;
 using System.Collections;
 using System.Linq;
 using Ipfs;
+using Arteranos.Core.Operations;
 
 namespace Arteranos.UI
 {

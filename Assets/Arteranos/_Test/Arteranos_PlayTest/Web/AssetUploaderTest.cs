@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Arteranos.Core;
 using Ipfs;
 using Arteranos.Web;
+using Arteranos.Core.Operations;
 
 namespace Arteranos.PlayTest.Web
 {
@@ -30,7 +31,6 @@ namespace Arteranos.PlayTest.Web
             yield return null;
 
             srv = go1.AddComponent<IPFSServiceImpl>();
-            _ = go1.AddComponent<AssetUploaderImpl>();
 
             yield return null;
 
@@ -179,7 +179,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    Arteranos.Web.AssetUploader.PrepareUploadToIPFS(
+                    AssetUploader.PrepareUploadToIPFS(
                         "https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip");
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{msg}");
@@ -214,7 +214,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    Arteranos.Web.AssetUploader.PrepareUploadToIPFS(
+                    AssetUploader.PrepareUploadToIPFS(
                         "file:///C:/DoesNotExist.no");
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{msg}");

@@ -18,7 +18,7 @@ using Ipfs.CoreApi;
 using System.Net.Http;
 using System.IO.Pipes;
 
-namespace Arteranos.Web
+namespace Arteranos.Core.Operations
 {
     internal class AssetUploaderContext : Context
     {
@@ -150,19 +150,9 @@ namespace Arteranos.Web
         }
     }
 
-    public class AssetUploaderImpl : AssetUploader
+    public static class AssetUploader
     {
-        private void Awake()
-        {
-            Instance = this;
-        }
-
-        private void OnDestroy()
-        {
-            Instance = null;
-        }
-
-        public override (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS_(string assetURL, int timeout = 600, bool pin = false)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS(string assetURL, int timeout = 600, bool pin = false)
         {
             AssetUploaderContext context = new()
             {
@@ -183,7 +173,7 @@ namespace Arteranos.Web
             return (executor, context);
         }
 
-        public override Cid GetUploadedCid_(Context _context)
+        public static Cid GetUploadedCid(Context _context)
             => (_context as AssetUploaderContext).Cid;
     }
 }
