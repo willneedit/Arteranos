@@ -15,19 +15,9 @@ using Arteranos.Core;
 using System.Threading;
 using Utils = Arteranos.Core.Utils;
 using Ipfs;
-using Arteranos.Services;
 
 namespace Arteranos.Core.Operations
 {
-    internal class WorldDownloaderContext : Context
-    {
-        public Cid Cid = null;
-        public Cid WorldInfoCid = null;
-        public long size = -1;
-        public string worldZipFile = null;
-        public string worldAssetBundleFile = null;
-    }
-
     internal class BuildWorldInfoOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
@@ -96,11 +86,11 @@ namespace Arteranos.Core.Operations
 
             return await Task.Run(() =>
             {
-                string path = Path.ChangeExtension(context.worldZipFile, "dir");
+                string path = Path.ChangeExtension(context.TargetFile, "dir");
 
                 if (Directory.Exists(path)) Directory.Delete(path, true);
 
-                ZipFile.ExtractToDirectory(context.worldZipFile, path);
+                ZipFile.ExtractToDirectory(context.TargetFile, path);
 
                 string worldABF = WorldDownloader.GetWorldABFfromWD(path);
 
@@ -111,51 +101,6 @@ namespace Arteranos.Core.Operations
             });
         }
     }
-
-    internal class DownloadOp : IAsyncOperation<Context>
-    {
-        public int Timeout { get; set; }
-        public float Weight { get; set; } = 8.0f;
-        public string Caption { get => GetProgressText(); }
-        public Action<float> ProgressChanged { get; set; }
-
-        private long actualBytes = 0;
-        private long totalBytes = -1;
-        private string totalBytesMag = null;
-
-        private string GetProgressText()
-        {
-            if (totalBytesMag == null || totalBytes <= 0) return "Downloading...";
-
-            return $"Downloading ({Utils.Magnitude(actualBytes)} of {totalBytesMag})...";
-        }
-
-        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
-        {
-            WorldDownloaderContext context = _context as WorldDownloaderContext;
-
-            context.worldZipFile = $"{WorldDownloader.GetWorldCacheDir(context.Cid)}/world.zip";
-
-            IDataBlock fi = await IPFSService.Ipfs.FileSystem.ListFileAsync(context.Cid, token);
-
-            totalBytes = fi.Size;
-            totalBytesMag = Utils.Magnitude(totalBytes);
-
-            using Stream inStream = await IPFSService.Ipfs.FileSystem.ReadFileAsync(context.Cid, cancel: token);
-
-            string dir = Path.GetDirectoryName(context.worldZipFile);
-            if(!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-            using FileStream outStream = File.Create(context.worldZipFile);
-
-            await Utils.CopyWithProgress(inStream, outStream,
-                bytes => {
-                    actualBytes = bytes;
-                    ProgressChanged((float)bytes / totalBytes);
-                }, token);
-
-            return context;
-        }
-    }
     
     public static class WorldDownloader
     {
@@ -163,13 +108,14 @@ namespace Arteranos.Core.Operations
         {
             WorldDownloaderContext context = new()
             {
-                Cid = cid
+                Cid = cid,
+                TargetFile = $"{GetWorldCacheDir(cid)}/world.zip"
             };
 
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
             {
-                new DownloadOp(),
+                new AssetDownloadOp(),
                 new UnzipWorldFileOp(),
                 new BuildWorldInfoOp(),
             })
@@ -228,16 +174,5 @@ namespace Arteranos.Core.Operations
                 throw new FileNotFoundException("No suitable AssetBundle found in the zipfile.");
             return worldABF;
         }
-
-
-        //private void OnEnable()
-        //{
-        //    DownloadWorldAsync(
-        //        "https://github.com/willneedit/willneedit.github.io/blob/master/Abbey.zip?raw=true"
-        //        // "file://C:/Users/willneedit/Desktop/world.zip"
-        //        );
-
-        //    Debug.Log("Spawned the downloader in the background, we'll see...");
-        //}
     }
 }

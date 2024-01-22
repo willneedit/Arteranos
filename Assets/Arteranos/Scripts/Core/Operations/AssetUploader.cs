@@ -20,14 +20,6 @@ using System.IO.Pipes;
 
 namespace Arteranos.Core.Operations
 {
-    internal class AssetUploaderContext : Context
-    {
-        public string AssetURL = null;
-        public string TempFile = null;
-        public bool pin = false;
-        public Cid Cid = null;
-    }
-
     internal class UploadToIPFS : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }

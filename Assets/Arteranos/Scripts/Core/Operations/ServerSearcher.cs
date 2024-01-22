@@ -19,14 +19,6 @@ using Arteranos.Web;
 namespace Arteranos.Core.Operations
 {
 
-    internal class ServerSearcherContext : Context
-    {
-        public List<ServerInfo> serverInfos = null;
-        public Cid desiredWorldCid = null;
-        public ServerPermissions desiredWorldPermissions = null;
-        public MultiHash resultPeerID = null;
-    }
-
     internal class PreloadServerRequirementsOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
