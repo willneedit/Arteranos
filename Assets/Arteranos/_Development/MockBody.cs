@@ -8,6 +8,7 @@
 #if UNITY_EDITOR
 
 using Arteranos.Avatar;
+using Arteranos.Core.Operations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -43,6 +44,12 @@ namespace Arteranos
         public bool Invisible { get; set; }
 
         public float OriginalFullHeight => throw new System.NotImplementedException();
+
+        public List<MeshBlendShapeIndex> MouthOpen => throw new System.NotImplementedException();
+
+        public List<Transform> Eyes => throw new System.NotImplementedException();
+
+        public List<MeshBlendShapeIndex> EyeBlink => throw new System.NotImplementedException();
 
         public void RequestAvatarHeightChange(float targetHeight)
         {

@@ -22,12 +22,11 @@ namespace Arteranos.Core.Operations
         public Action<float> ProgressChanged { get; set; }
 
         private long actualBytes = 0;
-        private long totalBytes = -1;
         private string totalBytesMag = null;
 
         private string GetProgressText()
         {
-            if (totalBytesMag == null || totalBytes <= 0) return "Downloading...";
+            if (totalBytesMag == null) return "Downloading...";
 
             return $"Downloading ({Utils.Magnitude(actualBytes)} of {totalBytesMag})...";
         }
@@ -38,8 +37,8 @@ namespace Arteranos.Core.Operations
 
             IDataBlock fi = await IPFSService.Ipfs.FileSystem.ListFileAsync(context.Cid, token);
 
-            totalBytes = fi.Size;
-            totalBytesMag = Utils.Magnitude(totalBytes);
+            context.Size = fi.Size;
+            totalBytesMag = Utils.Magnitude(context.Size);
 
             using Stream inStream = await IPFSService.Ipfs.FileSystem.ReadFileAsync(context.Cid, cancel: token);
 
@@ -50,7 +49,7 @@ namespace Arteranos.Core.Operations
             await Utils.CopyWithProgress(inStream, outStream,
                 bytes => {
                     actualBytes = bytes;
-                    ProgressChanged((float)bytes / totalBytes);
+                    ProgressChanged((float)bytes / context.Size);
                 }, token);
 
             return context;

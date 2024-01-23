@@ -13,6 +13,7 @@ using ReadyPlayerMe.AvatarLoader;
 using System.Collections.Generic;
 using Arteranos.XR;
 using Arteranos.Core;
+using Arteranos.Core.Operations;
 
 namespace Arteranos.Avatar
 {
@@ -46,6 +47,10 @@ namespace Arteranos.Avatar
 
         public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
+
+        public List<MeshBlendShapeIndex> MouthOpen { get; private set; }
+        public List<Transform> Eyes { get; private set; }
+        public List<MeshBlendShapeIndex> EyeBlink { get; private set; }
 
         public bool Invisible
         {

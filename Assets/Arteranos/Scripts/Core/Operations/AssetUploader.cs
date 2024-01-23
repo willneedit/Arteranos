@@ -49,15 +49,14 @@ namespace Arteranos.Core.Operations
 
             try
             {
-                FileInfo fileInfo = new FileInfo(context.TempFile);
+                FileInfo fileInfo = new(context.TempFile);
                 totalBytes = fileInfo.Length;
                 totalBytesMag = Utils.Magnitude(totalBytes);
 
                 using Stream stream = File.OpenRead(context.TempFile);
 
-                using AnonymousPipeServerStream pipeServer = new AnonymousPipeServerStream();
-                using AnonymousPipeClientStream pipeClient =
-                  new AnonymousPipeClientStream(pipeServer.GetClientHandleAsString());
+                using AnonymousPipeServerStream pipeServer = new();
+                using AnonymousPipeClientStream pipeClient = new(pipeServer.GetClientHandleAsString());
 
                 _ = Utils.CopyWithProgress(stream, pipeServer, bytes => {
                     actualBytes = bytes;
@@ -123,7 +122,7 @@ namespace Arteranos.Core.Operations
             else
             {
                 // Deal with local (file) resources
-                FileInfo fileInfo = new FileInfo(assetURL);
+                FileInfo fileInfo = new(assetURL);
                 totalBytes = fileInfo.Length;
                 inStream = File.OpenRead(assetURL);
             }

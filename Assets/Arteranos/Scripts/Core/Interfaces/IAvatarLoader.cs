@@ -5,29 +5,15 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core.Operations;
 using System.Collections;
 using UnityEngine;
 
 namespace Arteranos.Avatar
 {
-    public interface IAvatarLoader
+    public interface IAvatarLoader : IAvatarMeasures
     {
-        Transform LeftHand { get; }
-        Transform RightHand { get; }
-        Transform LeftFoot { get; }
-        Transform RightFoot { get; }
-
-        Quaternion LhrOffset { get; }
-        Quaternion RhrOffset { get; }
-
-
-        Transform CenterEye { get; }
-        Transform Head { get; }
-
-        float FootElevation { get; }
         string GalleryModeURL { get; set; }
-        float EyeHeight { get; }
-        float FullHeight { get; }
         bool Invisible { get; set; }
         float OriginalFullHeight { get; }
 
