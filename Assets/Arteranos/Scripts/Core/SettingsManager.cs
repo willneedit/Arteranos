@@ -124,9 +124,9 @@ namespace Arteranos.Core
         protected abstract void StartCoroutineAsync_(Func<IEnumerator> action);
 
         public static void PingServerChangeWorld(string invoker, Cid WorldCid)
-            => Instance.PingServerChangeWorld_(invoker, WorldCid);
+            => Instance?.PingServerChangeWorld_(invoker, WorldCid);
         public static void StartCoroutineAsync(Func<IEnumerator> action)
-            => Instance.StartCoroutineAsync_(action);
+            => Instance?.StartCoroutineAsync_(action);
 
         public static bool IsSelf(MultiHash ServerPeerID)
             => Instance.IsSelf_(ServerPeerID);

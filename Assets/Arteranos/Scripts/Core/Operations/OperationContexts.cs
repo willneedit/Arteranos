@@ -67,6 +67,8 @@ namespace Arteranos.Core.Operations
     internal class AvatarDownloaderContext : AssetDownloaderContext, IAvatarMeasures
     {
         public GameObject Avatar { get; set; } = null;
+        public bool? SidedCapitalized { get; set; } = null; // 'left' or 'Left' ?
+        public int SidedPatternIndex { get; set; } = -1;
         public Transform LeftHand { get; set; } = null;
         public Transform RightHand { get; set; } = null;
         public Transform LeftFoot { get; set; } = null;

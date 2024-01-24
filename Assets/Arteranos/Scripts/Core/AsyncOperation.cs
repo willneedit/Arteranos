@@ -78,8 +78,9 @@ namespace Arteranos.Core
 
                     weightSoFar += operation.Weight;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Debug.LogException(ex);
                     if(tokenSource.IsCancellationRequested) tokenSource.Dispose();
                     throw;
                 }
