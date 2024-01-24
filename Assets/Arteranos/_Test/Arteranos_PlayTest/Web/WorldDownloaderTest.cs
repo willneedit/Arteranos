@@ -24,6 +24,11 @@ namespace Arteranos.PlayTest.Web
 {
     public class WorldDownloaderTest
     {
+        private const string WebURLAsset = "https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip";
+        private const string PlainFileAsset = "Assets/Arteranos/_Test/Sceelix_Abbey.zip";
+        private string FileURLAsset => $"file:///{PlainFileAsset}";
+        private string QuotedFileAsset => $"\"{PlainFileAsset}\"";
+
         IPFSServiceImpl srv = null;
         IpfsEngine ipfs = null;
         Peer self = null;
@@ -54,8 +59,7 @@ namespace Arteranos.PlayTest.Web
         private async Task UploadTestWorld()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AssetUploader.PrepareUploadToIPFS(
-                    "file:///D:/Users/carsten/Documents/Sceelix_Abbey.zip");
+                AssetUploader.PrepareUploadToIPFS(FileURLAsset);
 
             await ao.ExecuteAsync(co);
 

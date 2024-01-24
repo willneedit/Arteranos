@@ -16,7 +16,10 @@ namespace Arteranos.PlayTest.Web
 {
     public class AssetUploaderTest
     {
-        private const string AssetURL = "file:///D:/Users/carsten/Documents/Sceelix_Abbey.zip";
+        private const string WebURLAsset = "https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip";
+        private const string PlainFileAsset = "Assets/Arteranos/_Test/Sceelix_Abbey.zip";
+        private string FileURLAsset => $"file:///{PlainFileAsset}";
+        private string QuotedFileAsset => $"\"{PlainFileAsset}\"";
 
         IPFSServiceImpl srv = null;
         IpfsEngine ipfs = null;
@@ -71,8 +74,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(
-                        "file:///D:/Users/carsten/Documents/Sceelix_Abbey.zip");
+                    AssetUploader.PrepareUploadToIPFS(FileURLAsset);
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
@@ -107,8 +109,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(
-                        "D:/Users/carsten/Documents/Sceelix_Abbey.zip");
+                    AssetUploader.PrepareUploadToIPFS(PlainFileAsset);
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
@@ -143,8 +144,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(
-                        "\"D:/Users/carsten/Documents/Sceelix_Abbey.zip\"");
+                    AssetUploader.PrepareUploadToIPFS(QuotedFileAsset);
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
@@ -179,8 +179,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(
-                        "https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip");
+                    AssetUploader.PrepareUploadToIPFS(WebURLAsset);
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{msg}");
 
