@@ -19,6 +19,8 @@ using UnityEngine.UI;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
+using Arteranos.Core.Operations;
+using TreeEditor;
 
 namespace Arteranos.Core
 {
@@ -240,6 +242,14 @@ namespace Arteranos.Core
                 Vector2.zero);
         }
 
+        /// <summary>
+        /// Copy from inStream to outStream, report its progress.
+        /// </summary>
+        /// <param name="inStream"></param>
+        /// <param name="outStream"></param>
+        /// <param name="reportProgress"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public static async Task CopyWithProgress(Stream inStream, Stream outStream, Action<long> reportProgress, CancellationToken token = default)
         {
             long totalBytes = 0;
@@ -260,6 +270,62 @@ namespace Arteranos.Core
             }
             outStream.Flush();
             outStream.Close();
+        }
+
+        public static void RateGameObject(GameObject go, IObjectStats warn, IObjectStats cutoff, IObjectStats counted)
+        {
+            float Rate(int actual, int l1, int l2)
+            {
+                if (actual > l2) return -0.40f; // Beyond 'red' mark
+                if (actual > l1) return -0.20f; // Beyond 'yellow' mark
+                return 0.0f; // Green
+            }
+
+            counted.Count = 0;
+            counted.Vertices = 0;
+            counted.Triangles = 0;
+            counted.Materials = 0;
+            counted.Rating = 1.0f;
+
+            CountGameObject(go.transform, counted);
+
+            counted.Rating += Rate(counted.Count, warn.Count, cutoff.Count);
+            counted.Rating += Rate(counted.Vertices, warn.Vertices, cutoff.Vertices);
+            counted.Rating += Rate(counted.Triangles, warn.Triangles, cutoff.Triangles);
+            counted.Rating += Rate(counted.Materials, warn.Materials, cutoff.Materials);
+
+            counted.Rating = Mathf.Clamp01(counted.Rating);
+        }
+
+        public static void CountGameObject(Transform t, IObjectStats counted)
+        {
+            Mesh m = null;
+            SkinnedMeshRenderer smr = t.gameObject.GetComponent<SkinnedMeshRenderer>();
+            if (smr)
+            {
+                m = smr.sharedMesh;
+                counted.Materials += smr.materials.Length;
+            }
+            MeshFilter mf = t.gameObject.GetComponent<MeshFilter>();
+            if (mf) 
+            { 
+                m = mf.sharedMesh;
+            }
+            MeshRenderer mr = t.gameObject.GetComponent<MeshRenderer>();
+            if(mr)
+            {
+                counted.Materials += mr.materials.Length;
+            }
+
+            if (m)
+            {
+                counted.Count++;
+                counted.Triangles += m.triangles.Length;
+                counted.Vertices += m.vertices.Length;
+            }
+
+            foreach(Transform transform in t)
+                CountGameObject(transform, counted);
         }
     }
 }

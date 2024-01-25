@@ -133,10 +133,37 @@ namespace Arteranos.PlayTest.Web
             Assert.IsNotNull(AvatarDownloader.GetLoadedAvatar(co));
 
             GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
-            avatar.SetActive(true);
-            avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+            // avatar.SetActive(true);
+            // avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
-            yield return new WaitForSeconds(5);
+            IObjectStats ar = AvatarDownloader.GetAvatarRating(co);
+            Assert.AreEqual(1.0f, ar.Rating);
+            Assert.IsTrue(ar.Vertices < 12000);
+            Assert.IsTrue(ar.Triangles < 60000);
+            Assert.IsTrue(ar.Vertices != 0);
+
+            IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
+
+            Assert.IsNotNull(am);
+
+            Assert.AreEqual("LeftHand", am.LeftHand.name);
+            Assert.AreEqual("RightHand", am.RightHand.name);
+            Assert.AreEqual("LeftFoot", am.LeftFoot.name);
+            Assert.AreEqual("RightFoot", am.RightFoot.name);
+
+            Assert.AreEqual(2, am.Eyes.Count);
+
+            Assert.IsTrue(am.EyeHeight > 1.725f);
+            Assert.IsTrue(am.EyeHeight < 1.726f);
+
+            Assert.IsTrue(am.FootElevation > 0.126f);
+            Assert.IsTrue(am.FootElevation < 0.127f);
+
+            Assert.IsTrue(am.FullHeight > 1.86f);
+            Assert.IsTrue(am.FullHeight < 1.87f);
+
+            // yield return new WaitForSeconds(5);
+            // yield return UnityPAK();
         }
     }
 }

@@ -33,6 +33,14 @@ namespace Arteranos.Core.Operations
         public int Index { get; set; } = -1;
     }
 
+    public interface IObjectStats
+    {
+        int Count { get; set; }
+        int Vertices { get; set; }
+        int Triangles { get; set; }
+        int Materials { get; set; }
+        float Rating { get; set; } // Normalized, more is better
+    }
     public interface IAvatarMeasures
     {
         Transform CenterEye { get; } // The position, as close as much to match the headset
@@ -64,7 +72,7 @@ namespace Arteranos.Core.Operations
         public string worldAssetBundleFile = null;
     }
 
-    internal class AvatarDownloaderContext : AssetDownloaderContext, IAvatarMeasures
+    internal class AvatarDownloaderContext : AssetDownloaderContext, IAvatarMeasures, IObjectStats
     {
         public GameObject Avatar { get; set; } = null;
         public bool? SidedCapitalized { get; set; } = null; // 'left' or 'Left' ?
@@ -89,6 +97,11 @@ namespace Arteranos.Core.Operations
         public List<MeshBlendShapeIndex> EyeBlink { get; set; }
 
         public List<string> JointNames { get; set; } // Bone names to use the network IK transmission
+        public int Count { get; set; }
+        public int Vertices { get; set; }
+        public int Triangles { get; set; }
+        public int Materials { get; set; }
+        public float Rating { get; set; }
     }
 
     internal class ServerSearcherContext : Context

@@ -15,110 +15,39 @@ using System.Threading;
 using Utils = Arteranos.Core.Utils;
 using Ipfs;
 using GLTFast;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Arteranos.Core.Operations
 {
-    /// <summary>
-    /// Cut down GameObjectInstantiator to create a single game object, not a full scene
-    /// along with external lights and camera.
-    /// </summary>
-    internal class GltFastGameObjectInstantiator : GameObjectInstantiator
+    internal class ObjectStats : IObjectStats
     {
-        public GltFastGameObjectInstantiator(
-            IGltfReadable gltf,
-            Transform parent,
-            InstantiationSettings settings = null
-        )
-            : base(gltf, parent, null, settings)
-        {
-        }
-
-        public override void AddPrimitive(
-            uint nodeIndex,
-            string meshName,
-            Mesh mesh,
-            int[] materialIndices,
-            uint[] joints = null,
-            uint? rootJoint = null,
-            float[] morphTargetWeights = null,
-            int primitiveNumeration = 0
-        )
-        {
-            if ((m_Settings.Mask & ComponentType.Mesh) == 0)
-            {
-                return;
-            }
-
-            GameObject meshGo;
-            if (primitiveNumeration == 0)
-            {
-                // Use Node GameObject for first Primitive
-                meshGo = m_Nodes[nodeIndex];
-                // Ready Player Me - Parent mesh to Avatar root game object
-                meshGo.transform.SetParent(m_Parent.transform);
-            }
-            else
-            {
-                meshGo = new GameObject(meshName);
-                meshGo.transform.SetParent(m_Nodes[nodeIndex].transform, false);
-                meshGo.layer = m_Settings.Layer;
-            }
-
-            Renderer renderer;
-
-            bool hasMorphTargets = mesh.blendShapeCount > 0;
-            if (joints == null && !hasMorphTargets)
-            {
-                MeshFilter meshFilter = meshGo.AddComponent<MeshFilter>();
-                meshFilter.mesh = mesh;
-                MeshRenderer meshRenderer = meshGo.AddComponent<MeshRenderer>();
-                renderer = meshRenderer;
-            }
-            else
-            {
-                SkinnedMeshRenderer skinnedMeshRenderer = meshGo.AddComponent<SkinnedMeshRenderer>();
-                skinnedMeshRenderer.updateWhenOffscreen = m_Settings.SkinUpdateWhenOffscreen;
-                if (joints != null)
-                {
-                    Transform[] bones = new Transform[joints.Length];
-                    for (int j = 0; j < bones.Length; j++)
-                    {
-                        uint jointIndex = joints[j];
-                        bones[j] = m_Nodes[jointIndex].transform;
-                    }
-                    skinnedMeshRenderer.bones = bones;
-                    if (rootJoint.HasValue)
-                    {
-                        skinnedMeshRenderer.rootBone = m_Nodes[rootJoint.Value].transform;
-                    }
-                }
-                skinnedMeshRenderer.sharedMesh = mesh;
-                if (morphTargetWeights != null)
-                {
-                    for (int i = 0; i < morphTargetWeights.Length; i++)
-                    {
-                        float weight = morphTargetWeights[i];
-                        skinnedMeshRenderer.SetBlendShapeWeight(i, weight);
-                    }
-                }
-                renderer = skinnedMeshRenderer;
-            }
-
-            Material[] materials = new Material[materialIndices.Length];
-            for (int index = 0; index < materials.Length; index++)
-            {
-                Material material = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
-                materials[index] = material;
-            }
-
-            renderer.sharedMaterials = materials;
-        }
+        public int Count { get; set; }
+        public int Vertices { get; set; }
+        public int Triangles { get; set; }
+        public int Materials { get; set; }
+        public float Rating { get; set; }
     }
 
-    internal class FixupSkeletonOp : IAsyncOperation<Context>
+    internal class MeasureSkeletonOp : IAsyncOperation<Context>
     {
-        private const string BONE_HIPS = "Hips";
         private const string BONE_ARMATURE = "Armature";
+
+        private readonly ObjectStats warningLevels = new ObjectStats()
+        {
+            Count = 2,
+            Vertices = 12000,
+            Triangles = 60000,
+            Materials = 2,
+        };
+
+        private readonly ObjectStats errorLevels = new ObjectStats()
+        {
+            Count = 4,
+            Vertices = 16000,
+            Triangles = 90000,
+            Materials = 4,
+        };
 
         public int Timeout { get; set; }
         public float Weight { get; set; } = 0.01f;
@@ -131,9 +60,10 @@ namespace Arteranos.Core.Operations
         {
             AvatarDownloaderContext context = _context as AvatarDownloaderContext;
 
-            // Add the armature (root) bone, if it isn't already present
             Transform avatarTransform = context.Avatar.transform;
-            AddArmatureBone(avatarTransform);
+
+            // Pull up the other children besides the bones in the hierarchy root
+            PullupMeshes(avatarTransform);
 
             // Try to find the IK relevant limbs
             context.LeftFoot = AvatarDownloader.TrySidedLimb(context, "Foot", false);
@@ -141,19 +71,77 @@ namespace Arteranos.Core.Operations
             context.LeftHand = AvatarDownloader.TrySidedLimb(context, "Hand", false);
             context.RightHand = AvatarDownloader.TrySidedLimb(context, "Hand", true);
 
+            // Find the eyes (usually two ... :)
+            context.Eyes = new();
+            FindLimbsPattern(avatarTransform, "(.*Eye|Eye.*)", context.Eyes);
+
+            // How far the feet joints are lifted from the ground (like, the soles)
+            float FootElevation = 0.0f;
+            int FeetCount = 0;
+
+            if(context.LeftFoot)
+            {
+                FootElevation += context.LeftFoot.position.y;
+                FeetCount++;
+            }
+
+            if(context.RightFoot)
+            {
+                FootElevation += context.RightFoot.position.y;
+                FeetCount++;
+            }
+
+            if(FeetCount > 0) FootElevation = FootElevation / FeetCount;
+            context.FootElevation = FootElevation;
+
+            // Same as with the eyes. They *should* be in the same height....
+            float EyeHeight = 0.0f;
+            foreach (Transform t in context.Eyes) EyeHeight += t.position.y;
+            if(context.Eyes.Count > 0) EyeHeight = EyeHeight / context.Eyes.Count;
+            context.EyeHeight = EyeHeight;
+
+            // Maybe I had to look for the way to get the bounding box.
+            context.FullHeight = FoldTransformHierarchy(avatarTransform, 0.0f, 
+                (t, f) => t.position.y > f ? t.position.y : f);
+
+            // Get the overall rating about the avatar
+            Utils.RateGameObject(context.Avatar, warningLevels, errorLevels, context);
+
             return Task.FromResult<Context>(context);
         }
 
-        private static void AddArmatureBone(Transform avatarTransform)
+        private static void PullupMeshes(Transform avatarTransform)
         {
-            if (!avatarTransform.Find(BONE_ARMATURE))
-            {
-                GameObject armature = new(BONE_ARMATURE);
-                armature.transform.parent = avatarTransform;
+            Transform armature = avatarTransform.Find(BONE_ARMATURE);
+            if (!armature) return;
 
-                Transform hips = avatarTransform.Find(BONE_HIPS);
-                if (hips) hips.parent = armature.transform;
+            for (int i = 0; i < armature.childCount; i++)
+            {
+                Transform transform = armature.GetChild(i);
+                if (transform.gameObject.GetComponent<Renderer>())
+                {
+                    transform.parent = avatarTransform;
+                    i--;
+                }
             }
+        }
+
+        public static void FindLimbsPattern(Transform t, string pattern, List<Transform> collected)
+        {
+            Match m = Regex.Match(t.name, pattern, RegexOptions.IgnoreCase);
+            if (m.Success) collected.Add(t);
+
+            foreach(Transform transform in t)
+                FindLimbsPattern(transform, pattern, collected);
+        }
+
+        public static T FoldTransformHierarchy<T>(Transform t, T start, Func<Transform, T, T> progress)
+        {
+            start = progress(t, start);
+            foreach(Transform tc in t)
+                start = FoldTransformHierarchy(tc, start, progress);
+
+            return start;
         }
     }
 
@@ -178,7 +166,7 @@ namespace Arteranos.Core.Operations
             {
                 context.Avatar = new GameObject();
                 context.Avatar.SetActive(false);
-                GltFastGameObjectInstantiator customInstantiator = new(gltf, context.Avatar.transform);
+                GameObjectInstantiator customInstantiator = new(gltf, context.Avatar.transform);
 
                 await gltf.InstantiateMainSceneAsync(customInstantiator);
             }
@@ -202,7 +190,7 @@ namespace Arteranos.Core.Operations
             {
                 new AssetDownloadOp(),
                 new SetupAvatarObjOp(),
-                new FixupSkeletonOp(),
+                new MeasureSkeletonOp(),
             })
             { Timeout = timeout };
 
@@ -286,11 +274,13 @@ namespace Arteranos.Core.Operations
         public static string GetAvatarCacheFile(Cid cid)
             => $"{FileUtils.temporaryCachePath}/AvatarCache/{Utils.GetURLHash(cid)}.glb";
 
-        public static GameObject GetLoadedAvatar(Context _context)
-        {
-            AvatarDownloaderContext context = _context as AvatarDownloaderContext;
-            return context.Avatar;
-        }
+        public static GameObject GetLoadedAvatar(Context _context) 
+            => (_context as AvatarDownloaderContext).Avatar;
 
+        public static IObjectStats GetAvatarRating(Context _context)
+            => _context as IObjectStats;
+
+        public static IAvatarMeasures GetAvatarMeasures(Context _context) 
+            => _context as IAvatarMeasures;
     }
 }
