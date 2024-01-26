@@ -49,7 +49,9 @@ namespace Arteranos
 
         public List<Transform> Eyes => throw new System.NotImplementedException();
 
-        public List<MeshBlendShapeIndex> EyeBlink => throw new System.NotImplementedException();
+        public List<MeshBlendShapeIndex> EyeBlinkLeft => throw new System.NotImplementedException();
+
+        public List<MeshBlendShapeIndex> EyeBlinkRight => throw new System.NotImplementedException();
 
         public void RequestAvatarHeightChange(float targetHeight)
         {

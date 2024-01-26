@@ -153,6 +153,8 @@ namespace Arteranos.PlayTest.Web
 
             Assert.AreEqual(2, am.Eyes.Count);
 
+            Assert.IsNotNull(am.CenterEye);
+
             Assert.IsTrue(am.EyeHeight > 1.725f);
             Assert.IsTrue(am.EyeHeight < 1.726f);
 
@@ -161,6 +163,18 @@ namespace Arteranos.PlayTest.Web
 
             Assert.IsTrue(am.FullHeight > 1.86f);
             Assert.IsTrue(am.FullHeight < 1.87f);
+
+            Assert.AreEqual(1, am.MouthOpen.Count);
+            Assert.IsNotNull(am.MouthOpen[0].Renderer);
+            Assert.IsTrue(am.MouthOpen[0].Index >= 0);
+
+            Assert.AreEqual(1, am.EyeBlinkLeft.Count);
+            Assert.IsNotNull(am.EyeBlinkLeft[0].Renderer);
+            Assert.IsTrue(am.EyeBlinkLeft[0].Index >= 0);
+
+            Assert.AreEqual(1, am.EyeBlinkRight.Count);
+            Assert.IsNotNull(am.EyeBlinkRight[0].Renderer);
+            Assert.IsTrue(am.EyeBlinkRight[0].Index >= 0);
 
             // yield return new WaitForSeconds(5);
             // yield return UnityPAK();

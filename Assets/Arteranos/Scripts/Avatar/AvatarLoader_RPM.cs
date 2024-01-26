@@ -50,7 +50,8 @@ namespace Arteranos.Avatar
 
         public List<MeshBlendShapeIndex> MouthOpen { get; private set; }
         public List<Transform> Eyes { get; private set; }
-        public List<MeshBlendShapeIndex> EyeBlink { get; private set; }
+        public List<MeshBlendShapeIndex> EyeBlinkLeft { get; private set; }
+        public List<MeshBlendShapeIndex> EyeBlinkRight { get; private set; }
 
         public bool Invisible
         {

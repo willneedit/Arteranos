@@ -56,7 +56,8 @@ namespace Arteranos.Core.Operations
         Transform RightHand { get; }
         List<MeshBlendShapeIndex> MouthOpen { get; } // Blend shape(s) to make the mouth opeen
         List<Transform> Eyes { get; } // The eyes to roll/move
-        List<MeshBlendShapeIndex> EyeBlink { get; } // Blend shape(s) to make the eye(s) closed
+        List<MeshBlendShapeIndex> EyeBlinkLeft { get; } // Blend shape(s) to make the eye(s) closed
+        List<MeshBlendShapeIndex> EyeBlinkRight { get; } // Blend shape(s) to make the eye(s) closed
     }
 
     internal class AssetDownloaderContext : Context, IAssetDownloaderContext
@@ -94,7 +95,8 @@ namespace Arteranos.Core.Operations
 
         public List<MeshBlendShapeIndex> MouthOpen { get; set; }
         public List<Transform> Eyes { get; set; }
-        public List<MeshBlendShapeIndex> EyeBlink { get; set; }
+        public List<MeshBlendShapeIndex> EyeBlinkLeft { get; set; }
+        public List<MeshBlendShapeIndex> EyeBlinkRight { get; set; }
 
         public List<string> JointNames { get; set; } // Bone names to use the network IK transmission
         public int Count { get; set; }

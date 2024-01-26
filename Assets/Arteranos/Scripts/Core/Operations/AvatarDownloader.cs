@@ -29,6 +29,53 @@ namespace Arteranos.Core.Operations
         public float Rating { get; set; }
     }
 
+    internal class FindBlendShapesOp : IAsyncOperation<Context>
+    {
+        private const string MOUTH_OPEN_BLEND_SHAPE_NAME = "mouthOpen";
+        private const string EYE_BLINK_LEFT_BLEND_SHAPE_NAME = "eyeBlinkLeft";
+        private const string EYE_BLINK_RIGHT_BLEND_SHAPE_NAME = "eyeBlinkRight";
+
+
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 0.01f;
+        public string Caption { get; set; } = "Getting Blend Shapes";
+
+        public Action<float> ProgressChanged { get; set; }
+
+        public Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            AvatarDownloaderContext context = _context as AvatarDownloaderContext;
+
+            Transform avatarTransform = context.Avatar.transform;
+
+            context.MouthOpen = new();
+            FindBlendShapedMeshes(avatarTransform, MOUTH_OPEN_BLEND_SHAPE_NAME, context.MouthOpen);
+
+            context.EyeBlinkLeft = new();
+            FindBlendShapedMeshes(avatarTransform, EYE_BLINK_LEFT_BLEND_SHAPE_NAME, context.EyeBlinkLeft);
+
+            context.EyeBlinkRight = new();
+            FindBlendShapedMeshes(avatarTransform, EYE_BLINK_RIGHT_BLEND_SHAPE_NAME, context.EyeBlinkRight);
+
+            return Task.FromResult<Context>(context);
+        }
+
+        public void FindBlendShapedMeshes(Transform t, string whichBlendShape, List<MeshBlendShapeIndex> collected)
+        {
+            SkinnedMeshRenderer[] meshes = t.gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+            foreach(SkinnedMeshRenderer mesh in meshes)
+            {
+                int index = mesh.sharedMesh.GetBlendShapeIndex(whichBlendShape);
+                if (index >= 0)
+                    collected.Add(new()
+                    {
+                        Index = index,
+                        Renderer = mesh,
+                    });
+            }
+        }
+    }
+
     internal class MeasureSkeletonOp : IAsyncOperation<Context>
     {
         private const string BONE_ARMATURE = "Armature";
@@ -94,15 +141,24 @@ namespace Arteranos.Core.Operations
             if(FeetCount > 0) FootElevation = FootElevation / FeetCount;
             context.FootElevation = FootElevation;
 
-            // Same as with the eyes. They *should* be in the same height....
-            float EyeHeight = 0.0f;
-            foreach (Transform t in context.Eyes) EyeHeight += t.position.y;
-            if(context.Eyes.Count > 0) EyeHeight = EyeHeight / context.Eyes.Count;
-            context.EyeHeight = EyeHeight;
-
             // Maybe I had to look for the way to get the bounding box.
             context.FullHeight = FoldTransformHierarchy(avatarTransform, 0.0f, 
                 (t, f) => t.position.y > f ? t.position.y : f);
+
+            // The Avatar Point Of View. Between the eyes, but not if the avatar breakdancing...
+            Vector3 centerEyePos = Vector3.zero;
+            foreach (Transform t in context.Eyes) centerEyePos += t.position;
+            GameObject cEyeGO = new("Avatar_POV");
+            if (context.Eyes.Count > 0)
+                centerEyePos = centerEyePos / context.Eyes.Count;
+            cEyeGO.transform.parent = avatarTransform;
+            cEyeGO.transform.position = centerEyePos;
+            context.CenterEye = cEyeGO.transform;
+            context.EyeHeight = context.CenterEye.position.y;
+
+            // The hand rotation offset. T-pose needs to palms down.
+            context.LhrOffset = Quaternion.Euler(0, 90, 90);
+            context.RhrOffset = Quaternion.Euler(0, -90, -90);
 
             // Get the overall rating about the avatar
             Utils.RateGameObject(context.Avatar, warningLevels, errorLevels, context);
@@ -191,6 +247,7 @@ namespace Arteranos.Core.Operations
                 new AssetDownloadOp(),
                 new SetupAvatarObjOp(),
                 new MeasureSkeletonOp(),
+                new FindBlendShapesOp(),
             })
             { Timeout = timeout };
 
