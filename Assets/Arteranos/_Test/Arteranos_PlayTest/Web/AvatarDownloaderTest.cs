@@ -12,14 +12,14 @@ using Ipfs;
 using Arteranos.Web;
 using Arteranos.Core.Operations;
 using System;
+using Arteranos.Avatar;
 
 namespace Arteranos.PlayTest.Web
 {
     public class AvatarDownloaderTest
     {
-        private const string PlainFileAsset = "Assets/Arteranos/_Test/Iwontsay.glb";
-        private string FileURLAsset => $"file:///{PlainFileAsset}";
-        private string QuotedFileAsset => $"\"{PlainFileAsset}\"";
+        private const string Asset_iws = "file:///Assets/Arteranos/_Test/Iwontsay.glb";
+        private const string Asset_sarah = "file:///Assets/Arteranos/_Test/Sarah.glb";
 
 
         IPFSServiceImpl srv = null;
@@ -74,7 +74,7 @@ namespace Arteranos.PlayTest.Web
         private async Task UploadTestAvatar()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AssetUploader.PrepareUploadToIPFS(FileURLAsset);
+                AssetUploader.PrepareUploadToIPFS(Asset_iws);
 
             await ao.ExecuteAsync(co);
 
@@ -117,7 +117,7 @@ namespace Arteranos.PlayTest.Web
         }
 
         [UnityTest]
-        public IEnumerator AvatarDownloadAsync()
+        public IEnumerator AvatarDownload()
         {
             Assert.IsNotNull(AvatarCid);
 
@@ -176,7 +176,30 @@ namespace Arteranos.PlayTest.Web
             Assert.IsNotNull(am.EyeBlinkRight[0].Renderer);
             Assert.IsTrue(am.EyeBlinkRight[0].Index >= 0);
 
+            Assert.IsNull(avatar.GetComponent<AvatarEyeAnimator>());
+
             // yield return new WaitForSeconds(5);
+            // yield return UnityPAK();
+        }
+
+        [UnityTest]
+        public IEnumerator InstallAvatarEyeAnimator()
+        {
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                {
+                    InstallEyeAnimation = true
+                });
+
+            Task t = ao.ExecuteAsync(co);
+
+            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar.SetActive(true);
+
+            Assert.IsNotNull(avatar.GetComponent<AvatarEyeAnimator>());
+
             // yield return UnityPAK();
         }
     }

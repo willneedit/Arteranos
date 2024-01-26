@@ -17,6 +17,7 @@ using Ipfs;
 using GLTFast;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Arteranos.Avatar;
 
 namespace Arteranos.Core.Operations
 {
@@ -27,6 +28,29 @@ namespace Arteranos.Core.Operations
         public int Triangles { get; set; }
         public int Materials { get; set; }
         public float Rating { get; set; }
+    }
+
+    internal class InstallEyeAnimationOp : IAsyncOperation<Context>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 0.01f;
+
+        public string Caption { get; set; } = "Installing the eye animation handler";
+
+        public Action<float> ProgressChanged { get; set; }
+
+        public Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            AvatarDownloaderContext context = _context as AvatarDownloaderContext;
+
+            if(context.InstallEyeAnimation)
+            {
+                AvatarEyeAnimator a = context.Avatar.AddComponent<AvatarEyeAnimator>();
+                a.AvatarMeasures = context;
+            }
+
+            return Task.FromResult<Context>(context);
+        }
     }
 
     internal class FindBlendShapesOp : IAsyncOperation<Context>
@@ -234,12 +258,15 @@ namespace Arteranos.Core.Operations
     
     public static class AvatarDownloader
     {
-        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadAvatar(Cid cid, int timeout = 600)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadAvatar(Cid cid, IAvatarDownloaderOptions options = null, int timeout = 600)
         {
             AvatarDownloaderContext context = new()
             {
                 Cid = cid,
                 TargetFile = GetAvatarCacheFile(cid),
+
+                InstallAvatarController = options?.InstallAvatarController ?? false,
+                InstallEyeAnimation = options?.InstallEyeAnimation ?? false,
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
@@ -248,6 +275,7 @@ namespace Arteranos.Core.Operations
                 new SetupAvatarObjOp(),
                 new MeasureSkeletonOp(),
                 new FindBlendShapesOp(),
+                new InstallEyeAnimationOp(),
             })
             { Timeout = timeout };
 

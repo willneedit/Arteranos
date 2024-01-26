@@ -73,11 +73,27 @@ namespace Arteranos.Core.Operations
         public string worldAssetBundleFile = null;
     }
 
-    internal class AvatarDownloaderContext : AssetDownloaderContext, IAvatarMeasures, IObjectStats
+    public interface IAvatarDownloaderOptions
     {
-        public GameObject Avatar { get; set; } = null;
-        public bool? SidedCapitalized { get; set; } = null; // 'left' or 'Left' ?
-        public int SidedPatternIndex { get; set; } = -1;
+        bool InstallEyeAnimation { get; set; }
+        bool InstallAvatarController { get; set; }
+    }
+
+    public class AvatarDownloaderOptions : IAvatarDownloaderOptions
+    {
+        public bool InstallEyeAnimation { get; set; }
+        public bool InstallAvatarController { get; set; }
+    }
+
+    internal class AvatarDownloaderContext : AssetDownloaderContext, IAvatarDownloaderOptions, IAvatarMeasures, IObjectStats
+    {
+        public bool InstallEyeAnimation { get; set; } = false;
+        public bool InstallAvatarController { get; set; } = false;
+
+        public GameObject Avatar = null;
+        public bool? SidedCapitalized = null; // 'left' or 'Left' ?
+        public int SidedPatternIndex = -1;
+
         public Transform LeftHand { get; set; } = null;
         public Transform RightHand { get; set; } = null;
         public Transform LeftFoot { get; set; } = null;
