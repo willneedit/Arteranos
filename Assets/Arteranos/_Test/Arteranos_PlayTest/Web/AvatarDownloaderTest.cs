@@ -32,7 +32,6 @@ namespace Arteranos.PlayTest.Web
         [UnitySetUp]
         public IEnumerator SetupIPFS()
         {
-            Debug.Log("UnitySetup begin");
             SetupScene();
 
             GameObject go1 = new("SettingsManager");
@@ -56,9 +55,6 @@ namespace Arteranos.PlayTest.Web
 
                 await t;
             }).Wait();
-
-            Debug.Log("UnitySetup end");
-
         }
 
         private void SetupScene()
@@ -90,8 +86,6 @@ namespace Arteranos.PlayTest.Web
         [UnityTearDown]
         public IEnumerator TeardownIPFS()
         {
-            Debug.Log("UnityTeardown begin");
-
             if (AvatarCid != null)
             {
                 ipfs.Block.RemoveAsync(AvatarCid).Wait();
@@ -115,8 +109,6 @@ namespace Arteranos.PlayTest.Web
             GameObject.Destroy(li.gameObject);
 
             yield return new WaitForSeconds(1);
-
-            Debug.Log("UnityTeardown end");
         }
 
         public IEnumerator UnityPAK()
@@ -160,6 +152,7 @@ namespace Arteranos.PlayTest.Web
             Assert.AreEqual("RightHand", am.RightHand.name);
             Assert.AreEqual("LeftFoot", am.LeftFoot.name);
             Assert.AreEqual("RightFoot", am.RightFoot.name);
+            Assert.AreEqual("Head", am.Head.name);
 
             Assert.AreEqual(2, am.Eyes.Count);
 
@@ -186,6 +179,7 @@ namespace Arteranos.PlayTest.Web
             Assert.IsNotNull(am.EyeBlinkRight[0].Renderer);
             Assert.IsTrue(am.EyeBlinkRight[0].Index >= 0);
 
+
             Assert.IsNull(avatar.GetComponent<AvatarEyeAnimator>());
 
             // yield return new WaitForSeconds(5);
@@ -210,6 +204,29 @@ namespace Arteranos.PlayTest.Web
 
             Assert.IsNotNull(avatar.GetComponent<AvatarEyeAnimator>());
 
+            // yield return UnityPAK();
+        }
+
+        [UnityTest]
+        public IEnumerator InstallIK()
+        {
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                {
+                    InstallFootIK = true,
+                    InstallHandIK = true
+                });
+
+            Task t = ao.ExecuteAsync(co);
+
+            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar.SetActive(true);
+
+            IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
+
+            Assert.AreEqual(12, am.JointNames.Count);
             // yield return UnityPAK();
         }
     }

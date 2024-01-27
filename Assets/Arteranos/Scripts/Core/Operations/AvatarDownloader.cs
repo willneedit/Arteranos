@@ -18,6 +18,7 @@ using GLTFast;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Arteranos.Avatar;
+using DitzelGames.FastIK;
 
 namespace Arteranos.Core.Operations
 {
@@ -30,13 +31,77 @@ namespace Arteranos.Core.Operations
         public float Rating { get; set; }
     }
 
+    internal class InstallIKHandlers : IAsyncOperation<Context>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 0.01f;
+        public string Caption { get; set; } = "Installing IK handlers";
+        public Action<float> ProgressChanged { get; set; }
+
+        public Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            AvatarDownloaderContext context = _context as AvatarDownloaderContext;
+
+            Transform avatarTransform = context.Avatar.transform;
+
+            context.JointNames = new();
+
+            if(context.InstallFootIK)
+            {
+                // Knees are _in front of_ the body. We aren't ostriches...
+                RigIK(context.LeftFoot, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
+                RigIK(context.RightFoot, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
+            }
+
+            if(context.InstallHandIK)
+            {
+                RigIK(context.LeftHand, avatarTransform, context.JointNames);
+                RigIK(context.RightHand, avatarTransform, context.JointNames);
+            }
+
+            return Task.FromResult<Context>(context);
+        }
+
+        private void RigIK(Transform limb, Transform at, List<string> jointNames, Vector3? poleOffset = null, int bones = 2)
+        {
+            if (!limb) return;
+
+            Transform pole = null;
+
+            if(poleOffset != null)
+            {
+                pole = new GameObject($"Pole_{limb}").transform;
+                pole.SetPositionAndRotation(
+                    limb.position + at.rotation * poleOffset.Value,
+                    limb.rotation);
+                pole.SetParent(at);
+            }
+
+            Transform handle = new GameObject($"Handle_{limb}").transform;
+            handle.SetPositionAndRotation(limb.position, limb.rotation);
+            handle.SetParent(at);
+
+            FastIKFabric limbIK = limb.gameObject.AddComponent<FastIKFabric>();
+
+            limbIK.ChainLength = bones;
+            limbIK.Target = handle;
+            limbIK.Pole = pole;
+
+            // For Network IK, note down all of the affected joints
+            Transform bone = limb;
+            for (int i = 0; i <= bones; i++)
+            {
+                jointNames.Add(bone.name);
+                bone = bone.parent;
+            }
+        }
+    }
+
     internal class InstallEyeAnimationOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 0.01f;
-
         public string Caption { get; set; } = "Installing the eye animation handler";
-
         public Action<float> ProgressChanged { get; set; }
 
         public Task<Context> ExecuteAsync(Context _context, CancellationToken token)
@@ -141,6 +206,8 @@ namespace Arteranos.Core.Operations
             context.RightFoot = AvatarDownloader.TrySidedLimb(context, "Foot", true);
             context.LeftHand = AvatarDownloader.TrySidedLimb(context, "Hand", false);
             context.RightHand = AvatarDownloader.TrySidedLimb(context, "Hand", true);
+
+            context.Head = avatarTransform.FindRecursive("Head");
 
             // Find the eyes (usually two ... :)
             context.Eyes = new();
@@ -267,6 +334,8 @@ namespace Arteranos.Core.Operations
 
                 InstallAvatarController = options?.InstallAvatarController ?? false,
                 InstallEyeAnimation = options?.InstallEyeAnimation ?? false,
+                InstallFootIK = options?.InstallFootIK ?? false,
+                InstallHandIK = options?.InstallHandIK ?? false,
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
@@ -276,6 +345,7 @@ namespace Arteranos.Core.Operations
                 new MeasureSkeletonOp(),
                 new FindBlendShapesOp(),
                 new InstallEyeAnimationOp(),
+                new InstallIKHandlers(),
             })
             { Timeout = timeout };
 

@@ -53,6 +53,8 @@ namespace Arteranos
 
         public List<MeshBlendShapeIndex> EyeBlinkRight => throw new System.NotImplementedException();
 
+        public List<string> JointNames { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
         public void RequestAvatarHeightChange(float targetHeight)
         {
             throw new System.NotImplementedException();

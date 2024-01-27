@@ -54,6 +54,7 @@ namespace Arteranos.Core.Operations
         Quaternion RhrOffset { get; }
         Transform RightFoot { get; }
         Transform RightHand { get; }
+        List<string> JointNames { get; set; }
         List<MeshBlendShapeIndex> MouthOpen { get; } // Blend shape(s) to make the mouth opeen
         List<Transform> Eyes { get; } // The eyes to roll/move
         List<MeshBlendShapeIndex> EyeBlinkLeft { get; } // Blend shape(s) to make the eye(s) closed
@@ -77,18 +78,24 @@ namespace Arteranos.Core.Operations
     {
         bool InstallEyeAnimation { get; set; }
         bool InstallAvatarController { get; set; }
+        bool InstallFootIK { get; set; }
+        bool InstallHandIK { get; set; }
     }
 
     public class AvatarDownloaderOptions : IAvatarDownloaderOptions
     {
         public bool InstallEyeAnimation { get; set; }
         public bool InstallAvatarController { get; set; }
+        public bool InstallFootIK { get; set; }
+        public bool InstallHandIK { get; set; }
     }
 
     internal class AvatarDownloaderContext : AssetDownloaderContext, IAvatarDownloaderOptions, IAvatarMeasures, IObjectStats
     {
         public bool InstallEyeAnimation { get; set; } = false;
         public bool InstallAvatarController { get; set; } = false;
+        public bool InstallFootIK { get; set; } = false;
+        public bool InstallHandIK { get; set; } = false;
 
         public GameObject Avatar = null;
         public bool? SidedCapitalized = null; // 'left' or 'Left' ?

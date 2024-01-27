@@ -48,6 +48,7 @@ namespace Arteranos.Avatar
         public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
         public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
 
+        public List<string> JointNames { get; set; }
         public List<MeshBlendShapeIndex> MouthOpen { get; private set; }
         public List<Transform> Eyes { get; private set; }
         public List<MeshBlendShapeIndex> EyeBlinkLeft { get; private set; }
