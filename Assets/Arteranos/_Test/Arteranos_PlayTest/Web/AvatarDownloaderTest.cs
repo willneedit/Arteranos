@@ -13,13 +13,14 @@ using Arteranos.Web;
 using Arteranos.Core.Operations;
 using System;
 using Arteranos.Avatar;
+using UnityEditor;
+using Object = UnityEngine.Object;
 
 namespace Arteranos.PlayTest.Web
 {
     public class AvatarDownloaderTest
     {
         private const string Asset_iws = "file:///Assets/Arteranos/_Test/Iwontsay.glb";
-        private const string Asset_sarah = "file:///Assets/Arteranos/_Test/Sarah.glb";
 
 
         IPFSServiceImpl srv = null;
@@ -59,14 +60,11 @@ namespace Arteranos.PlayTest.Web
 
         private void SetupScene()
         {
-            GameObject go = new("Camera");
-            go.AddComponent<Camera>();
-            go.transform.position = new(0, 1.75f, -2);
+            Camera go = new GameObject("Camera").AddComponent<Camera>();
+            go.transform.position = new(0, 1, -2);
 
-            GameObject go2 = new("Light");
-            Light li = go2.AddComponent<Light>();
-            go2.transform.position = new(0, 3, 0);
-            go2.transform.rotation = Quaternion.Euler(50, -30, 0);
+            Light li = new GameObject("Light").AddComponent<Light>();
+            li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
             li.type = LightType.Directional;
             li.color = Color.white;
         }
@@ -83,6 +81,14 @@ namespace Arteranos.PlayTest.Web
             Assert.IsNotNull(AvatarCid);
         }
 
+        private GameObject CreateSteppingStone(bool right)
+        {
+            GameObject ob = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/_Test/SteppingStone.prefab");
+            GameObject go = Object.Instantiate(ob);
+            go.transform.position = new(right ? 0.15f : -0.15f, 0);
+            return go;
+        }
+
         [UnityTearDown]
         public IEnumerator TeardownIPFS()
         {
@@ -97,16 +103,16 @@ namespace Arteranos.PlayTest.Web
             self = null;
             AvatarCid = null;
 
-            StartupManagerMock go1 = GameObject.FindObjectOfType<StartupManagerMock>();
-            GameObject.Destroy(go1.gameObject);
+            StartupManagerMock go1 = Object.FindObjectOfType<StartupManagerMock>();
+            Object.Destroy(go1.gameObject);
 
             yield return null;
 
-            Camera ca = GameObject.FindObjectOfType<Camera>();
-            GameObject.Destroy(ca.gameObject);
+            Camera ca = Object.FindObjectOfType<Camera>();
+            Object.Destroy(ca.gameObject);
 
-            Light li = GameObject.FindObjectOfType<Light>();
-            GameObject.Destroy(li.gameObject);
+            Light li = Object.FindObjectOfType<Light>();
+            Object.Destroy(li.gameObject);
 
             yield return new WaitForSeconds(1);
         }
@@ -229,5 +235,34 @@ namespace Arteranos.PlayTest.Web
             Assert.AreEqual(12, am.JointNames.Count);
             // yield return UnityPAK();
         }
+
+        [UnityTest]
+        public IEnumerator TestFootIK()
+        {
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                {
+                    InstallFootIK = true,
+                    InstallHandIK = true
+                });
+
+            Task t = ao.ExecuteAsync(co);
+
+            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar.SetActive(true);
+            avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+
+            GameObject go = CreateSteppingStone(false);
+            yield return new WaitForSeconds(5);
+
+            Object.Destroy(go);
+            go = CreateSteppingStone(true);
+            yield return new WaitForSeconds(5);
+
+            Object.Destroy(go);
+        }
+
     }
 }

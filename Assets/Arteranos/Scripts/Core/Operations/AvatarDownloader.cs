@@ -48,12 +48,20 @@ namespace Arteranos.Core.Operations
 
             if(context.InstallFootIK)
             {
+                Transform footHandle;
+                FootIKCollider footIK;
+
                 // Knees are _in front of_ the body. We aren't ostriches...
-                RigIK(context.LeftFoot, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
-                RigIK(context.RightFoot, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
+                footHandle = RigIK(context.LeftFoot, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
+                footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
+                footIK.AvatarMeasures = context;
+                
+                footHandle = RigIK(context.RightFoot, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
+                footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
+                footIK.AvatarMeasures = context;
             }
 
-            if(context.InstallHandIK)
+            if (context.InstallHandIK)
             {
                 RigIK(context.LeftHand, avatarTransform, context.JointNames);
                 RigIK(context.RightHand, avatarTransform, context.JointNames);
@@ -62,22 +70,22 @@ namespace Arteranos.Core.Operations
             return Task.FromResult<Context>(context);
         }
 
-        private void RigIK(Transform limb, Transform at, List<string> jointNames, Vector3? poleOffset = null, int bones = 2)
+        private Transform RigIK(Transform limb, Transform at, List<string> jointNames, Vector3? poleOffset = null, int bones = 2)
         {
-            if (!limb) return;
+            if (!limb) return null;
 
             Transform pole = null;
 
             if(poleOffset != null)
             {
-                pole = new GameObject($"Pole_{limb}").transform;
+                pole = new GameObject($"Pole_{limb.name}").transform;
                 pole.SetPositionAndRotation(
                     limb.position + at.rotation * poleOffset.Value,
                     limb.rotation);
                 pole.SetParent(at);
             }
 
-            Transform handle = new GameObject($"Handle_{limb}").transform;
+            Transform handle = new GameObject($"Handle_{limb.name}").transform;
             handle.SetPositionAndRotation(limb.position, limb.rotation);
             handle.SetParent(at);
 
@@ -94,6 +102,8 @@ namespace Arteranos.Core.Operations
                 jointNames.Add(bone.name);
                 bone = bone.parent;
             }
+
+            return handle;
         }
     }
 
@@ -169,7 +179,7 @@ namespace Arteranos.Core.Operations
     {
         private const string BONE_ARMATURE = "Armature";
 
-        private readonly ObjectStats warningLevels = new ObjectStats()
+        private readonly ObjectStats warningLevels = new()
         {
             Count = 2,
             Vertices = 12000,
@@ -177,7 +187,7 @@ namespace Arteranos.Core.Operations
             Materials = 2,
         };
 
-        private readonly ObjectStats errorLevels = new ObjectStats()
+        private readonly ObjectStats errorLevels = new()
         {
             Count = 4,
             Vertices = 16000,
@@ -229,7 +239,7 @@ namespace Arteranos.Core.Operations
                 FeetCount++;
             }
 
-            if(FeetCount > 0) FootElevation = FootElevation / FeetCount;
+            if (FeetCount > 0) FootElevation /= FeetCount;
             context.FootElevation = FootElevation;
 
             // Maybe I had to look for the way to get the bounding box.
@@ -241,7 +251,7 @@ namespace Arteranos.Core.Operations
             foreach (Transform t in context.Eyes) centerEyePos += t.position;
             GameObject cEyeGO = new("Avatar_POV");
             if (context.Eyes.Count > 0)
-                centerEyePos = centerEyePos / context.Eyes.Count;
+                centerEyePos /= context.Eyes.Count;
             cEyeGO.transform.parent = avatarTransform;
             cEyeGO.transform.position = centerEyePos;
             context.CenterEye = cEyeGO.transform;
