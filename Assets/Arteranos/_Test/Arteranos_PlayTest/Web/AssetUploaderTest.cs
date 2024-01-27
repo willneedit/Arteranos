@@ -54,7 +54,7 @@ namespace Arteranos.PlayTest.Web
             StartupManagerMock go1 = GameObject.FindObjectOfType<StartupManagerMock>();
             GameObject.Destroy(go1.gameObject);
 
-            yield return null;
+            yield return new WaitForSeconds(1);
         }
 
         [UnityTest]
@@ -209,6 +209,8 @@ namespace Arteranos.PlayTest.Web
         public async Task UploadMissingFileAsync()
         {
             Cid AssetCid = null;
+
+            LogAssert.Expect(LogType.Exception, "FileNotFoundException: Could not find file 'C:\\DoesNotExist.no'.");
 
             try
             {

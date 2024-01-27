@@ -32,6 +32,7 @@ namespace Arteranos.PlayTest.Web
         [UnitySetUp]
         public IEnumerator SetupIPFS()
         {
+            Debug.Log("UnitySetup begin");
             SetupScene();
 
             GameObject go1 = new("SettingsManager");
@@ -55,6 +56,9 @@ namespace Arteranos.PlayTest.Web
 
                 await t;
             }).Wait();
+
+            Debug.Log("UnitySetup end");
+
         }
 
         private void SetupScene()
@@ -86,6 +90,8 @@ namespace Arteranos.PlayTest.Web
         [UnityTearDown]
         public IEnumerator TeardownIPFS()
         {
+            Debug.Log("UnityTeardown begin");
+
             if (AvatarCid != null)
             {
                 ipfs.Block.RemoveAsync(AvatarCid).Wait();
@@ -107,6 +113,10 @@ namespace Arteranos.PlayTest.Web
 
             Light li = GameObject.FindObjectOfType<Light>();
             GameObject.Destroy(li.gameObject);
+
+            yield return new WaitForSeconds(1);
+
+            Debug.Log("UnityTeardown end");
         }
 
         public IEnumerator UnityPAK()

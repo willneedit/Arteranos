@@ -85,7 +85,7 @@ namespace Arteranos.PlayTest.Web
             StartupManagerMock go1 = GameObject.FindObjectOfType<StartupManagerMock>();
             GameObject.Destroy(go1.gameObject);
 
-            yield return null;
+            yield return new WaitForSeconds(1);
         }
 
         [Test]
