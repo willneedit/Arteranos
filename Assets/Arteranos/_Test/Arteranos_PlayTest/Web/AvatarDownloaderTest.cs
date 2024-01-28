@@ -243,6 +243,7 @@ namespace Arteranos.PlayTest.Web
                 AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
                     InstallFootIK = true,
+                    installFootIKCollider = true,
                     InstallHandIK = true
                 });
 

@@ -54,9 +54,12 @@ namespace Arteranos.Core.Operations
                 foreach(FootIKData foot in context.Feet)
                 {
                     footHandle = RigIK(foot.FootTransform, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
-                    footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
-                    footIK.Elevation = foot.Elevation;
-                    footIK.rootTransform = context.Avatar.transform;
+                    if(context.installFootIKCollider)
+                    {
+                        footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
+                        footIK.Elevation = foot.Elevation;
+                        footIK.rootTransform = context.Avatar.transform;
+                    }
                 }
             }
 
@@ -345,6 +348,7 @@ namespace Arteranos.Core.Operations
                 InstallAvatarController = options?.InstallAvatarController ?? false,
                 InstallEyeAnimation = options?.InstallEyeAnimation ?? false,
                 InstallFootIK = options?.InstallFootIK ?? false,
+                installFootIKCollider = options?.installFootIKCollider ?? false,
                 InstallHandIK = options?.InstallHandIK ?? false,
                 DesiredHeight = options?.DesiredHeight ?? 0,
             };
