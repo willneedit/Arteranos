@@ -27,10 +27,16 @@ namespace Arteranos.Core.Operations
         string TargetFile { get; set; }
     }
 
-    public class MeshBlendShapeIndex
+    public struct MeshBlendShapeIndex
     {
-        public SkinnedMeshRenderer Renderer { get; set; } = null;
-        public int Index { get; set; } = -1;
+        public SkinnedMeshRenderer Renderer;
+        public int Index;
+    }
+
+    public struct FootIKData
+    {
+        public Transform FootTransform;
+        public float Elevation;
     }
 
     public interface IObjectStats
@@ -45,18 +51,17 @@ namespace Arteranos.Core.Operations
     {
         Transform CenterEye { get; } // The position, as close as much to match the headset
         float EyeHeight { get; } // Distance of the eyes to the floor
-        float FootElevation { get; } // Close to zero, but with plateau shoes or hooves...
         float FullHeight { get; }
+        float UnscaledHeight { get; } // = FullHeight only with scale = 1
         Transform Head { get; }
-        Transform LeftFoot { get; }
         Transform LeftHand { get; }
         Quaternion LhrOffset { get; }
         Quaternion RhrOffset { get; }
-        Transform RightFoot { get; }
         Transform RightHand { get; }
         List<string> JointNames { get; set; }
-        List<MeshBlendShapeIndex> MouthOpen { get; } // Blend shape(s) to make the mouth opeen
+        List<FootIKData> Feet { get; set; } // The feet to handle with IK
         List<Transform> Eyes { get; } // The eyes to roll/move
+        List<MeshBlendShapeIndex> MouthOpen { get; } // Blend shape(s) to make the mouth opeen
         List<MeshBlendShapeIndex> EyeBlinkLeft { get; } // Blend shape(s) to make the eye(s) closed
         List<MeshBlendShapeIndex> EyeBlinkRight { get; } // Blend shape(s) to make the eye(s) closed
     }
@@ -80,6 +85,7 @@ namespace Arteranos.Core.Operations
         bool InstallAvatarController { get; set; }
         bool InstallFootIK { get; set; }
         bool InstallHandIK { get; set; }
+        float DesiredHeight { get; set; }
     }
 
     public class AvatarDownloaderOptions : IAvatarDownloaderOptions
@@ -88,6 +94,7 @@ namespace Arteranos.Core.Operations
         public bool InstallAvatarController { get; set; }
         public bool InstallFootIK { get; set; }
         public bool InstallHandIK { get; set; }
+        public float DesiredHeight { get; set; }
     }
 
     internal class AvatarDownloaderContext : AssetDownloaderContext, IAvatarDownloaderOptions, IAvatarMeasures, IObjectStats
@@ -96,6 +103,7 @@ namespace Arteranos.Core.Operations
         public bool InstallAvatarController { get; set; } = false;
         public bool InstallFootIK { get; set; } = false;
         public bool InstallHandIK { get; set; } = false;
+        public float DesiredHeight { get; set; } = 0.0f;
 
         public GameObject Avatar = null;
         public bool? SidedCapitalized = null; // 'left' or 'Left' ?
@@ -103,20 +111,18 @@ namespace Arteranos.Core.Operations
 
         public Transform LeftHand { get; set; } = null;
         public Transform RightHand { get; set; } = null;
-        public Transform LeftFoot { get; set; } = null;
-        public Transform RightFoot { get; set; } = null;
-
         public Quaternion LhrOffset { get; set; } = Quaternion.identity;
         public Quaternion RhrOffset { get; set; } = Quaternion.identity;
 
         public Transform CenterEye { get; set; } = null;
         public Transform Head { get; set; } = null;
 
-        public float FootElevation { get; set; }
         public float EyeHeight { get; set; }
         public float FullHeight { get; set; }
+        public float UnscaledHeight { get; set; }
 
         public List<MeshBlendShapeIndex> MouthOpen { get; set; }
+        public List<FootIKData> Feet { get; set; }
         public List<Transform> Eyes { get; set; }
         public List<MeshBlendShapeIndex> EyeBlinkLeft { get; set; }
         public List<MeshBlendShapeIndex> EyeBlinkRight { get; set; }

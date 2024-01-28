@@ -85,23 +85,6 @@ namespace Arteranos.Avatar
         // --------------------------------------------------------------------
         #region Pose updating
 
-        private void AdjustFootIK(Transform foot)
-        {
-            // Everything except Layers 17 and 18 (BubbleFriend and BubbleStranger)
-            int layerMask = ~((1 << 17) | (1 << 18));
-
-            // If the avatar is a midget, he cannot lift his feet half a meter up, so sacle down accordingly.
-            float maxLiftKnees = 0.50f * (m_AvatarData.OriginalFullHeight / m_AvatarData.FullHeight);
-
-            Ray ray = new(foot.position + Vector3.up * maxLiftKnees, Vector3.down);
-
-            if(Physics.SphereCast(ray, m_AvatarData.FootElevation, out RaycastHit hitInfo, 0.50f, layerMask))
-            {
-                foot.SetPositionAndRotation(hitInfo.point + Vector3.up * m_AvatarData.FootElevation,
-                    Quaternion.FromToRotation(Vector3.up, hitInfo.normal) * foot.rotation);
-            }
-        }
-
         public void UpdateOwnPose()
         {
             // VR: Hand and head tracking
@@ -153,18 +136,6 @@ namespace Arteranos.Avatar
                 anim.SetFloat("Walking", moveSpeed.z);
                 anim.SetFloat("SpeedScale", speedScale);
             }
-        }
-
-        public void LateUpdate()
-        {
-            // VR + 2D: Feet IK (only with feet, of course)
-
-            // Edge case: Client disconnected between the Update()'s and LateUpdate().
-            if(m_AvatarData?.LeftFoot)
-                AdjustFootIK(m_AvatarData.LeftFoot);
-
-            if(m_AvatarData?.RightFoot)
-                AdjustFootIK(m_AvatarData.RightFoot);
         }
 
         public void UpdateAlienPose()

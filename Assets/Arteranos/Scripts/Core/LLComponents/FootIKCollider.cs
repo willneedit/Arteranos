@@ -19,7 +19,8 @@ namespace Arteranos.Avatar
     // on the avatar in question...
     public class FootIKCollider : MonoBehaviour
     {
-        public IAvatarMeasures AvatarMeasures = null;
+        public float Elevation = 0;
+        public Transform rootTransform = null;
 
         public void LateUpdate() 
             => AdjustFootIK(transform);
@@ -29,18 +30,20 @@ namespace Arteranos.Avatar
             // Everything except Layers 17 and 18 (BubbleFriend and BubbleStranger)
             int layerMask = ~((1 << 17) | (1 << 18));
 
-            // FIXME Unscaled avatar size in relation
-            // FIXME Custom up vector
+            Vector3 upVector = rootTransform.rotation * Vector3.up;
+            float scale = rootTransform.localScale.y;
+
             // FIXME Maybe with a 'falling' animation would the IK switched off.
-            // If the avatar is a midget, he cannot lift his feet half a meter up, so sacle down accordingly.
-            float maxLiftKnees = 0.50f; // * (AvatarMeasures.OriginalFullHeight / AvatarMeasures.FullHeight);
 
-            Ray ray = new(foot.position + Vector3.up * maxLiftKnees, Vector3.down);
+            // Larger avatars can lift their knees higher than smaller avatars
+            float maxLiftKnees = 0.50f * scale;
 
-            if (Physics.SphereCast(ray, AvatarMeasures.FootElevation, out RaycastHit hitInfo, 0.50f, layerMask))
+            Ray ray = new(foot.position + upVector * maxLiftKnees, -upVector);
+
+            if (Physics.SphereCast(ray, Elevation, out RaycastHit hitInfo, 0.50f, layerMask))
             {
-                foot.SetPositionAndRotation(hitInfo.point + Vector3.up * AvatarMeasures.FootElevation,
-                    Quaternion.FromToRotation(Vector3.up, hitInfo.normal) * foot.rotation);
+                foot.SetPositionAndRotation(hitInfo.point + upVector * Elevation,
+                    Quaternion.FromToRotation(upVector, hitInfo.normal) * foot.rotation);
             }
         }
     }

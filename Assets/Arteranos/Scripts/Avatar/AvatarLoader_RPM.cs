@@ -69,6 +69,10 @@ namespace Arteranos.Avatar
             }
         }
 
+        public List<FootIKData> Feet { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+        public float UnscaledHeight => throw new System.NotImplementedException();
+
         private AvatarBrain avatarBrain = null;
 
         private void Awake() => m_AvatarStandin = Resources.Load<GameObject>("Avatar/Avatar_StandIn");

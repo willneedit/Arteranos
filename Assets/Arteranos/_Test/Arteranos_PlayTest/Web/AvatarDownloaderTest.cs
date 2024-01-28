@@ -156,19 +156,19 @@ namespace Arteranos.PlayTest.Web
 
             Assert.AreEqual("LeftHand", am.LeftHand.name);
             Assert.AreEqual("RightHand", am.RightHand.name);
-            Assert.AreEqual("LeftFoot", am.LeftFoot.name);
-            Assert.AreEqual("RightFoot", am.RightFoot.name);
             Assert.AreEqual("Head", am.Head.name);
 
             Assert.AreEqual(2, am.Eyes.Count);
+
+            Assert.AreEqual(2, am.Feet.Count);
+
+            Assert.IsTrue(am.Feet[0].Elevation > 0.126f);
+            Assert.IsTrue(am.Feet[0].Elevation < 0.127f);
 
             Assert.IsNotNull(am.CenterEye);
 
             Assert.IsTrue(am.EyeHeight > 1.725f);
             Assert.IsTrue(am.EyeHeight < 1.726f);
-
-            Assert.IsTrue(am.FootElevation > 0.126f);
-            Assert.IsTrue(am.FootElevation < 0.127f);
 
             Assert.IsTrue(am.FullHeight > 1.86f);
             Assert.IsTrue(am.FullHeight < 1.87f);
@@ -264,5 +264,40 @@ namespace Arteranos.PlayTest.Web
             Object.Destroy(go);
         }
 
+
+        [UnityTest]
+        public IEnumerator ScaleAvatar()
+        {
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                {
+                    DesiredHeight = 0.50f
+                });
+
+            Task t = ao.ExecuteAsync(co);
+
+            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar.SetActive(true);
+            avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+
+            IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
+
+            Assert.IsTrue(am.FullHeight > 0.499f);
+            Assert.IsTrue(am.FullHeight < 0.501f);
+
+            Assert.IsTrue(am.UnscaledHeight > 1.86f);
+            Assert.IsTrue(am.UnscaledHeight < 1.87f);
+
+            Transform transform = avatar.transform;
+
+            Assert.IsTrue(transform.localScale.x < 0.27f);
+            Assert.IsTrue(transform.localScale.y < 0.27f);
+            Assert.IsTrue(transform.localScale.z < 0.27f);
+
+            Assert.IsTrue(am.Feet[0].Elevation > 0.126f * transform.localScale.x);
+            Assert.IsTrue(am.Feet[0].Elevation < 0.127f * transform.localScale.x);
+        }
     }
 }

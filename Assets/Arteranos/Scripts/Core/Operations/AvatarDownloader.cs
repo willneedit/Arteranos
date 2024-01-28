@@ -51,14 +51,13 @@ namespace Arteranos.Core.Operations
                 Transform footHandle;
                 FootIKCollider footIK;
 
-                // Knees are _in front of_ the body. We aren't ostriches...
-                footHandle = RigIK(context.LeftFoot, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
-                footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
-                footIK.AvatarMeasures = context;
-                
-                footHandle = RigIK(context.RightFoot, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
-                footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
-                footIK.AvatarMeasures = context;
+                foreach(FootIKData foot in context.Feet)
+                {
+                    footHandle = RigIK(foot.FootTransform, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
+                    footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
+                    footIK.Elevation = foot.Elevation;
+                    footIK.rootTransform = context.Avatar.transform;
+                }
             }
 
             if (context.InstallHandIK)
@@ -208,43 +207,44 @@ namespace Arteranos.Core.Operations
 
             Transform avatarTransform = context.Avatar.transform;
 
+            // Maybe I had to look for the way to get the bounding box.
+            context.UnscaledHeight = FoldTransformHierarchy(avatarTransform, 0.0f,
+                (t, f) => t.position.y > f ? t.position.y : f);
+
+            if(context.DesiredHeight != 0 && context.UnscaledHeight > 0)
+            {
+                // Scale up (or down) the avatar to the desired height before
+                // to do the measuring.
+                float scale = context.DesiredHeight / context.UnscaledHeight;
+                avatarTransform.localScale = new Vector3(scale, scale, scale);
+                context.FullHeight = FoldTransformHierarchy(avatarTransform, 0.0f,
+                    (t, f) => t.position.y > f ? t.position.y : f);
+            }
+            else
+                context.FullHeight = context.UnscaledHeight;
+
             // Pull up the other children besides the bones in the hierarchy root
             PullupMeshes(avatarTransform);
 
             // Try to find the IK relevant limbs
-            context.LeftFoot = AvatarDownloader.TrySidedLimb(context, "Foot", false);
-            context.RightFoot = AvatarDownloader.TrySidedLimb(context, "Foot", true);
             context.LeftHand = AvatarDownloader.TrySidedLimb(context, "Hand", false);
             context.RightHand = AvatarDownloader.TrySidedLimb(context, "Hand", true);
 
             context.Head = avatarTransform.FindRecursive("Head");
 
+            context.Feet = new();
+            List<Transform> feetTransforms = new();
+            FindLimbsPattern(avatarTransform, "(.*Foot|Foot.*)", feetTransforms);
+            foreach (Transform transform in feetTransforms)
+                context.Feet.Add(new()
+                {
+                    FootTransform = transform,
+                    Elevation = transform.position.y
+                });
+
             // Find the eyes (usually two ... :)
             context.Eyes = new();
             FindLimbsPattern(avatarTransform, "(.*Eye|Eye.*)", context.Eyes);
-
-            // How far the feet joints are lifted from the ground (like, the soles)
-            float FootElevation = 0.0f;
-            int FeetCount = 0;
-
-            if(context.LeftFoot)
-            {
-                FootElevation += context.LeftFoot.position.y;
-                FeetCount++;
-            }
-
-            if(context.RightFoot)
-            {
-                FootElevation += context.RightFoot.position.y;
-                FeetCount++;
-            }
-
-            if (FeetCount > 0) FootElevation /= FeetCount;
-            context.FootElevation = FootElevation;
-
-            // Maybe I had to look for the way to get the bounding box.
-            context.FullHeight = FoldTransformHierarchy(avatarTransform, 0.0f, 
-                (t, f) => t.position.y > f ? t.position.y : f);
 
             // The Avatar Point Of View. Between the eyes, but not if the avatar breakdancing...
             Vector3 centerEyePos = Vector3.zero;
@@ -346,6 +346,7 @@ namespace Arteranos.Core.Operations
                 InstallEyeAnimation = options?.InstallEyeAnimation ?? false,
                 InstallFootIK = options?.InstallFootIK ?? false,
                 InstallHandIK = options?.InstallHandIK ?? false,
+                DesiredHeight = options?.DesiredHeight ?? 0,
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
