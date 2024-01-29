@@ -58,15 +58,22 @@ namespace Arteranos.PlayTest.Web
             }).Wait();
         }
 
+        Camera ca = null;
+        Light li = null;
+        GameObject pl = null;
+
         private void SetupScene()
         {
-            Camera go = new GameObject("Camera").AddComponent<Camera>();
-            go.transform.position = new(0, 1, -2);
+            ca = new GameObject("Camera").AddComponent<Camera>();
+            ca.transform.position = new(0, 1, -2);
 
-            Light li = new GameObject("Light").AddComponent<Light>();
+            li = new GameObject("Light").AddComponent<Light>();
             li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
             li.type = LightType.Directional;
             li.color = Color.white;
+
+            GameObject bpl = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/_Test/Plane.prefab");
+            pl = Object.Instantiate(bpl);
         }
 
         private async Task UploadTestAvatar()
@@ -85,9 +92,10 @@ namespace Arteranos.PlayTest.Web
         {
             GameObject ob = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/_Test/SteppingStone.prefab");
             GameObject go = Object.Instantiate(ob);
-            go.transform.position = new(right ? 0.15f : -0.15f, 0);
+            go.transform.position = new(right ? 0.20f : -0.20f, 0);
             return go;
         }
+
 
         [UnityTearDown]
         public IEnumerator TeardownIPFS()
@@ -108,12 +116,9 @@ namespace Arteranos.PlayTest.Web
 
             yield return null;
 
-            Camera ca = Object.FindObjectOfType<Camera>();
             Object.Destroy(ca.gameObject);
-
-            Light li = Object.FindObjectOfType<Light>();
             Object.Destroy(li.gameObject);
-
+            Object.Destroy(pl);
             yield return new WaitForSeconds(1);
         }
 
@@ -243,7 +248,7 @@ namespace Arteranos.PlayTest.Web
                 AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
                     InstallFootIK = true,
-                    installFootIKCollider = true,
+                    InstallFootIKCollider = true,
                     InstallHandIK = true
                 });
 
@@ -299,6 +304,86 @@ namespace Arteranos.PlayTest.Web
 
             Assert.IsTrue(am.Feet[0].Elevation > 0.126f * transform.localScale.x);
             Assert.IsTrue(am.Feet[0].Elevation < 0.127f * transform.localScale.x);
+        }
+
+        [UnityTest]
+        public IEnumerator AnimateAvatar()
+        {
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                {
+                    InstallAnimController = 1
+                });
+
+            Task t = ao.ExecuteAsync(co);
+
+            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar.SetActive(true);
+            avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+
+            Animator animator = avatar.GetComponent<Animator>();
+
+            Assert.IsNotNull(animator);
+
+            yield return new WaitForSeconds(2);
+
+            animator.SetInteger("IntWalkFrontBack", 1);
+            yield return new WaitForSeconds(5);
+
+            animator.SetInteger("IntWalkFrontBack", 0);
+            yield return new WaitForSeconds(2);
+
+            animator.SetInteger("IntWalkFrontBack", -1);
+            yield return new WaitForSeconds(5);
+
+            animator.SetInteger("IntWalkFrontBack", 0);
+            yield return new WaitForSeconds(2);
+
+            animator.SetInteger("IntWalkLeftRight", 1);
+            yield return new WaitForSeconds(5);
+
+            animator.SetInteger("IntWalkLeftRight", 0);
+            yield return new WaitForSeconds(2);
+
+            animator.SetInteger("IntWalkLeftRight", -1);
+            yield return new WaitForSeconds(5);
+
+            animator.SetInteger("IntWalkLeftRight", 0);
+            yield return new WaitForSeconds(2);
+        }
+        [UnityTest]
+        public IEnumerator AnimateIKAvatar()
+        {
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                {
+                    InstallFootIK = true,
+                    InstallFootIKCollider = true,
+                    InstallAnimController = 1
+                });
+
+            Task t = ao.ExecuteAsync(co);
+
+            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar.SetActive(true);
+            avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+
+            Animator animator = avatar.GetComponent<Animator>();
+
+            Assert.IsNotNull(animator);
+
+            animator.SetInteger("IntWalkFrontBack", 1);
+
+            yield return new WaitForSeconds(5);
+            GameObject go = CreateSteppingStone(false);
+            yield return new WaitForSeconds(5);
+
+            Object.Destroy(go);
+            // yield return UnityPAK();
         }
     }
 }

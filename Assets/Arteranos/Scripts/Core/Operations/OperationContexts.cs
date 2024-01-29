@@ -82,9 +82,9 @@ namespace Arteranos.Core.Operations
     public interface IAvatarDownloaderOptions
     {
         bool InstallEyeAnimation { get; set; }
-        bool InstallAvatarController { get; set; }
+        int InstallAnimController { get; set; }
         bool InstallFootIK { get; set; }
-        bool installFootIKCollider { get; set; }
+        bool InstallFootIKCollider { get; set; }
         bool InstallHandIK { get; set; }
         float DesiredHeight { get; set; }
     }
@@ -92,9 +92,9 @@ namespace Arteranos.Core.Operations
     public class AvatarDownloaderOptions : IAvatarDownloaderOptions
     {
         public bool InstallEyeAnimation { get; set; }
-        public bool InstallAvatarController { get; set; }
+        public int InstallAnimController { get; set; }
         public bool InstallFootIK { get; set; }
-        public bool installFootIKCollider { get; set; }
+        public bool InstallFootIKCollider { get; set; }
         public bool InstallHandIK { get; set; }
         public float DesiredHeight { get; set; }
     }
@@ -102,9 +102,9 @@ namespace Arteranos.Core.Operations
     internal class AvatarDownloaderContext : AssetDownloaderContext, IAvatarDownloaderOptions, IAvatarMeasures, IObjectStats
     {
         public bool InstallEyeAnimation { get; set; } = false;
-        public bool InstallAvatarController { get; set; } = false;
+        public int InstallAnimController { get; set; } = 0;
         public bool InstallFootIK { get; set; } = false;
-        public bool installFootIKCollider { get; set; } = false;
+        public bool InstallFootIKCollider { get; set; } = false;
         public bool InstallHandIK { get; set; } = false;
         public float DesiredHeight { get; set; } = 0.0f;
 

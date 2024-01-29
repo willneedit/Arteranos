@@ -31,6 +31,36 @@ namespace Arteranos.Core.Operations
         public float Rating { get; set; }
     }
 
+    internal class InstallAnimController : IAsyncOperation<Context>
+    {
+        const string controllerResource = "AvatarAnim/Anims/AvatarAnimationController";
+        const string maleAvatarResource = "AvatarAnim/Anims/RPM_MaleAvatar";
+        const string femaleAvatarResource = "AvatarAnim/Anims/RPM_FemaleAvatar";
+
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 0.01f;
+        public string Caption { get; set; } = "Installing animation controller";
+        public Action<float> ProgressChanged { get; set; }
+
+        public Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            AvatarDownloaderContext context = _context as AvatarDownloaderContext;
+
+            if (context.InstallAnimController != 0)
+            {
+                Animator animator = context.Avatar.AddComponent<Animator>();
+                animator.runtimeAnimatorController = 
+                    Resources.Load<RuntimeAnimatorController>(controllerResource);
+                animator.avatar = Resources.Load<UnityEngine.Avatar>(
+                    context.InstallAnimController > 0
+                    ? maleAvatarResource
+                    : femaleAvatarResource);
+            }
+
+            return Task.FromResult<Context>(context);
+        }
+    }
+
     internal class InstallIKHandlers : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
@@ -54,11 +84,12 @@ namespace Arteranos.Core.Operations
                 foreach(FootIKData foot in context.Feet)
                 {
                     footHandle = RigIK(foot.FootTransform, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
-                    if(context.installFootIKCollider)
+                    if(context.InstallFootIKCollider)
                     {
                         footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
                         footIK.Elevation = foot.Elevation;
                         footIK.rootTransform = context.Avatar.transform;
+                        footIK.guidedTransform = foot.FootTransform;
                     }
                 }
             }
@@ -345,10 +376,10 @@ namespace Arteranos.Core.Operations
                 Cid = cid,
                 TargetFile = GetAvatarCacheFile(cid),
 
-                InstallAvatarController = options?.InstallAvatarController ?? false,
+                InstallAnimController = options?.InstallAnimController ?? 0,
                 InstallEyeAnimation = options?.InstallEyeAnimation ?? false,
                 InstallFootIK = options?.InstallFootIK ?? false,
-                installFootIKCollider = options?.installFootIKCollider ?? false,
+                InstallFootIKCollider = options?.InstallFootIKCollider ?? false,
                 InstallHandIK = options?.InstallHandIK ?? false,
                 DesiredHeight = options?.DesiredHeight ?? 0,
             };
@@ -361,6 +392,7 @@ namespace Arteranos.Core.Operations
                 new FindBlendShapesOp(),
                 new InstallEyeAnimationOp(),
                 new InstallIKHandlers(),
+                new InstallAnimController()
             })
             { Timeout = timeout };
 
