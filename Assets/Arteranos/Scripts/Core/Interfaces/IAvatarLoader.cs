@@ -5,9 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Core.Operations;
-using System.Collections;
-using UnityEngine;
+using Arteranos.Core;
 
 namespace Arteranos.Avatar
 {

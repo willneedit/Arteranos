@@ -7,9 +7,9 @@
 
 using UnityEngine;
 
-using Arteranos.Core.Operations;
 using Random = UnityEngine.Random;
 using System.Collections;
+using Arteranos.Core;
 
 namespace Arteranos.Avatar
 {

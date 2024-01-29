@@ -291,10 +291,6 @@ namespace Arteranos.Core.Operations
             context.CenterEye = cEyeGO.transform;
             context.EyeHeight = context.CenterEye.position.y;
 
-            // The hand rotation offset. T-pose needs to palms down.
-            context.LhrOffset = Quaternion.Euler(0, 90, 90);
-            context.RhrOffset = Quaternion.Euler(0, -90, -90);
-
             // Get the overall rating about the avatar
             Utils.RateGameObject(context.Avatar, warningLevels, errorLevels, context);
 

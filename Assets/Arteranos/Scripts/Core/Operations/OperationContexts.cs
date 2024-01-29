@@ -5,66 +5,13 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.IO;
-using System.IO.Compression;
-using System.Threading.Tasks;
 using UnityEngine;
 
-using Arteranos.Core;
-using System.Threading;
-using Utils = Arteranos.Core.Utils;
 using Ipfs;
-using Arteranos.Services;
 using System.Collections.Generic;
 
 namespace Arteranos.Core.Operations
 {
-    public interface IAssetDownloaderContext
-    {
-        Cid Cid { get; set; }
-        long Size { get; set; }
-        string TargetFile { get; set; }
-    }
-
-    public struct MeshBlendShapeIndex
-    {
-        public SkinnedMeshRenderer Renderer;
-        public int Index;
-    }
-
-    public struct FootIKData
-    {
-        public Transform FootTransform;
-        public float Elevation;
-    }
-
-    public interface IObjectStats
-    {
-        int Count { get; set; }
-        int Vertices { get; set; }
-        int Triangles { get; set; }
-        int Materials { get; set; }
-        float Rating { get; set; } // Normalized, more is better
-    }
-    public interface IAvatarMeasures
-    {
-        Transform CenterEye { get; } // The position, as close as much to match the headset
-        float EyeHeight { get; } // Distance of the eyes to the floor
-        float FullHeight { get; }
-        float UnscaledHeight { get; } // = FullHeight only with scale = 1
-        Transform Head { get; }
-        Transform LeftHand { get; }
-        Quaternion LhrOffset { get; }
-        Quaternion RhrOffset { get; }
-        Transform RightHand { get; }
-        List<string> JointNames { get; set; }
-        List<FootIKData> Feet { get; set; } // The feet to handle with IK
-        List<Transform> Eyes { get; } // The eyes to roll/move
-        List<MeshBlendShapeIndex> MouthOpen { get; } // Blend shape(s) to make the mouth opeen
-        List<MeshBlendShapeIndex> EyeBlinkLeft { get; } // Blend shape(s) to make the eye(s) closed
-        List<MeshBlendShapeIndex> EyeBlinkRight { get; } // Blend shape(s) to make the eye(s) closed
-    }
 
     internal class AssetDownloaderContext : Context, IAssetDownloaderContext
     {
@@ -114,8 +61,6 @@ namespace Arteranos.Core.Operations
 
         public Transform LeftHand { get; set; } = null;
         public Transform RightHand { get; set; } = null;
-        public Quaternion LhrOffset { get; set; } = Quaternion.identity;
-        public Quaternion RhrOffset { get; set; } = Quaternion.identity;
 
         public Transform CenterEye { get; set; } = null;
         public Transform Head { get; set; } = null;

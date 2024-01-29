@@ -23,6 +23,10 @@ namespace Arteranos.Avatar
         private IAvatarLoader m_AvatarData = null;
         private NetworkPose m_Poser = null;
 
+        // Transpose controller rotations to avatar body rotations
+        public readonly Quaternion LhrOffset = Quaternion.Euler(0, 90, 90);
+        public readonly Quaternion RhrOffset = Quaternion.Euler(0, -90, -90);
+
         public void Awake()
         {
             m_AvatarData = GetComponent<IAvatarLoader>();
@@ -106,14 +110,14 @@ namespace Arteranos.Avatar
                 {
                     m_AvatarData.LeftHand.SetPositionAndRotation(
                             LeftHand.position + cEyeOffset,
-                            LeftHand.rotation * m_AvatarData.LhrOffset);
+                            LeftHand.rotation * LhrOffset);
                 }
 
                 if(RightHand && m_AvatarData.RightHand && ccs.Controller_right)
                 {
                     m_AvatarData.RightHand.SetPositionAndRotation(
                             RightHand.position + cEyeOffset,
-                            RightHand.rotation * m_AvatarData.RhrOffset);
+                            RightHand.rotation * RhrOffset);
                 }
 
                 if(m_AvatarData.Head)

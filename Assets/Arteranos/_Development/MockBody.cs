@@ -8,8 +8,7 @@
 #if UNITY_EDITOR
 
 using Arteranos.Avatar;
-using Arteranos.Core.Operations;
-using System.Collections;
+using Arteranos.Core;
 using System.Collections.Generic;
 using UnityEngine;
 
