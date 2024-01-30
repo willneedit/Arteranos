@@ -33,9 +33,9 @@ namespace Arteranos.Core.Operations
 
     internal class InstallAnimController : IAsyncOperation<Context>
     {
-        const string controllerResource = "AvatarAnim/Anims/AvatarAnimationController";
-        const string maleAvatarResource = "AvatarAnim/Anims/RPM_MaleAvatar";
-        const string femaleAvatarResource = "AvatarAnim/Anims/RPM_FemaleAvatar";
+        const string controllerResource = "AvatarAnim/AvatarAnimationController";
+        const string maleAvatarResource = "AvatarAnim/RPM_MaleAvatar";
+        const string femaleAvatarResource = "AvatarAnim/RPM_FemaleAvatar";
 
         public int Timeout { get; set; }
         public float Weight { get; set; } = 0.01f;

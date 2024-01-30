@@ -49,8 +49,8 @@ namespace Arteranos.Core
         Transform Head { get; }
         Transform LeftHand { get; }
         Transform RightHand { get; }
-        List<string> JointNames { get; set; }
-        List<FootIKData> Feet { get; set; } // The feet to handle with IK
+        List<string> JointNames { get; }
+        List<FootIKData> Feet { get; } // The feet to handle with IK
         List<Transform> Eyes { get; } // The eyes to roll/move
         List<MeshBlendShapeIndex> MouthOpen { get; } // Blend shape(s) to make the mouth opeen
         List<MeshBlendShapeIndex> EyeBlinkLeft { get; } // Blend shape(s) to make the eye(s) closed
