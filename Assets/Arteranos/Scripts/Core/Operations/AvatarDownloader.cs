@@ -365,7 +365,7 @@ namespace Arteranos.Core.Operations
     
     public static class AvatarDownloader
     {
-        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadAvatar(Cid cid, IAvatarDownloaderOptions options = null, int timeout = 600)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadAvatar(Cid cid, AvatarDownloaderOptions options = null, int timeout = 600)
         {
             AvatarDownloaderContext context = new()
             {

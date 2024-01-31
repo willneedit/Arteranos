@@ -9,7 +9,8 @@
         "ipfs.peertalk",
         "Arteranos.Services",
         "Arteranos.Core",
-        "Arteranos.Web"
+        "Arteranos.Web",
+        "Arteranos.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
