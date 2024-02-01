@@ -30,22 +30,22 @@ namespace Arteranos.Avatar
 
         private void Start()
         {
-            StartCoroutine(AnimateEyes());
-        }
-
-        private IEnumerator AnimateEyes()
-        {
-            while(true)
+            IEnumerator AnimateEyes()
             {
-                yield return new WaitForSeconds(Random.Range(blinkIntervalLow, blinkIntervalHigh));
+                while (true)
+                {
+                    yield return new WaitForSeconds(Random.Range(blinkIntervalLow, blinkIntervalHigh));
 
-                SetEyesClosedState(1.0f);
-                RotateEyes();
+                    SetEyesClosedState(1.0f);
+                    RotateEyes();
 
-                yield return new WaitForSeconds(Random.Range(blinkDurationLow, blinkDurationHigh));
+                    yield return new WaitForSeconds(Random.Range(blinkDurationLow, blinkDurationHigh));
 
-                SetEyesClosedState(0.0f);
+                    SetEyesClosedState(0.0f);
+                }
             }
+
+            StartCoroutine(AnimateEyes());
         }
 
         private void SetEyesClosedState(float state)

@@ -140,11 +140,11 @@ namespace Arteranos.Core.Operations
         }
     }
 
-    internal class InstallEyeAnimationOp : IAsyncOperation<Context>
+    internal class InstallAnimationOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 0.01f;
-        public string Caption { get; set; } = "Installing the eye animation handler";
+        public string Caption { get; set; } = "Installing the animation handlers";
         public Action<float> ProgressChanged { get; set; }
 
         public Task<Context> ExecuteAsync(Context _context, CancellationToken token)
@@ -154,6 +154,12 @@ namespace Arteranos.Core.Operations
             if(context.InstallEyeAnimation)
             {
                 AvatarEyeAnimator a = context.Avatar.AddComponent<AvatarEyeAnimator>();
+                a.AvatarMeasures = context;
+            }
+
+            if(context.InstallMouthAnimation)
+            {
+                AvatarMouthAnimator a = context.Avatar.AddComponent<AvatarMouthAnimator>();
                 a.AvatarMeasures = context;
             }
 
@@ -374,6 +380,7 @@ namespace Arteranos.Core.Operations
 
                 InstallAnimController = options?.InstallAnimController ?? 0,
                 InstallEyeAnimation = options?.InstallEyeAnimation ?? false,
+                InstallMouthAnimation = options?.InstallMouthAnimation ?? false,
                 InstallFootIK = options?.InstallFootIK ?? false,
                 InstallFootIKCollider = options?.InstallFootIKCollider ?? false,
                 InstallHandIK = options?.InstallHandIK ?? false,
@@ -386,7 +393,7 @@ namespace Arteranos.Core.Operations
                 new SetupAvatarObjOp(),
                 new MeasureSkeletonOp(),
                 new FindBlendShapesOp(),
-                new InstallEyeAnimationOp(),
+                new InstallAnimationOp(),
                 new InstallIKHandlers(),
                 new InstallAnimController()
             })
