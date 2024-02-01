@@ -45,7 +45,7 @@ namespace Arteranos.Avatar
 
         public bool isOwned => false;
 
-        public IAvatarLoader Body => GetComponent<IAvatarLoader>();
+        public IAvatarBody Body => GetComponent<IAvatarBody>();
 
         public UserID UserID { get; set; } = null;
 

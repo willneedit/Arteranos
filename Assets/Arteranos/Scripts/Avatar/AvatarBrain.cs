@@ -93,7 +93,7 @@ namespace Arteranos.Avatar
                 AppearanceStatus &= ~ASBit;
         }
 
-        public IAvatarLoader Body => GetComponent<IAvatarLoader>();
+        public IAvatarBody Body => GetComponent<IAvatarBody>();
 
         public void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered)
         {
@@ -686,7 +686,7 @@ namespace Arteranos.Avatar
             ps.transform.SetParent(transform, false);
 
             // A little bit 'up' (relative to the user)
-            Vector3 offset = transform.rotation * Vector3.up * (Body.FullHeight * 1.10f);
+            Vector3 offset = transform.rotation * Vector3.up * (Body.AvatarMeasures.FullHeight * 1.10f);
             ps.transform.SetLocalPositionAndRotation(offset, Quaternion.identity);
 
             StartCoroutine(CleanupEmojiPS(ps));

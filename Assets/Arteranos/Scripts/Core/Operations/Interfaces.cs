@@ -42,6 +42,7 @@ namespace Arteranos.Core
 
     public interface IAvatarMeasures
     {
+        GameObject Avatar { get; }
         Transform CenterEye { get; } // The position, as close as much to match the headset
         float EyeHeight { get; } // Distance of the eyes to the floor
         float FullHeight { get; }

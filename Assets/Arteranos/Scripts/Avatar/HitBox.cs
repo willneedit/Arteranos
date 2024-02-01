@@ -49,7 +49,7 @@ namespace Arteranos.Avatar
                 m_PopoutTime = SettingsManager.Client.Controls.NameplateOut;
             }
 
-            if(fullHeight != Brain.Body.FullHeight)
+            if(fullHeight != Brain.Body.AvatarMeasures.FullHeight)
                 UpdateAvatarHeight();
 
             stableDuration += Time.deltaTime;
@@ -81,7 +81,7 @@ namespace Arteranos.Avatar
 
         private void UpdateAvatarHeight()
         {
-            fullHeight = Brain.Body.FullHeight;
+            fullHeight = Brain.Body.AvatarMeasures.FullHeight;
 
             CapsuleCollider[] ccs = GetComponentsInChildren<CapsuleCollider>();
             foreach(CapsuleCollider cc in ccs) 

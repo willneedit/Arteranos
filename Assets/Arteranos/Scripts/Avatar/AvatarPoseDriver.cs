@@ -18,9 +18,11 @@ namespace Arteranos.Avatar
 
     public class AvatarPoseDriver : NetworkBehaviour
     {
-        private Transform LeftHand = null;
-        private Transform RightHand = null;
-        private IAvatarLoader m_AvatarData = null;
+        private Transform Controller_LeftHand = null;
+        private Transform Controller_RightHand = null;
+        private Transform Handle_LeftHand = null;
+        private Transform Handle_RightHand = null;
+        private IAvatarMeasures AvatarMeasures = null;
         private NetworkPose m_Poser = null;
 
         // Transpose controller rotations to avatar body rotations
@@ -29,7 +31,6 @@ namespace Arteranos.Avatar
 
         public void Awake()
         {
-            m_AvatarData = GetComponent<IAvatarLoader>();
             m_Poser = GetComponent<NetworkPose>();
 
             syncDirection = SyncDirection.ServerToClient;
@@ -62,13 +63,13 @@ namespace Arteranos.Avatar
             if(useXR)
             {
                 // In VR, connect the VR hand controllers to the puppet's hands strings.
-                LeftHand = xrot.FindRecursive("LeftHand Controller");
-                RightHand = xrot.FindRecursive("RightHand Controller");
+                Controller_LeftHand = xrot.FindRecursive("LeftHand Controller");
+                Controller_RightHand = xrot.FindRecursive("RightHand Controller");
             }
             else
             {
                 // In 2D, just use the default pose and leave it be.
-                m_AvatarData.ResetPose(true, true);
+                ResetPose(true, true);
             }
 
             // And, move the XR (or 2D) rig to the own avatar's position.
@@ -77,14 +78,44 @@ namespace Arteranos.Avatar
             Physics.SyncTransforms();
         }
 
-        /// <summary>
-        /// Uploads the full set of the joint names. Both owner and alien avatars are
-        /// synced by Replacer, so need not to sync here, too.
-        /// </summary>
-        /// <param name="rootTransform"></param>
-        /// <param name="names">Array of the joint (aka bone) names</param>
-        public void UploadJointNames(Transform rootTransform, string[] names) 
-            => m_Poser.UploadJointNames(rootTransform, names);
+        public void UpdateAvatarMeasures(IAvatarMeasures am)
+        {
+            m_Poser.UploadJointNames(am.Avatar.transform, am.JointNames.ToArray());
+            AvatarMeasures = am;
+
+            Handle_LeftHand = am.Avatar.transform.FindRecursive($"Handle_{am.LeftHand.name}");
+            Handle_RightHand = am.Avatar.transform.FindRecursive($"Handle_{am.RightHand.name}");
+
+            ResetPose(true, true);
+
+            if (isOwned)
+            {
+                IXRControl xrc = XRControl.Instance;
+
+                xrc.EyeHeight = am.EyeHeight;
+                xrc.BodyHeight = am.FullHeight;
+
+                xrc.ReconfigureXRRig();
+            }
+        }
+
+        public void ResetPose(bool leftHand, bool rightHand)
+        {
+            if (Controller_LeftHand != null && leftHand)
+            {
+                Vector3 idle_lh = new(-0.4f, 0, 0);
+                Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
+                Handle_LeftHand.SetLocalPositionAndRotation(idle_lh, idle_rlh);
+            }
+
+            if (Controller_RightHand != null && rightHand)
+            {
+                Vector3 idle_rh = new(0.4f, 0, 0);
+                Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
+                Handle_RightHand.SetLocalPositionAndRotation(idle_rh, idle_rrh);
+            }
+
+        }
 
         // --------------------------------------------------------------------
         #region Pose updating
@@ -94,34 +125,34 @@ namespace Arteranos.Avatar
             // VR: Hand and head tracking
             if(SettingsManager.Client.VRMode)
             {
-                if(m_AvatarData.CenterEye == null) return;
+                if(AvatarMeasures.CenterEye == null) return;
 
                 Transform cam = XRControl.Instance.cameraTransform;
                 ControlSettingsJSON ccs = SettingsManager.Client.Controls;
 
-                Vector3 cEyeOffset = m_AvatarData.CenterEye.position -
+                Vector3 cEyeOffset = AvatarMeasures.CenterEye.position -
                     cam.position;
 
                 // If the respective controllers are disabled, reset their hand poses
                 // and bypass the tracking.
-                m_AvatarData.ResetPose(!ccs.Controller_left, !ccs.Controller_right);
+                ResetPose(!ccs.Controller_left, !ccs.Controller_right);
 
-                if(LeftHand && m_AvatarData.LeftHand && ccs.Controller_left)
+                if(Controller_LeftHand && Handle_LeftHand && ccs.Controller_left)
                 {
-                    m_AvatarData.LeftHand.SetPositionAndRotation(
-                            LeftHand.position + cEyeOffset,
-                            LeftHand.rotation * LhrOffset);
+                    Handle_LeftHand.SetPositionAndRotation(
+                            Controller_LeftHand.position + cEyeOffset,
+                            Controller_LeftHand.rotation * LhrOffset);
                 }
 
-                if(RightHand && m_AvatarData.RightHand && ccs.Controller_right)
+                if(Controller_RightHand && Handle_RightHand && ccs.Controller_right)
                 {
-                    m_AvatarData.RightHand.SetPositionAndRotation(
-                            RightHand.position + cEyeOffset,
-                            RightHand.rotation * RhrOffset);
+                    Handle_RightHand.SetPositionAndRotation(
+                            Controller_RightHand.position + cEyeOffset,
+                            Controller_RightHand.rotation * RhrOffset);
                 }
 
-                if(m_AvatarData.Head)
-                    m_AvatarData.Head.rotation = cam.rotation;
+                if(AvatarMeasures.Head)
+                    AvatarMeasures.Head.rotation = cam.rotation;
             }
 
             // VR + 2D: Walking animation (only with loaded avatars)
@@ -135,7 +166,7 @@ namespace Arteranos.Avatar
                 Vector3 moveSpeed = Quaternion.Inverse(transform.rotation) * cc.velocity;
 
                 // ... and smaller people has to walk in a quicker pace.
-                float speedScale = m_AvatarData.OriginalFullHeight / m_AvatarData.FullHeight;
+                float speedScale = AvatarMeasures.UnscaledHeight / AvatarMeasures.FullHeight;
 
                 anim.SetFloat("Walking", moveSpeed.z);
                 anim.SetFloat("SpeedScale", speedScale);
@@ -159,7 +190,7 @@ namespace Arteranos.Avatar
         {
             float amount = GetComponent<AvatarVoice>().MeasureAmplitude();
 
-            m_AvatarData?.UpdateOpenMouth(amount);
+            AvatarMeasures.Avatar.GetComponent<AvatarMouthAnimator>().MouthOpen = amount;
         }
 
         #endregion

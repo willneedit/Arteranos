@@ -58,10 +58,10 @@ namespace Arteranos.Core.Operations
         public bool InstallHandIK { get; set; } = false;
         public float DesiredHeight { get; set; } = 0.0f;
 
-        public GameObject Avatar = null;
         public bool? SidedCapitalized = null; // 'left' or 'Left' ?
         public int SidedPatternIndex = -1;
 
+        public GameObject Avatar { get; set; } = null;
         public Transform LeftHand { get; set; } = null;
         public Transform RightHand { get; set; } = null;
 

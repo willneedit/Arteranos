@@ -67,7 +67,7 @@ namespace Arteranos.UI
             currentAvatar.SetActive(false);
             GameObject go = Instantiate(AvatarLoaderRPM, currentAvatar.transform);
 
-            IAvatarLoader loader = go.GetComponent<IAvatarLoader>();
+            IAvatarBody loader = go.GetComponent<IAvatarBody>();
             loader.GalleryModeURL = puppet.AvatarCidString;
             currentAvatar.SetActive(true);
         }

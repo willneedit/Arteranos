@@ -22,7 +22,7 @@ namespace Arteranos.Avatar
         string Nickname { get; }
         int AppearanceStatus { get; set; }
         bool isOwned { get; }
-        IAvatarLoader Body { get; }
+        IAvatarBody Body { get; }
         GameObject gameObject { get; }
         Transform transform { get; }
         UserID UserID { get; set; }
