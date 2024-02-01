@@ -12,7 +12,7 @@ namespace Arteranos.NetworkIO
     // NetworkPose Snapshot
     public struct PoseSnapshot : Snapshot
     {
-        public const int MAX_SIZE = sizeof(ushort) * 8;
+        public const int MAX_SIZE = sizeof(uint) * 8;
         public double remoteTime { get; set; }
         public double localTime { get; set; }
 
@@ -44,7 +44,7 @@ namespace Arteranos.NetworkIO
                 interpolated);
         }
 
-        public ushort Changed(Quaternion[] last, float rotationSensitivity)
+        public uint Changed(Quaternion[] last, float rotationSensitivity)
         {
             // last.rotation == null means there's never been a 'last' one.
 
@@ -60,7 +60,7 @@ namespace Arteranos.NetworkIO
                     mask |= 1 << i;
             }
 
-            return (ushort) mask;
+            return (uint) mask;
         }
     }
     public static class ExtendPoseSnapshot
@@ -68,12 +68,12 @@ namespace Arteranos.NetworkIO
         public static void WritePoseSnapshot(this NetworkWriter writer, 
             Quaternion[] quats,
             ref Quaternion[] lastQuats,
-            ushort mask, 
+            uint mask, 
             bool compressRotation)
         {
             Debug.Assert(quats.Length == PoseSnapshot.MAX_SIZE);
 
-            writer.WriteUShort(mask);
+            writer.WriteUInt(mask);
 
             for(int i = 0; i < quats.Length; i++)
             {
@@ -95,7 +95,7 @@ namespace Arteranos.NetworkIO
         {
             Debug.Assert(quats.Length == PoseSnapshot.MAX_SIZE);
 
-            ushort mask = reader.ReadUShort();
+            uint mask = reader.ReadUInt();
 
             for(int i = 0; i < quats.Length; i++)
             {

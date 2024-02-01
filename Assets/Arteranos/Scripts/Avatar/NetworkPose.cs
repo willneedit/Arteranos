@@ -140,7 +140,7 @@ namespace Arteranos.NetworkIO
                 // Debug.Log($"Skipped snapshot queue for {name} to snapshot[{serverSnapshots.Count-1}]");
             }
 
-            ushort mask;
+            uint mask;
             if(initialState || lastSerializedRotations == null)
             {
                 // initial - serialize all of these
