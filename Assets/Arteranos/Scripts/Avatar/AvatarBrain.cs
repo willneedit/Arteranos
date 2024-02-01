@@ -39,6 +39,8 @@ namespace Arteranos.Avatar
 
         public float AvatarHeight { get => m_AvatarHeight; private set => CmdPropagateAvatarHeight(value); }
 
+        public int AvatarGender { get => m_AvatarGender; private set => CmdPropagateAvatarGender(value); }
+
         public UserPrivacy UserPrivacy { get => m_UserPrivacy; private set => CmdPropagateUserPrivacy(value); }
 
         // Okay to use the setter. The SyncVar would yell at you if you fiddle with the privilege client-side
@@ -171,7 +173,7 @@ namespace Arteranos.Avatar
             Subconscious.ReadyState = AvatarSubconscious.READY_COMPLETE;
         }
 
-        private void CommitAvatarChanged(string URL, float Height)
+        private void CommitAvatarChanged(string URL, float Height, int gender)
         {
             if (isOwned)
             {
@@ -201,7 +203,7 @@ namespace Arteranos.Avatar
         {
             Client cs = SettingsManager.Client;
 
-            CommitAvatarChanged(cs.AvatarURL, cs.AvatarHeight);
+            CommitAvatarChanged(cs.AvatarCidString, cs.AvatarHeight, cs.Me.CurrentAvatarGender);
 
             UserPrivacy = cs.UserPrivacy;
         }
@@ -240,6 +242,9 @@ namespace Arteranos.Avatar
         [SyncVar(hook = nameof(OnAvatarHeightChanged))]
         private float m_AvatarHeight = 175;
 
+        [SyncVar(hook = nameof(OnAvatarGenderChanged))]
+        private int m_AvatarGender = 0;
+
         // No [SyncVar] - server only for privacy reasons
         private string m_Address = null;
 
@@ -271,9 +276,11 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void OnAvatarURLChanged(string _, string URL) => Body?.RequestAvatarURLChange(URL);
+        private void OnAvatarURLChanged(string _, string URL) => Body?.ReloadAvatar(m_AvatarURL, m_AvatarHeight, m_AvatarGender);
 
-        private void OnAvatarHeightChanged(float _, float height) => Body?.RequestAvatarHeightChange(height);
+        private void OnAvatarHeightChanged(float _, float height) => Body?.ReloadAvatar(m_AvatarURL, m_AvatarHeight, m_AvatarGender);
+
+        private void OnAvatarGenderChanged(int _, int gender) => Body?.ReloadAvatar(m_AvatarURL, m_AvatarHeight, m_AvatarGender);
 
         private void OnUserIDChanged(UserID _1, UserID userID)
         {
@@ -302,7 +309,8 @@ namespace Arteranos.Avatar
 
         [Command]
         private void CmdPropagateAvatarHeight(float height) => m_AvatarHeight = height;
-
+        [Command]
+        private void CmdPropagateAvatarGender(int gender) => m_AvatarGender = gender;
         [Command]
         private void CmdPerformEmote(string emojiName) => RpcPerformEmote(emojiName);
 

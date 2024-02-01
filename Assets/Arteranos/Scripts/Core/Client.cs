@@ -129,16 +129,16 @@ namespace Arteranos.Core
     public class AvatarDescriptionJSON : IEquatable<AvatarDescriptionJSON>
     {
         // Avatar designator, valid only for the selected avatar provider
-        public string AvatarURL { get; set; }
+        public string AvatarCidString { get; set; }
 
         // Avatar height in cm
         public float AvatarHeight { get; set; } = 175;
 
         public override bool Equals(object obj) => obj is AvatarDescriptionJSON jSON && Equals(jSON);
         public bool Equals(AvatarDescriptionJSON other) 
-            => AvatarURL == other.AvatarURL 
+            => AvatarCidString == other.AvatarCidString 
             && AvatarHeight == other.AvatarHeight;
-        public override int GetHashCode() => HashCode.Combine(AvatarURL, AvatarHeight);
+        public override int GetHashCode() => HashCode.Combine(AvatarCidString, AvatarHeight);
 
         public static bool operator ==(AvatarDescriptionJSON left, AvatarDescriptionJSON right) => left.Equals(right);
         public static bool operator !=(AvatarDescriptionJSON left, AvatarDescriptionJSON right) => !(left == right);
@@ -247,9 +247,12 @@ namespace Arteranos.Core
         // Current avatar
         public virtual AvatarDescriptionJSON CurrentAvatar { get; set; } = new() 
         {
-            AvatarURL = "6394c1e69ef842b3a5112221",
+            AvatarCidString = null, // First-time startup will load a dafault avatar
             AvatarHeight = 175
         };
+
+        // Gender identification, for the animation: -1: female, 0: neutral/random, 1: male
+        public virtual int CurrentAvatarGender { get; set; } = 0;
 
         // Avatar storage
         public virtual List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
@@ -339,7 +342,7 @@ namespace Arteranos.Core
 
         public const string PATH_CLIENT_SETTINGS = "UserSettings.json";
 
-        public event Action<string, float> OnAvatarChanged;
+        public event Action<string, float, int> OnAvatarChanged;
         public event Action<bool> OnVRModeChanged;
         public event Action<float, float> OnPrivacyBubbleChanged;
         public event Action<ControlSettingsJSON, MovementSettingsJSON, ServerPermissions> OnXRControllerChanged;
@@ -347,14 +350,14 @@ namespace Arteranos.Core
         public event Action<UserPrivacy> OnUserPrivacyChanged;
 
         [JsonIgnore]
-        public string AvatarURL
+        public string AvatarCidString
         {
-            get => Me.CurrentAvatar.AvatarURL;
+            get => Me.CurrentAvatar.AvatarCidString;
             set 
             {
-                string old = Me.CurrentAvatar.AvatarURL;
-                Me.CurrentAvatar.AvatarURL = value;
-                if(old != Me.CurrentAvatar.AvatarURL) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarURL, Me.CurrentAvatar.AvatarHeight);
+                string old = Me.CurrentAvatar.AvatarCidString;
+                Me.CurrentAvatar.AvatarCidString = value;
+                if(old != value) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarCidString, Me.CurrentAvatar.AvatarHeight, Me.CurrentAvatarGender);
             }
         }
 
@@ -366,7 +369,19 @@ namespace Arteranos.Core
             {
                 float old = Me.CurrentAvatar.AvatarHeight;
                 Me.CurrentAvatar.AvatarHeight = value;
-                if (old != Me.CurrentAvatar.AvatarHeight) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarURL, Me.CurrentAvatar.AvatarHeight);
+                if (old != value) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarCidString, Me.CurrentAvatar.AvatarHeight, Me.CurrentAvatarGender);
+            }
+        }
+
+        [JsonIgnore]
+        public int AvatarGender
+        {
+            get => Me.CurrentAvatarGender;
+            set
+            {
+                int old = Me.CurrentAvatarGender;
+                Me.CurrentAvatarGender = value;
+                if(old != value) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarCidString, Me.CurrentAvatar.AvatarHeight, Me.CurrentAvatarGender);
             }
         }
         [JsonIgnore]

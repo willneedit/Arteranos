@@ -15,14 +15,12 @@ namespace Arteranos.UI
         [SerializeField] private Spinner spn_OnlineStatus = null;
         [SerializeField] private TMP_InputField txt_Nickname = null;
         [SerializeField] private TMP_Text tro_UserID = null;
-        [SerializeField] private TMP_InputField txt_AvatarURL = null;
-        [SerializeField] private TMP_Text tro_AvatarProvider = null;
+        [SerializeField] private Spinner spn_Gender = null;
         [SerializeField] private NumberedSlider sldn_AvatarHeight = null;
         [SerializeField] private Button btn_CreateAvatar = null;
         [SerializeField] private Button btn_AvatarGallery = null;
 
         private readonly Dictionary<string, Visibility> statusNames = new();
-        private readonly Dictionary<string, AvatarProvider> APNames = new();
 
         private Client cs = null;
         private bool dirty = false;
@@ -40,16 +38,9 @@ namespace Arteranos.UI
 
             spn_OnlineStatus.Options = statusNames.Keys.ToArray();
 
-            foreach(AvatarProvider ap in Enum.GetValues(typeof(AvatarProvider)))
-            {
-                string name = Utils.GetEnumDescription(ap);
-                if(name != null)
-                    APNames.Add(name, ap);
-            }
-
             spn_OnlineStatus.OnChanged += OnVisibilityChanged;
             txt_Nickname.onValueChanged.AddListener((string current) => dirty = true);
-            txt_AvatarURL.onValueChanged.AddListener((string current) => dirty = true);
+            spn_Gender.OnChanged += (v, d) => dirty = true;
             sldn_AvatarHeight.OnValueChanged += (float height) => dirty = true;
 
             btn_CreateAvatar.onClick.AddListener(OnCreateAvatarClicked);
@@ -65,7 +56,7 @@ namespace Arteranos.UI
         private void OnCreateAvatarClicked()
         {
             SysMenu.CloseSysMenus();
-            CreateAvatarUIFactory.New();
+            AddAvatarUI.New();
         }
 
         // Using OnEnable() instead Start() because of the need to update the UserID from
@@ -84,9 +75,8 @@ namespace Arteranos.UI
             txt_Nickname.text = cs.Me.Nickname;
 
             tro_UserID.text = cs.GetFingerprint(fpmode);
-            txt_AvatarURL.text = cs.AvatarURL;
+            spn_Gender.value = cs.Me.CurrentAvatarGender + 1;
             sldn_AvatarHeight.value = cs.AvatarHeight;
-            tro_AvatarProvider.text = Utils.GetEnumDescription(cs.Me.CurrentAvatar.AvatarProvider);
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
@@ -96,7 +86,8 @@ namespace Arteranos.UI
         {
             base.OnDisable();
 
-            cs.AvatarURL = txt_AvatarURL.text;
+            // cs.AvatarURL = txt_AvatarURL.text;
+            cs.Me.CurrentAvatarGender = spn_Gender.value - 1;
             cs.AvatarHeight = sldn_AvatarHeight.value;
             cs.Me.Nickname = txt_Nickname.text;
 

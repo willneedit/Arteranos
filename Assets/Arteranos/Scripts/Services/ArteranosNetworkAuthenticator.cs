@@ -49,7 +49,6 @@ namespace Arteranos.Services
 
             public string Nickname;
             public bool isGuest;
-            public bool isCustom;
             public string deviceUID;
         }
 
@@ -478,7 +477,6 @@ namespace Arteranos.Services
 
                 Nickname = cs.Me.Nickname,
                 isGuest = cs.Me.Login.IsGuest,
-                isCustom = cs.Me.CurrentAvatar.IsCustom,
                 deviceUID = SystemInfo.deviceUniqueIdentifier
             }, msg.ServerPublicKey, out CryptPacket p);
 

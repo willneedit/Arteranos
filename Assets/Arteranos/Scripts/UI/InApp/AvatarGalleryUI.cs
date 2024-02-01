@@ -59,9 +59,6 @@ namespace Arteranos.UI
             if(Me.AvatarGallery.Count < 1) return;
 
             AvatarDescriptionJSON puppet = Me.AvatarGallery[index];
-            if(puppet.AvatarProvider != AvatarProvider.RPM)
-                throw new Exception("Providers other than RPM are not supported yet.");
-
             currentAvatar = new("Projection");
             currentAvatar.transform.SetParent(transform, false);
             currentAvatar.transform.SetLocalPositionAndRotation(
@@ -71,7 +68,7 @@ namespace Arteranos.UI
             GameObject go = Instantiate(AvatarLoaderRPM, currentAvatar.transform);
 
             IAvatarLoader loader = go.GetComponent<IAvatarLoader>();
-            loader.GalleryModeURL = puppet.AvatarURL;
+            loader.GalleryModeURL = puppet.AvatarCidString;
             currentAvatar.SetActive(true);
         }
 
@@ -97,8 +94,7 @@ namespace Arteranos.UI
             if(IsEmpty() || GetMeAvatar() == Me.AvatarGallery[index]) return;
 
             AvatarDescriptionJSON puppet = Me.AvatarGallery[index];
-            SettingsManager.Client.AvatarURL = puppet.AvatarURL;
-            Me.CurrentAvatar.AvatarProvider = puppet.AvatarProvider;
+            SettingsManager.Client.AvatarCidString = puppet.AvatarCidString;
 
             LightOn(btn_commit, false);
             dirty = true;

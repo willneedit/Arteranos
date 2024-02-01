@@ -15,8 +15,7 @@ namespace Arteranos.Avatar
         bool Invisible { get; set; }
         float OriginalFullHeight { get; }
 
-        void RequestAvatarHeightChange(float targetHeight);
-        void RequestAvatarURLChange(string current);
+        void ReloadAvatar(string url, float height, int gender);
 
         /// <summary>
         /// Reset the the avatar to an 'Attention' pose

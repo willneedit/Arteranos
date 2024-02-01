@@ -51,8 +51,7 @@ namespace Arteranos.UI
             avatarCreatorStateMachine.gameObject.SetActive(false);
             SysMenu.CloseSysMenus();
 
-            cs.AvatarURL = avatarId;
-            cs.Me.CurrentAvatar.AvatarProvider = AvatarProvider.RPM;
+            cs.AvatarCidString = avatarId;
         }
     }
 }

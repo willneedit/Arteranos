@@ -45,9 +45,6 @@ namespace Arteranos.Avatar
         public float OriginalFullHeight { get; private set; }
 
 
-        public Quaternion LhrOffset { get => Quaternion.Euler(0, 90, 90); }
-        public Quaternion RhrOffset { get => Quaternion.Euler(0, -90, -90); }
-
         public List<string> JointNames { get; set; }
         public List<MeshBlendShapeIndex> MouthOpen { get; private set; }
         public List<Transform> Eyes { get; private set; }
@@ -90,13 +87,15 @@ namespace Arteranos.Avatar
             m_AvatarGameObject = Instantiate(m_AvatarStandin);
             m_AvatarGameObject.transform.SetParent(transform, false);
 
+#if false
             if (!string.IsNullOrEmpty(GalleryModeURL)) RequestAvatarURLChange(GalleryModeURL);
             else avatarBrain = GetComponent<AvatarBrain>();
+#endif
         }
 
         private string last = null;
         private string present = null;
-
+#if false
         public void RequestAvatarURLChange(string current)
         {
             if(loading || current == null || last == current) return;
@@ -123,6 +122,12 @@ namespace Arteranos.Avatar
             SetupMouthBlendShapes(null);
             Destroy(m_AvatarGameObject); m_AvatarGameObject = null;
             RequestAvatarURLChange(present);
+        }
+#endif
+
+        public void ReloadAvatar(string url, float height, int gender)
+        {
+            throw new KeyNotFoundException();
         }
 
         // --------------------------------------------------------------------

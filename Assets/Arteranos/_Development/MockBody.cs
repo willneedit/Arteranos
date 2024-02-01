@@ -57,6 +57,11 @@ namespace Arteranos
 
         public float UnscaledHeight => throw new System.NotImplementedException();
 
+        public void ReloadAvatar(string url, float height, int gender)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void RequestAvatarHeightChange(float targetHeight)
         {
             throw new System.NotImplementedException();
