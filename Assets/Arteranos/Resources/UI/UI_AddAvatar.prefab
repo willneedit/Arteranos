@@ -3194,7 +3194,7 @@ PrefabInstance:
     - target: {fileID: 8231778681636196198, guid: 4690c91a61ae7944b9ff755e33b11bc2,
         type: 3}
       propertyPath: m_text
-      value: Add Avatar
+      value: Load Avatar
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4690c91a61ae7944b9ff755e33b11bc2, type: 3}

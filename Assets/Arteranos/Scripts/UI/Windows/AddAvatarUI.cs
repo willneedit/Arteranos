@@ -37,7 +37,14 @@ namespace Arteranos.UI
 
         private Transform PreviewSpace = null;
         private GameObject Avatar = null;
+        private string LastPreviewedURL = null;
         private Cid AvatarCid = null;
+
+        public string btn_LabelAddAvatar
+        {
+            get => btn_AddAvatar.transform.GetChild(0).GetComponent<TMP_Text>().text;
+            set => btn_AddAvatar.transform.GetChild(0).GetComponent<TMP_Text>().text = value;
+        }
 
 #if UNITY_INCLUDE_TESTS
         public string Test_AvatarURL 
@@ -67,7 +74,87 @@ namespace Arteranos.UI
 
             btn_Close.onClick.AddListener(() => Destroy(gameObject));
             btn_AddAvatar.onClick.AddListener(OnAddAvatarClicked);
+            txt_AddAvatarModelURL.onValueChanged.AddListener(OnAvatarURLChanged);
         }
+
+        protected override void Start()
+        {
+            base.Start();
+
+            IEnumerator RotatePreviewCoroutine()
+            {
+                float angle = 0.0f;
+
+                while(true)
+                {
+                    angle += Time.deltaTime * 45.0f;
+                    if (angle > 350.0f) angle -= 360.0f;
+                    if(Avatar)
+                        Avatar.transform.localRotation = Quaternion.Euler(0.0f, angle, 0.0f);
+
+                    yield return new WaitForEndOfFrame();
+                }
+            }
+
+            IEnumerator AnimateAvatarCoroutine()
+            {
+                while(true)
+                {
+                    // I know. Ugly hack.... 
+                    if(Avatar)
+                    {
+                        Animator animator = Avatar.GetComponent<Animator>();
+
+                        yield return new WaitForSeconds(2);
+
+                        if (!animator) continue;
+                        animator.SetInteger("IntWalkFrontBack", 1);
+                        yield return new WaitForSeconds(5);
+
+                        if (!animator) continue;
+                        animator.SetInteger("IntWalkFrontBack", 0);
+                        yield return new WaitForSeconds(2);
+
+                        if (!animator) continue;
+                        animator.SetInteger("IntWalkFrontBack", -1);
+                        yield return new WaitForSeconds(5);
+
+                        if (!animator) continue;
+                        animator.SetInteger("IntWalkFrontBack", 0);
+                        yield return new WaitForSeconds(2);
+
+                        if (!animator) continue;
+                        animator.SetInteger("IntWalkLeftRight", 1);
+                        yield return new WaitForSeconds(5);
+
+                        if (!animator) continue;
+                        animator.SetInteger("IntWalkLeftRight", 0);
+                        yield return new WaitForSeconds(2);
+
+                        if (!animator) continue;
+                        animator.SetInteger("IntWalkLeftRight", -1);
+                        yield return new WaitForSeconds(5);
+
+                        if (!animator) continue;
+                        animator.SetInteger("IntWalkLeftRight", 0);
+                        yield return new WaitForSeconds(1);
+
+                    }
+                    yield return new WaitForSeconds(1);
+                }
+            }
+
+            StartCoroutine(RotatePreviewCoroutine());
+            StartCoroutine(AnimateAvatarCoroutine());
+        }
+
+        private void OnAvatarURLChanged(string arg0)
+        {
+            btn_LabelAddAvatar = LastPreviewedURL == txt_AddAvatarModelURL.text 
+                ? "Confirm"
+                : "Load Avatar";
+        }
+
 
         private void OnAddAvatarClicked()
         {
@@ -86,6 +173,13 @@ namespace Arteranos.UI
 
                     while (!t.IsCompleted) yield return new WaitForEndOfFrame();
 
+                    if(t.IsFaulted)
+                    {
+                        lbl_Notice.text = "Failed to load from this URL";
+                        btn_AddAvatar.interactable = true;
+                        yield break;
+                    }
+
                     Cid cid = AssetUploader.GetUploadedCid(co);
                     AssetCid = cid;
                 }
@@ -94,13 +188,23 @@ namespace Arteranos.UI
                     if(Avatar) Destroy(Avatar);
 
                     (AsyncOperationExecutor<Context> ao, Context co) =
-                        AvatarDownloader.PrepareDownloadAvatar(AssetCid);
+                        AvatarDownloader.PrepareDownloadAvatar(AssetCid, new()
+                        {
+                            InstallAnimController = 1,
+                        });
 
                     ao.ProgressChanged += (ratio, msg) => lbl_Notice.text = $"{msg}";
 
                     Task t = ao.ExecuteAsync(co);
 
                     while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+                    if (t.IsFaulted)
+                    {
+                        lbl_Notice.text = "Failed to decode the avatar model";
+                        btn_AddAvatar.interactable = true;
+                        yield break;
+                    }
 
                     Avatar = AvatarDownloader.GetLoadedAvatar(co);
 
@@ -126,11 +230,14 @@ namespace Arteranos.UI
                     obj_Placeholder.SetActive(false);
                     Transform AvatarTransform = Avatar.transform;
                     AvatarTransform.parent = PreviewSpace;
-                    // LocalPosition is (0,0,0), (0,0,0)
-                    // AvatarTransform.localScale = obj_Placeholder.transform.localScale;
-                    AvatarTransform.localPosition = new Vector3(0, -50, 0);
+                    AvatarTransform.localPosition = new Vector3(0, -50, -25);
                     AvatarTransform.localScale = new Vector3(50, 50, 50);
                     Avatar.SetActive(true);
+
+                    lbl_Notice.text = "Avatar successfully loaded";
+                    LastPreviewedURL = txt_AddAvatarModelURL.text;
+                    btn_LabelAddAvatar = "Confirm";
+                    AvatarCid = AssetCid;
                 }
                 else
                 {

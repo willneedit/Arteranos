@@ -126,5 +126,46 @@ namespace Arteranos.PlayTest.UI
 
             yield return UnityPAK();
         }
+
+        [UnityTest]
+        public IEnumerator LoadAvatarUndecided()
+        {
+            AddAvatarUI aaui = AddAvatarUI.New();
+            yield return new WaitForSeconds(1);
+
+            aaui.Test_AvatarURL = Asset_iws;
+
+            yield return new WaitForSeconds(1);
+
+            aaui.Test_OnAddAvatarClicked();
+
+            yield return new WaitForSeconds(1);
+
+            aaui.Test_AvatarURL = Asset_iws[0..^2]; // User changes URL....
+
+            yield return new WaitForSeconds(2);
+
+            aaui.Test_AvatarURL = Asset_iws; // ... but changes his mind to the loaded avatar again
+
+            yield return new WaitForSeconds(2);
+        }
+
+        [UnityTest]
+        public IEnumerator LoadWithFailingURLs()
+        {
+            LogAssert.Expect(LogType.Exception, "FileNotFoundException: Could not find file 'C:\\Does.Not.exist'.");
+
+            AddAvatarUI aaui = AddAvatarUI.New();
+            yield return null;
+
+            aaui.Test_AvatarURL = "C:\\Does.Not.exist";
+
+            yield return new WaitForSeconds(1);
+
+            aaui.Test_OnAddAvatarClicked();
+
+            yield return new WaitForSeconds(1);
+
+        }
     }
 }
