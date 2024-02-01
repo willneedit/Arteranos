@@ -17,15 +17,6 @@ using System.Linq;
 
 namespace Arteranos.Core
 {
-    public enum AvatarProvider
-    {
-        Invalid = 0,    // Invalid, use fallback avatar
-        [Description("Raw Avatar")]
-        Raw,            // Raw URL to download the avatar model
-        [Description("Ready Player Me")]
-        RPM,            // Ready Player Me avatar URL or Shortcode
-    }
-
     public enum Visibility
     {
         Invalid = 0,
@@ -140,21 +131,14 @@ namespace Arteranos.Core
         // Avatar designator, valid only for the selected avatar provider
         public string AvatarURL { get; set; }
 
-        // Avatar provider to get the user's avatar
-        public AvatarProvider AvatarProvider { get; set; }
-
         // Avatar height in cm
         public float AvatarHeight { get; set; } = 175;
-
-        [JsonIgnore]
-        public bool IsCustom => AvatarProvider == AvatarProvider.Raw || AvatarProvider == AvatarProvider.Invalid;
 
         public override bool Equals(object obj) => obj is AvatarDescriptionJSON jSON && Equals(jSON);
         public bool Equals(AvatarDescriptionJSON other) 
             => AvatarURL == other.AvatarURL 
-            && AvatarProvider == other.AvatarProvider 
             && AvatarHeight == other.AvatarHeight;
-        public override int GetHashCode() => HashCode.Combine(AvatarURL, AvatarProvider, AvatarHeight);
+        public override int GetHashCode() => HashCode.Combine(AvatarURL, AvatarHeight);
 
         public static bool operator ==(AvatarDescriptionJSON left, AvatarDescriptionJSON right) => left.Equals(right);
         public static bool operator !=(AvatarDescriptionJSON left, AvatarDescriptionJSON right) => !(left == right);
@@ -263,7 +247,6 @@ namespace Arteranos.Core
         // Current avatar
         public virtual AvatarDescriptionJSON CurrentAvatar { get; set; } = new() 
         {
-            AvatarProvider = AvatarProvider.RPM,
             AvatarURL = "6394c1e69ef842b3a5112221",
             AvatarHeight = 175
         };

@@ -19,13 +19,6 @@ namespace Arteranos.Core
             int index = 0;
             int possible = 10;
 
-            bool usesGuest = SettingsManager.Client?.Me.Login.IsGuest ?? true;
-
-            bool usesCustomAvatar = SettingsManager.Client?.Me.CurrentAvatar.IsCustom ?? true;
-
-            // The 'Big Three' are true booleans - either true or false, no inbetweens.
-
-            // Double weight for one of the 'Big Three'
             index += Flying.FuzzyEq(user.Flying) * 2;
 
 
