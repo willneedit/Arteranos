@@ -154,10 +154,10 @@ namespace Arteranos.Avatar
 
             if (isOwned)
             {
-                DownloadClientSettings();
-
                 // That's me, set aside from the unwashed crowd. :)
                 XRControl.Me = this;
+
+                DownloadClientSettings();
 
                 _ = BubbleCoordinatorFactory.New(this);
 
@@ -180,6 +180,8 @@ namespace Arteranos.Avatar
                 AvatarURL = URL;
 
                 AvatarHeight = Height;
+
+                AvatarGender = gender;
             }
         }
 

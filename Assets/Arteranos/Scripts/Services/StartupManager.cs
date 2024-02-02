@@ -44,7 +44,7 @@ namespace Arteranos.Services
 
             XR.XRControl.Instance.enabled = true;
 
-            yield return new WaitForEndOfFrame();
+            yield return UploadDefaultAvatars();
 
             if (TargetedPeerID == null && DesiredWorldCid != null)
             {
@@ -63,7 +63,7 @@ namespace Arteranos.Services
             else
             {
                 Task t = WorldTransition.EnterWorldAsync(DesiredWorldCid);
-                while(!t.IsCompleted && !t.IsFaulted) yield return null;
+                while(!t.IsCompleted) yield return null;
             }
 
 
@@ -71,7 +71,7 @@ namespace Arteranos.Services
             {
                 // Manually start the server, including with the initialization.
                 Task t = NetworkStatus.StartServer();
-                while (!t.IsCompleted && !t.IsFaulted) yield return null;
+                while (!t.IsCompleted) yield return null;
                 yield return new WaitForSeconds(5);
                 (string address, int _, int mdport) = GetServerConnectionData();
                 Debug.Log($"Server is running, launcher link is: http://{address}:{mdport}/");
@@ -92,6 +92,31 @@ namespace Arteranos.Services
 
             StartCoroutine(StartupCoroutine());
         }
+
+        private IEnumerator UploadDefaultAvatars()
+        {
+            Cid cid = null;
+            IEnumerator UploadAvatar(string resourceMA)
+            {
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    AssetUploader.PrepareUploadToIPFS(resourceMA);
+
+                Task t = ao.ExecuteAsync(co);
+
+                while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+                cid = AssetUploader.GetUploadedCid(co);
+
+            }
+            string ResourceMA = "resource:///Avatar/6394c1e69ef842b3a5112221.glb";
+            string ResourceFA = "resource:///Avatar/63c26702e5b9a435587fba51.glb";
+
+            yield return UploadAvatar(ResourceMA); 
+            DefaultMaleAvatar = cid;
+            yield return UploadAvatar(ResourceFA);
+            DefaultFemaleAvatar = cid;
+        }
+
 
         protected override void PingServerChangeWorld_(string invoker, Cid WorldCid) 
             => _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, WorldCid);

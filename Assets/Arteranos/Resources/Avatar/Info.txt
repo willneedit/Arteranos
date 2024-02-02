@@ -1,0 +1,11 @@
+Default avatars @ Ready Player Me
+
+Female: https://models.readyplayer.me/63c26702e5b9a435587fba51.glb
+Male: https://models.readyplayer.me/6394c1e69ef842b3a5112221.glb
+
+Reduced with...
+
+https://api.readyplayer.me/v1/avatars/63c26702e5b9a435587fba51.glb?pose=A&meshLod=0&textureAtlas=1024&textureSizeLimit=1024&textureChannels=baseColor,normal,metallicRoughness,emissive,occlusion&morphTargets=eyeBlinkLeft,eyeBlinkRight,mouthOpen&useHands=false&useDracoMeshCompression=false&useMeshOptCompression=false
+
+https://api.readyplayer.me/v1/avatars/6394c1e69ef842b3a5112221.glb?pose=A&meshLod=0&textureAtlas=1024&textureSizeLimit=1024&textureChannels=baseColor,normal,metallicRoughness,emissive,occlusion&morphTargets=eyeBlinkLeft,eyeBlinkRight,mouthOpen&useHands=false&useDracoMeshCompression=false&useMeshOptCompression=false
+

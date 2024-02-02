@@ -38,7 +38,7 @@ namespace Arteranos.Avatar
             ChangeBubbleSize(cs.SizeBubbleStrangers, false);
 
             // TODO Update for avatar reconfiguring
-            transform.localPosition += transform.rotation * Vector3.up * Brain.Body.AvatarMeasures.FullHeight / 2;
+            // transform.localPosition += transform.rotation * Vector3.up * Brain.Body.AvatarMeasures.FullHeight / 2;
         }
 
         public void ChangeBubbleSize(float diameter, bool isFriend)

@@ -16,7 +16,7 @@ using Arteranos.Core;
 namespace Arteranos.Avatar
 {
 
-    public class AvatarPoseDriver : NetworkBehaviour
+    public class AvatarPoseDriver : MonoBehaviour
     {
         private Transform Controller_LeftHand = null;
         private Transform Controller_RightHand = null;
@@ -29,17 +29,17 @@ namespace Arteranos.Avatar
         public readonly Quaternion LhrOffset = Quaternion.Euler(0, 90, 90);
         public readonly Quaternion RhrOffset = Quaternion.Euler(0, -90, -90);
 
-        public void Awake()
+        private AvatarBrain AvatarBrain = null;
+        public bool isOwned => AvatarBrain?.isOwned ?? false;
+
+        private void Awake()
         {
             m_Poser = GetComponent<NetworkPose>();
-
-            syncDirection = SyncDirection.ServerToClient;
+            AvatarBrain = GetComponent<AvatarBrain>();
         }
 
-        public override void OnStartClient()
+        private void Start()
         {
-            base.OnStartClient();
-
             if(isOwned)
             {
                 SettingsManager.Client.OnVRModeChanged += OnXRChanged;
@@ -48,12 +48,10 @@ namespace Arteranos.Avatar
 
         }
 
-        public override void OnStopClient()
+        private void OnDestroy()
         {
             if(isOwned)
                 SettingsManager.Client.OnVRModeChanged -= OnXRChanged;
-
-            base.OnStopClient();
         }
 
         private void OnXRChanged(bool useXR)
@@ -190,7 +188,8 @@ namespace Arteranos.Avatar
         {
             float amount = GetComponent<AvatarVoice>().MeasureAmplitude();
 
-            AvatarMeasures.Avatar.GetComponent<AvatarMouthAnimator>().MouthOpen = amount;
+            if(AvatarMeasures?.Avatar != null)
+                AvatarMeasures.Avatar.GetComponent<AvatarMouthAnimator>().MouthOpen = amount;
         }
 
         #endregion

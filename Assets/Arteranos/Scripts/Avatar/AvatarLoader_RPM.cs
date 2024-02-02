@@ -7,20 +7,22 @@
 
 using UnityEngine;
 
-using ReadyPlayerMe.AvatarLoader;
-
-using System.Collections.Generic;
 using Arteranos.Core;
+using System.Collections;
+using Ipfs;
+using Arteranos.Core.Operations;
+using System.Threading.Tasks;
+using System;
+using Random = UnityEngine.Random;
 
 namespace Arteranos.Avatar
 {
     public class AvatarLoader_RPM : MonoBehaviour, IAvatarBody
     {
-        private GameObject m_AvatarStandin = null;
+        private GameObject AvatarStandin = null;
         private bool loading = false;
 
-        private GameObject m_AvatarGameObject = null;
-        private AvatarObjectLoader m_AvatarLoader = null;
+        private GameObject AvatarGameObject = null;
         public IAvatarMeasures AvatarMeasures { get; set; } = null;
 
 
@@ -35,104 +37,98 @@ namespace Arteranos.Avatar
             set
             {
                 m_invisible = value;
-                if(m_AvatarGameObject!= null)
+                if(AvatarGameObject!= null)
                 {
-                    Renderer[] renderers = m_AvatarGameObject.GetComponentsInChildren<Renderer>();
+                    Renderer[] renderers = AvatarGameObject.GetComponentsInChildren<Renderer>();
                     foreach(Renderer renderer in renderers)
                         renderer.enabled = !Invisible;
                 }
             }
         }
 
-        private AvatarBrain avatarBrain = null;
-
-        private void Awake() => m_AvatarStandin = Resources.Load<GameObject>("Avatar/Avatar_StandIn");
         private bool m_invisible = false;
-        private float? DesiredHeight = null;
 
+        private AvatarBrain AvatarBrain = null;
+        public bool isOwned => AvatarBrain?.isOwned ?? false;
 
-        public void OnEnable()
+        private void Awake()
         {
-            m_AvatarLoader = new AvatarObjectLoader();
-            // m_AvatarLoader.SaveInProjectFolder = true;
-            m_AvatarLoader.OnCompleted += AvatarLoadComplete;
-            m_AvatarLoader.OnFailed += AvatarLoadFailed;
-
-            m_AvatarGameObject = Instantiate(m_AvatarStandin);
-            m_AvatarGameObject.transform.SetParent(transform, false);
-
-#if false
-            if (!string.IsNullOrEmpty(GalleryModeURL)) RequestAvatarURLChange(GalleryModeURL);
-            else avatarBrain = GetComponent<AvatarBrain>();
-#endif
+            AvatarStandin = Resources.Load<GameObject>("Avatar/Avatar_StandIn");
+            AvatarBrain = GetComponent<AvatarBrain>();
         }
 
-        private string last = null;
-        private string present = null;
-#if false
-        public void RequestAvatarURLChange(string current)
+        private void Start()
         {
-            if(loading || current == null || last == current) return;
-            present= current;
+            // Put up the Stand-in for the time where the avatar is loaded
+            AvatarGameObject = Instantiate(AvatarStandin);
+            AvatarGameObject.transform.SetParent(transform, false);
+            //AvatarGameObject.transform.SetPositionAndRotation(transform.position, transform.rotation);
+        }
+
+        public void ReloadAvatar(string avatarCid, float height, int gender)
+        {
+            DateTime settleTime;
+
+            Cid _avatarCid = null;
+            float _cmheight = 175;
+            int _gender = 0;
+
+            IEnumerator AvatarDownloaderCoroutine()
+            {
+                while(settleTime > DateTime.Now)
+                    yield return new WaitForSeconds((settleTime - DateTime.Now).Seconds);
+
+                if (_gender == 0)
+                    _gender = (Random.Range(0, 100) < 50) ? -1 : 1;
+
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    AvatarDownloader.PrepareDownloadAvatar(_avatarCid, new()
+                    {
+                        DesiredHeight = _cmheight / 100.0f,
+                        InstallAnimController = _gender,
+                        InstallEyeAnimation = true,
+                        InstallMouthAnimation = true,
+                        InstallFootIK = isOwned,
+                        InstallFootIKCollider = isOwned,
+                        InstallHandIK = isOwned
+                    });
+
+                Task t = ao.ExecuteAsync(co);
+
+                while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+                if (AvatarGameObject)
+                    Destroy(AvatarGameObject);
+
+                if (t.IsFaulted)
+                    AvatarGameObject = Instantiate(AvatarStandin);
+                else
+                {
+                    AvatarMeasures = AvatarDownloader.GetAvatarMeasures(co);
+                    AvatarGameObject = AvatarMeasures.Avatar;
+                }
+
+                if (AvatarBrain)
+                    AvatarGameObject.name += $"_{AvatarBrain.NetID}";
+                else
+                    AvatarGameObject.name += "_puppet";
+
+                AvatarGameObject.transform.SetParent(transform, false);
+                //AvatarGameObject.transform.SetPositionAndRotation(transform.position, transform.rotation);
+
+                GetComponent<AvatarPoseDriver>().UpdateAvatarMeasures(AvatarMeasures);
+
+                AvatarGameObject.SetActive(true);
+                loading = false;
+            }
+
+            settleTime = DateTime.Now + TimeSpan.FromSeconds(5);
+
+            if (loading) return;
 
             loading = true;
-            Debug.Log("Starting avatar loading: " + current);
 
-            m_AvatarLoader.LoadAvatar(current.ToString());
-        }
-
-        public void RequestAvatarHeightChange(float targetHeight)
-        {
-            if(loading) return;
-
-            if (DesiredHeight != null && targetHeight == DesiredHeight.Value) return;
-
-            DesiredHeight = targetHeight / 100.0f;
-            Debug.Log($"Resizing avatar to {DesiredHeight}");
-
-            last = string.Empty;
-
-            // FIXME Maybe it needs the regular avatar loading, too?
-            SetupMouthBlendShapes(null);
-            Destroy(m_AvatarGameObject); m_AvatarGameObject = null;
-            RequestAvatarURLChange(present);
-        }
-#endif
-
-        public void ReloadAvatar(string url, float height, int gender)
-        {
-            throw new KeyNotFoundException();
-        }
-
-        // --------------------------------------------------------------------
-
-
-        void AvatarLoadComplete(object _, CompletionEventArgs args)
-        {
-            if(m_AvatarGameObject != null)
-                Destroy(m_AvatarGameObject);
-
-            GetComponent<AvatarPoseDriver>().UpdateAvatarMeasures(AvatarMeasures);
-
-            if (avatarBrain != null)
-                args.Avatar.name += $"_{avatarBrain.NetID}";
-            else
-                args.Avatar.name += "_puppet";
-
-            args.Avatar.transform.SetParent(transform, false);
-
-            // Refresh the visibility state for the new avatar
-            Invisible = m_invisible;
-
-            Debug.Log("Successfully loaded avatar");
-            last = present;
-            loading = false;
-        }
-
-        void AvatarLoadFailed(object sender, FailureEventArgs args)
-        {
-            Debug.Log($"Avatar loading failed with error message: {args.Message}");
-            loading = false;
+            StartCoroutine(AvatarDownloaderCoroutine());
         }
 
     }

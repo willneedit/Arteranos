@@ -17,6 +17,7 @@ using Arteranos.Services;
 using Ipfs.CoreApi;
 using System.Net.Http;
 using System.IO.Pipes;
+using UnityEngine;
 
 namespace Arteranos.Core.Operations
 {
@@ -118,6 +119,14 @@ namespace Arteranos.Core.Operations
                 response.EnsureSuccessStatusCode();
                 totalBytes = response.Content.Headers.ContentLength ?? -1;
                 inStream = await response.Content.ReadAsStreamAsync();
+            }
+            else if(assetURL.StartsWith("resource:///"))
+            {
+                assetURL = assetURL[12..];
+
+                TextAsset ta = Resources.Load<TextAsset>(assetURL);
+                inStream = new MemoryStream(ta.bytes);
+                inStream.Position = 0;
             }
             else
             {
