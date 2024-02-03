@@ -14,6 +14,6 @@ namespace Arteranos.Avatar
         string GalleryModeURL { get; set; }
         bool Invisible { get; set; }
         IAvatarMeasures AvatarMeasures { get; }
-        void ReloadAvatar(string url, float height, int gender);
+        void ReloadAvatar(string CidString, float height, int gender);
     }
 }

@@ -67,11 +67,11 @@ namespace Arteranos.Avatar
 
         public void ReloadAvatar(string avatarCid, float height, int gender)
         {
-            DateTime settleTime;
+            DateTime settleTime = DateTime.Now + TimeSpan.FromSeconds(5);
 
-            Cid _avatarCid = null;
-            float _cmheight = 175;
-            int _gender = 0;
+            Cid _avatarCid = avatarCid;
+            float _cmheight = height;
+            int _gender = gender;
 
             IEnumerator AvatarDownloaderCoroutine()
             {
@@ -121,8 +121,6 @@ namespace Arteranos.Avatar
                 AvatarGameObject.SetActive(true);
                 loading = false;
             }
-
-            settleTime = DateTime.Now + TimeSpan.FromSeconds(5);
 
             if (loading) return;
 

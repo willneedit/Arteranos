@@ -34,16 +34,6 @@ namespace Arteranos.Core.Operations
             sl.Name = worldABF;
         }
 
-        public static async Task<(Exception, WorldData)> GetWorldDataAsync(Cid WorldCid)
-        {
-            static (Exception, WorldData) _GetWorldData() => (null, new WorldData());
-
-            return await Task.Run(_GetWorldData);
-        }
-
-        public static bool IsWorldPreloaded(Cid WorldCid)
-            => WorldInfo.DBLookup(WorldCid) != null;
-
         public static async Task MoveToOfflineWorld()
         {
             bool done = false;

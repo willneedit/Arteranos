@@ -108,12 +108,10 @@ namespace Arteranos.Services
                 cid = AssetUploader.GetUploadedCid(co);
 
             }
-            string ResourceMA = "resource:///Avatar/6394c1e69ef842b3a5112221.glb";
-            string ResourceFA = "resource:///Avatar/63c26702e5b9a435587fba51.glb";
 
-            yield return UploadAvatar(ResourceMA); 
+            yield return UploadAvatar("resource:///Avatar/6394c1e69ef842b3a5112221.glb"); 
             DefaultMaleAvatar = cid;
-            yield return UploadAvatar(ResourceFA);
+            yield return UploadAvatar("resource:///Avatar/63c26702e5b9a435587fba51.glb");
             DefaultFemaleAvatar = cid;
         }
 

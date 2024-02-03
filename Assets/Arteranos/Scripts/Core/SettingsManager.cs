@@ -33,8 +33,8 @@ namespace Arteranos.Core
         public static Cid WorldInfoCid { get; set; }
         public static string DefaultTOStext { get; internal set; } = "";
 
-        public Cid DefaultMaleAvatar { get; protected set; } = null;
-        public Cid DefaultFemaleAvatar { get; protected set; } = null;
+        public static Cid DefaultMaleAvatar { get; protected set; } = null;
+        public static Cid DefaultFemaleAvatar { get; protected set; } = null;
 
         public static ServerJSON ActiveServerData =>
             NetworkStatus.GetOnlineLevel() == OnlineLevel.Client

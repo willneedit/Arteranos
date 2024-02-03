@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +13,7 @@ using Arteranos.XR;
 using Arteranos.Social;
 using System.Linq;
 using Ipfs;
+using Random = UnityEngine.Random;
 
 namespace Arteranos.Avatar
 {
@@ -35,7 +36,7 @@ namespace Arteranos.Avatar
 
         public uint NetID => netIdentity.netId;
 
-        public string AvatarURL { get => m_AvatarURL; private set => CmdPropagateAvatarURL(value); }
+        public string AvatarCidString { get => m_AvatarCidString; private set => CmdPropagateAvatarURL(value); }
 
         public float AvatarHeight { get => m_AvatarHeight; private set => CmdPropagateAvatarHeight(value); }
 
@@ -173,11 +174,11 @@ namespace Arteranos.Avatar
             Subconscious.ReadyState = AvatarSubconscious.READY_COMPLETE;
         }
 
-        private void CommitAvatarChanged(string URL, float Height, int gender)
+        private void CommitAvatarChanged(string CidString, float Height, int gender)
         {
             if (isOwned)
             {
-                AvatarURL = URL;
+                AvatarCidString = CidString;
 
                 AvatarHeight = Height;
 
@@ -205,7 +206,19 @@ namespace Arteranos.Avatar
         {
             Client cs = SettingsManager.Client;
 
-            CommitAvatarChanged(cs.AvatarCidString, cs.AvatarHeight, cs.Me.CurrentAvatarGender);
+            string avatarCidString = cs.AvatarCidString;
+            int avatarGender = cs.AvatarGender;
+
+            // Schrödinger's cat and today's view of people's gender... all alike.
+            // ¯\_(ツ)_/¯
+            if (avatarGender == 0)
+                avatarGender = Random.Range(0, 100) < 50 ? -1 : 1;
+
+            avatarCidString ??= avatarGender < 0
+                    ? SettingsManager.DefaultFemaleAvatar
+                    : SettingsManager.DefaultMaleAvatar;
+
+            CommitAvatarChanged(avatarCidString, cs.AvatarHeight, avatarGender);
 
             UserPrivacy = cs.UserPrivacy;
         }
@@ -238,8 +251,8 @@ namespace Arteranos.Avatar
         [SyncVar] // Default if someone circumvented the Authenticator and the Network Manager.
         private ulong m_UserState = (Core.UserState.Banned | Core.UserState.Exploiting);
 
-        [SyncVar(hook = nameof(OnAvatarURLChanged))]
-        private string m_AvatarURL = null;
+        [SyncVar(hook = nameof(OnAvatarCidStringChanged))]
+        private string m_AvatarCidString = null;
 
         [SyncVar(hook = nameof(OnAvatarHeightChanged))]
         private float m_AvatarHeight = 175;
@@ -278,11 +291,11 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void OnAvatarURLChanged(string _, string URL) => Body?.ReloadAvatar(m_AvatarURL, m_AvatarHeight, m_AvatarGender);
+        private void OnAvatarCidStringChanged(string _1, string _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight, m_AvatarGender);
 
-        private void OnAvatarHeightChanged(float _, float height) => Body?.ReloadAvatar(m_AvatarURL, m_AvatarHeight, m_AvatarGender);
+        private void OnAvatarHeightChanged(float _1, float _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight, m_AvatarGender);
 
-        private void OnAvatarGenderChanged(int _, int gender) => Body?.ReloadAvatar(m_AvatarURL, m_AvatarHeight, m_AvatarGender);
+        private void OnAvatarGenderChanged(int _1, int _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight, m_AvatarGender);
 
         private void OnUserIDChanged(UserID _1, UserID userID)
         {
@@ -307,7 +320,7 @@ namespace Arteranos.Avatar
         private void CmdPropagateUserPrivacy(UserPrivacy userPrivacy) => m_UserPrivacy = userPrivacy;
 
         [Command]
-        private void CmdPropagateAvatarURL(string URL) => m_AvatarURL = URL;
+        private void CmdPropagateAvatarURL(string URL) => m_AvatarCidString = URL;
 
         [Command]
         private void CmdPropagateAvatarHeight(float height) => m_AvatarHeight = height;
@@ -435,7 +448,6 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region World change event handling
 
-        [Obsolete("URL -> Cid transition")]
         public void MakeWorkdToChange(Cid Cid)
         {
             WorldInfo wmd = WorldInfo.DBLookup(Cid);
@@ -465,99 +477,6 @@ namespace Arteranos.Avatar
             SettingsManager.PingServerChangeWorld(UserID, CidString);
         }
 
-#if false
-        [ClientRpc]
-        private void ReceiveWorldTransition(string worldURL)
-        {
-            Server ss = SettingsManager.Server;
-
-            Debug.Log($"Received world transition: isServer={isServer}, isOwned={isOwned}, Source World={ss.WorldURL}, Target World={worldURL}");
-
-            // worldURL could be null means reloading the same world.
-            if(worldURL == null) return;
-
-            // It could be a latecoming user entering, or a laggard answering the dialogue.
-            if(ss.WorldURL == worldURL)
-            {
-                Debug.Log("World transition - already in that targeted world.");
-                return;
-            }
-
-            // Now that's the real deal.
-            Debug.Log($"WORLD TRANSITION: From {ss.WorldURL} to {worldURL} - Choose now!");
-
-            ShowWorldChangeDialog(worldURL,
-            (response) => OnWorldChangeAnswer(worldURL, response));
-        }
-
-        private static void ShowWorldChangeDialog(string worldURL, Action<int> resposeCallback)
-        {
-
-            WorldMetaData md = WorldGallery.RetrieveWorldMetaData(worldURL);
-
-            string worldname = md?.WorldName ?? worldURL;
-
-            IDialogUI dialog = DialogUIFactory.New();
-
-            dialog.Text =
-                "This server is about to change the world to\n" +
-                $"{worldname}\n" +
-                "What to do?";
-
-            dialog.Buttons = new string[]
-            {
-                "Go offline",
-                "Stay",
-                "Follow"
-            };
-
-            dialog.OnDialogDone += resposeCallback;
-        }
-        private void OnWorldChangeAnswer(string worldURL, int response)
-        {
-            // Disconnect, go offline
-            if(response == 0)
-            {
-                // Only the client disconnected, but the server part of the host
-                // remains
-                NetworkClient.Disconnect();
-                return;
-            }
-
-            // TODO dispatch to a server selector in an offline world
-
-            // Here on now, remote triggered world change.
-            if(response == 2)
-                WorldTransition.InitiateTransition(worldURL);
-        }
-
-        [Command]
-        private void PropagateWorldTransition(string worldURL)
-        {
-            // The hacked client may display the new world, but we won't distribute the
-            // world throughout the server.
-            if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
-
-            // Pure server needs to be notified and transitioned, too.
-            if(isServer && !isClient && !string.IsNullOrEmpty(worldURL))
-            {
-                SettingsManager.Server.WorldURL = worldURL;
-                WorldTransition.InitiateTransition(worldURL);
-            }
-            else
-            {
-                ReceiveWorldTransition(worldURL);
-            }
-        }
-
-        private void CommitWorldChanged(string worldURL)
-        {
-            // We already have transitioned, now we have to tell that the world has changed,
-            // and we have to wake up, and for us it is just to find ourselves.
-            if(isOwned)
-                PropagateWorldTransition(worldURL);
-        }
-#endif
         #endregion
         // ---------------------------------------------------------------
         #region Social state negotiation

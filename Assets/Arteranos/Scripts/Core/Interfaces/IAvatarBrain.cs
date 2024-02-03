@@ -17,7 +17,6 @@ namespace Arteranos.Avatar
 {
     public interface IAvatarBrain
     {
-        string AvatarURL { get; }
         uint NetID { get; }
         string Nickname { get; }
         int AppearanceStatus { get; set; }
@@ -30,7 +29,6 @@ namespace Arteranos.Avatar
         ulong UserState { get; set; }
         string Address { get; set; }
         string DeviceID { get; set; }
-        float AvatarHeight { get; }
 
         event Action<int> OnAppearanceStatusChanged;
 

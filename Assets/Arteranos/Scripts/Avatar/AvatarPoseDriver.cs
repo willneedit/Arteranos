@@ -7,8 +7,6 @@
 
 using UnityEngine;
 
-using Mirror;
-
 using Arteranos.NetworkIO;
 using Arteranos.XR;
 using Arteranos.Core;
@@ -99,18 +97,18 @@ namespace Arteranos.Avatar
 
         public void ResetPose(bool leftHand, bool rightHand)
         {
-            if (Controller_LeftHand != null && leftHand)
+            if (leftHand)
             {
                 Vector3 idle_lh = new(-0.4f, 0, 0);
                 Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
-                Handle_LeftHand.SetLocalPositionAndRotation(idle_lh, idle_rlh);
+                Handle_LeftHand?.SetLocalPositionAndRotation(idle_lh, idle_rlh);
             }
 
-            if (Controller_RightHand != null && rightHand)
+            if (rightHand)
             {
                 Vector3 idle_rh = new(0.4f, 0, 0);
                 Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
-                Handle_RightHand.SetLocalPositionAndRotation(idle_rh, idle_rrh);
+                Handle_RightHand?.SetLocalPositionAndRotation(idle_rh, idle_rrh);
             }
 
         }
@@ -163,20 +161,20 @@ namespace Arteranos.Avatar
                 // The direction...
                 Vector3 moveSpeed = Quaternion.Inverse(transform.rotation) * cc.velocity;
 
-                // ... and smaller people has to walk in a quicker pace.
-                float speedScale = AvatarMeasures.UnscaledHeight / AvatarMeasures.FullHeight;
+                int frontBack = 0;
+                if (moveSpeed.z < -0.5f) frontBack = -1;
+                if (moveSpeed.z >  0.5f) frontBack = 1;
 
-                anim.SetFloat("Walking", moveSpeed.z);
-                anim.SetFloat("SpeedScale", speedScale);
+                int leftRight = 0;
+                if (moveSpeed.x < -0.5f) leftRight = -1;
+                if (moveSpeed.x >  0.5f) leftRight = 1;
+
+                anim.SetInteger("IntWalkFrontBack", frontBack);
+                anim.SetInteger("IntWalkLeftRight", leftRight);
+
+                // ... and smaller people have to walk in a quicker pace.
+                anim.SetFloat("Speed", (float)(AvatarMeasures.UnscaledHeight / AvatarMeasures.FullHeight));
             }
-        }
-
-        public void UpdateAlienPose()
-        {
-            // Locomotion: NetworkTransform.
-            // Pose: NetworkPose.
-
-            // Maybe TODO: Face morphing and hand morphing for trigger/grip usage
         }
 
         #endregion
@@ -196,6 +194,7 @@ namespace Arteranos.Avatar
 
         void Update()
         {
+            // Avatars from other clients are slaved by the NetworkTransform and -Pose.
             if(isOwned)
             {
                 IXRControl instance = XRControl.Instance;
@@ -212,10 +211,6 @@ namespace Arteranos.Avatar
                 // Needs to update the pose AFTER the position and rotation because
                 // of a nasty flickering.
                 UpdateOwnPose();
-            }
-            else
-            {
-                UpdateAlienPose();
             }
 
             RouteVoice();
