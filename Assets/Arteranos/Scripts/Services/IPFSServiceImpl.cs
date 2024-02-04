@@ -27,13 +27,13 @@ namespace Arteranos.Services
 {
     public class IPFSServiceImpl : IPFSService
     {
-        public override IpfsEngine _Ipfs { get => ipfs; }
-        public override Peer _Self { get => self; }
-        public override SignKey _ServerKeyPair { get => serverKeyPair; }
+        public override IpfsEngine Ipfs_ { get => ipfs; }
+        public override Peer Self_ { get => self; }
+        public override SignKey ServerKeyPair_ { get => serverKeyPair; }
         public static string CachedPTOSNotice { get; private set; } = null;
 
-        public override event Action<IPublishedMessage> _OnReceivedHello;
-        public override event Action<IPublishedMessage> _OnReceivedServerDirectMessage;
+        public override event Action<IPublishedMessage> OnReceivedHello_;
+        public override event Action<IPublishedMessage> OnReceivedServerDirectMessage_;
 
         private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
 
@@ -103,7 +103,7 @@ namespace Arteranos.Services
                 {
                     if (msg.Sender.Id == self.Id) return;
                     bool success = await ParseIncomingIPFSMessageAsync(msg);
-                    if(success) _OnReceivedHello?.Invoke(msg);
+                    if(success) OnReceivedHello_?.Invoke(msg);
                 }, 
                 cts.Token);
 
@@ -112,7 +112,7 @@ namespace Arteranos.Services
                 {
                     if (msg.Sender.Id == self.Id) return;
                     bool success = await ParseIncomingIPFSMessageAsync(msg);
-                    if (success) _OnReceivedServerDirectMessage?.Invoke(msg);
+                    if (success) OnReceivedServerDirectMessage_?.Invoke(msg);
                 }, 
                 cts.Token);
 
@@ -122,7 +122,7 @@ namespace Arteranos.Services
 
             ipfs = ipfsTmp;
 
-            await _FlipServerDescription(true);
+            await FlipServerDescription_(true);
 
             UserFingerprints = new List<byte[]>();
 
@@ -133,7 +133,7 @@ namespace Arteranos.Services
 
         private async void OnDestroy()
         {
-            await _FlipServerDescription(false);
+            await FlipServerDescription_(false);
 
             await ipfs.StopAsync().ConfigureAwait(false);
 
@@ -165,7 +165,7 @@ namespace Arteranos.Services
                 {
                     try
                     {
-                        await _SendServerOnlineData();
+                        await SendServerOnlineData_();
                     }
                     catch (Exception ex)
                     {
@@ -177,7 +177,7 @@ namespace Arteranos.Services
             }
         }
 
-        public override async Task<IPAddress> _GetPeerIPAddress(string PeerID, CancellationToken token = default)
+        public override async Task<IPAddress> GetPeerIPAddress_(string PeerID, CancellationToken token = default)
         {
             Peer found = await ipfs.Dht.FindPeerAsync(PeerID, token).ConfigureAwait(false);
 
@@ -195,10 +195,10 @@ namespace Arteranos.Services
             };
         }
 
-        public override async Task _FlipServerDescription(bool reload)
+        public override async Task FlipServerDescription_(bool reload)
         {
             if(currentSDCid != null)
-                await _Ipfs.Block.RemoveAsync(currentSDCid);
+                await Ipfs_.Block.RemoveAsync(currentSDCid);
 
             if (!reload) return;
 
@@ -230,7 +230,7 @@ namespace Arteranos.Services
             currentSDCid = fsn.Id;
         }
 
-        public override Task _SendServerOnlineData()
+        public override Task SendServerOnlineData_()
         {
             // Flood mitigation
             if(last > DateTime.Now - TimeSpan.FromSeconds(30)) return Task.CompletedTask;
@@ -252,7 +252,7 @@ namespace Arteranos.Services
             return ipfs.PubSub.PublishAsync(topic_hello, ms);
         }
 
-        public override Task _SendServerHello()
+        public override Task SendServerHello_()
         {
             ServerHello.SDLink selflink = new()
             {
@@ -275,7 +275,7 @@ namespace Arteranos.Services
             return ipfs.PubSub.PublishAsync(topic_hello, ms);
         }
 
-        public override async Task _SendServerDirectMessage(string peerId, PeerMessage message)
+        public override async Task SendServerDirectMessage_(string peerId, PeerMessage message)
         {
             using CancellationTokenSource cts = new(100);
             using MemoryStream ms = new();
@@ -283,6 +283,19 @@ namespace Arteranos.Services
             message.Serialize(ms);
             ms.Position = 0;
             await ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", ms, cts.Token);
+        }
+
+        public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)
+        {
+            if(pinned)
+                return ipfs.Pin.AddAsync(cid, cancel: token);
+            else
+                return ipfs.Pin.RemoveAsync(cid, cancel: token);
+        }
+
+        public override Task<IEnumerable<Cid>> ListPinned_(CancellationToken token = default)
+        {
+            return ipfs.Pin.ListAsync(token);
         }
 
         public async Task<bool> ParseIncomingIPFSMessageAsync(IPublishedMessage publishedMessage)

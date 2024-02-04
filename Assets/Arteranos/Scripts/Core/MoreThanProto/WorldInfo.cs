@@ -49,7 +49,7 @@ namespace Arteranos.Core
         {
             new WorldInfo()._DBDelete(cid);
             // Remove the pin, too, just in case.
-            IPFSService.Ipfs.Pin.RemoveAsync(cid);
+            IPFSService.PinCid(cid, false);
         }
 
         public static IEnumerable<WorldInfo> DBList()
@@ -100,17 +100,17 @@ namespace Arteranos.Core
 
         public void Favourite()
         {
-            IPFSService.Ipfs.Pin.AddAsync(WorldCid);
+            IPFSService.PinCid(WorldCid, true);
         }
 
         public void Unfavourite()
         {
-            IPFSService.Ipfs.Pin.RemoveAsync(WorldCid);
+            IPFSService.PinCid(WorldCid, false);
         }
 
         public bool IsFavourited()
         {
-            List<Cid> all = Task.Run(async () => (await IPFSService.Ipfs.Pin.ListAsync()).ToList()).Result;
+            List<Cid> all = Task.Run(async () => (await IPFSService.ListPinned()).ToList()).Result;
             return all.Contains(WorldCid);
         }
 

@@ -280,35 +280,42 @@ namespace Arteranos.Services
 
     public abstract class IPFSService : MonoBehaviour
     {
-        public abstract IpfsEngine _Ipfs { get; }
-        public abstract Peer _Self { get; }
-        public abstract SignKey _ServerKeyPair { get; }
+        public abstract IpfsEngine Ipfs_ { get; }
+        public abstract Peer Self_ { get; }
+        public abstract SignKey ServerKeyPair_ { get; }
 
-        public abstract event Action<IPublishedMessage> _OnReceivedHello;
-        public abstract event Action<IPublishedMessage> _OnReceivedServerDirectMessage;
+        public abstract event Action<IPublishedMessage> OnReceivedHello_;
+        public abstract event Action<IPublishedMessage> OnReceivedServerDirectMessage_;
 
-        public abstract Task<IPAddress> _GetPeerIPAddress(string PeerID, CancellationToken token = default);
-        public abstract Task _FlipServerDescription(bool reload);
-        public abstract Task _SendServerHello();
-        public abstract Task _SendServerOnlineData();
-        public abstract Task _SendServerDirectMessage(string peerId, PeerMessage message);
+        public abstract Task<IPAddress> GetPeerIPAddress_(string PeerID, CancellationToken token = default);
+        public abstract Task FlipServerDescription_(bool reload);
+        public abstract Task SendServerHello_();
+        public abstract Task SendServerOnlineData_();
+        public abstract Task SendServerDirectMessage_(string peerId, PeerMessage message);
+        public abstract Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);
+        public abstract Task<IEnumerable<Cid>> ListPinned_(CancellationToken token = default);
 
         public static IPFSService Instance { get; protected set; }
 
         public static IpfsEngine Ipfs
-            => Instance._Ipfs;
+            => Instance.Ipfs_;
         public static Peer Self 
-            => Instance._Self;
+            => Instance.Self_;
         public static Task<IPAddress> GetPeerIPAddress(string PeerID, CancellationToken token = default)
-            => Instance._GetPeerIPAddress(PeerID, token);
+            => Instance.GetPeerIPAddress_(PeerID, token);
         public static Task FlipServerDescription(bool reload)
-            => Instance._FlipServerDescription(reload);
+            => Instance.FlipServerDescription_(reload);
         public static Task SendServerHello()
-            => Instance._SendServerHello();
+            => Instance.SendServerHello_();
         public static Task SendServerOnlineData()
-            => Instance._SendServerOnlineData();
+            => Instance.SendServerOnlineData_();
         public static Task SendServerDirectMessage(string peerId, PeerMessage message)
-            => Instance._SendServerDirectMessage(peerId, message);
+            => Instance.SendServerDirectMessage_(peerId, message);
+
+        public static Task PinCid(Cid cid, bool pinned, CancellationToken token = default)
+            => Instance.PinCid_(cid, pinned, token);
+        public static Task<IEnumerable<Cid>> ListPinned(CancellationToken token = default)
+            => Instance.ListPinned_(token);
 
     }
     #endregion
