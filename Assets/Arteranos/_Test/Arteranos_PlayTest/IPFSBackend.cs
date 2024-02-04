@@ -42,9 +42,9 @@ namespace Arteranos.PlayTest
             yield return TestFixture.SetupIPFS();
             Assert.IsNotNull(TestFixture.Ipfs);
 
-            Assert.IsNotNull(TestFixture.IPFSService._ServerKeyPair);
-            Assert.IsNotNull(TestFixture.IPFSService._Self);
-            Assert.AreEqual(TestFixture.IPFSService._Self.Id, TestFixture.IPFSService._ServerKeyPair.PublicKey.ToId());
+            Assert.IsNotNull(TestFixture.IPFSService.ServerKeyPair_);
+            Assert.IsNotNull(TestFixture.IPFSService.Self_);
+            Assert.AreEqual(TestFixture.IPFSService.Self_.Id, TestFixture.IPFSService.ServerKeyPair_.PublicKey.ToId());
         }
 
         [UnityTest]
@@ -131,7 +131,7 @@ namespace Arteranos.PlayTest
 
             try
             {
-                TestFixture.IPFSService._OnReceivedHello += Receiver;
+                TestFixture.IPFSService.OnReceivedHello_ += Receiver;
                 using TempNode otherNode = new TempNode();
                 await otherNode.StartAsync();
 
@@ -151,7 +151,7 @@ namespace Arteranos.PlayTest
             }
             finally
             {
-                TestFixture.IPFSService._OnReceivedHello -= Receiver;
+                TestFixture.IPFSService.OnReceivedHello_ -= Receiver;
             }
         }
 
@@ -181,7 +181,7 @@ namespace Arteranos.PlayTest
 
             await otherNode.PubSub.SubscribeAsync("/X-Arteranos/Server-Hello", msg => sender = msg.Sender, cts.Token);
 
-            await TestFixture.IPFSService._SendServerHello();
+            await TestFixture.IPFSService.SendServerHello_();
 
             await TestFixture.WaitForConditionAsync(5, () => (sender != null), "Message was not received");
 

@@ -8,6 +8,7 @@
 
 using Arteranos.Core;
 using Arteranos.Core.Operations;
+using Arteranos.Services;
 using Ipfs;
 using System;
 using System.Collections;
@@ -260,8 +261,15 @@ namespace Arteranos.UI
             {
                 Client cs = SettingsManager.Client;
 
+                // TODO: Unpin the old avatar if it's gone from the favouriteds too.
+                //if (cs.AvatarCidString != null)
+                //    IPFSService.PinCid(cs.AvatarCidString, false);
+
+                // Save this as the current avatar and keep it.
                 cs.AvatarCidString = AvatarCid;
                 cs.Save();
+                IPFSService.PinCid(AvatarCid, true);
+
                 Destroy(gameObject);
             }
             else

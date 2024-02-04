@@ -88,9 +88,9 @@ namespace Arteranos.PlayTest.Services
 
             yield return null;
 
-            yield return TestFixture.WaitForCondition(5, () => srv?._Ipfs != null, "IPFS server timeout");
+            yield return TestFixture.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
 
-            ipfs = srv._Ipfs;
+            ipfs = srv.Ipfs_;
 
             self = Task.Run(async () => await ipfs.LocalPeer).Result;
         }
@@ -138,7 +138,7 @@ namespace Arteranos.PlayTest.Services
 
             try
             {
-                srv._OnReceivedHello += Receiver;
+                srv.OnReceivedHello_ += Receiver;
                 await otherNode.StartAsync();
                 Peer other = await otherNode.LocalPeer;
 
@@ -155,7 +155,7 @@ namespace Arteranos.PlayTest.Services
             }
             finally
             {
-                srv._OnReceivedHello -= Receiver;
+                srv.OnReceivedHello_ -= Receiver;
 
                 await otherNode.StopAsync();
             }
@@ -197,7 +197,7 @@ namespace Arteranos.PlayTest.Services
 
                 await otherNode.Swarm.ConnectAsync(self.Addresses.First());
 
-                await srv._SendServerHello();
+                await srv.SendServerHello_();
 
                 await TestFixture.WaitForConditionAsync(5, () => (hello != null), "Message was not received");
 
@@ -277,7 +277,7 @@ namespace Arteranos.PlayTest.Services
 
             using CancellationTokenSource cts = new(TimeSpan.FromSeconds(20));
 
-            IPAddress addr = await srv._GetPeerIPAddress(peerID, cts.Token);
+            IPAddress addr = await srv.GetPeerIPAddress_(peerID, cts.Token);
 
             Debug.Log($"Peer's address is {addr}");
         }
@@ -299,7 +299,7 @@ namespace Arteranos.PlayTest.Services
 
             try
             {
-                IPAddress addr = await srv._GetPeerIPAddress(wrongPeerID, cts.Token);
+                IPAddress addr = await srv.GetPeerIPAddress_(wrongPeerID, cts.Token);
 
                 Debug.Log($"Peer's address is {addr}");
 
