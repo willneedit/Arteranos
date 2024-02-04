@@ -164,8 +164,18 @@ namespace Arteranos.UI
                 Cid AssetCid = null;
 
                 {
+                    string sourceURL = txt_AddAvatarModelURL.text;
+
+                    // Naked Ready Player Me URL fixup: Request the necessary morph targets
+                    if((sourceURL.StartsWith("https://models.readyplayer.me/") ||
+                        sourceURL.StartsWith("http://models.readyplayer.me/")) &&
+                        sourceURL.EndsWith(".glb"))
+                    {
+                        sourceURL += "?morphTargets=eyeBlinkLeft,eyeBlinkRight,mouthOpen";
+                    }
+
                     (AsyncOperationExecutor<Context> ao, Context co) =
-                        AssetUploader.PrepareUploadToIPFS(txt_AddAvatarModelURL.text);
+                        AssetUploader.PrepareUploadToIPFS(sourceURL);
 
                     ao.ProgressChanged += (ratio, msg) => lbl_Notice.text = $"{msg}";
 
@@ -246,8 +256,19 @@ namespace Arteranos.UI
                 btn_AddAvatar.interactable = true;
             }
 
-            btn_AddAvatar.interactable = false;
-            StartCoroutine(UploadAvatarCoroutine());
+            if(btn_LabelAddAvatar == "Confirm")
+            {
+                Client cs = SettingsManager.Client;
+
+                cs.AvatarCidString = AvatarCid;
+                cs.Save();
+                Destroy(gameObject);
+            }
+            else
+            {
+                btn_AddAvatar.interactable = false;
+                StartCoroutine(UploadAvatarCoroutine());
+            }
         }
     }
 }

@@ -220,18 +220,18 @@ namespace Arteranos.Core.Operations
 
         private readonly ObjectStats warningLevels = new()
         {
-            Count = 2,
+            Count = 6,
             Vertices = 12000,
             Triangles = 60000,
-            Materials = 2,
+            Materials = 6,
         };
 
         private readonly ObjectStats errorLevels = new()
         {
-            Count = 4,
+            Count = 10,
             Vertices = 16000,
             Triangles = 90000,
-            Materials = 4,
+            Materials = 10,
         };
 
         public int Timeout { get; set; }
@@ -246,6 +246,7 @@ namespace Arteranos.Core.Operations
             AvatarDownloaderContext context = _context as AvatarDownloaderContext;
 
             Transform avatarTransform = context.Avatar.transform;
+            Transform armature = avatarTransform.Find(BONE_ARMATURE);
 
             // Maybe I had to look for the way to get the bounding box.
             context.UnscaledHeight = FoldTransformHierarchy(avatarTransform, 0.0f,
@@ -270,11 +271,11 @@ namespace Arteranos.Core.Operations
             context.LeftHand = AvatarDownloader.TrySidedLimb(context, "Hand", false);
             context.RightHand = AvatarDownloader.TrySidedLimb(context, "Hand", true);
 
-            context.Head = avatarTransform.FindRecursive("Head");
+            context.Head = armature.FindRecursive("Head");
 
             context.Feet = new();
             List<Transform> feetTransforms = new();
-            FindLimbsPattern(avatarTransform, "(.*Foot|Foot.*)", feetTransforms);
+            FindLimbsPattern(armature, "(.*Foot|Foot.*)", feetTransforms);
             foreach (Transform transform in feetTransforms)
                 context.Feet.Add(new()
                 {
@@ -284,7 +285,7 @@ namespace Arteranos.Core.Operations
 
             // Find the eyes (usually two ... :)
             context.Eyes = new();
-            FindLimbsPattern(avatarTransform, "(.*Eye|Eye.*)", context.Eyes);
+            FindLimbsPattern(armature, "(.*Eye|Eye.*)", context.Eyes);
 
             // The Avatar Point Of View. Between the eyes, but not if the avatar breakdancing...
             Vector3 centerEyePos = Vector3.zero;
