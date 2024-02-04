@@ -9,13 +9,17 @@ using Arteranos.Core;
 using Arteranos.Avatar;
 using System;
 using UnityEngine;
+using System.Collections;
+using Ipfs;
+using Arteranos.Core.Operations;
+using System.Threading.Tasks;
+using Arteranos.Services;
+using Org.BouncyCastle.Asn1.Icao;
 
 namespace Arteranos.UI
 {
     public class AvatarGalleryUI : MonoBehaviour
     {
-        [SerializeField] private GameObject AvatarLoaderRPM = null;
-
         [SerializeField] private Renderer btn_prev = null;
         [SerializeField] private Renderer btn_next = null;
         [SerializeField] private Renderer btn_save = null;
@@ -44,6 +48,32 @@ namespace Arteranos.UI
 
         private void ShowAvatar()
         {
+            IEnumerator LoadAvatarCoroutine(Cid AvatarCid)
+            {
+                if (currentAvatar != null)
+                    Destroy(currentAvatar);
+                currentAvatar = null;
+
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new()
+                    {
+                        InstallAnimController = SettingsManager.Client.Me.CurrentAvatarGender,
+                        //DesiredHeight = 1.75f,
+                        InstallEyeAnimation = true,
+                    });
+
+                Task t = ao.ExecuteAsync(co);
+
+                while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+                currentAvatar = AvatarDownloader.GetLoadedAvatar(co);
+                currentAvatar.transform.SetParent(transform, false);
+                currentAvatar.transform.SetLocalPositionAndRotation(
+                    puppetPosition,
+                    puppetRotation);
+                currentAvatar.SetActive(true);
+            }
+
             int count = Me.AvatarGallery.Count;
 
             LightOn(btn_save, !IsMeInGallery());
@@ -52,27 +82,16 @@ namespace Arteranos.UI
             LightOn(btn_next, count > 1);
             LightOn(btn_delete, !IsEmpty());
 
-            if(currentAvatar != null)
-                Destroy(currentAvatar);
-            currentAvatar = null;
-
             if(Me.AvatarGallery.Count < 1) return;
 
-            AvatarDescriptionJSON puppet = Me.AvatarGallery[index];
-            currentAvatar = new("Projection");
-            currentAvatar.transform.SetParent(transform, false);
-            currentAvatar.transform.SetLocalPositionAndRotation(
-                puppetPosition,
-                puppetRotation);
-            currentAvatar.SetActive(false);
-            GameObject go = Instantiate(AvatarLoaderRPM, currentAvatar.transform);
-
-            IAvatarBody loader = go.GetComponent<IAvatarBody>();
-            loader.GalleryModeURL = puppet.AvatarCidString;
-            currentAvatar.SetActive(true);
+            StartCoroutine(LoadAvatarCoroutine(Me.AvatarGallery[index].AvatarCidString));
         }
 
-        private AvatarDescriptionJSON GetMeAvatar() => Me.CurrentAvatar;
+        private AvatarDescriptionJSON GetMeAvatar() => new()
+        {
+            AvatarCidString = Me.CurrentAvatar.AvatarCidString,
+            AvatarHeight = Me.CurrentAvatar.AvatarHeight,
+        };
 
         public bool IsMeInGallery() => Me.AvatarGallery.Contains(GetMeAvatar());
 
@@ -107,6 +126,7 @@ namespace Arteranos.UI
             AvatarDescriptionJSON meAva = GetMeAvatar();
 
             Me.AvatarGallery.Insert(index, meAva);
+            IPFSService.PinCid(meAva.AvatarCidString, true);
             ShowAvatar();
 
             dirty = true;
@@ -117,6 +137,7 @@ namespace Arteranos.UI
             if(IsEmpty()) return;
 
             Me.AvatarGallery.RemoveAt(index);
+            // TODO Only unpin when it's not the cuurent avatar, too
             ShowAvatar();
 
             dirty = true;

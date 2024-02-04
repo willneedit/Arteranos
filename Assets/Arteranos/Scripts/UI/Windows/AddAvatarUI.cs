@@ -201,7 +201,7 @@ namespace Arteranos.UI
                     (AsyncOperationExecutor<Context> ao, Context co) =
                         AvatarDownloader.PrepareDownloadAvatar(AssetCid, new()
                         {
-                            InstallAnimController = 1,
+                            InstallAnimController = SettingsManager.Client.Me.CurrentAvatarGender,
                         });
 
                     ao.ProgressChanged += (ratio, msg) => lbl_Notice.text = $"{msg}";
