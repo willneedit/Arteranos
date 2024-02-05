@@ -167,12 +167,14 @@ namespace Arteranos.UI
                 {
                     string sourceURL = txt_AddAvatarModelURL.text;
 
-                    // Naked Ready Player Me URL fixup: Request the necessary morph targets
+                    // Naked Ready Player Me URL fixup...
+                    //  - Necessary morph targets
+                    //  - T-pose, not A-pose
                     if((sourceURL.StartsWith("https://models.readyplayer.me/") ||
                         sourceURL.StartsWith("http://models.readyplayer.me/")) &&
                         sourceURL.EndsWith(".glb"))
                     {
-                        sourceURL += "?morphTargets=eyeBlinkLeft,eyeBlinkRight,mouthOpen";
+                        sourceURL += "?pose=T&morphTargets=eyeBlinkLeft,eyeBlinkRight,mouthOpen";
                     }
 
                     (AsyncOperationExecutor<Context> ao, Context co) =
@@ -201,7 +203,7 @@ namespace Arteranos.UI
                     (AsyncOperationExecutor<Context> ao, Context co) =
                         AvatarDownloader.PrepareDownloadAvatar(AssetCid, new()
                         {
-                            InstallAnimController = SettingsManager.Client.Me.CurrentAvatarGender,
+                            InstallAnimController = true,
                         });
 
                     ao.ProgressChanged += (ratio, msg) => lbl_Notice.text = $"{msg}";

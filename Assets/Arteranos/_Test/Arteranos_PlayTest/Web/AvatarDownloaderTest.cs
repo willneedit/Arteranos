@@ -14,7 +14,10 @@ using Arteranos.Core.Operations;
 using System;
 using Arteranos.Avatar;
 using UnityEditor;
+using Newtonsoft.Json;
+
 using Object = UnityEngine.Object;
+using System.Collections.Generic;
 
 namespace Arteranos.PlayTest.Web
 {
@@ -312,7 +315,7 @@ namespace Arteranos.PlayTest.Web
             (AsyncOperationExecutor<Context> ao, Context co) =
                 AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
-                    InstallAnimController = 1
+                    InstallAnimController = true
                 });
 
             Task t = ao.ExecuteAsync(co);
@@ -326,6 +329,11 @@ namespace Arteranos.PlayTest.Web
             Animator animator = avatar.GetComponent<Animator>();
 
             Assert.IsNotNull(animator);
+
+            UnityEngine.Avatar animAva = animator.avatar;
+
+            Assert.IsTrue(animAva.isValid);
+            Assert.IsTrue(animAva.isHuman);
 
             yield return new WaitForSeconds(2);
 
@@ -361,7 +369,7 @@ namespace Arteranos.PlayTest.Web
                 {
                     InstallFootIK = true,
                     InstallFootIKCollider = true,
-                    InstallAnimController = 1
+                    InstallAnimController = true
                 });
 
             Task t = ao.ExecuteAsync(co);
@@ -384,6 +392,34 @@ namespace Arteranos.PlayTest.Web
 
             Object.Destroy(go);
             // yield return UnityPAK();
+        }
+
+        struct boneTranslation
+        {
+            public string BoneName;
+            public string HumanName;
+        }
+        class table
+        {
+            public Dictionary<string, string> translationTable;
+        }
+        [UnityTest]
+        public IEnumerator SaveBoneTranslationTable()
+        {
+            yield return null;
+
+            const string femaleAvatarResource = "AvatarAnim/RPM_FemaleAvatar";
+
+            UnityEngine.Avatar avatar_bp =
+                Resources.Load<UnityEngine.Avatar>(femaleAvatarResource);
+
+
+            table table = new() { translationTable = new() };
+            foreach (HumanBone bone in avatar_bp.humanDescription.human)
+                table.translationTable.Add(bone.boneName, bone.humanName);
+
+            string json = JsonConvert.SerializeObject(table, Formatting.Indented);
+            File.WriteAllText("RPMBoneTranslations.json", json);
         }
     }
 }

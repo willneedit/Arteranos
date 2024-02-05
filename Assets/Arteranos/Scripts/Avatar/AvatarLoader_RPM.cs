@@ -85,7 +85,7 @@ namespace Arteranos.Avatar
                     AvatarDownloader.PrepareDownloadAvatar(_avatarCid, new()
                     {
                         DesiredHeight = _cmheight / 100.0f,
-                        InstallAnimController = _gender,
+                        InstallAnimController = true,
                         InstallEyeAnimation = true,
                         InstallMouthAnimation = true,
                         InstallFootIK = isOwned,

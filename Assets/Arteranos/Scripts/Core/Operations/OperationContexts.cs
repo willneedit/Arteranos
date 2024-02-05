@@ -30,7 +30,7 @@ namespace Arteranos.Core.Operations
     {
         bool InstallEyeAnimation { get; set; }
         bool InstallMouthAnimation { get; set; }
-        int InstallAnimController { get; set; }
+        bool InstallAnimController { get; set; }
         bool InstallFootIK { get; set; }
         bool InstallFootIKCollider { get; set; }
         bool InstallHandIK { get; set; }
@@ -41,7 +41,7 @@ namespace Arteranos.Core.Operations
     {
         public bool InstallEyeAnimation { get; set; }
         public bool InstallMouthAnimation { get; set; }
-        public int InstallAnimController { get; set; }
+        public bool InstallAnimController { get; set; }
         public bool InstallFootIK { get; set; }
         public bool InstallFootIKCollider { get; set; }
         public bool InstallHandIK { get; set; }
@@ -52,7 +52,7 @@ namespace Arteranos.Core.Operations
     {
         public bool InstallEyeAnimation { get; set; } = false;
         public bool InstallMouthAnimation { get; set; } = false;
-        public int InstallAnimController { get; set; } = 0;
+        public bool InstallAnimController { get; set; } = false;
         public bool InstallFootIK { get; set; } = false;
         public bool InstallFootIKCollider { get; set; } = false;
         public bool InstallHandIK { get; set; } = false;

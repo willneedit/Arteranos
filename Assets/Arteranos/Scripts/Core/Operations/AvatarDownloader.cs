@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Arteranos.Avatar;
 using DitzelGames.FastIK;
+using Newtonsoft.Json;
 
 namespace Arteranos.Core.Operations
 {
@@ -31,11 +32,17 @@ namespace Arteranos.Core.Operations
         public float Rating { get; set; }
     }
 
+    internal class BoneTranslations
+    {
+        public Dictionary<string, string> translationTable;
+    }
+
     internal class InstallAnimController : IAsyncOperation<Context>
     {
         const string controllerResource = "AvatarAnim/AvatarAnimationController";
-        const string maleAvatarResource = "AvatarAnim/RPM_MaleAvatar";
-        const string femaleAvatarResource = "AvatarAnim/RPM_FemaleAvatar";
+        const string RPMBoneTranslation = "AvatarAnim/RPMBoneTranslations";
+
+        const string BONE_ARMATURE = "Armature";
 
         public int Timeout { get; set; }
         public float Weight { get; set; } = 0.01f;
@@ -46,15 +53,56 @@ namespace Arteranos.Core.Operations
         {
             AvatarDownloaderContext context = _context as AvatarDownloaderContext;
 
-            if (context.InstallAnimController != 0)
+            if (context.InstallAnimController)
             {
+                UnityEngine.Avatar avatar;
+#if true
+                // Preconditions:
+                //  - Avatar must be in T-Pose
+                //  - Skeleton must contain the HumanTrait.RequiredBone's
+
+                List<HumanBone> bones = new();
+                TextAsset ta = Resources.Load<TextAsset>(RPMBoneTranslation);
+                BoneTranslations table = JsonConvert.DeserializeObject<BoneTranslations>(ta.text);
+
+                foreach (KeyValuePair<string, string> bone in table.translationTable)
+                {
+                    bones.Add(new()
+                    {
+                        boneName = bone.Key,    // Skeleton's bone names
+                        humanName = bone.Value, // Mecanim's bone names
+                        limit = new()
+                        {
+                            // Refer to the skeleton's T pose as the base of the animations.
+                            useDefaultValues = true
+                        }
+                    });
+                }
+
+                // Build the avatar with the minimal dataset
+                HumanDescription hd = new()
+                {
+                    human = bones.ToArray(),
+                };
+
+                avatar = AvatarBuilder.BuildHumanAvatar(context.Avatar, hd);
+                avatar.name = "Generated Human Avatar";
+
+                if (!avatar.isValid)
+                    throw new ArgumentException("Avatar is considered invalid.");
+
+                if (!avatar.isHuman)
+                    throw new ArgumentException("Avatar is considered nonhuman.");
+#else
+                avatar = Resources.Load<UnityEngine.Avatar>(
+                context.InstallAnimController > 0
+                ? maleAvatarResource
+                : femaleAvatarResource);
+#endif
                 Animator animator = context.Avatar.AddComponent<Animator>();
                 animator.runtimeAnimatorController = 
                     Resources.Load<RuntimeAnimatorController>(controllerResource);
-                animator.avatar = Resources.Load<UnityEngine.Avatar>(
-                    context.InstallAnimController > 0
-                    ? maleAvatarResource
-                    : femaleAvatarResource);
+                animator.avatar = avatar;
             }
 
             return Task.FromResult<Context>(context);
@@ -379,7 +427,7 @@ namespace Arteranos.Core.Operations
                 Cid = cid,
                 TargetFile = GetAvatarCacheFile(cid),
 
-                InstallAnimController = options?.InstallAnimController ?? 0,
+                InstallAnimController = options?.InstallAnimController ?? false,
                 InstallEyeAnimation = options?.InstallEyeAnimation ?? false,
                 InstallMouthAnimation = options?.InstallMouthAnimation ?? false,
                 InstallFootIK = options?.InstallFootIK ?? false,

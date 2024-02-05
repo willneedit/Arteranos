@@ -57,7 +57,7 @@ namespace Arteranos.UI
                 (AsyncOperationExecutor<Context> ao, Context co) =
                     AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new()
                     {
-                        InstallAnimController = SettingsManager.Client.Me.CurrentAvatarGender,
+                        InstallAnimController = true,
                         //DesiredHeight = 1.75f,
                         InstallEyeAnimation = true,
                     });
