@@ -42,8 +42,6 @@ namespace Arteranos.Core.Operations
         const string controllerResource = "AvatarAnim/AvatarAnimationController";
         const string RPMBoneTranslation = "AvatarAnim/RPMBoneTranslations";
 
-        const string BONE_ARMATURE = "Armature";
-
         public int Timeout { get; set; }
         public float Weight { get; set; } = 0.01f;
         public string Caption { get; set; } = "Installing animation controller";
@@ -56,7 +54,6 @@ namespace Arteranos.Core.Operations
             if (context.InstallAnimController)
             {
                 UnityEngine.Avatar avatar;
-#if true
                 // Preconditions:
                 //  - Avatar must be in T-Pose
                 //  - Skeleton must contain the HumanTrait.RequiredBone's
@@ -93,12 +90,6 @@ namespace Arteranos.Core.Operations
 
                 if (!avatar.isHuman)
                     throw new ArgumentException("Avatar is considered nonhuman.");
-#else
-                avatar = Resources.Load<UnityEngine.Avatar>(
-                context.InstallAnimController > 0
-                ? maleAvatarResource
-                : femaleAvatarResource);
-#endif
                 Animator animator = context.Avatar.AddComponent<Animator>();
                 animator.runtimeAnimatorController = 
                     Resources.Load<RuntimeAnimatorController>(controllerResource);
@@ -136,7 +127,7 @@ namespace Arteranos.Core.Operations
                     {
                         footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
                         footIK.Elevation = foot.Elevation;
-                        footIK.rootTransform = context.Avatar.transform;
+                        footIK.rootTransform = avatarTransform;
                         footIK.guidedTransform = foot.FootTransform;
                     }
                 }
@@ -144,8 +135,25 @@ namespace Arteranos.Core.Operations
 
             if (context.InstallHandIK)
             {
-                RigIK(context.LeftHand, avatarTransform, context.JointNames);
-                RigIK(context.RightHand, avatarTransform, context.JointNames);
+                Transform handHandle;
+                HandIKController handIK;
+                handHandle = RigIK(context.LeftHand, avatarTransform, context.JointNames);
+                if(context.InstallHandIKController)
+                {
+                    handIK = handHandle.gameObject.AddComponent<HandIKController>();
+                    handIK.rootTransform = avatarTransform;
+                    handIK.RightSide = false;
+                    handIK.AvatarMeasures = context;
+                }
+
+                handHandle = RigIK(context.RightHand, avatarTransform, context.JointNames);
+                if(context.InstallHandIKController)
+                {
+                    handIK = handHandle.gameObject.AddComponent<HandIKController>();
+                    handIK.rootTransform = avatarTransform;
+                    handIK.RightSide = true;
+                    handIK.AvatarMeasures = context;
+                }
             }
 
             return Task.FromResult<Context>(context);
@@ -432,6 +440,7 @@ namespace Arteranos.Core.Operations
                 InstallMouthAnimation = options?.InstallMouthAnimation ?? false,
                 InstallFootIK = options?.InstallFootIK ?? false,
                 InstallFootIKCollider = options?.InstallFootIKCollider ?? false,
+                InstallHandIKController = options?.InstallHandIKController ?? false,
                 InstallHandIK = options?.InstallHandIK ?? false,
                 DesiredHeight = options?.DesiredHeight ?? 0,
             };

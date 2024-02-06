@@ -71,15 +71,11 @@ namespace Arteranos.Avatar
 
             Cid _avatarCid = avatarCid;
             float _cmheight = height;
-            int _gender = gender;
 
             IEnumerator AvatarDownloaderCoroutine()
             {
                 while(settleTime > DateTime.Now)
                     yield return new WaitForSeconds((settleTime - DateTime.Now).Seconds);
-
-                if (_gender == 0)
-                    _gender = (Random.Range(0, 100) < 50) ? -1 : 1;
 
                 (AsyncOperationExecutor<Context> ao, Context co) =
                     AvatarDownloader.PrepareDownloadAvatar(_avatarCid, new()
@@ -90,7 +86,8 @@ namespace Arteranos.Avatar
                         InstallMouthAnimation = true,
                         InstallFootIK = isOwned,
                         InstallFootIKCollider = isOwned,
-                        InstallHandIK = isOwned
+                        InstallHandIK = isOwned,
+                        InstallHandIKController = isOwned,
                     });
 
                 Task t = ao.ExecuteAsync(co);

@@ -33,6 +33,7 @@ namespace Arteranos.Core.Operations
         bool InstallAnimController { get; set; }
         bool InstallFootIK { get; set; }
         bool InstallFootIKCollider { get; set; }
+        bool InstallHandIKController { get; set; }
         bool InstallHandIK { get; set; }
         float DesiredHeight { get; set; }
     }
@@ -44,6 +45,7 @@ namespace Arteranos.Core.Operations
         public bool InstallAnimController { get; set; }
         public bool InstallFootIK { get; set; }
         public bool InstallFootIKCollider { get; set; }
+        public bool InstallHandIKController { get; set; }
         public bool InstallHandIK { get; set; }
         public float DesiredHeight { get; set; }
     }
@@ -55,6 +57,7 @@ namespace Arteranos.Core.Operations
         public bool InstallAnimController { get; set; } = false;
         public bool InstallFootIK { get; set; } = false;
         public bool InstallFootIKCollider { get; set; } = false;
+        public bool InstallHandIKController { get; set; } = false;
         public bool InstallHandIK { get; set; } = false;
         public float DesiredHeight { get; set; } = 0.0f;
 

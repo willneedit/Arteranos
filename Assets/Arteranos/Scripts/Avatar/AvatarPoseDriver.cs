@@ -16,23 +16,15 @@ namespace Arteranos.Avatar
 
     public class AvatarPoseDriver : MonoBehaviour
     {
-        private Transform Controller_LeftHand = null;
-        private Transform Controller_RightHand = null;
-        private Transform Handle_LeftHand = null;
-        private Transform Handle_RightHand = null;
         private IAvatarMeasures AvatarMeasures = null;
-        private NetworkPose m_Poser = null;
-
-        // Transpose controller rotations to avatar body rotations
-        public readonly Quaternion LhrOffset = Quaternion.Euler(0, 90, 90);
-        public readonly Quaternion RhrOffset = Quaternion.Euler(0, -90, -90);
+        private NetworkPose NetworkPose = null;
 
         private AvatarBrain AvatarBrain = null;
         public bool isOwned => AvatarBrain?.isOwned ?? false;
 
         private void Awake()
         {
-            m_Poser = GetComponent<NetworkPose>();
+            NetworkPose = GetComponent<NetworkPose>();
             AvatarBrain = GetComponent<AvatarBrain>();
         }
 
@@ -56,18 +48,6 @@ namespace Arteranos.Avatar
         {
             Transform xrot = XRControl.Instance.rigTransform;
 
-            if(useXR)
-            {
-                // In VR, connect the VR hand controllers to the puppet's hands strings.
-                Controller_LeftHand = xrot.FindRecursive("LeftHand Controller");
-                Controller_RightHand = xrot.FindRecursive("RightHand Controller");
-            }
-            else
-            {
-                // In 2D, just use the default pose and leave it be.
-                ResetPose(true, true);
-            }
-
             // And, move the XR (or 2D) rig to the own avatar's position.
             Debug.Log("Moving rig");
             xrot.transform.SetPositionAndRotation(transform.position, transform.rotation);
@@ -76,13 +56,8 @@ namespace Arteranos.Avatar
 
         public void UpdateAvatarMeasures(IAvatarMeasures am)
         {
-            m_Poser.UploadJointNames(am.Avatar.transform, am.JointNames.ToArray());
+            NetworkPose.UploadJointNames(am.Avatar.transform, am.JointNames.ToArray());
             AvatarMeasures = am;
-
-            Handle_LeftHand = am.Avatar.transform.FindRecursive($"Handle_{am.LeftHand.name}");
-            Handle_RightHand = am.Avatar.transform.FindRecursive($"Handle_{am.RightHand.name}");
-
-            ResetPose(true, true);
 
             if (isOwned)
             {
@@ -95,57 +70,17 @@ namespace Arteranos.Avatar
             }
         }
 
-        public void ResetPose(bool leftHand, bool rightHand)
-        {
-            if (leftHand)
-            {
-                Vector3 idle_lh = new(-0.4f, 0, 0);
-                Quaternion idle_rlh = Quaternion.Euler(180, -90, 0);
-                Handle_LeftHand?.SetLocalPositionAndRotation(idle_lh, idle_rlh);
-            }
-
-            if (rightHand)
-            {
-                Vector3 idle_rh = new(0.4f, 0, 0);
-                Quaternion idle_rrh = Quaternion.Euler(180, 90, 0);
-                Handle_RightHand?.SetLocalPositionAndRotation(idle_rh, idle_rrh);
-            }
-
-        }
-
         // --------------------------------------------------------------------
         #region Pose updating
 
         public void UpdateOwnPose()
         {
-            // VR: Hand and head tracking
+            // VR: Head tracking
             if(SettingsManager.Client.VRMode)
             {
                 if(AvatarMeasures.CenterEye == null) return;
 
                 Transform cam = XRControl.Instance.cameraTransform;
-                ControlSettingsJSON ccs = SettingsManager.Client.Controls;
-
-                Vector3 cEyeOffset = AvatarMeasures.CenterEye.position -
-                    cam.position;
-
-                // If the respective controllers are disabled, reset their hand poses
-                // and bypass the tracking.
-                ResetPose(!ccs.Controller_left, !ccs.Controller_right);
-
-                if(Controller_LeftHand && Handle_LeftHand && ccs.Controller_left)
-                {
-                    Handle_LeftHand.SetPositionAndRotation(
-                            Controller_LeftHand.position + cEyeOffset,
-                            Controller_LeftHand.rotation * LhrOffset);
-                }
-
-                if(Controller_RightHand && Handle_RightHand && ccs.Controller_right)
-                {
-                    Handle_RightHand.SetPositionAndRotation(
-                            Controller_RightHand.position + cEyeOffset,
-                            Controller_RightHand.rotation * RhrOffset);
-                }
 
                 if(AvatarMeasures.Head)
                     AvatarMeasures.Head.rotation = cam.rotation;
