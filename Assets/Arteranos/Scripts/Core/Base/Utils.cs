@@ -60,12 +60,6 @@ namespace Arteranos.Core
         public static readonly string WorldCacheRootDir = $"{FileUtils.temporaryCachePath}/WorldCache";
 
         /// <summary>
-        /// The avatar cache directory.
-        /// FIXME Needs to be extended when the additional avatar providers will be implemented
-        /// </summary>
-        public static string RPMAvatarCache => ReadyPlayerMe.Core.DirectoryUtility.GetAvatarsDirectoryPath();
-
-        /// <summary>
         /// Simulate a RC circuit (a capacitor and resistor) to measure the capacitor's charge,
         /// used in for example a VU meter. 
         /// </summary>

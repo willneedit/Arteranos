@@ -1,12 +1,3 @@
-[submodule "Packages/rpm-unity-sdk-avatar-loader"]
-	path = Packages/rpm-unity-sdk-avatar-loader
-	url = https://github.com/willneedit/rpm-unity-sdk-avatar-loader.git
-[submodule "Packages/rpm-unity-sdk-core"]
-	path = Packages/rpm-unity-sdk-core
-	url = https://github.com/willneedit/rpm-unity-sdk-core.git
-[submodule "Packages/rpm-unity-sdk-avatar-creator"]
-	path = Packages/rpm-unity-sdk-avatar-creator
-	url = https://github.com/willneedit/rpm-unity-sdk-avatar-creator.git
 [submodule "Packages/Mirror"]
 	path = Packages/Mirror
 	url = https://github.com/willneedit/Mirror.git

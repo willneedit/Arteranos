@@ -17,7 +17,7 @@ using Random = UnityEngine.Random;
 
 namespace Arteranos.Avatar
 {
-    public class AvatarLoader_RPM : MonoBehaviour, IAvatarBody
+    public class AvatarLoader : MonoBehaviour, IAvatarBody
     {
         private GameObject AvatarStandin = null;
         private bool loading = false;
@@ -25,11 +25,6 @@ namespace Arteranos.Avatar
         private GameObject AvatarGameObject = null;
         public IAvatarMeasures AvatarMeasures { get; set; } = null;
 
-
-        // Non-null: manually load a puppet avatar on init
-        public string GalleryModeURL { get => m_GalleryModeURL; set => m_GalleryModeURL = value; }
-
-        [SerializeField] private string m_GalleryModeURL = null;
 
         public bool Invisible
         {

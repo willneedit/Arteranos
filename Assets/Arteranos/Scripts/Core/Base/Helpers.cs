@@ -425,15 +425,6 @@ namespace Arteranos.UI
         }
     }
 
-    public class CreateAvatarUIFactory : UIBehaviour
-    {
-        public static ICreateAvatarUI New() 
-        {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_CreateAvatar"));
-            return go.GetComponent<ICreateAvatarUI>();
-        }
-    }
-
     public class AvatarGalleryUIFactory : UIBehaviour
     {
         public static IAvatarGalleryUI New()

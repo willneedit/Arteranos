@@ -21,32 +21,6 @@
       },
       "hash": "a7f502e4bba2416411c64b1160dc01d53da75fcd"
     },
-    "com.readyplayerme.avatarcreator": {
-      "version": "file:rpm-unity-sdk-avatar-creator",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.unity.ugui": "1.0.0",
-        "com.unity.nuget.newtonsoft-json": "3.0.2"
-      }
-    },
-    "com.readyplayerme.avatarloader": {
-      "version": "file:rpm-unity-sdk-avatar-loader",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.unity.ugui": "1.0.0",
-        "com.unity.nuget.newtonsoft-json": "3.0.2"
-      }
-    },
-    "com.readyplayerme.core": {
-      "version": "file:rpm-unity-sdk-core",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.0.2"
-      }
-    },
     "com.unity.2d.animation": {
       "version": "7.0.9",
       "depth": 1,

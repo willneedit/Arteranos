@@ -190,9 +190,6 @@ namespace Arteranos.UI
         {
             if(Directory.Exists(Utils.WorldCacheRootDir))
                 Directory.Delete(Utils.WorldCacheRootDir, true);
-
-            if (Directory.Exists(Utils.RPMAvatarCache))
-                Directory.Delete(Utils.RPMAvatarCache, true);
         }
     }
 }
