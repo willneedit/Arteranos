@@ -13,6 +13,6 @@ namespace Arteranos.Avatar
     {
         bool Invisible { get; set; }
         IAvatarMeasures AvatarMeasures { get; }
-        void ReloadAvatar(string CidString, float height, int gender);
+        void ReloadAvatar(string CidString, float height);
     }
 }

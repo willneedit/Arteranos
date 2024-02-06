@@ -141,7 +141,6 @@ namespace Arteranos.Core.Operations
                 if(context.InstallHandIKController)
                 {
                     handIK = handHandle.gameObject.AddComponent<HandIKController>();
-                    handIK.rootTransform = avatarTransform;
                     handIK.RightSide = false;
                     handIK.AvatarMeasures = context;
                 }
@@ -150,7 +149,6 @@ namespace Arteranos.Core.Operations
                 if(context.InstallHandIKController)
                 {
                     handIK = handHandle.gameObject.AddComponent<HandIKController>();
-                    handIK.rootTransform = avatarTransform;
                     handIK.RightSide = true;
                     handIK.AvatarMeasures = context;
                 }

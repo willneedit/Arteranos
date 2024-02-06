@@ -60,7 +60,7 @@ namespace Arteranos.Avatar
             //AvatarGameObject.transform.SetPositionAndRotation(transform.position, transform.rotation);
         }
 
-        public void ReloadAvatar(string avatarCid, float height, int gender)
+        public void ReloadAvatar(string avatarCid, float height)
         {
             DateTime settleTime = DateTime.Now + TimeSpan.FromSeconds(5);
 

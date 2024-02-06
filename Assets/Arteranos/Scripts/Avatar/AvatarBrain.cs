@@ -40,8 +40,6 @@ namespace Arteranos.Avatar
 
         public float AvatarHeight { get => m_AvatarHeight; private set => CmdPropagateAvatarHeight(value); }
 
-        public int AvatarGender { get => m_AvatarGender; private set => CmdPropagateAvatarGender(value); }
-
         public UserPrivacy UserPrivacy { get => m_UserPrivacy; private set => CmdPropagateUserPrivacy(value); }
 
         // Okay to use the setter. The SyncVar would yell at you if you fiddle with the privilege client-side
@@ -174,15 +172,12 @@ namespace Arteranos.Avatar
             Subconscious.ReadyState = AvatarSubconscious.READY_COMPLETE;
         }
 
-        private void CommitAvatarChanged(string CidString, float Height, int gender)
+        private void CommitAvatarChanged(string CidString, float Height)
         {
             if (isOwned)
             {
                 AvatarCidString = CidString;
-
                 AvatarHeight = Height;
-
-                AvatarGender = gender;
             }
         }
 
@@ -207,18 +202,16 @@ namespace Arteranos.Avatar
             Client cs = SettingsManager.Client;
 
             string avatarCidString = cs.AvatarCidString;
-            int avatarGender = cs.AvatarGender;
 
             // Schrödinger's cat and today's view of people's gender... all alike.
             // ¯\_(ツ)_/¯
-            if (avatarGender == 0)
-                avatarGender = Random.Range(0, 100) < 50 ? -1 : 1;
+            int avatarGender = Random.Range(0, 100) < 50 ? -1 : 1;
 
             avatarCidString ??= avatarGender < 0
                     ? SettingsManager.DefaultFemaleAvatar
                     : SettingsManager.DefaultMaleAvatar;
 
-            CommitAvatarChanged(avatarCidString, cs.AvatarHeight, avatarGender);
+            CommitAvatarChanged(avatarCidString, cs.AvatarHeight);
 
             UserPrivacy = cs.UserPrivacy;
         }
@@ -257,9 +250,6 @@ namespace Arteranos.Avatar
         [SyncVar(hook = nameof(OnAvatarHeightChanged))]
         private float m_AvatarHeight = 175;
 
-        [SyncVar(hook = nameof(OnAvatarGenderChanged))]
-        private int m_AvatarGender = 0;
-
         // No [SyncVar] - server only for privacy reasons
         private string m_Address = null;
 
@@ -291,11 +281,9 @@ namespace Arteranos.Avatar
             }
         }
 
-        private void OnAvatarCidStringChanged(string _1, string _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight, m_AvatarGender);
+        private void OnAvatarCidStringChanged(string _1, string _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
 
-        private void OnAvatarHeightChanged(float _1, float _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight, m_AvatarGender);
-
-        private void OnAvatarGenderChanged(int _1, int _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight, m_AvatarGender);
+        private void OnAvatarHeightChanged(float _1, float _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
 
         private void OnUserIDChanged(UserID _1, UserID userID)
         {
@@ -324,8 +312,7 @@ namespace Arteranos.Avatar
 
         [Command]
         private void CmdPropagateAvatarHeight(float height) => m_AvatarHeight = height;
-        [Command]
-        private void CmdPropagateAvatarGender(int gender) => m_AvatarGender = gender;
+
         [Command]
         private void CmdPerformEmote(string emojiName) => RpcPerformEmote(emojiName);
 

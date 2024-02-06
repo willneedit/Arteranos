@@ -251,9 +251,6 @@ namespace Arteranos.Core
             AvatarHeight = 175
         };
 
-        // Gender identification, for the animation: -1: female, 0: neutral/random, 1: male
-        public virtual int CurrentAvatarGender { get; set; } = 0;
-
         // Avatar storage
         public virtual List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
 
@@ -342,7 +339,7 @@ namespace Arteranos.Core
 
         public const string PATH_CLIENT_SETTINGS = "UserSettings.json";
 
-        public event Action<string, float, int> OnAvatarChanged;
+        public event Action<string, float> OnAvatarChanged;
         public event Action<bool> OnVRModeChanged;
         public event Action<float, float> OnPrivacyBubbleChanged;
         public event Action<ControlSettingsJSON, MovementSettingsJSON, ServerPermissions> OnXRControllerChanged;
@@ -357,7 +354,7 @@ namespace Arteranos.Core
             {
                 string old = Me.CurrentAvatar.AvatarCidString;
                 Me.CurrentAvatar.AvatarCidString = value;
-                if(old != value) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarCidString, Me.CurrentAvatar.AvatarHeight, Me.CurrentAvatarGender);
+                if(old != value) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarCidString, Me.CurrentAvatar.AvatarHeight);
             }
         }
 
@@ -369,21 +366,10 @@ namespace Arteranos.Core
             {
                 float old = Me.CurrentAvatar.AvatarHeight;
                 Me.CurrentAvatar.AvatarHeight = value;
-                if (old != value) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarCidString, Me.CurrentAvatar.AvatarHeight, Me.CurrentAvatarGender);
+                if (old != value) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarCidString, Me.CurrentAvatar.AvatarHeight);
             }
         }
 
-        [JsonIgnore]
-        public int AvatarGender
-        {
-            get => Me.CurrentAvatarGender;
-            set
-            {
-                int old = Me.CurrentAvatarGender;
-                Me.CurrentAvatarGender = value;
-                if(old != value) OnAvatarChanged?.Invoke(Me.CurrentAvatar.AvatarCidString, Me.CurrentAvatar.AvatarHeight, Me.CurrentAvatarGender);
-            }
-        }
         [JsonIgnore]
         private Crypto Crypto = null;
 

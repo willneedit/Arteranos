@@ -14,7 +14,6 @@ namespace Arteranos.Avatar
 {
     public class HandIKController : MonoBehaviour
     {
-        public Transform rootTransform = null;
         public IAvatarMeasures AvatarMeasures = null;
         public bool RightSide = false;
 

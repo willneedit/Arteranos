@@ -15,7 +15,6 @@ namespace Arteranos.UI
         [SerializeField] private Spinner spn_OnlineStatus = null;
         [SerializeField] private TMP_InputField txt_Nickname = null;
         [SerializeField] private TMP_Text tro_UserID = null;
-        [SerializeField] private Spinner spn_Gender = null;
         [SerializeField] private NumberedSlider sldn_AvatarHeight = null;
         [SerializeField] private Button btn_CreateAvatar = null;
         [SerializeField] private Button btn_AvatarGallery = null;
@@ -40,7 +39,6 @@ namespace Arteranos.UI
 
             spn_OnlineStatus.OnChanged += OnVisibilityChanged;
             txt_Nickname.onValueChanged.AddListener((string current) => dirty = true);
-            spn_Gender.OnChanged += (v, d) => dirty = true;
             sldn_AvatarHeight.OnValueChanged += (float height) => dirty = true;
 
             btn_CreateAvatar.onClick.AddListener(OnCreateAvatarClicked);
@@ -75,7 +73,6 @@ namespace Arteranos.UI
             txt_Nickname.text = cs.Me.Nickname;
 
             tro_UserID.text = cs.GetFingerprint(fpmode);
-            spn_Gender.value = cs.Me.CurrentAvatarGender + 1;
             sldn_AvatarHeight.value = cs.AvatarHeight;
 
             // Reset the state as it's the initial state, not the blank slate.
@@ -86,8 +83,6 @@ namespace Arteranos.UI
         {
             base.OnDisable();
 
-            // cs.AvatarURL = txt_AvatarURL.text;
-            cs.Me.CurrentAvatarGender = spn_Gender.value - 1;
             cs.AvatarHeight = sldn_AvatarHeight.value;
             cs.Me.Nickname = txt_Nickname.text;
 
