@@ -17,8 +17,6 @@ namespace Arteranos.Avatar
 {
     public class MockBrain : MonoBehaviour, IAvatarBrain
     {
-        public string AvatarURL => "6394c1e69ef842b3a5112221";
-
         public uint NetID => 9999;
 
         public string Nickname { get => UserID; }
@@ -55,9 +53,6 @@ namespace Arteranos.Avatar
         public string Address { get; set; } = string.Empty;
         public string DeviceID { get; set; } = string.Empty;
 
-        public float AvatarHeight { get; set; } = 175;
-        public string CurrentWorld { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
         public event Action<int> OnAppearanceStatusChanged;
 
         [SerializeField] private int m_NetMuteStatus = 0;
@@ -66,9 +61,7 @@ namespace Arteranos.Avatar
         {
             if(!isOwned) AvatarHitBoxFactory.New(this);
 
-            Crypto crypto = new();
-
-            UserID = new(crypto.PublicKey, "TI-99 4a");
+            UserID = new(null, "TI-99 4a");
         }
 
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)

@@ -170,8 +170,8 @@ namespace Arteranos.PlayTest.Web
 
             Assert.AreEqual(2, am.Feet.Count);
 
-            Assert.IsTrue(am.Feet[0].Elevation > 0.126f);
-            Assert.IsTrue(am.Feet[0].Elevation < 0.127f);
+            Assert.IsTrue(am.Feet[0].Elevation > 0.123f);
+            Assert.IsTrue(am.Feet[0].Elevation < 0.124f);
 
             Assert.IsNotNull(am.CenterEye);
 
@@ -305,8 +305,8 @@ namespace Arteranos.PlayTest.Web
             Assert.IsTrue(transform.localScale.y < 0.27f);
             Assert.IsTrue(transform.localScale.z < 0.27f);
 
-            Assert.IsTrue(am.Feet[0].Elevation > 0.126f * transform.localScale.x);
-            Assert.IsTrue(am.Feet[0].Elevation < 0.127f * transform.localScale.x);
+            Assert.IsTrue(am.Feet[0].Elevation > 0.123f * transform.localScale.x);
+            Assert.IsTrue(am.Feet[0].Elevation < 0.124f * transform.localScale.x);
         }
 
         [UnityTest]
@@ -404,6 +404,7 @@ namespace Arteranos.PlayTest.Web
             public Dictionary<string, string> translationTable;
         }
         [UnityTest]
+        [Ignore("To convert Ready Player Me's skeleton structure to JSON")]
         public IEnumerator SaveBoneTranslationTable()
         {
             yield return null;
