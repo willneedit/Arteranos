@@ -377,7 +377,7 @@ namespace Arteranos.UI
             // Server uses an unknown TOS deviating from the standard TOS, needs to ask.
             if (si.UsesCustomTOS) return false;
 
-            byte[] currentTOSHash = Crypto.SHA256(SettingsManager.DefaultTOStext);
+            byte[] currentTOSHash = Hashes.SHA256(SettingsManager.DefaultTOStext);
 
             // Only if the user's knowledge of the default TOS is up to date.
             return client.KnowsDefaultTOS != null && currentTOSHash.SequenceEqual(client.KnowsDefaultTOS);

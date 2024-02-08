@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using Ipfs;
+using Arteranos.Core.Cryptography;
 
 namespace Arteranos.Core
 {
@@ -122,7 +123,7 @@ namespace Arteranos.Core
             {
                 if (PrivacyTOSNotice == null) return null;
 
-                return Crypto.SHA256(PrivacyTOSNotice);
+                return Hashes.SHA256(PrivacyTOSNotice);
             }
         }
 
@@ -131,7 +132,7 @@ namespace Arteranos.Core
             get 
             {
                 if (PrivacyTOSNotice == null) return false; 
-                return !PrivacyTOSNoticeHash.SequenceEqual(Crypto.SHA256(SettingsManager.DefaultTOStext));
+                return !PrivacyTOSNoticeHash.SequenceEqual(Hashes.SHA256(SettingsManager.DefaultTOStext));
             }
         }
     }

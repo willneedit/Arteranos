@@ -13,6 +13,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
+using Arteranos.Core.Cryptography;
 
 namespace Arteranos.UI
 {
@@ -87,7 +88,7 @@ namespace Arteranos.UI
             {
                 // We needed to deal with the default TOS.
                 if (!ServerInfo.UsesCustomTOS)
-                    client.KnowsDefaultTOS = Crypto.SHA256(SettingsManager.DefaultTOStext);
+                    client.KnowsDefaultTOS = Hashes.SHA256(SettingsManager.DefaultTOStext);
 
                 Client.UpdateServerPass(ServerInfo, true, null);
                 client.Save();
