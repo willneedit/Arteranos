@@ -19,8 +19,6 @@ using UnityEngine.UI;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
-using Arteranos.Core.Operations;
-using TreeEditor;
 
 namespace Arteranos.Core
 {
@@ -268,7 +266,7 @@ namespace Arteranos.Core
 
         public static void RateGameObject(GameObject go, IObjectStats warn, IObjectStats cutoff, IObjectStats counted)
         {
-            float Rate(int actual, int l1, int l2)
+            static float Rate(int actual, int l1, int l2)
             {
                 if (actual > l2) return -0.40f; // Beyond 'red' mark
                 if (actual > l1) return -0.20f; // Beyond 'yellow' mark
