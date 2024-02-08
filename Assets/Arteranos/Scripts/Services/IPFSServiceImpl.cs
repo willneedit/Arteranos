@@ -275,14 +275,14 @@ namespace Arteranos.Services
             return ipfs.PubSub.PublishAsync(topic_hello, ms);
         }
 
-        public override async Task SendServerDirectMessage_(string peerId, PeerMessage message)
+        public override Task SendServerDirectMessage_(string peerId, PeerMessage message)
         {
             using CancellationTokenSource cts = new(100);
             using MemoryStream ms = new();
 
             message.Serialize(ms);
             ms.Position = 0;
-            await ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", ms, cts.Token);
+            return ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", ms, cts.Token);
         }
 
         public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)
@@ -298,23 +298,23 @@ namespace Arteranos.Services
             return ipfs.Pin.ListAsync(token);
         }
 
-        public async Task<bool> ParseIncomingIPFSMessageAsync(IPublishedMessage publishedMessage)
+        public Task<bool> ParseIncomingIPFSMessageAsync(IPublishedMessage publishedMessage)
         {
             try
             {
                 PeerMessage peerMessage = PeerMessage.Deserialize(publishedMessage.DataStream);
 
                 if (peerMessage is ServerHello sh)
-                    return await ParseServerHelloAsync(sh);
+                    return ParseServerHelloAsync(sh);
                 else if (peerMessage is ServerOnlineData sod)
-                    return await ParseServerOnlineData(sod, publishedMessage.Sender);
+                    return ParseServerOnlineData(sod, publishedMessage.Sender);
                 else
                     throw new ArgumentException($"Unknown message from Peer {publishedMessage.Sender.Id}");
             }
             catch (Exception ex)
             {
                 Debug.LogException(ex);
-                return false;
+                return Task.FromResult(false);
             }
         }
 
