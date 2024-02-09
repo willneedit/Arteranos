@@ -87,6 +87,9 @@ namespace Arteranos.Core.Cryptography
         public void TransmitMessage(byte[] data, PublicKey receiver, out byte[] messageData) 
             => TransmitMessage(data, new[] { receiver }, out messageData);
 
+        public void Sign(byte[] data, out byte[] signature)
+            => OwnerSignKey.Sign(data, out signature);
+
         #endregion
 
         #region Receiver

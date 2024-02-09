@@ -124,10 +124,7 @@ namespace Arteranos.Core
 
         public void Decrypt<T>(CryptPacket p, out T payload) => Crypto.Decrypt(p, out payload);
 
-        public void Sign(byte[] data, out byte[] signature) => Crypto.Sign(data, out signature);
-
-        public static void TransmitMessage<T>(T data, byte[][] receiverPublicKeys, out CMSPacket packet)
-            => SettingsManager.Server.Crypto.TransmitMessage(data, receiverPublicKeys, out packet);
+        public void Sign(byte[] data, out byte[] signature) => CMH.Sign(data, out signature);
 
         public static void TransmitMessage<T>(T data, byte[] receiverPublicKey, out CMSPacket packet)
             => SettingsManager.Server.Crypto.TransmitMessage(data, receiverPublicKey, out packet);
