@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core.Cryptography;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -18,36 +19,11 @@ namespace Arteranos.Core
     /// </summary>
     public class ServerJSON
     {
-        [JsonIgnore]
-        public static int DefaultMetadataPort = 9779;
-
-        [JsonIgnore]
-        public static string DefaultMetadataPath = "/metadata.asn1";
-
-        [JsonIgnore]
-        private bool includeCompleteKey = false;
-
-        [JsonIgnore]
-        private byte[] serverKey = null;
-
-        [JsonIgnore]
-        protected bool IncludeCompleteKey
-        {
-            get => includeCompleteKey;
-            set => includeCompleteKey = value;
-        }
-
         // The main server listen port.
         public int ServerPort = 9777;
 
         // The server metadata retrieval port.
-        public int MetadataPort = DefaultMetadataPort;
-
-        // Server listen address. Empty means allowing connections from anywhere.
-        public string ListenAddress = string.Empty;
-
-        // Allow viewing avatars in the server mode like in a spectator mode.
-        public bool ShowAvatars = true;
+        public int MetadataPort = 9779;
 
         // The server nickname.
         public string Name = string.Empty;
@@ -64,18 +40,8 @@ namespace Arteranos.Core
         // The server's permissions
         public ServerPermissions Permissions = new();
 
-        // The server's COMPLETE key
-        public byte[] ServerKey
-        {
-            // Require explicit enabling the export of the whole key to prevent leaking
-            // the key with the server settings
-            get => includeCompleteKey ? serverKey : null;
-            set => serverKey = value;
-        }
-
         [JsonIgnore]
         public byte[] ServerPublicKey = null;
-
 
         public ServerJSON Strip()
         {
@@ -83,10 +49,9 @@ namespace Arteranos.Core
             {
                 ServerPort = ServerPort,
                 MetadataPort = MetadataPort,
-                ListenAddress = ListenAddress,
-                ShowAvatars = ShowAvatars,
                 Name = Name,
                 Description = Description,
+                Public = Public,
                 Icon = new byte[0],         // Remove the icon to reduce the packet size
                 Permissions = Permissions,
                 ServerPublicKey = ServerPublicKey
@@ -100,16 +65,15 @@ namespace Arteranos.Core
         public DateTime ConfigTimestamp { get; private set; }
 
         [JsonIgnore]
+        private CryptoMessageHandler CMH = null;
+
+        [JsonIgnore]
         private Crypto Crypto = null;
 
         public const string PATH_SERVER_SETTINGS = "ServerSettings.json";
 
         public void Save()
         {
-            using Guard guard = new(
-                () => IncludeCompleteKey = true,
-                () => IncludeCompleteKey = false);
-
             try
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
@@ -138,7 +102,6 @@ namespace Arteranos.Core
                     ss.ServerPort -= 100;
                     ss.MetadataPort -= 100;
                     ss.Name += " DS";
-                    ss.ServerKey = null;
                 }
 
                 ss.ConfigTimestamp = FileUtils.ReadConfig(PATH_SERVER_SETTINGS, File.GetLastWriteTime);
@@ -146,40 +109,17 @@ namespace Arteranos.Core
             catch(Exception e)
             {
                 Debug.LogWarning($"Failed to load server settings: {e.Message}");
-                ss = new();
-                ss.ConfigTimestamp = DateTime.UnixEpoch;
+                ss = new() { ConfigTimestamp = DateTime.UnixEpoch };
             }
 
-            using (Guard guard = new(
-                () => ss.IncludeCompleteKey = true,
-                () => ss.IncludeCompleteKey = false))
-            {
-                try
-                {
-                    if(ss.ServerKey == null)
-                    {
-                        ss.Crypto = new();
-                        ss.ServerKey = ss.Crypto.Export(true);
-
-                        ss.Save();
-                    }
-                    else
-                    {
-                        ss.Crypto = new(ss.ServerKey);
-                    }
-                }
-                catch(Exception e)
-                {
-                    Debug.LogError($"Internal error while regenerating server key - regenerating...: {e.Message}");
-                    ss.Crypto = new();
-                    ss.ServerKey = ss.Crypto.Export(true);
-
-                    ss.Save();
-                }
-            }
-
-            ss.ServerPublicKey = ss.Crypto.PublicKey;
             return ss;
+        }
+
+        // Called back from the IPFS Service
+        public void UpdateServerKey(SignKey serverKeyPair)
+        {
+            serverKeyPair.ExportPublicKey(out ServerPublicKey);
+            CMH = new(serverKeyPair);
         }
 
         public void Decrypt<T>(CryptPacket p, out T payload) => Crypto.Decrypt(p, out payload);

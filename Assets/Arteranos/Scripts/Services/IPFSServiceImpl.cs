@@ -122,6 +122,9 @@ namespace Arteranos.Services
 
             ipfs = ipfsTmp;
 
+            // Call back to update the server core data
+            SettingsManager.Server.UpdateServerKey(serverKeyPair);
+
             await FlipServerDescription_(true);
 
             UserFingerprints = new List<byte[]>();

@@ -11,6 +11,7 @@ using Arteranos.Core;
 using Arteranos.Core.Cryptography;
 using Arteranos.XR;
 using Ipfs;
+using Ipfs.Core.Cryptography.Proto;
 using Ipfs.Engine;
 using System;
 using System.Collections.Generic;
@@ -301,6 +302,10 @@ namespace Arteranos.Services
             => Instance.Ipfs_;
         public static Peer Self 
             => Instance.Self_;
+        public static SignKey ServerKeyPair
+            => Instance.ServerKeyPair_;
+        public static PublicKey ServerPublicKey
+            => ServerKeyPair.PublicKey;
         public static Task<IPAddress> GetPeerIPAddress(string PeerID, CancellationToken token = default)
             => Instance.GetPeerIPAddress_(PeerID, token);
         public static Task FlipServerDescription(bool reload)
