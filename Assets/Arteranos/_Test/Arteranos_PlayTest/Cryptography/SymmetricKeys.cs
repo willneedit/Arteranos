@@ -28,7 +28,7 @@ namespace Arteranos.PlayTest.Cryptography
             SymmetricKey key = SymmetricKey.Generate();
 
             Assert.IsNotNull(key);
-            Assert.IsNotNull(key.iv);
+            Assert.IsNotNull(key.IV);
         }
 
         [Test]
@@ -37,10 +37,10 @@ namespace Arteranos.PlayTest.Cryptography
             byte[] data = Encoding.UTF8.GetBytes("this is to be encrypted");
 
             SymmetricKey key = SymmetricKey.Generate();
-            byte[] iv = key.iv;
+            byte[] iv = key.IV;
             key.Encrypt(data, out byte[] cipher);
 
-            key.iv = iv;
+            key.IV = iv;
             key.Decrypt(cipher, out byte[] returned);
 
             Assert.AreNotEqual(data, cipher);

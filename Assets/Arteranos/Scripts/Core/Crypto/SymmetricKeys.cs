@@ -14,7 +14,8 @@ namespace Arteranos.Core.Cryptography
 {
     public class SymmetricKey : IDisposable
     {
-        public byte[] iv { get; set; } = null;
+        public byte[] IV { get; set; } = null;
+        public byte[] Key => Aes.Key;
         private Aes Aes { get; set; } = null;
 
         public static SymmetricKey Generate()
@@ -26,26 +27,28 @@ namespace Arteranos.Core.Cryptography
             return new()
             {
                 Aes = aes,
-                iv = aes.IV,
+                IV = aes.IV,
             };
         }
 
         public static SymmetricKey Import(byte[] key, byte[] iv)
         {
-            Aes aes = new AesCryptoServiceProvider();
-            aes.Key = key;
-            aes.IV = iv;
+            Aes aes = new AesCryptoServiceProvider
+            {
+                Key = key,
+                IV = iv
+            };
 
             return new()
             {
                 Aes = aes,
-                iv = aes.IV,
+                IV = aes.IV,
             };
         }
 
         public void Encrypt(byte[] plaintext, out byte[] cipher)
         {
-            Aes.IV = iv;
+            Aes.IV = IV;
 
             using MemoryStream ciphertext = new();
             using CryptoStream cs = new(ciphertext, Aes.CreateEncryptor(), CryptoStreamMode.Write);
@@ -57,7 +60,7 @@ namespace Arteranos.Core.Cryptography
 
         public void Decrypt(byte[] cipher, out byte[] plain)
         {
-            Aes.IV = iv;
+            Aes.IV = IV;
 
             using MemoryStream plaintext = new();
             using CryptoStream cs = new(plaintext, Aes.CreateDecryptor(), CryptoStreamMode.Write);

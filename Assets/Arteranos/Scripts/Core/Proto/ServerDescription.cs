@@ -86,7 +86,7 @@ namespace Arteranos.Core
 
         public override int GetHashCode()
         {
-            HashCode hash = new HashCode();
+            HashCode hash = new();
             hash.Add(Name);
             hash.Add(ServerPort);
             hash.Add(MetadataPort);

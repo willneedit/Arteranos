@@ -77,7 +77,7 @@ namespace Arteranos.PlayTest.Cryptography
             // Bob gets Alice's Public Key and the document's signature.
             Assert.DoesNotThrow(() =>
             {
-                SignKey.Verify(alicePubKey, toSign, signature);
+                AsymmetricKey.Verify(alicePubKey, toSign, signature);
             });
         }
 
@@ -98,7 +98,7 @@ namespace Arteranos.PlayTest.Cryptography
             // Bob gets Alice's Public Key and the document's signature.
             Assert.DoesNotThrow(() =>
             {
-                SignKey.Verify(alicePubKey, toSign, signature);
+                AsymmetricKey.Verify(alicePubKey, toSign, signature);
             });
         }
 

@@ -33,17 +33,17 @@ namespace Arteranos.Core.Cryptography
         void ExportPublicKey(out byte[] keyBytes);
     }
 
-    public interface ISignKey
+    public interface ISignKey : IAsymmetricKey
     {
         void Sign(byte[] data, out byte[] signature);
     }
 
-    public interface IEncryptionKey
+    public interface IEncryptionKey : IAsymmetricKey
     {
         void Decrypt(byte[] cipher, out byte[] data);
     }
 
-    public interface IAgreeKey
+    public interface IAgreeKey : IAsymmetricKey
     {
         void Agree(byte[] otherPublicKey, out byte[] sharedSecret);
     }
@@ -58,7 +58,7 @@ namespace Arteranos.Core.Cryptography
         {
             get
             {
-                if (fingerprint == null) fingerprint = CryptoHelpers.GetFingerprint(PublicKey.Serialize());
+                fingerprint ??= CryptoHelpers.GetFingerprint(PublicKey.Serialize());
                 return fingerprint;
             }
         }
@@ -94,7 +94,7 @@ namespace Arteranos.Core.Cryptography
 
         public void ExportPrivateKey(out byte[] keyBytes)
         {
-            var pkcs8 = new Pkcs8Generator(PrivateKey, null);
+            Pkcs8Generator pkcs8 = new(PrivateKey, null);
             keyBytes = pkcs8.Generate().Content;
         }
 
@@ -111,7 +111,7 @@ namespace Arteranos.Core.Cryptography
         {
             PublicKey key = PublicKey.Deserialize(othersPublicKey);
             AsymmetricKeyParameter publicKey = PublicKeyFactory.CreateKey(key.Data);
-            var encryptEngine = new Pkcs1Encoding(new RsaEngine());
+            Pkcs1Encoding encryptEngine = new(new RsaEngine());
             encryptEngine.Init(true, publicKey);
             cipher = encryptEngine.ProcessBlock(data, 0, data.Length);
         }
