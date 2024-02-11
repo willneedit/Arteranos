@@ -56,7 +56,7 @@ namespace Arteranos.Core.Operations
                         WorldName = metaData.WorldName,
                         WorldDescription = metaData.WorldDescription,
                         AuthorNickname = (string)metaData.AuthorID,
-                        AuthorPublicKey = (byte[])metaData.AuthorID,
+                        AuthorPublicKey = metaData.AuthorID.SignPublicKey.Serialize(),
                         ContentRating = metaData.ContentRating,
                         Signature = null,
                         ScreenshotPNG = screenshotBytes,

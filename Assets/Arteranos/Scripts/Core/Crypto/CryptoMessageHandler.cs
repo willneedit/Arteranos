@@ -22,7 +22,7 @@ namespace Arteranos.Core.Cryptography
         [ProtoMember(1)]
         public byte[] data;
         [ProtoMember(2)]
-        public byte[] signerPubKey;
+        public PublicKey signerPubKey;
         [ProtoMember(3)]
         public byte[] signature;
     }
@@ -42,7 +42,7 @@ namespace Arteranos.Core.Cryptography
     public class CMSPacket
     {
         [ProtoMember(1)]
-        public byte[] senderAgrPubKey;
+        public PublicKey senderAgrPubKey;
         [ProtoMember(2)]
         public List<ReceiverKey> receiverKeys;
         [ProtoMember(3)]
@@ -91,7 +91,7 @@ namespace Arteranos.Core.Cryptography
             else
             {
                 // If there's one, check it.
-                signerPublicKey = PublicKey.Deserialize(signedMessage.signerPubKey);
+                signerPublicKey = signedMessage.signerPubKey;
                 signerPublicKey.Verify(signedMessage.data, signedMessage.signature);
             }
         }
@@ -111,7 +111,7 @@ namespace Arteranos.Core.Cryptography
 
         #region Receiver
 
-        internal SymmetricKey MatchReceiverKey(ReceiverKey attempt, byte[] senderAgrPubKey, byte[] messageIV)
+        internal SymmetricKey MatchReceiverKey(ReceiverKey attempt, PublicKey senderAgrPubKey, byte[] messageIV)
         {
             // Only when this receiver's AgreeKey Fingerprint is the right one.
             if(!attempt.receiverAgrFingerprint.SequenceEqual(SessionKey.Fingerprint))
@@ -155,7 +155,7 @@ namespace Arteranos.Core.Cryptography
             }
 
             OwnerSignKey.Sign(message.data, out message.signature);
-            OwnerSignKey.ExportPublicKey(out message.signerPubKey);
+            message.signerPubKey = OwnerSignKey.PublicKey;
         }
 
         internal SymmetricKey WrapMessage(byte[] data, out CMSPacket encryptedMessage)
@@ -175,7 +175,7 @@ namespace Arteranos.Core.Cryptography
 
             encryptedMessage = new()
             {
-                senderAgrPubKey = AgreePublicKey.Serialize(),
+                senderAgrPubKey = AgreePublicKey,
                 IV = messageKey.IV,
                 encryptedSignedMessage = ms.ToArray()
             };
@@ -186,9 +186,7 @@ namespace Arteranos.Core.Cryptography
 
         internal ReceiverKey WrapForReceiver(SymmetricKey messageKey, PublicKey receiverAgrPublicKey)
         {
-            byte[] otherPublicKeyBlob = receiverAgrPublicKey.Serialize();
-
-            SessionKey.Agree(otherPublicKeyBlob, out byte[] sharedSecret);
+            SessionKey.Agree(receiverAgrPublicKey, out byte[] sharedSecret);
             ReceiverKey receiverKey = new();
 
             Random rand = new();
@@ -196,7 +194,7 @@ namespace Arteranos.Core.Cryptography
             rand.NextBytes(receiverKey.wrapIV);
             using SymmetricKey ephem = SymmetricKey.Import(sharedSecret, receiverKey.wrapIV);
             ephem.Encrypt(messageKey.Key, out receiverKey.wrappedSessionKey);
-            receiverKey.receiverAgrFingerprint = CryptoHelpers.GetFingerprint(otherPublicKeyBlob);
+            receiverKey.receiverAgrFingerprint = CryptoHelpers.GetFingerprint(receiverAgrPublicKey);
 
             return receiverKey;
         }

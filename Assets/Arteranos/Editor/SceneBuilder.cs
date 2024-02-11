@@ -47,7 +47,7 @@ namespace Arteranos.Editor
             client = Client.Load();
             metadata = WorldMetaData.LoadDefaults();
 
-            metadata.AuthorID = new(client.UserSignPublicKey.Serialize(), client.Me.Nickname);
+            metadata.AuthorID = new(client.UserSignPublicKey, client.Me.Nickname);
             metadata.ContentRating = client.ContentFilterPreferences;
             metadata.RequiresPassword = false;
 

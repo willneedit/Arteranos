@@ -46,6 +46,7 @@ namespace Arteranos.Core.Cryptography
     public interface IAgreeKey : IAsymmetricKey
     {
         void Agree(byte[] otherPublicKey, out byte[] sharedSecret);
+        void Agree(PublicKey otherPublicKey, out byte[] sharedSecret);
     }
 
     public class AsymmetricKey : IDisposable, IEquatable<AsymmetricKey>
@@ -58,7 +59,7 @@ namespace Arteranos.Core.Cryptography
         {
             get
             {
-                fingerprint ??= CryptoHelpers.GetFingerprint(PublicKey.Serialize());
+                fingerprint ??= CryptoHelpers.GetFingerprint(PublicKey);
                 return fingerprint;
             }
         }
@@ -227,10 +228,16 @@ namespace Arteranos.Core.Cryptography
 
         public void Agree(byte[] otherPublicKey, out byte[] sharedSecret)
         {
+            PublicKey key = PublicKey.Deserialize(otherPublicKey);
+
+            Agree(key, out sharedSecret);
+        }
+
+        public void Agree(PublicKey key, out byte[] sharedSecret)
+        {
             IBasicAgreement agreement = new ECDHBasicAgreement();
 
             agreement.Init(PrivateKey);
-            PublicKey key = PublicKey.Deserialize(otherPublicKey);
             AsymmetricKeyParameter publicKey = PublicKeyFactory.CreateKey(key.Data);
 
             BigInteger secret = agreement.CalculateAgreement(publicKey);

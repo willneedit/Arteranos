@@ -142,7 +142,7 @@ namespace Arteranos.Avatar
 
             // Ignore injected messages
             IAvatarBrain senderBrain = senderGO.GetComponent<IAvatarBrain>();
-            if(PublicKey.Deserialize(senderBrain.UserID.SignPublicKey) != signerPublicKey)
+            if(senderBrain.UserID.SignPublicKey != signerPublicKey)
                 return;
 
             ReceiveTextMessage(senderGO, text);

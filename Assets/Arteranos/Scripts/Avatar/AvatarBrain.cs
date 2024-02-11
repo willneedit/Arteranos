@@ -390,7 +390,7 @@ namespace Arteranos.Avatar
                     if (page.payload != null)
                         packets.entries.AddRange(page.payload);
 
-                    Server.TransmitMessage(packets.Serialize(), PublicKey.Deserialize(UserID.SignPublicKey), out CMSPacket packet);
+                    Server.TransmitMessage(packets.Serialize(), UserID.SignPublicKey, out CMSPacket packet);
                     TargetDeliverServerPacket(type, packet);
 
                     if (page.payload == null) break;
@@ -411,7 +411,7 @@ namespace Arteranos.Avatar
         {
             try
             {
-                _ = ServerConfig.ServerPerformServerPacket(this, type, p);
+                ServerConfig.ServerPerformServerPacket(this, type, p);
             }
             catch (Exception e)
             {

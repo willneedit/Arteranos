@@ -1,4 +1,5 @@
-﻿using ProtoBuf;
+﻿using Ipfs.Core.Cryptography.Proto;
+using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Arteranos.Core
     {
         // Has to be there, for serialization.
         [ProtoMember(1)]
-        public byte[] SignPublicKey = null;
+        public PublicKey SignPublicKey = null;
 
         [ProtoMember(2)]
         public string Nickname = null;
@@ -20,7 +21,7 @@ namespace Arteranos.Core
 
         }
 
-        public UserID(byte[] SignPublicKey, string Nickname)
+        public UserID(PublicKey SignPublicKey, string Nickname)
         {
             this.SignPublicKey = SignPublicKey;
             this.Nickname = Nickname;
@@ -30,10 +31,10 @@ namespace Arteranos.Core
         {
             if(other?.SignPublicKey == null || SignPublicKey == null) return false;
 
-            return SignPublicKey.SequenceEqual(other.SignPublicKey);
+            return SignPublicKey == other.SignPublicKey;
         }
 
-        public static implicit operator byte[](UserID userID) => userID?.SignPublicKey;
+        public static implicit operator PublicKey(UserID userID) => userID?.SignPublicKey;
 
         public static implicit operator string(UserID userID) => userID?.Nickname;
 
@@ -41,7 +42,7 @@ namespace Arteranos.Core
         public override int GetHashCode()
         {
             HashCode hc = new();
-            foreach(byte b in SignPublicKey) hc.Add(b);
+            foreach(byte b in SignPublicKey.Serialize()) hc.Add(b);
             return hc.ToHashCode();
         }
 

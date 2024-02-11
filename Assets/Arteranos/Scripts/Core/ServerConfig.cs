@@ -85,13 +85,10 @@ namespace Arteranos.Core
         #region Server actions
 
         [Server]
-        public static byte[] ServerPerformServerPacket(IAvatarBrain source, SCMType type, CMSPacket p)
+        public static void ServerPerformServerPacket(IAvatarBrain source, SCMType type, CMSPacket p)
         {
-            byte[] expectedSignatureKey = source.UserID;
-
-
             Server.ReceiveMessage(p, out byte[] payloadBlob, out PublicKey supposedSigner);
-            if (supposedSigner != PublicKey.Deserialize(expectedSignatureKey)) throw new Exception("Invalid signature");
+            if (supposedSigner != (PublicKey)source.UserID) throw new Exception("Invalid signature");
 
             switch (type)
             {
@@ -104,8 +101,6 @@ namespace Arteranos.Core
                 default:
                     throw new NotImplementedException();
             }
-
-            return expectedSignatureKey;
         }
 
 

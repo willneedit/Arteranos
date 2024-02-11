@@ -240,7 +240,7 @@ namespace Arteranos.Core
 
             AddUser(new ServerUserState()
             {
-                userID = new(cs.UserSignPublicKey.Serialize(), cs.Me.Nickname),
+                userID = new(cs.UserSignPublicKey, cs.Me.Nickname),
                 userState = UserState.Srv_admin,
                 address = null,
                 deviceUID = null,

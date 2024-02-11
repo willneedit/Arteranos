@@ -1,4 +1,5 @@
 ﻿using Arteranos.Core;
+using Ipfs.Core.Cryptography.Proto;
 using System;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -44,12 +45,19 @@ public static class CryptoHelpers
         return string.Join(" ", words);
     }
 
+    public static byte[] GetFingerprint(UserID userID)
+        => GetFingerprint(userID.SignPublicKey.Serialize());
+    public static byte[] GetFingerprint(PublicKey publicKey) 
+        => GetFingerprint(publicKey.Serialize());
     public static byte[] GetFingerprint(byte[] publicKey)
     {
         using IncrementalHash myHash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         myHash.AppendData(publicKey);
         return myHash.GetHashAndReset();
     }
+
+    public static string ToString(string v, UserID userID)
+        => ToString(v, userID.SignPublicKey.Serialize());
 
     public static string ToString(string v, byte[] publicKey)
     {

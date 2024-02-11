@@ -301,7 +301,7 @@ namespace Arteranos.Services
 
                 ServerUserState query = new()
                 {
-                    userID = new UserID(request.ClientSignPublicKey.Serialize(), request.Nickname),
+                    userID = new UserID(request.ClientSignPublicKey, request.Nickname),
                     address = conn.address,
                     deviceUID = request.deviceUID
                 };
