@@ -1,13 +1,18 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Arteranos.Core
 {
+    [ProtoContract]
     public class UserID : IEquatable<UserID>
     {
         // Has to be there, for serialization.
-        public byte[] PublicKey = null;
+        [ProtoMember(1)]
+        public byte[] SignPublicKey = null;
+
+        [ProtoMember(2)]
         public string Nickname = null;
 
         public UserID()
@@ -15,20 +20,20 @@ namespace Arteranos.Core
 
         }
 
-        public UserID(byte[] PublicKey, string Nickname)
+        public UserID(byte[] SignPublicKey, string Nickname)
         {
-            this.PublicKey = PublicKey;
+            this.SignPublicKey = SignPublicKey;
             this.Nickname = Nickname;
         }
 
         public bool Equals(UserID other)
         {
-            if(other?.PublicKey == null || PublicKey == null) return false;
+            if(other?.SignPublicKey == null || SignPublicKey == null) return false;
 
-            return PublicKey.SequenceEqual(other.PublicKey);
+            return SignPublicKey.SequenceEqual(other.SignPublicKey);
         }
 
-        public static implicit operator byte[](UserID userID) => userID?.PublicKey;
+        public static implicit operator byte[](UserID userID) => userID?.SignPublicKey;
 
         public static implicit operator string(UserID userID) => userID?.Nickname;
 
@@ -36,7 +41,7 @@ namespace Arteranos.Core
         public override int GetHashCode()
         {
             HashCode hc = new();
-            foreach(byte b in PublicKey) hc.Add(b);
+            foreach(byte b in SignPublicKey) hc.Add(b);
             return hc.ToHashCode();
         }
 

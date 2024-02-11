@@ -8,8 +8,10 @@
 #pragma warning disable IDE1006 // Because Unity's more relaxed naming convention
 
 using Arteranos.Core;
+using Arteranos.Core.Cryptography;
 using Arteranos.Social;
 using Ipfs;
+using Ipfs.Core.Cryptography.Proto;
 using System;
 using UnityEngine;
 
@@ -25,6 +27,7 @@ namespace Arteranos.Avatar
         GameObject gameObject { get; }
         Transform transform { get; }
         UserID UserID { get; set; }
+        PublicKey AgreePublicKey { get; set; }
         UserPrivacy UserPrivacy { get; }
         ulong UserState { get; set; }
         string Address { get; set; }

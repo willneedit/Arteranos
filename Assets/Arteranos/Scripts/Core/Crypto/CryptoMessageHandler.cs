@@ -28,7 +28,7 @@ namespace Arteranos.Core.Cryptography
     }
 
     [ProtoContract]
-    internal class ReceiverKey
+    public class ReceiverKey
     {
         [ProtoMember(1)]
         public byte[] receiverAgrFingerprint;
@@ -39,7 +39,7 @@ namespace Arteranos.Core.Cryptography
     }
 
     [ProtoContract]
-    internal class EncryptedMessage
+    public class CMSPacket
     {
         [ProtoMember(1)]
         public byte[] senderAgrPubKey;
@@ -68,24 +68,41 @@ namespace Arteranos.Core.Cryptography
 
         #region Public
 
-        public void ReceiveMessage(byte[] messageData, out byte[] data, out PublicKey signerPublicKey)
+        public void ReceiveMessage(CMSPacket message, out byte[] data, out PublicKey signerPublicKey)
         {
-            using MemoryStream ms = new(messageData);
-            EncryptedMessage message = Serializer.Deserialize<EncryptedMessage>(ms);
-            ReceiveMessage(message, out data, out signerPublicKey);
+            byte[] signedMessageData = null;
+            if (message.receiverKeys?.Count > 0)
+            {
+                // Decrypt message (if it's for this handler)
+                using SymmetricKey decryptKey = FindReceiverKey(message);
+                decryptKey.Decrypt(message.encryptedSignedMessage, out signedMessageData);
+            }
+            else // No encryption, take message as plaintext
+                signedMessageData = message.encryptedSignedMessage;
+
+            using MemoryStream ms = new(signedMessageData);
+            SignedMessage signedMessage = Serializer.Deserialize<SignedMessage>(ms);
+
+            data = signedMessage.data;
+
+            // No signature?
+            if (signedMessage.signerPubKey == null)
+                signerPublicKey = null;
+            else
+            {
+                // If there's one, check it.
+                signerPublicKey = PublicKey.Deserialize(signedMessage.signerPubKey);
+                signerPublicKey.Verify(signedMessage.data, signedMessage.signature);
+            }
         }
 
-        public void TransmitMessage(byte[] data, PublicKey[] receivers, out byte[] messageData)
+        public void TransmitMessage(byte[] data, PublicKey[] receivers, out CMSPacket message)
         {
-            EncryptedMessage message = TransmitMessage(data, receivers);
-            using MemoryStream ms = new();
-            Serializer.Serialize(ms, message);
-            ms.Position = 0;
-            messageData = ms.ToArray();
+            message = TransmitMessage(data, receivers);
         }
 
-        public void TransmitMessage(byte[] data, PublicKey receiver, out byte[] messageData) 
-            => TransmitMessage(data, new[] { receiver }, out messageData);
+        public void TransmitMessage(byte[] data, PublicKey receiver, out CMSPacket message) 
+            => TransmitMessage(data, new[] { receiver }, out message);
 
         public void Sign(byte[] data, out byte[] signature)
             => OwnerSignKey.Sign(data, out signature);
@@ -113,7 +130,7 @@ namespace Arteranos.Core.Cryptography
             return SymmetricKey.Import(messageKey, messageIV);
         }
 
-        internal SymmetricKey FindReceiverKey(EncryptedMessage message)
+        internal SymmetricKey FindReceiverKey(CMSPacket message)
         {
             foreach(ReceiverKey receiverKey in message.receiverKeys)
             {
@@ -122,34 +139,6 @@ namespace Arteranos.Core.Cryptography
             }
 
             throw new CryptographicException("Message is not supposed for this handler");
-        }
-
-        internal void ReceiveMessage(EncryptedMessage message, out byte[] data, out PublicKey signerPublicKey)
-        {
-            byte[] signedMessageData = null;
-            if (message.receiverKeys?.Count > 0)
-            {
-                // Decrypt message (if it's for this handler)
-                using SymmetricKey decryptKey = FindReceiverKey(message);
-                decryptKey.Decrypt(message.encryptedSignedMessage, out signedMessageData);
-            }
-            else // No encryption, take message as plaintext
-                signedMessageData = message.encryptedSignedMessage;
-
-            using MemoryStream ms = new(signedMessageData);
-            SignedMessage signedMessage = Serializer.Deserialize<SignedMessage>(ms);
-
-            data = signedMessage.data;
-
-            // No signature?
-            if(signedMessage.signerPubKey == null)
-                signerPublicKey = null;
-            else
-            {
-                // If there's one, check it.
-                signerPublicKey = PublicKey.Deserialize(signedMessage.signerPubKey);
-                signerPublicKey.Verify(signedMessage.data, signedMessage.signature);
-            }
         }
 
         #endregion
@@ -169,7 +158,7 @@ namespace Arteranos.Core.Cryptography
             OwnerSignKey.ExportPublicKey(out message.signerPubKey);
         }
 
-        internal SymmetricKey WrapMessage(byte[] data, out EncryptedMessage encryptedMessage)
+        internal SymmetricKey WrapMessage(byte[] data, out CMSPacket encryptedMessage)
         {
             SignedMessage signed = new()
             {
@@ -212,9 +201,9 @@ namespace Arteranos.Core.Cryptography
             return receiverKey;
         }
 
-        internal EncryptedMessage TransmitMessage(byte[] data, PublicKey[] receivers)
+        internal CMSPacket TransmitMessage(byte[] data, PublicKey[] receivers)
         {
-            using SymmetricKey messageKey = WrapMessage(data, out EncryptedMessage message);
+            using SymmetricKey messageKey = WrapMessage(data, out CMSPacket message);
             if(receivers?.Length > 0)
             {
                 messageKey.Encrypt(message.encryptedSignedMessage, out message.encryptedSignedMessage);

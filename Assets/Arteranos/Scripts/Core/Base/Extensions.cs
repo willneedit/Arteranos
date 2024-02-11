@@ -9,12 +9,26 @@ using UnityEngine;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using Ipfs;
+using Mirror;
+using Ipfs.Core.Cryptography.Proto;
 
 namespace Arteranos.Core
 {
     public static class Extensions
     {
+        // To enable Mirror to directly transmit IPFS/BouncyCastle Public Keys.
+        public static void WritePublicKey(this NetworkWriter writer, PublicKey value)
+        {
+            byte[] data = value.Serialize();
+            writer.Write(data);
+        }
+
+        public static PublicKey ReadPublicKey(this NetworkReader reader)
+        {
+            byte[] data = reader.Read<byte[]>();
+            return PublicKey.Deserialize(data);
+        }
+
         /// <summary>
         /// Returns a relevance index for the comparison.
         /// </summary>

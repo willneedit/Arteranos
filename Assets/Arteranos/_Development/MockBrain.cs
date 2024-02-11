@@ -8,8 +8,10 @@
 #if UNITY_EDITOR
 
 using Arteranos.Core;
+using Arteranos.Core.Cryptography;
 using Arteranos.Social;
 using Ipfs;
+using Ipfs.Core.Cryptography.Proto;
 using System;
 using UnityEngine;
 
@@ -52,6 +54,7 @@ namespace Arteranos.Avatar
         public ulong UserState { get; set; } = 0;
         public string Address { get; set; } = string.Empty;
         public string DeviceID { get; set; } = string.Empty;
+        public PublicKey AgreePublicKey { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event Action<int> OnAppearanceStatusChanged;
 

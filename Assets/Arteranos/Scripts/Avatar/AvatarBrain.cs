@@ -14,6 +14,8 @@ using Arteranos.Social;
 using System.Linq;
 using Ipfs;
 using Random = UnityEngine.Random;
+using Arteranos.Core.Cryptography;
+using Ipfs.Core.Cryptography.Proto;
 
 namespace Arteranos.Avatar
 {
@@ -45,6 +47,8 @@ namespace Arteranos.Avatar
         // Okay to use the setter. The SyncVar would yell at you if you fiddle with the privilege client-side
         public UserID UserID { get => m_userID; set => m_userID = value; }
 
+        public PublicKey AgreePublicKey { get => m_AgreePublicKey; set => m_AgreePublicKey = value; }
+
         public string Nickname { get => m_userID; }
 
         public ulong UserState { get => m_UserState; set => m_UserState = value; }
@@ -75,7 +79,7 @@ namespace Arteranos.Avatar
                     : Avatar.AppearanceStatus.OK;
                 int newNetAS = value & ~Avatar.AppearanceStatus.MASK_LOCAL;
 
-                if(oldNetAS != newNetAS)
+                if (oldNetAS != newNetAS)
                     // Spread the word...
                     CmdPropagateInt(AVKeys.NetAppearanceStatus, newNetAS);
                 else
@@ -86,7 +90,7 @@ namespace Arteranos.Avatar
 
         public void SetAppearanceStatusBit(int ASBit, bool set)
         {
-            if(set)
+            if (set)
                 AppearanceStatus |= ASBit;
             else
                 AppearanceStatus &= ~ASBit;
@@ -97,7 +101,7 @@ namespace Arteranos.Avatar
         public void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered)
         {
             // Not for the desired sphere of influence
-            if(isFriend != SocialState.IsFriends(touchy)) return;
+            if (isFriend != SocialState.IsFriends(touchy)) return;
 
             touchy.SetAppearanceStatusBit(Avatar.AppearanceStatus.Bubbled, entered);
         }
@@ -110,15 +114,15 @@ namespace Arteranos.Avatar
         {
             string modestr = string.Empty;
 
-            if(isServer && isClient) modestr += "Host";
-            else if(isServer) modestr += "Server";
-            else if(isClient) modestr += "Client";
+            if (isServer && isClient) modestr += "Host";
+            else if (isServer) modestr += "Server";
+            else if (isClient) modestr += "Client";
             else modestr += "?";
 
-            if(isOwned) modestr += ", Owned";
+            if (isOwned) modestr += ", Owned";
 
             string objmsg = (message is string msgstr) ? msgstr : message.ToString();
-            return UserID != null 
+            return UserID != null
                 ? $"[{Nickname}][{modestr}] {objmsg}"
                 : $"[???][{modestr}] {objmsg}";
         }
@@ -184,7 +188,7 @@ namespace Arteranos.Avatar
         public override void OnStopClient()
         {
             // Maybe it isn't owned anymore, but it would be worse the other way round.
-            if(isOwned) XRControl.Me = null;
+            if (isOwned) XRControl.Me = null;
 
             SettingsManager.Client.OnAvatarChanged -= CommitAvatarChanged;
 
@@ -221,11 +225,11 @@ namespace Arteranos.Avatar
         #region Running
         private void Update()
         {
-            if((Subconscious.ReadyState & AvatarSubconscious.READY_COMPLETE) == 0)
+            if ((Subconscious.ReadyState & AvatarSubconscious.READY_COMPLETE) == 0)
                 return;
 
             // The text message reception loop
-            if(isOwned)
+            if (isOwned)
                 DoTextMessageLoop();
         }
 
@@ -237,6 +241,9 @@ namespace Arteranos.Avatar
 
         [SyncVar(hook = nameof(OnUserIDChanged))]
         private UserID m_userID = null;
+
+        [SyncVar]
+        private PublicKey m_AgreePublicKey = null;
 
         [SyncVar]
         private UserPrivacy m_UserPrivacy = null;
@@ -379,11 +386,11 @@ namespace Arteranos.Avatar
                     Core.Utils.Paginated<T> page = Core.Utils.Paginate(data, pagenum++);
 
 
-                    List<T> packets = new();
+                    ListOfSerialized<T> packets = new() { entries = new() };
                     if (page.payload != null)
-                        packets = page.payload.ToList();
+                        packets.entries.AddRange(page.payload);
 
-                    Server.TransmitMessage(packets, UserID.PublicKey, out CMSPacket packet);
+                    Server.TransmitMessage(packets.Serialize(), PublicKey.Deserialize(UserID.SignPublicKey), out CMSPacket packet);
                     TargetDeliverServerPacket(type, packet);
 
                     if (page.payload == null) break;

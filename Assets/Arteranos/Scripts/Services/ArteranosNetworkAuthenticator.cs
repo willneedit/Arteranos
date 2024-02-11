@@ -20,6 +20,10 @@ using System.Linq;
 using Arteranos.UI;
 using System.Collections.Concurrent;
 using Arteranos.Web;
+using Ipfs.Core.Cryptography.Proto;
+using ProtoBuf;
+using System.IO;
+using Arteranos.Core.Cryptography;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-authenticators
@@ -36,27 +40,33 @@ namespace Arteranos.Services
         {
             public Version ServerVersion;
             public string ServerName;
-            public byte[] ServerPublicKey;
-            public byte[] ClientChallenge;
+            public PublicKey ServerSignPublicKey;
+            public PublicKey ServerAgreePublicKey;
             public int SequenceNumber;
         }
 
-        internal struct AuthRequestPayload
+        [ProtoContract]
+        internal struct AuthRequestPayload // Signed and encrypted
         {
+            [ProtoMember(1)]
             public int SequenceNumber;
-            public byte[] ClientResponse;
-            public byte[] ClientPublicKey;
 
+            [ProtoMember(2)]
             public string Nickname;
-            public bool isGuest;
+
+            [ProtoMember(3)]
             public string deviceUID;
+
+            [ProtoMember(4)]
+            public PublicKey ClientSignPublicKey; // It's self-signed, okay?!
         }
 
         internal struct AuthRequestMessage : NetworkMessage
         {
             public Version ClientVersion;
+            public PublicKey ClientAgreePublicKey;
 
-            public CryptPacket Payload;
+            public CMSPacket Payload; // As AuthRequestPayload, signed with Client, encrypted with Client and Server's keys.
         }
 
         internal struct AuthResponseMessage : NetworkMessage
@@ -64,7 +74,6 @@ namespace Arteranos.Services
             public HttpStatusCode status;
             public string message;
             public ServerJSON ServerSettings;
-            public byte[] ClientPubKeySig;
             public ulong UserState;
         }
 
@@ -142,7 +151,6 @@ namespace Arteranos.Services
 
         internal struct ChallengeListEntry
         {
-            public byte[] challenge;
             public DateTime time;
         }
 
@@ -192,7 +200,6 @@ namespace Arteranos.Services
             // Allow sixty seconds between the greeting message and the client's reaction.
             ChallengeListEntry entry = new()
             {
-                challenge = GetChallengeBytes(32),
                 time = DateTime.Now + TimeSpan.FromSeconds(60),
             };
 
@@ -203,8 +210,8 @@ namespace Arteranos.Services
             {
                 ServerVersion = Version.Load(),
                 ServerName = ss.Name,
-                ServerPublicKey = ss.ServerPublicKey,
-                ClientChallenge = entry.challenge,
+                ServerSignPublicKey = ss.ServerSignPublicKey,
+                ServerAgreePublicKey = ss.ServerAgrPublicKey,
                 SequenceNumber = sequence
             };
 
@@ -239,13 +246,31 @@ namespace Arteranos.Services
 
             // if(connectionsPendingDisconnect.Contains(conn)) return;
 
-            Server ss = SettingsManager.Server;
+            AuthResponseMessage response = default;
+            AuthRequestPayload request = default;
+            try
+            {
+                Server.ReceiveMessage(encryptedMsg.Payload, out byte[] payloadBlob, out PublicKey signerPublicKey);
+                
+                using MemoryStream ms = new(payloadBlob);
+                request = Serializer.Deserialize<AuthRequestPayload>(ms);
 
-            ss.Decrypt(encryptedMsg.Payload, out AuthRequestPayload request);
+                // Wait, what?!
+                if (signerPublicKey != request.ClientSignPublicKey)
+                    throw new Exception("Wrong signature key");
 
-            AuthResponseMessage response;
+                response.status = 0;
+            }
+            catch (Exception)
+            {
+                response = new()
+                {
+                    status = HttpStatusCode.Unauthorized,
+                    message = $"Signature check failed.",
+                };
+            }
 
-            if(!encryptedMsg.ClientVersion.IsGE(Version.VERSION_MIN))
+            if (!encryptedMsg.ClientVersion.IsGE(Version.VERSION_MIN))
             {
                 // Insufficient version
                 response = new()
@@ -254,7 +279,7 @@ namespace Arteranos.Services
                     message = $"Your client is outdated.\nVersion {Version.VERSION_MIN} required,\nPlease update.",
                 };
             }
-            else if(!ChallengeList.TryGetValue(request.SequenceNumber, out ChallengeListEntry ce))
+            else if (!ChallengeList.TryGetValue(request.SequenceNumber, out _))
             {
                 // Authentication attempt either out-of-band or expired. Or it's a replay attack.
                 response = new()
@@ -263,31 +288,20 @@ namespace Arteranos.Services
                     message = $"Request timed out",
                 };
             }
-            else if(!Crypto.Verify(ce.challenge, request.ClientResponse, request.ClientPublicKey))
-            {
-                // Fake Client Public Key, Challenge signing failed, ...
-                response = new()
-                {
-                    status = HttpStatusCode.Unauthorized,
-                    message = $"Signature check failed.",
-                };
-            }
-            else
+            else if(response.status == 0)
             {
                 // All checks pan out.
                 response = new()
                 {
                     status = HttpStatusCode.OK,
                     message = "OK",
+                    // Add the server settings and the signature of the client's public key.
+                    ServerSettings = SettingsManager.Server.Strip()
                 };
-
-                // Add the server settings and the signature of the client's public key.
-                ss.Sign(request.ClientPublicKey, out response.ClientPubKeySig);
-                response.ServerSettings = SettingsManager.Server.Strip();
 
                 ServerUserState query = new()
                 {
-                    userID = new UserID(request.ClientPublicKey, request.Nickname),
+                    userID = new UserID(request.ClientSignPublicKey.Serialize(), request.Nickname),
                     address = conn.address,
                     deviceUID = request.deviceUID
                 };
@@ -389,13 +403,15 @@ namespace Arteranos.Services
 
             Client cs = SettingsManager.Client;
 
+            byte[] pubKeyData = msg.ServerSignPublicKey.Serialize();
+
             if(!cs.ServerPasses.TryGetValue(key, out ServerPass sp))
             {
                 // New server encountered. Yay!
                 cs.ServerPasses.Add(key, new()
                 {
                     PrivacyTOSHash = null,
-                    ServerPublicKey = msg.ServerPublicKey
+                    ServerPublicKey = pubKeyData
                 });
                 SubmitAuthRequest(msg);
                 cs.Save();
@@ -404,13 +420,13 @@ namespace Arteranos.Services
             else if(sp.ServerPublicKey == null)
             {
                 // Somewhat known, because we dealt with the custom TOS, and never connected to it yet.
-                sp.ServerPublicKey = msg.ServerPublicKey;
+                sp.ServerPublicKey = pubKeyData;
                 cs.ServerPasses[key] = sp;
                 SubmitAuthRequest(msg);
                 cs.Save();
                 return;
             }
-            else if(msg.ServerPublicKey.SequenceEqual(sp.ServerPublicKey))
+            else if(pubKeyData.SequenceEqual(sp.ServerPublicKey))
             {
                 // Known server, everything is okay.
                 SubmitAuthRequest(msg);
@@ -455,7 +471,7 @@ namespace Arteranos.Services
 
             cs.ServerPasses.TryGetValue(key, out ServerPass sp);
 
-            sp.ServerPublicKey = msg.ServerPublicKey;
+            sp.ServerPublicKey = msg.ServerSignPublicKey.Serialize();
 
             cs.ServerPasses[key] = sp;
             cs.Save();
@@ -467,23 +483,26 @@ namespace Arteranos.Services
         {
             Client cs = SettingsManager.Client;
 
-            cs.Sign(msg.ClientChallenge, out byte[] response);
-
-            Crypto.Encrypt(new AuthRequestPayload()
+            AuthRequestPayload authRequestPayload = new()
             {
                 SequenceNumber = msg.SequenceNumber,
-                ClientResponse = response,
-                ClientPublicKey = cs.UserPublicKey,
 
                 Nickname = cs.Me.Nickname,
-                isGuest = cs.Me.Login.IsGuest,
-                deviceUID = SystemInfo.deviceUniqueIdentifier
-            }, msg.ServerPublicKey, out CryptPacket p);
+                deviceUID = SystemInfo.deviceUniqueIdentifier,
+                ClientSignPublicKey = cs.UserSignPublicKey,
+            };
+
+            using MemoryStream ms = new();
+            Serializer.Serialize(ms, authRequestPayload);
+            ms.Position = 0;
+            byte[] authRequestPayloadBlob = ms.ToArray();
+            Client.TransmitMessage(authRequestPayloadBlob, msg.ServerAgreePublicKey, out CMSPacket encryptedPayload);
 
             NetworkClient.Send(new AuthRequestMessage()
             {
                 ClientVersion = Version.Load(),
-                Payload = p
+                ClientAgreePublicKey = cs.UserAgrPublicKey,
+                Payload = encryptedPayload
             });
         }
 

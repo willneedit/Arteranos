@@ -8,7 +8,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using System.Linq;
 using System.ComponentModel;
@@ -173,25 +172,6 @@ namespace Arteranos.Core
         Dice_5
     }
 
-    /*
-     * ServerUserState ::= SEQUENCE {
-     *      UserID        UserID OPTIONAL,
-     *      userState     INTEGER,
-     *      address   [1] UTF8STRING OPTIONAL,
-     *      deviceUID [2] UTF8STRING OPTIONAL,
-     *      remarks   [3] UTF8STRING OPTIONAL
-     * }
-     */
-
-    public struct ServerUserState
-    {
-        [ASN1Tag(true)]    public UserID userID;
-                           public ulong userState;
-        [ASN1Tag(1, true)] public string address;
-        [ASN1Tag(2, true)] public string deviceUID;
-        [ASN1Tag(3, true)] public string remarks;
-    }
-
     public class ServerUserBase
     {
         public List<ServerUserState> Base = new();
@@ -260,7 +240,7 @@ namespace Arteranos.Core
 
             AddUser(new ServerUserState()
             {
-                userID = new(cs.UserPublicKey, cs.Me.Nickname),
+                userID = new(cs.UserSignPublicKey.Serialize(), cs.Me.Nickname),
                 userState = UserState.Srv_admin,
                 address = null,
                 deviceUID = null,

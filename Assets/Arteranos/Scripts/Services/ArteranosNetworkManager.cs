@@ -220,7 +220,7 @@ namespace Arteranos.Services
                 ResponseMessages.Remove(conn.connectionId);
 
                 brain.UserState = seq.response.UserState;
-                brain.UserID = new UserID(seq.request.ClientPublicKey, seq.request.Nickname);
+                brain.UserID = new UserID(seq.request.ClientSignPublicKey.Serialize(), seq.request.Nickname);
                 brain.Address = conn.address;
                 brain.DeviceID = seq.request.deviceUID;
 

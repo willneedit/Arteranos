@@ -6,6 +6,7 @@
  */
 
 using Arteranos.Core.Cryptography;
+using Ipfs.Core.Cryptography.Proto;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -41,7 +42,10 @@ namespace Arteranos.Core
         public ServerPermissions Permissions = new();
 
         [JsonIgnore]
-        public byte[] ServerPublicKey = null;
+        public PublicKey ServerSignPublicKey = null;
+
+        [JsonIgnore]
+        public PublicKey ServerAgrPublicKey = null;
 
         public ServerJSON Strip()
         {
@@ -54,7 +58,8 @@ namespace Arteranos.Core
                 Public = Public,
                 Icon = new byte[0],         // Remove the icon to reduce the packet size
                 Permissions = Permissions,
-                ServerPublicKey = ServerPublicKey
+                ServerSignPublicKey = ServerSignPublicKey,
+                ServerAgrPublicKey = ServerAgrPublicKey
             };
         }
     }
@@ -67,8 +72,6 @@ namespace Arteranos.Core
         [JsonIgnore]
         private CryptoMessageHandler CMH = null;
 
-        [JsonIgnore]
-        private Crypto Crypto = null;
 
         public const string PATH_SERVER_SETTINGS = "ServerSettings.json";
 
@@ -81,7 +84,7 @@ namespace Arteranos.Core
 
                 ConfigTimestamp = DateTime.Now;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogWarning($"Failed to save server settings: {e.Message}");
             }
@@ -96,7 +99,7 @@ namespace Arteranos.Core
                 string json = FileUtils.ReadTextConfig(PATH_SERVER_SETTINGS);
                 ss = JsonConvert.DeserializeObject<Server>(json);
 
-                if(FileUtils.NeedsFallback(PATH_SERVER_SETTINGS))
+                if (FileUtils.NeedsFallback(PATH_SERVER_SETTINGS))
                 {
                     Debug.LogWarning("Modifying server settings: Ports, Name, Server Key");
                     ss.ServerPort -= 100;
@@ -106,7 +109,7 @@ namespace Arteranos.Core
 
                 ss.ConfigTimestamp = FileUtils.ReadConfig(PATH_SERVER_SETTINGS, File.GetLastWriteTime);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogWarning($"Failed to load server settings: {e.Message}");
                 ss = new() { ConfigTimestamp = DateTime.UnixEpoch };
@@ -118,18 +121,17 @@ namespace Arteranos.Core
         // Called back from the IPFS Service
         public void UpdateServerKey(SignKey serverKeyPair)
         {
-            serverKeyPair.ExportPublicKey(out ServerPublicKey);
+            // Take the peer keypair as the (constant) signing key and its identification,
+            // and generate a session-based key for (EC)DH key agreement.
             CMH = new(serverKeyPair);
+            ServerSignPublicKey = CMH.SignPublicKey;
+            ServerAgrPublicKey = CMH.AgreePublicKey;
         }
 
-        public void Decrypt<T>(CryptPacket p, out T payload) => Crypto.Decrypt(p, out payload);
+        public static void TransmitMessage(byte[] data, PublicKey receiver, out CMSPacket messageData)
+            => SettingsManager.Server.CMH.TransmitMessage(data, receiver, out messageData);
 
-        public void Sign(byte[] data, out byte[] signature) => CMH.Sign(data, out signature);
-
-        public static void TransmitMessage<T>(T data, byte[] receiverPublicKey, out CMSPacket packet)
-            => SettingsManager.Server.Crypto.TransmitMessage(data, receiverPublicKey, out packet);
-
-        public static void ReceiveMessage<T>(CMSPacket packet, ref byte[] expectedSignatureKey, out T data)
-            => SettingsManager.Server.Crypto.ReceiveMessage(packet, ref expectedSignatureKey, out data);
+        public static void ReceiveMessage(CMSPacket messageData, out byte[] data, out PublicKey signerPublicKey)
+            => SettingsManager.Server.CMH.ReceiveMessage(messageData, out data, out signerPublicKey);
     }
 }

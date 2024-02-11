@@ -13,6 +13,8 @@ using System.Security.Cryptography;
 using System.Text;
 using DERSerializer;
 
+#if false
+
 namespace Arteranos.Core
 {
     public struct CryptPacket
@@ -282,3 +284,4 @@ namespace Arteranos.Core
         #endregion
     }
 }
+#endif

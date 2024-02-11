@@ -14,6 +14,8 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using Arteranos.Social;
 using System.Linq;
+using Arteranos.Core.Cryptography;
+using Ipfs.Core.Cryptography.Proto;
 
 namespace Arteranos.Core
 {
@@ -216,27 +218,8 @@ namespace Arteranos.Core
 
     public class UserDataSettingsJSON
     {
-        [JsonIgnore]
-        private bool includeCompleteKey = false;
-
-        [JsonIgnore]
-        private byte[] userKey = null;
-
-        [JsonIgnore]
-        public bool IncludeCompleteKey
-        {
-            get => includeCompleteKey;
-            set => includeCompleteKey = value;
-        }
-
-        // The server's COMPLETE key
-        public byte[] UserKey
-        {
-            // Require explicit enabling the export of the whole key to prevent leaking
-            // the key with the server settings
-            get => includeCompleteKey ? userKey : null;
-            set => userKey = value;
-        }
+        // User's signature key pair
+        public byte[] UserSignKeyPair = null;
 
         // The display name of the user. Generate if null
         public virtual string Nickname { get; set; } = "Anonymous";
@@ -371,10 +354,13 @@ namespace Arteranos.Core
         }
 
         [JsonIgnore]
-        private Crypto Crypto = null;
+        private CryptoMessageHandler CMH = null;
 
         [JsonIgnore]
-        public byte[] UserPublicKey => Crypto.PublicKey;
+        public PublicKey UserSignPublicKey => CMH.SignPublicKey;
+
+        [JsonIgnore]
+        public PublicKey UserAgrPublicKey => CMH.AgreePublicKey;
 
         [JsonIgnore]
         public override bool VRMode
@@ -423,20 +409,13 @@ namespace Arteranos.Core
 
         public void PingUserPrivacyChanged() => OnUserPrivacyChanged?.Invoke(UserPrivacy);
 
-        public void Decrypt<T>(CryptPacket p, out T payload) => Crypto.Decrypt(p, out payload);
+        public string GetFingerprint(string fmt = null) => CryptoHelpers.ToString(fmt, UserSignPublicKey.Serialize());
 
-        public void Sign(byte[] data, out byte[] signature) => Crypto.Sign(data, out signature);
+        public static void TransmitMessage(byte[] data, PublicKey receiver, out CMSPacket messageData)
+            => SettingsManager.Client.CMH.TransmitMessage(data, receiver, out messageData);
 
-        public static void TransmitMessage<T>(T data, byte[][] receiverPublicKeys, out CMSPacket packet)
-            => SettingsManager.Client.Crypto.TransmitMessage(data, receiverPublicKeys, out packet);
-
-        public static void TransmitMessage<T>(T data, byte[] receiverPublicKey, out CMSPacket packet)
-            => SettingsManager.Client.Crypto.TransmitMessage(data, receiverPublicKey, out packet);
-
-        public static void ReceiveMessage<T>(CMSPacket packet, ref byte[] expectedSignatureKey, out T data)
-            => SettingsManager.Client.Crypto.ReceiveMessage(packet, ref expectedSignatureKey, out data);
-
-        public string GetFingerprint(string fmt = null) => Crypto.ToString(fmt);
+        public static void ReceiveMessage(CMSPacket messageData, out byte[] data, out PublicKey signerPublicKey)
+            => SettingsManager.Client.CMH.ReceiveMessage(messageData, out data, out signerPublicKey);
 
         #endregion
         // ---------------------------------------------------------------
@@ -522,10 +501,6 @@ namespace Arteranos.Core
 
         public void Save()
         {
-            using Guard guard = new(
-                () => Me.IncludeCompleteKey = true,
-                () => Me.IncludeCompleteKey = false);
-
             try
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
@@ -552,33 +527,21 @@ namespace Arteranos.Core
                 cs = new();
             }
 
-            using(Guard guard = new(
-                () => cs.Me.IncludeCompleteKey = true,
-                () => cs.Me.IncludeCompleteKey = false))
             {
 
-                try
+                SignKey userKey;
+                if (cs.Me.UserSignKeyPair == null)
                 {
-                    if(cs.Me.UserKey == null)
-                    {
-                        cs.Crypto = new();
-                        cs.Me.UserKey = cs.Crypto.Export(true);
-
-                        cs.Save();
-                    }
-                    else
-                    {
-                        cs.Crypto = new(cs.Me.UserKey);
-                    }
-                }
-                catch(Exception e)
-                {
-                    Debug.LogError($"Internal error while regenerating user key - regenerating...: {e.Message}");
-                    cs.Crypto = new();
-                    cs.Me.UserKey = cs.Crypto.Export(true);
+                    userKey = SignKey.Generate();
+                    userKey.ExportPrivateKey(out cs.Me.UserSignKeyPair);
 
                     cs.Save();
                 }
+                else
+                    userKey = SignKey.ImportPrivateKey(cs.Me.UserSignKeyPair);
+
+                cs.CMH = new(userKey);
+
                 // Postprocessing to generate the derived values
                 if(cs.RefreshAuthentication())
                     // Save the settings back if the randomized guest login occurs and the login token is deleted.

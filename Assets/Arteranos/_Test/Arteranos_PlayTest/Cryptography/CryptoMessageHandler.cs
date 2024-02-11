@@ -38,7 +38,7 @@ namespace Arteranos.PlayTest.Cryptography
 
             byte[] message = Encoding.UTF8.GetBytes("this is to be unencrypted and signed");
 
-            cmh.TransmitMessage(message, new PublicKey[0], out byte[] messageData);
+            cmh.TransmitMessage(message, new PublicKey[0], out CMSPacket messageData);
 
             Assert.IsNotNull(messageData);
         }
@@ -53,7 +53,7 @@ namespace Arteranos.PlayTest.Cryptography
 
             byte[] message = Encoding.UTF8.GetBytes("this is to be encrypted and signed");
 
-            cmh.TransmitMessage(message, receiver.PublicKey, out byte[] messageData);
+            cmh.TransmitMessage(message, receiver.PublicKey, out CMSPacket messageData);
 
             Assert.IsNotNull(messageData);
         }
@@ -69,7 +69,7 @@ namespace Arteranos.PlayTest.Cryptography
 
             byte[] message = Encoding.UTF8.GetBytes("this is to be encrypted and signed");
 
-            aliceCmh.TransmitMessage(message, bobCmh.AgreePublicKey, out byte[] messageData);
+            aliceCmh.TransmitMessage(message, bobCmh.AgreePublicKey, out CMSPacket messageData);
 
             bobCmh.ReceiveMessage(messageData, out byte[] decodedMessage, out PublicKey supposedSender);
 
@@ -91,7 +91,7 @@ namespace Arteranos.PlayTest.Cryptography
 
             byte[] message = Encoding.UTF8.GetBytes("this is to be encrypted and signed");
 
-            aliceCmh.TransmitMessage(message, bobCmh.AgreePublicKey, out byte[] messageData);
+            aliceCmh.TransmitMessage(message, bobCmh.AgreePublicKey, out CMSPacket messageData);
 
             Assert.Throws<CryptographicException>(() => 
             {
@@ -113,7 +113,7 @@ namespace Arteranos.PlayTest.Cryptography
 
             byte[] message = Encoding.UTF8.GetBytes("this is to be encrypted and signed");
 
-            MalloryCmh.TransmitMessage(message, bobCmh.AgreePublicKey, out byte[] messageData);
+            MalloryCmh.TransmitMessage(message, bobCmh.AgreePublicKey, out CMSPacket messageData);
 
             bobCmh.ReceiveMessage(messageData, out byte[] decodedMessage, out PublicKey supposedSender);
 

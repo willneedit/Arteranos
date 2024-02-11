@@ -15,6 +15,9 @@ using Arteranos.Social;
 using System;
 using System.Linq;
 using Arteranos.XR;
+using Arteranos.Core.Cryptography;
+using System.Text;
+using Ipfs.Core.Cryptography.Proto;
 
 namespace Arteranos.Avatar
 {
@@ -118,27 +121,36 @@ namespace Arteranos.Avatar
 
         private void TransmitTextMessage(GameObject receiverGO, string text)
         {
-            Crypto.Encrypt(text, receiverGO.GetComponent<IAvatarBrain>().UserID, out CryptPacket p);
+            IAvatarBrain receiverBrain = receiverGO.GetComponent<IAvatarBrain>();
+            byte[] data = Encoding.UTF8.GetBytes(text);
+            Client.TransmitMessage(data, receiverBrain.AgreePublicKey, out CMSPacket p);
             CmdTransmitTextMessage(receiverGO, p);
         }
 
         [Command]
-        private void CmdTransmitTextMessage(GameObject receiverGO, CryptPacket p) 
+        private void CmdTransmitTextMessage(GameObject receiverGO, CMSPacket p) 
             => GetSC(receiverGO).TargetReceiveTextMessage(gameObject, p);
 
         [TargetRpc]
-        private void TargetReceiveTextMessage(GameObject senderGO, CryptPacket p)
+        private void TargetReceiveTextMessage(GameObject senderGO, CMSPacket p)
         {
-            SettingsManager.Client.Decrypt(p, out string text);
+            Client.ReceiveMessage(p, out byte[] data, out PublicKey signerPublicKey);
+            string text = Encoding.UTF8.GetString(data);
+
+            // Already gone.
+            if (senderGO == null) return;
+
+            // Ignore injected messages
+            IAvatarBrain senderBrain = senderGO.GetComponent<IAvatarBrain>();
+            if(PublicKey.Deserialize(senderBrain.UserID.SignPublicKey) != signerPublicKey)
+                return;
+
             ReceiveTextMessage(senderGO, text);
         }
 
         private void ReceiveTextMessage(GameObject senderGO, string text)
         {
             if(!isOwned) throw new Exception("Not owner");
-
-            // Where did they go...?
-            if(senderGO == null) return;
 
             IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();
 

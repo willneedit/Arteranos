@@ -12,6 +12,8 @@ using Arteranos.Avatar;
 using Arteranos.Services;
 using Arteranos.Social;
 using Mirror;
+using Arteranos.Core.Cryptography;
+using Ipfs.Core.Cryptography.Proto;
 
 namespace Arteranos.Core
 {
@@ -21,12 +23,6 @@ namespace Arteranos.Core
         SrvReportUserInfo,      // Server to client : Server User State
         ClnUpdateUserInfo,      // Client to server : Server User State (ServerUserState)
         ClnKickUser             // Client to Server : Kick/Ban targeted user (KickPacket)
-    }
-
-    public struct KickPacket
-    {
-        public UserID UserID;
-        public ServerUserState State;
     }
 
     public static class ServerConfig
@@ -40,10 +36,11 @@ namespace Arteranos.Core
                 UpdateLocalUserState(null, user);
             else
             {
+
                 // Sign, encrypt and transmit.
                 Client.TransmitMessage(
-                    user,
-                    SettingsManager.ActiveServerData.ServerPublicKey,
+                    user.Serialize(),
+                    SettingsManager.ActiveServerData.ServerAgrPublicKey,
                     out CMSPacket p);
 
                 // Use Network Behavior to contact the remote server
@@ -73,8 +70,8 @@ namespace Arteranos.Core
             {
                 // Sign, encrypt and transmit.
                 Client.TransmitMessage(
-                    kp, 
-                    SettingsManager.ActiveServerData.ServerPublicKey, 
+                    kp.Serialize(), 
+                    SettingsManager.ActiveServerData.ServerAgrPublicKey, 
                     out CMSPacket p);
 
                 // Use Network Behavior to contact the remote server
@@ -92,15 +89,17 @@ namespace Arteranos.Core
         {
             byte[] expectedSignatureKey = source.UserID;
 
+
+            Server.ReceiveMessage(p, out byte[] payloadBlob, out PublicKey supposedSigner);
+            if (supposedSigner != PublicKey.Deserialize(expectedSignatureKey)) throw new Exception("Invalid signature");
+
             switch (type)
             {
                 case SCMType.ClnUpdateUserInfo:
-                    Server.ReceiveMessage(p, ref expectedSignatureKey, out ServerUserState user);
-                    UpdateLocalUserState(source, user);
+                    UpdateLocalUserState(source, ServerUserState.Deserialize(payloadBlob));
                     break;
                 case SCMType.ClnKickUser:
-                    Server.ReceiveMessage(p, ref expectedSignatureKey, out KickPacket target);
-                    CommitLocalKickUser(source, target);
+                    CommitLocalKickUser(source, KickPacket.Deserialize(payloadBlob));
                     break;
                 default:
                     throw new NotImplementedException();
@@ -152,11 +151,14 @@ namespace Arteranos.Core
         {
             try
             {
-                byte[] serverPublicKey = SettingsManager.ActiveServerData.ServerPublicKey;
-                Client.ReceiveMessage(packet, ref serverPublicKey, out List<T> packets);
+                Client.ReceiveMessage(packet, out byte[] payload, out PublicKey signerPublicKey);
+                if (signerPublicKey != SettingsManager.Server.ServerSignPublicKey)
+                    throw new Exception("Invalid signature");
 
-                if (packets.Count == 0) callback = null;
-                foreach (T entry in packets) callback?.Invoke(entry);
+                ListOfSerialized<T> packets = ListOfSerialized<T>.Deserialize(payload);
+
+                if (packets.entries.Count == 0) callback = null;
+                foreach (T entry in packets.entries) callback?.Invoke(entry);
             }
             catch (Exception)
             {
