@@ -12,8 +12,6 @@ using UnityEngine;
 using System.Linq;
 using System.ComponentModel;
 
-using DERSerializer;
-
 namespace Arteranos.Core
 {
     public struct UserState

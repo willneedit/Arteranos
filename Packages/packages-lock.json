@@ -401,12 +401,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.willneedit.asn1": {
-      "version": "file:Unity-asn1-package",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "ipfs.engine": {
       "version": "file:Unity-IPFS-Engine",
       "depth": 0,

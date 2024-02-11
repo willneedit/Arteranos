@@ -4,13 +4,7 @@ using Arteranos.Core;
 using Arteranos.Avatar;
 using System.Collections.Generic;
 using System;
-using System.Collections;
-using System.Linq;
-
-using DERSerializer;
 using System.Threading.Tasks;
-using Arteranos.Web;
-using Arteranos.XR;
 using Arteranos.UI;
 using Ipfs;
 using Arteranos.Core.Operations;
@@ -44,8 +38,6 @@ namespace Arteranos.Services
         private readonly Dictionary<int, AuthSequence> ResponseMessages = new();
 
         private readonly Dictionary<int, DateTime> SCLastUpdatedToClient = new();
-
-        private DateTime SCSnapshotCutoff = DateTime.MinValue;
 
         #region Utilities
 
@@ -184,7 +176,6 @@ namespace Arteranos.Services
         {
             // Next time, prepare the next collection list as the full list
             // to cater to the latecomer.
-            SCSnapshotCutoff = DateTime.MinValue;
             SCLastUpdatedToClient[conn.connectionId] = DateTime.MinValue;
         }
 
@@ -327,8 +318,6 @@ namespace Arteranos.Services
         public override void OnStartClient()
         {
             base.OnStartClient();
-
-            SCSnapshotCutoff = DateTime.MinValue;
 
             NetworkClient.RegisterHandler<WorldChangeAnnounceMessage>(OnClientGotWCA);
         }
