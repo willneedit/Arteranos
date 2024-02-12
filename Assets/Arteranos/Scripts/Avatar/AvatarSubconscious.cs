@@ -235,7 +235,8 @@ namespace Arteranos.Avatar
 
             // But, derive the global UserIDs to the scoped UserIDs.
             foreach(SocialListEntryJSON item in q)
-                ReloadSocialState(item.UserID, item.State);
+                if(item.UserID.SignPublicKey != null)
+                    ReloadSocialState(item.UserID, item.State);
         }
 
         #endregion

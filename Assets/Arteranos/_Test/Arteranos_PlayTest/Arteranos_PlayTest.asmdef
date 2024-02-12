@@ -20,7 +20,9 @@
         "nunit.framework.dll",
         "Nito.AsyncEx.Coordination.dll",
         "Newtonsoft.Json.dll",
-        "BouncyCastle.Crypto.dll"
+        "BouncyCastle.Crypto.dll",
+        "protobuf-net.dll",
+        "Google.Protobuf.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [
