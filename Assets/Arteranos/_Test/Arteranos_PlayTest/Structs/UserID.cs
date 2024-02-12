@@ -65,6 +65,21 @@ namespace Arteranos.PlayTest.Structs
         }
 
         [Test]
+        public void SerializabilityEmbedded()
+        {
+            SignKey aliceKey = SignKey.Generate();
+            UserID alice = new(aliceKey.PublicKey, "Alice");
+
+            byte[] bytes = alice.Serialize();
+
+            UserID aliceRestored = UserID.Deserialize(bytes);
+
+            Assert.IsNotNull(aliceRestored);
+            Assert.AreEqual(alice.Nickname, aliceRestored.Nickname);
+            Assert.AreEqual(alice.SignPublicKey, aliceRestored.SignPublicKey);
+        }
+
+        [Test]
         public void Equality()
         {
             SignKey aliceKey = SignKey.Generate();

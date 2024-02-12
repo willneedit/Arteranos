@@ -2,6 +2,7 @@
 using ProtoBuf;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Arteranos.Core
@@ -26,6 +27,16 @@ namespace Arteranos.Core
             this.SignPublicKey = SignPublicKey;
             this.Nickname = Nickname;
         }
+
+        public byte[] Serialize()
+        {
+            using MemoryStream ms = new();
+            Serializer.Serialize(ms, this);
+            return ms.ToArray();
+        }
+
+        public static UserID Deserialize(byte[] data)
+            => Serializer.Deserialize<UserID>(new MemoryStream(data));
 
         public bool Equals(UserID other)
         {
