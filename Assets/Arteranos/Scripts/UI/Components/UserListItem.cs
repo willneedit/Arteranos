@@ -76,9 +76,9 @@ namespace Arteranos.UI
             // When it's active, watch for the status updates - both internal and external causes.
             if(go_Overlay.activeSelf)
             {
-                IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetSocialList(targetUserID);
+                IEnumerable<KeyValuePair<UserID, ulong>> q = SettingsManager.Client.GetSocialList(targetUserID);
 
-                ulong currentState = (q.Count() > 0) ? q.First().State : SocialState.None;
+                ulong currentState = (q.Count() > 0) ? q.First().Value : SocialState.None;
 
                 bool friends = SocialState.IsFriendRequested(currentState);
 

@@ -72,10 +72,10 @@ namespace Arteranos.Core
             Client cs = SettingsManager.Client;
 
             // Look for your friend list if the sender is a friend - use the global UserID
-            IEnumerable<SocialListEntryJSON> q = cs.GetSocialList(sender);
+            IEnumerable<KeyValuePair<UserID, ulong>> q = cs.GetSocialList(sender);
 
             // Either it's the scoped UserID, exactly matching, or the global UserID. 
-            if(q.Count() > 0) sender = q.First().UserID;
+            if(q.Count() > 0) sender = q.First().Key;
 
             stash.incoming.Add(new()
             {

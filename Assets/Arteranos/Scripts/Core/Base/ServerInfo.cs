@@ -93,13 +93,13 @@ namespace Arteranos.Core
                 if (OnlineData?.UserFingerprints == null) return 0;
 
                 int friend = 0;
-                IEnumerable<SocialListEntryJSON> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.State));
+                IEnumerable<KeyValuePair<UserID, ulong>> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.Value));
 
-                foreach (SocialListEntryJSON entry in friends)
+                foreach (KeyValuePair<UserID, ulong> entry in friends)
                 {
                     var q = from fpentry in OnlineData.UserFingerprints
                             where Convert.ToBase64String(fpentry) == 
-                            CryptoHelpers.ToString(CryptoHelpers.FP_Base64, entry.UserID)
+                            CryptoHelpers.ToString(CryptoHelpers.FP_Base64, entry.Key)
                             select fpentry;
 
                     if (q.Any()) friend++;

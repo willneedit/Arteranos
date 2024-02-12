@@ -14,16 +14,16 @@ namespace Arteranos.UI
 {
     public class UserPanel_Incoming : UserPanelBase
     {
-        public override IEnumerable<SocialListEntryJSON> GetSocialListTab()
+        public override IEnumerable<KeyValuePair<UserID, ulong>> GetSocialListTab()
         {
-            IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriendReceived);
-            foreach(SocialListEntryJSON entry in list) yield return entry;
+            IEnumerable<KeyValuePair<UserID, ulong>> list = cs.GetSocialList(null, IsFriendReceived);
+            foreach(KeyValuePair<UserID, ulong> entry in list) yield return entry;
         }
 
-        private bool IsFriendReceived(SocialListEntryJSON arg)
+        private bool IsFriendReceived(KeyValuePair<UserID, ulong> arg)
         {
-            return SocialState.IsFriendOffered(arg.State)
-                && !SocialState.IsFriendRequested(arg.State);
+            return SocialState.IsFriendOffered(arg.Value)
+                && !SocialState.IsFriendRequested(arg.Value);
         }
     }
 }

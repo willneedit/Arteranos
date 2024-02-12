@@ -167,15 +167,6 @@ namespace Arteranos.Core
         public virtual int AGCLevel { get; set; } = 0;
     }
 
-    public class SocialListEntryJSON
-    {
-        // The user's ID, global for friends, scoped otherwise
-        public virtual UserID UserID { get; set; } = null;
-
-        // ORed bits from Social.SocialState
-        public virtual ulong State { get; set; } = SocialState.None;
-    }
-
     public class ControlSettingsJSON
     {
         public virtual VKUsage VK_Usage { get; set; } = VKUsage.VROnly;
@@ -238,7 +229,7 @@ namespace Arteranos.Core
         public virtual List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
 
         // The user's social state to others
-        public virtual List<SocialListEntryJSON> SocialList { get; set; } = new();
+        public virtual Dictionary<UserID, ulong> SocialList { get; set; } = new();
     }
 
     public class UserHUDSettingsJSON
@@ -423,20 +414,7 @@ namespace Arteranos.Core
 
         public void SaveSocialStates(UserID userID, ulong state)
         {
-            // It _should_ be zero or exactly one entries to update
-            SocialListEntryJSON[] q = GetSocialList(userID).ToArray();
-
-            for(int i = 0; i < q.Length; ++i) Me.SocialList.Remove(q[i]);
-
-            if(state != SocialState.None)
-            {
-                Me.SocialList.Add(new()
-                {
-                    UserID = userID,
-                    State = state
-                });
-            }
-
+            Me.SocialList[userID] = state;
             Save();
         }
 
@@ -446,27 +424,28 @@ namespace Arteranos.Core
         /// <param name="userID">the targeted user, null if everyone</param>
         /// <param name="p">Additional search limitations</param>
         /// <returns>The matching entries with the equivalent UserIDs</returns>
-        public IEnumerable<SocialListEntryJSON> GetSocialList(
-            UserID userID = null, Func<SocialListEntryJSON, bool> p = null)
+        public IEnumerable<KeyValuePair<UserID, ulong>> GetSocialList(
+            UserID userID = null, Func<KeyValuePair<UserID, ulong>, bool> p = null)
         {
             p ??= (x) => true;
 
-            return from entry in Me.SocialList
-                   where (userID == null || entry.UserID == userID) && p(entry)
-                   select entry;
+            foreach (var socialListEntry in Me.SocialList)
+                if((userID == null || socialListEntry.Key == userID) && 
+                    p.Invoke(socialListEntry)) yield return socialListEntry;
         }
 
         public void UpdateSocialListEntry(UserID userID, Func<ulong, ulong> modification)
         {
-            IEnumerable<SocialListEntryJSON> q = GetSocialList(userID);
-            ulong state = (q.Count() > 0) ? q.First().State : SocialState.None;
+            ulong state = Me.SocialList.ContainsKey(userID)
+                ? Me.SocialList[userID]
+                : SocialState.None;
 
             state = modification(state);
 
             SaveSocialStates(userID, state);
         }
 
-        #endregion
+#endregion
         // ---------------------------------------------------------------
         #region Save & Load
 
@@ -490,14 +469,6 @@ namespace Arteranos.Core
 
             return dirty;
         }
-
-        /// <summary>
-        /// Get the filtered relations list, resticted to the current server, or the global UserIDs
-        /// </summary>
-        /// <param name="userID">The userID</param>
-        /// <returns>The scoped or even the global UserID's entry</returns>
-        [Obsolete]
-        public IEnumerable<SocialListEntryJSON> GetFilteredSocialList(UserID userID = null) => GetSocialList(userID, (x) => true);
 
         public void Save()
         {

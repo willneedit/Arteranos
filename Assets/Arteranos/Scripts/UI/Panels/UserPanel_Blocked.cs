@@ -18,13 +18,13 @@ namespace Arteranos.UI
 {
     public class UserPanel_Blocked : UserPanelBase
     {
-        public override IEnumerable<SocialListEntryJSON> GetSocialListTab()
+        public override IEnumerable<KeyValuePair<UserID, ulong>> GetSocialListTab()
         {
-            IEnumerable<SocialListEntryJSON> list = cs.GetSocialList(null, IsFriends);
-            foreach(SocialListEntryJSON entry in list) yield return entry;
+            IEnumerable<KeyValuePair<UserID, ulong>> list = cs.GetSocialList(null, IsFriends);
+            foreach(KeyValuePair<UserID, ulong> entry in list) yield return entry;
         }
 
-        private bool IsFriends(SocialListEntryJSON arg)
-            => SocialState.IsBlocked(arg.State);
+        private bool IsFriends(KeyValuePair<UserID, ulong> arg)
+            => SocialState.IsBlocked(arg.Value);
     }
 }

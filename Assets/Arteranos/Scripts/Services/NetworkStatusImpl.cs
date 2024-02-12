@@ -448,19 +448,6 @@ namespace Arteranos.Services
 
         }
 
-        protected override bool IsVerifiedUser_(UserID claimant)
-        {
-            // If it's online, his Public Key has to be already verified in the login.
-            if (GetOnlineUser_(claimant) != null) return true;
-
-            // Or, the claimant could have been noticed by you, in any case.
-            IEnumerable<SocialListEntryJSON> q = SettingsManager.Client.GetSocialList(claimant);
-
-            if (q.Count() > 0) return true;
-
-            return false;
-        }
-
         // TODO implement ServerUserBase database lookup (see UserPanel_ServerUserList)
         #endregion
         // -------------------------------------------------------------------

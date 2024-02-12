@@ -19,32 +19,28 @@ namespace Arteranos.UI
 {
     public class UserPanel_Here : UserPanelBase
     {
-        public override IEnumerable<SocialListEntryJSON> GetSocialListTab()
+        public override IEnumerable<KeyValuePair<UserID, ulong>> GetSocialListTab()
         {
-            Dictionary<UserID, SocialListEntryJSON> list = new();
+            Dictionary<UserID, ulong> list = new();
 
             // Get the currently logged-in users with the default state....
             foreach(IAvatarBrain user in NetworkStatus.GetOnlineUsers())
             {
                 if(user.UserID == XRControl.Me.UserID) continue;
 
-                list[user.UserID] = new SocialListEntryJSON()
-                {
-                    UserID = user.UserID,
-                    State = SocialState.None,
-                };
+                list[user.UserID] = SocialState.None;
             }
 
             // Fill in the subset of the data in the social database.
-            foreach(SocialListEntryJSON entry in cs.GetSocialList())
+            foreach(KeyValuePair<UserID, ulong> entry in cs.GetSocialList())
             {
-                if(!list.ContainsKey(entry.UserID)) continue;
+                if(!list.ContainsKey(entry.Key)) continue;
 
-                list[entry.UserID].State = entry.State;
+                list[entry.Key] = entry.Value;
             }
 
-            foreach(KeyValuePair<UserID, SocialListEntryJSON> entry in list) 
-                yield return entry.Value;
+            foreach(KeyValuePair<UserID, ulong> entry in list) 
+                yield return entry;
         }
 
     }

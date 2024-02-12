@@ -148,7 +148,6 @@ namespace Arteranos.Services
         protected abstract IAvatarBrain GetOnlineUser_(UserID userID);
         protected abstract IAvatarBrain GetOnlineUser_(uint netId);
         protected abstract IEnumerable<IAvatarBrain> GetOnlineUsers_();
-        protected abstract bool IsVerifiedUser_(UserID claimant);
         protected abstract void StartClient_(Uri connectionUri);
         protected abstract Task StartHost_(bool resetConnection = false);
         protected abstract Task StartServer_();
@@ -199,10 +198,6 @@ namespace Arteranos.Services
             => Instance.GetOnlineUser_(netId);
         public static IEnumerable<IAvatarBrain> GetOnlineUsers() 
             => Instance.GetOnlineUsers_();
-        public static bool IsVerifiedUser(UserID claimant) 
-            => Instance.IsVerifiedUser_(claimant);
-
-
     }
 
     public abstract class AudioManager : MonoBehaviour
