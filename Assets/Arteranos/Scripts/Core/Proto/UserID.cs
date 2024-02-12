@@ -2,12 +2,15 @@
 using ProtoBuf;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.IO;
-using System.Linq;
+using System.Text;
 
 namespace Arteranos.Core
 {
     [ProtoContract]
+    [TypeConverter(typeof(UserIDConverter))]
     public class UserID : IEquatable<UserID>
     {
         // Has to be there, for serialization.
@@ -59,5 +62,42 @@ namespace Arteranos.Core
 
         public static bool operator ==(UserID left, UserID right) => EqualityComparer<UserID>.Default.Equals(left, right);
         public static bool operator !=(UserID left, UserID right) => !(left == right);
+    }
+
+    public class UserIDConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if(sourceType == typeof(string)) return true;
+            return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            if(destinationType == typeof(string)) return true;
+            return base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        {
+            if(value is string s)
+            {
+                byte[] bytes = Convert.FromBase64String(s);
+                return UserID.Deserialize(bytes);
+            }
+            else
+                return base.ConvertFrom(context, culture, value);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        {
+            if (destinationType == typeof(string))
+            {
+                byte[] bytes = ((UserID)value).Serialize();
+                return Convert.ToBase64String(bytes);
+            }
+            else
+                return base.ConvertTo(context, culture, value, destinationType);
+        }
     }
 }

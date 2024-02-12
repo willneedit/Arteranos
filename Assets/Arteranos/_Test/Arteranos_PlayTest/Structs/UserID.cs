@@ -153,5 +153,48 @@ namespace Arteranos.PlayTest.Structs
             keyValuePairs.Remove(new(bobKey.PublicKey, null));
             Assert.AreEqual(0, keyValuePairs.Count);
         }
+
+        private struct Encap
+        {
+           public Dictionary<UserID, int> dict;
+        }
+
+        [Test]
+        public void DictionarySerializable()
+        {
+            SignKey aliceKey = SignKey.Generate();
+            UserID alice = new(aliceKey.PublicKey, "Alice");
+
+            SignKey bobKey = SignKey.Generate();
+            UserID bob = new(bobKey.PublicKey, "Bob");
+
+            Encap encap = new() { dict = new() };
+
+            var keyValuePairs = encap.dict;
+
+            keyValuePairs.Clear();
+            keyValuePairs.Add(alice, 10);
+            keyValuePairs.Add(bob, 20);
+
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(encap, Newtonsoft.Json.Formatting.Indented);
+            UnityEngine.Debug.Log(json);
+
+            var keyValuePairsRestored = Newtonsoft.Json.JsonConvert.DeserializeObject<Encap>(json).dict;
+
+            Assert.IsNotNull(keyValuePairsRestored);
+            Assert.AreEqual(2, keyValuePairsRestored.Count);
+
+            Assert.IsTrue(keyValuePairsRestored.ContainsKey(alice));
+            Assert.AreEqual(10, keyValuePairsRestored[alice]);
+            Assert.AreEqual(20, keyValuePairsRestored[bob]);
+
+            int i = 2;
+            foreach (var keyValuePair in keyValuePairsRestored)
+            {
+                if (keyValuePair.Key == aliceKey.PublicKey) i--;
+                if(keyValuePair.Key == bobKey.PublicKey) i--;
+            }
+            Assert.AreEqual(0, i);
+        }
     }
 }
