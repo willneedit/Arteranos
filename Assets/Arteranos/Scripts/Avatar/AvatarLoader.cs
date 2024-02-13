@@ -13,7 +13,6 @@ using Ipfs;
 using Arteranos.Core.Operations;
 using System.Threading.Tasks;
 using System;
-using Random = UnityEngine.Random;
 
 namespace Arteranos.Avatar
 {
@@ -57,7 +56,6 @@ namespace Arteranos.Avatar
             // Put up the Stand-in for the time where the avatar is loaded
             AvatarGameObject = Instantiate(AvatarStandin);
             AvatarGameObject.transform.SetParent(transform, false);
-            //AvatarGameObject.transform.SetPositionAndRotation(transform.position, transform.rotation);
         }
 
         public void ReloadAvatar(string avatarCid, float height)
@@ -106,7 +104,6 @@ namespace Arteranos.Avatar
                     AvatarGameObject.name += "_puppet";
 
                 AvatarGameObject.transform.SetParent(transform, false);
-                //AvatarGameObject.transform.SetPositionAndRotation(transform.position, transform.rotation);
 
                 GetComponent<AvatarPoseDriver>().UpdateAvatarMeasures(AvatarMeasures);
 

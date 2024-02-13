@@ -231,10 +231,9 @@ namespace Arteranos.Avatar
 
             // Copy users with the global UserIDs and the scoped UserIDs matching this server
             // Note, both current and logged-out users!
-            IEnumerable<KeyValuePair<UserID, ulong>> q = SettingsManager.Client.GetSocialList(null);
 
             // But, derive the global UserIDs to the scoped UserIDs.
-            foreach(KeyValuePair<UserID, ulong> item in q)
+            foreach (KeyValuePair<UserID, ulong> item in SettingsManager.Client.GetSocialList(null))
                 ReloadSocialState(item.Key, item.Value);
         }
 

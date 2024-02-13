@@ -7,7 +7,6 @@
 
 using Arteranos.Avatar;
 using Arteranos.Core;
-using System;
 using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine;
@@ -29,12 +28,6 @@ namespace Arteranos.XR
 
         private XROrigin CurrentVRRig { get; set; }
 
-        public new bool enabled
-        {
-            get => base.enabled;
-            set => base.enabled = value;
-        }
-
         public Transform rigTransform
         {
             get => CurrentVRRig.transform;
@@ -43,11 +36,6 @@ namespace Arteranos.XR
         public Transform cameraTransform
         {
             get => CurrentVRRig.Camera.transform;
-        }
-
-        public new GameObject gameObject
-        {
-            get => base.gameObject;
         }
 
         public void Awake()
@@ -61,20 +49,20 @@ namespace Arteranos.XR
         bool quitting = false;
         public IEnumerator VRLoopCoroutine()
         {
-            while(true)
+            while (true)
             {
                 bool desiredVRMode = SettingsManager.Client.DesiredVRMode && !quitting;
                 bool actualVRMode = SettingsManager.Client.VRMode;
 
 
-                if(desiredVRMode && !actualVRMode)
+                if (desiredVRMode && !actualVRMode)
                 {
                     if (XRGeneralSettings.Instance.Manager.activeLoader == null)
                     {
                         Debug.Log("Initializing XR loader...");
                         XRGeneralSettings.Instance.Manager.InitializeLoaderSync();
                     }
-                    // OpenXR restarter world be a good idea, but its implementation leaves a lot to be desired.
+                    // OpenXR restarter would be a good idea, but its implementation leaves a lot to be desired.
                     GameObject go = GameObject.Find("~oxrestarter");
                     if (go != null) Destroy(go);
 
@@ -89,7 +77,7 @@ namespace Arteranos.XR
                     else // Doesn't work now, switch off for now.
                         SettingsManager.Client.DesiredVRMode = false;
                 }
-                if(!desiredVRMode && actualVRMode)
+                if (!desiredVRMode && actualVRMode)
                 {
                     StopXR();
                     UpdateXROrigin(false);
@@ -108,7 +96,7 @@ namespace Arteranos.XR
             XRGeneralSettings.Instance.Manager.DeinitializeLoader();
             Debug.Log("XR stopped completely.");
         }
-        
+
         // Start is called before the first frame update
         void Start()
         {
@@ -132,7 +120,7 @@ namespace Arteranos.XR
             Vector3 position = Vector3.zero;
             Quaternion rotation = Quaternion.identity;
 
-            if(CurrentVRRig != null)
+            if (CurrentVRRig != null)
             {
                 position = CurrentVRRig.transform.position;
                 rotation = CurrentVRRig.transform.rotation;
@@ -149,7 +137,7 @@ namespace Arteranos.XR
         {
             quitting = true;
             StopAllCoroutines();
-            StopXR();
+            if (SettingsManager.Client.VRMode) StopXR();
         }
 
         /// <summary>
@@ -183,12 +171,12 @@ namespace Arteranos.XR
         public void FreezeControls(bool value)
         {
             XROrigin xro = CurrentVRRig;
-            if(xro == null) return;
-            
-            ActionBasedSnapTurnProvider snapTurnProvider = 
+            if (xro == null) return;
+
+            ActionBasedSnapTurnProvider snapTurnProvider =
                 xro.gameObject.GetComponent<ActionBasedSnapTurnProvider>();
 
-            ActionBasedContinuousMoveProvider continuousMoveProvider = 
+            ActionBasedContinuousMoveProvider continuousMoveProvider =
                 xro.gameObject.GetComponent<ActionBasedContinuousMoveProvider>();
 
             ActionBasedContinuousTurnProvider ContTurnProvider =
@@ -198,14 +186,14 @@ namespace Arteranos.XR
             KMTrackedPoseDriver kMTrackedPoseDriver =
                 xro.gameObject.GetComponentInChildren<KMTrackedPoseDriver>();
 
-            Core.MovementSettingsJSON mcs = Core.SettingsManager.Client.Movement;
+            MovementSettingsJSON mcs = SettingsManager.Client.Movement;
 
-            bool smooth = mcs.Turn == Core.TurnType.Smooth;
-            if(snapTurnProvider != null) snapTurnProvider.enabled = !value && !smooth;
-            if(ContTurnProvider != null) ContTurnProvider.enabled = !value && smooth;
+            bool smooth = mcs.Turn == TurnType.Smooth;
+            if (snapTurnProvider != null) snapTurnProvider.enabled = !value && !smooth;
+            if (ContTurnProvider != null) ContTurnProvider.enabled = !value && smooth;
 
-            if(continuousMoveProvider != null) continuousMoveProvider.enabled = !value;
-            if(kMTrackedPoseDriver != null) kMTrackedPoseDriver.enabled = !value;
+            if (continuousMoveProvider != null) continuousMoveProvider.enabled = !value;
+            if (kMTrackedPoseDriver != null) kMTrackedPoseDriver.enabled = !value;
         }
 
         private IEnumerator MoveRigCoroutine()
@@ -218,7 +206,7 @@ namespace Arteranos.XR
 
             Transform spawn = User.SpawnManager.GetStartPosition();
 
-            if(spawn != null)
+            if (spawn != null)
             {
                 startPosition = spawn.position;
                 startRotation = spawn.rotation;
