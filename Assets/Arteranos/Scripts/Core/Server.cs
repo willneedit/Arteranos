@@ -8,6 +8,7 @@
 using Arteranos.Core.Cryptography;
 using Ipfs.Core.Cryptography.Proto;
 using Newtonsoft.Json;
+using ProtoBuf;
 using System;
 using System.IO;
 using UnityEngine;
@@ -18,33 +19,43 @@ namespace Arteranos.Core
     /// <summary>
     /// The static server configuration data.
     /// </summary>
+    [ProtoContract]
     public class ServerJSON
     {
         // The main server listen port.
+        [ProtoMember(1)]
         public int ServerPort = 9777;
 
         // The server metadata retrieval port.
+        [ProtoMember(2)]
         public int MetadataPort = 9779;
 
         // The server nickname.
+        [ProtoMember(3)]
         public string Name = string.Empty;
 
         // The short server description.
+        [ProtoMember(4)]
         public string Description = string.Empty;
 
         // The server icon. PNG file bytes, at least 128x128, at most 512x512
+        [ProtoMember(5)]
         public byte[] Icon = new byte[] { };
 
         // Public server. True means that the server's data can be spread around.
+        [ProtoMember(6)]
         public bool Public = true;
 
         // The server's permissions
+        [ProtoMember(7)]
         public ServerPermissions Permissions = new();
 
         [JsonIgnore]
+        [ProtoMember(8)]
         public PublicKey ServerSignPublicKey = null;
 
         [JsonIgnore]
+        [ProtoMember(9)]
         public PublicKey ServerAgrPublicKey = null;
 
         public ServerJSON Strip()

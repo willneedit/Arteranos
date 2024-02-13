@@ -59,6 +59,9 @@ namespace Arteranos.Services
 
             [ProtoMember(4)]
             public PublicKey ClientSignPublicKey; // It's self-signed, okay?!
+
+            [ProtoMember(5)]
+            public PublicKey ClientAgreePublicKey;
         }
 
         internal struct AuthRequestMessage : NetworkMessage
@@ -69,14 +72,30 @@ namespace Arteranos.Services
             public CMSPacket Payload; // As AuthRequestPayload, signed with Client, encrypted with Client and Server's keys.
         }
 
-        internal struct AuthResponseMessage : NetworkMessage
+        [ProtoContract]
+        internal struct AuthResponsePayload
         {
+            [ProtoMember(1)]
             public HttpStatusCode status;
+
+            [ProtoMember(2)]
             public string message;
+
+            [ProtoMember(3)]
             public ServerJSON ServerSettings;
+
+            [ProtoMember(4)]
             public ulong UserState;
+
+            [ProtoMember(5)]
+            public PublicKey ServerAgreePublicKey;
         }
 
+        internal struct AuthResponseMessage : NetworkMessage
+        {
+            public PublicKey ServerAgreePublicKey;
+            public CMSPacket Payload; // As AuthResponsePayload, signed with Server
+        }
         #endregion
 
         #region Utilities
@@ -158,7 +177,7 @@ namespace Arteranos.Services
         {
             public NetworkConnectionToClient conn;
             public AuthRequestPayload request;
-            public AuthResponseMessage response;
+            public AuthResponsePayload response;
         }
 
         // Every two seconds, look for the outdated login attempts to remove them.
@@ -246,7 +265,7 @@ namespace Arteranos.Services
 
             // if(connectionsPendingDisconnect.Contains(conn)) return;
 
-            AuthResponseMessage response = default;
+            AuthResponsePayload response = default;
             AuthRequestPayload request = default;
             try
             {
@@ -258,6 +277,9 @@ namespace Arteranos.Services
                 // Wait, what?!
                 if (signerPublicKey != request.ClientSignPublicKey)
                     throw new Exception("Wrong signature key");
+
+                if (encryptedMsg.ClientAgreePublicKey != request.ClientAgreePublicKey)
+                    throw new Exception("Wrong agreement key");
 
                 response.status = 0;
             }
@@ -345,7 +367,17 @@ namespace Arteranos.Services
 
         private void EmitAuthResponse(ResponseQueueEntry e)
         {
-            e.conn.Send(e.response);
+            Server ss = SettingsManager.Server;
+
+            using MemoryStream ms = new();
+            Serializer.Serialize(ms, e.response);
+            Server.TransmitMessage(ms.ToArray(), e.request.ClientAgreePublicKey, out CMSPacket encryptedPayload);
+
+            e.conn.Send(new AuthResponseMessage()
+            {
+                Payload = encryptedPayload,
+                ServerAgreePublicKey = ss.ServerAgrPublicKey
+            });
 
             bool accepted = e.response.status == HttpStatusCode.OK;
 
@@ -490,13 +522,12 @@ namespace Arteranos.Services
                 Nickname = cs.Me.Nickname,
                 deviceUID = SystemInfo.deviceUniqueIdentifier,
                 ClientSignPublicKey = cs.UserSignPublicKey,
+                ClientAgreePublicKey = cs.UserAgrPublicKey
             };
 
             using MemoryStream ms = new();
             Serializer.Serialize(ms, authRequestPayload);
-            ms.Position = 0;
-            byte[] authRequestPayloadBlob = ms.ToArray();
-            Client.TransmitMessage(authRequestPayloadBlob, msg.ServerAgreePublicKey, out CMSPacket encryptedPayload);
+            Client.TransmitMessage(ms.ToArray(), msg.ServerAgreePublicKey, out CMSPacket encryptedPayload);
 
             NetworkClient.Send(new AuthRequestMessage()
             {
@@ -510,9 +541,14 @@ namespace Arteranos.Services
         /// Called on client when the server's AuthResponseMessage arrives
         /// </summary>
         /// <param name="msg">The message payload</param>
-        private void OnAuthResponseMessage(AuthResponseMessage msg)
+        private void OnAuthResponseMessage(AuthResponseMessage encyptedMsg)
         {
-            if(msg.status != HttpStatusCode.OK)
+            Client.ReceiveMessage(encyptedMsg.Payload, out byte[] payloadBlob, out PublicKey signerPublicKey);
+
+            using MemoryStream ms = new(payloadBlob);
+            AuthResponsePayload msg = Serializer.Deserialize<AuthResponsePayload>(ms);
+
+            if (msg.status != HttpStatusCode.OK)
             {
                 ConnectionManager.DeliverDisconnectReason(msg.message);
 

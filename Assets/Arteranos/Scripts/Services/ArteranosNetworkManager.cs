@@ -21,7 +21,7 @@ namespace Arteranos.Services
         internal struct AuthSequence
         {
             public ArteranosNetworkAuthenticator.AuthRequestPayload request;
-            public ArteranosNetworkAuthenticator.AuthResponseMessage response;
+            public ArteranosNetworkAuthenticator.AuthResponsePayload response;
         }
 
         internal struct WorldChangeAnnounceMessage : NetworkMessage
@@ -214,6 +214,7 @@ namespace Arteranos.Services
                 brain.UserID = new UserID(seq.request.ClientSignPublicKey, seq.request.Nickname);
                 brain.Address = conn.address;
                 brain.DeviceID = seq.request.deviceUID;
+                brain.AgreePublicKey = seq.request.ClientAgreePublicKey;
 
                 EmitToClientCurrentWorld(conn);
             }

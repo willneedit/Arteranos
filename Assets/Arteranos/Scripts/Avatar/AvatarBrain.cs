@@ -209,9 +209,7 @@ namespace Arteranos.Avatar
 
             // Schrödinger's cat and today's view of people's gender... all alike.
             // ¯\_(ツ)_/¯
-            int avatarGender = Random.Range(0, 100) < 50 ? -1 : 1;
-
-            avatarCidString ??= avatarGender < 0
+            avatarCidString ??= (Random.Range(0, 100) < 50)
                     ? SettingsManager.DefaultFemaleAvatar
                     : SettingsManager.DefaultMaleAvatar;
 
