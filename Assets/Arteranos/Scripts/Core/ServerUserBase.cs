@@ -236,34 +236,37 @@ namespace Arteranos.Core
                 return;
             }
 
-            AddUser(new ServerUserState()
+            ServerUserState user = new()
             {
                 userID = new(cs.UserSignPublicKey, cs.Me.Nickname),
                 userState = UserState.Srv_admin,
                 address = null,
                 deviceUID = null,
                 remarks = "Auto-generated root user"
-            });
+            };
+
+            RemoveUsers(user);
+            AddUser(user);
 
             Save();
         }
 
         public static ServerUserBase Load()
         {
-            ServerUserBase sub;
+            ServerUserBase sub = null;
 
             try
             {
-                string json = FileUtils.ReadTextConfig(PATH_SERVER_USERBASE);
-                sub = JsonConvert.DeserializeObject<ServerUserBase>(json);
+                sub = JsonConvert.DeserializeObject<ServerUserBase>(FileUtils.ReadTextConfig(PATH_SERVER_USERBASE));
             }
-            catch(Exception e)
+            catch(Exception)
             {
-                Debug.LogWarning($"Failed to load server user base - generating root server admin: {e.Message}");
-                sub = new();
-
-                sub.AddRootSA();
             }
+
+            sub ??= new();
+
+            // It's the _local_ server instance, just update the local root user entry.
+            sub.AddRootSA();
 
             return sub;
         }
