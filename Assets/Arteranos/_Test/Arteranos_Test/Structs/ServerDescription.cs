@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Arteranos.Core.Cryptography;
 
-namespace Arteranos.PlayTest.Structs
+namespace Arteranos.Test.Structs
 {
 
 

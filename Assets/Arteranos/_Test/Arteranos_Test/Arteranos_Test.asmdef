@@ -19,7 +19,10 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "Newtonsoft.Json.dll",
-        "Nito.AsyncEx.Coordination.dll"
+        "Nito.AsyncEx.Coordination.dll",
+        "Google.Protobuf.dll",
+        "protobuf-net.dll",
+        "BouncyCastle.Crypto.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

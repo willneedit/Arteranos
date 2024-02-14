@@ -5,7 +5,7 @@ using Arteranos.Core.Cryptography;
 using System.Text;
 using System.Security.Cryptography;
 
-namespace Arteranos.PlayTest.Cryptography
+namespace Arteranos.Test.Cryptography
 {
     public class CryptoMessageHandlers
     {

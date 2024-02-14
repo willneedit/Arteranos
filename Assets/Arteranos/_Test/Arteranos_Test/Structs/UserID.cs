@@ -6,7 +6,7 @@ using Arteranos.Core;
 using Arteranos.Core.Cryptography;
 using Ipfs.Core.Cryptography.Proto;
 
-namespace Arteranos.PlayTest.Structs
+namespace Arteranos.Test.Structs
 {
     public class UserIDs
     {
