@@ -47,7 +47,7 @@ namespace Arteranos.Avatar
 
         private void Awake()
         {
-            AvatarStandin = Resources.Load<GameObject>("Avatar/Avatar_StandIn");
+            AvatarStandin = SettingsManager.BP.Avatar_Loading_StandIn;
             AvatarBrain = GetComponent<AvatarBrain>();
         }
 

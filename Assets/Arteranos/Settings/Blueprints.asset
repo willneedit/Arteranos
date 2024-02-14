@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96fc6abd617b295458d40188a057cc64, type: 3}
+  m_Name: Blueprints
+  m_EditorClassIdentifier: 
+  EmojiSettings: {fileID: 11400000, guid: f8e2d71e1f04e3340b93a752046a7468, type: 2}
+  AudioMixer: {fileID: 24100000, guid: 3fc5c597681705246b1a6a09aebb2f36, type: 2}
+  Avatar_Loading_StandIn: {fileID: 3985354216906982376, guid: 67b69500f6853f9409549929b49e4dc2,
+    type: 3}
+  UI:
+    Dialog: {fileID: 1401308523161811021, guid: b08a789bff0e5e746b4efea304237fc2,
+      type: 3}
+    AgreementDialog: {fileID: 7130032338797606157, guid: 0483ac8f5ecae7b479c6488586ff71ff,
+      type: 3}
+    KickBan: {fileID: 2172038527422595235, guid: 34ded7b324b4a674490ea3dfac611594,
+      type: 3}
+    Progress: {fileID: 2306558801302682169, guid: 85d5da75405e4214098e161d385b6368,
+      type: 3}
+    TextMessage: {fileID: 2837209915542619872, guid: ba56c5a59ec4c2243896f8b46ca59647,
+      type: 3}
+    SysMenu: {fileID: 4193041269047191700, guid: cc0253c76cfe89d428cb1feef9f9861f,
+      type: 3}
+    AddAvatar: {fileID: 1889180529585697687, guid: 15a025e4ea26c034e8217fba633838d8,
+      type: 3}
+    ContentFilter: {fileID: 4304480360161841479, guid: 68f66881523bc704daf73f87819e7367,
+      type: 3}
+    LicenseText: {fileID: 7130032338797606157, guid: 821df0f4d152ed64e9d2f4d4a402c0a4,
+      type: 3}
+    Login: {fileID: 745566904668032620, guid: e303604ab17822a40ab4b0d976e1769e, type: 3}
+    ServerInfo: {fileID: 1889180529585697687, guid: bcddff2582d86f7448cf9d773fa3ae52,
+      type: 3}
+    ServerList: {fileID: 1889180529585697687, guid: de980c2889ea78249a5ed23529eca106,
+      type: 3}
+    ServerUserList: {fileID: 1889180529585697687, guid: c7129470c88799d48a0b89a3215be970,
+      type: 3}
+    UserHUD: {fileID: 7320566017384123864, guid: d4474b3215e621b4bbc707cb0c3e8d45,
+      type: 3}
+    WorldPanel: {fileID: 1889180529585697687, guid: 30fa112d6d177534daae0ebc0159a434,
+      type: 3}
+  InApp:
+    AvatarGalleryPedestal: {fileID: 3879904410954356699, guid: 029ea5ee39836354f97cb7c946878aee,
+      type: 3}
+    AvatarHitBox: {fileID: 7338753451169802769, guid: aedac2686a239bc46895d027496d9261,
+      type: 3}
+    CameraDrone: {fileID: 1091690915500474784, guid: c2d31261000005e409d5d9c9fd479d32,
+      type: 3}
+    Nameplate: {fileID: 1527640920646415749, guid: bd652b88a97fb5249a0584c1386a4c4c,
+      type: 3}
+    PrivacyBubble: {fileID: 5746132282716911089, guid: 62d7f213b44d1194aa9bc85df55381c2,
+      type: 3}
+  UIComponents:
+    ServerListItem: {fileID: 7778222521524494029, guid: 8fc12c431a7d00442b4c3a5f55f37090,
+      type: 3}
+    SserverUserListItem: {fileID: 7778222521524494029, guid: d7d824c35ee1d28408708cd22198b5a8,
+      type: 3}
+    UserListItem: {fileID: 7778222521524494029, guid: 95637e548ffdfef40941c8c502964f35,
+      type: 3}
+    WorldPanelItem: {fileID: 7778222521524494029, guid: 6e18a6fd290cb374a9ea29b871d4b71a,
+      type: 3}

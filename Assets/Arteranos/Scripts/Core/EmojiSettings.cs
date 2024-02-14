@@ -27,8 +27,6 @@ namespace Arteranos.Core
         [SerializeField] private EmojiButton[] EmojiButtons;
         [SerializeField] private Material MaterialTemplate;
 
-        private const string PATH_EMOJI_SETTINGS = "Settings/Emojis";
-
         private readonly Dictionary<string, EmojiButton> KnownEmojis = new();
 
         private static EmojiSettings Instance = null;
@@ -37,7 +35,7 @@ namespace Arteranos.Core
         {
             if(Instance != null) return Instance;
 
-            EmojiSettings emojiSettings = Resources.Load<EmojiSettings>(PATH_EMOJI_SETTINGS);
+            EmojiSettings emojiSettings = SettingsManager.BP.EmojiSettings;
 
             for(int i = 0; i < emojiSettings.EmojiButtons.Length; i++)
             {

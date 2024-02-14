@@ -515,6 +515,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a2cfad5887abbf48a7473a3019ead5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Blueprints: {fileID: 11400000, guid: 39e399cb8f2f35742ad226ea9adeb4de, type: 2}
 --- !u!114 &7512317098316174466
 MonoBehaviour:
   m_ObjectHideFlags: 0

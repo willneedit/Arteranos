@@ -17,6 +17,8 @@ namespace Arteranos.Core
     {
         public static SettingsManager Instance;
 
+        public Blueprints Blueprints;
+
         private CommandLine Command;
 
         protected static MultiHash TargetedPeerID = null;
@@ -35,6 +37,8 @@ namespace Arteranos.Core
 
         public static Cid DefaultMaleAvatar { get; protected set; } = null;
         public static Cid DefaultFemaleAvatar { get; protected set; } = null;
+
+        public static Blueprints BP => Instance.Blueprints;
 
         public static ServerJSON ActiveServerData =>
             NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
