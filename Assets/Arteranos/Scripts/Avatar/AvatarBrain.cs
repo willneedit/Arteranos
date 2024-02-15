@@ -388,7 +388,7 @@ namespace Arteranos.Avatar
                     if (page.payload != null)
                         packets.entries.AddRange(page.payload);
 
-                    Server.TransmitMessage(packets.Serialize(), UserID.SignPublicKey, out CMSPacket packet);
+                    Server.TransmitMessage(packets.Serialize(), AgreePublicKey, out CMSPacket packet);
                     TargetDeliverServerPacket(type, packet);
 
                     if (page.payload == null) break;
