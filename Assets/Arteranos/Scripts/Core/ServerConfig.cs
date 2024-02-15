@@ -87,20 +87,24 @@ namespace Arteranos.Core
         [Server]
         public static void ServerPerformServerPacket(IAvatarBrain source, SCMType type, CMSPacket p)
         {
-            Server.ReceiveMessage(p, out byte[] payloadBlob, out PublicKey supposedSigner);
-            if (supposedSigner != (PublicKey)source.UserID) throw new Exception("Invalid signature");
-
-            switch (type)
+            try
             {
-                case SCMType.ClnUpdateUserInfo:
-                    UpdateLocalUserState(source, ServerUserState.Deserialize(payloadBlob));
-                    break;
-                case SCMType.ClnKickUser:
-                    CommitLocalKickUser(source, KickPacket.Deserialize(payloadBlob));
-                    break;
-                default:
-                    throw new NotImplementedException();
+                Server.ReceiveMessage(p, out byte[] payloadBlob, out PublicKey supposedSigner);
+                if (supposedSigner != (PublicKey)source.UserID) throw new Exception("Invalid signature");
+
+                switch (type)
+                {
+                    case SCMType.ClnUpdateUserInfo:
+                        UpdateLocalUserState(source, ServerUserState.Deserialize(payloadBlob));
+                        break;
+                    case SCMType.ClnKickUser:
+                        CommitLocalKickUser(source, KickPacket.Deserialize(payloadBlob));
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
             }
+            catch { } // Discard malformed packets
         }
 
 

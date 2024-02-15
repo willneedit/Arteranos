@@ -134,8 +134,15 @@ namespace Arteranos.Avatar
         [TargetRpc]
         private void TargetReceiveTextMessage(GameObject senderGO, CMSPacket p)
         {
-            Client.ReceiveMessage(p, out byte[] data, out PublicKey signerPublicKey);
-            string text = Encoding.UTF8.GetString(data);
+            string text;
+            PublicKey signerPublicKey;
+
+            try
+            {
+                Client.ReceiveMessage(p, out byte[] data, out signerPublicKey);
+                text = Encoding.UTF8.GetString(data);
+            }
+            catch { return; } // Discard malformed messages
 
             // Already gone.
             if (senderGO == null) return;
