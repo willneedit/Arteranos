@@ -384,6 +384,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ChoiceBook
       objectReference: {fileID: 0}
+    - target: {fileID: 3995104435120682697, guid: e0188d43f9de31042ac67bbff8de2205,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3995104436472947777, guid: e0188d43f9de31042ac67bbff8de2205,
         type: 3}
       propertyPath: m_Material
