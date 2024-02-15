@@ -37,7 +37,7 @@ namespace Arteranos.UI
 
         public static UserListItem New(Transform parent, UserID targetUserID)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/UserListItem"));
+            GameObject go = Instantiate(BP.I.UIComponents.UserListItem);
             go.transform.SetParent(parent, false);
             UserListItem UserListItem = go.GetComponent<UserListItem>();
             UserListItem.targetUserID = targetUserID;

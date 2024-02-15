@@ -62,7 +62,7 @@ namespace Arteranos.UI
 
         public static WorldPanelUI New()
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_WorldPanel"));
+            GameObject go = Instantiate(BP.I.UI.WorldPanel);
             return go.GetComponent<WorldPanelUI>();
         }
 

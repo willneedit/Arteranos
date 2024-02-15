@@ -35,7 +35,7 @@ namespace Arteranos.UI
 
         public static ServerListItem New(Transform parent, string PeerID)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/ServerListItem"));
+            GameObject go = Instantiate(BP.I.UIComponents.ServerListItem);
             go.transform.SetParent(parent, false);
             ServerListItem serverListItem = go.GetComponent<ServerListItem>();
             serverListItem.PeerID = PeerID;

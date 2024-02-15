@@ -16,6 +16,10 @@ MonoBehaviour:
   AudioMixer: {fileID: 24100000, guid: 3fc5c597681705246b1a6a09aebb2f36, type: 2}
   Avatar_Loading_StandIn: {fileID: 3985354216906982376, guid: 67b69500f6853f9409549929b49e4dc2,
     type: 3}
+  AvatarAnimController: {fileID: 9100000, guid: cb08c7ab6aee60f478728bc6d78ccf84,
+    type: 2}
+  RPMBoneTranslation: {fileID: 4900000, guid: 66a51722207631f4aac9c25a038fecf3, type: 3}
+  PrivacyTOSNotice: {fileID: 4900000, guid: 08362dfbee11cd14ea1658be30f19536, type: 3}
   UI:
     Dialog: {fileID: 1401308523161811021, guid: b08a789bff0e5e746b4efea304237fc2,
       type: 3}

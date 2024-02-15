@@ -10,6 +10,7 @@ using UnityEngine.InputSystem;
 using System.Linq;
 using Arteranos.Services;
 using System;
+using Arteranos.Core;
 
 namespace Arteranos.UI
 {
@@ -34,7 +35,7 @@ namespace Arteranos.UI
                 return;
             }
 
-            GameObject original = Resources.Load<GameObject>("UI/UI_SysMenu");
+            GameObject original = BP.I.UI.SysMenu;
             // NB: The resource is _cached_, the blueprint itself is modified and couldn't find the component
             // because it's already disabled the second time around!
             original.GetComponentInChildren<ChoiceBook>(true).gameObject.SetActive(false);

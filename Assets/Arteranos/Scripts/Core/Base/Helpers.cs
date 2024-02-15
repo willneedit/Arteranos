@@ -83,7 +83,7 @@ namespace Arteranos.Avatar
         public static IHitBox New(IAvatarBrain brain)
         {
             GameObject go = Instantiate(
-                Resources.Load<GameObject>("UI/InApp/AvatarHitBox"), brain.transform);
+                BP.I.InApp.AvatarHitBox, brain.transform);
             IHitBox hitBox = go.GetComponent<IHitBox>();
             hitBox.Brain = brain;
 
@@ -96,7 +96,7 @@ namespace Arteranos.Avatar
         public static IBubbleCoordinator New(IAvatarBrain brain)
         {
             GameObject go = Instantiate(
-                Resources.Load<GameObject>("UI/InApp/PrivacyBubble"), brain.transform);
+                BP.I.InApp.PrivacyBubble, brain.transform);
             IBubbleCoordinator bc = go.GetComponent<IBubbleCoordinator>();
             bc.Brain = brain;
             return bc;
@@ -397,7 +397,7 @@ namespace Arteranos.UI
                 return null;
             }
 
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_AgreementDialog"));
+            GameObject go = Instantiate(BP.I.UI.AgreementDialog);
             IAgreementDialogUI AgreementDialogUI = go.GetComponent<IAgreementDialogUI>();
             AgreementDialogUI.OnDisagree += disagree;
             AgreementDialogUI.OnAgree += agree;
@@ -410,7 +410,7 @@ namespace Arteranos.UI
     {
         public static IDialogUI New()
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_Dialog"));
+            GameObject go = Instantiate(BP.I.UI.Dialog);
             return go.GetComponent<IDialogUI>();
         }
 
@@ -420,7 +420,7 @@ namespace Arteranos.UI
     {
         public static IProgressUI New()
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_Progress"));
+            GameObject go = Instantiate(BP.I.UI.Progress);
             return go.GetComponent<IProgressUI>();
         }
     }
@@ -435,7 +435,7 @@ namespace Arteranos.UI
             position += rotation * Vector3.forward * 1.5f;
 
             GameObject go = Instantiate(
-                Resources.Load<GameObject>("UI/InApp/AvatarGalleryPedestal"),
+                BP.I.InApp.AvatarGalleryPedestal,
                 position,
                 rotation
                 );
@@ -455,7 +455,7 @@ namespace Arteranos.UI
 
             if(nameplate == null)
             {
-                GameObject original = Resources.Load<GameObject>("UI/InApp/Nameplate");
+                GameObject original = BP.I.InApp.Nameplate;
                 original.SetActive(false);
 
                 go = Instantiate(original, bearer.transform);
@@ -474,7 +474,7 @@ namespace Arteranos.UI
     {
         public static ITextMessageUI New(IAvatarBrain receiver)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_TextMessage"));
+            GameObject go = Instantiate(BP.I.UI.TextMessage);
             ITextMessageUI textMessageUI = go.GetComponent<ITextMessageUI>();
             textMessageUI.Receiver = receiver;
             return textMessageUI;
@@ -485,7 +485,7 @@ namespace Arteranos.UI
     {
         public static IKickBanUI New(IAvatarBrain target)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_KickBan"));
+            GameObject go = Instantiate(BP.I.UI.KickBan);
             IKickBanUI kickBanUI = go.GetComponentInChildren<IKickBanUI>();
             kickBanUI.Target = target;
             return kickBanUI;

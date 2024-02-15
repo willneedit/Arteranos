@@ -30,7 +30,7 @@ namespace Arteranos.UI
 
         public static ServerListUI New()
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_ServerList"));
+            GameObject go = Instantiate(BP.I.UI.ServerList);
             return go.GetComponent<ServerListUI>();
         }
 

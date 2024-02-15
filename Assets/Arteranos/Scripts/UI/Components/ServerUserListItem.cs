@@ -32,7 +32,7 @@ namespace Arteranos.UI
 
         public static ServerUserListItem New(Transform parent, ServerUserState user)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/Components/ServerUserListItem"));
+            GameObject go = Instantiate(BP.I.UIComponents.SserverUserListItem);
             go.transform.SetParent(parent, false);
             ServerUserListItem userListItem = go.GetComponent<ServerUserListItem>();
             userListItem.user = user;

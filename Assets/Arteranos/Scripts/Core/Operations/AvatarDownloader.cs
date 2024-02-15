@@ -59,7 +59,7 @@ namespace Arteranos.Core.Operations
                 //  - Skeleton must contain the HumanTrait.RequiredBone's
 
                 List<HumanBone> bones = new();
-                TextAsset ta = Resources.Load<TextAsset>(RPMBoneTranslation);
+                TextAsset ta = BP.I.RPMBoneTranslation;
                 BoneTranslations table = JsonConvert.DeserializeObject<BoneTranslations>(ta.text);
 
                 foreach (KeyValuePair<string, string> bone in table.translationTable)
@@ -91,8 +91,7 @@ namespace Arteranos.Core.Operations
                 if (!avatar.isHuman)
                     throw new ArgumentException("Avatar is considered nonhuman.");
                 Animator animator = context.Avatar.AddComponent<Animator>();
-                animator.runtimeAnimatorController = 
-                    Resources.Load<RuntimeAnimatorController>(controllerResource);
+                animator.runtimeAnimatorController = BP.I.AvatarAnimController;
                 animator.avatar = avatar;
             }
 

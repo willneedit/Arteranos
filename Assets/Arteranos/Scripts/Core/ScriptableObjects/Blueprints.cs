@@ -6,7 +6,6 @@
  */
 
 using System;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -25,6 +24,12 @@ namespace Arteranos.Core
         public AudioMixer AudioMixer;
 
         public GameObject Avatar_Loading_StandIn;
+
+        public RuntimeAnimatorController AvatarAnimController;
+
+        public TextAsset RPMBoneTranslation;
+
+        public TextAsset PrivacyTOSNotice;
 
         [Serializable]
         public struct UI_
@@ -69,5 +74,10 @@ namespace Arteranos.Core
         }
 
         public UIComponents_ UIComponents;
+    }
+
+    public static class BP
+    {
+        public static Blueprints I;
     }
 }

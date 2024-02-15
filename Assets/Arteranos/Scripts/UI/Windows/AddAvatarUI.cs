@@ -59,9 +59,8 @@ namespace Arteranos.UI
 
         public static AddAvatarUI New()
         {
-            GameObject blueprint = Resources.Load<GameObject>("UI/UI_AddAvatar");
-            blueprint.SetActive(false);
-            AddAvatarUI aaui = Instantiate(blueprint).GetComponent<AddAvatarUI>();
+            BP.I.UI.AddAvatar.SetActive(false);
+            AddAvatarUI aaui = Instantiate(BP.I.UI.AddAvatar).GetComponent<AddAvatarUI>();
             aaui.gameObject.SetActive(true);
             return aaui;
 

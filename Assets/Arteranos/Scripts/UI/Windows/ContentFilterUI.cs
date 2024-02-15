@@ -82,7 +82,7 @@ namespace Arteranos.UI
     
         public static ContentFilterUI New()
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_ContentFilter"));
+            GameObject go = Instantiate(BP.I.UI.ContentFilter);
             return go.GetComponent<ContentFilterUI>();
         }
 

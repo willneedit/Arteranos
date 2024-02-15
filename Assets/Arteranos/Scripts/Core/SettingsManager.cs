@@ -33,12 +33,10 @@ namespace Arteranos.Core
         public static Server Server { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
         public static Cid WorldInfoCid { get; set; }
-        public static string DefaultTOStext { get; internal set; } = "";
+        public static string DefaultTOStext  => BP.I.PrivacyTOSNotice.text;
 
         public static Cid DefaultMaleAvatar { get; protected set; } = null;
         public static Cid DefaultFemaleAvatar { get; protected set; } = null;
-
-        public static Blueprints BP => Instance.Blueprints;
 
         public static ServerJSON ActiveServerData =>
             NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
@@ -47,11 +45,11 @@ namespace Arteranos.Core
 
         protected virtual void Awake()
         {
+            BP.I = Blueprints;
+
             SetupPurgatory();
 
             ParseSettingsAndCmdLine();
-
-            DefaultTOStext = Resources.Load<TextAsset>("Templates/PrivacyTOSNotice")?.text;
         }
 
         protected abstract void OnDestroy();

@@ -26,7 +26,7 @@ namespace Arteranos.UI
         private const string LICENSEASSETNAME = "LICENSE";
         public static LicenseTextUI New(bool thirdparty)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/UI_LicenseText"));
+            GameObject go = Instantiate(BP.I.UI.LicenseText);
             LicenseTextUI licenseTextUI = go.GetComponent<LicenseTextUI>();
             licenseTextUI.thirdparty = thirdparty;
             return licenseTextUI;

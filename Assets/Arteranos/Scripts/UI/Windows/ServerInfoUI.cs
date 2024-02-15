@@ -19,9 +19,8 @@ namespace Arteranos.UI
     {
         public static ServerInfoUI New(ServerInfo si)
         {
-            GameObject blueprint = Resources.Load<GameObject>("UI/UI_ServerInfo");
-            blueprint.SetActive(false);
-            GameObject go = Instantiate(blueprint);
+            BP.I.UI.ServerInfo.SetActive(false);
+            GameObject go = Instantiate(BP.I.UI.ServerInfo);
             ServerInfoUI serverInfoUI = go.GetComponent<ServerInfoUI>();
             serverInfoUI.si = si;
             go.SetActive(true);

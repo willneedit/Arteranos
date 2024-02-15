@@ -75,7 +75,7 @@ namespace Arteranos.Services
         private void Awake()
         {
             Instance = this;
-            mixer = SettingsManager.BP.AudioMixer;
+            mixer = BP.I.AudioMixer;
         }
 
         private void OnDestroy() => Instance = null;

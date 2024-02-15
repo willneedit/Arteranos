@@ -35,7 +35,7 @@ namespace Arteranos.Core
         {
             if(Instance != null) return Instance;
 
-            EmojiSettings emojiSettings = SettingsManager.BP.EmojiSettings;
+            EmojiSettings emojiSettings = BP.I.EmojiSettings;
 
             for(int i = 0; i < emojiSettings.EmojiButtons.Length; i++)
             {

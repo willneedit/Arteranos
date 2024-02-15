@@ -236,7 +236,7 @@ namespace Arteranos.UI
         {
             SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
 
-            GameObject go = Instantiate(Resources.Load<GameObject>("UI/InApp/CameraDrone"));
+            GameObject go = Instantiate(BP.I.InApp.CameraDrone);
 
             // In front of yourself
             Transform view = Camera.main.transform;
