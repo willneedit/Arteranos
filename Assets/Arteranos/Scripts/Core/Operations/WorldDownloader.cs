@@ -15,6 +15,7 @@ using Arteranos.Core;
 using System.Threading;
 using Utils = Arteranos.Core.Utils;
 using Ipfs;
+using Org.BouncyCastle.Asn1.Cms;
 
 namespace Arteranos.Core.Operations
 {
@@ -55,8 +56,7 @@ namespace Arteranos.Core.Operations
                         WorldCid = context.Cid,
                         WorldName = metaData.WorldName,
                         WorldDescription = metaData.WorldDescription,
-                        AuthorNickname = (string)metaData.AuthorID,
-                        AuthorPublicKey = metaData.AuthorID.SignPublicKey.Serialize(),
+                        Author = metaData.AuthorID,
                         ContentRating = metaData.ContentRating,
                         Signature = null,
                         ScreenshotPNG = screenshotBytes,

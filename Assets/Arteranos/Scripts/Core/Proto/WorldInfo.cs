@@ -26,11 +26,11 @@ namespace Arteranos.Core
         [ProtoMember(3)]
         public string WorldDescription;
 
-        [ProtoMember(4)]
-        public string AuthorNickname;
+        //[ProtoMember(4)]
+        //public string AuthorNickname;
 
-        [ProtoMember(5)]
-        public byte[] AuthorPublicKey;
+        //[ProtoMember(5)]
+        //public byte[] AuthorPublicKey;
 
         [ProtoMember(6)]
         public ServerPermissions ContentRating;
@@ -43,6 +43,9 @@ namespace Arteranos.Core
 
         [ProtoMember(9)]
         public DateTime Created;
+
+        [ProtoMember(10)]
+        public UserID Author;
 
     }
 

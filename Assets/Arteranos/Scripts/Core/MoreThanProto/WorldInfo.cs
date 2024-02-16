@@ -110,8 +110,8 @@ namespace Arteranos.Core
 
         public bool IsFavourited()
         {
-            List<Cid> all = Task.Run(async () => (await IPFSService.ListPinned()).ToList()).Result;
-            return all.Contains(WorldCid);
+            IEnumerable<Cid> all = Task.Run(() => IPFSService.ListPinned()).Result;
+            return all.ToList().Contains(WorldCid);
         }
 
 

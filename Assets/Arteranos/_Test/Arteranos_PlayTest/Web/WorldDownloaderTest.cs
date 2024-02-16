@@ -24,10 +24,8 @@ namespace Arteranos.PlayTest.Web
 {
     public class WorldDownloaderTest
     {
-        private const string WebURLAsset = "https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip";
         private const string PlainFileAsset = "Assets/Arteranos/_Test/Sceelix_Abbey.zip";
         private string FileURLAsset => $"file:///{PlainFileAsset}";
-        private string QuotedFileAsset => $"\"{PlainFileAsset}\"";
 
         IPFSServiceImpl srv = null;
         IpfsEngine ipfs = null;
@@ -108,8 +106,11 @@ namespace Arteranos.PlayTest.Web
             WorldInfo wi = await WorldDownloader.GetWorldInfoAsync(co);
 
             Assert.IsNotNull(wi.WorldName);
-            Assert.IsNotNull(wi.win.AuthorNickname);
+            Assert.IsNotNull(wi.win.Author);
             Assert.AreEqual(WorldCid.ToString(), wi.WorldCid);
+
+            UserID userID = wi.win.Author;
+            Assert.AreEqual("Ancient Iwontsay", (string) userID);
         }
 
         [Test]
