@@ -36,8 +36,7 @@ namespace Arteranos.PlayTest.Web
         [UnitySetUp]
         public IEnumerator SetupIPFS()
         {
-            GameObject go1 = new("SettingsManager");
-            StartupManagerMock sm = go1.AddComponent<StartupManagerMock>();
+            GameObject go1 = TestFixture.SetupStartupManagerMock();
 
             yield return null;
 

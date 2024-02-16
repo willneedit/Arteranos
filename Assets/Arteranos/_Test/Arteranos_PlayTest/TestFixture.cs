@@ -10,8 +10,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
-using Arteranos.Core;
-using Ipfs;
+using UnityEditor;
 
 namespace Arteranos.PlayTest
 {
@@ -23,6 +22,11 @@ namespace Arteranos.PlayTest
         public static IpfsEngine Ipfs { get => ipfs; }
         public static IPFSServiceImpl IPFSService { get => iPFSService; }
 
+        public static GameObject SetupStartupManagerMock()
+        {
+            GameObject bp = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/_Test/Arteranos_PlayTest/SceneEssentialsMock.prefab");
+            return UnityEngine.Object.Instantiate(bp);
+        }
         public static IEnumerator SetupIPFS()
         {
             ipfs = null;
@@ -85,36 +89,6 @@ namespace Arteranos.PlayTest
                 }
                 await Task.Yield();
             }
-        }
-    }
-
-    public class StartupManagerMock : SettingsManager
-    {
-        protected override void Awake()
-        {
-            Instance = this;
-
-            base.Awake();
-        }
-
-        protected override bool IsSelf_(MultiHash ServerPeerID)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void OnDestroy()
-        {
-            Instance = null;
-        }
-
-        protected override void PingServerChangeWorld_(string invoker, Cid cid)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void StartCoroutineAsync_(Func<IEnumerator> action)
-        {
-            return;
         }
     }
 
