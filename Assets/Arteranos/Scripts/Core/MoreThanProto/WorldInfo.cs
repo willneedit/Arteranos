@@ -61,7 +61,7 @@ namespace Arteranos.Core
 
             try
             {
-                Stream s = await IPFSService.Ipfs.FileSystem.ReadFileAsync(WorldInfoCid, cancel);
+                Stream s = await IPFSService.ReadCid(WorldInfoCid, cancel);
                 WorldInfo wi = new()
                 {
                     win = null,
@@ -91,7 +91,7 @@ namespace Arteranos.Core
             Serializer.Serialize(ms, win);
             ms.Position = 0;
 
-            IFileSystemNode fsn = await IPFSService.Ipfs.FileSystem.AddAsync(ms, options: ao, cancel: cancel);
+            IFileSystemNode fsn = await IPFSService.AddStream(ms, options: ao, cancel: cancel);
             WorldInfoCid = fsn.Id;
             return WorldInfoCid;
         }

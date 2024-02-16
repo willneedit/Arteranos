@@ -12,10 +12,12 @@ using Arteranos.Core.Cryptography;
 using Arteranos.XR;
 using Ipfs;
 using Ipfs.Core.Cryptography.Proto;
+using Ipfs.CoreApi;
 using Ipfs.Engine;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -289,12 +291,11 @@ namespace Arteranos.Services
         public abstract Task SendServerOnlineData_();
         public abstract Task SendServerDirectMessage_(string peerId, PeerMessage message);
         public abstract Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);
-        public abstract Task<IEnumerable<Cid>> ListPinned_(CancellationToken token = default);
 
         public static IPFSService Instance { get; protected set; }
 
-        public static IpfsEngine Ipfs
-            => Instance.Ipfs_;
+        //public static IpfsEngine Ipfs
+        //    => Instance.Ipfs_;
         public static Peer Self 
             => Instance.Self_;
         public static SignKey ServerKeyPair
@@ -312,11 +313,16 @@ namespace Arteranos.Services
         public static Task SendServerDirectMessage(string peerId, PeerMessage message)
             => Instance.SendServerDirectMessage_(peerId, message);
 
-        public static Task PinCid(Cid cid, bool pinned, CancellationToken token = default)
-            => Instance.PinCid_(cid, pinned, token);
-        public static Task<IEnumerable<Cid>> ListPinned(CancellationToken token = default)
-            => Instance.ListPinned_(token);
-
+        public static Task PinCid(Cid cid, bool pinned, CancellationToken cancel = default)
+            => Instance.PinCid_(cid, pinned, cancel);
+        public static Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
+            => Instance.Ipfs_.Pin.ListAsync(cancel);
+        public static Task<Stream> ReadCid(Cid cid, CancellationToken cancel = default)
+            => Instance.Ipfs_.FileSystem.ReadFileAsync(cid, cancel);
+        public static Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
+            => Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel);
+        public static Task<IFileSystemNode> ListCids(Cid cid, CancellationToken cancel = default)
+            => Instance.Ipfs_.FileSystem.ListFileAsync(cid, cancel);
     }
     #endregion
     // -------------------------------------------------------------------

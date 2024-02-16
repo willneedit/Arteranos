@@ -60,6 +60,8 @@ namespace Arteranos.Services
 
         private List<byte[]> UserFingerprints = new();
 
+        // ---------------------------------------------------------------
+        #region Start & Stop
         private async void Start()
         {
             Instance = this;
@@ -198,6 +200,9 @@ namespace Arteranos.Services
             };
         }
 
+        #endregion
+        // ---------------------------------------------------------------
+        #region Peer communication and data exchange
         public override async Task FlipServerDescription_(bool reload)
         {
             if(currentSDCid != null)
@@ -288,19 +293,6 @@ namespace Arteranos.Services
             return ipfs.PubSub.PublishAsync($"{topic_sdm}/{peerId}", ms, cts.Token);
         }
 
-        public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)
-        {
-            if(pinned)
-                return ipfs.Pin.AddAsync(cid, cancel: token);
-            else
-                return ipfs.Pin.RemoveAsync(cid, cancel: token);
-        }
-
-        public override Task<IEnumerable<Cid>> ListPinned_(CancellationToken token = default)
-        {
-            return ipfs.Pin.ListAsync(token);
-        }
-
         public Task<bool> ParseIncomingIPFSMessageAsync(IPublishedMessage publishedMessage)
         {
             try
@@ -384,5 +376,17 @@ namespace Arteranos.Services
 
             return true;
         }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region IPFS Lowlevel interface
+        public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)
+        {
+            if (pinned)
+                return ipfs.Pin.AddAsync(cid, cancel: token);
+            else
+                return ipfs.Pin.RemoveAsync(cid, cancel: token);
+        }
+        #endregion
     }
 }

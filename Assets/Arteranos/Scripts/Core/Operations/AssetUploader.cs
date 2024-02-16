@@ -63,7 +63,7 @@ namespace Arteranos.Core.Operations
                     actualBytes = bytes;
                     ProgressChanged((float) bytes / totalBytes);
                 }, token);
-                IFileSystemNode fsn = await IPFSService.Ipfs.FileSystem.AddAsync(pipeClient, "", ao, token);
+                IFileSystemNode fsn = await IPFSService.AddStream(pipeClient, "", ao, token);
 
                 context.Cid = fsn.Id;
             }
