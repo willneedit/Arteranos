@@ -33,7 +33,7 @@ namespace Arteranos.Core
         public static Server Server { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
         public static Cid WorldInfoCid { get; set; }
-        public static string DefaultTOStext  => BP.I.PrivacyTOSNotice.text;
+        public static string DefaultTOStext { get; private set; } = null;
 
         public static Cid DefaultMaleAvatar { get; protected set; } = null;
         public static Cid DefaultFemaleAvatar { get; protected set; } = null;
@@ -50,6 +50,8 @@ namespace Arteranos.Core
             SetupPurgatory();
 
             ParseSettingsAndCmdLine();
+
+            DefaultTOStext = BP.I.PrivacyTOSNotice.text;
         }
 
         protected abstract void OnDestroy();
