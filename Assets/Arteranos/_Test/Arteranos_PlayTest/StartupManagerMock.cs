@@ -14,11 +14,6 @@ namespace Arteranos.PlayTest
             base.Awake();
         }
 
-        protected override bool IsSelf_(MultiHash ServerPeerID)
-        {
-            throw new NotImplementedException();
-        }
-
         protected override void OnDestroy()
         {
             Instance = null;

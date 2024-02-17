@@ -120,9 +120,6 @@ namespace Arteranos.Services
 
         protected override void StartCoroutineAsync_(Func<IEnumerator> action) 
             => QueuedCoroutine.Enqueue(action);
-
-        protected override bool IsSelf_(MultiHash ServerPeerID) 
-            => IPFSService.Self.Id == ServerPeerID;
     }
 }
 

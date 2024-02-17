@@ -126,7 +126,6 @@ namespace Arteranos.Core
             };
         }
 
-        protected abstract bool IsSelf_(MultiHash ServerPeerID);
         protected abstract void PingServerChangeWorld_(string invoker, Cid WorldCid);
         protected abstract void StartCoroutineAsync_(Func<IEnumerator> action);
 
@@ -134,8 +133,5 @@ namespace Arteranos.Core
             => Instance?.PingServerChangeWorld_(invoker, WorldCid);
         public static void StartCoroutineAsync(Func<IEnumerator> action)
             => Instance?.StartCoroutineAsync_(action);
-
-        public static bool IsSelf(MultiHash ServerPeerID)
-            => Instance.IsSelf_(ServerPeerID);
     }
 }
