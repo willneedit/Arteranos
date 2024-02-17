@@ -43,7 +43,7 @@ namespace Arteranos.PlayTest
                 yield break;
             }
 
-            GameObject go = new GameObject("IPFS Service");
+            GameObject go = new("IPFS Service");
             IPFSServiceImpl srv = go.AddComponent<IPFSServiceImpl>();
 
             DateTime expiry = DateTime.Now + TimeSpan.FromSeconds(5);

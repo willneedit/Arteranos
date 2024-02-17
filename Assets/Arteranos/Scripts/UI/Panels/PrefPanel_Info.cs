@@ -12,6 +12,7 @@ using UnityEngine.UI;
 
 using Arteranos.Services;
 using Arteranos.Core;
+using Ipfs;
 
 namespace Arteranos.UI
 {
@@ -51,12 +52,13 @@ namespace Arteranos.UI
         {
             base.OnEnable();
 
-            System.Net.IPAddress extip = NetworkStatus.PublicIPAddress;
-            lbl_ExternalIPAddr.text = (extip != null) ? extip.ToString() : "Unknown";
+            MultiHash RemotePeerId = SettingsManager.GetServerConnectionData();
+            string lltext = "Offline";
 
-            (string address, int _, int mdport) = SettingsManager.GetServerConnectionData();
-            
-            lbl_LauncherLink.text = address != null ? $"http://{address}:{mdport}/" : "Offline";
+            if (RemotePeerId != null)
+                lltext = $"arteranos://{RemotePeerId}/";
+
+            lbl_LauncherLink.text = lltext;
         }
 
         private void Update()

@@ -85,6 +85,9 @@ namespace Arteranos.Web
             ExpectConnectionResponse_();
             NetworkStatus.StartClient(connectionUri);
 
+            // Save it for now even before the connection negotiation and authentication
+            NetworkStatus.RemotePeerId = si.PeerID;
+
             // Here goes nothing...
             return true;
         }

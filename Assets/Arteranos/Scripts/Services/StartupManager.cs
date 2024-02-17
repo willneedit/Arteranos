@@ -73,8 +73,7 @@ namespace Arteranos.Services
                 Task t = NetworkStatus.StartServer();
                 while (!t.IsCompleted) yield return null;
                 yield return new WaitForSeconds(5);
-                (string address, int _, int mdport) = GetServerConnectionData();
-                Debug.Log($"Server is running, launcher link is: http://{address}:{mdport}/");
+                Debug.Log($"Server is running, launch argument is: arteranos://{IPFSService.Self.Id}/");
             }
         }
 

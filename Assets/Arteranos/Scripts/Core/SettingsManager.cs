@@ -110,18 +110,18 @@ namespace Arteranos.Core
         /// Returns the connection data of the remote server (in client mode) or the
         /// local server in the server and host mode. Nulls if offline.
         /// </summary>
-        /// <returns>IP address, server port, metadata port</returns>
+        /// <returns>Peer ID, the own one or the remote</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static (string address, int port, int mdport) GetServerConnectionData()
+        public static MultiHash GetServerConnectionData()
         {
             OnlineLevel ol = NetworkStatus.GetOnlineLevel();
 
             return ol switch
             {
-                OnlineLevel.Offline => (null, 0, 0),
-                OnlineLevel.Client => (NetworkStatus.ServerHost, NetworkStatus.ServerPort, CurrentServer?.MetadataPort ?? 0),
-                OnlineLevel.Server => (NetworkStatus.PublicIPAddress.ToString(), Server.ServerPort, Server.MetadataPort),
-                OnlineLevel.Host => (NetworkStatus.PublicIPAddress.ToString(), Server.ServerPort, Server.MetadataPort),
+                OnlineLevel.Offline => null,
+                OnlineLevel.Client => NetworkStatus.RemotePeerId,
+                OnlineLevel.Server => IPFSService.Self.Id,
+                OnlineLevel.Host => IPFSService.Self.Id,
                 _ => throw new NotImplementedException()
             };
         }

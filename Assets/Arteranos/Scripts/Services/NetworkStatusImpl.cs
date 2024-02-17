@@ -23,22 +23,16 @@ using System.Text.RegularExpressions;
 using Arteranos.Avatar;
 using System.Linq;
 using Arteranos.Core.Operations;
+using Ipfs;
 
 namespace Arteranos.Services
 {
     public partial class NetworkStatusImpl : NetworkStatus
     {
         private INatDevice device = null;
-        protected override IPAddress ExternalAddress_ { get; set; } = null;
-
-        protected override IPAddress PublicIPAddress_ { get; set; } = null;
-
-        protected override string ServerHost_ { get; set; } = null;
-
-        protected override int ServerPort_ { get; set; } = 0;
+        protected override MultiHash RemotePeerId_ { get; set; } = null;
 
         protected override event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
-
         protected override Action<bool, string> OnClientConnectionResponse_ { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
 
         protected override bool OpenPorts_
@@ -110,12 +104,6 @@ namespace Arteranos.Services
         {
             Debug.Log("Setting up NAT gateway configuration");
 
-            void FoundPublicIPAddress(IPAddress address)
-            {
-                PublicIPAddress_ = address;
-                Debug.Log($"    Public IP: {PublicIPAddress_?.ToString() ?? "Unknown!"}");
-            }
-
             IEnumerator RefreshDiscovery()
             {
                 while(true)
@@ -124,7 +112,6 @@ namespace Arteranos.Services
                     // and in its airplane mode.
                     if (GetConnectivityLevel_() == ConnectivityLevel.Unconnected)
                     {
-                        PublicIPAddress_ = null;
                         yield return new WaitForSeconds(10);
                     }
                     else
@@ -132,9 +119,6 @@ namespace Arteranos.Services
                         // Needs to be refreshed anytime, because the router invalidates port forwarding
                         // if the connected device falls idle, or catatonic.
                         NatUtility.StartDiscovery();
-
-                        // Only lean on the remote services if we don't have the public IP determined yet.
-                        if (PublicIPAddress_ == null) GetMyIP(FoundPublicIPAddress);
 
                         // Wait for refresh...
                         yield return new WaitForSeconds(500);
@@ -190,11 +174,11 @@ namespace Arteranos.Services
 
             device = e.Device;
 
-            ExternalAddress_ = await device.GetExternalIPAsync();
+            IPAddress ExternalAddress = await device.GetExternalIPAsync();
 
             Debug.Log($"Device found : {device.NatProtocol}");
             Debug.Log($"  Type       : {device.GetType().Name}");
-            Debug.Log($"  External IP: {ExternalAddress_}");
+            Debug.Log($"  External IP: {ExternalAddress}");
 
             OpenPortsAsync();
         }
@@ -234,9 +218,6 @@ namespace Arteranos.Services
 
         public async void OpenPortsAsync()
         {
-            // No NAT router at all? Lucky you! ;-)
-            if(ExternalAddress_ == null) return;
-
             // No point to open the ports if we're not supposed to.
             if(!OpenPorts_) return;
 
@@ -250,9 +231,6 @@ namespace Arteranos.Services
 
         public void ClosePortsAsync()
         {
-            // No NAT router at all? Lucky you! ;-)
-            if(ExternalAddress_ == null) return;
-
             Debug.Log("Closing ports in the router, if there's need to do.");
 
             Server ss = SettingsManager.Server;
@@ -269,70 +247,6 @@ namespace Arteranos.Services
 
         #endregion
         // -------------------------------------------------------------------
-        #region IP Address determination
-
-        public async void GetMyIP(Action<IPAddress> callback) 
-            => callback?.Invoke(await GetMyIpAsync());
-
-        private static CancellationTokenSource s_cts = null;
-
-        public static async Task<IPAddress> GetMyIpAsync()
-        {
-            // Services from https://stackoverflow.com/questions/3253701/get-public-external-ip-address
-            List<string> services = new()
-            {
-                "https://ipv4.icanhazip.com",
-                "https://api.ipify.org",
-                "https://ipinfo.io/ip",
-                "https://checkip.amazonaws.com",
-                "https://wtfismyip.com/text",
-                "http://icanhazip.com"
-            };
-
-            // Spread the load throughout on all of the services.
-            services.Shuffle();
-
-            s_cts = new CancellationTokenSource();
-
-            IPAddress result = null;
-
-            async Task GetOneMyIP(string service)
-            {
-                if (result != null || s_cts.Token.IsCancellationRequested) return;
-                result = await GetMyIPAsync(service);
-            }
-
-            TaskPool<string> pool = new(1);
-
-            foreach(string service in services)
-                pool.Schedule(service, GetOneMyIP);
-
-            await pool.Run(s_cts.Token);
-
-            return result;
-        }
-
-
-        public static async Task<IPAddress> GetMyIPAsync(string service)
-        {
-            try
-            {
-                using HttpClient webclient = new();
-
-                HttpResponseMessage response = await webclient.GetAsync(service, s_cts.Token);
-                string ipString = await response.Content.ReadAsStringAsync();
-
-                // https://ihateregex.io/expr/ip
-                Match m = Regex.Match(ipString, @"(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}");
-                
-                return m.Success ? IPAddress.Parse(m.Value) : null;
-            }
-            catch { }
-            return null;
-        }
-
-        #endregion
-        // -------------------------------------------------------------------
         #region Connections
 
         private bool transitionDisconnect = false;
@@ -343,10 +257,6 @@ namespace Arteranos.Services
             Debug.Log($"Attempting to connect to {connectionUri}...");
 
             manager.StartClient(connectionUri);
-
-            // It's preliminary, sure...
-            ServerHost_ = connectionUri.Host;
-            ServerPort_ = connectionUri.Port;
         }
 
         protected override async Task StopHost_(bool loadOfflineScene)
@@ -354,7 +264,7 @@ namespace Arteranos.Services
             manager.StopHost();
             OpenPorts = false;
 
-            ServerHost_ = null;
+            RemotePeerId_ = null;
 
             if (loadOfflineScene)
             {

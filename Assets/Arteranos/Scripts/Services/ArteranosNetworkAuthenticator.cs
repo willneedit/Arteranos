@@ -24,6 +24,7 @@ using Ipfs.Core.Cryptography.Proto;
 using ProtoBuf;
 using System.IO;
 using Arteranos.Core.Cryptography;
+using Ipfs;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-authenticators
@@ -425,11 +426,11 @@ namespace Arteranos.Services
         /// <param name="msg">Self explanatory</param>
         private void OnAuthGreetingMessage(AuthGreetingMessage msg)
         {
-            (string address, int port, int _) = SettingsManager.GetServerConnectionData();
+            MultiHash RemotePeerId = SettingsManager.GetServerConnectionData();
 
-            string key = $"{address}:{port}";
+            string key = RemotePeerId.ToString();
 
-            Debug.Log($"[Client] Server address: {key}");
+            Debug.Log($"[Client] Server PeerID : {key}");
             Debug.Log($"[Client] Server name   : {msg.ServerName}");
             Debug.Log($"[Client] Server version: {msg.ServerVersion.Full}");
 
@@ -497,9 +498,9 @@ namespace Arteranos.Services
             }
 
             Client cs = SettingsManager.Client;
-            (string address, int port, int _) = SettingsManager.GetServerConnectionData();
+            MultiHash RemotePeerId = SettingsManager.GetServerConnectionData();
 
-            string key = $"{address}:{port}";
+            string key = $"{RemotePeerId}";
 
             cs.ServerPasses.TryGetValue(key, out ServerPass sp);
 

@@ -138,12 +138,9 @@ namespace Arteranos.Services
     #region Services helpers
     public abstract class NetworkStatus : MonoBehaviour
     {
-        protected abstract IPAddress ExternalAddress_ { get; set; }
         protected abstract bool OpenPorts_ { get; set; }
         protected abstract Action<bool, string> OnClientConnectionResponse_ { get; set; }
-        protected abstract IPAddress PublicIPAddress_ { get; set; }
-        protected abstract string ServerHost_ { get; set; }
-        protected abstract int ServerPort_ { get; set; }
+        protected abstract MultiHash RemotePeerId_ { get; set; }
         protected abstract event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
         protected abstract ConnectivityLevel GetConnectivityLevel_();
         protected abstract OnlineLevel GetOnlineLevel_();
@@ -156,14 +153,6 @@ namespace Arteranos.Services
         protected abstract Task StopHost_(bool loadOfflineScene);
 
         public static NetworkStatus Instance { get; set; }
-
-        public static IPAddress ExternalAddress { get => Instance.ExternalAddress_; }
-
-        public static IPAddress PublicIPAddress { get => Instance.PublicIPAddress_; }
-
-        public static string ServerHost { get => Instance.ServerHost_; }
-
-        public static int ServerPort { get => Instance.ServerPort_; }
 
         public static bool OpenPorts
         {
@@ -182,6 +171,11 @@ namespace Arteranos.Services
             remove { if (Instance != null) Instance.OnNetworkStatusChanged_ -= value; }
         }
 
+        public static MultiHash RemotePeerId
+        {
+            get => Instance.RemotePeerId_;
+            set => Instance.RemotePeerId_ = value;
+        }
         public static ConnectivityLevel GetConnectivityLevel() 
             => Instance.GetConnectivityLevel_();
         public static OnlineLevel GetOnlineLevel() 
@@ -294,8 +288,6 @@ namespace Arteranos.Services
 
         public static IPFSService Instance { get; protected set; }
 
-        //public static IpfsEngine Ipfs
-        //    => Instance.Ipfs_;
         public static Peer Self 
             => Instance.Self_;
         public static SignKey ServerKeyPair
