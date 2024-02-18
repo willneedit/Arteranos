@@ -414,8 +414,22 @@ namespace Arteranos.Core
 
         public void SaveSocialStates(UserID userID, ulong state)
         {
-            Me.SocialList[userID] = state;
-            Save();
+            bool dirty = false;
+
+            if(Me.SocialList.TryGetValue(userID, out ulong oldstate))
+            {
+                if (oldstate != state || oldstate != SocialState.None) dirty = true;
+            }
+            else if(state != SocialState.None) dirty = true;
+
+            if (dirty)
+            {
+                if(state != SocialState.None)
+                    Me.SocialList[userID] = state;
+                else
+                    Me.SocialList.Remove(userID);
+                Save();
+            }
         }
 
         /// <summary>
