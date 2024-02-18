@@ -418,8 +418,16 @@ namespace Arteranos.Services
 
             WorldInfo wi = await WorldInfo.RetrieveAsync(message.WorldInfoCidString);
 
-            Debug.Log($"[Client] Info={message.WorldInfoCidString} is world {wi.WorldCid}. Dragging your client along.");
-            _ = await WorldTransition.VisitWorldAsync(wi.WorldCid);
+            if(wi == null)
+            {
+                Debug.Log("It's the offline world, falling back to the embedded scenery.");
+                _ = await WorldTransition.VisitWorldAsync(null);
+            }
+            else
+            {
+                Debug.Log($"[Client] Info={message.WorldInfoCidString} is world {wi.WorldCid}. Dragging your client along.");
+                _ = await WorldTransition.VisitWorldAsync(wi.WorldCid);
+            }
         }
 
 

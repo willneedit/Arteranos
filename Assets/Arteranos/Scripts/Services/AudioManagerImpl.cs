@@ -70,12 +70,11 @@ namespace Arteranos.Services
 
         private int micAGCLevel;
 
-        private static AudioMixer mixer = null;
+        private static AudioMixer mixer => BP.I.AudioMixer;
 
         private void Awake()
         {
             Instance = this;
-            mixer = BP.I.AudioMixer;
         }
 
         private void OnDestroy() => Instance = null;

@@ -187,6 +187,13 @@ namespace Arteranos.Avatar
         [TargetRpc]
         private void TargetReceiveReflectiveSocialState(GameObject senderGO, ulong state)
         {
+            // Can happen -- timing problem with users just logging in or out
+            if (!senderGO)
+            {
+                Debug.LogWarning("Discarding reflective social state of vanished user");
+                return;
+            }
+
             if(!isOwned) throw new Exception("Not owner");
 
             IAvatarBrain sender = senderGO.GetComponent<IAvatarBrain>();

@@ -49,7 +49,7 @@ namespace Arteranos.Avatar
                 m_PopoutTime = SettingsManager.Client.Controls.NameplateOut;
             }
 
-            if(fullHeight != Brain.Body.AvatarMeasures.FullHeight)
+            if(Brain.Body?.AvatarMeasures != null && fullHeight != Brain.Body.AvatarMeasures.FullHeight)
                 UpdateAvatarHeight();
 
             stableDuration += Time.deltaTime;
