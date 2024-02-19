@@ -234,9 +234,9 @@ namespace Arteranos.Core
 
     public class UserHUDSettingsJSON
     {
-        public virtual float AxisX { get; set; } = -1.5f;   // * 10
+        public virtual float AxisX { get; set; } = -1.3f;   // * 10
 
-        public virtual float AxisY { get; set; } = -1.0f;   // * 10
+        public virtual float AxisY { get; set; } = -0.6f;   // * 10
 
         public virtual float Log2Size { get; set; } = 0;    // 2^x (-2 ... 2 <=> 0.25 ... 4 )
 
