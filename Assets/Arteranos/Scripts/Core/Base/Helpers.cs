@@ -430,7 +430,7 @@ namespace Arteranos.UI
             Transform t = XRControl.Instance.rigTransform;
             Vector3 position = t.position;
             Quaternion rotation= t.rotation;
-            position += rotation * Vector3.forward * 1.5f;
+            position += rotation * Vector3.forward * 2f;
 
             GameObject go = Instantiate(
                 BP.I.InApp.AvatarGalleryPedestal,
