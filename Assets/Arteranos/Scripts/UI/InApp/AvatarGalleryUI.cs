@@ -6,15 +6,12 @@
  */
 
 using Arteranos.Core;
-using Arteranos.Avatar;
-using System;
 using UnityEngine;
 using System.Collections;
 using Ipfs;
 using Arteranos.Core.Operations;
 using System.Threading.Tasks;
 using Arteranos.Services;
-using Org.BouncyCastle.Asn1.Icao;
 
 namespace Arteranos.UI
 {

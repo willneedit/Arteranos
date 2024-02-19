@@ -35,13 +35,17 @@ namespace Arteranos.UI
 
         [SerializeField] private TMP_InputField txt_AddAvatarModelURL;
         [SerializeField] private Button btn_AddAvatar;
+        [SerializeField] private Button btn_AddToGallery;
 
         private Transform PreviewSpace = null;
         private GameObject Avatar = null;
         private string LastPreviewedURL = null;
         private Cid AvatarCid = null;
 
-        public string btn_LabelAddAvatar
+        private const string tc_LoadAvatar = "Load Avatar";
+        private const string tc_SetCurrent = "Set Current";
+
+        private string btn_LabelAddAvatar
         {
             get => btn_AddAvatar.transform.GetChild(0).GetComponent<TMP_Text>().text;
             set => btn_AddAvatar.transform.GetChild(0).GetComponent<TMP_Text>().text = value;
@@ -74,7 +78,10 @@ namespace Arteranos.UI
 
             btn_Close.onClick.AddListener(() => Destroy(gameObject));
             btn_AddAvatar.onClick.AddListener(OnAddAvatarClicked);
+            btn_AddToGallery.onClick.AddListener(OnAddToGalleryClicked);
             txt_AddAvatarModelURL.onValueChanged.AddListener(OnAvatarURLChanged);
+
+            btn_AddToGallery.gameObject.SetActive(false);
         }
 
         protected override void Start()
@@ -150,9 +157,11 @@ namespace Arteranos.UI
 
         private void OnAvatarURLChanged(string arg0)
         {
-            btn_LabelAddAvatar = LastPreviewedURL == txt_AddAvatarModelURL.text 
-                ? "Confirm"
-                : "Load Avatar";
+            bool unchanged = LastPreviewedURL == txt_AddAvatarModelURL.text;
+            btn_LabelAddAvatar = unchanged
+                ? tc_SetCurrent
+                : tc_LoadAvatar;
+            btn_AddToGallery.gameObject.SetActive(unchanged);
         }
 
 
@@ -248,8 +257,8 @@ namespace Arteranos.UI
 
                     lbl_Notice.text = "Avatar successfully loaded";
                     LastPreviewedURL = txt_AddAvatarModelURL.text;
-                    btn_LabelAddAvatar = "Confirm";
                     AvatarCid = AssetCid;
+                    OnAvatarURLChanged(LastPreviewedURL);
                 }
                 else
                 {
@@ -258,7 +267,7 @@ namespace Arteranos.UI
                 btn_AddAvatar.interactable = true;
             }
 
-            if(btn_LabelAddAvatar == "Confirm")
+            if(btn_LabelAddAvatar == tc_SetCurrent)
             {
                 Client cs = SettingsManager.Client;
 
@@ -278,6 +287,28 @@ namespace Arteranos.UI
                 btn_AddAvatar.interactable = false;
                 StartCoroutine(UploadAvatarCoroutine());
             }
+        }
+
+        private void OnAddToGalleryClicked()
+        {
+            Client client = SettingsManager.Client;
+
+            AvatarDescriptionJSON newAva = new()
+            {
+                AvatarCidString = AvatarCid,
+                AvatarHeight = client.AvatarHeight,
+            };
+
+            if(!client.Me.AvatarGallery.Contains(newAva))
+                client.Me.AvatarGallery.Add(newAva);
+            IPFSService.PinCid(AvatarCid, true);
+
+            lbl_Notice.text = "Avatar stored in Gallery";
+
+            txt_AddAvatarModelURL.text = string.Empty;
+            OnAvatarURLChanged(LastPreviewedURL);
+
+            client.Save();
         }
     }
 }
