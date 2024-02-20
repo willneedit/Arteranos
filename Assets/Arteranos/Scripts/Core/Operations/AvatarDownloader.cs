@@ -39,9 +39,6 @@ namespace Arteranos.Core.Operations
 
     internal class InstallAnimController : IAsyncOperation<Context>
     {
-        const string controllerResource = "AvatarAnim/AvatarAnimationController";
-        const string RPMBoneTranslation = "AvatarAnim/RPMBoneTranslations";
-
         public int Timeout { get; set; }
         public float Weight { get; set; } = 0.01f;
         public string Caption { get; set; } = "Installing animation controller";
@@ -132,6 +129,12 @@ namespace Arteranos.Core.Operations
                 }
             }
 
+            if(context.ReadFootJoints)
+            {
+                foreach (FootIKData foot in context.Feet)
+                    ReadJointNames(foot.FootTransform, context.JointNames);
+            }
+
             if (context.InstallHandIK)
             {
                 Transform handHandle;
@@ -153,6 +156,12 @@ namespace Arteranos.Core.Operations
                 }
             }
 
+            if(context.ReadHandJoints)
+            {
+                ReadJointNames(context.LeftHand, context.JointNames);
+                ReadJointNames(context.RightHand, context.JointNames);
+            }
+
             return Task.FromResult<Context>(context);
         }
 
@@ -162,7 +171,7 @@ namespace Arteranos.Core.Operations
 
             Transform pole = null;
 
-            if(poleOffset != null)
+            if (poleOffset != null)
             {
                 pole = new GameObject($"Pole_{limb.name}").transform;
                 pole.SetPositionAndRotation(
@@ -181,6 +190,11 @@ namespace Arteranos.Core.Operations
             limbIK.Target = handle;
             limbIK.Pole = pole;
 
+            return handle;
+        }
+
+        private static void ReadJointNames(Transform limb, List<string> jointNames, int bones = 2)
+        {
             // For Network IK, note down all of the affected joints
             Transform bone = limb;
             for (int i = 0; i <= bones; i++)
@@ -188,8 +202,6 @@ namespace Arteranos.Core.Operations
                 jointNames.Add(bone.name);
                 bone = bone.parent;
             }
-
-            return handle;
         }
     }
 
@@ -439,6 +451,8 @@ namespace Arteranos.Core.Operations
                 InstallFootIKCollider = options?.InstallFootIKCollider ?? false,
                 InstallHandIKController = options?.InstallHandIKController ?? false,
                 InstallHandIK = options?.InstallHandIK ?? false,
+                ReadFootJoints = options?.ReadFootJoints ?? false,
+                ReadHandJoints = options?.ReadHandJoints ?? false,
                 DesiredHeight = options?.DesiredHeight ?? 0,
             };
 

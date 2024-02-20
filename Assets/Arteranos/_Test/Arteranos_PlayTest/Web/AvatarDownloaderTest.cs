@@ -23,7 +23,7 @@ namespace Arteranos.PlayTest.Web
 {
     public class AvatarDownloaderTest
     {
-        private const string Asset_iws = "file:///Assets/Arteranos/_Test/Iwontsay.glb";
+        private const string Asset_iws = "file:///Assets/Arteranos/_Test/6394c1e69ef842b3a5112221.glb";
 
 
         IPFSServiceImpl srv = null;
@@ -228,6 +228,30 @@ namespace Arteranos.PlayTest.Web
                 {
                     InstallFootIK = true,
                     InstallHandIK = true
+                });
+
+            Task t = ao.ExecuteAsync(co);
+
+            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar.SetActive(true);
+
+            IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
+
+            // Read*Joints is false, no joints transmission
+            Assert.AreEqual(0, am.JointNames.Count);
+            // yield return UnityPAK();
+        }
+
+        [UnityTest]
+        public IEnumerator ReadRemoteJointNames()
+        {
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                {
+                    ReadFootJoints = true,
+                    ReadHandJoints = true
                 });
 
             Task t = ao.ExecuteAsync(co);

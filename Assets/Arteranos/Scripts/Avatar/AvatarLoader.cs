@@ -79,8 +79,10 @@ namespace Arteranos.Avatar
                         InstallMouthAnimation = true,
                         InstallFootIK = isOwned,
                         InstallFootIKCollider = isOwned,
+                        ReadFootJoints = true,
                         InstallHandIK = isOwned,
                         InstallHandIKController = isOwned,
+                        ReadHandJoints = true,
                     });
 
                 Task t = ao.ExecuteAsync(co);

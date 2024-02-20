@@ -32,9 +32,11 @@ namespace Arteranos.Core.Operations
         bool InstallMouthAnimation { get; set; }
         bool InstallAnimController { get; set; }
         bool InstallFootIK { get; set; }
+        bool InstallHandIK { get; set; }
         bool InstallFootIKCollider { get; set; }
         bool InstallHandIKController { get; set; }
-        bool InstallHandIK { get; set; }
+        bool ReadFootJoints { get; set; }
+        bool ReadHandJoints { get; set; }
         float DesiredHeight { get; set; }
     }
 
@@ -44,9 +46,11 @@ namespace Arteranos.Core.Operations
         public bool InstallMouthAnimation { get; set; }
         public bool InstallAnimController { get; set; }
         public bool InstallFootIK { get; set; }
+        public bool InstallHandIK { get; set; }
         public bool InstallFootIKCollider { get; set; }
         public bool InstallHandIKController { get; set; }
-        public bool InstallHandIK { get; set; }
+        public bool ReadFootJoints { get; set; }
+        public bool ReadHandJoints { get; set; }
         public float DesiredHeight { get; set; }
     }
 
@@ -56,9 +60,11 @@ namespace Arteranos.Core.Operations
         public bool InstallMouthAnimation { get; set; } = false;
         public bool InstallAnimController { get; set; } = false;
         public bool InstallFootIK { get; set; } = false;
+        public bool InstallHandIK { get; set; } = false;
         public bool InstallFootIKCollider { get; set; } = false;
         public bool InstallHandIKController { get; set; } = false;
-        public bool InstallHandIK { get; set; } = false;
+        public bool ReadFootJoints { get; set; } = false;
+        public bool ReadHandJoints { get; set; } = false;
         public float DesiredHeight { get; set; } = 0.0f;
 
         public bool? SidedCapitalized = null; // 'left' or 'Left' ?
