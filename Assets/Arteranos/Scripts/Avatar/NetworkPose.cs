@@ -268,7 +268,7 @@ namespace Arteranos.NetworkIO
             }
         }
 
-        void Update()
+        void LateUpdate()
         {
             // if server then always sync to others.
             if      (isServer) UpdateServer();

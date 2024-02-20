@@ -118,7 +118,7 @@ namespace Arteranos.Core.Operations
 
                 foreach(FootIKData foot in context.Feet)
                 {
-                    footHandle = RigIK(foot.FootTransform, avatarTransform, context.JointNames, new Vector3(0, 0, 2));
+                    footHandle = RigIK(foot.FootTransform, avatarTransform, new Vector3(0, 0, 2));
                     if(context.InstallFootIKCollider)
                     {
                         footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
@@ -139,7 +139,7 @@ namespace Arteranos.Core.Operations
             {
                 Transform handHandle;
                 HandIKController handIK;
-                handHandle = RigIK(context.LeftHand, avatarTransform, context.JointNames);
+                handHandle = RigIK(context.LeftHand, avatarTransform);
                 if(context.InstallHandIKController)
                 {
                     handIK = handHandle.gameObject.AddComponent<HandIKController>();
@@ -147,7 +147,7 @@ namespace Arteranos.Core.Operations
                     handIK.AvatarMeasures = context;
                 }
 
-                handHandle = RigIK(context.RightHand, avatarTransform, context.JointNames);
+                handHandle = RigIK(context.RightHand, avatarTransform);
                 if(context.InstallHandIKController)
                 {
                     handIK = handHandle.gameObject.AddComponent<HandIKController>();
@@ -165,7 +165,7 @@ namespace Arteranos.Core.Operations
             return Task.FromResult<Context>(context);
         }
 
-        private Transform RigIK(Transform limb, Transform at, List<string> jointNames, Vector3? poleOffset = null, int bones = 2)
+        private Transform RigIK(Transform limb, Transform at, Vector3? poleOffset = null, int bones = 2)
         {
             if (!limb) return null;
 
