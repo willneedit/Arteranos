@@ -10,34 +10,24 @@ using UnityEngine;
 using Arteranos.NetworkIO;
 using Arteranos.XR;
 using Arteranos.Core;
-using Mirror;
 
 namespace Arteranos.Avatar
 {
 
-    public class AvatarPoseDriver : NetworkBehaviour
+    public class AvatarPoseDriver : MonoBehaviour
     {
         private IAvatarMeasures AvatarMeasures = null;
         private NetworkPose NetworkPose = null;
-        private Animator anim = null;
 
-        [SyncVar]
-        public Vector2 animMoveDirection = Vector2.zero;
-
-        [SyncVar]
-        public float animMoveSpeed = 1.0f;
+        private bool isOwned => NetworkPose.isOwned;
 
         private void Awake()
         {
             NetworkPose = GetComponent<NetworkPose>();
-            syncDirection = SyncDirection.ClientToServer;
-            syncInterval = 0;
         }
 
-        public override void OnStartClient()
+        private void Start()
         {
-            base.OnStartClient();
-
             if(isOwned)
             {
                 SettingsManager.Client.OnVRModeChanged += OnXRChanged;
@@ -46,12 +36,10 @@ namespace Arteranos.Avatar
 
         }
 
-        public override void OnStopClient()
+        private void OnDestroy()
         {
             if(isOwned)
                 SettingsManager.Client.OnVRModeChanged -= OnXRChanged;
-
-            base.OnStopClient();
         }
 
         private void OnXRChanged(bool useXR)
@@ -78,9 +66,6 @@ namespace Arteranos.Avatar
 
                 xrc.ReconfigureXRRig();
             }
-
-            // The user got a new body in general, even if it's not yet active.
-            anim = GetComponentInChildren<Animator>(true);
         }
 
         // --------------------------------------------------------------------
@@ -113,20 +98,11 @@ namespace Arteranos.Avatar
             if (moveSpeed.x < -0.5f) newMoveDirection.x = -1;
             if (moveSpeed.x > 0.5f) newMoveDirection.x = 1;
 
-            animMoveDirection = newMoveDirection;
+            NetworkPose.animMoveDirection = newMoveDirection;
 
-            animMoveSpeed = AvatarMeasures != null
+            NetworkPose.animMoveSpeed = AvatarMeasures != null
                 ? (float)(AvatarMeasures.UnscaledHeight / AvatarMeasures.FullHeight)
                 : 1.0f;
-        }
-
-        private void UpdateBaseAnimation()
-        {
-            if (anim == null) return;
-
-            anim.SetInteger("IntWalkFrontBack", (int)animMoveDirection.y);
-            anim.SetInteger("IntWalkLeftRight", (int)animMoveDirection.x);
-            anim.SetFloat("Speed", animMoveSpeed);
         }
 
         #endregion
@@ -166,9 +142,6 @@ namespace Arteranos.Avatar
                 // Set and propagate the avatar baseline animation (e.g. walking)
                 UpdateOwnPose();
             }
-
-            // Both local and remote avatar have to set the animation direction into effect
-            UpdateBaseAnimation();
 
             // Route the user's audio level into the mouth morphing
             RouteVoice();

@@ -21,6 +21,8 @@ namespace Arteranos.NetworkIO
         public string[] jointNames = null;
         public Transform[] jointTransforms = null;
 
+        protected Animator anim = null;
+
         protected virtual void Awake()
         {
             jointNames = new string[PoseSnapshot.MAX_SIZE];
@@ -40,6 +42,10 @@ namespace Arteranos.NetworkIO
                 jointTransforms[i] = rootTransform.FindRecursive(names[i]);
                 Debug.Assert(jointTransforms[i] != null);
             }
+
+
+            // The user got a new body in general, even if it's not yet active.
+            anim = GetComponentInChildren<Animator>(true);
         }
 
         public Quaternion[] RetrievePoseData()

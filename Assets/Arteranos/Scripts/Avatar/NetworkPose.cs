@@ -25,6 +25,11 @@ namespace Arteranos.NetworkIO
         [Tooltip("Apply smallest-three quaternion compression. This is lossy, you can disable it if the small rotation inaccuracies are noticeable in your project.")]
         public bool compressRotation = false;
 
+        // Base animation directives, synchronized.
+        public Vector2 animMoveDirection = Vector2.zero;
+        public float animMoveSpeed = 1.0f;
+
+
         // Used to store last sent snapshots
         protected PoseSnapshot last;
 
@@ -153,6 +158,8 @@ namespace Arteranos.NetworkIO
             }
 
             writer.WritePoseSnapshot(snapshot.rotation, ref lastSerializedRotations, mask, compressRotation);
+            writer.WriteVector2(animMoveDirection);
+            writer.WriteFloat(animMoveSpeed);
 
             // set 'last'
             last = snapshot;
@@ -168,6 +175,8 @@ namespace Arteranos.NetworkIO
 
             // ... and delta
             Quaternion[] rotation = reader.ReadPoseSnapshot(ref lastDeserializedRotations, compressRotation);
+            animMoveDirection = reader.ReadVector2();
+            animMoveSpeed = reader.ReadFloat();
 
             // handle depending on server / client / host.
             // server has priority for host mode.
@@ -268,7 +277,17 @@ namespace Arteranos.NetworkIO
             }
         }
 
-        void LateUpdate()
+        private void Update()
+        {
+            // Both local and remote avatar have to set the animation direction into effect
+            if (anim == null) return;
+
+            anim.SetInteger("IntWalkFrontBack", (int)animMoveDirection.y);
+            anim.SetInteger("IntWalkLeftRight", (int)animMoveDirection.x);
+            anim.SetFloat("Speed", animMoveSpeed);
+        }
+
+        private void LateUpdate()
         {
             // if server then always sync to others.
             if      (isServer) UpdateServer();
