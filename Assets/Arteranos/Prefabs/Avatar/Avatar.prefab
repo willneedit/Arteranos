@@ -55,6 +55,8 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0.1
+  animMoveDirection: {x: 0, y: 0}
+  animMoveSpeed: 1
 --- !u!114 &244397833489866318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67,8 +69,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3d04faf237846a428aa61df13cce2f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_GalleryModeURL: 
-  animator: {fileID: 0}
 --- !u!114 &2032202113796676651
 MonoBehaviour:
   m_ObjectHideFlags: 0
