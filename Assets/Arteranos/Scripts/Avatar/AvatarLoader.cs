@@ -31,19 +31,18 @@ namespace Arteranos.Avatar
             set
             {
                 m_invisible = value;
-                if(AvatarGameObject!= null)
-                {
-                    Renderer[] renderers = AvatarGameObject.GetComponentsInChildren<Renderer>();
-                    foreach(Renderer renderer in renderers)
-                        renderer.enabled = !Invisible;
-                }
+                if (!AvatarGameObject) return;
+
+                Renderer[] renderers = AvatarGameObject.GetComponentsInChildren<Renderer>();
+                foreach (Renderer renderer in renderers)
+                    renderer.enabled = !Invisible;
             }
         }
 
         private bool m_invisible = false;
 
         private AvatarBrain AvatarBrain = null;
-        public bool isOwned => AvatarBrain?.isOwned ?? false;
+        public bool IsOwned => AvatarBrain ? AvatarBrain.isOwned : false;
 
         private void Awake()
         {
@@ -67,7 +66,7 @@ namespace Arteranos.Avatar
 
             IEnumerator AvatarDownloaderCoroutine()
             {
-                while(settleTime > DateTime.Now)
+                while (settleTime > DateTime.Now)
                     yield return new WaitForSeconds((settleTime - DateTime.Now).Seconds);
 
                 (AsyncOperationExecutor<Context> ao, Context co) =
@@ -77,11 +76,11 @@ namespace Arteranos.Avatar
                         InstallAnimController = true,
                         InstallEyeAnimation = true,
                         InstallMouthAnimation = true,
-                        InstallFootIK = isOwned,
-                        InstallFootIKCollider = isOwned,
+                        InstallFootIK = IsOwned,
+                        InstallFootIKCollider = IsOwned,
                         ReadFootJoints = true,
-                        InstallHandIK = isOwned,
-                        InstallHandIKController = isOwned,
+                        InstallHandIK = IsOwned,
+                        InstallHandIKController = IsOwned,
                         ReadHandJoints = true,
                     });
 
@@ -100,10 +99,7 @@ namespace Arteranos.Avatar
                     AvatarGameObject = AvatarMeasures.Avatar;
                 }
 
-                if (AvatarBrain)
-                    AvatarGameObject.name += $"_{AvatarBrain.NetID}";
-                else
-                    AvatarGameObject.name += "_puppet";
+                AvatarGameObject.name += AvatarBrain ? $"_{AvatarBrain.NetID}" : "_puppet";
 
                 AvatarGameObject.transform.SetParent(transform, false);
 
@@ -113,12 +109,12 @@ namespace Arteranos.Avatar
                 loading = false;
             }
 
-            if (loading) return;
+            if (!loading)
+            {
+                loading = true;
 
-            loading = true;
-
-            StartCoroutine(AvatarDownloaderCoroutine());
+                StartCoroutine(AvatarDownloaderCoroutine());
+            }
         }
-
     }
 }

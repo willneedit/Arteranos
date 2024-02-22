@@ -19,7 +19,7 @@ namespace Arteranos.Avatar
         private IAvatarMeasures AvatarMeasures = null;
         private NetworkPose NetworkPose = null;
 
-        private bool isOwned => NetworkPose.isOwned;
+        private bool IsOwned => NetworkPose.isOwned;
 
         private void Awake()
         {
@@ -28,7 +28,7 @@ namespace Arteranos.Avatar
 
         private void Start()
         {
-            if(isOwned)
+            if(IsOwned)
             {
                 SettingsManager.Client.OnVRModeChanged += OnXRChanged;
                 OnXRChanged(SettingsManager.Client.VRMode);
@@ -38,7 +38,7 @@ namespace Arteranos.Avatar
 
         private void OnDestroy()
         {
-            if(isOwned)
+            if(IsOwned)
                 SettingsManager.Client.OnVRModeChanged -= OnXRChanged;
         }
 
@@ -57,7 +57,7 @@ namespace Arteranos.Avatar
             NetworkPose.UploadJointNames(am.Avatar.transform, am.JointNames.ToArray());
             AvatarMeasures = am;
 
-            if (isOwned)
+            if (IsOwned)
             {
                 IXRControl xrc = XRControl.Instance;
 
@@ -110,12 +110,21 @@ namespace Arteranos.Avatar
         // --------------------------------------------------------------------
         #region Face/Voice morphing
 
+        private AvatarVoice AvatarVoice = null;
+        private AvatarMouthAnimator AvatarMouthAnimator = null;
+
         private void RouteVoice()
         {
-            float amount = GetComponent<AvatarVoice>().MeasureAmplitude();
+            if (!AvatarVoice)
+                AvatarVoice = GetComponent<AvatarVoice>();
+
+            if (!AvatarMouthAnimator && AvatarMeasures?.Avatar)
+                AvatarMouthAnimator = AvatarMeasures.Avatar.GetComponent<AvatarMouthAnimator>();
+
+            float amount = AvatarVoice.MeasureAmplitude();
 
             if(AvatarMeasures?.Avatar != null)
-                AvatarMeasures.Avatar.GetComponent<AvatarMouthAnimator>().MouthOpen = amount;
+                AvatarMouthAnimator.MouthOpen = amount;
         }
 
         #endregion
@@ -123,7 +132,7 @@ namespace Arteranos.Avatar
         void Update()
         {
             // Avatars from other clients are slaved by the NetworkTransform and -Pose.
-            if(isOwned)
+            if(IsOwned)
             {
                 IXRControl instance = XRControl.Instance;
                 Transform xro = instance.rigTransform;
