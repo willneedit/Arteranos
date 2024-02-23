@@ -13,16 +13,34 @@ using Ipfs;
 using Arteranos.Core.Operations;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 
 namespace Arteranos.Avatar
 {
     public class AvatarLoader : MonoBehaviour, IAvatarBody
     {
-        private GameObject AvatarStandin = null;
+        internal struct InternalAvatarMeasures : IAvatarMeasures
+        {
+            public readonly GameObject Avatar => Instantiate(BP.I.Avatar_Loading_StandIn);
+            public readonly Transform CenterEye => null;
+            public readonly float EyeHeight => 1.75f;
+            public readonly float FullHeight => 1.86f;
+            public readonly float UnscaledHeight => 1.86f;
+            public readonly Transform Head => null;
+            public readonly Transform LeftHand => null;
+            public readonly Transform RightHand => null;
+            public readonly List<string> JointNames => new();
+            public readonly List<FootIKData> Feet => new();
+            public readonly List<Transform> Eyes => new();
+            public readonly List<MeshBlendShapeIndex> MouthOpen => new();
+            public readonly List<MeshBlendShapeIndex> EyeBlinkLeft => new();
+            public readonly List<MeshBlendShapeIndex> EyeBlinkRight => new();
+        }
+
         private bool loading = false;
 
         private GameObject AvatarGameObject = null;
-        public IAvatarMeasures AvatarMeasures { get; set; } = null;
+        public IAvatarMeasures AvatarMeasures { get; private set; } = null;
 
 
         public bool Invisible
@@ -46,14 +64,14 @@ namespace Arteranos.Avatar
 
         private void Awake()
         {
-            AvatarStandin = BP.I.Avatar_Loading_StandIn;
+            AvatarMeasures = new InternalAvatarMeasures();
             AvatarBrain = GetComponent<AvatarBrain>();
         }
 
         private void Start()
         {
             // Put up the Stand-in for the time where the avatar is loaded
-            AvatarGameObject = Instantiate(AvatarStandin);
+            AvatarGameObject = AvatarMeasures.Avatar;
             AvatarGameObject.transform.SetParent(transform, false);
         }
 
@@ -91,13 +109,11 @@ namespace Arteranos.Avatar
                 if (AvatarGameObject)
                     Destroy(AvatarGameObject);
 
-                if (t.IsFaulted)
-                    AvatarGameObject = Instantiate(AvatarStandin);
-                else
-                {
-                    AvatarMeasures = AvatarDownloader.GetAvatarMeasures(co);
-                    AvatarGameObject = AvatarMeasures.Avatar;
-                }
+                AvatarMeasures = t.IsFaulted 
+                    ? new InternalAvatarMeasures() 
+                    : AvatarDownloader.GetAvatarMeasures(co);
+
+                AvatarGameObject = AvatarMeasures.Avatar;
 
                 AvatarGameObject.name += AvatarBrain ? $"_{AvatarBrain.NetID}" : "_puppet";
 

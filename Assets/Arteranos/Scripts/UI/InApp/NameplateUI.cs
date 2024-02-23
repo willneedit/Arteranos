@@ -51,10 +51,9 @@ namespace Arteranos.UI
             lbl_Name.text = GetLabelText();
 
             Bearer.OnAppearanceStatusChanged += OnAppearanceStatusChanged;
-            float fullHeight = Bearer.Body.AvatarMeasures?.FullHeight ?? 0.5f; // Maybe the avatar isn#t loaded yet.
+            float fullHeight = Bearer.Body.AvatarMeasures.FullHeight; // Maybe the avatar isn#t loaded yet.
             // TODO Up vector? LocalPosition respects the root rotation, but...
-            transform.localPosition = new Vector3(0, fullHeight + 0.2f, 0);
-            transform.localRotation = Quaternion.Euler(0, 180, 0);
+            transform.SetLocalPositionAndRotation(new Vector3(0, fullHeight + 0.2f, 0), Quaternion.Euler(0, 180, 0));
             OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 

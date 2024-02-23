@@ -76,12 +76,10 @@ namespace Arteranos.Avatar
             // VR: Head tracking
             if(SettingsManager.Client.VRMode)
             {
-                if(AvatarMeasures.CenterEye == null) return;
+                if(!AvatarMeasures.CenterEye || !AvatarMeasures.Head) return;
 
-                Transform cam = XRControl.Instance.cameraTransform;
-
-                if(AvatarMeasures.Head)
-                    AvatarMeasures.Head.rotation = cam.rotation;
+                Transform cam = XRControl.Instance.cameraTransform;                
+                AvatarMeasures.Head.rotation = cam.rotation;
             }
 
             // VR + 2D: Walking animation (only with loaded avatars)

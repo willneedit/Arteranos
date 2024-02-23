@@ -66,6 +66,10 @@ namespace Arteranos.Avatar
 
         private void AdjustHandIK(Transform handHandle)
         {
+            // Should never happen because AvatarDownloader installed the component
+            // as well as entering the hand transform into AvatarMeasures.
+            if (!guidedTransform) return;
+
             if (!ControllerTransform)
             {
                 // No controller. Set the hand's pose along with its animation.
