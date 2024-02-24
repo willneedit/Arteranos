@@ -154,6 +154,7 @@ namespace Arteranos.Avatar
 
             ResyncInitialValues();
 
+            Subconscious.OnStartClientSlaved();
 
             if (isOwned)
             {
@@ -165,15 +166,14 @@ namespace Arteranos.Avatar
                 _ = BubbleCoordinatorFactory.New(this);
 
                 PostOffice.Load();
+
+                StartCoroutine(DoTextMessageLoop());
             }
             else
             {
                 // Alien avatars get the hit capsules to target them to call up the nameplates.
                 HitBox = AvatarHitBoxFactory.New(this);
             }
-
-            // Avatar startup complete, all systems go.
-            Subconscious.ReadyState = AvatarSubconscious.READY_COMPLETE;
         }
 
         private void CommitAvatarChanged(string CidString, float Height)
@@ -221,14 +221,15 @@ namespace Arteranos.Avatar
         #endregion
         // ---------------------------------------------------------------
         #region Running
-        private void Update()
-        {
-            if ((Subconscious.ReadyState & AvatarSubconscious.READY_COMPLETE) == 0)
-                return;
 
-            // The text message reception loop
-            if (isOwned)
-                DoTextMessageLoop();
+        private IEnumerator DoTextMessageLoop()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(2);
+
+                DoTextMessage();
+            }
         }
 
         #endregion
@@ -292,9 +293,6 @@ namespace Arteranos.Avatar
 
         private void OnUserIDChanged(UserID _1, UserID userID)
         {
-            Subconscious.ReadyState = AvatarSubconscious.READY_USERID;
-            Subconscious.ReadyState = AvatarSubconscious.READY_CRYPTO;
-
             if(isServer)
             {
                 int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
@@ -539,7 +537,7 @@ namespace Arteranos.Avatar
             return busy;
         }
 
-        private void DoTextMessageLoop()
+        private void DoTextMessage()
         {
             if(replyTo != null)
             {

@@ -5,11 +5,8 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections.Generic;
-
 using UnityEngine;
 
-using Mirror;
 using Arteranos.Core;
 using Arteranos.Social;
 using System;
@@ -18,88 +15,47 @@ using Arteranos.XR;
 using Arteranos.Core.Cryptography;
 using System.Text;
 using Ipfs.Core.Cryptography.Proto;
+using System.Collections;
+using System.Collections.Generic;
+using Mirror;
 
 namespace Arteranos.Avatar
 {
     public class AvatarSubconscious : NetworkBehaviour
     {
-        public const int READY_USERID   = (1 <<  0);
-        public const int READY_CRYPTO   = (1 <<  1);
-        public const int READY_ME       = (1 <<  2);
-        public const int READY_ANNOUNCE = (1 << 24);
-        public const int READY_COMPLETE = (1 << 30);
-
-        // ---------------------------------------------------------------
         #region Start & Stop
-
-        public int ReadyState 
-        {
-            get => m_ReadyState;
-            set
-            {
-                int old = m_ReadyState;
-                m_ReadyState |= value; // NOTE: Intentional. Only for latches.
-                if (old != m_ReadyState) ReadyStateChanged?.Invoke(old, m_ReadyState);
-            }
-        }
-
-        public event Action<int, int> ReadyStateChanged;
 
         // The own ideas about the other users, and vice versa
         private readonly Dictionary<UserID, ulong> SocialMemory = new();
 
         private IAvatarBrain Brain = null;
 
-        private int m_ReadyState = 0;
-
-        private void Reset()
-        {
-            syncDirection = SyncDirection.ServerToClient;
-            syncMode = SyncMode.Observers;
-        }
+        // private bool isOwned => Brain.isOwned;
 
         private void Awake() => Brain = GetComponent<IAvatarBrain>();
 
-        public override void OnStartClient()
+        // Formerly NetworkBehavior, but now it's slaved to the Brain.
+        // Heh, Id, I ... but no superego :)
+        public void OnStartClientSlaved()
         {
-            base.OnStartClient();
-
-            ReadyStateChanged += OnReadyStateChanged;
-
-            // Initialize the filtered friend (and shit) list
-            if(isOwned)
-                InitializeSocialStates();
-        }
-
-        public override void OnStopClient()
-        {
-            ReadyStateChanged -= OnReadyStateChanged;
-
-            base.OnStopClient();
-        }
-
-        private void Update()
-        {
-            if((ReadyState & READY_ME) == 0 && XRControl.Me != null)
-                ReadyState = READY_ME;
-        }
-
-
-        private void OnReadyStateChanged(int oldval, int newval)
-        {
-            Brain.LogDebug($"Ready state changed from {oldval} to {newval}");
-
-            // Newly online user, do the neccessary handshake, once the userID and the public key
-            // is available.
-            int r1 = READY_CRYPTO|READY_USERID|READY_ME;
-            if((newval & (r1|READY_ANNOUNCE)) == r1 && !isOwned)
+            IEnumerator AnnounceArrival()
             {
-                ReadyState = READY_ANNOUNCE;
+                // I'm a remote avatar, and we haven't seen the local user yet.
+                while (XRControl.Me == null)
+                    yield return new WaitForSeconds(1);
+
+                XRControl.Me.LogDebug($"{Brain.UserID} announcing its arrival");
+
+                // Now we're talking!
                 XRControl.Me.gameObject.
                     GetComponent<AvatarSubconscious>().AnnounceArrival(Brain.UserID);
             }
-        }
 
+            if(isOwned)
+                InitializeSocialStates();           // Initialize the filtered friend (and shit) list
+            else
+                StartCoroutine(AnnounceArrival());  // Tell the local user that I'm here
+        }
 
         #endregion
         // ---------------------------------------------------------------
