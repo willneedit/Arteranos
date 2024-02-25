@@ -10,13 +10,6 @@ using ProtoBuf;
 
 namespace Arteranos.Core
 {
-    //public enum PeerMessageType
-    //{
-    //    ServerHello     = 0x48454C4F, // 'HELO' - Sending the server's general description
-    //    ImOkay          = 0x494D4F4B, // 'IMOK' - Sending the server's user list and current world CID
-    //    AreYouThere     = 0x4159543F, // 'AYT?' - Prompts (PeerID) with an ImOkay response
-    //}
-
     [ProtoContract]
     [ProtoInclude(65537, typeof(ServerHello))]
     [ProtoInclude(65538, typeof(ServerOnlineData))]

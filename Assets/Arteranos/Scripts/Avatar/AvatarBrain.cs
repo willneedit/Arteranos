@@ -471,11 +471,102 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Social state negotiation
 
+        public ulong GetSocialStateTo(UserID to) 
+            => SettingsManager.Client.Me.SocialList.TryGetValue(to, out ulong state)
+                ? state : SocialState.None;
+
+        public ulong GetSocialStateTo(IAvatarBrain receiver)
+            => GetSocialStateTo(receiver.UserID);
+
+        public void SendCTCPacket(IAvatarBrain receiver, CTCPacket packet)
+        {
+            if (!receiver?.gameObject)
+            {
+                Debug.LogWarning($"Discarding CTCP for an already logged out user");
+                return;
+            }
+
+            // Wrap up, encrypt and send
+            try
+            {
+                packet.sender = UserID;
+
+                byte[] data = packet.Serialize();
+                Client.TransmitMessage(data, receiver.AgreePublicKey, out CMSPacket messageData);
+                NetworkClient.Send(new CTCPacketEnvelope()
+                {
+                    receiver = receiver.UserID,
+                    CTCPayload = messageData
+                });
+            }
+            catch { }
+        }
+
+        public void ReceiveCTCPacket(CTCPacketEnvelope envelope)
+        {
+            CTCPacket packet;
+            try
+            {
+                Client.ReceiveMessage(envelope.CTCPayload, out byte[] data, out PublicKey signerPublicKey);
+                packet = CTCPacket.Deserialize(data);
+
+                if (packet.sender != signerPublicKey)
+                    throw new Exception($"Supposed sender {packet.sender} doesn't match its key");
+
+                if (packet is CTCPUserState packetUS) ReactReceivedSSE(packetUS);
+                else if(packet is CTCPTextMessage packetTxt) ReactReceiveTextMessage(packetTxt);
+                else throw new InvalidOperationException("Unknown CTC Packet, discarded");
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return;
+            }
+
+            // NOTREACHED
+        }
+
+        private void ReactReceivedSSE(CTCPUserState received)
+        {
+            UserID sender = received.sender;
+
+            // Sync with the mirrored social states
+            ulong state = SocialState.ReflectSocialState(received.state, GetSocialStateTo(sender));
+
+            // Save, for now.
+            SettingsManager.Client.SaveSocialStates(sender, state);
+
+            // And take it the immediate effects, like blocking.
+            IAvatarBrain senderB = NetworkStatus.GetOnlineUser(sender);
+            UpdateSSEffects(senderB, state);
+        }
+
+        private void ReactReceiveTextMessage(CTCPTextMessage received)
+        {
+            UserID sender = received.sender;
+
+            PostOffice.EnqueueIncoming(sender, sender, received.text);
+            PostOffice.Save();
+        }
+
         public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
-            => Subconscious.OfferFriendship(receiver, offering);
+        {
+            ulong state = GetSocialStateTo(receiver.UserID);
+            SocialState.SetFriendState(ref state, offering);
+
+            SendSocialState(receiver, state);
+        }
 
         public void BlockUser(IAvatarBrain receiver, bool blocking = true)
-            => Subconscious.BlockUser(receiver, blocking);
+        {
+            ulong state = GetSocialStateTo(receiver.UserID);
+            if (blocking)
+                SocialState.SetFriendState(ref state, false);
+
+            SocialState.SetBlockState(ref state, blocking);
+
+            SendSocialState(receiver, state);
+        }
 
         public void UpdateSSEffects(IAvatarBrain receiver, ulong state)
         {
@@ -499,11 +590,26 @@ namespace Arteranos.Avatar
             // Maybe the intended receiver logged off while you tried to send a goodbye message.
             if(receiver == null) return;
 
-            Subconscious.SendTextMessage(receiver, text);
+            SendCTCPacket(receiver, new CTCPTextMessage()
+            {
+                text = text
+            });
         }
 
-        public ulong GetOwnState(IAvatarBrain receiver)
-            => Subconscious.GetOwnState(receiver.UserID);
+        private void SendSocialState(IAvatarBrain receiver, ulong state)
+        {
+            SettingsManager.Client.SaveSocialStates(receiver.UserID, state);
+
+            // Maybe the intended receiver logged off while you tried to send a goodbye message.
+            if (receiver == null) return;
+
+            SendCTCPacket(receiver, new CTCPUserState()
+            {
+                state = state
+            });
+        }
+
+
         #endregion
         // ---------------------------------------------------------------
         #region Text message reception
@@ -511,19 +617,6 @@ namespace Arteranos.Avatar
         private volatile IDialogUI m_txtMessageBox = null;
 
         private volatile IAvatarBrain replyTo = null;
-
-        public void ReceiveTextMessage(IAvatarBrain sender, string text)
-        {
-            if(IsTextMessageOccupied())
-            {
-                // Put the message onto the pile... together with the dozens others...
-                PostOffice.EnqueueIncoming(sender.UserID, sender.Nickname, text);
-                PostOffice.Save();
-                return;
-            }
-
-            ShowTextMessage(sender, sender.Nickname, text);
-        }
 
         private bool IsTextMessageOccupied()
         {

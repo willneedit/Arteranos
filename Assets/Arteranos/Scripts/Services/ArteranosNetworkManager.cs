@@ -39,6 +39,7 @@ namespace Arteranos.Services
 
         private readonly Dictionary<int, DateTime> SCLastUpdatedToClient = new();
 
+        // ---------------------------------------------------------------
         #region Utilities
 
         internal void AddResponseMessage(int connid, AuthSequence sequence)
@@ -54,7 +55,7 @@ namespace Arteranos.Services
         }
 
         #endregion
-
+        // ---------------------------------------------------------------
         #region Unity Callbacks
 
         /// <summary>
@@ -98,7 +99,7 @@ namespace Arteranos.Services
         }
 
         #endregion
-
+        // ---------------------------------------------------------------
         #region Start & Stop
 
         /// <summary>
@@ -119,7 +120,7 @@ namespace Arteranos.Services
         }
 
         #endregion
-
+        // ---------------------------------------------------------------
         #region Scene Management
 
         /// <summary>
@@ -164,7 +165,7 @@ namespace Arteranos.Services
         }
 
         #endregion
-
+        // ---------------------------------------------------------------
         #region Server System Callbacks
 
         /// <summary>
@@ -247,7 +248,7 @@ namespace Arteranos.Services
         public override void OnServerError(NetworkConnectionToClient conn, TransportError transportError, string message) { }
 
         #endregion
-
+        // ---------------------------------------------------------------
         #region Client System Callbacks
 
         /// <summary>
@@ -288,7 +289,7 @@ namespace Arteranos.Services
         public override void OnClientError(TransportError transportError, string message) { }
 
         #endregion
-
+        // ---------------------------------------------------------------
         #region Start & Stop Callbacks
 
         // Since there are multiple versions of StartServer, StartClient and StartHost, to reliably customize
@@ -311,6 +312,8 @@ namespace Arteranos.Services
 
             ResponseMessages.Clear();
             SCLastUpdatedToClient.Clear();
+
+            NetworkServer.RegisterHandler<CTCPacketEnvelope>(OnServerGotCTCP);
         }
 
         /// <summary>
@@ -321,6 +324,7 @@ namespace Arteranos.Services
             base.OnStartClient();
 
             NetworkClient.RegisterHandler<WorldChangeAnnounceMessage>(OnClientGotWCA);
+            NetworkServer.RegisterHandler<CTCPacketEnvelope>(OnClientGotCTCP);
         }
 
         /// <summary>
@@ -336,6 +340,8 @@ namespace Arteranos.Services
             base.OnStopServer();
 
             SettingsManager.WorldInfoCid = null;
+
+            NetworkServer.UnregisterHandler<CTCPacketEnvelope>();
         }
 
         /// <summary>
@@ -346,11 +352,11 @@ namespace Arteranos.Services
             base.OnStopClient();
 
             NetworkClient.UnregisterHandler<WorldChangeAnnounceMessage>();
-
+            NetworkServer.UnregisterHandler<CTCPacketEnvelope>();
         }
 
         #endregion
-
+        // ---------------------------------------------------------------
         #region World Change Announcements
 
         [Server]
@@ -432,5 +438,38 @@ namespace Arteranos.Services
 
 
         #endregion
+        // ---------------------------------------------------------------
+        #region CTC Routing
+
+        [Server]
+        private void OnServerGotCTCP(NetworkConnectionToClient client, CTCPacketEnvelope envelope)
+        {
+            IAvatarBrain receiver = NetworkStatus.GetOnlineUser(envelope.receiver);
+            if (receiver == null)
+            {
+                Debug.LogWarning($"Discarding CTCP for nonexistent/offline user {envelope.receiver}");
+                return;
+            }
+
+            // Forward the message to the intended receiver as-is.
+            NetworkIdentity netid = receiver.gameObject.GetComponent<NetworkIdentity>();
+            netid.connectionToClient.Send(envelope);
+        }
+
+        [Client]
+        private void OnClientGotCTCP(NetworkConnectionToClient client, CTCPacketEnvelope envelope)
+        {
+            IAvatarBrain receiver = NetworkStatus.GetOnlineUser(envelope.receiver);
+            if (receiver == null)
+            {
+                Debug.LogWarning($"Discarding CTCP for nonexistent/offline user {envelope.receiver}");
+                return;
+            }
+
+            receiver.ReceiveCTCPacket(envelope);
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
     }
 }

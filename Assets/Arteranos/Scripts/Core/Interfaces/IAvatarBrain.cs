@@ -36,7 +36,7 @@ namespace Arteranos.Avatar
         event Action<int> OnAppearanceStatusChanged;
 
         void BlockUser(IAvatarBrain receiver, bool blocking = true);
-        ulong GetOwnState(IAvatarBrain receiver);
+        ulong GetSocialStateTo(IAvatarBrain receiver);
         bool IsAbleTo(UserCapabilities cap, IAvatarBrain target);
         void LogDebug(object message);
         void LogError(object message);
@@ -45,12 +45,12 @@ namespace Arteranos.Avatar
         void OfferFriendship(IAvatarBrain receiver, bool offering = true);
         void PerformEmote(string emoteName);
         void QueryServerPacket(SCMType type);
-        void ReceiveTextMessage(IAvatarBrain sender, string text);
         void SendTextMessage(IAvatarBrain receiver, string text);
         void SetAppearanceStatusBit(int ASBit, bool set);
         void PerformServerPacket(SCMType type, CMSPacket p);
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
         void ServerKickUser(string reason);
         void MakeWorkdToChange(Cid Cid);
+        void ReceiveCTCPacket(CTCPacketEnvelope envelope);
     }
 }

@@ -100,7 +100,7 @@ namespace Arteranos.Avatar
 
         }
 
-        public ulong GetOwnState(IAvatarBrain receiver) => 0;
+        public ulong GetSocialStateTo(IAvatarBrain receiver) => 0;
 
         public void SendTextMessage(IAvatarBrain receiver, string text)
             => LogDebug($"To {receiver.Nickname}: {text}");
@@ -128,6 +128,11 @@ namespace Arteranos.Avatar
         }
 
         public void MakeWorkdToChange(Cid cid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReceiveCTCPacket(CTCPacketEnvelope envelope)
         {
             throw new NotImplementedException();
         }

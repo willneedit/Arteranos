@@ -41,7 +41,7 @@ namespace Arteranos.Social
         private static bool IsAny(ulong you, ulong stateBit) => Bit64field.IsAny(you, stateBit);
 
         private static bool IsAll(IAvatarBrain target, ulong stateBit) 
-            => IsAll(XRControl.Me?.GetOwnState(target) ?? None, stateBit);
+            => IsAll(XRControl.Me?.GetSocialStateTo(target) ?? None, stateBit);
 
         //private static bool IsAny(IAvatarBrain target, ulong stateBit)
         //    => IsAny(XRControl.Me?.GetOwnState(target) ?? None, stateBit);
