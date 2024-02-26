@@ -312,8 +312,6 @@ namespace Arteranos.Services
 
             ResponseMessages.Clear();
             SCLastUpdatedToClient.Clear();
-
-            NetworkServer.RegisterHandler<CTCPacketEnvelope>(OnServerGotCTCP);
         }
 
         /// <summary>
@@ -324,7 +322,6 @@ namespace Arteranos.Services
             base.OnStartClient();
 
             NetworkClient.RegisterHandler<WorldChangeAnnounceMessage>(OnClientGotWCA);
-            NetworkServer.RegisterHandler<CTCPacketEnvelope>(OnClientGotCTCP);
         }
 
         /// <summary>
@@ -340,8 +337,6 @@ namespace Arteranos.Services
             base.OnStopServer();
 
             SettingsManager.WorldInfoCid = null;
-
-            NetworkServer.UnregisterHandler<CTCPacketEnvelope>();
         }
 
         /// <summary>
@@ -352,7 +347,6 @@ namespace Arteranos.Services
             base.OnStopClient();
 
             NetworkClient.UnregisterHandler<WorldChangeAnnounceMessage>();
-            NetworkServer.UnregisterHandler<CTCPacketEnvelope>();
         }
 
         #endregion
@@ -436,38 +430,6 @@ namespace Arteranos.Services
             }
         }
 
-
-        #endregion
-        // ---------------------------------------------------------------
-        #region CTC Routing
-
-        [Server]
-        private void OnServerGotCTCP(NetworkConnectionToClient client, CTCPacketEnvelope envelope)
-        {
-            IAvatarBrain receiver = NetworkStatus.GetOnlineUser(envelope.receiver);
-            if (receiver == null)
-            {
-                Debug.LogWarning($"Discarding CTCP for nonexistent/offline user {envelope.receiver}");
-                return;
-            }
-
-            // Forward the message to the intended receiver as-is.
-            NetworkIdentity netid = receiver.gameObject.GetComponent<NetworkIdentity>();
-            netid.connectionToClient.Send(envelope);
-        }
-
-        [Client]
-        private void OnClientGotCTCP(NetworkConnectionToClient client, CTCPacketEnvelope envelope)
-        {
-            IAvatarBrain receiver = NetworkStatus.GetOnlineUser(envelope.receiver);
-            if (receiver == null)
-            {
-                Debug.LogWarning($"Discarding CTCP for nonexistent/offline user {envelope.receiver}");
-                return;
-            }
-
-            receiver.ReceiveCTCPacket(envelope);
-        }
 
         #endregion
         // ---------------------------------------------------------------

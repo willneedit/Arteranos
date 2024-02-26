@@ -136,6 +136,11 @@ namespace Arteranos.Avatar
         {
             throw new NotImplementedException();
         }
+
+        public void SendSocialState(IAvatarBrain receiver, ulong state)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

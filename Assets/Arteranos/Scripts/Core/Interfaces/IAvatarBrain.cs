@@ -51,6 +51,6 @@ namespace Arteranos.Avatar
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
         void ServerKickUser(string reason);
         void MakeWorkdToChange(Cid Cid);
-        void ReceiveCTCPacket(CTCPacketEnvelope envelope);
+        void SendSocialState(IAvatarBrain receiver, ulong state);
     }
 }

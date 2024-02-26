@@ -34,8 +34,6 @@ namespace Arteranos.Avatar
 
         private IHitBox HitBox = null;
 
-        private AvatarSubconscious Subconscious { get; set; } = null;
-
         public uint NetID => netIdentity.netId;
 
         public string AvatarCidString { get => m_AvatarCidString; private set => CmdPropagateAvatarURL(value); }
@@ -143,6 +141,24 @@ namespace Arteranos.Avatar
 
         public override void OnStartClient()
         {
+            IEnumerator HelloFromRemoteAvatar()
+            {
+                // I'm a remote avatar, and we haven't seen the local user yet.
+                while (XRControl.Me == null)
+                    yield return new WaitForSeconds(1);
+
+                ulong localState = XRControl.Me.GetSocialStateTo(this);
+
+                Debug.Log($"{(string) UserID} (remote) announcing its arrival (local state: {localState})");
+               
+                // Now we're talking!
+                XRControl.Me.SendSocialState(this, localState);
+
+                // The other way round?
+                // In the other client, this remote avatar would be the local avatar, and
+                // the local avatar would be the remote avatar.
+            }
+
             Client cs = SettingsManager.Client;
 
             base.OnStartClient();
@@ -153,8 +169,6 @@ namespace Arteranos.Avatar
             SettingsManager.Client.OnUserPrivacyChanged += (x) => { if (isOwned) UserPrivacy = x; };
 
             ResyncInitialValues();
-
-            Subconscious.OnStartClientSlaved();
 
             if (isOwned)
             {
@@ -173,6 +187,9 @@ namespace Arteranos.Avatar
             {
                 // Alien avatars get the hit capsules to target them to call up the nameplates.
                 HitBox = AvatarHitBoxFactory.New(this);
+
+                // Greet the local user and sync his social state as soon as it arrived
+                StartCoroutine(HelloFromRemoteAvatar());
             }
         }
 
@@ -264,8 +281,6 @@ namespace Arteranos.Avatar
 
         void Awake()
         {
-            Subconscious = GetComponent<AvatarSubconscious>();
-
             syncDirection = SyncDirection.ServerToClient;
         }
 
@@ -471,9 +486,14 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Social state negotiation
 
-        public ulong GetSocialStateTo(UserID to) 
-            => SettingsManager.Client.Me.SocialList.TryGetValue(to, out ulong state)
-                ? state : SocialState.None;
+        public ulong GetSocialStateTo(UserID to)
+        {
+            if (!isOwned)
+                throw new InvalidOperationException("Not owner");
+
+            return SettingsManager.Client.Me.SocialList.TryGetValue(to, out ulong state)
+                        ? state : SocialState.None;
+        }
 
         public ulong GetSocialStateTo(IAvatarBrain receiver)
             => GetSocialStateTo(receiver.UserID);
@@ -493,13 +513,37 @@ namespace Arteranos.Avatar
 
                 byte[] data = packet.Serialize();
                 Client.TransmitMessage(data, receiver.AgreePublicKey, out CMSPacket messageData);
-                NetworkClient.Send(new CTCPacketEnvelope()
+
+                CmdRouteCTCP(new CTCPacketEnvelope()
                 {
                     receiver = receiver.UserID,
                     CTCPayload = messageData
                 });
             }
             catch { }
+        }
+
+        [Command]
+        void CmdRouteCTCP(CTCPacketEnvelope envelope)
+        {
+            AvatarBrain receiver = NetworkStatus.GetOnlineUser(envelope.receiver) as AvatarBrain;
+            if (receiver == null)
+            {
+                Debug.LogWarning($"Discarding CTCP for nonexistent/offline user {envelope.receiver}");
+                return;
+            }
+            NetworkIdentity netid = receiver.gameObject.GetComponent<NetworkIdentity>();
+
+            Debug.Log($"[Server] Routing CTCP to {(string)envelope.receiver} ({netid.netId})");
+
+            receiver.TargetReceiveCTCPacket(netid.connectionToClient, envelope);
+        }
+
+        [TargetRpc]
+        private void TargetReceiveCTCPacket(NetworkConnectionToClient connectionToClient, CTCPacketEnvelope envelope)
+        {
+            Debug.Log($"[Client] Received CTCP to {(string)envelope.receiver}");
+            ReceiveCTCPacket(envelope);
         }
 
         public void ReceiveCTCPacket(CTCPacketEnvelope envelope)
@@ -529,6 +573,8 @@ namespace Arteranos.Avatar
         private void ReactReceivedSSE(CTCPUserState received)
         {
             UserID sender = received.sender;
+
+            LogDebug($"{(string) sender} updated social status to (his view) {received.state}");
 
             // Sync with the mirrored social states
             ulong state = SocialState.ReflectSocialState(received.state, GetSocialStateTo(sender));
@@ -596,8 +642,11 @@ namespace Arteranos.Avatar
             });
         }
 
-        private void SendSocialState(IAvatarBrain receiver, ulong state)
+        public void SendSocialState(IAvatarBrain receiver, ulong state)
         {
+            if (!isOwned)
+                throw new InvalidOperationException("Not owner");
+
             SettingsManager.Client.SaveSocialStates(receiver.UserID, state);
 
             // Maybe the intended receiver logged off while you tried to send a goodbye message.
