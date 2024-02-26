@@ -498,7 +498,7 @@ namespace Arteranos.Avatar
         public ulong GetSocialStateTo(IAvatarBrain receiver)
             => GetSocialStateTo(receiver.UserID);
 
-        public void SendCTCPacket(IAvatarBrain receiver, CTCPacket packet)
+        private void SendCTCPacket(IAvatarBrain receiver, CTCPacket packet)
         {
             if (!receiver?.gameObject)
             {
@@ -524,7 +524,7 @@ namespace Arteranos.Avatar
         }
 
         [Command]
-        void CmdRouteCTCP(CTCPacketEnvelope envelope)
+        private void CmdRouteCTCP(CTCPacketEnvelope envelope)
         {
             AvatarBrain receiver = NetworkStatus.GetOnlineUser(envelope.receiver) as AvatarBrain;
             if (receiver == null)
@@ -540,7 +540,7 @@ namespace Arteranos.Avatar
         }
 
         [TargetRpc]
-        private void TargetReceiveCTCPacket(NetworkConnectionToClient connectionToClient, CTCPacketEnvelope envelope)
+        private void TargetReceiveCTCPacket(NetworkConnectionToClient _, CTCPacketEnvelope envelope)
         {
             Debug.Log($"[Client] Received CTCP to {(string)envelope.receiver}");
             ReceiveCTCPacket(envelope);
@@ -618,8 +618,6 @@ namespace Arteranos.Avatar
         {
             if(receiver == null) return;
 
-            LogDebug($"I feel about {receiver.Nickname}: {state}");
-
             // You blocked him.
             bool own_blocked = SocialState.IsBlocked(state);
             receiver.SetAppearanceStatusBit(Avatar.AppearanceStatus.Blocked, own_blocked);
@@ -647,10 +645,10 @@ namespace Arteranos.Avatar
             if (!isOwned)
                 throw new InvalidOperationException("Not owner");
 
-            SettingsManager.Client.SaveSocialStates(receiver.UserID, state);
-
             // Maybe the intended receiver logged off while you tried to send a goodbye message.
             if (receiver == null) return;
+
+            SettingsManager.Client.SaveSocialStates(receiver.UserID, state);
 
             SendCTCPacket(receiver, new CTCPUserState()
             {
