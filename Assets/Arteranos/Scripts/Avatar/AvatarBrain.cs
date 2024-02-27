@@ -60,11 +60,7 @@ namespace Arteranos.Avatar
             get
             {
                 // Join the local and the net-wide status
-                int status = m_ints.ContainsKey(AVKeys.NetAppearanceStatus)
-                    ? m_ints[AVKeys.NetAppearanceStatus]
-                    : Avatar.AppearanceStatus.OK;
-
-                return status | LocalAppearanceStatus;
+                return m_NetAppearanceStatus | LocalAppearanceStatus;
             }
 
             set
@@ -72,17 +68,14 @@ namespace Arteranos.Avatar
                 // Split the local and the net-wide status
                 LocalAppearanceStatus = value & Avatar.AppearanceStatus.MASK_LOCAL;
 
-                int oldNetAS = m_ints.ContainsKey(AVKeys.NetAppearanceStatus)
-                    ? m_ints[AVKeys.NetAppearanceStatus]
-                    : Avatar.AppearanceStatus.OK;
                 int newNetAS = value & ~Avatar.AppearanceStatus.MASK_LOCAL;
 
-                if (oldNetAS != newNetAS)
+                if (m_NetAppearanceStatus != newNetAS)
                     // Spread the word...
-                    CmdPropagateInt(AVKeys.NetAppearanceStatus, newNetAS);
+                    CmdPropagateNetAppearanceStatus(newNetAS);
                 else
                     // Or, follow through.
-                    UpdateNetAppearanceStatus(value);
+                    UpdateNetAppearanceStatus();
             }
         }
 
@@ -163,12 +156,8 @@ namespace Arteranos.Avatar
 
             base.OnStartClient();
 
-            m_ints.Callback += OnMIntsChanged;
-
             SettingsManager.Client.OnAvatarChanged += CommitAvatarChanged;
             SettingsManager.Client.OnUserPrivacyChanged += (x) => { if (isOwned) UserPrivacy = x; };
-
-            ResyncInitialValues();
 
             if (isOwned)
             {
@@ -181,7 +170,7 @@ namespace Arteranos.Avatar
 
                 PostOffice.Load();
 
-                StartCoroutine(DoTextMessageLoop());
+                StartCoroutine(DoTextMessageLoopCoroutine());
             }
             else
             {
@@ -208,8 +197,6 @@ namespace Arteranos.Avatar
             if (isOwned) XRControl.Me = null;
 
             SettingsManager.Client.OnAvatarChanged -= CommitAvatarChanged;
-
-            m_ints.Callback -= OnMIntsChanged;
 
             base.OnStopClient();
         }
@@ -239,7 +226,7 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Running
 
-        private IEnumerator DoTextMessageLoop()
+        private IEnumerator DoTextMessageLoopCoroutine()
         {
             while (true)
             {
@@ -253,7 +240,8 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Networking
 
-        private readonly SyncDictionary<AVKeys, int> m_ints = new();
+        [SyncVar(hook = nameof(OnNetAppearanceStatusChanged))]
+        private int m_NetAppearanceStatus = 0;
 
         [SyncVar(hook = nameof(OnUserIDChanged))]
         private UserID m_userID = null;
@@ -284,23 +272,8 @@ namespace Arteranos.Avatar
             syncDirection = SyncDirection.ServerToClient;
         }
 
-        private void ResyncInitialValues()
-        {
-            foreach(KeyValuePair<AVKeys, int> kvpi in m_ints)
-                OnMIntsChanged(SyncDictionary<AVKeys, int>.Operation.OP_ADD, kvpi.Key, kvpi.Value);
-
-        }
-
-
-        private void OnMIntsChanged(SyncDictionary<AVKeys, int>.Operation op, AVKeys key, int value)
-        {
-            switch(key)
-            {
-                case AVKeys.NetAppearanceStatus:
-                    // Either been self-muted or by other means, the announcement comes down from the server.
-                    UpdateNetAppearanceStatus(value); break;
-            }
-        }
+        public void OnNetAppearanceStatusChanged(int _1, int newValue) 
+            => UpdateNetAppearanceStatus();
 
         private void OnAvatarCidStringChanged(string _1, string _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
 
@@ -319,8 +292,9 @@ namespace Arteranos.Avatar
             }
         }
 
+        // Maybe I have to include a second component for the client-guided variables?
         [Command]
-        private void CmdPropagateInt(AVKeys key, int value) => m_ints[key] = value;
+        private void CmdPropagateNetAppearanceStatus(int value) => m_NetAppearanceStatus = value;
 
         [Command]
         private void CmdPropagateUserPrivacy(UserPrivacy userPrivacy) => m_UserPrivacy = userPrivacy;
@@ -438,7 +412,7 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Appearance Status
 
-        private void UpdateNetAppearanceStatus(int _)
+        private void UpdateNetAppearanceStatus()
         {
             // Special case - self-modifying appearance status, like making yourself invisible,
             // and, to a lesser extent, self-muting.
@@ -484,20 +458,7 @@ namespace Arteranos.Avatar
 
         #endregion
         // ---------------------------------------------------------------
-        #region Social state negotiation
-
-        public ulong GetSocialStateTo(UserID to)
-        {
-            if (!isOwned)
-                throw new InvalidOperationException("Not owner");
-
-            return SettingsManager.Client.Me.SocialList.TryGetValue(to, out ulong state)
-                        ? state : SocialState.None;
-        }
-
-        public ulong GetSocialStateTo(IAvatarBrain receiver)
-            => GetSocialStateTo(receiver.UserID);
-
+        #region CTCP
         private void SendCTCPacket(IAvatarBrain receiver, CTCPacket packet)
         {
             if (!receiver?.gameObject)
@@ -558,7 +519,7 @@ namespace Arteranos.Avatar
                     throw new Exception($"Supposed sender {packet.sender} doesn't match its key");
 
                 if (packet is CTCPUserState packetUS) ReactReceivedSSE(packetUS);
-                else if(packet is CTCPTextMessage packetTxt) ReactReceiveTextMessage(packetTxt);
+                else if (packet is CTCPTextMessage packetTxt) ReactReceiveTextMessage(packetTxt);
                 else throw new InvalidOperationException("Unknown CTC Packet, discarded");
             }
             catch (Exception e)
@@ -569,6 +530,22 @@ namespace Arteranos.Avatar
 
             // NOTREACHED
         }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Social state negotiation
+
+        public ulong GetSocialStateTo(UserID to)
+        {
+            if (!isOwned)
+                throw new InvalidOperationException("Not owner");
+
+            return SettingsManager.Client.Me.SocialList.TryGetValue(to, out ulong state)
+                        ? state : SocialState.None;
+        }
+
+        public ulong GetSocialStateTo(IAvatarBrain receiver)
+            => GetSocialStateTo(receiver.UserID);
 
         private void ReactReceivedSSE(CTCPUserState received)
         {
@@ -585,14 +562,6 @@ namespace Arteranos.Avatar
             // And take it the immediate effects, like blocking.
             IAvatarBrain senderB = NetworkStatus.GetOnlineUser(sender);
             UpdateSSEffects(senderB, state);
-        }
-
-        private void ReactReceiveTextMessage(CTCPTextMessage received)
-        {
-            UserID sender = received.sender;
-
-            PostOffice.EnqueueIncoming(sender, sender, received.text);
-            PostOffice.Save();
         }
 
         public void OfferFriendship(IAvatarBrain receiver, bool offering = true)
@@ -664,6 +633,14 @@ namespace Arteranos.Avatar
         private volatile IDialogUI m_txtMessageBox = null;
 
         private volatile IAvatarBrain replyTo = null;
+
+        private void ReactReceiveTextMessage(CTCPTextMessage received)
+        {
+            UserID sender = received.sender;
+
+            PostOffice.EnqueueIncoming(sender, sender, received.text);
+            PostOffice.Save();
+        }
 
         private bool IsTextMessageOccupied()
         {

@@ -20,20 +20,6 @@ namespace Arteranos.Core.Operations
 {
     public static class WorldTransition
     {
-        private static IEnumerator EnterDownloadedWorldCoroutine(string worldABF)
-        {
-            Debug.Log($"Download complete, world={worldABF}");
-
-            yield return null;
-
-            // Deploy the scene loader.
-            GameObject go = new("_SceneLoader");
-            go.AddComponent<Persistence>();
-            SceneLoader sl = go.AddComponent<SceneLoader>();
-            sl.OnFinishingSceneChange += () => XRControl.Instance.MoveRig();
-            sl.Name = worldABF;
-        }
-
         public static async Task MoveToOfflineWorld()
         {
             bool done = false;
@@ -157,7 +143,21 @@ namespace Arteranos.Core.Operations
 
         public static void EnterDownloadedWorld(string worldABF)
         {
-            SettingsManager.StartCoroutineAsync(() => EnterDownloadedWorldCoroutine(worldABF));
+            static IEnumerator EnterDownloadedWorld_(string worldABF)
+            {
+                Debug.Log($"Download complete, world={worldABF}");
+
+                yield return null;
+
+                // Deploy the scene loader.
+                GameObject go = new("_SceneLoader");
+                go.AddComponent<Persistence>();
+                SceneLoader sl = go.AddComponent<SceneLoader>();
+                sl.OnFinishingSceneChange += () => XRControl.Instance.MoveRig();
+                sl.Name = worldABF;
+            }
+
+            SettingsManager.StartCoroutineAsync(() => EnterDownloadedWorld_(worldABF));
         }
     }
 }
