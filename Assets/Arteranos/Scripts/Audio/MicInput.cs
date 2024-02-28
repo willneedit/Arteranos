@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Threading.Tasks;
 using POpusCodec;
 using POpusCodec.Enums;
 using UnityEngine;
@@ -167,6 +167,8 @@ namespace Arteranos.Audio
                 Debug.Log("No microphone present");
             }
 
+            // Force the reallocation of the temp buffer
+            temp = null;
         }
 
         private void OnDestroy()
@@ -187,17 +189,14 @@ namespace Arteranos.Audio
             }
         }
 
+        private float[] temp = null;
         IEnumerator ReadRawAudio()
         {
             int loops = 0;
             int readAbsPos = 0;
             int prevPos = 0;
 
-
-
-            // was SampleRate / 10 -- the amount of 1/10th of a second,
-            // and with the 20ms encoder delay, five packets amount to 100ms.
-            float[] temp = new float[packetSize * 5];
+            temp ??= new float[packetSize];
 
             while(true)
             {
@@ -251,7 +250,7 @@ namespace Arteranos.Audio
             micBuffer.AddRange(data);
 
             int packets = micBuffer.Count / packetSize;
-            for(int i = 0; i < packets; i++)
+            for (int i = 0; i < packets; i++)
             {
                 byte[] encodedData = encoder.Encode(micBuffer.GetRange(i * packetSize, packetSize).ToArray());
                 OnSegmentReady?.Invoke(packetndex++, encodedData);
