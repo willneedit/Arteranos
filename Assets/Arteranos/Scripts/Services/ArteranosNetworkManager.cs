@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Arteranos.UI;
 using Ipfs;
 using Arteranos.Core.Operations;
+using Ipfs.Core.Cryptography.Proto;
+using Arteranos.Core.Cryptography;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -312,6 +314,8 @@ namespace Arteranos.Services
 
             ResponseMessages.Clear();
             SCLastUpdatedToClient.Clear();
+
+            NetworkServer.RegisterHandler<CTSPacketEnvelope>(OnServerGotCTSPacket);
         }
 
         /// <summary>
@@ -322,6 +326,7 @@ namespace Arteranos.Services
             base.OnStartClient();
 
             NetworkClient.RegisterHandler<WorldChangeAnnounceMessage>(OnClientGotWCA);
+            NetworkClient.RegisterHandler<CTSPacketEnvelope>(OnClientGotCTSPacket);
         }
 
         /// <summary>
@@ -337,6 +342,8 @@ namespace Arteranos.Services
             base.OnStopServer();
 
             SettingsManager.WorldInfoCid = null;
+
+            NetworkServer.UnregisterHandler<CTSPacketEnvelope>();
         }
 
         /// <summary>
@@ -347,6 +354,7 @@ namespace Arteranos.Services
             base.OnStopClient();
 
             NetworkClient.UnregisterHandler<WorldChangeAnnounceMessage>();
+            NetworkClient.UnregisterHandler<CTSPacketEnvelope>();
         }
 
         #endregion
@@ -431,6 +439,112 @@ namespace Arteranos.Services
         }
 
 
+        #endregion
+        // ---------------------------------------------------------------
+        #region CTS Packets (Communication)
+
+        [Server]
+        private void OnServerGotCTSPacket(NetworkConnectionToClient client, CTSPacketEnvelope envelope)
+        {
+            try
+            {
+                Server.ReceiveMessage(envelope.CTSPayload, out byte[] data, out PublicKey signerPublicKey);
+                IAvatarBrain sender = NetworkStatus.GetOnlineUser(client.identity.netId);
+
+                if (sender == null || sender.UserID != signerPublicKey)
+                    throw new InvalidOperationException("Sender with invalid/forged packet signature");
+
+                ServerLocalCTSPacket(sender.UserID, CTSPacket.Deserialize(data));
+            }
+            catch (Exception ex)
+            {
+                client.Disconnect();
+                Debug.LogException(ex);
+            }
+        }
+
+        public void EmitToServerCTSPacket(CTSPacket packet)
+        {
+            Client client = SettingsManager.Client;
+            UserID sender = new(client.UserSignPublicKey, client.Me.Nickname);
+
+            if (!NetworkClient.active)
+                // Directly slice the packet into the server logic
+                ServerLocalCTSPacket(sender, packet);
+            else
+            {
+                // Sign, encrypt and send it off to the connected server
+                Client.TransmitMessage(
+                    packet.Serialize(), 
+                    SettingsManager.ActiveServerData.ServerAgrPublicKey, 
+                    out CMSPacket payload);
+                NetworkClient.Send(new CTSPacketEnvelope()
+                {
+                    CTSPayload = payload
+                });
+            }
+        }
+
+        [Client]
+        private void OnClientGotCTSPacket(CTSPacketEnvelope envelope)
+        {
+            try
+            {
+                Client.ReceiveMessage(envelope.CTSPayload, out byte[] data, out PublicKey signerPublicKey);
+                if (SettingsManager.ActiveServerData.ServerSignPublicKey != signerPublicKey)
+                    throw new InvalidOperationException("Sender is not the active server");
+
+                ClientLocalCTSPacket(CTSPacket.Deserialize(data));
+            }
+            catch (Exception ex)
+            {
+                // No disconnect because of injected messages from trolls.
+                Debug.LogException(ex);
+            }
+        }
+
+        public void EmitToClientCTSPacket(CTSPacket packet, IAvatarBrain to = null)
+        {
+            if (!NetworkServer.active)
+                // Directly slice the packet into the client logic
+                ClientLocalCTSPacket(packet);
+            else
+            {
+                // Sign, encrypt if it's toward to a specific user
+                Server.TransmitMessage(
+                    packet.Serialize(),
+                    to?.AgreePublicKey, // Leave unencrypted if it's for everyone
+                    out CMSPacket payload);
+
+                CTSPacketEnvelope envelope = new() { CTSPayload = payload };
+
+                // Send to all, or the specific user
+                if (to == null)
+                    NetworkServer.SendToAll(envelope);
+                else
+                    to.gameObject.GetComponent<NetworkIdentity>().connectionToClient.Send(envelope);
+            }
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region CTS Packets (on Server)
+
+        // Entry point of the server side and offline mode
+        public void ServerLocalCTSPacket(UserID sender, CTSPacket packet)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region CTS Packets (on Client)
+
+        // Entry point of the client side and offline mode
+        private void ClientLocalCTSPacket(CTSPacket packet)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
         // ---------------------------------------------------------------
     }

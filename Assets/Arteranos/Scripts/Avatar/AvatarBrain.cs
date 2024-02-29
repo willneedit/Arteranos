@@ -272,7 +272,7 @@ namespace Arteranos.Avatar
             syncDirection = SyncDirection.ServerToClient;
         }
 
-        public void OnNetAppearanceStatusChanged(int _1, int newValue) 
+        public void OnNetAppearanceStatusChanged(int _1, int _2) 
             => UpdateNetAppearanceStatus();
 
         private void OnAvatarCidStringChanged(string _1, string _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
@@ -472,8 +472,7 @@ namespace Arteranos.Avatar
             {
                 packet.sender = UserID;
 
-                byte[] data = packet.Serialize();
-                Client.TransmitMessage(data, receiver.AgreePublicKey, out CMSPacket messageData);
+                Client.TransmitMessage(packet.Serialize(), receiver.AgreePublicKey, out CMSPacket messageData);
 
                 CmdRouteCTCP(new CTCPacketEnvelope()
                 {
