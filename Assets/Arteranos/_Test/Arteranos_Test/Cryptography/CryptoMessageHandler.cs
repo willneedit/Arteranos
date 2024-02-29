@@ -78,6 +78,25 @@ namespace Arteranos.Test.Cryptography
         }
 
         [Test]
+        public void TransmitAndReceiveSignOnly()
+        {
+            ISignKey aliceSignKey = SignKey.Generate();
+            CryptoMessageHandler aliceCmh = new(aliceSignKey);
+
+            ISignKey bobSignKey = SignKey.Generate();
+            CryptoMessageHandler bobCmh = new(bobSignKey);
+
+            byte[] message = Encoding.UTF8.GetBytes("this is to be encrypted and signed");
+
+            aliceCmh.TransmitMessage(message, new PublicKey[0], out CMSPacket messageData);
+
+            bobCmh.ReceiveMessage(messageData, out byte[] decodedMessage, out PublicKey supposedSender);
+
+            Assert.AreEqual(message, decodedMessage);
+            Assert.AreEqual(supposedSender, aliceCmh.SignPublicKey);
+        }
+
+        [Test]
         public void AttemptEavesdrop()
         {
             ISignKey aliceSignKey = SignKey.Generate();

@@ -102,7 +102,7 @@ namespace Arteranos.Core.Cryptography
         }
 
         public void TransmitMessage(byte[] data, PublicKey receiver, out CMSPacket message) 
-            => TransmitMessage(data, new[] { receiver }, out message);
+            => TransmitMessage(data, receiver != null ? new[] { receiver } : new PublicKey[0], out message);
 
         public void Sign(byte[] data, out byte[] signature)
             => OwnerSignKey.Sign(data, out signature);
