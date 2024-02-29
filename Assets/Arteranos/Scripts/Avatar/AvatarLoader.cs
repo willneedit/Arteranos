@@ -66,10 +66,7 @@ namespace Arteranos.Avatar
         {
             AvatarMeasures = new InternalAvatarMeasures();
             AvatarBrain = GetComponent<AvatarBrain>();
-        }
-
-        private void Start()
-        {
+ 
             // Put up the Stand-in for the time where the avatar is loaded
             AvatarGameObject = AvatarMeasures.Avatar;
             AvatarGameObject.transform.SetParent(transform, false);
