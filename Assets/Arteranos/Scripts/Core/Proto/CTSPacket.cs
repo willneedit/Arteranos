@@ -69,9 +69,12 @@ namespace Arteranos.Core
     public class CTSPWorldChangeAnnouncement : CTSPacket
     {
         [ProtoMember(1)]
-        public string WorldCidString;
+        public string WorldCid; // In case if the World Info isn't available yet
 
         [ProtoMember(2)]
-        public string WorldName;
+        public WorldInfo WorldInfo;
+
+        [ProtoMember(3)]
+        public string Message; // Nonzero if it needs a dialog to pop up
     }
 }

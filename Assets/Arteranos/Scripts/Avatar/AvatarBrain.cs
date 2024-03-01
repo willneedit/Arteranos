@@ -425,39 +425,6 @@ namespace Arteranos.Avatar
 
         #endregion
         // ---------------------------------------------------------------
-        #region World change event handling
-
-        public void MakeWorkdToChange(Cid Cid)
-        {
-            WorldInfo wmd = WorldInfo.DBLookup(Cid);
-
-            if (wmd?.ContentRating != null)
-            {
-                // Remotely connected user tries to sneak in something gross or raunchy?
-                if (wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions))
-                {
-                    IDialogUI dialog = DialogUIFactory.New();
-                    dialog.Text = "Rejected world: Content permission violation";
-                    dialog.Buttons = new string[] { "Got it" };
-                }
-            }
-
-            CmdMakeWorldToChange(Cid);
-        }
-
-        [Command]
-        private void CmdMakeWorldToChange(string CidString)
-        {
-            if (!IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null)) return;
-
-            WorldInfo wmd = WorldInfo.DBLookup(CidString);
-            if (wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.Server.Permissions)) return;
-
-            SettingsManager.PingServerChangeWorld(UserID, CidString);
-        }
-
-        #endregion
-        // ---------------------------------------------------------------
         #region CTCP
         private void SendCTCPacket(IAvatarBrain receiver, CTCPacket packet)
         {

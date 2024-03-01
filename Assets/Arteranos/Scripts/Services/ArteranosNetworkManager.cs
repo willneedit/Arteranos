@@ -10,6 +10,7 @@ using Ipfs;
 using Arteranos.Core.Operations;
 using Ipfs.Core.Cryptography.Proto;
 using Arteranos.Core.Cryptography;
+using System.Collections;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -24,13 +25,6 @@ namespace Arteranos.Services
         {
             public ArteranosNetworkAuthenticator.AuthRequestPayload request;
             public ArteranosNetworkAuthenticator.AuthResponsePayload response;
-        }
-
-        internal struct WorldChangeAnnounceMessage : NetworkMessage
-        {
-            public string Invoker;
-            public string WorldInfoCidString;
-            public string Message;
         }
 
         // Overrides the base singleton so we don't
@@ -219,7 +213,7 @@ namespace Arteranos.Services
                 brain.DeviceID = seq.request.deviceUID;
                 brain.AgreePublicKey = seq.request.ClientAgreePublicKey;
 
-                EmitToClientCurrentWorld(conn);
+                _ = EmitToClientCurrentWorld(conn, seq.request.ClientAgreePublicKey);
             }
             else conn.Disconnect();  // No discussion, there'd be something fishy...
         }
@@ -325,7 +319,6 @@ namespace Arteranos.Services
         {
             base.OnStartClient();
 
-            NetworkClient.RegisterHandler<WorldChangeAnnounceMessage>(OnClientGotWCA);
             NetworkClient.RegisterHandler<CTSPacketEnvelope>(OnClientGotCTSPacket);
         }
 
@@ -353,7 +346,6 @@ namespace Arteranos.Services
         {
             base.OnStopClient();
 
-            NetworkClient.UnregisterHandler<WorldChangeAnnounceMessage>();
             NetworkClient.UnregisterHandler<CTSPacketEnvelope>();
         }
 
@@ -362,81 +354,26 @@ namespace Arteranos.Services
         #region World Change Announcements
 
         [Server]
-        public async Task EmitToClientsWCAAsync(string invoker, Cid WorldCid)
+        public async Task EmitToClientCurrentWorld(NetworkConnectionToClient conn, PublicKey agreePublicKey)
         {
-            // First, download, do the consistency checks and set up the server's idea
-            // of the world.
-            Exception ex = await WorldTransition.VisitWorldAsync(WorldCid);
-
-            string message = null;
-
-            // Something have gone wrong - the server is already in the offline world. Tell
-            // the clients about the changed direction.
-            if (ex != null)
+            IEnumerator SendWCAJustForTheLaggard(NetworkConnectionToClient conn, PublicKey agreePublicKey, WorldInfo wi)
             {
-                WorldCid = null;
-                message = "Error in loading the world.";
+                yield return null;
+
+                EmitToClientCTSPacket(new CTSPWorldChangeAnnouncement()
+                {
+                    WorldCid = wi?.WorldCid,
+                    WorldInfo = wi,
+                }, conn, agreePublicKey);
             }
 
-            WorldInfo wi = WorldInfo.DBLookup(WorldCid);
+            WorldInfo wi = await WorldInfo.RetrieveAsync(SettingsManager.WorldInfoCid);
 
-            WorldChangeAnnounceMessage wca = new()
-            {
-                Invoker = invoker,
-                WorldInfoCidString = wi.WorldInfoCid,
-                Message = message,
-            };
+            Debug.Log($"[Server] sending world CID '{SettingsManager.WorldInfoCid}' to latecoming conn {conn.connectionId}");
 
-            Debug.Log("[Server] Announcing the clients about the changed world.");
-            NetworkServer.SendToAll(wca);
+            SettingsManager.StartCoroutineAsync(() => SendWCAJustForTheLaggard(conn, agreePublicKey, wi));
         }
 
-        [Server]
-        public void EmitToClientCurrentWorld(NetworkConnectionToClient conn)
-        {
-            WorldChangeAnnounceMessage wca = new()
-            {
-                Invoker = null,
-                WorldInfoCidString = SettingsManager.WorldInfoCid
-            };
-
-            Debug.Log($"[Server] sending worldURL '{SettingsManager.WorldInfoCid}' to latecoming conn {conn.connectionId}");
-            conn.Send(wca);
-        }
-
-        [Client]
-        private async void OnClientGotWCA(WorldChangeAnnounceMessage message)
-        {
-            Debug.Log($"[Client] Server announce: Changed world from {SettingsManager.WorldInfoCid} to {message.WorldInfoCidString} by {message.Invoker}");
-            
-            if(!string.IsNullOrEmpty(message.Message))
-            {
-                IDialogUI dialog = DialogUIFactory.New();
-                dialog.Text = message.Message;
-                dialog.Buttons = new string[] { "OK" };
-            }
-
-            // We've already moved to the target world as the server, so no need to
-            // hassle ourselves.
-            if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
-            {
-                Debug.Log($"[Client] ... but we're in the host mode, we're already in it.");
-                return;
-            }
-
-            WorldInfo wi = await WorldInfo.RetrieveAsync(message.WorldInfoCidString);
-
-            if(wi == null)
-            {
-                Debug.Log("It's the offline world, falling back to the embedded scenery.");
-                _ = await WorldTransition.VisitWorldAsync(null);
-            }
-            else
-            {
-                Debug.Log($"[Client] Info={message.WorldInfoCidString} is world {wi.WorldCid}. Dragging your client along.");
-                _ = await WorldTransition.VisitWorldAsync(wi.WorldCid);
-            }
-        }
 
 
         #endregion
@@ -505,6 +442,17 @@ namespace Arteranos.Services
 
         public void EmitToClientCTSPacket(CTSPacket packet, IAvatarBrain to = null)
         {
+            NetworkConnectionToClient connectionToClient = null;
+            if (to != null)
+                connectionToClient = to.gameObject.GetComponent<NetworkIdentity>().connectionToClient;
+
+            PublicKey agreePublicKey = to?.AgreePublicKey;
+
+            EmitToClientCTSPacket(packet, connectionToClient, agreePublicKey);
+        }
+
+        private void EmitToClientCTSPacket(CTSPacket packet, NetworkConnectionToClient connectionToClient = null, PublicKey agreePublicKey = null)
+        {
             if (!NetworkServer.active)
                 // Directly slice the packet into the client logic
                 ClientLocalCTSPacket(packet);
@@ -513,16 +461,16 @@ namespace Arteranos.Services
                 // Sign, encrypt if it's toward to a specific user
                 Server.TransmitMessage(
                     packet.Serialize(),
-                    to?.AgreePublicKey, // Leave unencrypted if it's for everyone
+                    agreePublicKey, // Leave unencrypted if it's for everyone
                     out CMSPacket payload);
 
                 CTSPacketEnvelope envelope = new() { CTSPayload = payload };
 
                 // Send to all, or the specific user
-                if (to == null)
-                    NetworkServer.SendToAll(envelope);
+                if (connectionToClient != null)
+                    connectionToClient.Send(envelope);
                 else
-                    to.gameObject.GetComponent<NetworkIdentity>().connectionToClient.Send(envelope);
+                    NetworkServer.SendToAll(envelope);
             }
         }
 
@@ -533,7 +481,10 @@ namespace Arteranos.Services
         // Entry point of the server side and offline mode
         public void ServerLocalCTSPacket(UserID sender, CTSPacket packet)
         {
-            throw new NotImplementedException();
+            if(packet is CTSPWorldChangeAnnouncement wca) 
+                _ = MakeWorldTransition(sender, true, wca);
+            else
+                throw new NotImplementedException();
         }
 
         #endregion
@@ -543,9 +494,133 @@ namespace Arteranos.Services
         // Entry point of the client side and offline mode
         private void ClientLocalCTSPacket(CTSPacket packet)
         {
-            throw new NotImplementedException();
+            if(packet is CTSPWorldChangeAnnouncement wca)
+                _ = MakeWorldTransition(null, false, wca);
+            else
+                throw new NotImplementedException();
         }
         #endregion
         // ---------------------------------------------------------------
+        #region World Teansition (all)
+
+        // Invoked by the owner by EmitToServerCTSPacket()
+        // Stage 1: Server or host - check privilege and server's permissions, transition.
+        // Stage 2: Client - transition (if not same as in host)
+        private async Task MakeWorldTransition(UserID invoker, bool inServer, CTSPWorldChangeAnnouncement changeAnnouncement)
+        {
+
+            IEnumerator ShowDialogCoroutine(string message)
+            {
+                XR.ScreenFader.StartFading(0.0f);
+
+                yield return null;
+
+                IDialogUI dialog = DialogUIFactory.New();
+                dialog.Text = message;
+                dialog.Buttons = new string[] { "OK" };
+            }
+
+            IEnumerator EmitCoroutine(CTSPWorldChangeAnnouncement changeAnnouncement, IAvatarBrain to)
+            {
+                yield return null;
+
+                EmitToClientCTSPacket(changeAnnouncement, to);
+            }
+
+            void StopWorldAction(string message)
+            {
+                // In any reason, unfade the screen
+                XR.ScreenFader.StartFading(0.0f);
+
+                // If we're not interactive, tell the client what's going on.
+                if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Server)
+                {
+                    changeAnnouncement.Message = message;
+                    Debug.Log($"[Server] {message}");
+                    PropagateWorldTransition(changeAnnouncement);
+                }
+                else
+                    SettingsManager.StartCoroutineAsync(() => ShowDialogCoroutine(message));
+            }
+
+            void PropagateWorldTransition(CTSPWorldChangeAnnouncement changeAnnouncement)
+            {
+                IAvatarBrain to = null;
+                if (changeAnnouncement.Message != null)
+                    to = NetworkStatus.GetOnlineUser(invoker);
+
+                SettingsManager.StartCoroutineAsync(() => EmitCoroutine(changeAnnouncement, to));
+            }
+
+            // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+            // It isn't the transition. Only the server telling what went wrong.
+            if (changeAnnouncement.Message != null)
+            {
+                StopWorldAction(changeAnnouncement.Message);
+                return;
+            }
+
+            if(inServer)
+            {
+                changeAnnouncement.invoker = invoker;
+
+                if(!Core.Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null))
+                {
+                    StopWorldAction("You're not allowed to change the server's world.");
+                    return;
+                }
+            }
+
+            Debug.Log($"Server: {inServer} {(string) changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldCid}");
+
+            Cid WorldCid = changeAnnouncement.WorldCid;
+
+            if(WorldCid != null)
+            {
+                (Exception ex, Context _) = await WorldTransition.PreloadWorldDataAsync(WorldCid);
+                changeAnnouncement.WorldInfo = WorldInfo.DBLookup(WorldCid);
+
+                if(inServer)
+                {
+                    // Server or host: Check world's content ratings against thr server's permissions
+                    WorldInfo wi = WorldInfo.DBLookup(WorldCid);
+
+                    if (wi?.ContentRating != null)
+                    {
+                        // Remotely connected user tries to sneak in something gross or raunchy?
+                        if ((wi?.ContentRating).IsInViolation(SettingsManager.Server.Permissions))
+                        {
+                            StopWorldAction("World is in violation of the server's content permission");
+                            return;
+                        }
+                    }
+                }
+            }
+
+            Cid WorldInfoCid = changeAnnouncement.WorldInfo?.WorldInfoCid;
+
+            // In Stage 1: We're really in the current world.
+            // In Stage 2: In Host mode, the announcement came looped back in Stage 1
+            if (SettingsManager.WorldInfoCid == WorldInfoCid)
+            {
+                if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
+                    StopWorldAction("Already in the current world.");
+
+                XR.ScreenFader.StartFading(0.0f);
+
+                return;
+            }
+
+            if (WorldInfoCid == null)
+                await WorldTransition.MoveToOfflineWorld();
+            else
+                await WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldInfo.WorldCid);
+
+            // When we're done this, order everyone the transition, or the invoker what went wrong.
+            if (inServer)
+                PropagateWorldTransition(changeAnnouncement);
+        }
+        #endregion
     }
 }

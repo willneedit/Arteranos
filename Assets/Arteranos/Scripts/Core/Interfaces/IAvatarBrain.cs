@@ -50,7 +50,6 @@ namespace Arteranos.Avatar
         void PerformServerPacket(SCMType type, CMSPacket p);
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
         void ServerKickUser(string reason);
-        void MakeWorkdToChange(Cid Cid);
         void SendSocialState(IAvatarBrain receiver, ulong state);
     }
 }

@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.Core.Operations;
 using Arteranos.Web;
@@ -62,7 +63,11 @@ namespace Arteranos.Services
             }
             else
             {
-                Task t = WorldTransition.EnterWorldAsync(DesiredWorldCid);
+
+                Task t = DesiredWorldCid == null 
+                    ? WorldTransition.MoveToOfflineWorld() 
+                    : WorldTransition.EnterWorldAsync(DesiredWorldCid);
+
                 while(!t.IsCompleted) yield return null;
             }
 
@@ -115,11 +120,14 @@ namespace Arteranos.Services
         }
 
 
-        protected override void PingServerChangeWorld_(string invoker, Cid WorldCid) 
-            => _ = ArteranosNetworkManager.Instance.EmitToClientsWCAAsync(invoker, WorldCid);
-
         protected override void StartCoroutineAsync_(Func<IEnumerator> action) 
             => QueuedCoroutine.Enqueue(action);
+
+        protected override void EmitToClientCTSPacket_(CTSPacket packet, IAvatarBrain to = null) 
+            => ArteranosNetworkManager.Instance.EmitToClientCTSPacket(packet, to);
+
+        protected override void EmitToServerCTSPacket_(CTSPacket packet) 
+            => ArteranosNetworkManager.Instance.EmitToServerCTSPacket(packet);
     }
 }
 

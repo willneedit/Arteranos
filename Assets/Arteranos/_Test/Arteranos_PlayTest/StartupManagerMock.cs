@@ -2,6 +2,7 @@
 using System;
 using Arteranos.Core;
 using Ipfs;
+using Arteranos.Avatar;
 
 namespace Arteranos.PlayTest
 {
@@ -14,14 +15,19 @@ namespace Arteranos.PlayTest
             base.Awake();
         }
 
+        protected override void EmitToClientCTSPacket_(CTSPacket packet, IAvatarBrain to = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void EmitToServerCTSPacket_(CTSPacket packet)
+        {
+            throw new NotImplementedException();
+        }
+
         protected override void OnDestroy()
         {
             Instance = null;
-        }
-
-        protected override void PingServerChangeWorld_(string invoker, Cid cid)
-        {
-            throw new NotImplementedException();
         }
 
         protected override void StartCoroutineAsync_(Func<IEnumerator> action)

@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Avatar;
 using Arteranos.Services;
 using Ipfs;
 using System;
@@ -126,12 +127,15 @@ namespace Arteranos.Core
             };
         }
 
-        protected abstract void PingServerChangeWorld_(string invoker, Cid WorldCid);
         protected abstract void StartCoroutineAsync_(Func<IEnumerator> action);
+        protected abstract void EmitToClientCTSPacket_(CTSPacket packet, IAvatarBrain to = null);
+        protected abstract void EmitToServerCTSPacket_(CTSPacket packet);
 
-        public static void PingServerChangeWorld(string invoker, Cid WorldCid)
-            => Instance?.PingServerChangeWorld_(invoker, WorldCid);
         public static void StartCoroutineAsync(Func<IEnumerator> action)
             => Instance?.StartCoroutineAsync_(action);
+        public static void EmitToClientCTSPacket(CTSPacket packet, IAvatarBrain to = null)
+            => Instance?.EmitToClientCTSPacket_(packet, to);
+        public static void EmitToServerCTSPacket(CTSPacket packet)
+            => Instance?.EmitToServerCTSPacket_(packet);
     }
 }

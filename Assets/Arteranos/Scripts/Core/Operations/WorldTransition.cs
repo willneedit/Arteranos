@@ -129,16 +129,11 @@ namespace Arteranos.Core.Operations
 
             await Task.Delay(1000);
 
-            if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
+            // Pawn it off to the network message delivery service
+            SettingsManager.EmitToServerCTSPacket(new CTSPWorldChangeAnnouncement()
             {
-                // In the offline mode, directly change the scene.
-                await VisitWorldAsync(WorldCid);
-            }
-            else
-            {
-                // In the online mode, let the own avatar ask the server to initiate transition.
-                XRControl.Me.MakeWorkdToChange(WorldCid);
-            }
+                WorldCid = WorldCid,
+            });
         }
 
         public static void EnterDownloadedWorld(string worldABF)
