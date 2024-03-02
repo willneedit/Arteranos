@@ -213,7 +213,7 @@ namespace Arteranos.Services
                 brain.DeviceID = seq.request.deviceUID;
                 brain.AgreePublicKey = seq.request.ClientAgreePublicKey;
 
-                _ = EmitToClientCurrentWorld(conn, seq.request.ClientAgreePublicKey);
+                _ = EmitToClientCurrentWorld(conn, brain.AgreePublicKey);
             }
             else conn.Disconnect();  // No discussion, there'd be something fishy...
         }
@@ -537,13 +537,13 @@ namespace Arteranos.Services
                 {
                     changeAnnouncement.Message = message;
                     Debug.Log($"[Server] {message}");
-                    PropagateWorldTransition(changeAnnouncement);
+                    PropagateWorldTransition();
                 }
                 else
                     SettingsManager.StartCoroutineAsync(() => ShowDialogCoroutine(message));
             }
 
-            void PropagateWorldTransition(CTSPWorldChangeAnnouncement changeAnnouncement)
+            void PropagateWorldTransition()
             {
                 IAvatarBrain to = null;
                 if (changeAnnouncement.Message != null)
@@ -552,74 +552,122 @@ namespace Arteranos.Services
                 SettingsManager.StartCoroutineAsync(() => EmitCoroutine(changeAnnouncement, to));
             }
 
+            bool WorldNeedsPreloasding()
+            {
+                try
+                {
+                    if (changeAnnouncement.WorldCid == null) return false; // It's the offline embedded world.
+
+                    if (string.IsNullOrEmpty(WorldDownloader.GetWorldABF(changeAnnouncement.WorldCid))) return true;
+
+                    return false;
+                }
+                catch { return true; }
+
+                // NOTREACHED
+            }
+
+            async Task<bool> PreloadWorld()
+            {
+                (Exception ex, Context _) = await WorldTransition.PreloadWorldDataAsync(changeAnnouncement.WorldCid);
+
+                if (ex != null)
+                {
+                    StopWorldAction(ex.Message);
+                    return false;
+                }
+
+                return true;
+            }
+
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+            OnlineLevel onlineLevel = NetworkStatus.GetOnlineLevel();
 
             // It isn't the transition. Only the server telling what went wrong.
             if (changeAnnouncement.Message != null)
             {
-                StopWorldAction(changeAnnouncement.Message);
+                Debug.Log($"[Server to you] {changeAnnouncement.Message}");
+                SettingsManager.StartCoroutineAsync(() => ShowDialogCoroutine(changeAnnouncement.Message));
                 return;
             }
 
-            if(inServer)
+            if (inServer)
             {
                 changeAnnouncement.invoker = invoker;
+                Debug.Log($"[Server] {(string)changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldCid}");
 
-                if(!Core.Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null))
+                // If we're in the offline mode, we _are_ the only user, the one which are the server admin
+                // If we're in the server or host mode, anyone could attempt it to invoke a change.
+                if (NetworkServer.active)
                 {
-                    StopWorldAction("You're not allowed to change the server's world.");
+                    IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+
+                    if (sender == null || !sender.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null))
+                    {
+                        StopWorldAction("You're not allowed to change the server's world.");
+                        return;
+                    }
+                }
+
+                if(changeAnnouncement.WorldCid != null)
+                {
+                    changeAnnouncement.WorldInfo = WorldInfo.DBLookup(changeAnnouncement.WorldCid);
+
+                    if (WorldNeedsPreloasding() || changeAnnouncement.WorldInfo == null)
+                    {
+                        if (!(await PreloadWorld())) return;
+                        changeAnnouncement.WorldInfo = WorldInfo.DBLookup(changeAnnouncement.WorldCid);
+                    }
+
+                    // Server checks if the world's content rating goes along with its own permissions
+                    if (changeAnnouncement.WorldInfo.ContentRating != null
+                        && (changeAnnouncement.WorldInfo.ContentRating).IsInViolation(SettingsManager.Server.Permissions))
+                    {
+                        StopWorldAction("World is in violation of the server's content permission");
+                        return;
+                    }
+                }
+
+                if (SettingsManager.WorldInfoCid == changeAnnouncement.WorldInfo.WorldInfoCid)
+                {
+                    StopWorldAction("Already in the current world.");
                     return;
                 }
             }
-
-            Debug.Log($"Server: {inServer} {(string) changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldCid}");
-
-            Cid WorldCid = changeAnnouncement.WorldCid;
-
-            if(WorldCid != null)
+            else
             {
-                (Exception ex, Context _) = await WorldTransition.PreloadWorldDataAsync(WorldCid);
-                changeAnnouncement.WorldInfo = WorldInfo.DBLookup(WorldCid);
+                Debug.Log($"[Client] {(string)changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldCid}");
 
-                if(inServer)
-                {
-                    // Server or host: Check world's content ratings against thr server's permissions
-                    WorldInfo wi = WorldInfo.DBLookup(WorldCid);
-
-                    if (wi?.ContentRating != null)
-                    {
-                        // Remotely connected user tries to sneak in something gross or raunchy?
-                        if ((wi?.ContentRating).IsInViolation(SettingsManager.Server.Permissions))
-                        {
-                            StopWorldAction("World is in violation of the server's content permission");
-                            return;
-                        }
-                    }
-                }
+                if (WorldNeedsPreloasding())
+                    if (!(await PreloadWorld())) return;
             }
-
-            Cid WorldInfoCid = changeAnnouncement.WorldInfo?.WorldInfoCid;
 
             // In Stage 1: We're really in the current world.
             // In Stage 2: In Host mode, the announcement came looped back in Stage 1
-            if (SettingsManager.WorldInfoCid == WorldInfoCid)
+            if (SettingsManager.WorldInfoCid == changeAnnouncement.WorldInfo.WorldInfoCid)
             {
-                if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
+                if (onlineLevel == OnlineLevel.Client)
                     StopWorldAction("Already in the current world.");
+                else
+                    Debug.Log("Host or offline mode, we're already here.");
 
-                XR.ScreenFader.StartFading(0.0f);
+
+                if(onlineLevel != OnlineLevel.Host && onlineLevel != OnlineLevel.Offline)
+                    XR.ScreenFader.StartFading(0.0f, 2.0f);
 
                 return;
             }
 
-            if (WorldInfoCid == null)
+
+            if (changeAnnouncement.WorldCid == null)
                 await WorldTransition.MoveToOfflineWorld();
             else
-                await WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldInfo.WorldCid);
+                await WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldCid);
 
             // When we're done this, order everyone the transition, or the invoker what went wrong.
             if (inServer)
-                PropagateWorldTransition(changeAnnouncement);
+                PropagateWorldTransition();
         }
         #endregion
     }
