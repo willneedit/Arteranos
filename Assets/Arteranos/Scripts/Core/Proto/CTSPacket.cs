@@ -68,8 +68,8 @@ namespace Arteranos.Core
     [ProtoContract]
     public class CTSPWorldChangeAnnouncement : CTSPacket
     {
-        [ProtoMember(1)]
-        public string WorldCid; // In case if the World Info isn't available yet
+        // [ProtoMember(1)]
+        // public string WorldCid; // In case if the World Info isn't available yet
 
         [ProtoMember(2)]
         public WorldInfo WorldInfo;

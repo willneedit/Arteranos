@@ -362,7 +362,7 @@ namespace Arteranos.Services
 
                 EmitToClientCTSPacket(new CTSPWorldChangeAnnouncement()
                 {
-                    WorldCid = wi?.WorldCid,
+                    // WorldCid = wi?.WorldCid,
                     WorldInfo = wi,
                 }, conn, agreePublicKey);
             }
@@ -556,9 +556,9 @@ namespace Arteranos.Services
             {
                 try
                 {
-                    if (changeAnnouncement.WorldCid == null) return false; // It's the offline embedded world.
+                    if (changeAnnouncement.WorldInfo == null) return false; // It's the offline embedded world.
 
-                    if (string.IsNullOrEmpty(WorldDownloader.GetWorldABF(changeAnnouncement.WorldCid))) return true;
+                    if (string.IsNullOrEmpty(WorldDownloader.GetWorldABF(changeAnnouncement.WorldInfo.WorldCid))) return true;
 
                     return false;
                 }
@@ -569,7 +569,7 @@ namespace Arteranos.Services
 
             async Task<bool> PreloadWorld()
             {
-                (Exception ex, Context _) = await WorldTransition.PreloadWorldDataAsync(changeAnnouncement.WorldCid);
+                (Exception ex, Context _) = await WorldTransition.PreloadWorldDataAsync(changeAnnouncement.WorldInfo.WorldCid);
 
                 if (ex != null)
                 {
@@ -595,7 +595,7 @@ namespace Arteranos.Services
             if (inServer)
             {
                 changeAnnouncement.invoker = invoker;
-                Debug.Log($"[Server] {(string)changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldCid}");
+                Debug.Log($"[Server] {(string)changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldInfo?.WorldCid}");
 
                 // If we're in the offline mode, we _are_ the only user, the one which are the server admin
                 // If we're in the server or host mode, anyone could attempt it to invoke a change.
@@ -610,15 +610,9 @@ namespace Arteranos.Services
                     }
                 }
 
-                if(changeAnnouncement.WorldCid != null)
+                if(changeAnnouncement.WorldInfo != null)
                 {
-                    changeAnnouncement.WorldInfo = WorldInfo.DBLookup(changeAnnouncement.WorldCid);
-
-                    if (WorldNeedsPreloasding() || changeAnnouncement.WorldInfo == null)
-                    {
-                        if (!(await PreloadWorld())) return;
-                        changeAnnouncement.WorldInfo = WorldInfo.DBLookup(changeAnnouncement.WorldCid);
-                    }
+                    if (WorldNeedsPreloasding() && !(await PreloadWorld())) return;
 
                     // Server checks if the world's content rating goes along with its own permissions
                     if (changeAnnouncement.WorldInfo.ContentRating != null
@@ -637,10 +631,9 @@ namespace Arteranos.Services
             }
             else
             {
-                Debug.Log($"[Client] {(string)changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldCid}");
+                Debug.Log($"[Client] {(string)changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldInfo?.WorldCid}");
 
-                if (WorldNeedsPreloasding())
-                    if (!(await PreloadWorld())) return;
+                if (WorldNeedsPreloasding() && !(await PreloadWorld())) return;
             }
 
             // In Stage 1: We're really in the current world.
@@ -659,15 +652,10 @@ namespace Arteranos.Services
                 return;
             }
 
-
-            if (changeAnnouncement.WorldCid == null)
-                await WorldTransition.MoveToOfflineWorld();
-            else
-                await WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldCid);
+            await WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldInfo?.WorldCid);
 
             // When we're done this, order everyone the transition, or the invoker what went wrong.
-            if (inServer)
-                PropagateWorldTransition();
+            if (inServer) PropagateWorldTransition();
         }
         #endregion
     }

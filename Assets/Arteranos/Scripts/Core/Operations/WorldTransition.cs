@@ -123,7 +123,21 @@ namespace Arteranos.Core.Operations
         /// <param name="WorldCid"></param>
         /// 
         /// <returns>Task completed, or the server has been notified</returns>
+        [Obsolete("Use EnterWIAsync(), either with WorldInfo or its CID")]
         public static async Task EnterWorldAsync(Cid WorldCid)
+        {
+            WorldInfo wi = WorldInfo.DBLookup(WorldCid);
+
+            await EnterWIAsync(wi);
+        }
+
+        public static async Task EnterWIAsync(Cid WorldInfoCid)
+        {
+            WorldInfo wi = await WorldInfo.RetrieveAsync(WorldInfoCid);
+            await EnterWIAsync(wi);
+        }
+
+        public static async Task EnterWIAsync(WorldInfo wi)
         {
             ScreenFader.StartFading(1.0f);
 
@@ -132,7 +146,7 @@ namespace Arteranos.Core.Operations
             // Pawn it off to the network message delivery service
             SettingsManager.EmitToServerCTSPacket(new CTSPWorldChangeAnnouncement()
             {
-                WorldCid = WorldCid,
+                WorldInfo = wi,
             });
         }
 
