@@ -11,6 +11,8 @@ using Arteranos.Core.Operations;
 using Ipfs.Core.Cryptography.Proto;
 using Arteranos.Core.Cryptography;
 using System.Collections;
+using Arteranos.Social;
+using Arteranos.Web;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -380,26 +382,6 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region CTS Packets (Communication)
 
-        [Server]
-        private void OnServerGotCTSPacket(NetworkConnectionToClient client, CTSPacketEnvelope envelope)
-        {
-            try
-            {
-                Server.ReceiveMessage(envelope.CTSPayload, out byte[] data, out PublicKey signerPublicKey);
-                IAvatarBrain sender = NetworkStatus.GetOnlineUser(client.identity.netId);
-
-                if (sender == null || sender.UserID != signerPublicKey)
-                    throw new InvalidOperationException("Sender with invalid/forged packet signature");
-
-                ServerLocalCTSPacket(sender.UserID, CTSPacket.Deserialize(data));
-            }
-            catch (Exception ex)
-            {
-                client.Disconnect();
-                Debug.LogException(ex);
-            }
-        }
-
         public void EmitToServerCTSPacket(CTSPacket packet)
         {
             Client client = SettingsManager.Client;
@@ -412,31 +394,13 @@ namespace Arteranos.Services
             {
                 // Sign, encrypt and send it off to the connected server
                 Client.TransmitMessage(
-                    packet.Serialize(), 
-                    SettingsManager.ActiveServerData.ServerAgrPublicKey, 
+                    packet.Serialize(),
+                    SettingsManager.ActiveServerData.ServerAgrPublicKey,
                     out CMSPacket payload);
                 NetworkClient.Send(new CTSPacketEnvelope()
                 {
                     CTSPayload = payload
                 });
-            }
-        }
-
-        [Client]
-        private void OnClientGotCTSPacket(CTSPacketEnvelope envelope)
-        {
-            try
-            {
-                Client.ReceiveMessage(envelope.CTSPayload, out byte[] data, out PublicKey signerPublicKey);
-                if (SettingsManager.ActiveServerData.ServerSignPublicKey != signerPublicKey)
-                    throw new InvalidOperationException("Sender is not the active server");
-
-                ClientLocalCTSPacket(CTSPacket.Deserialize(data));
-            }
-            catch (Exception ex)
-            {
-                // No disconnect because of injected messages from trolls.
-                Debug.LogException(ex);
             }
         }
 
@@ -474,6 +438,62 @@ namespace Arteranos.Services
             }
         }
 
+        private IEnumerator ShowDialogCoroutine(string message)
+        {
+            XR.ScreenFader.StartFading(0.0f);
+
+            yield return null;
+
+            IDialogUI dialog = DialogUIFactory.New();
+            dialog.Text = message;
+            dialog.Buttons = new string[] { "OK" };
+        }
+
+        private IEnumerator EmitCoroutine(CTSPacket packet, IAvatarBrain to)
+        {
+            yield return null;
+
+            EmitToClientCTSPacket(packet, to);
+        }
+
+        [Server]
+        private void OnServerGotCTSPacket(NetworkConnectionToClient client, CTSPacketEnvelope envelope)
+        {
+            try
+            {
+                Server.ReceiveMessage(envelope.CTSPayload, out byte[] data, out PublicKey signerPublicKey);
+                IAvatarBrain sender = NetworkStatus.GetOnlineUser(client.identity.netId);
+
+                if (sender == null || sender.UserID != signerPublicKey)
+                    throw new InvalidOperationException("Sender with invalid/forged packet signature");
+
+                ServerLocalCTSPacket(sender.UserID, CTSPacket.Deserialize(data));
+            }
+            catch (Exception ex)
+            {
+                client.Disconnect();
+                Debug.LogException(ex);
+            }
+        }
+
+        [Client]
+        private void OnClientGotCTSPacket(CTSPacketEnvelope envelope)
+        {
+            try
+            {
+                Client.ReceiveMessage(envelope.CTSPayload, out byte[] data, out PublicKey signerPublicKey);
+                if (SettingsManager.ActiveServerData.ServerSignPublicKey != signerPublicKey)
+                    throw new InvalidOperationException("Sender is not the active server");
+
+                ClientLocalCTSPacket(CTSPacket.Deserialize(data));
+            }
+            catch (Exception ex)
+            {
+                // No disconnect because of injected messages from trolls.
+                Debug.LogException(ex);
+            }
+        }
+
         #endregion
         // ---------------------------------------------------------------
         #region CTS Packets (on Server)
@@ -481,8 +501,10 @@ namespace Arteranos.Services
         // Entry point of the server side and offline mode
         public void ServerLocalCTSPacket(UserID sender, CTSPacket packet)
         {
-            if(packet is CTSPWorldChangeAnnouncement wca) 
+            if (packet is CTSPWorldChangeAnnouncement wca)
                 _ = MakeWorldTransition(sender, true, wca);
+            else if (packet is CTSPUpdateUserState uss)
+                _ = ServerUpdateUserState(sender, uss);
             else
                 throw new NotImplementedException();
         }
@@ -494,11 +516,14 @@ namespace Arteranos.Services
         // Entry point of the client side and offline mode
         private void ClientLocalCTSPacket(CTSPacket packet)
         {
-            if(packet is CTSPWorldChangeAnnouncement wca)
+            if (packet is CTSPWorldChangeAnnouncement wca)
                 _ = MakeWorldTransition(null, false, wca);
+            else if (packet is CTSPUpdateUserState uss)
+                _ = ClientInformUpdatedUserState(uss);
             else
                 throw new NotImplementedException();
         }
+
         #endregion
         // ---------------------------------------------------------------
         #region World Teansition (all)
@@ -508,25 +533,6 @@ namespace Arteranos.Services
         // Stage 2: Client - transition (if not same as in host)
         private async Task MakeWorldTransition(UserID invoker, bool inServer, CTSPWorldChangeAnnouncement changeAnnouncement)
         {
-
-            IEnumerator ShowDialogCoroutine(string message)
-            {
-                XR.ScreenFader.StartFading(0.0f);
-
-                yield return null;
-
-                IDialogUI dialog = DialogUIFactory.New();
-                dialog.Text = message;
-                dialog.Buttons = new string[] { "OK" };
-            }
-
-            IEnumerator EmitCoroutine(CTSPWorldChangeAnnouncement changeAnnouncement, IAvatarBrain to)
-            {
-                yield return null;
-
-                EmitToClientCTSPacket(changeAnnouncement, to);
-            }
-
             void StopWorldAction(string message)
             {
                 // In any reason, unfade the screen
@@ -603,7 +609,7 @@ namespace Arteranos.Services
                 {
                     IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
 
-                    if (sender == null || !sender.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null))
+                    if (sender == null || !sender.IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null))
                     {
                         StopWorldAction("You're not allowed to change the server's world.");
                         return;
@@ -658,5 +664,87 @@ namespace Arteranos.Services
             if (inServer) PropagateWorldTransition();
         }
         #endregion
+        // ---------------------------------------------------------------
+        #region User State updates (all)
+
+        private async Task ServerUpdateUserState(UserID invoker, CTSPUpdateUserState uss)
+        {
+            uss.invoker = invoker;
+
+            IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+            IAvatarBrain receiver = NetworkStatus.GetOnlineUser(uss.receiver);
+
+            if (NetworkServer.active)
+            {
+
+                UserCapabilities action = UserCapabilities.CanAdminServerUsers;
+
+                if (UserState.IsBanned(uss.State.userState))
+                {
+                    action = UserCapabilities.CanBanUser;
+                    uss.toDisconnect = true; // Of course.
+                }
+                else if (uss.toDisconnect)
+                    action = UserCapabilities.CanKickUser;
+
+                if (sender == null || !sender.IsAbleTo(action, receiver))
+                    return;
+            }
+
+            SettingsManager.ServerUsers.AddUser(uss.State);
+            SettingsManager.ServerUsers.Save();
+
+            if (receiver != null)
+            {
+                // Leave out the details of the means of banning (IP, deviceID, ...)
+                // to not to make ban evasion easier than it is.
+                CTSPUpdateUserState cleaned = new()
+                {
+                    invoker = uss.invoker,
+                    receiver = uss.receiver,
+                    toDisconnect = uss.toDisconnect,
+                    State = new()
+                    {
+                        userState = uss.State.userState,
+                    }
+                };
+
+                // Tell the user what's going on.
+                SettingsManager.StartCoroutineAsync(() => EmitCoroutine(cleaned, receiver));
+
+                // And, update the user's server-to-client SyncVar.
+                receiver.UserState = uss.State.userState;
+
+                // Disconnect if it's kicking at least.
+                if (uss.toDisconnect)
+                {
+                    await Task.Delay(500);
+                    NetworkIdentity nid = receiver.gameObject.GetComponent<NetworkIdentity>();
+                    nid.connectionToClient.Disconnect();
+                }
+            }
+        }
+
+        private Task ClientInformUpdatedUserState(CTSPUpdateUserState uss)
+        {
+            if(uss.toDisconnect)
+            {
+                string reason = UserState.IsBanned(uss.State.userState)
+                    ? "You've been banned from this server."
+                    : "You've been kicked from this server.";
+
+                // The server will disconnect this user anyway.
+                ConnectionManager.DeliverDisconnectReason(reason);
+
+                return Task.CompletedTask;
+            }
+
+            // Maybe some notification for promoting/demoting other users.
+
+            return Task.CompletedTask;
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
     }
 }

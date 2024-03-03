@@ -80,6 +80,8 @@ namespace Arteranos.Core
         // All of the 'good' bits.
         public const ulong GOOD_MASK = ((ulong)1 << 48) - 1;
 
+        public static bool IsBadGuy(ulong field) => Bit64field.IsAny(field, ~GOOD_MASK);
+
         public static bool IsBanned(ulong field) => Bit64field.IsAny(field, Banned);
 
         public static bool IsWAdmin(ulong field) => Bit64field.IsAny(field, World_admin | World_admin_asstnt);

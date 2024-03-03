@@ -48,6 +48,9 @@ namespace Arteranos.Core
 
         [ProtoMember(2)]
         public ServerUserState State;
+
+        [ProtoMember(3)]
+        public bool toDisconnect;
     }
 
     // C: Ask server for the notable(!) user base
