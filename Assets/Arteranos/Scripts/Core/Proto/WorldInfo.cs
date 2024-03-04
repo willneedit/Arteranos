@@ -71,5 +71,28 @@ namespace Arteranos.Core
         public static WorldInfo Deserialize(Stream stream)
             => Serializer.Deserialize<WorldInfo>(stream);
 
+        public WorldInfo Strip()
+        {
+            WorldInfo stripped = new WorldInfo()
+            { 
+                win = win,
+                WorldInfoCid = WorldInfoCid, // Changed contents - points to the original one.
+                Updated = Updated
+            };
+
+            stripped.win = new()
+            {
+                WorldCid = win.WorldCid,
+                WorldName = win.WorldName,
+                WorldDescription = win.WorldDescription,
+                Signature = win.Signature,
+                ScreenshotPNG = null, // Leave the screenshot for brevity
+                Created = win.Created,
+                Author = win.Author,
+                ContentRating = win.ContentRating,
+            };
+
+            return stripped;
+        }
     }
 }

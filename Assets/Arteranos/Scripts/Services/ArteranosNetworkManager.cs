@@ -364,8 +364,7 @@ namespace Arteranos.Services
 
                 EmitToClientCTSPacket(new CTSPWorldChangeAnnouncement()
                 {
-                    // WorldCid = wi?.WorldCid,
-                    WorldInfo = wi,
+                    WorldInfo = wi.Strip(),
                 }, conn, agreePublicKey);
             }
 

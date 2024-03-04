@@ -146,7 +146,7 @@ namespace Arteranos.Core.Operations
             // Pawn it off to the network message delivery service
             SettingsManager.EmitToServerCTSPacket(new CTSPWorldChangeAnnouncement()
             {
-                WorldInfo = wi,
+                WorldInfo = wi.Strip(),
             });
         }
 
