@@ -112,8 +112,14 @@ namespace Arteranos.UI
 
         private void UpdateServerUserState()
         {
-            ServerConfig.UpdateServerUserState(user);
+            CTSPUpdateUserState uss = new()
+            {
+                toDisconnect = false,
+                receiver = user.userID,
+                State = user
+            };
 
+            SettingsManager.EmitToServerCTSPacket(uss);
             UpdateUserData();
         }
 

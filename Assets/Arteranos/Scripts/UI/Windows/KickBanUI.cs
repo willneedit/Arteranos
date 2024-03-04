@@ -95,9 +95,10 @@ namespace Arteranos.UI
             // Fill out the pattern of the targeted user action and transmit it
             // to the server to fill the fields and do the final decision.
 
-            KickPacket kickPacket = new()
+            CTSPUpdateUserState uss = new()
             {
-                UserID = Target.UserID,
+                toDisconnect = true,
+                receiver = Target.UserID,
                 State = new()
                 {
                     userID = chk_Ban_UID.isOn ? Target.UserID : null,
@@ -108,7 +109,7 @@ namespace Arteranos.UI
                 }
             };
 
-            ServerConfig.KickUser(kickPacket);
+            SettingsManager.EmitToServerCTSPacket(uss);
             Destroy(gameObject);
         }
 

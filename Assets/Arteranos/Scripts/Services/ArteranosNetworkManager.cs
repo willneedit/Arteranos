@@ -671,11 +671,21 @@ namespace Arteranos.Services
         {
             uss.invoker = invoker;
 
-            IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
             IAvatarBrain receiver = NetworkStatus.GetOnlineUser(uss.receiver);
+
+            // Fill in the server-only data for the user record
+            if (receiver != null)
+            {
+                if (uss.State.address != null)
+                    uss.State.address = receiver.Address;
+
+                if (uss.State.deviceUID != null)
+                    uss.State.deviceUID = receiver.DeviceID;
+            }
 
             if (NetworkServer.active)
             {
+                IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
 
                 UserCapabilities action = UserCapabilities.CanAdminServerUsers;
 
