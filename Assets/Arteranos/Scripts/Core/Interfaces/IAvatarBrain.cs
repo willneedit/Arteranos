@@ -44,12 +44,9 @@ namespace Arteranos.Avatar
         void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered);
         void OfferFriendship(IAvatarBrain receiver, bool offering = true);
         void PerformEmote(string emoteName);
-        void QueryServerPacket(SCMType type);
         void SendTextMessage(IAvatarBrain receiver, string text);
         void SetAppearanceStatusBit(int ASBit, bool set);
-        void PerformServerPacket(SCMType type, CMSPacket p);
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
-        void ServerKickUser(string reason);
         void SendSocialState(IAvatarBrain receiver, ulong state);
     }
 }

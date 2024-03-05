@@ -317,97 +317,6 @@ namespace Arteranos.Avatar
             LoopPerformEmoji(emojiName);
         }
 
-        #region User kicking
-
-        [Server]
-        public void ServerKickUser(string reason)
-        {
-            IEnumerator KNBCoroutine(NetworkConnectionToClient targetConn, string text)
-            {
-                TargetDeliverMessage(targetConn, text);
-
-                // Let the target have the message before the disconnect
-                yield return new WaitForSeconds(0.5f);
-
-                targetConn.Disconnect();
-            }
-
-            NetworkConnectionToClient targetConn = gameObject.GetComponent<NetworkIdentity>().connectionToClient;
-
-            StartCoroutine(KNBCoroutine(targetConn, reason));
-        }
-
-
-        [TargetRpc]
-        private void TargetDeliverMessage(NetworkConnectionToClient _, string message)
-            => ConnectionManager.DeliverDisconnectReason(message);
-
-        #endregion
-
-        #region Server side queries and actions interface
-
-        [Command]
-        private void CmdQueryServerPacket(SCMType type)
-        {
-            switch (type)
-            {
-                case SCMType.SrvReportUserInfo:
-                    ServerQueryServerPacket(type, ServerConfig.QueryLocalUserBase(this));
-                    break;
-                default:
-                    throw new NotImplementedException();
-
-            }
-        }
-
-        [Server]
-        private void ServerQueryServerPacket<T>(SCMType type, IEnumerable<T> data)
-        {
-            IEnumerator EmitSusPages(SCMType type, T[] data)
-            {
-                int pagenum = 1;
-                while (true)
-                {
-                    Core.Utils.Paginated<T> page = Core.Utils.Paginate(data, pagenum++);
-
-
-                    ListOfSerialized<T> packets = new() { entries = new() };
-                    if (page.payload != null)
-                        packets.entries.AddRange(page.payload);
-
-                    Server.TransmitMessage(packets.Serialize(), AgreePublicKey, out CMSPacket packet);
-                    TargetDeliverServerPacket(type, packet);
-
-                    if (page.payload == null) break;
-
-                    yield return new WaitForEndOfFrame();
-                }
-            }
-
-            StartCoroutine(EmitSusPages(type, data.ToArray()));
-        }
-
-        [TargetRpc]
-        private void TargetDeliverServerPacket(SCMType type, CMSPacket packet)
-            => ServerConfig.TargetDeliverServerPacket(type, packet);
-
-        [Command]
-        private void CmdPerformServerPacket(SCMType type, CMSPacket p)
-        {
-            try
-            {
-                ServerConfig.ServerPerformServerPacket(this, type, p);
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning(e.Message);
-                // Something is wrong for the user administration, no matter what.
-                return;
-            }
-
-        }
-        #endregion
-
         #endregion
         // ---------------------------------------------------------------
         #region Appearance Status
@@ -749,12 +658,6 @@ namespace Arteranos.Avatar
                 _ => throw new NotImplementedException(),
             };
         }
-
-        public void QueryServerPacket(SCMType type)
-            => CmdQueryServerPacket(type);
-
-        public void PerformServerPacket(SCMType type, CMSPacket p)
-            => CmdPerformServerPacket(type, p);
 
         #endregion
     }
