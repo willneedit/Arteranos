@@ -34,7 +34,11 @@ namespace Arteranos.UI
             foreach (IAvatarBrain user in NetworkStatus.GetOnlineUsers())
                 PopulateOnlineSUBItem(user);
 
-            ServerConfig.QueryServerUserBase(PopulateSUBItem);
+            // Prime myself for listening...
+            SettingsManager.OnClientReceivedServerUserStateAnswer += PopulateServerSUBItem;
+
+            // And send the query to the server.
+            SettingsManager.EmitToServerCTSPacket(new STCUserInfo() { State = new() });
         }
 
         protected override void OnDisable()
@@ -46,8 +50,8 @@ namespace Arteranos.UI
 
             foreach (GameObject item in list) Destroy(item);
 
-            // Abort the server user database query if necessary.
-            ServerConfig.QueryServerUserBase(null);
+            // Discard the remaining anser packets the server wish to deliver.
+            SettingsManager.OnClientReceivedServerUserStateAnswer -= PopulateServerSUBItem;
 
             base.OnDisable();
         }
@@ -65,6 +69,8 @@ namespace Arteranos.UI
             };
             PopulateSUBItem(user);
         }
+        private void PopulateServerSUBItem(UserID userID, ServerUserState state)
+            => PopulateSUBItem(state);
 
         private void PopulateSUBItem(ServerUserState state) 
             => ServerUserListItem.New(lvc_ServerUserList, state);

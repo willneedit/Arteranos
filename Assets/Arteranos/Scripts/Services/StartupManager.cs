@@ -128,6 +128,13 @@ namespace Arteranos.Services
 
         protected override void EmitToServerCTSPacket_(CTSPacket packet) 
             => ArteranosNetworkManager.Instance.EmitToServerCTSPacket(packet);
+
+
+        protected override event Action<UserID, ServerUserState> OnClientReceivedServerUserStateAnswer_
+        {
+            add => ArteranosNetworkManager.Instance.OnClientReceivedServerUserStateAnswer += value;
+            remove => ArteranosNetworkManager.Instance.OnClientReceivedServerUserStateAnswer -= value;
+        }
     }
 }
 

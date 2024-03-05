@@ -62,7 +62,7 @@ namespace Arteranos.Core
         public UserID UserID;
 
         [ProtoMember(2)]
-        public ulong State;
+        public ServerUserState State;
     }
 
     // C: Invoke a world change
@@ -75,7 +75,7 @@ namespace Arteranos.Core
         // public string WorldCid; // In case if the World Info isn't available yet
 
         [ProtoMember(2)]
-        public WorldInfo WorldInfo;
+        public WorldInfo WorldInfo; // NOTE: No Screenshot for brevity, WorldInfoCid points to original
 
         [ProtoMember(3)]
         public string Message; // Nonzero if it needs a dialog to pop up

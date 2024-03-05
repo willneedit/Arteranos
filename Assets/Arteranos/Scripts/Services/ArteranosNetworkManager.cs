@@ -13,6 +13,8 @@ using Arteranos.Core.Cryptography;
 using System.Collections;
 using Arteranos.Social;
 using Arteranos.Web;
+using Codice.Client.Common;
+using System.Linq;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -495,7 +497,7 @@ namespace Arteranos.Services
 
         #endregion
         // ---------------------------------------------------------------
-        #region CTS Packets (on Server)
+        #region CTS Packets dispatch
 
         // Entry point of the server side and offline mode
         public void ServerLocalCTSPacket(UserID sender, CTSPacket packet)
@@ -504,13 +506,11 @@ namespace Arteranos.Services
                 _ = MakeWorldTransition(sender, true, wca);
             else if (packet is CTSPUpdateUserState uss)
                 _ = ServerUpdateUserState(sender, uss);
+            else if (packet is STCUserInfo userInfoQuery)
+                _ = ServerQueryUserState(sender, userInfoQuery);
             else
                 throw new NotImplementedException();
         }
-
-        #endregion
-        // ---------------------------------------------------------------
-        #region CTS Packets (on Client)
 
         // Entry point of the client side and offline mode
         private void ClientLocalCTSPacket(CTSPacket packet)
@@ -519,6 +519,8 @@ namespace Arteranos.Services
                 _ = MakeWorldTransition(null, false, wca);
             else if (packet is CTSPUpdateUserState uss)
                 _ = ClientInformUpdatedUserState(uss);
+            else if (packet is STCUserInfo userInfo)
+                _ = ClientQueryUserState(userInfo);
             else
                 throw new NotImplementedException();
         }
@@ -664,7 +666,7 @@ namespace Arteranos.Services
         }
         #endregion
         // ---------------------------------------------------------------
-        #region User State updates (all)
+        #region Server User State updates (all)
 
         private async Task ServerUpdateUserState(UserID invoker, CTSPUpdateUserState uss)
         {
@@ -696,10 +698,11 @@ namespace Arteranos.Services
                 else if (uss.toDisconnect)
                     action = UserCapabilities.CanKickUser;
 
-                if (sender == null || !sender.IsAbleTo(action, receiver))
+                if (!Core.Utils.IsAbleTo(sender, action, receiver))
                     return;
             }
 
+            SettingsManager.ServerUsers.RemoveUsers(uss.State);
             SettingsManager.ServerUsers.AddUser(uss.State);
             SettingsManager.ServerUsers.Save();
 
@@ -755,5 +758,67 @@ namespace Arteranos.Services
 
         #endregion
         // ---------------------------------------------------------------
+        #region Server User State queries (all)
+
+        private Task ServerQueryUserState(UserID invoker, STCUserInfo userInfoQuery)
+        {
+            IEnumerator EmitServerUserStateEntries(UserID invoker, IEnumerable<ServerUserState> q)
+            {
+                IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+                int i = 0;
+
+                // toList() to freeze the collection's state because of concurrency issues
+                // _between frames_
+                foreach(ServerUserState serverUserState in q.ToList())
+                {
+                    // Give the server a breather...
+                    if ((i++ % 20) == 0)
+                    {
+                        yield return new WaitForEndOfFrame();
+
+                        // ... Phew. Are you still there?
+                        sender = NetworkStatus.GetOnlineUser(invoker);
+
+                        // User may have logged out, exit prematurely.
+                        if (NetworkServer.active && sender == null) yield break;
+                    }
+
+                    // Tell the client the results, one at a time
+                    EmitToClientCTSPacket(new STCUserInfo()
+                    {
+                        invoker = invoker,
+                        UserID = serverUserState.userID,
+                        State = serverUserState
+                    }, sender);
+                }
+            }
+
+            userInfoQuery.invoker = invoker;
+
+            if (NetworkServer.active)
+            {
+                IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+
+                if (!Core.Utils.IsAbleTo(sender, UserCapabilities.CanAdminServerUsers, null))
+                    return Task.CompletedTask;
+            }
+
+            // State as in the 'where' clause in SQL.
+            IEnumerable<ServerUserState> q = SettingsManager.ServerUsers.FindUsers(userInfoQuery.State);
+
+            StartCoroutine(EmitServerUserStateEntries(invoker, q));
+            return Task.CompletedTask;
+        }
+
+        public event Action<UserID, ServerUserState> OnClientReceivedServerUserStateAnswer = null;
+
+        private Task ClientQueryUserState(STCUserInfo userInfo)
+        {
+            // Whatever listened in the client's app, use the trampoline
+            // to bounce the results to.
+            OnClientReceivedServerUserStateAnswer?.Invoke(userInfo.UserID, userInfo.State);
+            return Task.CompletedTask;
+        }
+        #endregion
     }
 }

@@ -8,6 +8,8 @@ namespace Arteranos.PlayTest
 {
     public class StartupManagerMock : SettingsManager
     {
+        protected override event Action<UserID, ServerUserState> OnClientReceivedServerUserStateAnswer_;
+
         protected override void Awake()
         {
             Instance = this;

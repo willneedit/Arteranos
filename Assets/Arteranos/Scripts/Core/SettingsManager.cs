@@ -131,11 +131,19 @@ namespace Arteranos.Core
         protected abstract void EmitToClientCTSPacket_(CTSPacket packet, IAvatarBrain to = null);
         protected abstract void EmitToServerCTSPacket_(CTSPacket packet);
 
+        protected abstract event Action<UserID, ServerUserState> OnClientReceivedServerUserStateAnswer_;
+            
         public static void StartCoroutineAsync(Func<IEnumerator> action)
             => Instance?.StartCoroutineAsync_(action);
         public static void EmitToClientCTSPacket(CTSPacket packet, IAvatarBrain to = null)
             => Instance?.EmitToClientCTSPacket_(packet, to);
         public static void EmitToServerCTSPacket(CTSPacket packet)
             => Instance?.EmitToServerCTSPacket_(packet);
+
+        public static event Action<UserID, ServerUserState> OnClientReceivedServerUserStateAnswer
+        {
+            add => Instance.OnClientReceivedServerUserStateAnswer_ += value;
+            remove => Instance.OnClientReceivedServerUserStateAnswer_ -= value;
+        }
     }
 }
