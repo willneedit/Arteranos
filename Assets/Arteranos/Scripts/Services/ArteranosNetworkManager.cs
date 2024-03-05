@@ -6,14 +6,12 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using Arteranos.UI;
-using Ipfs;
 using Arteranos.Core.Operations;
 using Ipfs.Core.Cryptography.Proto;
 using Arteranos.Core.Cryptography;
 using System.Collections;
 using Arteranos.Social;
 using Arteranos.Web;
-using Codice.Client.Common;
 using System.Linq;
 
 /*
@@ -408,8 +406,16 @@ namespace Arteranos.Services
         public void EmitToClientCTSPacket(CTSPacket packet, IAvatarBrain to = null)
         {
             NetworkConnectionToClient connectionToClient = null;
+
             if (to != null)
+            {
+                if(to.gameObject == null)
+                {
+                    Debug.Log("[Server] Discarding CTSPacket to specific logged-out client");
+                    return;
+                }
                 connectionToClient = to.gameObject.GetComponent<NetworkIdentity>().connectionToClient;
+            }
 
             PublicKey agreePublicKey = to?.AgreePublicKey;
 
@@ -452,9 +458,9 @@ namespace Arteranos.Services
 
         private IEnumerator EmitCoroutine(CTSPacket packet, IAvatarBrain to)
         {
-            yield return null;
-
             EmitToClientCTSPacket(packet, to);
+
+            yield return null;
         }
 
         [Server]
