@@ -59,7 +59,8 @@ namespace Arteranos.Services
                 while (NetworkClient.isConnecting) yield return null;
 
                 if (!NetworkClient.isConnected)
-                    _ = WorldTransition.EnterWorldAsync(null);
+                    // And now, the remote server did let me down.
+                    _ = WorldTransition.MoveToOfflineWorld();
             }
             else
             {
