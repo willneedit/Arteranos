@@ -616,7 +616,7 @@ namespace Arteranos.Services
                 {
                     IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
 
-                    if (sender == null || !sender.IsAbleTo(UserCapabilities.CanInitiateWorldTransition, null))
+                    if (!Core.Utils.IsAbleTo(sender, UserCapabilities.CanInitiateWorldTransition, null))
                     {
                         StopWorldAction("You're not allowed to change the server's world.");
                         return;

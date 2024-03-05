@@ -143,7 +143,7 @@ namespace Arteranos.Core
         public static event Action<UserID, ServerUserState> OnClientReceivedServerUserStateAnswer
         {
             add => Instance.OnClientReceivedServerUserStateAnswer_ += value;
-            remove => Instance.OnClientReceivedServerUserStateAnswer_ -= value;
+            remove { if (Instance != null) Instance.OnClientReceivedServerUserStateAnswer_ -= value; }
         }
     }
 }

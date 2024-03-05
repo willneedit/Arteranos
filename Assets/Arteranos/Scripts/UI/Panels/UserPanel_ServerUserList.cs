@@ -51,7 +51,8 @@ namespace Arteranos.UI
             foreach (GameObject item in list) Destroy(item);
 
             // Discard the remaining anser packets the server wish to deliver.
-            SettingsManager.OnClientReceivedServerUserStateAnswer -= PopulateServerSUBItem;
+            if(SettingsManager.Instance != null)
+                SettingsManager.OnClientReceivedServerUserStateAnswer -= PopulateServerSUBItem;
 
             base.OnDisable();
         }
