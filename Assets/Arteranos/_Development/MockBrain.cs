@@ -43,8 +43,6 @@ namespace Arteranos.Avatar
             touchy.SetAppearanceStatusBit(Avatar.AppearanceStatus.Bubbled, entered);
         }
 
-        public bool isOwned => false;
-
         public IAvatarBody Body => GetComponent<IAvatarBody>();
 
         public UserID UserID { get; set; } = null;
@@ -62,7 +60,7 @@ namespace Arteranos.Avatar
 
         private void Start()
         {
-            if(!isOwned) AvatarHitBoxFactory.New(this);
+            AvatarHitBoxFactory.New(this);
 
             UserID = new(null, "TI-99 4a");
         }

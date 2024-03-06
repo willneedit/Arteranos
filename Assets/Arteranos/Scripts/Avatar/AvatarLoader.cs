@@ -60,7 +60,7 @@ namespace Arteranos.Avatar
         private bool m_invisible = false;
 
         private AvatarBrain AvatarBrain = null;
-        public bool IsOwned => AvatarBrain ? AvatarBrain.isOwned : false;
+        public bool isLocalPlayer => AvatarBrain ? AvatarBrain.isLocalPlayer : false;
 
         private void Awake()
         {
@@ -76,26 +76,23 @@ namespace Arteranos.Avatar
         {
             DateTime settleTime = DateTime.Now + TimeSpan.FromSeconds(5);
 
-            Cid _avatarCid = avatarCid;
-            float _cmheight = height;
-
             IEnumerator AvatarDownloaderCoroutine()
             {
                 while (settleTime > DateTime.Now)
                     yield return new WaitForSeconds((settleTime - DateTime.Now).Seconds);
 
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AvatarDownloader.PrepareDownloadAvatar(_avatarCid, new()
+                    AvatarDownloader.PrepareDownloadAvatar((Cid)avatarCid, new()
                     {
-                        DesiredHeight = _cmheight / 100.0f,
+                        DesiredHeight = (float)height / 100.0f,
                         InstallAnimController = true,
                         InstallEyeAnimation = true,
                         InstallMouthAnimation = true,
-                        InstallFootIK = IsOwned,
-                        InstallFootIKCollider = IsOwned,
+                        InstallFootIK = isLocalPlayer,
+                        InstallFootIKCollider = isLocalPlayer,
                         ReadFootJoints = true,
-                        InstallHandIK = IsOwned,
-                        InstallHandIKController = IsOwned,
+                        InstallHandIK = isLocalPlayer,
+                        InstallHandIKController = isLocalPlayer,
                         ReadHandJoints = true,
                     });
 

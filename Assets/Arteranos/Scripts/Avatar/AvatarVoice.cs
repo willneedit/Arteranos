@@ -46,13 +46,13 @@ namespace Arteranos.Avatar
         {
             base.OnStartClient();
 
-            if(isOwned)
+            if(isLocalPlayer)
                 AudioManager.OnSegmentReady += ReceivedMicInput;
         }
 
         public override void OnStopClient()
         {
-            if(isOwned)
+            if(isLocalPlayer)
                 AudioManager.OnSegmentReady -= ReceivedMicInput;
 
             base.OnStopClient();

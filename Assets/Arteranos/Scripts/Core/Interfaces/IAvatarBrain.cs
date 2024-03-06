@@ -8,9 +8,7 @@
 #pragma warning disable IDE1006 // Because Unity's more relaxed naming convention
 
 using Arteranos.Core;
-using Arteranos.Core.Cryptography;
 using Arteranos.Social;
-using Ipfs;
 using Ipfs.Core.Cryptography.Proto;
 using System;
 using UnityEngine;
@@ -22,7 +20,6 @@ namespace Arteranos.Avatar
         uint NetID { get; }
         string Nickname { get; }
         int AppearanceStatus { get; set; }
-        bool isOwned { get; }
         IAvatarBody Body { get; }
         GameObject gameObject { get; }
         Transform transform { get; }

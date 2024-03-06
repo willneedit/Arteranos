@@ -110,7 +110,7 @@ namespace Arteranos.Avatar
             else if (isClient) modestr += "Client";
             else modestr += "?";
 
-            if (isOwned) modestr += ", Owned";
+            if (isLocalPlayer) modestr += ", Local";
 
             string objmsg = (message is string msgstr) ? msgstr : message.ToString();
             return UserID != null
@@ -157,9 +157,9 @@ namespace Arteranos.Avatar
             base.OnStartClient();
 
             SettingsManager.Client.OnAvatarChanged += CommitAvatarChanged;
-            SettingsManager.Client.OnUserPrivacyChanged += (x) => { if (isOwned) UserPrivacy = x; };
+            SettingsManager.Client.OnUserPrivacyChanged += (x) => { if (isLocalPlayer) UserPrivacy = x; };
 
-            if (isOwned)
+            if (isLocalPlayer)
             {
                 // That's me, set aside from the unwashed crowd. :)
                 XRControl.Me = this;
@@ -184,7 +184,7 @@ namespace Arteranos.Avatar
 
         private void CommitAvatarChanged(string CidString, float Height)
         {
-            if (isOwned)
+            if (isLocalPlayer)
             {
                 AvatarCidString = CidString;
                 AvatarHeight = Height;
@@ -194,7 +194,7 @@ namespace Arteranos.Avatar
         public override void OnStopClient()
         {
             // Maybe it isn't owned anymore, but it would be worse the other way round.
-            if (isOwned) XRControl.Me = null;
+            if (isLocalPlayer) XRControl.Me = null;
 
             SettingsManager.Client.OnAvatarChanged -= CommitAvatarChanged;
 
@@ -412,7 +412,7 @@ namespace Arteranos.Avatar
 
         public ulong GetSocialStateTo(UserID to)
         {
-            if (!isOwned)
+            if (!isLocalPlayer)
                 throw new InvalidOperationException("Not owner");
 
             return SettingsManager.Client.Me.SocialList.TryGetValue(to, out ulong state)
@@ -486,7 +486,7 @@ namespace Arteranos.Avatar
 
         public void SendSocialState(IAvatarBrain receiver, ulong state)
         {
-            if (!isOwned)
+            if (!isLocalPlayer)
                 throw new InvalidOperationException("Not owner");
 
             // Maybe the intended receiver logged off while you tried to send a goodbye message.
