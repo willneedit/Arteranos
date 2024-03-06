@@ -10,25 +10,34 @@ using UnityEngine;
 using Arteranos.NetworkIO;
 using Arteranos.XR;
 using Arteranos.Core;
+using Mirror;
 
 namespace Arteranos.Avatar
 {
 
-    public class AvatarPoseDriver : MonoBehaviour
+    public class AvatarPoseDriver : NetworkBehaviour
     {
         private IAvatarMeasures AvatarMeasures = null;
         private NetworkPose NetworkPose = null;
 
-        private bool IsOwned => NetworkPose.isOwned;
+        // Base animation directives, synchronized.
+        [SyncVar]
+        public Vector2 animMoveDirection = Vector2.zero;
+
+        [SyncVar]
+        public float animMoveSpeed = 1.0f;
+
 
         private void Awake()
         {
             NetworkPose = GetComponent<NetworkPose>();
         }
 
-        private void Start()
+        public override void OnStartClient()
         {
-            if(IsOwned)
+            base.OnStartClient();
+
+            if(isLocalPlayer)
             {
                 SettingsManager.Client.OnVRModeChanged += OnXRChanged;
                 OnXRChanged(SettingsManager.Client.VRMode);
@@ -36,10 +45,18 @@ namespace Arteranos.Avatar
 
         }
 
-        private void OnDestroy()
+        public override void OnStopClient()
         {
-            if(IsOwned)
+            if(isLocalPlayer)
                 SettingsManager.Client.OnVRModeChanged -= OnXRChanged;
+
+            base.OnStopClient();
+        }
+
+        protected virtual void OnValidate()
+        {
+            syncDirection = SyncDirection.ClientToServer;
+            syncInterval = 0;
         }
 
         private void OnXRChanged(bool useXR)
@@ -57,7 +74,7 @@ namespace Arteranos.Avatar
             NetworkPose.UploadJointNames(am.Avatar.transform, am.JointNames.ToArray());
             AvatarMeasures = am;
 
-            if (IsOwned)
+            if (isLocalPlayer)
             {
                 IXRControl xrc = XRControl.Instance;
 
@@ -96,9 +113,9 @@ namespace Arteranos.Avatar
             if (moveSpeed.x < -0.5f) newMoveDirection.x = -1;
             if (moveSpeed.x > 0.5f) newMoveDirection.x = 1;
 
-            NetworkPose.animMoveDirection = newMoveDirection;
+            animMoveDirection = newMoveDirection;
 
-            NetworkPose.animMoveSpeed = AvatarMeasures != null
+            animMoveSpeed = AvatarMeasures != null
                 ? (float)(AvatarMeasures.UnscaledHeight / AvatarMeasures.FullHeight)
                 : 1.0f;
         }
@@ -130,7 +147,7 @@ namespace Arteranos.Avatar
         void Update()
         {
             // Avatars from other clients are slaved by the NetworkTransform and -Pose.
-            if(IsOwned)
+            if(isLocalPlayer)
             {
                 IXRControl instance = XRControl.Instance;
                 Transform xro = instance.rigTransform;
