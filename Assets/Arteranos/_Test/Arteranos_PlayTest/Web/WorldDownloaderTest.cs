@@ -48,7 +48,7 @@ namespace Arteranos.PlayTest.Web
         private async Task UploadTestWorld()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AssetUploader.PrepareUploadToIPFS(FileURLAsset);
+                AssetUploader.PrepareUploadToIPFS(FileURLAsset, true);
 
             await ao.ExecuteAsync(co);
 

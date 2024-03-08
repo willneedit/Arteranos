@@ -9,15 +9,14 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-using Arteranos.Core;
 using System.Threading;
-using Utils = Arteranos.Core.Utils;
 using Ipfs;
 using Arteranos.Services;
 using Ipfs.CoreApi;
 using System.Net.Http;
 using System.IO.Pipes;
 using UnityEngine;
+using System.IO.Compression;
 
 namespace Arteranos.Core.Operations
 {
@@ -51,12 +50,44 @@ namespace Arteranos.Core.Operations
             }
             finally
             {
-                if (File.Exists(path)) File.Delete(path);
+                if (Directory.Exists(path)) Directory.Delete(path);
             }
 
             return context;
         }
     }
+
+    internal class UnzipFileOp : IAsyncOperation<Context>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 2.0f;
+        public string Caption { get; set; } = "Uncompressing file";
+        public Action<float> ProgressChanged { get; set; }
+
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            AssetUploaderContext context = _context as AssetUploaderContext;
+
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    string path = $"{context.TempFile}.dir";
+
+                    if (Directory.Exists(path)) Directory.Delete(path, true);
+
+                    ZipFile.ExtractToDirectory(context.TempFile, path);
+
+                    return context;
+                }
+                finally
+                {
+                    if (File.Exists(context.TempFile)) File.Delete(context.TempFile);
+                }
+            });
+        }
+    }
+
     internal class UploadFileToIPFS : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
@@ -188,23 +219,41 @@ namespace Arteranos.Core.Operations
 
     public static class AssetUploader
     {
-        public static (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS(string assetURL, int timeout = 600, bool pin = false)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS(string assetURL, bool asArchive, int timeout = 600, bool pin = false)
         {
             AssetUploaderContext context = new()
             {
                 AssetURL = assetURL,
-                TempFile = $"{Path.GetTempFileName()}",
+                asArchive = asArchive,
+                TempFile = Path.GetTempFileName(),
                 pin = pin
             };
 
-            AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
+            AsyncOperationExecutor<Context> executor;
+
+            if (asArchive)
             {
-                new DownloadFromWeb(),
-                new UploadFileToIPFS()
-            })
+                executor = new(new IAsyncOperation<Context>[]
+                {
+                    new DownloadFromWeb(),
+                    new UnzipFileOp(),
+                    new UploadDirectoryToIPFS()
+                })
+                {
+                    Timeout = timeout
+                };
+            }
+            else
             {
-                Timeout = timeout
-            };
+                executor = new(new IAsyncOperation<Context>[]
+                {
+                    new DownloadFromWeb(),
+                    new UploadFileToIPFS()
+                })
+                {
+                    Timeout = timeout
+                };
+            }
 
             return (executor, context);
         }

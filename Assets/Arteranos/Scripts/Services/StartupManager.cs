@@ -104,7 +104,7 @@ namespace Arteranos.Services
             IEnumerator UploadAvatar(string resourceMA)
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(resourceMA);
+                    AssetUploader.PrepareUploadToIPFS(resourceMA, false); // Plsin GLB files
 
                 Task t = ao.ExecuteAsync(co);
 

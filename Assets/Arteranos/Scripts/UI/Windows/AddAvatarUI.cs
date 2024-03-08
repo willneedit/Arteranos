@@ -186,7 +186,7 @@ namespace Arteranos.UI
                     }
 
                     (AsyncOperationExecutor<Context> ao, Context co) =
-                        AssetUploader.PrepareUploadToIPFS(sourceURL);
+                        AssetUploader.PrepareUploadToIPFS(sourceURL, false); // Plain GLB file
 
                     ao.ProgressChanged += (ratio, msg) => lbl_Notice.text = $"{msg}";
 

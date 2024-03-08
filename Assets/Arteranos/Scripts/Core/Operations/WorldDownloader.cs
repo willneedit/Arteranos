@@ -11,11 +11,8 @@ using System.IO.Compression;
 using System.Threading.Tasks;
 using UnityEngine;
 
-using Arteranos.Core;
 using System.Threading;
-using Utils = Arteranos.Core.Utils;
 using Ipfs;
-using Org.BouncyCastle.Asn1.Cms;
 
 namespace Arteranos.Core.Operations
 {

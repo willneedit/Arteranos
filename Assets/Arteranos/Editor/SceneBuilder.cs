@@ -399,18 +399,6 @@ namespace Arteranos.Editor
 
         }
 
-        private static async Task<string> UploadWorldToIPFS(string assetURL)
-        {
-            AsyncOperationExecutor<Context> ao = null;
-            Context co = null;
-            
-            (ao, co) = AssetUploader.PrepareUploadToIPFS(assetURL);
-            await ao.ExecuteAsync(co);
-
-            return AssetUploader.GetUploadedCid(co);
-
-        }
-
         // Wipe off the scene loader in the saved scene in Edit mode on reentering it.
         [InitializeOnLoad]
         public static class OnEditModeChanged
@@ -438,7 +426,7 @@ namespace Arteranos.Editor
 
                         IProgressUI pui = ProgressUIFactory.New();
 
-                        pui.SetupAsyncOperations(() => AssetUploader.PrepareUploadToIPFS(testWorldZip));
+                        pui.SetupAsyncOperations(() => AssetUploader.PrepareUploadToIPFS(testWorldZip, true)); // <-- Obvious, huh?
 
                         pui.Completed += context =>
                         {

@@ -105,9 +105,10 @@ namespace Arteranos.Core.Operations
 
     internal class AssetUploaderContext : Context
     {
-        public string AssetURL = null;
+        public bool asArchive = false;          // Asset (ZIP) archive will be unpacked ans published as a directory
+        public string AssetURL = null;          // Local file, file: URL, http(s): URL, resource: URL
         public string TempFile = null;
         public bool pin = false;
-        public Cid Cid = null;
+        public Cid Cid = null;                  // Contents as the file as-is, or the directory repacked as tar, or the root for <cid>/path/to/file.ext
     }
 }

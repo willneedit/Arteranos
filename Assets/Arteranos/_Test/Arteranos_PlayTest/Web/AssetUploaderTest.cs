@@ -73,7 +73,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(FileURLAsset);
+                    AssetUploader.PrepareUploadToIPFS(FileURLAsset, false);
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
@@ -108,7 +108,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(PlainFileAsset);
+                    AssetUploader.PrepareUploadToIPFS(PlainFileAsset, false);
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
@@ -143,7 +143,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(QuotedFileAsset);
+                    AssetUploader.PrepareUploadToIPFS(QuotedFileAsset, false);
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
@@ -178,7 +178,7 @@ namespace Arteranos.PlayTest.Web
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(WebURLAsset);
+                    AssetUploader.PrepareUploadToIPFS(WebURLAsset, false);
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{msg}");
 
@@ -215,7 +215,7 @@ namespace Arteranos.PlayTest.Web
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
                     AssetUploader.PrepareUploadToIPFS(
-                        "file:///C:/DoesNotExist.no");
+                        "file:///C:/DoesNotExist.no", false);
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{msg}");
 

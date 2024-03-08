@@ -288,7 +288,7 @@ namespace Arteranos.UI
 
             IProgressUI pui = ProgressUIFactory.New();
 
-            pui.SetupAsyncOperations(() => AssetUploader.PrepareUploadToIPFS(txt_AddWorldURL.text, pin: true));
+            pui.SetupAsyncOperations(() => AssetUploader.PrepareUploadToIPFS(txt_AddWorldURL.text, true, pin: true)); // World Zip file
 
             pui.Completed += context =>
             {
