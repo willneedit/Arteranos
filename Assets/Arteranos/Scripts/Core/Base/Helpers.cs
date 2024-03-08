@@ -309,12 +309,14 @@ namespace Arteranos.Services
             => Instance.PinCid_(cid, pinned, cancel);
         public static Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
             => Instance.Ipfs_.Pin.ListAsync(cancel);
-        public static Task<Stream> ReadCid(Cid cid, CancellationToken cancel = default)
-            => Instance.Ipfs_.FileSystem.ReadFileAsync(cid, cancel);
+        public static Task<Stream> ReadFile(string path, CancellationToken cancel = default)
+            => Instance.Ipfs_.FileSystem.ReadFileAsync(path, cancel);
         public static Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
             => Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel);
-        public static Task<IFileSystemNode> ListCids(Cid cid, CancellationToken cancel = default)
-            => Instance.Ipfs_.FileSystem.ListFileAsync(cid, cancel);
+        public static Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
+            => Instance.Ipfs_.FileSystem.ListFileAsync(path, cancel);
+        public static Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
+            => Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel);
     }
     #endregion
     // -------------------------------------------------------------------

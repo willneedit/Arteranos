@@ -21,7 +21,43 @@ using UnityEngine;
 
 namespace Arteranos.Core.Operations
 {
-    internal class UploadToIPFS : IAsyncOperation<Context>
+    internal class UploadDirectoryToIPFS : IAsyncOperation<Context>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 1.0f;
+        public string Caption { get => GetProgressText(); }
+        public Action<float> ProgressChanged { get; set; }
+
+        private string GetProgressText()
+        {
+            return "Uploading...";
+        }
+
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            AssetUploaderContext context = _context as AssetUploaderContext;
+
+            string path = $"{context.TempFile}.dir";
+
+            AddFileOptions ao = new()
+            {
+                Pin = context.pin
+            };
+
+            try
+            {
+                IFileSystemNode fsn = await IPFSService.AddDirectory(path, options: ao);
+                context.Cid = fsn.Id;
+            }
+            finally
+            {
+                if (File.Exists(path)) File.Delete(path);
+            }
+
+            return context;
+        }
+    }
+    internal class UploadFileToIPFS : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 1.0f;
@@ -164,7 +200,7 @@ namespace Arteranos.Core.Operations
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
             {
                 new DownloadFromWeb(),
-                new UploadToIPFS()
+                new UploadFileToIPFS()
             })
             {
                 Timeout = timeout

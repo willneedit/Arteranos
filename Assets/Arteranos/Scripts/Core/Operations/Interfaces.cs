@@ -26,7 +26,7 @@ namespace Arteranos.Core
 
     public interface IAssetDownloaderContext
     {
-        Cid Cid { get; set; }
+        string path { get; set; }
         long Size { get; set; }
         string TargetFile { get; set; }
     }

@@ -441,7 +441,7 @@ namespace Arteranos.Core.Operations
         {
             AvatarDownloaderContext context = new()
             {
-                Cid = cid,
+                path = cid,
                 TargetFile = GetAvatarCacheFile(cid),
 
                 InstallAnimController = options?.InstallAnimController ?? false,

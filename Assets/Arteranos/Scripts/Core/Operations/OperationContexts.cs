@@ -15,14 +15,14 @@ namespace Arteranos.Core.Operations
 
     internal class AssetDownloaderContext : Context, IAssetDownloaderContext
     {
-        public Cid Cid { get; set; } = null;
+        public string path { get; set; } = null;
         public string TargetFile { get; set; } = null;
         public long Size { get; set; } = -1;
     }
 
     internal class WorldDownloaderContext : AssetDownloaderContext
     {
-        public Cid WorldInfoCid = null;
+        public string WorldInfoCid = null;
         public string worldAssetBundleFile = null;
     }
 

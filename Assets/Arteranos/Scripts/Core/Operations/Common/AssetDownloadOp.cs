@@ -35,12 +35,12 @@ namespace Arteranos.Core.Operations
         {
             AssetDownloaderContext context = _context as AssetDownloaderContext;
 
-            IFileSystemNode fi = await IPFSService.ListCids(context.Cid, token);
+            IFileSystemNode fi = await IPFSService.ListFile(context.path, token);
 
             context.Size = fi.Size;
             totalBytesMag = Utils.Magnitude(context.Size);
 
-            using Stream inStream = await IPFSService.ReadCid(context.Cid, cancel: token);
+            using Stream inStream = await IPFSService.ReadFile(context.path, cancel: token);
 
             string dir = Path.GetDirectoryName(context.TargetFile);
             if(!Directory.Exists(dir)) Directory.CreateDirectory(dir);

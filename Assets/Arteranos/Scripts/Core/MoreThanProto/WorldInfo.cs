@@ -61,7 +61,7 @@ namespace Arteranos.Core
 
             try
             {
-                Stream s = await IPFSService.ReadCid(WorldInfoCid, cancel);
+                Stream s = await IPFSService.ReadFile(WorldInfoCid, cancel);
                 WorldInfo wi = new()
                 {
                     win = null,

@@ -33,7 +33,7 @@ namespace Arteranos.Core.Operations
 
             async Task<Context> Execute()
             {
-                string wcd = WorldDownloader.GetWorldCacheDir(context.Cid);
+                string wcd = WorldDownloader.GetWorldCacheDir(context.path);
                 string rootPath = $"{wcd}/world.dir";
 
                 string metadataFile = $"{rootPath}/Metadata.json";
@@ -53,7 +53,7 @@ namespace Arteranos.Core.Operations
                 {
                     win = new()
                     {
-                        WorldCid = context.Cid,
+                        WorldCid = context.path,
                         WorldName = metaData.WorldName,
                         WorldDescription = metaData.WorldDescription,
                         Author = metaData.AuthorID,
@@ -108,7 +108,7 @@ namespace Arteranos.Core.Operations
         {
             WorldDownloaderContext context = new()
             {
-                Cid = cid,
+                path = cid,
                 TargetFile = $"{GetWorldCacheDir(cid)}/world.zip"
             };
 
