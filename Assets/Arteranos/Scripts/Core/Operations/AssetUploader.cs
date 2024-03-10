@@ -50,7 +50,7 @@ namespace Arteranos.Core.Operations
             }
             finally
             {
-                if (Directory.Exists(path)) Directory.Delete(path);
+                if (Directory.Exists(path)) Directory.Delete(path, true);
             }
 
             return context;
