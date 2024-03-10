@@ -27,6 +27,7 @@ namespace Arteranos.Core
     public interface IAssetDownloaderContext
     {
         string path { get; set; }
+        bool isTarred { get; set; }
         long Size { get; set; }
         string TargetFile { get; set; }
     }

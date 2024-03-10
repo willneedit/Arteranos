@@ -16,6 +16,7 @@ using Ipfs;
 
 namespace Arteranos.Core.Operations
 {
+    [Obsolete]
     internal class BuildWorldInfoOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
@@ -70,6 +71,8 @@ namespace Arteranos.Core.Operations
             return await Task.Run(Execute);
         }
     }
+
+    [Obsolete]
     internal class UnzipWorldFileOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
@@ -98,7 +101,45 @@ namespace Arteranos.Core.Operations
             });
         }
     }
-    
+
+
+    public static class WorldDownloaderNew
+    {
+        public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldInfo(Cid WorldCid, int timeout = 600)
+        {
+            WorldInfoContext context = new()
+            {
+                WorldCid = WorldCid
+            };
+
+            AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
+            {})
+            {
+                Timeout = timeout
+            };
+
+            return (executor, context);
+        }
+
+        public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldAsset(Cid WorldCid, int timeout = 600)
+        {
+            WorldAssetContext context = new()
+            {
+                WorldCid = WorldCid
+            };
+
+            AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
+            {})
+            {
+                Timeout = timeout
+            };
+
+            return (executor, context);
+        }
+
+    }
+
+    [Obsolete("Transition to WorldDownloaderNew")]
     public static class WorldDownloader
     {
         public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(Cid cid, int timeout = 600)

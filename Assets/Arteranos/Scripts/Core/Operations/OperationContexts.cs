@@ -9,6 +9,7 @@ using UnityEngine;
 
 using Ipfs;
 using System.Collections.Generic;
+using System;
 
 namespace Arteranos.Core.Operations
 {
@@ -16,14 +17,28 @@ namespace Arteranos.Core.Operations
     internal class AssetDownloaderContext : Context, IAssetDownloaderContext
     {
         public string path { get; set; } = null;
+        public bool isTarred { get; set; } = false;
         public string TargetFile { get; set; } = null;
         public long Size { get; set; } = -1;
     }
 
+    [Obsolete("Transition to WorldInfoContext and WorldAssetContext")]
     internal class WorldDownloaderContext : AssetDownloaderContext
     {
         public string WorldInfoCid = null;
         public string worldAssetBundleFile = null;
+    }
+
+    internal class WorldInfoContext : Context
+    {
+        public Cid WorldCid;
+        public WorldInfo WorldInfo;
+    }
+
+    internal class WorldAssetContext : Context
+    {
+        public Cid WorldCid;
+        public string WorldAssetBundlePath;
     }
 
     public interface IAvatarDownloaderOptions
@@ -105,7 +120,7 @@ namespace Arteranos.Core.Operations
 
     internal class AssetUploaderContext : Context
     {
-        public bool asArchive = false;          // Asset (ZIP) archive will be unpacked ans published as a directory
+        public bool asTarred = false;           // Asset (ZIP) archive will be unpacked and published as a directory
         public string AssetURL = null;          // Local file, file: URL, http(s): URL, resource: URL
         public string TempFile = null;
         public bool pin = false;

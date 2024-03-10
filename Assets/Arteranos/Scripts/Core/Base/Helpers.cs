@@ -311,6 +311,8 @@ namespace Arteranos.Services
             => Instance.Ipfs_.Pin.ListAsync(cancel);
         public static Task<Stream> ReadFile(string path, CancellationToken cancel = default)
             => Instance.Ipfs_.FileSystem.ReadFileAsync(path, cancel);
+        public static Task<Stream> Get(string path, CancellationToken cancel = default)
+            => Instance.Ipfs_.FileSystem.GetAsync(path, cancel: cancel);
         public static Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
             => Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel);
         public static Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)

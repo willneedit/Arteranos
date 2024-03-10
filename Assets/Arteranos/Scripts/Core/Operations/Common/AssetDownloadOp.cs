@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using Ipfs;
 using Arteranos.Services;
+using ICSharpCode.SharpZipLib.Tar;
+using System.Text;
 
 namespace Arteranos.Core.Operations
 {
@@ -40,17 +42,34 @@ namespace Arteranos.Core.Operations
             context.Size = fi.Size;
             totalBytesMag = Utils.Magnitude(context.Size);
 
-            using Stream inStream = await IPFSService.ReadFile(context.path, cancel: token);
-
             string dir = Path.GetDirectoryName(context.TargetFile);
             if(!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-            using FileStream outStream = File.Create(context.TargetFile);
 
-            await Utils.CopyWithProgress(inStream, outStream,
-                bytes => {
-                    actualBytes = bytes;
-                    ProgressChanged((float)bytes / context.Size);
-                }, token);
+
+            if(!context.isTarred)
+            {
+                // Read plain file
+                using Stream inStream = await IPFSService.ReadFile(context.path, cancel: token);
+                using FileStream outStream = File.Create(context.TargetFile);
+
+                await Utils.CopyWithProgress(inStream, outStream,
+                    bytes => {
+                        actualBytes = bytes;
+                        ProgressChanged((float)bytes / context.Size);
+                    }, token);
+            }
+            else
+            {
+                // Extract directory
+                Stream tar = await IPFSService.Get(context.path, token);
+                using TarArchive archive = TarArchive.CreateInputTarArchive(tar, Encoding.UTF8);
+                archive.ProgressMessageEvent += (a, e, m) =>
+                {
+                    actualBytes += e.Size;
+                    ProgressChanged((float)actualBytes / context.Size);
+                };
+                archive.ExtractContents(context.TargetFile);
+            }
 
             return context;
         }

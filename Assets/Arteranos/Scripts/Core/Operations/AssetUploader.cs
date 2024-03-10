@@ -193,7 +193,6 @@ namespace Arteranos.Core.Operations
 
                 TextAsset ta = Resources.Load<TextAsset>(assetURL);
                 inStream = new MemoryStream(ta.bytes);
-                inStream.Position = 0;
             }
             else
             {
@@ -219,19 +218,19 @@ namespace Arteranos.Core.Operations
 
     public static class AssetUploader
     {
-        public static (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS(string assetURL, bool asArchive, int timeout = 600, bool pin = false)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS(string assetURL, bool asTarred, int timeout = 600, bool pin = false)
         {
             AssetUploaderContext context = new()
             {
                 AssetURL = assetURL,
-                asArchive = asArchive,
+                asTarred = asTarred,
                 TempFile = Path.GetTempFileName(),
                 pin = pin
             };
 
             AsyncOperationExecutor<Context> executor;
 
-            if (asArchive)
+            if (asTarred)
             {
                 executor = new(new IAsyncOperation<Context>[]
                 {
