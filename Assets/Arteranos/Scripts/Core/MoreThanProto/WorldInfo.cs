@@ -55,6 +55,7 @@ namespace Arteranos.Core
         public static IEnumerable<WorldInfo> DBList()
             => new WorldInfo()._DBList();
 
+        [Obsolete("WorldInfos will not published, the world cid suffices")]
         public static async Task<WorldInfo> RetrieveAsync(Cid WorldInfoCid, CancellationToken cancel = default)
         {
             if (WorldInfoCid == null) return null;
@@ -78,6 +79,7 @@ namespace Arteranos.Core
             }
         }
 
+        [Obsolete("WorldInfos will not published, the world cid suffices")]
         public static WorldInfo Retrieve(Cid WorldInfoCid) 
             => Task.Run(async () => await RetrieveAsync(WorldInfoCid)).Result;
 

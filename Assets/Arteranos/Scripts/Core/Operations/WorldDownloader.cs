@@ -13,6 +13,10 @@ using UnityEngine;
 
 using System.Threading;
 using Ipfs;
+using Arteranos.Services;
+using System.Collections.Generic;
+using System.Text;
+using ICSharpCode.SharpZipLib.Tar;
 
 namespace Arteranos.Core.Operations
 {
@@ -94,7 +98,7 @@ namespace Arteranos.Core.Operations
 
                 string worldABF = WorldDownloader.GetWorldABFfromWD(path);
 
-                context.worldAssetBundleFile = worldABF;
+                context.WorldAssetBundleFile = worldABF;
 
                 return context;
 
@@ -102,18 +106,152 @@ namespace Arteranos.Core.Operations
         }
     }
 
+    internal class DownloadWorldInfoOp : IAsyncOperation<Context>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 2.0f;
+        public string Caption { get; set; } = "Uncompressing file";
+        public Action<float> ProgressChanged { get; set; }
 
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            WorldDownloadContext context = _context as WorldDownloadContext;
+
+            IFileSystemNode fsn = await IPFSService.ListFile(context.WorldCid);
+            IEnumerable<IFileSystemLink> links = fsn.Links;
+
+            string screenshotName = null;
+            long screenshotSize = 0;
+
+            foreach(IFileSystemLink link in links)
+                if (link.Name.StartsWith("Screenshot"))
+                {
+                    screenshotName = link.Name;
+                    screenshotSize = link.Size;
+                    break;
+                }
+
+            byte[] screenshotBytes = new byte[screenshotSize];
+            using (Stream stream = await IPFSService.ReadFile($"{context.WorldCid}/{screenshotName}"))
+            {
+                stream.Read(screenshotBytes, 0, screenshotBytes.Length);
+            }
+
+            using (Stream stream = await IPFSService.ReadFile($"{context.WorldCid}/Metadata.json"))
+            {
+                using MemoryStream ms = new();
+                await Utils.CopyWithProgress(stream, ms);
+                string json = Encoding.UTF8.GetString(ms.ToArray());
+                WorldMetaData metaData = WorldMetaData.Deserialize(json);
+
+                WorldInfo wi = new()
+                {
+                    win = new()
+                    {
+                        WorldCid = context.WorldCid,
+                        WorldName = metaData.WorldName,
+                        WorldDescription = metaData.WorldDescription,
+                        Author = metaData.AuthorID,
+                        ContentRating = metaData.ContentRating,
+                        Signature = null,
+                        ScreenshotPNG = screenshotBytes,
+                        Created = metaData.Created,
+                    },
+                    Updated = DateTime.MinValue
+                };
+                context.WorldInfo = wi;
+            }
+
+            return context;
+        }
+    }
+
+    internal class DownloadWorldDataOp : IAsyncOperation<Context>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 8.0f;
+        public string Caption { get => GetProgressText(); }
+        public Action<float> ProgressChanged { get; set; }
+
+        private long actualBytes = 0;
+        private long totalBytes = 0;
+        private string totalBytesMag = null;
+
+        private string GetProgressText()
+        {
+            if (totalBytesMag == null) return "Downloading...";
+
+            return $"Downloading ({Utils.Magnitude(actualBytes)} of {totalBytesMag})...";
+        }
+
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            static string GetArchitectureDirName()
+            {
+                string archPath = "AssetBundles";
+                RuntimePlatform p = Application.platform;
+                if (p == RuntimePlatform.OSXEditor || p == RuntimePlatform.OSXPlayer)
+                    archPath = "Mac";
+                if (p == RuntimePlatform.Android)
+                    archPath = "Android";
+
+                return archPath;
+            }
+
+            WorldDownloadContext context = _context as WorldDownloadContext;
+
+            string assetPath = $"{context.WorldCid}/{GetArchitectureDirName()}";
+
+            IFileSystemNode fi = await IPFSService.ListFile(assetPath, token);
+            if (!fi.IsDirectory)
+                throw new InvalidDataException("World data packet is not a directory");
+
+            IEnumerable<IFileSystemLink> files = fi.Links;
+            foreach (IFileSystemLink file in files) totalBytes += file.Size;
+            totalBytesMag = Utils.Magnitude(totalBytes);
+
+            // Clean out the unpacked files - IPFS takes care of the world data with its
+            // sense of importance (pimmed/unpinned like favourited/unfavourited)
+            Directory.Delete(Utils.WorldCacheRootDir, true);
+            Directory.CreateDirectory(Utils.WorldCacheRootDir);
+
+            Stream tar = await IPFSService.Get(assetPath, token);
+            using TarArchive archive = TarArchive.CreateInputTarArchive(tar, Encoding.UTF8);
+            archive.ProgressMessageEvent += (a, e, m) =>
+            {
+                actualBytes += e.Size;
+                ProgressChanged((float)actualBytes / totalBytes);
+            };
+            // Extract directory into the destination directory
+            archive.ExtractContents(Utils.WorldCacheRootDir);
+
+            context.WorldAssetBundlePath = null;
+            foreach (string file in Directory.EnumerateFiles($"{Utils.WorldCacheRootDir}/{fi.Id}", "*.unity"))
+            {
+                context.WorldAssetBundlePath = file;
+                break;
+            }
+
+            if (context.WorldAssetBundlePath == null)
+                throw new FileNotFoundException("World Asset Bundle not found");
+
+            return context;
+        }
+    }
+ 
     public static class WorldDownloaderNew
     {
         public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldInfo(Cid WorldCid, int timeout = 600)
         {
-            WorldInfoContext context = new()
+            WorldDownloadContext context = new()
             {
                 WorldCid = WorldCid
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
-            {})
+            {
+                new DownloadWorldInfoOp()
+            })
             {
                 Timeout = timeout
             };
@@ -123,13 +261,15 @@ namespace Arteranos.Core.Operations
 
         public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldAsset(Cid WorldCid, int timeout = 600)
         {
-            WorldAssetContext context = new()
+            WorldDownloadContext context = new()
             {
                 WorldCid = WorldCid
             };
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
-            {})
+            {
+                new DownloadWorldDataOp(),
+            })
             {
                 Timeout = timeout
             };
@@ -137,6 +277,11 @@ namespace Arteranos.Core.Operations
             return (executor, context);
         }
 
+        public static WorldInfo GetWorldInfo(Context _context)
+            => (_context as WorldDownloadContext).WorldInfo;
+
+        public static string GetWorldDataFile(Context _context)
+            => (_context as WorldDownloadContext).WorldAssetBundlePath;
     }
 
     [Obsolete("Transition to WorldDownloaderNew")]
@@ -173,7 +318,7 @@ namespace Arteranos.Core.Operations
         }
 
         private static string GetWorldABF(Context _context) 
-            => (_context as WorldDownloaderContext).worldAssetBundleFile;
+            => (_context as WorldDownloaderContext).WorldAssetBundleFile;
 
         public static Cid GetWorldInfoCid(Context _context)
             => (_context as WorldDownloaderContext).WorldInfoCid;

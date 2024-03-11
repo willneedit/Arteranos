@@ -242,7 +242,7 @@ namespace Arteranos.Core
         /// <param name="reportProgress"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static async Task CopyWithProgress(Stream inStream, Stream outStream, Action<long> reportProgress, CancellationToken token = default)
+        public static async Task CopyWithProgress(Stream inStream, Stream outStream, Action<long> reportProgress = null, CancellationToken token = default)
         {
             long totalBytes = 0;
             // 0.5MB. Should be a compromise between of too few progress reports and bandwidth bottlenecking
@@ -255,7 +255,7 @@ namespace Arteranos.Core
                 if (bytesRead == 0) break;
 
                 totalBytes += bytesRead;
-                reportProgress(totalBytes);
+                reportProgress?.Invoke(totalBytes);
 
                 await outStream.WriteAsync(buffer, 0, bytesRead);
                 await Task.Yield();

@@ -26,18 +26,13 @@ namespace Arteranos.Core.Operations
     internal class WorldDownloaderContext : AssetDownloaderContext
     {
         public string WorldInfoCid = null;
-        public string worldAssetBundleFile = null;
+        public string WorldAssetBundleFile = null;
     }
 
-    internal class WorldInfoContext : Context
+    internal class WorldDownloadContext : Context
     {
         public Cid WorldCid;
         public WorldInfo WorldInfo;
-    }
-
-    internal class WorldAssetContext : Context
-    {
-        public Cid WorldCid;
         public string WorldAssetBundlePath;
     }
 

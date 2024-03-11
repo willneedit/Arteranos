@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Arteranos.Core;
 using Ipfs;
 using Arteranos.Core.Operations;
+using System.Diagnostics;
 
 namespace Arteranos.PlayTest.Web
 {
@@ -77,81 +78,56 @@ namespace Arteranos.PlayTest.Web
             yield return new WaitForSeconds(1);
         }
 
-        [Test]
-        public void DownloadWorld()
+        [UnityTest]
+        public IEnumerator DownloadWorld()
         {
-            Task.Run(DownloadWorldAsync).Wait();
+            Stopwatch sw = Stopwatch.StartNew();
+            yield return DownloadWorldCoroutine();
+            sw.Stop();
+            UnityEngine.Debug.Log($"DownloadWorld elapsed time: {sw.Elapsed.Milliseconds} milliseconds");
         }
 
-        public async Task DownloadWorldAsync()
+        public IEnumerator DownloadWorldCoroutine()
         {
-            Assert.IsNotNull(WorldCid);
-
             (AsyncOperationExecutor<Context> ao, Context co) =
-                WorldDownloader.PrepareDownloadWorld(WorldCid);
+                WorldDownloaderNew.PrepareGetWorldAsset(WorldCid);
 
-            ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
+            ao.ProgressChanged += (ratio, msg) => UnityEngine.Debug.Log($"{ratio} - {msg}");
 
-            await ao.ExecuteAsync(co);
+            yield return ao.ExecuteCoroutine(co);
 
-            WorldInfo wi = await WorldDownloader.GetWorldInfoAsync(co);
+            string file = WorldDownloaderNew.GetWorldDataFile(co);
+
+            Assert.IsNotNull(file);
+            Assert.IsTrue(File.Exists(file));
+        }
+
+        [UnityTest]
+        public IEnumerator GetWorldInfo()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            yield return GetWorldInfoCoroutine();
+            sw.Stop();
+            UnityEngine.Debug.Log($"GetWorldInfo elapsed time: {sw.Elapsed.Milliseconds} milliseconds");
+        }
+
+        public IEnumerator GetWorldInfoCoroutine()
+        {
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                WorldDownloaderNew.PrepareGetWorldInfo(WorldCid);
+
+            yield return ao.ExecuteCoroutine(co);
+
+            WorldInfo wi = WorldDownloaderNew.GetWorldInfo(co);
+
+            Assert.IsNotNull(wi);
+            Assert.IsNotNull(wi.win.ScreenshotPNG);
 
             Assert.IsNotNull(wi.WorldName);
             Assert.IsNotNull(wi.win.Author);
-            Assert.AreEqual(WorldCid.ToString(), wi.WorldCid);
 
             UserID userID = wi.win.Author;
-            Assert.AreEqual("Ancient Iwontsay", (string) userID);
-        }
-
-        [Test]
-        public void GetWorldData()
-        {
-            Task.Run(GetWorldDataAsync).Wait();
-        }
-
-        public async Task GetWorldDataAsync()
-        {
-            (AsyncOperationExecutor<Context> ao, Context co) =
-                WorldDownloader.PrepareDownloadWorld(WorldCid);
-
-            await ao.ExecuteAsync(co);
-
-            WorldInfo wi = await WorldDownloader.GetWorldInfoAsync(co);
-
-            Assert.IsNotNull(wi);
-            Assert.AreEqual(wi.WorldCid, WorldCid.ToString());
-
-            Assert.IsNotEmpty(WorldDownloader.GetWorldCacheDir(WorldCid));
-            Assert.IsTrue(Directory.Exists(WorldDownloader.GetWorldCacheDir(WorldCid)));
-
-            Assert.IsNotEmpty(WorldDownloader.GetWorldABF(WorldCid));
-            Assert.IsTrue(File.Exists(WorldDownloader.GetWorldABF(WorldCid)));
-
-            // WorldInfo needs to be constant, even the the world was recently accessed.
-            wi.Updated = DateTime.Now;
-
-
-            string WICid = await wi.PublishAsync(true);
-
-            Assert.IsNotNull(WICid);
-            Assert.AreEqual(WICid, WorldDownloader.GetWorldInfoCid(co).ToString());
-            Assert.AreEqual(WICid, wi.WorldInfoCid);
-
-            // Look with the World Cid
-            WorldInfo wi2 = WorldInfo.DBLookup(WorldCid);
-
-            Assert.IsNotNull(wi2);
-            Assert.AreEqual(wi2.WorldCid, WorldCid.ToString());
-            Assert.AreEqual(wi2.WorldInfoCid, WICid);
-
-            // Look up with the World Info Cid
-            WorldInfo wi3 = await WorldInfo.RetrieveAsync(WICid);
-
-            Assert.IsNotNull(wi3);
-            Assert.AreEqual(wi3.WorldCid, WorldCid.ToString());
-            Assert.AreEqual(wi3.WorldInfoCid, WICid);
-
+            Assert.AreEqual("Ancient Iwontsay", (string)userID);
         }
     }
 }
