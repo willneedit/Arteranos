@@ -17,6 +17,7 @@ using Arteranos.Services;
 using System.Collections.Generic;
 using System.Text;
 using ICSharpCode.SharpZipLib.Tar;
+using System.IO.Pipes;
 
 namespace Arteranos.Core.Operations
 {
@@ -216,14 +217,25 @@ namespace Arteranos.Core.Operations
             Directory.CreateDirectory(Utils.WorldCacheRootDir);
 
             Stream tar = await IPFSService.Get(assetPath, token);
-            using TarArchive archive = TarArchive.CreateInputTarArchive(tar, Encoding.UTF8);
-            archive.ProgressMessageEvent += (a, e, m) =>
+
+            // Worker task to observe the progress...
+            using CancellationTokenSource cts = new();
+            _ = Task.Run(async () =>
             {
-                actualBytes += e.Size;
-                ProgressChanged((float)actualBytes / totalBytes);
-            };
-            // Extract directory into the destination directory
+                while (!cts.Token.IsCancellationRequested)
+                {
+                    if(actualBytes != tar.Position)
+                    {
+                        actualBytes = tar.Position;
+                        ProgressChanged((float)actualBytes / totalBytes);
+                    }
+                    await Task.Delay(10);
+                }
+            });
+
+            using TarArchive archive = TarArchive.CreateInputTarArchive(tar, Encoding.UTF8);
             archive.ExtractContents(Utils.WorldCacheRootDir);
+            cts.Cancel(); // ... and he's done it.
 
             context.WorldAssetBundlePath = null;
             foreach (string file in Directory.EnumerateFiles($"{Utils.WorldCacheRootDir}/{fi.Id}", "*.unity"))
