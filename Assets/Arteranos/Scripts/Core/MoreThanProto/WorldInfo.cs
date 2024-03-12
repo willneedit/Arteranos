@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core.Operations;
 using Arteranos.Services;
 using Ipfs;
 using Ipfs.CoreApi;
@@ -55,22 +56,16 @@ namespace Arteranos.Core
         public static IEnumerable<WorldInfo> DBList()
             => new WorldInfo()._DBList();
 
-        [Obsolete("WorldInfos will not published, the world cid suffices")]
-        public static async Task<WorldInfo> RetrieveAsync(Cid WorldInfoCid, CancellationToken cancel = default)
+        public static async Task<WorldInfo> RetrieveAsync(Cid WorldCid)
         {
-            if (WorldInfoCid == null) return null;
-
             try
             {
-                Stream s = await IPFSService.ReadFile(WorldInfoCid, cancel);
-                WorldInfo wi = new()
-                {
-                    win = null,
-                    WorldInfoCid = WorldInfoCid,
-                    Updated = DateTime.MinValue
-                };
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    WorldDownloaderNew.PrepareGetWorldInfo(WorldCid);
 
-                wi.win = Serializer.Deserialize<WorldInfoNetwork>(s);
+                co = await ao.ExecuteAsync(co);
+
+                WorldInfo wi = WorldDownloaderNew.GetWorldInfo(co);
                 return wi;
             }
             catch
@@ -79,10 +74,10 @@ namespace Arteranos.Core
             }
         }
 
-        [Obsolete("WorldInfos will not published, the world cid suffices")]
-        public static WorldInfo Retrieve(Cid WorldInfoCid) 
-            => Task.Run(async () => await RetrieveAsync(WorldInfoCid)).Result;
+        public static WorldInfo Retrieve(Cid WorldCid) 
+            => Task.Run(async () => await RetrieveAsync(WorldCid)).Result;
 
+        [Obsolete("Deprecating separate WorldInfo")]
         public async Task<Cid> PublishAsync(bool dryRun = false, CancellationToken cancel = default)
         {
             AddFileOptions ao = null;
@@ -94,7 +89,7 @@ namespace Arteranos.Core
             ms.Position = 0;
 
             IFileSystemNode fsn = await IPFSService.AddStream(ms, options: ao, cancel: cancel);
-            WorldInfoCid = fsn.Id;
+            Cid WorldInfoCid = fsn.Id;
             return WorldInfoCid;
         }
 

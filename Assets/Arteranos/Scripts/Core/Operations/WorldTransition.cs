@@ -33,7 +33,7 @@ namespace Arteranos.Core.Operations
 
                 XRControl.Instance.MoveRig();
 
-                SettingsManager.WorldInfoCid = null;
+                SettingsManager.WorldCid = null;
                 ScreenFader.StartFading(0.0f);
                 done = true;
             }
@@ -49,10 +49,9 @@ namespace Arteranos.Core.Operations
                 string worldABF = WorldDownloader.GetWorldABF(WorldCid);
 
                 WorldInfo wi = WorldInfo.DBLookup(WorldCid);
-                Cid WICid = wi.WorldInfoCid;
 
                 EnterDownloadedWorld(worldABF);
-                SettingsManager.WorldInfoCid = WICid;
+                SettingsManager.WorldCid = WorldCid;
             }
 
             return Task.Run(Enter);
@@ -123,17 +122,10 @@ namespace Arteranos.Core.Operations
         /// <param name="WorldCid"></param>
         /// 
         /// <returns>Task completed, or the server has been notified</returns>
-        [Obsolete("Use EnterWIAsync(), either with WorldInfo or its CID")]
         public static async Task EnterWorldAsync(Cid WorldCid)
         {
             WorldInfo wi = WorldInfo.DBLookup(WorldCid);
 
-            await EnterWIAsync(wi);
-        }
-
-        public static async Task EnterWIAsync(Cid WorldInfoCid)
-        {
-            WorldInfo wi = await WorldInfo.RetrieveAsync(WorldInfoCid);
             await EnterWIAsync(wi);
         }
 

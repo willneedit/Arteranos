@@ -58,9 +58,9 @@ namespace Arteranos.Core
         public WorldInfoNetwork win;
 
         // The other items are for the local use and stored in the client's FFDB.
-        [Obsolete("WorldInfoCid is sufficient both for WorldInfo and its assets")]
-        [ProtoMember(2)]
-        public string WorldInfoCid;
+        //[Obsolete("WorldInfoCid is sufficient both for WorldInfo and its assets", true)]
+        //[ProtoMember(2)]
+        //public string WorldInfoCid;
 
         [ProtoMember(3)]
         public DateTime Updated;
@@ -77,7 +77,6 @@ namespace Arteranos.Core
             WorldInfo stripped = new WorldInfo()
             { 
                 win = win,
-                WorldInfoCid = WorldInfoCid, // Changed contents - points to the original one.
                 Updated = Updated
             };
 

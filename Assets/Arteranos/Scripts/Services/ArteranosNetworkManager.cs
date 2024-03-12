@@ -336,7 +336,7 @@ namespace Arteranos.Services
         {
             base.OnStopServer();
 
-            SettingsManager.WorldInfoCid = null;
+            SettingsManager.WorldCid = null;
 
             NetworkServer.UnregisterHandler<CTSPacketEnvelope>();
         }
@@ -368,9 +368,9 @@ namespace Arteranos.Services
                 }, conn, agreePublicKey);
             }
 
-            WorldInfo wi = await WorldInfo.RetrieveAsync(SettingsManager.WorldInfoCid);
+            WorldInfo wi = await WorldInfo.RetrieveAsync(SettingsManager.WorldCid);
 
-            Debug.Log($"[Server] sending world CID '{SettingsManager.WorldInfoCid}' to latecoming conn {conn.connectionId}");
+            Debug.Log($"[Server] sending world CID '{SettingsManager.WorldCid}' to latecoming conn {conn.connectionId}");
 
             SettingsManager.StartCoroutineAsync(() => SendWCAJustForTheLaggard(conn, agreePublicKey, wi));
         }
@@ -636,7 +636,7 @@ namespace Arteranos.Services
                     }
                 }
 
-                if (SettingsManager.WorldInfoCid == changeAnnouncement.WorldInfo.WorldInfoCid)
+                if (SettingsManager.WorldCid == changeAnnouncement.WorldInfo.WorldCid)
                 {
                     StopWorldAction("Already in the current world.");
                     return;
@@ -651,7 +651,7 @@ namespace Arteranos.Services
 
             // In Stage 1: We're really in the current world.
             // In Stage 2: In Host mode, the announcement came looped back in Stage 1
-            if (SettingsManager.WorldInfoCid == changeAnnouncement.WorldInfo.WorldInfoCid)
+            if (SettingsManager.WorldCid == changeAnnouncement.WorldInfo.WorldCid)
             {
                 if (onlineLevel == OnlineLevel.Client)
                     StopWorldAction("Already in the current world.");

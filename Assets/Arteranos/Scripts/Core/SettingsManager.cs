@@ -33,7 +33,7 @@ namespace Arteranos.Core
         public static Client Client { get; internal set; }
         public static Server Server { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
-        public static Cid WorldInfoCid { get; set; }
+        public static Cid WorldCid { get; set; }
         public static string DefaultTOStext { get; private set; } = null;
 
         public static Cid DefaultMaleAvatar { get; protected set; } = null;

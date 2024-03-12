@@ -33,7 +33,7 @@ namespace Arteranos.Core
             DescriptionStruct = ServerDescription.DBLookup(PeerID.ToString());
 
             if(OnlineData != null) 
-                WorldInfo = WorldInfo.Retrieve(OnlineData.WorldInfoCid);
+                WorldInfo = WorldInfo.Retrieve(OnlineData.WorldCid);
 
             this.PeerID = PeerID;
         }
@@ -45,7 +45,7 @@ namespace Arteranos.Core
                 DescriptionStruct = ServerDescription.DBLookup(PeerID.ToString());
 
                 if (OnlineData != null)
-                    WorldInfo = WorldInfo.Retrieve(OnlineData.WorldInfoCid);
+                    WorldInfo = WorldInfo.Retrieve(OnlineData.WorldCid);
             });
         }
 

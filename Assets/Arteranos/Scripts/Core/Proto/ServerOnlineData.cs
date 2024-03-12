@@ -32,7 +32,7 @@ namespace Arteranos.Core
         public OnlineLevel OnlineLevel;
 
         [ProtoMember(6)]
-        public string WorldInfoCid;
+        public string WorldCid;
 
         public override void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);

@@ -11,7 +11,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using Arteranos.Web;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
@@ -199,9 +198,10 @@ namespace Arteranos.UI
 
             sortedWorldList.Clear();
 
-            if (SettingsManager.WorldInfoCid != null)
+            if (SettingsManager.WorldCid != null)
             {
-                WorldInfo wi = await WorldInfo.RetrieveAsync(SettingsManager.WorldInfoCid);
+                // FIXME Use Coroutine to make this as a nonblocking retrieval?
+                WorldInfo wi = await WorldInfo.RetrieveAsync(SettingsManager.WorldCid);
                 AddListEntry(wi.WorldCid);
             }
 

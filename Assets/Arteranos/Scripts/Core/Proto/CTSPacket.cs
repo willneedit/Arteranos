@@ -75,7 +75,7 @@ namespace Arteranos.Core
         // public string WorldCid; // In case if the World Info isn't available yet
 
         [ProtoMember(2)]
-        public WorldInfo WorldInfo; // NOTE: No Screenshot for brevity, WorldInfoCid points to original
+        public WorldInfo WorldInfo; // NOTE: No Screenshot for brevity, WorldCid points to original
 
         [ProtoMember(3)]
         public string Message; // Nonzero if it needs a dialog to pop up
