@@ -77,7 +77,7 @@ namespace Arteranos.Core
         public static WorldInfo Retrieve(Cid WorldCid) 
             => Task.Run(async () => await RetrieveAsync(WorldCid)).Result;
 
-        [Obsolete("Deprecating separate WorldInfo")]
+        [Obsolete("Deprecating separate WorldInfo", true)]
         public async Task<Cid> PublishAsync(bool dryRun = false, CancellationToken cancel = default)
         {
             AddFileOptions ao = null;

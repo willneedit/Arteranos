@@ -12,6 +12,7 @@ using Arteranos.Core;
 using Ipfs;
 using Arteranos.Core.Operations;
 using System.Diagnostics;
+using UnityEditor;
 
 namespace Arteranos.PlayTest.Web
 {
@@ -124,6 +125,19 @@ namespace Arteranos.PlayTest.Web
 
             UserID userID = wi.win.Author;
             Assert.AreEqual("Ancient Iwontsay", (string)userID);
+
+            Stream stream = File.OpenRead("Assets/Arteranos/_Test/Screenshot.png");
+            byte[] data = new byte[stream.Length];
+            stream.Read(data, 0, data.Length);
+            long length = data.Length < stream.Length ? data.Length : stream.Length;
+
+            if (wi.win.ScreenshotPNG.Length != stream.Length)
+               UnityEngine.Debug.Log($"Screenshot length mismatch, original={data.Length}, retrieved={wi.win.ScreenshotPNG.Length}");
+
+            for (long i = 0; i < length; i++)
+                if (data[i] != wi.win.ScreenshotPNG[i])
+                    Assert.Fail($"Screenshot doesn't match: offset={i}, original={data[i]}, retrieved={wi.win.ScreenshotPNG[i]}");
+
         }
     }
 }

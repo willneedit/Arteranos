@@ -440,7 +440,7 @@ namespace Arteranos.Editor
                 {
                     IProgressUI pui = ProgressUIFactory.New();
 
-                    pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(WorldCid));
+                    pui.SetupAsyncOperations(() => WorldDownloaderNew.PrepareGetWorldAsset(WorldCid));
 
                     pui.Completed += (context) => OnLoadWorldComplete(context);
                     pui.Faulted += OnLoadWorldFaulted;
@@ -451,7 +451,7 @@ namespace Arteranos.Editor
             private static void OnLoadWorldComplete(Context _context)
             {
                 Debug.Log("World data file loading and unpacking succeeded.");
-                WorldDownloader.EnterDownloadedWorld(_context);
+                WorldTransition.EnterDownloadedWorld();
             }
         }
     }

@@ -293,7 +293,7 @@ namespace Arteranos.UI
             pui.Completed += context =>
             {
                 Cid cid = AssetUploader.GetUploadedCid(context);
-                _ = ParseWorld(cid);
+                ParseWorld(cid);
             };
 
             pui.Faulted += (ex, context) =>
@@ -303,17 +303,30 @@ namespace Arteranos.UI
             };
         }
 
-        private async Task ParseWorld(Cid cid)
+        private void ParseWorld(Cid cid)
         {
-            (Exception ex, Context co) = await WorldTransition.PreloadWorldDataAsync(cid);
-            btn_AddWorld.interactable = true;
 
-            if(ex == null)
+            IEnumerator ParseWorldCoroutine()
             {
-                AddListEntry(cid, true);
+                yield return null;
 
-                SettingsManager.StartCoroutineAsync(() => ShowPage(0));
+                try
+                {
+                    (var ao, var co) = WorldDownloaderNew.PrepareGetWorldInfo(cid);
+                    yield return ao.ExecuteCoroutine(co);
+
+                    AddListEntry(cid, true);
+
+                    yield return ShowPage(0);
+                }
+                finally
+                {
+                    btn_AddWorld.interactable = true;
+
+                }
             }
+
+            StartCoroutine(ParseWorldCoroutine());
         }
     }
 }

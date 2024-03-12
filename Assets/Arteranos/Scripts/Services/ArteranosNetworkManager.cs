@@ -571,7 +571,7 @@ namespace Arteranos.Services
                 {
                     if (changeAnnouncement.WorldInfo == null) return false; // It's the offline embedded world.
 
-                    if (string.IsNullOrEmpty(WorldDownloader.GetWorldABF(changeAnnouncement.WorldInfo.WorldCid))) return true;
+                    if (string.IsNullOrEmpty(WorldDownloaderNew.CurrentWorldAssetBundlePath)) return true;
 
                     return false;
                 }

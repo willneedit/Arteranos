@@ -132,10 +132,12 @@ namespace Arteranos.Core.Operations
                     break;
                 }
 
-            byte[] screenshotBytes = new byte[screenshotSize];
+            byte[] screenshotBytes = null;
             using (Stream stream = await IPFSService.ReadFile($"{context.WorldCid}/{screenshotName}"))
             {
-                stream.Read(screenshotBytes, 0, screenshotBytes.Length);
+                using MemoryStream ms = new();
+                await Utils.CopyWithProgress(stream, ms);
+                screenshotBytes = ms.ToArray();
             }
 
             using (Stream stream = await IPFSService.ReadFile($"{context.WorldCid}/Metadata.json"))
@@ -161,6 +163,7 @@ namespace Arteranos.Core.Operations
                     Updated = DateTime.MinValue
                 };
                 context.WorldInfo = wi;
+                wi.DBUpdate();
             }
 
             return context;
@@ -200,6 +203,9 @@ namespace Arteranos.Core.Operations
             }
 
             WorldDownloadContext context = _context as WorldDownloadContext;
+
+            // Invalidate the 'current' asset bundle path.
+            WorldDownloaderNew.CurrentWorldAssetBundlePath = null;
 
             string assetPath = $"{context.WorldCid}/{GetArchitectureDirName()}";
 
@@ -247,12 +253,15 @@ namespace Arteranos.Core.Operations
             if (context.WorldAssetBundlePath == null)
                 throw new FileNotFoundException("World Asset Bundle not found");
 
+            WorldDownloaderNew.CurrentWorldAssetBundlePath = context.WorldAssetBundlePath;
             return context;
         }
     }
  
     public static class WorldDownloaderNew
     {
+        public static string CurrentWorldAssetBundlePath { get; internal set; } = null;
+
         public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldInfo(Cid WorldCid, int timeout = 600)
         {
             WorldDownloadContext context = new()
@@ -296,7 +305,7 @@ namespace Arteranos.Core.Operations
             => (_context as WorldDownloadContext).WorldAssetBundlePath;
     }
 
-    [Obsolete("Transition to WorldDownloaderNew")]
+    [Obsolete("Transition to WorldDownloaderNew", true)]
     public static class WorldDownloader
     {
         public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadWorld(Cid cid, int timeout = 600)
@@ -321,14 +330,6 @@ namespace Arteranos.Core.Operations
             return (executor, context);
 
         }
-
-        public static void EnterDownloadedWorld(Context _context)
-        {
-            string worldABF = GetWorldABF(_context);
-
-            WorldTransition.EnterDownloadedWorld(worldABF);
-        }
-
         private static string GetWorldABF(Context _context) 
             => (_context as WorldDownloaderContext).WorldAssetBundleFile;
 

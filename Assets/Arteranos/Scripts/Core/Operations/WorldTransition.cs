@@ -46,11 +46,7 @@ namespace Arteranos.Core.Operations
         {
             void Enter()
             {
-                string worldABF = WorldDownloader.GetWorldABF(WorldCid);
-
-                WorldInfo wi = WorldInfo.DBLookup(WorldCid);
-
-                EnterDownloadedWorld(worldABF);
+                EnterDownloadedWorld();
                 SettingsManager.WorldCid = WorldCid;
             }
 
@@ -67,7 +63,7 @@ namespace Arteranos.Core.Operations
             pui.AllowCancel = true;
 
             // FIXME See #71
-            pui.SetupAsyncOperations(() => WorldDownloader.PrepareDownloadWorld(WorldCid));
+            pui.SetupAsyncOperations(() => WorldDownloaderNew.PrepareGetWorldAsset(WorldCid));
 
             (Exception ex, Context co) = await pui.RunProgressAsync();
 
@@ -77,7 +73,7 @@ namespace Arteranos.Core.Operations
                 Debug.LogException(ex);
             }
             else
-                Debug.Log($"Download and unpacking completed: {WorldCid}");
+                Debug.Log($"Download of the world asset completed: {WorldCid}");
 
             return (ex, co);
         }
@@ -142,7 +138,7 @@ namespace Arteranos.Core.Operations
             });
         }
 
-        public static void EnterDownloadedWorld(string worldABF)
+        public static void EnterDownloadedWorld()
         {
             static IEnumerator EnterDownloadedWorld_(string worldABF)
             {
@@ -158,7 +154,7 @@ namespace Arteranos.Core.Operations
                 sl.Name = worldABF;
             }
 
-            SettingsManager.StartCoroutineAsync(() => EnterDownloadedWorld_(worldABF));
+            SettingsManager.StartCoroutineAsync(() => EnterDownloadedWorld_(WorldDownloaderNew.CurrentWorldAssetBundlePath));
         }
     }
 }
