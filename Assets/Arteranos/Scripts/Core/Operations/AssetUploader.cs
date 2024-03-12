@@ -14,7 +14,6 @@ using Ipfs;
 using Arteranos.Services;
 using Ipfs.CoreApi;
 using System.Net.Http;
-using System.IO.Pipes;
 using UnityEngine;
 using System.IO.Compression;
 
@@ -108,6 +107,8 @@ namespace Arteranos.Core.Operations
 
         public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
+            using CancellationTokenSource cts = new();
+
             AssetUploaderContext context = _context as AssetUploaderContext;
 
             AddFileOptions ao = new()
@@ -123,19 +124,26 @@ namespace Arteranos.Core.Operations
 
                 using Stream stream = File.OpenRead(context.TempFile);
 
-                using AnonymousPipeServerStream pipeServer = new();
-                using AnonymousPipeClientStream pipeClient = new(pipeServer.GetClientHandleAsString());
+                _ = Task.Run(async () =>
+                {
+                    while (!cts.Token.IsCancellationRequested)
+                    {
+                        if (actualBytes != stream.Position)
+                        {
+                            actualBytes = stream.Position;
+                            ProgressChanged((float)actualBytes / totalBytes);
+                        }
+                        await Task.Delay(10);
+                    }
+                });
 
-                _ = Utils.CopyWithProgress(stream, pipeServer, bytes => {
-                    actualBytes = bytes;
-                    ProgressChanged((float) bytes / totalBytes);
-                }, token);
-                IFileSystemNode fsn = await IPFSService.AddStream(pipeClient, "", ao, token);
+                IFileSystemNode fsn = await IPFSService.AddStream(stream, "", ao, token);
 
                 context.Cid = fsn.Id;
             }
             finally
             {
+                cts.Cancel();
                 if (File.Exists(context.TempFile)) File.Delete(context.TempFile);
             }
 

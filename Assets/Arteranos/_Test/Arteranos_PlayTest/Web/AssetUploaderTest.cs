@@ -24,7 +24,6 @@ namespace Arteranos.PlayTest.Web
 
         IPFSServiceImpl srv = null;
         IpfsEngine ipfs = null;
-        Peer self = null;
 
         [UnitySetUp]
         public IEnumerator SetupIPFS()
@@ -41,7 +40,6 @@ namespace Arteranos.PlayTest.Web
 
             ipfs = srv.Ipfs_;
 
-            self = Task.Run(async () => await ipfs.LocalPeer).Result;
         }
 
         [UnityTearDown]
@@ -49,10 +47,9 @@ namespace Arteranos.PlayTest.Web
         {
             srv = null;
             ipfs = null;
-            self = null;
 
-            StartupManagerMock go1 = GameObject.FindObjectOfType<StartupManagerMock>();
-            GameObject.Destroy(go1.gameObject);
+            StartupManagerMock go1 = Object.FindObjectOfType<StartupManagerMock>();
+            Object.Destroy(go1.gameObject);
 
             yield return new WaitForSeconds(1);
         }

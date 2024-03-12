@@ -22,7 +22,6 @@ namespace Arteranos.PlayTest.Web
 
         IPFSServiceImpl srv = null;
         IpfsEngine ipfs = null;
-        Peer self = null;
 
         Cid WorldCid = null;
 
@@ -40,8 +39,6 @@ namespace Arteranos.PlayTest.Web
             yield return TestFixture.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
 
             ipfs = srv.Ipfs_;
-
-            self = Task.Run(async () => await ipfs.LocalPeer).Result;
 
             Task.Run(async () => await UploadTestWorld()).Wait();
         }
@@ -69,11 +66,10 @@ namespace Arteranos.PlayTest.Web
 
             srv = null;
             ipfs = null;
-            self = null;
             WorldCid = null;
 
-            StartupManagerMock go1 = GameObject.FindObjectOfType<StartupManagerMock>();
-            GameObject.Destroy(go1.gameObject);
+            StartupManagerMock go1 = UnityEngine.Object.FindObjectOfType<StartupManagerMock>();
+            UnityEngine.Object.Destroy(go1.gameObject);
 
             yield return new WaitForSeconds(1);
         }
