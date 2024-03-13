@@ -29,24 +29,22 @@ namespace Arteranos.Core
 
         public ServerInfo(MultiHash PeerID)
         {
+            this.PeerID = PeerID;
+
             OnlineData = ServerOnlineData.DBLookup(PeerID.ToString());
             DescriptionStruct = ServerDescription.DBLookup(PeerID.ToString());
 
-            if(OnlineData != null) 
-                WorldInfo = WorldInfo.Retrieve(OnlineData.WorldCid);
-
-            this.PeerID = PeerID;
+            // For later, only if we're an indepth investigation
+            WorldInfo = null;
         }
 
         public async Task Update()
         {
-            await Task.Run(() => {
-                OnlineData = ServerOnlineData.DBLookup(PeerID.ToString());
-                DescriptionStruct = ServerDescription.DBLookup(PeerID.ToString());
+            OnlineData = ServerOnlineData.DBLookup(PeerID.ToString());
+            DescriptionStruct = ServerDescription.DBLookup(PeerID.ToString());
 
-                if (OnlineData != null)
-                    WorldInfo = WorldInfo.Retrieve(OnlineData.WorldCid);
-            });
+            if (OnlineData != null)
+                WorldInfo = await WorldInfo.RetrieveAsync(OnlineData.WorldCid);
         }
 
         public void Delete()

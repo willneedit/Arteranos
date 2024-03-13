@@ -58,39 +58,23 @@ namespace Arteranos.Core
 
         public static async Task<WorldInfo> RetrieveAsync(Cid WorldCid)
         {
+            // null means the offline world... or falling back to the erroneous world.
+            if (WorldCid == null) return null;
+
             try
             {
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    WorldDownloaderNew.PrepareGetWorldInfo(WorldCid);
+                    WorldDownloader.PrepareGetWorldInfo(WorldCid);
 
                 co = await ao.ExecuteAsync(co);
 
-                WorldInfo wi = WorldDownloaderNew.GetWorldInfo(co);
+                WorldInfo wi = WorldDownloader.GetWorldInfo(co);
                 return wi;
             }
             catch
             {
                 return null;
             }
-        }
-
-        public static WorldInfo Retrieve(Cid WorldCid) 
-            => Task.Run(async () => await RetrieveAsync(WorldCid)).Result;
-
-        [Obsolete("Deprecating separate WorldInfo", true)]
-        public async Task<Cid> PublishAsync(bool dryRun = false, CancellationToken cancel = default)
-        {
-            AddFileOptions ao = null;
-            if (dryRun)
-                ao = new AddFileOptions() { OnlyHash = true };
-
-            using MemoryStream ms = new();
-            Serializer.Serialize(ms, win);
-            ms.Position = 0;
-
-            IFileSystemNode fsn = await IPFSService.AddStream(ms, options: ao, cancel: cancel);
-            Cid WorldInfoCid = fsn.Id;
-            return WorldInfoCid;
         }
 
         // ---------------------------------------------------------------

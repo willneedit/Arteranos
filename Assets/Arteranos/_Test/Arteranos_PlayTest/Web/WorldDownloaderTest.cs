@@ -37,7 +37,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return null;
 
-            yield return TestFixture.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
+            yield return TestFixture.WaitForCondition(5, () => srv && srv.Ipfs_ != null, "IPFS server timeout");
 
             ipfs = srv.Ipfs_;
 
@@ -87,13 +87,13 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator DownloadWorldCoroutine()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                WorldDownloaderNew.PrepareGetWorldAsset(WorldCid);
+                WorldDownloader.PrepareGetWorldAsset(WorldCid);
 
             ao.ProgressChanged += (ratio, msg) => UnityEngine.Debug.Log($"{ratio} - {msg}");
 
             yield return ao.ExecuteCoroutine(co);
 
-            string file = WorldDownloaderNew.GetWorldDataFile(co);
+            string file = WorldDownloader.GetWorldDataFile(co);
 
             Assert.IsNotNull(file);
             Assert.IsTrue(File.Exists(file));
@@ -111,11 +111,11 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator GetWorldInfoCoroutine()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                WorldDownloaderNew.PrepareGetWorldInfo(WorldCid);
+                WorldDownloader.PrepareGetWorldInfo(WorldCid);
 
             yield return ao.ExecuteCoroutine(co);
 
-            WorldInfo wi = WorldDownloaderNew.GetWorldInfo(co);
+            WorldInfo wi = WorldDownloader.GetWorldInfo(co);
 
             Assert.IsNotNull(wi);
             Assert.IsNotNull(wi.win.ScreenshotPNG);

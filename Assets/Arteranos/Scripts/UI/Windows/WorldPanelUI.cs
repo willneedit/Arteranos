@@ -200,7 +200,6 @@ namespace Arteranos.UI
 
             if (SettingsManager.WorldCid != null)
             {
-                // FIXME Use Coroutine to make this as a nonblocking retrieval?
                 WorldInfo wi = await WorldInfo.RetrieveAsync(SettingsManager.WorldCid);
                 AddListEntry(wi.WorldCid);
             }
@@ -312,7 +311,7 @@ namespace Arteranos.UI
 
                 try
                 {
-                    (var ao, var co) = WorldDownloaderNew.PrepareGetWorldInfo(cid);
+                    (var ao, var co) = WorldDownloader.PrepareGetWorldInfo(cid);
                     yield return ao.ExecuteCoroutine(co);
 
                     AddListEntry(cid, true);

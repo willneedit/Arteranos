@@ -63,7 +63,7 @@ namespace Arteranos.Core.Operations
             pui.AllowCancel = true;
 
             // FIXME See #71
-            pui.SetupAsyncOperations(() => WorldDownloaderNew.PrepareGetWorldAsset(WorldCid));
+            pui.SetupAsyncOperations(() => WorldDownloader.PrepareGetWorldAsset(WorldCid));
 
             (Exception ex, Context co) = await pui.RunProgressAsync();
 
@@ -154,7 +154,7 @@ namespace Arteranos.Core.Operations
                 sl.Name = worldABF;
             }
 
-            SettingsManager.StartCoroutineAsync(() => EnterDownloadedWorld_(WorldDownloaderNew.CurrentWorldAssetBundlePath));
+            SettingsManager.StartCoroutineAsync(() => EnterDownloadedWorld_(WorldDownloader.CurrentWorldAssetBundlePath));
         }
     }
 }

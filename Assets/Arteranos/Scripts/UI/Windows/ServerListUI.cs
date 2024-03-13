@@ -70,24 +70,32 @@ namespace Arteranos.UI
             StartCoroutine(PopulateCoroutine());
         }
 
-        private async void OnReloadClicked()
+        private void OnReloadClicked()
         {
-            static Task DoUpdate(ServerListItem server) 
+            static Task DoUpdate(ServerListItem server)
                 => server.UpdateServerData();
 
-            btn_Reload.interactable = false;
+            IEnumerator ReloadCoroutine()
+            {
+                btn_Reload.interactable = false;
 
-            TaskPool<ServerListItem> pool = new();
+                TaskPool<ServerListItem> pool = new();
 
-            Debug.Log($"Reload started, queued {ServerList.Count} servers");
+                Debug.Log($"Reload started, queued {ServerList.Count} servers");
 
-            foreach (ServerListItem server in ServerList.Values)
-                pool.Schedule(server, DoUpdate);
+                foreach (ServerListItem server in ServerList.Values)
+                    pool.Schedule(server, DoUpdate);
 
-            await pool.Run();
+                Task t = pool.Run();
 
-            Debug.Log("Reload finished.");
-            if (btn_Reload != null) btn_Reload.interactable = true;
+                while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+
+                Debug.Log("Reload finished.");
+
+                btn_Reload.interactable = true;
+            }
+
+            StartCoroutine(ReloadCoroutine());
         }
     }
 }

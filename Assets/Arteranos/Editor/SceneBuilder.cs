@@ -179,7 +179,7 @@ namespace Arteranos.Editor
 
             Camera DroneCamera = FindObjectOfType<Camera>();
 
-            RenderTexture rt = new RenderTexture(1920, 1080, 0, RenderTextureFormat.ARGB32);
+            RenderTexture rt = new(1920, 1080, 0, RenderTextureFormat.ARGB32);
             DroneCamera.targetTexture = rt;
             RenderTexture.active = rt;
 
@@ -218,7 +218,7 @@ namespace Arteranos.Editor
     {
         public static readonly string ROOT_PATH = "Assets/Root/";
 
-        public static event System.Action OnCompletedBuild;
+        public static event Action OnCompletedBuild;
 
         public static WorldMetaData metadata;
         public static string screenshotFile;
@@ -273,8 +273,7 @@ namespace Arteranos.Editor
         {
             GameObject env = GameObject.Find("Environment");
 
-            if(env == null)
-                env = new GameObject("Environment");
+            if (env) env = new GameObject("Environment");
 
             List<GameObject> looseObjects = sc.GetRootGameObjects().ToList().FindAll(x =>
                 x.name != "Environment"
@@ -369,7 +368,7 @@ namespace Arteranos.Editor
 
             if(string.IsNullOrEmpty(targetFile)) targetFile = null;
 
-            metadata.Created = System.DateTime.Now;
+            metadata.Created = DateTime.Now;
 
             Common.BuildAssetBundle(
                 gatheredAssets.ToArray(),
@@ -440,18 +439,17 @@ namespace Arteranos.Editor
                 {
                     IProgressUI pui = ProgressUIFactory.New();
 
-                    pui.SetupAsyncOperations(() => WorldDownloaderNew.PrepareGetWorldAsset(WorldCid));
+                    pui.SetupAsyncOperations(() => WorldDownloader.PrepareGetWorldAsset(WorldCid));
 
-                    pui.Completed += (context) => OnLoadWorldComplete(context);
-                    pui.Faulted += OnLoadWorldFaulted;
+                    pui.Completed += (_context) =>
+                    {
+                        Debug.Log("World data file loading and unpacking succeeded.");
+                        WorldTransition.EnterDownloadedWorld();
+                    };
+
+                    pui.Faulted += (Exception ex, Context _context) => 
+                        Debug.LogError($"Error in loading world: {ex.Message}");
                 }
-            }
-
-            private static void OnLoadWorldFaulted(System.Exception ex, Context _context) => Debug.LogError($"Error in loading world: {ex.Message}");
-            private static void OnLoadWorldComplete(Context _context)
-            {
-                Debug.Log("World data file loading and unpacking succeeded.");
-                WorldTransition.EnterDownloadedWorld();
             }
         }
     }
