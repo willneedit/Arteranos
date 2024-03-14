@@ -34,7 +34,6 @@ namespace Arteranos.Web
             }
 
             ServerInfo si = new(PeerID);
-            await si.Update();
 
             bool? result = null;
             IEnumerator AskForAgreement()

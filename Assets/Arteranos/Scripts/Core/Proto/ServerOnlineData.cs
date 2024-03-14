@@ -16,11 +16,11 @@ namespace Arteranos.Core
     [ProtoContract]
     public partial class ServerOnlineData : PeerMessage
     {
-        //[ProtoMember(1)]
-        //public string CurrentWorldCid;
+        [ProtoMember(1)]
+        public string CurrentWorldCid;
 
-        //[ProtoMember(2)]
-        //public string CurrentWorldName;
+        [ProtoMember(2)]
+        public string CurrentWorldName;
 
         [ProtoMember(3)]
         public string ServerDescriptionCid; // Just in case if we don't have the SD at all.
@@ -31,8 +31,8 @@ namespace Arteranos.Core
         [ProtoMember(5)]
         public OnlineLevel OnlineLevel;
 
-        [ProtoMember(6)]
-        public string WorldCid;
+        //[ProtoMember(6)]
+        //public string WorldCid;
 
         public override void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);

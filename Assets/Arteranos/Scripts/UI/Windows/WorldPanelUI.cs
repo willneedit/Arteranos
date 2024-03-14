@@ -152,13 +152,11 @@ namespace Arteranos.UI
 
         private async Task CollateServersData()
         {
-            async Task UpdateOne(ServerInfo serverInfo)
+            Task UpdateOne(ServerInfo serverInfo)
             {
-                await serverInfo.Update();
-
                 // Server offline or has no world loaded?
                 Cid Cid = serverInfo.CurrentWorldCid;
-                if (!serverInfo.IsOnline || Cid == null) return;
+                if (!serverInfo.IsOnline || Cid == null) return Task.CompletedTask;
 
                 int friends = serverInfo.FriendCount;
 
@@ -183,6 +181,8 @@ namespace Arteranos.UI
                 }
 
                 DictMutex.ReleaseMutex();
+
+                return Task.CompletedTask;
             }
 
             CancellationTokenSource cts = new();

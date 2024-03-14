@@ -34,6 +34,7 @@ namespace Arteranos.Core
         public static Server Server { get; internal set; }
         public static ServerUserBase ServerUsers { get; internal set; }
         public static Cid WorldCid { get; set; }
+        public static string WorldName { get; set; }
         public static string DefaultTOStext { get; private set; } = null;
 
         public static Cid DefaultMaleAvatar { get; protected set; } = null;

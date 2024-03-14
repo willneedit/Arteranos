@@ -67,40 +67,6 @@ namespace Arteranos.Core.Operations
         }
     }
 
-    internal class UpdateServersOp : IAsyncOperation<Context>
-    {
-        public int Timeout { get; set; }
-        public float Weight { get; set; } = 8.0f;
-        public string Caption => $"Updating servers ({actualServer} of {serverCount})";
-        public Action<float> ProgressChanged { get; set; }
-
-        private int actualServer = 0;
-        private int serverCount = 0;
-
-        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
-        {
-            ServerSearcherContext context = _context as ServerSearcherContext;
-
-            async Task UpdateOne(ServerInfo info)
-            {
-                ProgressChanged?.Invoke(actualServer / serverCount);
-                await info.Update();
-                actualServer++;
-            }
-
-            serverCount = context.serverInfos.Count;
-
-            TaskPool<ServerInfo> pool = new(10);
-
-            foreach (ServerInfo info in context.serverInfos)
-                pool.Schedule(info, UpdateOne);
-
-            await pool.Run(token);
-
-            return context;
-        }
-    }
-
     internal class SortServersOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
@@ -170,7 +136,6 @@ namespace Arteranos.Core.Operations
             {
                 new PreloadServerRequirementsOp(),
                 new FetchServersOp(),
-                new UpdateServersOp(),
                 new SortServersOp()
             });
 

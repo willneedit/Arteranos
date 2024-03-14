@@ -34,6 +34,7 @@ namespace Arteranos.Core.Operations
                 XRControl.Instance.MoveRig();
 
                 SettingsManager.WorldCid = null;
+                SettingsManager.WorldName = null;
                 ScreenFader.StartFading(0.0f);
                 done = true;
             }
@@ -42,12 +43,13 @@ namespace Arteranos.Core.Operations
             while(!done) await Task.Yield();
         }
 
-        public static Task MoveToOnlineWorld(Cid WorldCid)
+        public static Task MoveToOnlineWorld(Cid WorldCid, string WorldName)
         {
             void Enter()
             {
                 EnterDownloadedWorld();
                 SettingsManager.WorldCid = WorldCid;
+                SettingsManager.WorldName = WorldName;
             }
 
             return Task.Run(Enter);
@@ -106,7 +108,7 @@ namespace Arteranos.Core.Operations
             if (ex != null)
                 await MoveToOfflineWorld();
             else
-                await MoveToOnlineWorld(WorldCid);
+                await MoveToOnlineWorld(WorldCid, wi.WorldName);
 
             return ex;
         }

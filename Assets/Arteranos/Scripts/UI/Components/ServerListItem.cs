@@ -97,15 +97,17 @@ namespace Arteranos.UI
             btn_Delete.gameObject.SetActive(true);
         }
 
-        public async Task UpdateServerData()
+        public Task UpdateServerData()
         {
             IEnumerator PSDCoroutine()
             {
                 yield return null;
                 PopulateServerData();
             }
-            await si.Update();
+
             SettingsManager.StartCoroutineAsync(PSDCoroutine);
+
+            return Task.CompletedTask;
         }
 
         private void VisualizeServerData()

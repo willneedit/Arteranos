@@ -665,7 +665,7 @@ namespace Arteranos.Services
                 return;
             }
 
-            await WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldInfo?.WorldCid);
+            await WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldInfo?.WorldCid, changeAnnouncement.WorldInfo?.WorldName);
 
             // When we're done this, order everyone the transition, or the invoker what went wrong.
             if (inServer) PropagateWorldTransition();
