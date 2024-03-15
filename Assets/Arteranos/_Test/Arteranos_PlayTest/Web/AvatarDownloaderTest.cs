@@ -52,12 +52,7 @@ namespace Arteranos.PlayTest.Web
 
             self = Task.Run(async () => await ipfs.LocalPeer).Result;
 
-            Task.Run(async () =>
-            {
-                Task t = UploadTestAvatar();
-
-                await t;
-            }).Wait();
+            yield return UploadTestAvatar();
         }
 
         Camera ca = null;
@@ -78,12 +73,12 @@ namespace Arteranos.PlayTest.Web
             pl = Object.Instantiate(bpl);
         }
 
-        private async Task UploadTestAvatar()
+        private IEnumerator UploadTestAvatar()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
                 AssetUploader.PrepareUploadToIPFS(Asset_iws, false);
 
-            await ao.ExecuteAsync(co);
+            yield return ao.ExecuteCoroutine(co);
 
             AvatarCid = AssetUploader.GetUploadedCid(co);
 
@@ -141,9 +136,7 @@ namespace Arteranos.PlayTest.Web
 
             ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
-            Task t = ao.ExecuteAsync(co);
-
-            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+            yield return ao.ExecuteCoroutine(co);
 
             Assert.IsNotNull(AvatarDownloader.GetLoadedAvatar(co));
 
@@ -208,9 +201,7 @@ namespace Arteranos.PlayTest.Web
                     InstallEyeAnimation = true
                 });
 
-            Task t = ao.ExecuteAsync(co);
-
-            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+            yield return ao.ExecuteCoroutine(co);
 
             GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
@@ -230,9 +221,7 @@ namespace Arteranos.PlayTest.Web
                     InstallHandIK = true
                 });
 
-            Task t = ao.ExecuteAsync(co);
-
-            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+            yield return ao.ExecuteCoroutine(co);
 
             GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
@@ -254,9 +243,7 @@ namespace Arteranos.PlayTest.Web
                     ReadHandJoints = true
                 });
 
-            Task t = ao.ExecuteAsync(co);
-
-            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+            yield return ao.ExecuteCoroutine(co);
 
             GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
@@ -278,9 +265,7 @@ namespace Arteranos.PlayTest.Web
                     InstallHandIK = true
                 });
 
-            Task t = ao.ExecuteAsync(co);
-
-            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+            yield return ao.ExecuteCoroutine(co);
 
             GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
@@ -306,9 +291,7 @@ namespace Arteranos.PlayTest.Web
                     DesiredHeight = 0.50f
                 });
 
-            Task t = ao.ExecuteAsync(co);
-
-            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+            yield return ao.ExecuteCoroutine(co);
 
             GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
@@ -341,9 +324,7 @@ namespace Arteranos.PlayTest.Web
                     InstallAnimController = true
                 });
 
-            Task t = ao.ExecuteAsync(co);
-
-            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+            yield return ao.ExecuteCoroutine(co);
 
             GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
@@ -395,9 +376,7 @@ namespace Arteranos.PlayTest.Web
                     InstallAnimController = true
                 });
 
-            Task t = ao.ExecuteAsync(co);
-
-            while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+            yield return ao.ExecuteCoroutine(co);
 
             GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);

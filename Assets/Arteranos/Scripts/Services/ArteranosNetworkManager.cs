@@ -215,7 +215,7 @@ namespace Arteranos.Services
                 brain.DeviceID = seq.request.deviceUID;
                 brain.AgreePublicKey = seq.request.ClientAgreePublicKey;
 
-                _ = EmitToClientCurrentWorld(conn, brain.AgreePublicKey);
+                EmitToClientCurrentWorld(conn, brain.AgreePublicKey);
             }
             else conn.Disconnect();  // No discussion, there'd be something fishy...
         }
@@ -356,11 +356,13 @@ namespace Arteranos.Services
         #region World Change Announcements
 
         [Server]
-        public async Task EmitToClientCurrentWorld(NetworkConnectionToClient conn, PublicKey agreePublicKey)
+        public void EmitToClientCurrentWorld(NetworkConnectionToClient conn, PublicKey agreePublicKey)
         {
-            IEnumerator SendWCAJustForTheLaggard(NetworkConnectionToClient conn, PublicKey agreePublicKey, WorldInfo wi)
+            IEnumerator SendWCAJustForTheLaggard(NetworkConnectionToClient conn, PublicKey agreePublicKey)
             {
-                yield return null;
+                WorldInfo wi = null;
+
+                yield return WorldInfo.RetrieveCoroutine(SettingsManager.WorldCid, (_wi) => wi = _wi);
 
                 EmitToClientCTSPacket(new CTSPWorldChangeAnnouncement()
                 {
@@ -368,11 +370,10 @@ namespace Arteranos.Services
                 }, conn, agreePublicKey);
             }
 
-            WorldInfo wi = await WorldInfo.RetrieveAsync(SettingsManager.WorldCid);
 
             Debug.Log($"[Server] sending world CID '{SettingsManager.WorldCid}' to latecoming conn {conn.connectionId}");
 
-            SettingsManager.StartCoroutineAsync(() => SendWCAJustForTheLaggard(conn, agreePublicKey, wi));
+            SettingsManager.StartCoroutineAsync(() => SendWCAJustForTheLaggard(conn, agreePublicKey));
         }
 
 

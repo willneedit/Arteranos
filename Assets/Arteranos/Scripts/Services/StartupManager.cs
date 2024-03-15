@@ -106,9 +106,7 @@ namespace Arteranos.Services
                 (AsyncOperationExecutor<Context> ao, Context co) =
                     AssetUploader.PrepareUploadToIPFS(resourceMA, false); // Plsin GLB files
 
-                Task t = ao.ExecuteAsync(co);
-
-                while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+                yield return ao.ExecuteCoroutine(co);
 
                 cid = AssetUploader.GetUploadedCid(co);
 

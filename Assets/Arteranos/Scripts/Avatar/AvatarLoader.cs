@@ -96,16 +96,14 @@ namespace Arteranos.Avatar
                         ReadHandJoints = true,
                     });
 
-                Task t = ao.ExecuteAsync(co);
-
-                while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+                yield return ao.ExecuteCoroutine(co, (status, _) => { if (status == TaskStatus.Faulted) co = null; });
 
                 if (AvatarGameObject)
                     Destroy(AvatarGameObject);
 
-                AvatarMeasures = t.IsFaulted 
-                    ? new InternalAvatarMeasures() 
-                    : AvatarDownloader.GetAvatarMeasures(co);
+                AvatarMeasures = co != null
+                    ? AvatarDownloader.GetAvatarMeasures(co)
+                    : new InternalAvatarMeasures();
 
                 AvatarGameObject = AvatarMeasures.Avatar;
 

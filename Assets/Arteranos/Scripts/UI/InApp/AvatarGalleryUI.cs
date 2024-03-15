@@ -59,9 +59,7 @@ namespace Arteranos.UI
                         InstallEyeAnimation = true,
                     });
 
-                Task t = ao.ExecuteAsync(co);
-
-                while (!t.IsCompleted) yield return new WaitForEndOfFrame();
+                yield return ao.ExecuteCoroutine(co);
 
                 currentAvatar = AvatarDownloader.GetLoadedAvatar(co);
                 currentAvatar.transform.SetParent(transform, false);

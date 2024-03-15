@@ -57,15 +57,6 @@ namespace Arteranos.PlayTest.Web
         [UnityTest]
         public IEnumerator UploadLocalFile()
         {
-            yield return null;
-
-            Task.Run(UploadLocalFileAsync).Wait();
-
-            yield return null;
-        }
-
-        public async Task UploadLocalFileAsync()
-        {
             Cid AssetCid = null;
 
             try
@@ -75,7 +66,7 @@ namespace Arteranos.PlayTest.Web
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
-                await ao.ExecuteAsync(co);
+                yield return ao.ExecuteCoroutine(co);
 
                 AssetCid = AssetUploader.GetUploadedCid(co);
 
@@ -85,21 +76,12 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
+                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
             }
         }
 
         [UnityTest]
         public IEnumerator UploadNakedLocalFile()
-        {
-            yield return null;
-
-            Task.Run(UploadNakedLocalFileAsync).Wait();
-
-            yield return null;
-        }
-
-        public async Task UploadNakedLocalFileAsync()
         {
             Cid AssetCid = null;
 
@@ -110,7 +92,7 @@ namespace Arteranos.PlayTest.Web
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
-                await ao.ExecuteAsync(co);
+                yield return ao.ExecuteCoroutine(co);
 
                 AssetCid = AssetUploader.GetUploadedCid(co);
 
@@ -120,21 +102,12 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
+                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
             }
         }
 
         [UnityTest]
         public IEnumerator UploadQuotedLocalFile()
-        {
-            yield return null;
-
-            Task.Run(UploadQuotedLocalFileAsync).Wait();
-
-            yield return null;
-        }
-
-        public async Task UploadQuotedLocalFileAsync()
         {
             Cid AssetCid = null;
 
@@ -145,7 +118,7 @@ namespace Arteranos.PlayTest.Web
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
-                await ao.ExecuteAsync(co);
+                yield return ao.ExecuteCoroutine(co);
 
                 AssetCid = AssetUploader.GetUploadedCid(co);
 
@@ -155,21 +128,12 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
+                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
             }
         }
 
         [UnityTest]
         public IEnumerator UploadWebFile()
-        {
-            yield return null;
-
-            Task.Run(UploadWebFileAsync).Wait();
-
-            yield return null;
-        }
-
-        public async Task UploadWebFileAsync()
         {
             Cid AssetCid = null;
 
@@ -180,7 +144,7 @@ namespace Arteranos.PlayTest.Web
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{msg}");
 
-                await ao.ExecuteAsync(co);
+                yield return ao.ExecuteCoroutine(co);
 
                 AssetCid = AssetUploader.GetUploadedCid(co);
 
@@ -189,21 +153,12 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
+                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
             }
         }
 
         [UnityTest]
         public IEnumerator UploadMissingFile()
-        {
-            yield return null;
-
-            Task.Run(UploadMissingFileAsync).Wait();
-
-            yield return null;
-        }
-
-        public async Task UploadMissingFileAsync()
         {
             Cid AssetCid = null;
 
@@ -217,34 +172,27 @@ namespace Arteranos.PlayTest.Web
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{msg}");
 
-                await ao.ExecuteAsync(co);
+                Context returned = co;
+                TaskStatus status = TaskStatus.Created;
 
-                Assert.Fail("Did not throw");
+                yield return ao.ExecuteCoroutine(co, (_status, _co) =>
+                {
+                    status = _status;
+                    returned = _co;
+                });
 
-                AssetCid = AssetUploader.GetUploadedCid(co);
-
-                Assert.IsNotNull(AssetCid);
-
+                Assert.IsNull(returned);
+                Assert.AreEqual(TaskStatus.Faulted, status);
             }
-            catch (FileNotFoundException) { }
             finally
             {
-                if (AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
+                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
             }
 
         }
 
         [UnityTest]
         public IEnumerator UploadDirectory()
-        {
-            yield return null;
-
-            Task.Run(UploadDirectoryAsync).Wait();
-
-            yield return null;
-        }
-
-        public async Task UploadDirectoryAsync()
         {
 
             Cid AssetCid = null;
@@ -256,13 +204,13 @@ namespace Arteranos.PlayTest.Web
 
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{msg}");
 
-                await ao.ExecuteAsync(co);
+                yield return ao.ExecuteCoroutine(co);
 
                 AssetCid = AssetUploader.GetUploadedCid(co);
 
                 Assert.IsNotNull(AssetCid);
 
-                IFileSystemNode fsn = await ipfs.FileSystem.ListFileAsync(AssetCid);
+                IFileSystemNode fsn = ipfs.FileSystem.ListFileAsync(AssetCid).Result;
                 IFileSystemLink[] files = fsn.Links.ToArray();
 
                 Assert.IsTrue(fsn.IsDirectory);
@@ -276,7 +224,7 @@ namespace Arteranos.PlayTest.Web
 
                 // How to search for a specific file in an archive: ListFileAsync, then iterate
                 // Alternatively, using file[0].Id works as well.
-                IFileSystemNode fsn_AB = await ipfs.FileSystem.ListFileAsync($"{AssetCid}/{files[0].Name}");
+                IFileSystemNode fsn_AB = ipfs.FileSystem.ListFileAsync($"{AssetCid}/{files[0].Name}").Result;
                 IFileSystemLink[] files_AB = fsn_AB.Links.ToArray();
                 Assert.IsTrue(fsn_AB.IsDirectory);
                 Assert.AreEqual(4, files_AB.Length);
@@ -286,7 +234,7 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) await ipfs.Block.RemoveAsync(AssetCid);
+                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
             }
         }
     }

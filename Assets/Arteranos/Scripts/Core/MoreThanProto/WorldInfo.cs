@@ -11,6 +11,7 @@ using Ipfs;
 using Ipfs.CoreApi;
 using ProtoBuf;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,6 +57,7 @@ namespace Arteranos.Core
         public static IEnumerable<WorldInfo> DBList()
             => new WorldInfo()._DBList();
 
+        [Obsolete("Needs to be converted to Coroutine")]
         public static async Task<WorldInfo> RetrieveAsync(Cid WorldCid)
         {
             // null means the offline world... or falling back to the erroneous world.
@@ -75,6 +77,22 @@ namespace Arteranos.Core
             {
                 return null;
             }
+        }
+
+        public static IEnumerator RetrieveCoroutine(Cid WorldCid, Action<WorldInfo> callback)
+        {
+            if(WorldCid == null)
+            {
+                callback?.Invoke(null);
+                yield break;
+            }
+
+            (AsyncOperationExecutor<Context> ao, Context co) = WorldDownloader.PrepareGetWorldInfo(WorldCid);
+
+            yield return ao.ExecuteCoroutine(co, (status, co) => {
+                WorldInfo wi = WorldDownloader.GetWorldInfo(co);
+                callback?.Invoke(wi);
+            });
         }
 
         // ---------------------------------------------------------------

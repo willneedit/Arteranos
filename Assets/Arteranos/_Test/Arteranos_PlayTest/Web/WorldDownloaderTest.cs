@@ -41,15 +41,15 @@ namespace Arteranos.PlayTest.Web
 
             ipfs = srv.Ipfs_;
 
-            Task.Run(async () => await UploadTestWorld()).Wait();
+            yield return UploadTestWorld();
         }
 
-        private async Task UploadTestWorld()
+        private IEnumerator UploadTestWorld()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
                 AssetUploader.PrepareUploadToIPFS(FileURLAsset, true);
 
-            await ao.ExecuteAsync(co);
+            yield return ao.ExecuteCoroutine(co);
 
             WorldCid = AssetUploader.GetUploadedCid(co);
 

@@ -59,6 +59,7 @@ namespace Arteranos.Core
         /// </summary>
         /// <param name="context">The context to work on</param>
         /// <returns>The awaitable Task containing the updated context</returns>
+        [Obsolete("Not recommended - use ExecuteCoroutine()")]
         public async Task<T> ExecuteAsync(T context)
         {
             tokenSource = new CancellationTokenSource();
@@ -100,12 +101,15 @@ namespace Arteranos.Core
         /// <returns>The Enumerator to work with the Coroutine framework</returns>
         public IEnumerator ExecuteCoroutine(T context, Action<TaskStatus, T> callback = null)
         {
+#pragma warning disable CS0618 // Typ oder Element ist veraltet
             Task<T> ao = ExecuteAsync(context);
+#pragma warning restore CS0618 // Typ oder Element ist veraltet
 
             yield return new WaitUntil(() => ao.IsCompleted);
 
             // From good to bad: Either RanToCompletion, Canceled or Faulted
-            callback?.Invoke(ao.Status, ao.Result);
+            // ao.Result throws if it's not completed successfully.
+            callback?.Invoke(ao.Status, ao.IsCompletedSuccessfully ? ao.Result : default);
         }
 
         public void Cancel()
