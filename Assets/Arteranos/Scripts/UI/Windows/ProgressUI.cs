@@ -178,7 +178,7 @@ namespace Arteranos.UI
                 exception = _exception;
             }
 
-            while (!completed) await Task.Yield();
+            while (!completed) await Task.Delay(8);
 
             return (exception, context);
 

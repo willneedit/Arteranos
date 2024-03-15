@@ -55,7 +55,7 @@ namespace Arteranos.Web
             SettingsManager.StartCoroutineAsync(AskForAgreement);
 
             // Take aim....  hold.... hold.... 
-            while(result == null) await Task.Yield();
+            while(result == null) await Task.Delay(8);
 
             // ... Fire!
             if(result == true) return await CommenceConnection(si);

@@ -72,7 +72,7 @@ namespace Arteranos.Core
                 }
 
                 if (token?.IsCancellationRequested ?? false) break;
-                await Task.Yield();
+                await Task.Delay(8);
             }
 
             Idle = true;

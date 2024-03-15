@@ -40,7 +40,7 @@ namespace Arteranos.Core.Operations
             }
             
             SettingsManager.StartCoroutineAsync(OfflineScene);
-            while(!done) await Task.Yield();
+            while(!done) await Task.Delay(8);
         }
 
         public static Task MoveToOnlineWorld(Cid WorldCid, string WorldName)

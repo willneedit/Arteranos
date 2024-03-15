@@ -92,7 +92,7 @@ namespace Arteranos.Core
                 transform.localRotation = Quaternion.Lerp(startRotation, targetTransform.localRotation, t);
                 transform.localScale = Vector3.Lerp(startScale, targetTransform.localScale, t);
                 time += Time.deltaTime;
-                await Task.Yield();
+                await Task.Delay(8);
             }
 
             if(!token.IsCancellationRequested)

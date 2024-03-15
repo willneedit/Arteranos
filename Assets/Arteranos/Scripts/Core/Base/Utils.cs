@@ -258,7 +258,7 @@ namespace Arteranos.Core
                 reportProgress?.Invoke(totalBytes);
 
                 await outStream.WriteAsync(buffer, 0, bytesRead);
-                await Task.Yield();
+                await Task.Delay(1);
             }
             outStream.Flush();
             outStream.Close();

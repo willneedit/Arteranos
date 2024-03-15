@@ -87,7 +87,7 @@ namespace Arteranos.PlayTest
                     Debug.LogError(message);
                     Assert.Fail(message);
                 }
-                await Task.Yield();
+                await Task.Delay(8);
             }
         }
     }

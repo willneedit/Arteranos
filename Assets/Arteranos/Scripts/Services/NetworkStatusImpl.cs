@@ -279,7 +279,7 @@ namespace Arteranos.Services
             }
 
             // And, wait for the network to really be shut down.
-            while (manager.isNetworkActive) await Task.Yield();
+            while (manager.isNetworkActive) await Task.Delay(8);
         }
 
         protected override async Task StartHost_(bool resetConnection = false)
@@ -295,7 +295,7 @@ namespace Arteranos.Services
             manager.StartHost();
 
             // And, wait for the network to really be started up.
-            while (!manager.isNetworkActive) await Task.Yield();
+            while (!manager.isNetworkActive) await Task.Delay(8);
         }
 
         protected override async Task StartServer_()
@@ -309,7 +309,7 @@ namespace Arteranos.Services
             manager.StartServer();
 
             // And, wait for the network to really be started up.
-            while (!manager.isNetworkActive) await Task.Yield();
+            while (!manager.isNetworkActive) await Task.Delay(8);
         }
 
         private async Task SmoothServerTransition()
