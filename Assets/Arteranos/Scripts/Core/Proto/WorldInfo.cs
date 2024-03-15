@@ -57,11 +57,6 @@ namespace Arteranos.Core
         [ProtoMember(1)]
         public WorldInfoNetwork win;
 
-        // The other items are for the local use and stored in the client's FFDB.
-        //[Obsolete("WorldInfoCid is sufficient both for WorldInfo and its assets", true)]
-        //[ProtoMember(2)]
-        //public string WorldInfoCid;
-
         [ProtoMember(3)]
         public DateTime Updated;
 

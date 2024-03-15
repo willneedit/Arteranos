@@ -22,13 +22,6 @@ namespace Arteranos.Core.Operations
         public long Size { get; set; } = -1;
     }
 
-    [Obsolete("Transition to WorldInfoContext and WorldAssetContext", true)]
-    internal class WorldDownloaderContext : AssetDownloaderContext
-    {
-        public string WorldInfoCid = null;
-        public string WorldAssetBundleFile = null;
-    }
-
     internal class WorldDownloadContext : Context
     {
         public Cid WorldCid;
