@@ -90,7 +90,7 @@ namespace Arteranos.UI
             Executor.ProgressChanged += OnProgressChanged;
             Executor.Completed += OnCompleted;
 
-            ExecuteAsync();
+            StartCoroutine(ExecuteCoroutine());
         }
 
         protected void Update()
@@ -138,19 +138,17 @@ namespace Arteranos.UI
 
         private void OnCancelButtonClicked() => Executor.Cancel();
 
-        private async void ExecuteAsync()
+        private IEnumerator ExecuteCoroutine()
         {
-            try
+            AggregateException status;
+            yield return Executor.ExecuteCoroutine(Context, (_status, _context) =>
             {
-                Context = await Executor.ExecuteAsync(Context);
-            }
-            catch(Exception ex)
-            {
-                Debug.LogWarning("Caught exception...");
-                Debug.LogException(ex);
+                status = _status;
+                Context = _context;
 
-                Faulted?.Invoke(ex, Context);
-            }
+                if (status != null)
+                    Faulted?.Invoke(status, Context);
+            });
 
             Destroy(gameObject);
         }

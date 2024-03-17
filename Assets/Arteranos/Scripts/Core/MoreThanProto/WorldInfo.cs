@@ -57,28 +57,6 @@ namespace Arteranos.Core
         public static IEnumerable<WorldInfo> DBList()
             => new WorldInfo()._DBList();
 
-        [Obsolete("Needs to be converted to Coroutine")]
-        public static async Task<WorldInfo> RetrieveAsync(Cid WorldCid)
-        {
-            // null means the offline world... or falling back to the erroneous world.
-            if (WorldCid == null) return null;
-
-            try
-            {
-                (AsyncOperationExecutor<Context> ao, Context co) =
-                    WorldDownloader.PrepareGetWorldInfo(WorldCid);
-
-                co = await ao.ExecuteAsync(co);
-
-                WorldInfo wi = WorldDownloader.GetWorldInfo(co);
-                return wi;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
         public static IEnumerator RetrieveCoroutine(Cid WorldCid, Action<WorldInfo> callback)
         {
             if(WorldCid == null)
@@ -90,8 +68,7 @@ namespace Arteranos.Core
             (AsyncOperationExecutor<Context> ao, Context co) = WorldDownloader.PrepareGetWorldInfo(WorldCid);
 
             yield return ao.ExecuteCoroutine(co, (status, co) => {
-                WorldInfo wi = WorldDownloader.GetWorldInfo(co);
-                callback?.Invoke(wi);
+                if(co != null) callback?.Invoke(WorldDownloader.GetWorldInfo(co));
             });
         }
 

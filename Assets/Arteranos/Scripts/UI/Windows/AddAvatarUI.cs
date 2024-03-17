@@ -190,10 +190,10 @@ namespace Arteranos.UI
 
                     ao.ProgressChanged += (ratio, msg) => lbl_Notice.text = $"{msg}";
 
-                    TaskStatus status = TaskStatus.Created;
-                    yield return ao.ExecuteCoroutine(co, (_status, _) =>  status = _status);
+                    AggregateException ex = null;
+                    yield return ao.ExecuteCoroutine(co, (_status, _) =>  ex = _status);
 
-                    if(status == TaskStatus.Faulted)
+                    if(ex != null)
                     {
                         lbl_Notice.text = "Failed to load from this URL";
                         btn_AddAvatar.interactable = true;
@@ -215,10 +215,10 @@ namespace Arteranos.UI
 
                     ao.ProgressChanged += (ratio, msg) => lbl_Notice.text = $"{msg}";
 
-                    TaskStatus status = TaskStatus.Created;
-                    yield return ao.ExecuteCoroutine(co, (_status, _) => status = _status);
+                    AggregateException ex = null;
+                    yield return ao.ExecuteCoroutine(co, (_status, _) => ex = _status);
 
-                    if (status == TaskStatus.Faulted)
+                    if (ex != null)
                     {
                         lbl_Notice.text = "Failed to decode the avatar model";
                         btn_AddAvatar.interactable = true;

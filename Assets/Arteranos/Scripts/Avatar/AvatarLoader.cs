@@ -96,7 +96,7 @@ namespace Arteranos.Avatar
                         ReadHandJoints = true,
                     });
 
-                yield return ao.ExecuteCoroutine(co, (status, _) => { if (status == TaskStatus.Faulted) co = null; });
+                yield return ao.ExecuteCoroutine(co, (ex, _) => { if (ex != null) co = null; });
 
                 if (AvatarGameObject)
                     Destroy(AvatarGameObject);

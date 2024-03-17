@@ -12,6 +12,8 @@ using Ipfs;
 using Arteranos.Web;
 using Arteranos.Core.Operations;
 using System.Linq;
+using System;
+using Object = UnityEngine.Object;
 
 namespace Arteranos.PlayTest.Web
 {
@@ -173,16 +175,16 @@ namespace Arteranos.PlayTest.Web
                 ao.ProgressChanged += (ratio, msg) => Debug.Log($"{msg}");
 
                 Context returned = co;
-                TaskStatus status = TaskStatus.Created;
+                AggregateException ex = null;
 
-                yield return ao.ExecuteCoroutine(co, (_status, _co) =>
+                yield return ao.ExecuteCoroutine(co, (_ex, _co) =>
                 {
-                    status = _status;
+                    ex = _ex;
                     returned = _co;
                 });
 
                 Assert.IsNull(returned);
-                Assert.AreEqual(TaskStatus.Faulted, status);
+                Assert.IsNotNull(ex);
             }
             finally
             {
