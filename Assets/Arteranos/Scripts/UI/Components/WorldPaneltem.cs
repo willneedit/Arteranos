@@ -8,10 +8,8 @@
 using System;
 using System.Collections;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
-using Arteranos.Web;
 using Arteranos.Core;
 using Arteranos.Services;
 using Ipfs;
@@ -29,13 +27,13 @@ namespace Arteranos.UI
         public Image img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
 
-        public WorldInfo WorldInfo { get; internal set; } = null;
         public Cid WorldCid { get; internal set; } = null;
         public int ServersCount { get; internal set; } = 0;
         public int UsersCount { get; internal set; } = 0;
         public int FriendsMax { get; internal set; } = 0;
-        public bool AllowedForThis {  get; internal set; } = true;
 
+        private bool AllowedForThis = true;
+        private WorldInfo WorldInfo = null;
         private string patternCaption = null;
 
         protected override void Awake()
@@ -61,20 +59,37 @@ namespace Arteranos.UI
 
             lbl_Caption.text = "Loading...";
 
-            PopulateWorldData(WorldInfo.WorldCid);
+            PopulateWorldData();
         }
 
-        private void PopulateWorldData(Cid cid)
+        private void PopulateWorldData()
         {
             IEnumerator VisCoroutine()
             {
-                yield return null;
+                // If the database lookup failed, we have to look further...
+                if (WorldInfo == null)
+                    yield return WorldInfo.RetrieveCoroutine(WorldCid, (wi) => WorldInfo = wi);
 
-                if (!string.IsNullOrEmpty(WorldInfo?.WorldName))
-                    VisualizeWorldData();
-                else
-                    lbl_Caption.text = $"({cid})";
+                // Cid seems to be invalid, or expired, or unreachable.
+                if (WorldInfo == null)
+                {
+                    lbl_Caption.text = "(unavailable)";
+                    yield break;
+                }
+
+                ServerPermissions permission = WorldInfo.win.ContentRating;
+                AllowedForThis = permission != null && !permission.IsInViolation(SettingsManager.ActiveServerData.Permissions);
+
+                VisualizeWorldData();
             }
+
+            if(WorldCid == null)
+            {
+                lbl_Caption.text = "(deleted)";
+                return;
+            }
+
+            WorldInfo = WorldInfo.DBLookup(WorldCid);
 
             StartCoroutine(VisCoroutine());
         }
@@ -110,12 +125,12 @@ namespace Arteranos.UI
 
         private void OnVisitClicked(bool inPlace)
         {
-            if(!string.IsNullOrEmpty(WorldInfo.WorldCid))
+            if(!string.IsNullOrEmpty(WorldCid))
             {
                 if(inPlace)
-                    _ = WorldTransition.EnterWorldAsync(WorldInfo.WorldCid);
+                    _ = WorldTransition.EnterWorldAsync(WorldCid);
                 else
-                    ServerSearcher.InitiateServerTransition(WorldInfo.WorldCid);
+                    ServerSearcher.InitiateServerTransition(WorldCid);
 
                 WorldInfo.BumpWI();
             }
@@ -124,13 +139,15 @@ namespace Arteranos.UI
         private void OnAddClicked()
         {
             WorldInfo.Favourite();
-            PopulateWorldData(WorldInfo.WorldCid);
+            PopulateWorldData();
         }
 
         private void OnDeleteClicked()
         {
             WorldInfo.Unfavourite();
-            PopulateWorldData(WorldInfo.WorldCid);
+            WorldInfo.DBDelete(WorldCid);
+            WorldCid = null;
+            PopulateWorldData();
         }
     }
 }

@@ -19,6 +19,8 @@ using System.Collections;
 using System.Linq;
 using Ipfs;
 using Arteranos.Core.Operations;
+using System.Collections.Concurrent;
+using Codice.Client.Common.FsNodeReaders;
 
 namespace Arteranos.UI
 {
@@ -28,7 +30,6 @@ namespace Arteranos.UI
         public int serversCount;
         public int usersCount;
         public int friendsMax;
-        public WorldInfo worldInfo;
         public bool favourited;
     }
 
@@ -52,7 +53,7 @@ namespace Arteranos.UI
         private Client cs = null;
 
         private readonly List<ServerInfo> serverInfos = new();
-        private readonly Dictionary<Cid, Collection> worldlist = new();
+        private readonly ConcurrentDictionary<Cid, Collection> worldlist = new();
         private readonly List<Cid> sortedWorldList = new();
         private Mutex DictMutex = null;
 
@@ -91,46 +92,101 @@ namespace Arteranos.UI
 
         protected override void Start()
         {
+            IEnumerator BuildSortedList()
+            {
+                worldlist.Clear();
+
+                yield return GatherServeredWorlds();
+
+                yield return GatherFavouritedWorlds();
+
+                CreateSortedWorldList();
+
+                yield return ShowPage(0);
+
+            }
+
             base.Start();
 
             cs = SettingsManager.Client;
 
             lbl_PageCount.text = "Loading...";
 
-            _ = CollateServersData();
+            StartCoroutine(BuildSortedList());
         }
 
-        private void AddListEntry(Cid cid, bool front = false)
+        private IEnumerator GatherServeredWorlds()
         {
-            if (sortedWorldList.Contains(cid)) return;
+            foreach(ServerInfo si in ServerInfo.Dump(DateTime.MinValue))
+            {
+                if(si.CurrentWorldCid == null) continue;
 
-            if (worldlist.TryGetValue(cid, out Collection list))
-            {
-                if(list.worldInfo == null)
-                    list.worldInfo = WorldInfo.DBLookup(cid);
-            }
-            else // Manually added?
-            {
-                worldlist[cid] = new()
+                worldlist.AddOrUpdate(si.CurrentWorldCid, new Collection()
                 {
-                    worldCid = cid,
+                    favourited = false,
                     friendsMax = 0,
-                    serversCount = 0,
-                    usersCount = 0,
-                    worldInfo = WorldInfo.DBLookup(cid),
-                    favourited = false
-                };
+                    serversCount = 1,
+                    usersCount = si.UserCount,
+                    worldCid = si.CurrentWorldCid
+                },
+                (cid, coll) =>
+                {
+                    coll.friendsMax = si.FriendCount > coll.friendsMax ? si.FriendCount : coll.friendsMax;
+                    coll.serversCount++;
+                    coll.usersCount += si.UserCount;
+                    return coll;
+                });
+
+                yield return new WaitForEndOfFrame();
             }
+        }
 
-            WorldInfo wmd = list?.worldInfo;
+        private IEnumerator GatherFavouritedWorlds()
+        {
+            foreach (WorldInfo wi in WorldInfo.DBList())
+                yield return AddManualWorldCoroutine(wi.WorldCid);
+        }
 
-            // Filter out the worlds which go against to _your_ preferences.
-            if (wmd?.ContentRating == null || !wmd.ContentRating.IsInViolation(SettingsManager.Client.ContentFilterPreferences))
+        private IEnumerator AddManualWorldCoroutine(Cid WorldCid)
+        {
+            worldlist.AddOrUpdate(WorldCid, new Collection()
             {
-                if(!front) sortedWorldList.Add(cid);
-                else sortedWorldList.Insert(0, cid);
+                favourited = true,
+                friendsMax = 0,
+                serversCount = 0,
+                usersCount = 0,
+                worldCid = WorldCid
+            },
+            (cid, coll) =>
+            {
+                coll.favourited = true;
+                return coll;
+            });
+
+            yield return new WaitForEndOfFrame();
+        }
+
+        private void CreateSortedWorldList()
+        {
+            sortedWorldList.Clear();
+            foreach(KeyValuePair<Cid, Collection> item in worldlist)
+                sortedWorldList.Add(item.Key);
+
+            sortedWorldList.Sort((x, y) => ScoreWorld(y) - ScoreWorld(x));
+        }
+
+        private void AddManualWorld(Cid WorldCid)
+        {
+            IEnumerator DoAdd()
+            {
+                yield return AddManualWorldCoroutine(WorldCid);
+
+                CreateSortedWorldList();
+
+                yield return ShowPage(0);
             }
-                
+
+            StartCoroutine(DoAdd());
         }
 
         private int ScoreWorld(Cid cid) 
@@ -148,82 +204,6 @@ namespace Arteranos.UI
             score += list.favourited ? 100000 : 0; // A class for its own.
 
             return score;
-        }
-
-        private async Task CollateServersData()
-        {
-            Task UpdateOne(ServerInfo serverInfo)
-            {
-                // Server offline or has no world loaded?
-                Cid Cid = serverInfo.CurrentWorldCid;
-                if (!serverInfo.IsOnline || Cid == null) return Task.CompletedTask;
-
-                int friends = serverInfo.FriendCount;
-
-                DictMutex.WaitOne();
-
-                if(worldlist.TryGetValue(Cid, out Collection list))
-                {
-                    list.serversCount++;
-                    list.usersCount += serverInfo.UserCount;
-                    if(friends > list.friendsMax) list.friendsMax = friends;
-                    worldlist[Cid] = list;
-                }
-                else
-                {
-                    worldlist[Cid] = new()
-                    {
-                        worldCid = Cid,
-                        friendsMax = friends,
-                        serversCount = 1,
-                        usersCount = serverInfo.UserCount
-                    };
-                }
-
-                DictMutex.ReleaseMutex();
-
-                return Task.CompletedTask;
-            }
-
-            CancellationTokenSource cts = new();
-
-            TaskPool<ServerInfo> pool = new(20);
-
-            foreach (ServerInfo entry in ServerInfo.Dump(DateTime.MinValue))
-                serverInfos.Add(entry);
-
-            foreach (ServerInfo info in serverInfos) pool.Schedule(info, UpdateOne);
-
-            await pool.Run(cts.Token);
-
-            sortedWorldList.Clear();
-
-            if (SettingsManager.WorldCid != null)
-            {
-                WorldInfo wi = await WorldInfo.RetrieveAsync(SettingsManager.WorldCid);
-                AddListEntry(wi.WorldCid);
-            }
-
-            foreach(WorldInfo wi in WorldInfo.DBList())
-            {
-                if(!wi.IsFavourited()) continue;
-
-                Cid cid = wi.WorldCid;
-                if (cid == null) continue;
-
-                AddListEntry(cid);
-                Collection list = worldlist[cid];
-                list.favourited = true;
-                worldlist[cid] = list;
-            }
-
-            Cid[] keys = worldlist.Keys.ToArray();
-            foreach (Cid cid in keys)
-                AddListEntry(cid);
-
-            sortedWorldList.Sort((x, y) => ScoreWorld(y) - ScoreWorld(x));
-
-            SettingsManager.StartCoroutineAsync(() => ShowPage(0));
         }
 
         private IEnumerator ShowPage(int currentPage)
@@ -249,13 +229,9 @@ namespace Arteranos.UI
                 wli.WorldCid = sortedWorldList[i];
                 if (worldlist.TryGetValue(wli.WorldCid, out Collection list))
                 {
-                    wli.WorldInfo = list.worldInfo;
                     wli.ServersCount = list.serversCount;
                     wli.UsersCount = list.usersCount;
                     wli.FriendsMax = list.friendsMax;
-
-                    WorldInfo wmd = list.worldInfo;
-                    wli.AllowedForThis = !(wmd?.ContentRating != null && wmd.ContentRating.IsInViolation(SettingsManager.ActiveServerData.Permissions));
                 }
                 go.SetActive(true);
             }
@@ -314,7 +290,7 @@ namespace Arteranos.UI
                     (var ao, var co) = WorldDownloader.PrepareGetWorldInfo(cid);
                     yield return ao.ExecuteCoroutine(co);
 
-                    AddListEntry(cid, true);
+                    AddManualWorld(cid);
 
                     yield return ShowPage(0);
                 }
