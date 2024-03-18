@@ -33,8 +33,7 @@ namespace Arteranos.Core
         public event Action<float, string> ProgressChanged;
         public event Action<T> Completed;
 
-        public int Timeout;
-        public bool IsCancelled => tokenSource.IsCancellationRequested;
+        public int Timeout = 600;
 
         private readonly IAsyncOperation<T>[] asyncOperations;
         private readonly float totalWeight;
@@ -61,7 +60,7 @@ namespace Arteranos.Core
         /// <returns>The awaitable Task containing the updated context</returns>
         private async Task<T> ExecuteAsync(T context)
         {
-            tokenSource = new CancellationTokenSource();
+            tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(Timeout));
             weightSoFar = 0f;
 
             foreach(IAsyncOperation<T> operation in asyncOperations)
@@ -72,6 +71,11 @@ namespace Arteranos.Core
 
                 try
                 {
+                    // Even if particular operations would be technically synced, we have to
+                    // look for that occasion.
+                    if (tokenSource.IsCancellationRequested)
+                        throw new OperationCanceledException();
+
                     OnProgressChanged(0f);
                     context = await operation.ExecuteAsync(context, tokenSource.Token);
                     OnProgressChanged(1f);
