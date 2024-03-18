@@ -70,6 +70,21 @@ namespace Arteranos.UI
 
         protected override void Start()
         {
+            IEnumerator ExecuteCoroutine()
+            {
+                AggregateException status;
+                yield return Executor.ExecuteCoroutine(Context, (_status, _context) =>
+                {
+                    status = _status;
+                    Context = _context;
+
+                    if (status != null)
+                        Faulted?.Invoke(status, Context);
+                });
+
+                Destroy(gameObject);
+            }
+
             base.Start();
 
             startTime = DateTime.Now;
@@ -138,49 +153,10 @@ namespace Arteranos.UI
 
         private void OnCancelButtonClicked() => Executor.Cancel();
 
-        private IEnumerator ExecuteCoroutine()
+        public void SetupResultCallbacks(Action<Context> success, Action<Exception, Context> failure)
         {
-            AggregateException status;
-            yield return Executor.ExecuteCoroutine(Context, (_status, _context) =>
-            {
-                status = _status;
-                Context = _context;
-
-                if (status != null)
-                    Faulted?.Invoke(status, Context);
-            });
-
-            Destroy(gameObject);
+            Completed += success;
+            Faulted += failure;
         }
-
-        public async Task<(Exception, Context)> RunProgressAsync()
-        {
-            Completed += OnCompletion;
-            Faulted += OnFaulted;
-
-            bool completed = false;
-            Context context = null;
-            Exception exception = null;
-
-            void OnCompletion(Context _context)
-            {
-                completed = true;
-                context = _context;
-                exception = null; // No news are good news.
-            }
-
-            void OnFaulted(Exception _exception, Context _context)
-            {
-                completed = true;
-                context = _context;
-                exception = _exception;
-            }
-
-            while (!completed) await Task.Delay(8);
-
-            return (exception, context);
-
-        }
-
     }
 }

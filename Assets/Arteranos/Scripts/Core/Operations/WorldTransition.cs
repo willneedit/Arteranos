@@ -55,7 +55,7 @@ namespace Arteranos.Core.Operations
             return Task.Run(Enter);
         }
 
-        public static async Task<(Exception, Context)> PreloadWorldDataAsync(Cid WorldCid)
+        public static void PreloadWorldDataAsync(Cid WorldCid, Action success, Action failure)
         {
             IProgressUI pui = ProgressUIFactory.New();
 
@@ -67,50 +67,18 @@ namespace Arteranos.Core.Operations
             // FIXME See #71
             pui.SetupAsyncOperations(() => WorldDownloader.PrepareGetWorldAsset(WorldCid));
 
-            (Exception ex, Context co) = await pui.RunProgressAsync();
-
-            if (ex != null)
-            {
-                Debug.LogWarning($"Error in loading world {WorldCid}");
-                Debug.LogException(ex);
-            }
-            else
-                Debug.Log($"Download of the world asset completed: {WorldCid}");
-
-            return (ex, co);
-        }
-
-        public static async Task<Exception> VisitWorldAsync(Cid WorldCid)
-        {
-            // Offline world. Always a safe space.
-            if(WorldCid == null)
-            {
-                await MoveToOfflineWorld();
-                return null;
-            }
-
-            (Exception ex, Context _) = await PreloadWorldDataAsync(WorldCid);
-
-            WorldInfo wi = WorldInfo.DBLookup(WorldCid);
-            ServerPermissions wmd = wi?.ContentRating;
-
-            if (wmd != null)
-            {
-                // Remotely connected user tries to sneak in something gross or raunchy?
-                if (wmd.IsInViolation(SettingsManager.ActiveServerData.Permissions))
+            pui.SetupResultCallbacks(
+                co =>
                 {
-                    Debug.Log("World is in violation of the server's content permission");
-                    ex = new AccessViolationException("The world is in violation of the server's content permissions.");
-                }
-            }
-
-            // The server says it's the new world, jump in or ship out.
-            if (ex != null)
-                await MoveToOfflineWorld();
-            else
-                await MoveToOnlineWorld(WorldCid, wi.WorldName);
-
-            return ex;
+                    Debug.Log($"Download of the world asset completed: {WorldCid}");
+                    success?.Invoke();
+                },
+                (ex, co) =>
+                {
+                    Debug.LogWarning($"Error in loading world {WorldCid}");
+                    Debug.LogException(ex);
+                    failure?.Invoke();
+                });
         }
 
         /// <summary>

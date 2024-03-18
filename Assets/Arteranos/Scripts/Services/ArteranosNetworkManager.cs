@@ -457,11 +457,9 @@ namespace Arteranos.Services
             dialog.Buttons = new string[] { "OK" };
         }
 
-        private IEnumerator EmitCoroutine(CTSPacket packet, IAvatarBrain to)
+        private void EmitCTSPacket(CTSPacket packet, IAvatarBrain to)
         {
             EmitToClientCTSPacket(packet, to);
-
-            yield return null;
         }
 
         [Server]
@@ -510,7 +508,7 @@ namespace Arteranos.Services
         public void ServerLocalCTSPacket(UserID sender, CTSPacket packet)
         {
             if (packet is CTSPWorldChangeAnnouncement wca)
-                _ = MakeWorldTransition(sender, true, wca);
+                StartCoroutine(MakeWorldTransition(sender, true, wca));
             else if (packet is CTSPUpdateUserState uss)
                 _ = ServerUpdateUserState(sender, uss);
             else if (packet is STCUserInfo userInfoQuery)
@@ -523,7 +521,7 @@ namespace Arteranos.Services
         private void ClientLocalCTSPacket(CTSPacket packet)
         {
             if (packet is CTSPWorldChangeAnnouncement wca)
-                _ = MakeWorldTransition(null, false, wca);
+                StartCoroutine(MakeWorldTransition(null, false, wca));
             else if (packet is CTSPUpdateUserState uss)
                 _ = ClientInformUpdatedUserState(uss);
             else if (packet is STCUserInfo userInfo)
@@ -539,9 +537,9 @@ namespace Arteranos.Services
         // Invoked by the owner by EmitToServerCTSPacket()
         // Stage 1: Server or host - check privilege and server's permissions, transition.
         // Stage 2: Client - transition (if not same as in host)
-        private async Task MakeWorldTransition(UserID invoker, bool inServer, CTSPWorldChangeAnnouncement changeAnnouncement)
+        private IEnumerator MakeWorldTransition(UserID invoker, bool inServer, CTSPWorldChangeAnnouncement changeAnnouncement)
         {
-            void StopWorldAction(string message)
+            IEnumerator StopWorldAction(string message)
             {
                 // In any reason, unfade the screen
                 XR.ScreenFader.StartFading(0.0f);
@@ -554,7 +552,7 @@ namespace Arteranos.Services
                     PropagateWorldTransition();
                 }
                 else
-                    SettingsManager.StartCoroutineAsync(() => ShowDialogCoroutine(message));
+                    yield return ShowDialogCoroutine(message);
             }
 
             void PropagateWorldTransition()
@@ -563,7 +561,7 @@ namespace Arteranos.Services
                 if (changeAnnouncement.Message != null)
                     to = NetworkStatus.GetOnlineUser(invoker);
 
-                SettingsManager.StartCoroutineAsync(() => EmitCoroutine(changeAnnouncement, to));
+                EmitCTSPacket(changeAnnouncement, to);
             }
 
             bool WorldNeedsPreloasding()
@@ -581,17 +579,16 @@ namespace Arteranos.Services
                 // NOTREACHED
             }
 
-            async Task<bool> PreloadWorld()
+            IEnumerator PreloadWorld()
             {
-                (Exception ex, Context _) = await WorldTransition.PreloadWorldDataAsync(changeAnnouncement.WorldInfo.WorldCid);
-
-                if (ex != null)
+                bool finished = false;
+                WorldTransition.PreloadWorldDataAsync(changeAnnouncement.WorldInfo.WorldCid, () => finished = true, () =>
                 {
-                    StopWorldAction(ex.Message);
-                    return false;
-                }
+                    StartCoroutine(StopWorldAction("Cannot load world"));
+                    finished = true;
+                });
 
-                return true;
+                yield return new WaitUntil(() => finished);
             }
 
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -603,8 +600,14 @@ namespace Arteranos.Services
             {
                 Debug.Log($"[Server to you] {changeAnnouncement.Message}");
                 SettingsManager.StartCoroutineAsync(() => ShowDialogCoroutine(changeAnnouncement.Message));
-                return;
+                yield break;
             }
+
+            // It's a blank server or host?
+            // FIXME (maybe) MoveToOfflineWorld() for the case of transition FROM a used server TO a blank one.
+            // Maybe? No dedicated Offline World with WorldCid == null; treating as an error.
+            if (changeAnnouncement.WorldInfo == null)
+                yield break;
 
             if (inServer)
             {
@@ -619,35 +622,37 @@ namespace Arteranos.Services
 
                     if (!Core.Utils.IsAbleTo(sender, UserCapabilities.CanInitiateWorldTransition, null))
                     {
-                        StopWorldAction("You're not allowed to change the server's world.");
-                        return;
+                        yield return StopWorldAction("You're not allowed to change the server's world.");
+                        yield break;
                     }
                 }
 
                 if(changeAnnouncement.WorldInfo != null)
                 {
-                    if (WorldNeedsPreloasding() && !(await PreloadWorld())) return;
+                    if (WorldNeedsPreloasding())
+                        yield return PreloadWorld();
 
                     // Server checks if the world's content rating goes along with its own permissions
                     if (changeAnnouncement.WorldInfo.ContentRating != null
                         && (changeAnnouncement.WorldInfo.ContentRating).IsInViolation(SettingsManager.Server.Permissions))
                     {
-                        StopWorldAction("World is in violation of the server's content permission");
-                        return;
+                        yield return StopWorldAction("World is in violation of the server's content permission");
+                        yield break;
                     }
                 }
 
                 if (SettingsManager.WorldCid == changeAnnouncement.WorldInfo.WorldCid)
                 {
-                    StopWorldAction("Already in the current world.");
-                    return;
+                    yield return StopWorldAction("Already in the current world.");
+                    yield break;
                 }
             }
             else
             {
                 Debug.Log($"[Client] {(string)changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldInfo?.WorldCid}");
 
-                if (WorldNeedsPreloasding() && !(await PreloadWorld())) return;
+                if (WorldNeedsPreloasding())
+                    yield return PreloadWorld();
             }
 
             // In Stage 1: We're really in the current world.
@@ -655,7 +660,7 @@ namespace Arteranos.Services
             if (SettingsManager.WorldCid == changeAnnouncement.WorldInfo.WorldCid)
             {
                 if (onlineLevel == OnlineLevel.Client)
-                    StopWorldAction("Already in the current world.");
+                    yield return StopWorldAction("Already in the current world.");
                 else
                     Debug.Log("Host or offline mode, we're already here.");
 
@@ -663,10 +668,11 @@ namespace Arteranos.Services
                 if(onlineLevel != OnlineLevel.Host && onlineLevel != OnlineLevel.Offline)
                     XR.ScreenFader.StartFading(0.0f, 2.0f);
 
-                return;
+                yield break;
             }
 
-            await WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldInfo?.WorldCid, changeAnnouncement.WorldInfo?.WorldName);
+            // FIXME async!
+            _ = WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldInfo?.WorldCid, changeAnnouncement.WorldInfo?.WorldName);
 
             // When we're done this, order everyone the transition, or the invoker what went wrong.
             if (inServer) PropagateWorldTransition();
@@ -729,7 +735,7 @@ namespace Arteranos.Services
                 };
 
                 // Tell the user what's going on.
-                SettingsManager.StartCoroutineAsync(() => EmitCoroutine(cleaned, receiver));
+                EmitCTSPacket(cleaned, receiver);
 
                 // And, update the user's server-to-client SyncVar.
                 receiver.UserState = uss.State.userState;

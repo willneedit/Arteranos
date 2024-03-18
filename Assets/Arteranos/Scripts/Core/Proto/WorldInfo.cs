@@ -69,7 +69,7 @@ namespace Arteranos.Core
 
         public WorldInfo Strip()
         {
-            WorldInfo stripped = new WorldInfo()
+            WorldInfo stripped = new()
             { 
                 win = win,
                 Updated = Updated
