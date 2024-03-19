@@ -112,7 +112,8 @@ namespace Arteranos
             return new[] { 
 //                "Assets/Arteranos/Scenes/SampleScene.unity"
                 "Assets/Arteranos/Scenes/_Startup.unity",
-                "Assets/Arteranos/Scenes/OfflineScene.unity"
+                "Assets/Arteranos/Scenes/OfflineScene.unity",
+                "Assets/Arteranos/Scenes/Transition.unity"
             };
         }
 
