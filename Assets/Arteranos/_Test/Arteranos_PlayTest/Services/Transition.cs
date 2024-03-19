@@ -74,5 +74,30 @@ namespace Arteranos.PlayTest.Services
 
             yield return new WaitForSeconds(5);
         }
+
+        [UnityTest]
+        public IEnumerator ProgressMonitoringFromAsync()
+        {
+            yield return TransitionProgressReceiver.TransitionFrom();
+
+            // Same as before, but in a worker thread, not in a Coroutine
+            Task t = Task.Run(async () =>
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    float progress = (float)i / (float)10;
+                    TransitionProgressReceiver.Instance.OnProgressChanged(progress, $"Progress {i}");
+
+                    await Task.Delay(2000);
+                }
+            });
+
+            // Wait for the task to be done.
+            yield return new WaitUntil(() => t.IsCompleted);
+
+            yield return TransitionProgressReceiver.TransitionTo(null, null);
+
+            yield return new WaitForSeconds(5);
+        }
     }
 }

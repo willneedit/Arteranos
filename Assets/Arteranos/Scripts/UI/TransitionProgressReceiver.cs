@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using Arteranos.Core.Operations;
 using Arteranos.XR;
 using Ipfs;
@@ -43,15 +44,23 @@ namespace Arteranos.Services
             Instance = null;
         }
 
+        // async safe
         public void OnProgressChanged(float progress, string progressText)
         {
-            // Even if there are three bars on your smartphone,
-            // there is a fourth state -- zero bars.
-            int lit = (int) (progress * (ProgressBarObjects.Length + 1));
-            for(int i = 0; i < ProgressBarObjects.Length; i++)
-                ProgressBarObjects[i].SetActive(i < lit);
+            IEnumerator ProgessCoroutine(float progress, string progressText)
+            {
+                // Even if there are three bars on your smartphone,
+                // there is a fourth state -- zero bars.
+                int lit = (int)(progress * (ProgressBarObjects.Length + 1));
+                for (int i = 0; i < ProgressBarObjects.Length; i++)
+                    ProgressBarObjects[i].SetActive(i < lit);
 
-            ProgressNotification = progressText;
+                ProgressNotification = progressText;
+
+                yield return null;
+            }
+
+            SettingsManager.StartCoroutineAsync(() => ProgessCoroutine(progress, progressText));
         }
 
         public static IEnumerator TransitionFrom()
