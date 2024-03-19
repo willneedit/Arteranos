@@ -54,6 +54,8 @@ namespace Arteranos.Core
             ParseSettingsAndCmdLine();
 
             DefaultTOStext = BP.I.PrivacyTOSNotice.text;
+            DefaultMaleAvatar = null;
+            DefaultFemaleAvatar = null;
         }
 
         protected abstract void OnDestroy();
