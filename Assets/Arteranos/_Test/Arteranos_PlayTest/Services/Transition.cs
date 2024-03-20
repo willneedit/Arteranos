@@ -19,11 +19,17 @@ using Ipfs.Engine.Cryptography;
 using Arteranos.Core.Cryptography;
 using System.Net;
 using UnityEditor;
+using Arteranos.Core.Operations;
 
 namespace Arteranos.PlayTest.Services
 {
     public class TransitionTest
     {
+        private const string PlainFileAsset = "Assets/Arteranos/_Test/Sceelix_Abbey.zip";
+        private string FileURLAsset => $"file:///{PlainFileAsset}";
+        Cid WorldCid = null;
+
+
         [UnitySetUp]
         public IEnumerator SetupIPFS()
         {
@@ -42,18 +48,32 @@ namespace Arteranos.PlayTest.Services
             GameObject go = UnityEngine.Object.Instantiate(bp);
 
             // Resynchronize with the background IPFS uploading processes
-            yield return new WaitForSeconds(5);
             yield return new WaitUntil(() => SettingsManager.DefaultFemaleAvatar != null);
+
+            yield return UploadTestWorld();
         }
+
+        private IEnumerator UploadTestWorld()
+        {
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                AssetUploader.PrepareUploadToIPFS(FileURLAsset, true);
+
+            yield return ao.ExecuteCoroutine(co);
+
+            WorldCid = AssetUploader.GetUploadedCid(co);
+
+            Assert.IsNotNull(WorldCid);
+        }
+
 
         [UnityTest]
         public IEnumerator InAndOut()
         {
-            yield return TransitionProgressReceiver.TransitionFrom();
+            yield return TransitionProgress.TransitionFrom();
 
             yield return new WaitForSeconds(5);
 
-            yield return TransitionProgressReceiver.TransitionTo(null, null);
+            yield return TransitionProgress.TransitionTo(null, null);
 
             yield return new WaitForSeconds(5);
         }
@@ -61,16 +81,16 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator ProgressMonitoring()
         {
-            yield return TransitionProgressReceiver.TransitionFrom();
+            yield return TransitionProgress.TransitionFrom();
 
             for(int i = 0; i < 10; i++)
             {
                 float progress = (float)i / (float)10;
-                TransitionProgressReceiver.Instance.OnProgressChanged(progress, $"Progress {i}");
+                TransitionProgress.Instance.OnProgressChanged(progress, $"Progress {i}");
                 yield return new WaitForSeconds(2f);
             }
 
-            yield return TransitionProgressReceiver.TransitionTo(null, null);
+            yield return TransitionProgress.TransitionTo(null, null);
 
             yield return new WaitForSeconds(5);
         }
@@ -78,7 +98,7 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator ProgressMonitoringFromAsync()
         {
-            yield return TransitionProgressReceiver.TransitionFrom();
+            yield return TransitionProgress.TransitionFrom();
 
             // Same as before, but in a worker thread, not in a Coroutine
             Task t = Task.Run(async () =>
@@ -86,7 +106,7 @@ namespace Arteranos.PlayTest.Services
                 for (int i = 0; i < 10; i++)
                 {
                     float progress = (float)i / (float)10;
-                    TransitionProgressReceiver.Instance.OnProgressChanged(progress, $"Progress {i}");
+                    TransitionProgress.Instance.OnProgressChanged(progress, $"Progress {i}");
 
                     await Task.Delay(2000);
                 }
@@ -95,7 +115,35 @@ namespace Arteranos.PlayTest.Services
             // Wait for the task to be done.
             yield return new WaitUntil(() => t.IsCompleted);
 
-            yield return TransitionProgressReceiver.TransitionTo(null, null);
+            yield return TransitionProgress.TransitionTo(null, null);
+
+            yield return new WaitForSeconds(5);
+        }
+
+        [UnityTest]
+        public IEnumerator TransitionWorld()
+        {
+            yield return TransitionProgress.TransitionFrom();
+
+            (AsyncOperationExecutor<Context> ao, Context co) =
+                WorldDownloader.PrepareGetWorldAsset(WorldCid);
+
+            ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
+
+            yield return ao.ExecuteCoroutine(co, (ex, co) =>
+            {
+                TransitionProgress.Instance.OnProgressChanged(1.0f,
+                    co != null ? "Success" : "Failed");
+            });
+
+            string file = WorldDownloader.GetWorldDataFile(co);
+
+            Assert.IsNotNull(file);
+            Assert.IsTrue(File.Exists(file));
+
+            yield return new WaitForSeconds(2);
+
+            yield return TransitionProgress.TransitionTo(WorldCid, "Would be WorldInfo.Name");
 
             yield return new WaitForSeconds(5);
         }

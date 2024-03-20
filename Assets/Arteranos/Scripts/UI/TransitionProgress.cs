@@ -17,9 +17,9 @@ using UnityEngine.SceneManagement;
 
 namespace Arteranos.Services
 {
-    public class TransitionProgressReceiver : MonoBehaviour
+    public class TransitionProgress : MonoBehaviour
     {
-        public static TransitionProgressReceiver Instance;
+        public static TransitionProgress Instance;
 
         public GameObject[] ProgressBarObjects = null;
         public TMP_Text ProgressNotificationOb = null;

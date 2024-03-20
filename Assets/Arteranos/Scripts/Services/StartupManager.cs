@@ -45,6 +45,9 @@ namespace Arteranos.Services
 
             XR.XRControl.Instance.enabled = true;
 
+            // First, wait for IPFS to come up.
+            yield return new WaitUntil(() => IPFSService.Instance?.Ipfs_ != null);
+
             yield return UploadDefaultAvatars();
 
             if (TargetedPeerID == null && DesiredWorldCid != null)
