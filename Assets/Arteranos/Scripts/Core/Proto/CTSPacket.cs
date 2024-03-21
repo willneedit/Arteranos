@@ -22,6 +22,7 @@ namespace Arteranos.Core
     [ProtoInclude(65537, typeof(CTSPUpdateUserState))]
     [ProtoInclude(65538, typeof(CTSPWorldChangeAnnouncement))]
     [ProtoInclude(65539, typeof(STCUserInfo))]
+    [ProtoInclude(65540, typeof(CTSMessage))]
     public class CTSPacket
     {
         [ProtoMember(1)]
@@ -71,13 +72,14 @@ namespace Arteranos.Core
     [ProtoContract]
     public class CTSPWorldChangeAnnouncement : CTSPacket
     {
-        // [ProtoMember(1)]
-        // public string WorldCid; // In case if the World Info isn't available yet
-
-        [ProtoMember(2)]
+        [ProtoMember(1)]
         public WorldInfo WorldInfo; // NOTE: No Screenshot for brevity, WorldCid points to original
+    }
 
-        [ProtoMember(3)]
-        public string Message; // Nonzero if it needs a dialog to pop up
+    // S: Dialog message
+    public class CTSMessage : CTSPacket
+    {
+        [ProtoMember(1)]
+        public string message;
     }
 }

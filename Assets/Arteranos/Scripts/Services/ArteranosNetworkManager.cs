@@ -13,6 +13,7 @@ using System.Collections;
 using Arteranos.Social;
 using Arteranos.Web;
 using System.Linq;
+using Ipfs;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -508,7 +509,9 @@ namespace Arteranos.Services
         public void ServerLocalCTSPacket(UserID sender, CTSPacket packet)
         {
             if (packet is CTSPWorldChangeAnnouncement wca)
-                StartCoroutine(MakeWorldTransition(sender, true, wca));
+                StartCoroutine(MakeServerWorldTransition(sender, wca));
+            else if (packet is CTSMessage message)
+                throw new InvalidOperationException($"Attempting to display a message on server: {message.message}");
             else if (packet is CTSPUpdateUserState uss)
                 _ = ServerUpdateUserState(sender, uss);
             else if (packet is STCUserInfo userInfoQuery)
@@ -521,7 +524,9 @@ namespace Arteranos.Services
         private void ClientLocalCTSPacket(CTSPacket packet)
         {
             if (packet is CTSPWorldChangeAnnouncement wca)
-                StartCoroutine(MakeWorldTransition(null, false, wca));
+                StartCoroutine(MakeClientWorldTransition(wca));
+            else if (packet is CTSMessage message)
+                StartCoroutine(ShowDialogCoroutine(message.message));
             else if (packet is CTSPUpdateUserState uss)
                 _ = ClientInformUpdatedUserState(uss);
             else if (packet is STCUserInfo userInfo)
@@ -534,149 +539,112 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region World Teansition (all)
 
-        // Invoked by the owner by EmitToServerCTSPacket()
-        // Stage 1: Server or host - check privilege and server's permissions, transition.
-        // Stage 2: Client - transition (if not same as in host)
-        private IEnumerator MakeWorldTransition(UserID invoker, bool inServer, CTSPWorldChangeAnnouncement changeAnnouncement)
+        private IEnumerator MakeServerWorldTransition(UserID invoker, CTSPWorldChangeAnnouncement wca)
         {
-            IEnumerator StopWorldAction(string message)
-            {
-                // In any reason, unfade the screen
-                XR.ScreenFader.StartFading(0.0f);
+            wca.invoker = invoker;
+            Debug.Log($"[Server] {(string)wca.invoker} wants to change the world to {wca.WorldInfo?.WorldCid}");
 
-                // If we're not interactive, tell the client what's going on.
-                if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Server)
+            IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+
+            // If we're in the offline mode, we _are_ the only user, the one which are the server admin
+            // If we're in the server or host mode, anyone could attempt it to invoke a change.
+            if (NetworkServer.active)
+            {
+                if (!Core.Utils.IsAbleTo(sender, UserCapabilities.CanInitiateWorldTransition, null))
                 {
-                    changeAnnouncement.Message = message;
-                    Debug.Log($"[Server] {message}");
-                    PropagateWorldTransition();
-                }
-                else
-                    yield return ShowDialogCoroutine(message);
-            }
-
-            void PropagateWorldTransition()
-            {
-                IAvatarBrain to = null;
-                if (changeAnnouncement.Message != null)
-                    to = NetworkStatus.GetOnlineUser(invoker);
-
-                EmitCTSPacket(changeAnnouncement, to);
-            }
-
-            bool WorldNeedsPreloasding()
-            {
-                try
-                {
-                    if (changeAnnouncement.WorldInfo == null) return false; // It's the offline embedded world.
-
-                    if (string.IsNullOrEmpty(WorldDownloader.CurrentWorldAssetBundlePath)) return true;
-
-                    return false;
-                }
-                catch { return true; }
-
-                // NOTREACHED
-            }
-
-            IEnumerator PreloadWorld()
-            {
-                bool finished = false;
-                WorldTransition.PreloadWorldDataAsync(changeAnnouncement.WorldInfo.WorldCid, () => finished = true, () =>
-                {
-                    StartCoroutine(StopWorldAction("Cannot load world"));
-                    finished = true;
-                });
-
-                yield return new WaitUntil(() => finished);
-            }
-
-            // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-            OnlineLevel onlineLevel = NetworkStatus.GetOnlineLevel();
-
-            // It isn't the transition. Only the server telling what went wrong.
-            if (changeAnnouncement.Message != null)
-            {
-                Debug.Log($"[Server to you] {changeAnnouncement.Message}");
-                SettingsManager.StartCoroutineAsync(() => ShowDialogCoroutine(changeAnnouncement.Message));
-                yield break;
-            }
-
-            // It's a blank server or host?
-            // FIXME (maybe) MoveToOfflineWorld() for the case of transition FROM a used server TO a blank one.
-            // Maybe? No dedicated Offline World with WorldCid == null; treating as an error.
-            if (changeAnnouncement.WorldInfo == null)
-                yield break;
-
-            if (inServer)
-            {
-                changeAnnouncement.invoker = invoker;
-                Debug.Log($"[Server] {(string)changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldInfo?.WorldCid}");
-
-                // If we're in the offline mode, we _are_ the only user, the one which are the server admin
-                // If we're in the server or host mode, anyone could attempt it to invoke a change.
-                if (NetworkServer.active)
-                {
-                    IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
-
-                    if (!Core.Utils.IsAbleTo(sender, UserCapabilities.CanInitiateWorldTransition, null))
+                    EmitToClientCTSPacket(new CTSMessage()
                     {
-                        yield return StopWorldAction("You're not allowed to change the server's world.");
-                        yield break;
-                    }
-                }
-
-                if(changeAnnouncement.WorldInfo != null)
-                {
-                    if (WorldNeedsPreloasding())
-                        yield return PreloadWorld();
-
-                    // Server checks if the world's content rating goes along with its own permissions
-                    if (changeAnnouncement.WorldInfo.ContentRating != null
-                        && (changeAnnouncement.WorldInfo.ContentRating).IsInViolation(SettingsManager.Server.Permissions))
-                    {
-                        yield return StopWorldAction("World is in violation of the server's content permission");
-                        yield break;
-                    }
-                }
-
-                if (SettingsManager.WorldCid == changeAnnouncement.WorldInfo.WorldCid)
-                {
-                    yield return StopWorldAction("Already in the current world.");
+                        invoker = invoker,
+                        message = "You are not allowed to switch worlds on this server."
+                    }, sender);
                     yield break;
                 }
             }
-            else
-            {
-                Debug.Log($"[Client] {(string)changeAnnouncement.invoker} wants to change the world to {changeAnnouncement.WorldInfo?.WorldCid}");
 
-                if (WorldNeedsPreloasding())
-                    yield return PreloadWorld();
+            yield return TransitionProgress.TransitionFrom();
+
+            Cid WorldCid = null;
+            string WorldName = null;
+            if (wca.WorldInfo != null)
+            {
+                WorldCid = wca.WorldInfo.WorldCid;
+                WorldName = wca.WorldInfo.WorldName;
+
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    WorldDownloader.PrepareGetWorldAsset(WorldCid);
+
+                ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
+
+                yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
+
+                if(co == null)
+                {
+                    EmitToClientCTSPacket(new CTSMessage()
+                    {
+                        invoker = invoker,
+                        message = "Error in loading the world."
+                    }, sender);
+
+                    // Invalidate the world info, because we are in a transitional stage.
+                    wca.WorldInfo = null;
+                    WorldCid = null;
+                    WorldName= null;
+                }
             }
 
-            // In Stage 1: We're really in the current world.
-            // In Stage 2: In Host mode, the announcement came looped back in Stage 1
-            if (SettingsManager.WorldCid == changeAnnouncement.WorldInfo.WorldCid)
+            yield return TransitionProgress.TransitionTo(WorldCid, WorldName);
+
+            // If we're in offline mode, we're done it.
+            // If we're in server or host mode, we need to announce the world change,
+            // no matter we're successfully loaded or falling back to the offline world.
+            // If we're in host mode, the message will be looped back, and sunk into /dev/null.
+            if(NetworkServer.active)
+                EmitCTSPacket(wca, null);
+        }
+
+        private IEnumerator MakeClientWorldTransition(CTSPWorldChangeAnnouncement wca)
+        {
+            OnlineLevel onlineLevel = NetworkStatus.GetOnlineLevel();
+            if(onlineLevel == OnlineLevel.Host)
             {
-                if (onlineLevel == OnlineLevel.Client)
-                    yield return StopWorldAction("Already in the current world.");
-                else
-                    Debug.Log("Host or offline mode, we're already here.");
-
-
-                if(onlineLevel != OnlineLevel.Host && onlineLevel != OnlineLevel.Offline)
-                    XR.ScreenFader.StartFading(0.0f, 2.0f);
-
+                Debug.Log("[Client] Server wants to change the world, but we are in the host mode.");
                 yield break;
             }
 
-            // FIXME async!
-            _ = WorldTransition.MoveToOnlineWorld(changeAnnouncement.WorldInfo?.WorldCid, changeAnnouncement.WorldInfo?.WorldName);
+            // Only for the client mode, no offline or host mode
+            yield return TransitionProgress.TransitionFrom();
 
-            // When we're done this, order everyone the transition, or the invoker what went wrong.
-            if (inServer) PropagateWorldTransition();
+            Cid WorldCid = null;
+            string WorldName = null;
+            if (wca.WorldInfo != null)
+            {
+                WorldCid = wca.WorldInfo.WorldCid;
+                WorldName = wca.WorldInfo.WorldName;
+
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    WorldDownloader.PrepareGetWorldAsset(WorldCid);
+
+                ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
+
+                yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
+
+                if (co == null)
+                {
+                    yield return ShowDialogCoroutine($"Error in loading world '{WorldName}' by {(string)wca.invoker} - disconnecting");
+
+                    // Invalidate the world info, because we are in a transitional stage.
+                    wca.WorldInfo = null;
+                    WorldCid = null;
+                    WorldName = null;
+
+                    // We're in the client mode, see above.
+                    NetworkStatus.StopHost(false);
+                }
+            }
+
+            yield return TransitionProgress.TransitionTo(WorldCid, WorldName);
         }
+
         #endregion
         // ---------------------------------------------------------------
         #region Server User State updates (all)
