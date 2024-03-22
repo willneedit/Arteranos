@@ -55,6 +55,8 @@ namespace Arteranos.Core
         [ProtoMember(14)]
         public byte[] signature;
 
+        [ProtoMember(15)]
+        public string ServerDescriptionCid; // Only matches itself if it's null!
 
         public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);

@@ -13,14 +13,11 @@ using UnityEngine.UI;
 using Arteranos.Core;
 using System.Collections.Generic;
 using System;
-using System.Threading.Tasks;
 using System.Threading;
 using System.Collections;
-using System.Linq;
 using Ipfs;
 using Arteranos.Core.Operations;
 using System.Collections.Concurrent;
-using Codice.Client.Common.FsNodeReaders;
 
 namespace Arteranos.UI
 {

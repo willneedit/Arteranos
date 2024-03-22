@@ -228,7 +228,8 @@ namespace Arteranos.Services
                 PrivacyTOSNotice = CachedPTOSNotice,
                 AdminNames = q.ToArray(),
                 PeerID = self.Id.ToString(),
-                LastModified = server.ConfigTimestamp
+                LastModified = server.ConfigTimestamp,
+                ServerDescriptionCid = null // Self-reference will be generated AFTER putting it to IPFS
             };
 
             using MemoryStream ms = new();
@@ -353,10 +354,7 @@ namespace Arteranos.Services
 
         private async Task<bool> ParseServerOnlineData(ServerOnlineData sod, Peer SenderPeer)
         {
-            string SenderPeerID = SenderPeer.Id.ToString();
-
-            // Maybe it's the first time where we've met. Need to check the background.
-            if(ServerDescription.DBLookup(SenderPeerID) == null)
+            async Task UpdateSD(ServerOnlineData sod, string SenderPeerID)
             {
                 using CancellationTokenSource cts = new(500);
 
@@ -365,8 +363,20 @@ namespace Arteranos.Services
                 PublicKey pk = PublicKey.FromId(SenderPeerID);
                 ServerDescription sd = ServerDescription.Deserialize(pk, s);
 
+                // Save the self-reference in the internal storage to detect the changes
+                sd.ServerDescriptionCid = sod.ServerDescriptionCid;
                 sd.DBUpdate();
             }
+
+            string SenderPeerID = SenderPeer.Id.ToString();
+
+            // Maybe it's the first time where we've met. Need to check the background.
+            // Or, the server changed its face.
+            ServerDescription savedDescription = ServerDescription.DBLookup(SenderPeerID);
+            if (savedDescription == null)
+                await UpdateSD(sod, SenderPeerID);
+            else if (savedDescription.ServerDescriptionCid != sod.ServerDescriptionCid)
+                await UpdateSD(sod, SenderPeerID);
 
             // Set on receive, no sense to transmit the actual time.
             // In this context, latencies don't matter.
