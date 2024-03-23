@@ -687,6 +687,11 @@ namespace Arteranos.Services
             SettingsManager.ServerUsers.AddUser(uss.State);
             SettingsManager.ServerUsers.Save();
 
+            // Admin list could have been changed
+            // (Maybe a ban list, too, in future...)
+            // so the server description has to be compiled and published.
+            _ = IPFSService.FlipServerDescription(true);
+
             if (receiver != null)
             {
                 // Leave out the details of the means of banning (IP, deviceID, ...)

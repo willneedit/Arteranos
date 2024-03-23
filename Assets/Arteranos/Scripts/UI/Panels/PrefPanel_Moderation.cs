@@ -15,6 +15,7 @@ using UnityEngine.Networking;
 using System.Collections;
 using System;
 using System.IO;
+using Arteranos.Services;
 
 namespace Arteranos.UI
 {
@@ -124,7 +125,11 @@ namespace Arteranos.UI
             }
 
             // Might be to disabled before it's really started, so cs may be null yet.
-            if(dirty) ss?.Save();
+            if (dirty && ss != null)
+            {
+                ss.Save();
+                IPFSService.FlipServerDescription(true);
+            }
             dirty = false;
         }
 

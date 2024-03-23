@@ -65,19 +65,20 @@ namespace Arteranos.Core
 
         public IEnumerable<T> _DBList()
         {
-            IEnumerable<string> files = Directory.EnumerateFiles(_KnownPeersRoot, _SearchPattern, SearchOption.AllDirectories);
-
-            foreach (string file in files)
+            try
             {
-                T sd = null;
-                using Stream stream = File.OpenRead(file);
-                sd = _Deserialize(stream);
+                IEnumerable<string> files = Directory.EnumerateFiles(_KnownPeersRoot, _SearchPattern, SearchOption.AllDirectories);
 
-                if (sd != null) yield return sd;
+                foreach (string file in files)
+                {
+                    T sd = null;
+                    using Stream stream = File.OpenRead(file);
+                    sd = _Deserialize(stream);
+
+                    if (sd != null) yield return sd;
+                }
             }
+            finally { }
         }
-
-
-
     }
 }
