@@ -31,7 +31,12 @@ namespace Arteranos.XR
         private float FadeStrength = 0.0f;
         private Volume FaderVolume;
 
-        private void Awake() => ScreenFader.Instance = this;
+        private void Awake()
+        {
+            ScreenFader.Instance = this;
+            FadeTargetStrength = 1.0f;
+            FadeStrength = 1.0f; // Start with opaque
+        }
 
         private void OnDestroy()
         {

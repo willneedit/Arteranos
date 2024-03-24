@@ -62,18 +62,11 @@ namespace Arteranos.Services
                 while (NetworkClient.isConnecting) yield return null;
 
                 if (!NetworkClient.isConnected)
-                    // And now, the remote server did let me down.
-                    _ = WorldTransition.MoveToOfflineWorld();
+                    yield return TransitionProgress.TransitionTo(null, null);
+                // else: Server tells us where we go.
             }
             else
-            {
-
-                Task t = DesiredWorldCid == null 
-                    ? WorldTransition.MoveToOfflineWorld() 
-                    : WorldTransition.EnterWorldAsync(DesiredWorldCid);
-
-                while(!t.IsCompleted) yield return null;
-            }
+                yield return TransitionProgress.TransitionTo(DesiredWorldCid, "???");
 
 
             if (FileUtils.Unity_Server)
@@ -93,10 +86,8 @@ namespace Arteranos.Services
 
             if(initialized) return;
 
+            // Very first frame, every Awake() has been called, everything is a go.
             initialized = true;
-
-            // Initialize with the black screen
-            XR.ScreenFader.StartFading(1.0f, 0.0f);
 
             StartCoroutine(StartupCoroutine());
         }

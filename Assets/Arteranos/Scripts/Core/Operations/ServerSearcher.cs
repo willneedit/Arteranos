@@ -185,10 +185,6 @@ namespace Arteranos.Core.Operations
                 return;
             }
 
-            XR.ScreenFader.StartFading(1.0f);
-
-            await Task.Delay(1000);
-
             // Matching server (with matching world, if needed), initiate remote connection
             await ConnectionManager.ConnectToServer(ServerPeerID);
         }

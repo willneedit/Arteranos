@@ -34,7 +34,6 @@ namespace Arteranos.Avatar
 
         public void NotifyBubbleBreached(IAvatarBrain touchy, bool isFriend, bool entered)
         {
-            // TODO People management
             bool haveFriends = true;
 
             // Not for the desired sphere of influence

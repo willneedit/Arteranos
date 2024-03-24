@@ -25,6 +25,7 @@ using Object = UnityEngine.Object;
 using System.Threading.Tasks;
 using Ipfs;
 using Arteranos.Core.Operations;
+using Arteranos.Services;
 
 namespace Arteranos.Editor
 {
@@ -444,7 +445,7 @@ namespace Arteranos.Editor
                     pui.Completed += (_context) =>
                     {
                         Debug.Log("World data file loading and unpacking succeeded.");
-                        WorldTransition.EnterDownloadedWorld();
+                        TransitionProgress.EnterDownloadedWorld();
                     };
 
                     pui.Faulted += (Exception ex, Context _context) => 

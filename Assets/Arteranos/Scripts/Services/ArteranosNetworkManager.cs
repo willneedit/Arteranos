@@ -449,8 +449,6 @@ namespace Arteranos.Services
 
         private IEnumerator ShowDialogCoroutine(string message)
         {
-            XR.ScreenFader.StartFading(0.0f);
-
             yield return null;
 
             IDialogUI dialog = DialogUIFactory.New();
@@ -559,6 +557,8 @@ namespace Arteranos.Services
                     }, sender);
                     yield break;
                 }
+
+                // TODO World's content ratings matches the server's content permissions?
             }
 
             yield return TransitionProgress.TransitionFrom();

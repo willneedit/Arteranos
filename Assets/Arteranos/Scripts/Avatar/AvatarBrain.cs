@@ -615,7 +615,6 @@ namespace Arteranos.Avatar
             return cap switch
             {
                 // User can enable flying if the current(!) server permits it
-                // TODO - maybe world restrictions.
                 // Maybe add SettingsManager.Client.PingXRControllersChanged();
                 // in the world transition, too.
                 UserCapabilities.CanEnableFly => isAnyAdmin || (SettingsManager.ActiveServerData?.Permissions.Flying ?? true),

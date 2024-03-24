@@ -222,8 +222,6 @@ namespace Arteranos.XR
 
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
-
-            ScreenFader.StartFading(0.0f);
         }
 
         public void MoveRig()

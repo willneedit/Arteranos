@@ -266,17 +266,7 @@ namespace Arteranos.Services
 
             RemotePeerId_ = null;
 
-            if (loadOfflineScene)
-            {
-                XR.ScreenFader.StartFading(1.0f);
-                await Task.Run(async () =>
-                {
-                    await Task.Delay(1000);
-                    await WorldTransition.MoveToOfflineWorld();
-                });
-
-                XR.ScreenFader.StartFading(0.0f);
-            }
+            if (loadOfflineScene) TransitionProgress.TransitionTo(null, null);
 
             // And, wait for the network to really be shut down.
             while (manager.isNetworkActive) await Task.Delay(8);
@@ -358,7 +348,6 @@ namespace Arteranos.Services
 
         }
 
-        // TODO implement ServerUserBase database lookup (see UserPanel_ServerUserList)
         #endregion
         // -------------------------------------------------------------------
     }
