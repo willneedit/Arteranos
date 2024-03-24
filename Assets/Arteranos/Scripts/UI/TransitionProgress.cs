@@ -109,12 +109,7 @@ namespace Arteranos.Services
                 XRControl.Instance.MoveRig();
             }
             else
-            {
                 yield return EnterDownloadedWorld();
-                // TODO Online worlds are async operated with the sceneloader!
-
-                yield return new WaitForSeconds(1f);
-            }
 
             SettingsManager.WorldCid = WorldCid;
             SettingsManager.WorldName = WorldName;
@@ -128,12 +123,21 @@ namespace Arteranos.Services
 
             yield return null;
 
+            bool done = false;
+
             // Deploy the scene loader.
             GameObject go = new("_SceneLoader");
             go.AddComponent<Persistence>();
             SceneLoader sl = go.AddComponent<SceneLoader>();
-            sl.OnFinishingSceneChange += () => XRControl.Instance.MoveRig();
+            sl.OnFinishingSceneChange += () =>
+            {
+                XRControl.Instance.MoveRig();
+                done = true;
+            };
+
             sl.Name = worldABF;
+
+            yield return new WaitUntil(() => done);
         }
     }
 }
