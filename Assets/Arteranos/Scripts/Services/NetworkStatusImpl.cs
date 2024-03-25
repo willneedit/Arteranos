@@ -266,7 +266,8 @@ namespace Arteranos.Services
 
             RemotePeerId_ = null;
 
-            if (loadOfflineScene) TransitionProgress.TransitionTo(null, null);
+            if (loadOfflineScene)
+                SettingsManager.StartCoroutineAsync(() => TransitionProgress.TransitionTo(null, null));
 
             // And, wait for the network to really be shut down.
             while (manager.isNetworkActive) await Task.Delay(8);
