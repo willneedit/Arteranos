@@ -140,8 +140,11 @@ namespace Arteranos.UI
 
         private IEnumerator GatherFavouritedWorlds()
         {
+            // The WorldInfo contains ALL the cached worlds so far. We have to see for
+            // the only pinned (= favourited) ones.
             foreach (WorldInfo wi in WorldInfo.DBList())
-                yield return AddManualWorldCoroutine(wi.WorldCid);
+                if(wi.IsFavourited())
+                    yield return AddManualWorldCoroutine(wi.WorldCid);
         }
 
         private IEnumerator AddManualWorldCoroutine(Cid WorldCid)
@@ -167,7 +170,12 @@ namespace Arteranos.UI
         {
             sortedWorldList.Clear();
             foreach(KeyValuePair<Cid, Collection> item in worldlist)
+            {
+                // It's nowhere hosted and unfavourited, so leave out the dross
+                if (ScoreWorld(item.Key) <= 0) continue;
+
                 sortedWorldList.Add(item.Key);
+            }
 
             sortedWorldList.Sort((x, y) => ScoreWorld(y) - ScoreWorld(x));
         }

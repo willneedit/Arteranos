@@ -540,6 +540,9 @@ namespace Arteranos.Services
         private IEnumerator MakeServerWorldTransition(UserID invoker, CTSPWorldChangeAnnouncement wca)
         {
             wca.invoker = invoker;
+
+            WorldInfo WorldInfo = wca.WorldInfo;
+
             Debug.Log($"[Server] {(string)wca.invoker} wants to change the world to {wca.WorldInfo?.WorldCid}");
 
             IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
@@ -548,6 +551,7 @@ namespace Arteranos.Services
             // If we're in the server or host mode, anyone could attempt it to invoke a change.
             if (NetworkServer.active)
             {
+                // Can the user change the world? Server admin or the like?
                 if (!Core.Utils.IsAbleTo(sender, UserCapabilities.CanInitiateWorldTransition, null))
                 {
                     EmitToClientCTSPacket(new CTSMessage()
@@ -558,7 +562,23 @@ namespace Arteranos.Services
                     yield break;
                 }
 
-                // TODO World's content ratings matches the server's content permissions?
+                // Can the user change a world like with p0rn or gore on this server which
+                // is like rated to G or PG-13? Even if it's the server admin?
+                if(WorldInfo != null)
+                {
+                    ServerPermissions permission = WorldInfo.win.ContentRating;
+                    bool AllowedForThis = permission != null && !permission.IsInViolation(SettingsManager.Server.Permissions);
+
+                    if(!AllowedForThis)
+                    {
+                        EmitToClientCTSPacket(new CTSMessage()
+                        {
+                            invoker = invoker,
+                            message = "The world's content rating doesn't match to this server's permissions."
+                        }, sender);
+                        yield break;
+                    }
+                }
             }
 
             yield return TransitionProgress.TransitionFrom();
@@ -621,16 +641,37 @@ namespace Arteranos.Services
                 WorldCid = wca.WorldInfo.WorldCid;
                 WorldName = wca.WorldInfo.WorldName;
 
-                (AsyncOperationExecutor<Context> ao, Context co) =
-                    WorldDownloader.PrepareGetWorldAsset(WorldCid);
+                bool success = true;
 
-                ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
-
-                yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
-
-                if (co == null)
+                // We got a _stripped_ version, start to download the full version now
+                // if it's unavailable locally yet.
+                if(success && WorldInfo.DBLookup(WorldCid) == null)
                 {
-                    yield return ShowDialogCoroutine($"Error in loading world '{WorldName}' by {(string)wca.invoker} - disconnecting");
+                    (AsyncOperationExecutor<Context> ao, Context co) =
+                        WorldDownloader.PrepareGetWorldInfo(WorldCid);
+
+                    ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
+
+                    yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
+
+                    success = co != null;
+                }
+
+                if (success)
+                {
+                    (AsyncOperationExecutor<Context> ao, Context co) =
+                        WorldDownloader.PrepareGetWorldAsset(WorldCid);
+
+                    ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
+
+                    yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
+
+                    success = co != null;
+                }
+
+                if (!success)
+                {
+                    yield return ShowDialogCoroutine($"Error in loading world '{WorldName}' - disconnecting");
 
                     // Invalidate the world info, because we are in a transitional stage.
                     wca.WorldInfo = null;
