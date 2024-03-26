@@ -25,43 +25,53 @@ namespace Arteranos.Web
         private void Awake() => Instance = this;
         private void OnDestroy() => Instance = null;
 
-        protected override async Task<bool> ConnectToServer_(MultiHash PeerID)
+        protected override Task<bool> ConnectToServer_(MultiHash PeerID)
         {
-            if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
-            {
-                // Anything but idle, cut off all connections before connecting to the desired server.
-                await NetworkStatus.StopHost(false);
-            }
-
-            ServerInfo si = new(PeerID);
 
             bool? result = null;
+            bool done = false;
             IEnumerator AskForAgreement()
             {
-                yield return null;
+                if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
+                {
+                    // Anything but idle, cut off all connections before connecting to the desired server.
+                    Task t0 = NetworkStatus.StopHost(false);
 
-                AgreementDialogUIFactory.New(si, 
-                    () => 
-                    { 
-                        result = false; 
-                    }, 
-                    () =>
-                    {
-                        result = true;
-                    });
+                    yield return new WaitUntil(() => t0.IsCompleted);
+                }
+
+                ServerInfo si = new(PeerID);
+
+                AgreementDialogUIFactory.New(si, () => result = false, () => result = true);
+
+                yield return new WaitUntil(() => result !=  null);
+
+                // User denied privacy agreement, backing out.
+                if (result == false)
+                {
+                    done = true;
+                    yield break;
+                }
+
+                Task<bool> t = CommenceConnection(si);
+
+                yield return new WaitUntil(() => t.IsCompleted);
+
+                result = t.Result;
+                done = true;
             }
 
-            // Ask for the privacy notice agreement, or silently agree if it's already known:
-            SettingsManager.StartCoroutineAsync(AskForAgreement);
 
-            // Take aim....  hold.... hold.... 
-            while(result == null) await Task.Delay(8);
+            Task<bool> t1 = Task.Run(async () =>
+            {
+                // Ask for the privacy notice agreement, or silently agree if it's already known:
+                SettingsManager.StartCoroutineAsync(AskForAgreement);
 
-            // ... Fire!
-            if(result == true) return await CommenceConnection(si);
+                while (!done) await Task.Delay(8);
+                return result.Value;
+            });
 
-            // Drat. Hangfire.
-            return false;
+            return t1;
         }
 
         private async Task<bool> CommenceConnection(ServerInfo si)

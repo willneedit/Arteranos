@@ -19,9 +19,8 @@ using Arteranos.Web;
 
 namespace Arteranos.Services
 {
-    public class TransitionProgress : MonoBehaviour
+    public class TransitionProgress : TransitionProgressStatic
     {
-        public static TransitionProgress Instance;
 
         public GameObject[] ProgressBarObjects = null;
         public TMP_Text ProgressNotificationOb = null;
@@ -47,7 +46,7 @@ namespace Arteranos.Services
         }
 
         // async safe
-        public void OnProgressChanged(float progress, string progressText)
+        public override void OnProgressChanged(float progress, string progressText)
         {
             IEnumerator ProgessCoroutine(float progress, string progressText)
             {
@@ -63,25 +62,6 @@ namespace Arteranos.Services
             }
 
             SettingsManager.StartCoroutineAsync(() => ProgessCoroutine(progress, progressText));
-        }
-
-        public static IEnumerator TransitionFrom()
-        {
-            ScreenFader.StartFading(1.0f);
-            yield return new WaitForSeconds(0.5f);
-
-            AsyncOperation ao = SceneManager.LoadSceneAsync("Transition");
-            while (!ao.isDone) yield return null;
-
-
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
-
-            XRControl.Instance.MoveRig();
-
-            ScreenFader.StartFading(0.0f);
-
-            yield return new WaitUntil(() => Instance);
         }
 
         // NOTE: Needs preloaded world! Just deploys the sceneloader which it uses

@@ -15,6 +15,7 @@ using Ipfs.Core.Cryptography.Proto;
 using Ipfs.CoreApi;
 using Ipfs.Engine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -320,6 +321,34 @@ namespace Arteranos.Services
         public static Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
             => Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel);
     }
+
+    public abstract class TransitionProgressStatic : MonoBehaviour
+    {
+        public static TransitionProgressStatic Instance;
+
+        public abstract void OnProgressChanged(float progress, string progressText);
+
+        public static IEnumerator TransitionFrom()
+        {
+            ScreenFader.StartFading(1.0f);
+            yield return new WaitForSeconds(0.5f);
+
+            UnityEngine.AsyncOperation ao = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Transition");
+            while (!ao.isDone) yield return null;
+
+
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            XRControl.Instance.MoveRig();
+
+            ScreenFader.StartFading(0.0f);
+
+            yield return new WaitUntil(() => Instance);
+        }
+
+
+    }
     #endregion
     // -------------------------------------------------------------------
 }
@@ -343,16 +372,6 @@ namespace Arteranos.Services
         public static void ExpectConnectionResponse()
             => Instance.ExpectConnectionResponse_();
     }
-
-    public struct WorldData
-    {
-        public Cid worldCid;
-        public string name;
-        public UserID authorID;
-        public byte[] icon;
-        public ServerPermissions permissions;
-    }
-
     #endregion
     // -------------------------------------------------------------------
 }

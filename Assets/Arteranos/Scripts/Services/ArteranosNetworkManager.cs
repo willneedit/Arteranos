@@ -196,10 +196,22 @@ namespace Arteranos.Services
         /// <param name="conn">Connection from client.</param>
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
-            Transform startPos = User.SpawnManager.GetStartPosition();
-            GameObject player = startPos != null
-                ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
-                : Instantiate(playerPrefab);
+            GameObject player = null;
+
+            // On Host: Start position.
+            if(conn.connectionId == NetworkConnection.LocalConnectionId)
+            {
+                Transform startPos = User.SpawnManager.GetStartPosition();
+                player = startPos != null
+                    ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
+                    : Instantiate(playerPrefab);
+            }
+            else // On Client: Transition
+            {
+                player = Instantiate(playerPrefab,
+                    new Vector3(0, -1000, 0),
+                    Quaternion.identity);
+            }
 
             NetworkServer.AddPlayerForConnection(conn, player);
 

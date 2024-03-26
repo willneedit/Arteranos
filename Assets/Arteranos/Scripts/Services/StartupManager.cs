@@ -82,9 +82,14 @@ namespace Arteranos.Services
         protected void Update()
         {
             if(QueuedCoroutine.TryDequeue(out Func<IEnumerator> action))
-                StartCoroutine(action());
+            {
+                if (action != null)
+                    StartCoroutine(action?.Invoke());
+                else
+                    Debug.LogWarning("Asynced Coroutine: Coroutine's underlying object == null");
+            }
 
-            if(initialized) return;
+            if (initialized) return;
 
             // Very first frame, every Awake() has been called, everything is a go.
             initialized = true;
