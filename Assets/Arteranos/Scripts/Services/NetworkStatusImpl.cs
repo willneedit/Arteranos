@@ -100,9 +100,9 @@ namespace Arteranos.Services
                 : OnlineLevel.Server;
         }
 
-        protected override bool isClientConnecting_ => NetworkClient.isConnecting;
+        protected override bool IsClientConnecting_ => NetworkClient.isConnecting;
 
-        protected override bool isClientConnected_ => NetworkClient.isConnected;
+        protected override bool IsClientConnected_ => NetworkClient.isConnected;
 
         void OnEnable()
         {
@@ -271,7 +271,7 @@ namespace Arteranos.Services
             RemotePeerId_ = null;
 
             if (loadOfflineScene)
-                SettingsManager.StartCoroutineAsync(() => TransitionProgress.TransitionTo(null, null));
+                SettingsManager.StartCoroutineAsync(() => TransitionProgressStatic.TransitionTo(null, null));
 
             // And, wait for the network to really be shut down.
             while (manager.isNetworkActive) await Task.Delay(8);

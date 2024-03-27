@@ -50,14 +50,15 @@ namespace Arteranos.Services
 
             yield return UploadDefaultAvatars();
 
-            if (TargetedPeerID == null && DesiredWorldCid != null)
+            if (DesiredWorldCid != null)
                 ServerSearcher.InitiateServerTransition(DesiredWorldCid);
             else if (TargetedPeerID != null)
                 yield return ConnectionManager.ConnectToServer(TargetedPeerID, null);
             else
-                yield return TransitionProgress.TransitionTo(DesiredWorldCid, "???");
+                yield return TransitionProgressStatic.TransitionTo(null, null);
 
 
+            // TODO Dedicated server: Startup world commandline argument processing
             if (FileUtils.Unity_Server)
             {
                 // Manually start the server, including with the initialization.

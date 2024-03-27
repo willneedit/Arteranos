@@ -91,14 +91,14 @@ namespace Arteranos.Web
             NetworkStatus.StartClient(connectionUri);
 
             // https://www.youtube.com/watch?v=dQw4w9WgXcQ
-            while (NetworkStatus.isClientConnecting) yield return new WaitForEndOfFrame();
+            while (NetworkStatus.IsClientConnecting) yield return new WaitForEndOfFrame();
 
             // Save it for now even before the connection negotiation and authentication
             NetworkStatus.RemotePeerId = si.PeerID;
 
             // Client failed to connect. Maybe an invalid IP, or a misconfigured firewall.
             // Fall back to the offline world.
-            if (!NetworkStatus.isClientConnected)
+            if (!NetworkStatus.IsClientConnected)
             {
                 callback?.Invoke(false);
                 yield return TransitionProgressStatic.TransitionTo(null, null);

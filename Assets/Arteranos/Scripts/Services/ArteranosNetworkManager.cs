@@ -196,7 +196,7 @@ namespace Arteranos.Services
         /// <param name="conn">Connection from client.</param>
         public override void OnServerAddPlayer(NetworkConnectionToClient conn)
         {
-            GameObject player = null;
+            GameObject player;
 
             // On Host: Start position.
             if(conn.connectionId == NetworkConnection.LocalConnectionId)
@@ -403,7 +403,7 @@ namespace Arteranos.Services
             if (!NetworkClient.active)
                 // Directly slice the packet into the server logic
                 ServerLocalCTSPacket(sender, packet);
-            else
+            else if (NetworkStatus.IsClientConnected)
             {
                 // Sign, encrypt and send it off to the connected server
                 Client.TransmitMessage(
@@ -415,6 +415,8 @@ namespace Arteranos.Services
                     CTSPayload = payload
                 });
             }
+            else
+                Debug.LogWarning("Client is disconnected/attempting to connect, no server data");
         }
 
         public void EmitToClientCTSPacket(CTSPacket packet, IAvatarBrain to = null)
@@ -593,7 +595,7 @@ namespace Arteranos.Services
                 }
             }
 
-            yield return TransitionProgress.TransitionFrom();
+            yield return TransitionProgressStatic.TransitionFrom();
 
             Cid WorldCid = null;
             string WorldName = null;
@@ -605,7 +607,7 @@ namespace Arteranos.Services
                 (AsyncOperationExecutor<Context> ao, Context co) =
                     WorldDownloader.PrepareGetWorldAsset(WorldCid);
 
-                ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
+                ao.ProgressChanged += TransitionProgressStatic.Instance.OnProgressChanged;
 
                 yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
 
@@ -624,7 +626,7 @@ namespace Arteranos.Services
                 }
             }
 
-            yield return TransitionProgress.TransitionTo(WorldCid, WorldName);
+            yield return TransitionProgressStatic.TransitionTo(WorldCid, WorldName);
 
             // If we're in offline mode, we're done it.
             // If we're in server or host mode, we need to announce the world change,
@@ -644,7 +646,7 @@ namespace Arteranos.Services
             }
 
             // Only for the client mode, no offline or host mode
-            yield return TransitionProgress.TransitionFrom();
+            yield return TransitionProgressStatic.TransitionFrom();
 
             Cid WorldCid = null;
             string WorldName = null;
@@ -662,7 +664,7 @@ namespace Arteranos.Services
                     (AsyncOperationExecutor<Context> ao, Context co) =
                         WorldDownloader.PrepareGetWorldInfo(WorldCid);
 
-                    ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
+                    ao.ProgressChanged += TransitionProgressStatic.Instance.OnProgressChanged;
 
                     yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
 
@@ -674,7 +676,7 @@ namespace Arteranos.Services
                     (AsyncOperationExecutor<Context> ao, Context co) =
                         WorldDownloader.PrepareGetWorldAsset(WorldCid);
 
-                    ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
+                    ao.ProgressChanged += TransitionProgressStatic.Instance.OnProgressChanged;
 
                     yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
 
@@ -695,7 +697,7 @@ namespace Arteranos.Services
                 }
             }
 
-            yield return TransitionProgress.TransitionTo(WorldCid, WorldName);
+            yield return TransitionProgressStatic.TransitionTo(WorldCid, WorldName);
         }
 
         #endregion

@@ -186,6 +186,8 @@ namespace Arteranos.Core.Operations
             }
 
             // Matching server (with matching world, if needed), initiate remote connection
+            // TODO Use callback to be notified about the connection success/failure,
+            // then maybe walk down on the list if the leading servers went dark.
             SettingsManager.StartCoroutineAsync(
                 () => ConnectionManager.ConnectToServer(ServerPeerID, null));
         }

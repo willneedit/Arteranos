@@ -147,8 +147,8 @@ namespace Arteranos.Services
         protected abstract event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
         protected abstract ConnectivityLevel GetConnectivityLevel_();
         protected abstract OnlineLevel GetOnlineLevel_();
-        protected abstract bool isClientConnecting_ { get; }
-        protected abstract bool isClientConnected_ { get; }
+        protected abstract bool IsClientConnecting_ { get; }
+        protected abstract bool IsClientConnected_ { get; }
         protected abstract IAvatarBrain GetOnlineUser_(UserID userID);
         protected abstract IAvatarBrain GetOnlineUser_(uint netId);
         protected abstract IEnumerable<IAvatarBrain> GetOnlineUsers_();
@@ -185,8 +185,8 @@ namespace Arteranos.Services
             => Instance.GetConnectivityLevel_();
         public static OnlineLevel GetOnlineLevel() 
             => Instance?.GetOnlineLevel_() ?? OnlineLevel.Offline;
-        public static bool isClientConnecting => Instance.isClientConnecting_;
-        public static bool isClientConnected => Instance.isClientConnected_;
+        public static bool IsClientConnecting => Instance.IsClientConnecting_;
+        public static bool IsClientConnected => Instance.IsClientConnected_;
         public static void StartClient(Uri connectionUri) 
             => Instance.StartClient_(connectionUri);
         public static Task StartHost(bool resetConnection = false) 
