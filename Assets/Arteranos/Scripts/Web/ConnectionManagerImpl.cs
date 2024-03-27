@@ -25,80 +25,90 @@ namespace Arteranos.Web
         private void Awake() => Instance = this;
         private void OnDestroy() => Instance = null;
 
-        protected override Task<bool> ConnectToServer_(MultiHash PeerID)
+        protected override IEnumerator ConnectToServer_(MultiHash PeerID, Action<bool> callback)
         {
 
             bool? result = null;
-            bool done = false;
-            IEnumerator AskForAgreement()
+
+            if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
             {
-                if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
-                {
-                    // Anything but idle, cut off all connections before connecting to the desired server.
-                    Task t0 = NetworkStatus.StopHost(false);
+                // Anything but idle, cut off all connections before connecting to the desired server.
+                Task t0 = NetworkStatus.StopHost(false);
 
-                    yield return new WaitUntil(() => t0.IsCompleted);
-                }
-
-                ServerInfo si = new(PeerID);
-
-                AgreementDialogUIFactory.New(si, () => result = false, () => result = true);
-
-                yield return new WaitUntil(() => result !=  null);
-
-                // User denied privacy agreement, backing out.
-                if (result == false)
-                {
-                    done = true;
-                    yield break;
-                }
-
-                Task<bool> t = CommenceConnection(si);
-
-                yield return new WaitUntil(() => t.IsCompleted);
-
-                result = t.Result;
-                done = true;
+                yield return new WaitUntil(() => t0.IsCompleted);
             }
 
+            ServerInfo si = new(PeerID);
 
-            Task<bool> t1 = Task.Run(async () =>
+            AgreementDialogUIFactory.New(si, () => result = false, () => result = true);
+
+            yield return new WaitUntil(() => result != null);
+
+            // User denied privacy agreement, backing out.
+            if (result == false)
             {
-                // Ask for the privacy notice agreement, or silently agree if it's already known:
-                SettingsManager.StartCoroutineAsync(AskForAgreement);
+                callback?.Invoke(false);
+                yield break;
+            }
 
-                while (!done) await Task.Delay(8);
-                return result.Value;
-            });
+            yield return CommenceConnection(si, _result => result = _result);
 
-            return t1;
+            callback?.Invoke(result.Value);
         }
 
-        private async Task<bool> CommenceConnection(ServerInfo si)
+        private IEnumerator CommenceConnection(ServerInfo si, Action<bool> callback)
         {
             IPAddress addr = IPAddress.Any;
 
-            try
+            // In any case, go into the transitional phase.
+            yield return TransitionProgressStatic.TransitionFrom();
+
+            TransitionProgressStatic.Instance.OnProgressChanged(0.10f, "Searching server");
+
+            Task<IPAddress> taskIPAddr = Task.Run(async () =>
             {
                 using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
-                addr = await IPFSService.GetPeerIPAddress(si.PeerID.ToString(), cts.Token);
-            }
-            catch
+                return await IPFSService.GetPeerIPAddress(si.PeerID.ToString(), cts.Token);
+            });
+
+            yield return new WaitUntil(() => taskIPAddr.IsCompleted);
+
+            if(!taskIPAddr.IsCompletedSuccessfully)
             {
                 Debug.Log($"{si.PeerID} is unreachable.");
-                return false;
+                yield return TransitionProgressStatic.TransitionTo(null, null);
+                callback?.Invoke(false);
+                yield break;
             }
+
+            addr = taskIPAddr.Result;
+
+            TransitionProgressStatic.Instance.OnProgressChanged(0.50f, "Connecting...");
 
             // FIXME Telepathy Transport specific.
             Uri connectionUri = new($"tcp4://{addr}:{si.ServerPort}");
             ExpectConnectionResponse_();
             NetworkStatus.StartClient(connectionUri);
 
+            // https://www.youtube.com/watch?v=dQw4w9WgXcQ
+            while (NetworkStatus.isClientConnecting) yield return new WaitForEndOfFrame();
+
             // Save it for now even before the connection negotiation and authentication
             NetworkStatus.RemotePeerId = si.PeerID;
 
-            // Here goes nothing...
-            return true;
+            // Client failed to connect. Maybe an invalid IP, or a misconfigured firewall.
+            // Fall back to the offline world.
+            if (!NetworkStatus.isClientConnected)
+            {
+                callback?.Invoke(false);
+                yield return TransitionProgressStatic.TransitionTo(null, null);
+                yield break;
+            }
+
+            callback?.Invoke(true);
+            // Just-connected server will tell which world we're going to.
+            // If the server is borked, the disconnecting server will cause the client to
+            // fall back to the offline world.
         }
 
         protected override void ExpectConnectionResponse_()

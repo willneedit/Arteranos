@@ -26,6 +26,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using AsyncOperation = UnityEngine.AsyncOperation;
 
 namespace Arteranos.Avatar
 {
@@ -145,6 +147,8 @@ namespace Arteranos.Services
         protected abstract event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
         protected abstract ConnectivityLevel GetConnectivityLevel_();
         protected abstract OnlineLevel GetOnlineLevel_();
+        protected abstract bool isClientConnecting_ { get; }
+        protected abstract bool isClientConnected_ { get; }
         protected abstract IAvatarBrain GetOnlineUser_(UserID userID);
         protected abstract IAvatarBrain GetOnlineUser_(uint netId);
         protected abstract IEnumerable<IAvatarBrain> GetOnlineUsers_();
@@ -181,6 +185,8 @@ namespace Arteranos.Services
             => Instance.GetConnectivityLevel_();
         public static OnlineLevel GetOnlineLevel() 
             => Instance?.GetOnlineLevel_() ?? OnlineLevel.Offline;
+        public static bool isClientConnecting => Instance.isClientConnecting_;
+        public static bool isClientConnected => Instance.isClientConnected_;
         public static void StartClient(Uri connectionUri) 
             => Instance.StartClient_(connectionUri);
         public static Task StartHost(bool resetConnection = false) 
@@ -333,7 +339,7 @@ namespace Arteranos.Services
             ScreenFader.StartFading(1.0f);
             yield return new WaitForSeconds(0.5f);
 
-            UnityEngine.AsyncOperation ao = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Transition");
+            AsyncOperation ao = SceneManager.LoadSceneAsync("Transition");
             while (!ao.isDone) yield return null;
 
 
@@ -347,6 +353,61 @@ namespace Arteranos.Services
             yield return new WaitUntil(() => Instance);
         }
 
+        // NOTE: Needs preloaded world! Just deploys the sceneloader which it uses
+        // the current preloaded world asset bundle!
+        public static IEnumerator TransitionTo(Cid WorldCid, string WorldName)
+        {
+            ScreenFader.StartFading(1.0f);
+            yield return new WaitForSeconds(0.5f);
+
+            yield return MoveToPreloadedWorld(WorldCid, WorldName);
+
+            ScreenFader.StartFading(0.0f);
+        }
+
+        private static IEnumerator MoveToPreloadedWorld(Cid WorldCid, string WorldName)
+        {
+            if (WorldCid == null)
+            {
+                AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
+                while (!ao.isDone) yield return null;
+
+                yield return new WaitForEndOfFrame();
+                yield return new WaitForEndOfFrame();
+
+                XRControl.Instance.MoveRig();
+            }
+            else
+                yield return EnterDownloadedWorld();
+
+            SettingsManager.WorldCid = WorldCid;
+            SettingsManager.WorldName = WorldName;
+        }
+
+        public static IEnumerator EnterDownloadedWorld()
+        {
+            string worldABF = Core.Operations.WorldDownloader.CurrentWorldAssetBundlePath;
+
+            Debug.Log($"Download complete, world={worldABF}");
+
+            yield return null;
+
+            bool done = false;
+
+            // Deploy the scene loader.
+            GameObject go = new("_SceneLoader");
+            go.AddComponent<Persistence>();
+            Web.SceneLoader sl = go.AddComponent<Web.SceneLoader>();
+            sl.OnFinishingSceneChange += () =>
+            {
+                XRControl.Instance.MoveRig();
+                done = true;
+            };
+
+            sl.Name = worldABF;
+
+            yield return new WaitUntil(() => done);
+        }
 
     }
     #endregion
@@ -359,14 +420,14 @@ namespace Arteranos.Services
     #region Web helpers
     public abstract class ConnectionManager : MonoBehaviour
     {
-        protected abstract Task<bool> ConnectToServer_(MultiHash PeerID);
+        protected abstract IEnumerator ConnectToServer_(MultiHash PeerID, Action<bool> callback);
         protected abstract void DeliverDisconnectReason_(string reason);
         protected abstract void ExpectConnectionResponse_();
 
         public static ConnectionManager Instance { get; protected set; }
 
-        public static Task<bool> ConnectToServer(MultiHash PeerID) 
-            => Instance.ConnectToServer_(PeerID);
+        public static IEnumerator ConnectToServer(MultiHash PeerID, Action<bool> callback) 
+            => Instance.ConnectToServer_(PeerID, callback);
         public static void DeliverDisconnectReason(string reason) 
             => Instance.DeliverDisconnectReason_(reason);
         public static void ExpectConnectionResponse()

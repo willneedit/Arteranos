@@ -100,6 +100,10 @@ namespace Arteranos.Services
                 : OnlineLevel.Server;
         }
 
+        protected override bool isClientConnecting_ => NetworkClient.isConnecting;
+
+        protected override bool isClientConnected_ => NetworkClient.isConnected;
+
         void OnEnable()
         {
             Debug.Log("Setting up NAT gateway configuration");

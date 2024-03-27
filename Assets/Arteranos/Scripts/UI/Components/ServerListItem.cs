@@ -124,10 +124,11 @@ namespace Arteranos.UI
                 $"Current World: {si.CurrentWorldName}";
         }
 
-        private async void OnVisitClicked()
+        private void OnVisitClicked()
         {
             btn_Visit.interactable = false;                
-            await ConnectionManager.ConnectToServer(PeerID);
+            // NOTE: Initiating transition, needs to be unhooked from the server list item, which will vanish!
+            SettingsManager.StartCoroutineAsync(() => ConnectionManager.ConnectToServer(PeerID, null));
 
             // Can be removed because of the TOS afreement window, ot other things.
             if(btn_Visit != null) btn_Visit.interactable = true;

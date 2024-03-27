@@ -186,7 +186,8 @@ namespace Arteranos.Core.Operations
             }
 
             // Matching server (with matching world, if needed), initiate remote connection
-            await ConnectionManager.ConnectToServer(ServerPeerID);
+            SettingsManager.StartCoroutineAsync(
+                () => ConnectionManager.ConnectToServer(ServerPeerID, null));
         }
     }
 }

@@ -51,20 +51,9 @@ namespace Arteranos.Services
             yield return UploadDefaultAvatars();
 
             if (TargetedPeerID == null && DesiredWorldCid != null)
-            {
                 ServerSearcher.InitiateServerTransition(DesiredWorldCid);
-            }
             else if (TargetedPeerID != null)
-            {
-                ConnectionManager.ConnectToServer(TargetedPeerID);
-
-                // https://www.youtube.com/watch?v=dQw4w9WgXcQ
-                while (NetworkClient.isConnecting) yield return null;
-
-                if (!NetworkClient.isConnected)
-                    yield return TransitionProgress.TransitionTo(null, null);
-                // else: Server tells us where we go.
-            }
+                yield return ConnectionManager.ConnectToServer(TargetedPeerID, null);
             else
                 yield return TransitionProgress.TransitionTo(DesiredWorldCid, "???");
 
