@@ -9,6 +9,7 @@ using Arteranos.Audio;
 using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.Core.Cryptography;
+using Arteranos.UI;
 using Arteranos.XR;
 using Ipfs;
 using Ipfs.Core.Cryptography.Proto;
@@ -351,6 +352,8 @@ namespace Arteranos.Services
             ScreenFader.StartFading(0.0f);
 
             yield return new WaitUntil(() => Instance);
+
+            SysMenuStatic.EnableHUD(false);
         }
 
         // NOTE: Needs preloaded world! Just deploys the sceneloader which it uses
@@ -363,6 +366,8 @@ namespace Arteranos.Services
             yield return MoveToPreloadedWorld(WorldCid, WorldName);
 
             ScreenFader.StartFading(0.0f);
+
+            SysMenuStatic.EnableHUD(true);
         }
 
         private static IEnumerator MoveToPreloadedWorld(Cid WorldCid, string WorldName)
@@ -572,6 +577,33 @@ namespace Arteranos.UI
             kickBanUI.Target = target;
             return kickBanUI;
         }
+    }
+
+    public abstract class SysMenuStatic : MonoBehaviour
+    {
+        public static SysMenuStatic Instance = null;
+
+        public abstract bool HUDEnabled { get; set; }
+        public abstract void CloseSysMenus_();
+        public abstract void ShowUserHUD_(bool show = true);
+        public abstract void DismissGadget_(string name = null);
+
+        public static void EnableHUD(bool enable)
+        {
+            Instance.HUDEnabled = enable;
+            DismissGadget();
+            ShowUserHUD(false);
+
+            if (!enable)
+                CloseSysMenus();
+            else
+                ShowUserHUD();
+
+        }
+
+        public static void CloseSysMenus() => Instance.CloseSysMenus_();
+        public static void ShowUserHUD(bool show = true) => Instance.ShowUserHUD_(show);
+        public static void DismissGadget(string name = null) => Instance.DismissGadget_(name);
     }
 
     #endregion

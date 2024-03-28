@@ -15,17 +15,25 @@ using Arteranos.Core;
 namespace Arteranos.UI
 {
 
-    public class SysMenu : MonoBehaviour
+    public class SysMenu : SysMenuStatic
     {
         [SerializeField] private InputActionHandler SystemMenu;
 
         public const string GADGET_CAMERA_DRONE = "Camera Drone";
 
-        public void Awake() => SystemMenu.PerformCallback = (InputAction.CallbackContext obj) => OpenSysMenu();
+
+        public override bool HUDEnabled { get; set; } = true;
+
+        public void Awake()
+        {
+            SystemMenu.PerformCallback = (InputAction.CallbackContext obj) => OpenSysMenu();
+            Instance = this;
+        }
 
         public void OnEnable() => SystemMenu.BindAction();
 
         public void OnDisable() => SystemMenu.UnbindAction();
+
 
         public static void OpenSysMenu()
         {
@@ -34,6 +42,8 @@ namespace Arteranos.UI
                 CloseSysMenus();
                 return;
             }
+
+            if (!Instance.HUDEnabled) return;
 
             GameObject original = BP.I.UI.SysMenu;
             // NB: The resource is _cached_, the blueprint itself is modified and couldn't find the component
@@ -59,19 +69,21 @@ namespace Arteranos.UI
             choiceBook.SetPageActive(found, false);
         }
 
-        public static void CloseSysMenus()
+        public override void CloseSysMenus_()
         {
             foreach(SysMenuKind menu in FindObjectsOfType<SysMenuKind>())
                 Destroy(menu.gameObject);
         }
 
-        public static void ShowUserHUD(bool show = true)
+        public override void ShowUserHUD_(bool show = true)
         {
+            show = show && Instance.HUDEnabled;
+
             UserHUDUI hud = FindObjectOfType<UserHUDUI>(true);
             if(hud != null) hud.gameObject.SetActive(show);
         }
 
-        public static void DismissGadget(string name = null)
+        public override void DismissGadget_(string name = null)
         {
             foreach(GadgetKind gad in FindObjectsOfType<GadgetKind>())
                 if(name == null || name == gad.Name) Destroy(gad.gameObject);
