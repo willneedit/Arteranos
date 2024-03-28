@@ -720,11 +720,15 @@ namespace Arteranos.Services
                     uss.State.deviceUID = receiver.DeviceID;
             }
 
+            UserCapabilities action = 0;
+
+            // TODO Audit log? Maybe.
+
             if (NetworkServer.active)
             {
                 IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
 
-                UserCapabilities action = UserCapabilities.CanAdminServerUsers;
+                action = UserCapabilities.CanAdminServerUsers;
 
                 if (UserState.IsBanned(uss.State.userState))
                 {
@@ -738,9 +742,14 @@ namespace Arteranos.Services
                     return;
             }
 
-            SettingsManager.ServerUsers.RemoveUsers(uss.State);
-            SettingsManager.ServerUsers.AddUser(uss.State);
-            SettingsManager.ServerUsers.Save();
+            // Kicking users has no lasting impact -- only user state changes
+            // and banning needs to be saved.
+            if(action != UserCapabilities.CanKickUser)
+            {
+                SettingsManager.ServerUsers.RemoveUsers(uss.State);
+                SettingsManager.ServerUsers.AddUser(uss.State);
+                SettingsManager.ServerUsers.Save();
+            }
 
             // Admin list could have been changed
             // (Maybe a ban list, too, in future...)
