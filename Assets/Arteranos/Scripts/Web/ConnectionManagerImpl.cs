@@ -90,11 +90,13 @@ namespace Arteranos.Web
             ExpectConnectionResponse_();
             NetworkStatus.StartClient(connectionUri);
 
+            // Save it for now even before the connection negotiation and authentication
+            // During the remainder of the ongoing frame, we have to have the PeerID available --
+            // the complete login sequence can be commenced before WaitForEndOfFrame() let us continue.
+            NetworkStatus.RemotePeerId = si.PeerID;
+
             // https://www.youtube.com/watch?v=dQw4w9WgXcQ
             while (NetworkStatus.IsClientConnecting) yield return new WaitForEndOfFrame();
-
-            // Save it for now even before the connection negotiation and authentication
-            NetworkStatus.RemotePeerId = si.PeerID;
 
             // Client failed to connect. Maybe an invalid IP, or a misconfigured firewall.
             // Fall back to the offline world.
