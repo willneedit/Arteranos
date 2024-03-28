@@ -101,7 +101,10 @@ namespace Arteranos.UI
         {
             IEnumerator PSDCoroutine()
             {
+                si = new(PeerID);
+
                 yield return null;
+
                 PopulateServerData();
             }
 
