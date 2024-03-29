@@ -18,6 +18,7 @@ using System.Collections;
 using Ipfs;
 using Arteranos.Core.Operations;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Arteranos.UI
 {
@@ -140,11 +141,21 @@ namespace Arteranos.UI
 
         private IEnumerator GatherFavouritedWorlds()
         {
+            Task<List<Cid>> taskPinned = WorldInfo.ListFavourites();
+
+            yield return new WaitUntil(() => taskPinned.IsCompleted);
+
+            List<Cid> pinned = taskPinned.Result;
+
             // The WorldInfo contains ALL the cached worlds so far. We have to see for
             // the only pinned (= favourited) ones.
             foreach (WorldInfo wi in WorldInfo.DBList())
-                if(wi.IsFavourited())
+            {
+                if (pinned.Contains(wi.WorldCid))
                     yield return AddManualWorldCoroutine(wi.WorldCid);
+
+                yield return new WaitForEndOfFrame();
+            }
         }
 
         private IEnumerator AddManualWorldCoroutine(Cid WorldCid)
@@ -213,6 +224,23 @@ namespace Arteranos.UI
 
         private IEnumerator ShowPage(int currentPage)
         {
+            IEnumerator PopupPanel(Transform panels, int i)
+            {
+                GameObject go = Instantiate(grp_WorldPanelSample, panels);
+                WorldPaneltem wli = go.GetComponentInChildren<WorldPaneltem>();
+                wli.WorldCid = sortedWorldList[i];
+                if (worldlist.TryGetValue(wli.WorldCid, out Collection list))
+                {
+                    wli.ServersCount = list.serversCount;
+                    wli.UsersCount = list.usersCount;
+                    wli.FriendsMax = list.friendsMax;
+                    wli.Favourited = list.favourited;
+                }
+                go.SetActive(true);
+
+                yield return new WaitForEndOfFrame();
+            }
+
             yield return null;
 
             this.currentPage = currentPage;
@@ -228,18 +256,7 @@ namespace Arteranos.UI
             if(endIndex > sortedWorldList.Count) endIndex = sortedWorldList.Count;
 
             for(int i = startIndex; i < endIndex; i++)
-            {
-                GameObject go = Instantiate(grp_WorldPanelSample, panels);
-                WorldPaneltem wli = go.GetComponentInChildren<WorldPaneltem>();
-                wli.WorldCid = sortedWorldList[i];
-                if (worldlist.TryGetValue(wli.WorldCid, out Collection list))
-                {
-                    wli.ServersCount = list.serversCount;
-                    wli.UsersCount = list.usersCount;
-                    wli.FriendsMax = list.friendsMax;
-                }
-                go.SetActive(true);
-            }
+                StartCoroutine(PopupPanel(panels, i));
 
             lbl_PageCount.text = string.Format(pageCountPattern, currentPage + 1, maxPage);
         }

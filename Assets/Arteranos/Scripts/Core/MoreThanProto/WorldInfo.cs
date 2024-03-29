@@ -84,12 +84,14 @@ namespace Arteranos.Core
             IPFSService.PinCid(WorldCid, false);
         }
 
-        public bool IsFavourited()
+        public static Task<List<Cid>> ListFavourites()
         {
-            IEnumerable<Cid> all = Task.Run(() => IPFSService.ListPinned()).Result;
-            return all.ToList().Contains(WorldCid);
+            return Task.Run(async () =>
+            {
+                IEnumerable<Cid> res = await IPFSService.ListPinned();
+                return res.ToList();
+            });
         }
-
 
         public void BumpWI()
         {

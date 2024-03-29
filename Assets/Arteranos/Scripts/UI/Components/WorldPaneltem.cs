@@ -31,6 +31,7 @@ namespace Arteranos.UI
         public int ServersCount { get; internal set; } = 0;
         public int UsersCount { get; internal set; } = 0;
         public int FriendsMax { get; internal set; } = 0;
+        public bool Favourited { get; internal set; } = false;
 
         private bool AllowedForThis = true;
         private WorldInfo WorldInfo = null;
@@ -103,8 +104,8 @@ namespace Arteranos.UI
                 Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null)
                 && AllowedForThis);
 
-            btn_Add.gameObject.SetActive(!WorldInfo.IsFavourited());
-            btn_Delete.gameObject.SetActive(WorldInfo.IsFavourited());
+            btn_Add.gameObject.SetActive(!Favourited);
+            btn_Delete.gameObject.SetActive(Favourited);
 
 
             if(WorldInfo.win.ScreenshotPNG != null)
@@ -139,12 +140,14 @@ namespace Arteranos.UI
         private void OnAddClicked()
         {
             WorldInfo.Favourite();
+            Favourited = true;
             PopulateWorldData();
         }
 
         private void OnDeleteClicked()
         {
             WorldInfo.Unfavourite();
+            Favourited = false;
             WorldInfo.DBDelete(WorldCid);
             WorldCid = null;
             PopulateWorldData();
