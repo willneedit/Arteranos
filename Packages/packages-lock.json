@@ -21,6 +21,15 @@
       },
       "hash": "a7f502e4bba2416411c64b1160dc01d53da75fcd"
     },
+    "com.looooong.asyncimageloader": {
+      "version": "file:UnityAsyncImageLoader",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.5.4",
+        "com.unity.mathematics": "1.2.1"
+      }
+    },
     "com.unity.2d.animation": {
       "version": "7.0.9",
       "depth": 1,

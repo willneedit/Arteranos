@@ -71,7 +71,10 @@ namespace Arteranos.UI
 
                 lbl_AdminList.text = string.Join(", ", si.AdminNames);
 
-                Utils.ShowImage(si.Icon, img_Icon);
+                Texture2D tex = null;
+                yield return Utils.LoadImageCoroutine(si.Icon, _tex => tex = _tex);
+
+                Utils.ShowImage(tex, img_Icon);
                 lbl_World.text = si.CurrentWorldName;
             }
 

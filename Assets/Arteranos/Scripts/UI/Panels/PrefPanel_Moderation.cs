@@ -94,7 +94,7 @@ namespace Arteranos.UI
             txt_Description.text = ss.Description;
 
             if(ss.Icon != null && ss.Icon.Length != 0)
-                UpdateIcon(ss.Icon);
+                StartCoroutine(UpdateIcon(ss.Icon));
 
             chk_Flying.isOn = ss.Permissions.Flying ?? true;
 
@@ -174,7 +174,7 @@ namespace Arteranos.UI
                         yield break;
 
                     ss.Icon = data;
-                    UpdateIcon(data);
+                    yield return UpdateIcon(data);
                     dirty = true;
                 }
                 else
@@ -186,9 +186,12 @@ namespace Arteranos.UI
             StartCoroutine(GetTexture(txt_IconURL.text));
         }
 
-        private void UpdateIcon(byte[] data)
+        private IEnumerator UpdateIcon(byte[] data)
         {
-            Utils.ShowImage(data, img_IconImage);
+            Texture2D tex = null;
+            yield return Utils.LoadImageCoroutine(data, _tex => tex = _tex);
+
+            Utils.ShowImage(tex, img_IconImage);
         }
 
         private void OnClearCachesClicked()

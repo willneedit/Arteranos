@@ -84,7 +84,8 @@ namespace Arteranos.UI
 
             if(si.IsValid)
             {
-                VisualizeServerData();
+                StartCoroutine(VisualizeServerData());
+
                 btn_Add.gameObject.SetActive(false);
                 btn_Delete.gameObject.SetActive(true);
                 return;
@@ -113,13 +114,16 @@ namespace Arteranos.UI
             return Task.CompletedTask;
         }
 
-        private void VisualizeServerData()
+        private IEnumerator VisualizeServerData()
         {
-            Utils.ShowImage(si.Icon, img_Icon);
+            Texture2D tex = null;
+            yield return Utils.LoadImageCoroutine(si.Icon, _tex => tex = _tex);
+
+            Utils.ShowImage(tex, img_Icon);
             if(!si.IsOnline)
             {
                 lbl_Caption.text = $"{si.Name} (Offline)";
-                return;
+                yield break;
             }
 
             lbl_Caption.text = 

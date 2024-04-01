@@ -14,6 +14,7 @@ using Arteranos.Core;
 using Arteranos.Services;
 using Ipfs;
 using Arteranos.Core.Operations;
+using UnityEngine;
 
 namespace Arteranos.UI
 {
@@ -24,7 +25,7 @@ namespace Arteranos.UI
         private HoverButton btn_Delete = null;
         private HoverButton btn_ChangeWorld = null;
 
-        public Image img_Screenshot = null;
+        public RawImage img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
 
         public Cid WorldCid { get; internal set; } = null;
@@ -81,7 +82,7 @@ namespace Arteranos.UI
                 ServerPermissions permission = WorldInfo.win.ContentRating;
                 AllowedForThis = permission != null && !permission.IsInViolation(SettingsManager.ActiveServerData.Permissions);
 
-                VisualizeWorldData();
+                yield return VisualizeWorldData();
             }
 
             if(WorldCid == null)
@@ -95,7 +96,7 @@ namespace Arteranos.UI
             StartCoroutine(VisCoroutine());
         }
 
-        private void VisualizeWorldData()
+        private IEnumerator VisualizeWorldData()
         {
             // If we're in Host mode, you're the admin of your own server, so we're able to
             // change the world. And you still have the great responsibility...
@@ -107,11 +108,6 @@ namespace Arteranos.UI
             btn_Add.gameObject.SetActive(!Favourited);
             btn_Delete.gameObject.SetActive(Favourited);
 
-
-            if(WorldInfo.win.ScreenshotPNG != null)
-                Utils.ShowImage(WorldInfo.win.ScreenshotPNG, img_Screenshot);
-
-
             string lvstr = (WorldInfo.Updated == DateTime.MinValue)
                 ? "Never"
                 : WorldInfo.Updated.ToShortDateString();
@@ -122,6 +118,16 @@ namespace Arteranos.UI
                 ServersCount,
                 UsersCount,
                 FriendsMax);
+
+            if (WorldInfo.win.ScreenshotPNG != null)
+            {
+                Texture2D tex = null;
+                yield return Utils.LoadImageCoroutine(WorldInfo.win.ScreenshotPNG, _tex => tex = _tex);
+
+                Utils.ShowImage(tex, img_Screenshot);
+            }
+
+            yield return null;
         }
 
         private void OnVisitClicked(bool inPlace)
