@@ -129,8 +129,8 @@ namespace Arteranos.UI
         {
             if(!string.IsNullOrEmpty(WorldCid))
             {
-                if(inPlace)
-                    _ = WorldTransition.EnterWorldAsync(WorldCid);
+                if (inPlace)
+                    SettingsManager.EnterWorld(WorldCid);
                 else
                     ServerSearcher.InitiateServerTransition(WorldCid);
 

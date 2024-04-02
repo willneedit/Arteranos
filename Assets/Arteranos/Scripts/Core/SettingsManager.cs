@@ -143,6 +143,16 @@ namespace Arteranos.Core
         public static void EmitToServerCTSPacket(CTSPacket packet)
             => Instance?.EmitToServerCTSPacket_(packet);
 
+        public static void EnterWorld(Cid WorldCid)
+        {
+            WorldInfo wi = WorldInfo.DBLookup(WorldCid);
+
+            EmitToServerCTSPacket(new CTSPWorldChangeAnnouncement()
+            {
+                WorldInfo = wi?.Strip()
+            });
+        }
+
         public static event Action<UserID, ServerUserState> OnClientReceivedServerUserStateAnswer
         {
             add => Instance.OnClientReceivedServerUserStateAnswer_ += value;

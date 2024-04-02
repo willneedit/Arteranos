@@ -169,7 +169,7 @@ namespace Arteranos.Core.Operations
                 if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
                     await NetworkStatus.StopHost(true);
 
-                await WorldTransition.EnterWorldAsync(WorldCid);
+                SettingsManager.EnterWorld(WorldCid);
 
                 // If we haven't a server (or, just left one), start up.
                 if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
