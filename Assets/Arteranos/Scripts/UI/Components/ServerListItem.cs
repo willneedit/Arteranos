@@ -20,7 +20,7 @@ namespace Arteranos.UI
     public class ServerListItem : ListItemBase
     {
         public string PeerID = null;
-        public Image img_Icon = null;
+        public RawImage img_Icon = null;
         public TMP_Text lbl_Caption = null;
 
         public Color BgndRegular;
@@ -116,10 +116,8 @@ namespace Arteranos.UI
 
         private IEnumerator VisualizeServerData()
         {
-            Texture2D tex = null;
-            yield return Utils.LoadImageCoroutine(si.Icon, _tex => tex = _tex);
+            yield return Utils.LoadImageCoroutine(si.Icon, _tex => img_Icon.texture = _tex);
 
-            Utils.ShowImage(tex, img_Icon);
             if(!si.IsOnline)
             {
                 lbl_Caption.text = $"{si.Name} (Offline)";

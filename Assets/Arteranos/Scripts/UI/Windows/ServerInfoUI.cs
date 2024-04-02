@@ -30,7 +30,7 @@ namespace Arteranos.UI
         [SerializeField] private Button btn_Close;
         [SerializeField] private TMP_Text lbl_Name;
         [SerializeField] private TMP_Text lbl_Address;
-        [SerializeField] private Image img_Icon;
+        [SerializeField] private RawImage img_Icon;
         [SerializeField] private TMP_Text lbl_LastUpdated;
         [SerializeField] private TMP_Text lbl_LastOnline;
         [SerializeField] private TMP_Text lbl_MatchIndex;
@@ -71,10 +71,8 @@ namespace Arteranos.UI
 
                 lbl_AdminList.text = string.Join(", ", si.AdminNames);
 
-                Texture2D tex = null;
-                yield return Utils.LoadImageCoroutine(si.Icon, _tex => tex = _tex);
+                yield return Utils.LoadImageCoroutine(si.Icon, _tex => img_Icon.texture = _tex);
 
-                Utils.ShowImage(tex, img_Icon);
                 lbl_World.text = si.CurrentWorldName;
             }
 

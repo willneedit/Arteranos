@@ -27,7 +27,7 @@ namespace Arteranos.UI
 
         public TMP_InputField txt_Description = null;
         public Button btn_Icon = null;
-        public Image img_IconImage = null;
+        public RawImage img_IconImage = null;
         public TMP_InputField txt_IconURL = null;
 
         public Button btn_WorldGallery = null;
@@ -188,10 +188,7 @@ namespace Arteranos.UI
 
         private IEnumerator UpdateIcon(byte[] data)
         {
-            Texture2D tex = null;
-            yield return Utils.LoadImageCoroutine(data, _tex => tex = _tex);
-
-            Utils.ShowImage(tex, img_IconImage);
+            yield return Utils.LoadImageCoroutine(data, _tex => img_IconImage.texture = _tex);
         }
 
         private void OnClearCachesClicked()

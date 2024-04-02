@@ -120,12 +120,7 @@ namespace Arteranos.UI
                 FriendsMax);
 
             if (WorldInfo.win.ScreenshotPNG != null)
-            {
-                Texture2D tex = null;
-                yield return Utils.LoadImageCoroutine(WorldInfo.win.ScreenshotPNG, _tex => tex = _tex);
-
-                Utils.ShowImage(tex, img_Screenshot);
-            }
+                yield return Utils.LoadImageCoroutine(WorldInfo.win.ScreenshotPNG, _tex => img_Screenshot.texture = _tex);
 
             yield return null;
         }

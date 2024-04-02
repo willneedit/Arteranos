@@ -228,17 +228,11 @@ namespace Arteranos.Core
             callback?.Invoke(tex);
         }
 
-        [Obsolete("TIME CONSUMING - Tex 2 Sprite is costly!")]
         public static void ShowImage(Texture2D icon, Image image)
         {
             image.sprite = Sprite.Create(icon,
                 new Rect(0, 0, icon.width, icon.height),
                 Vector2.zero);
-        }
-
-        public static void ShowImage(Texture2D icon, RawImage image)
-        {
-            image.texture = icon;
         }
 
         /// <summary>
