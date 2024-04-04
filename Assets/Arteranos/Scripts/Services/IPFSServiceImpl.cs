@@ -83,7 +83,6 @@ namespace Arteranos.Services
             minVersionString = Core.Version.VERSION_MIN;
 
             int port = SettingsManager.Server.MetadataPort;
-            port = 0; // DEBUG - Possible to leave it to a random port?
 
             IpfsEngine ipfsTmp;
             ipfsTmp = new(passphrase.ToCharArray());

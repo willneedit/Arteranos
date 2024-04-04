@@ -10,13 +10,11 @@ using Arteranos.Core;
 using Arteranos.Core.Operations;
 using Arteranos.Web;
 using Ipfs;
-using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using UnityEngine;
-using Utils = Arteranos.Core.Utils;
 
 namespace Arteranos.Services
 {
@@ -40,7 +38,7 @@ namespace Arteranos.Services
         {
             // Startup of dependent services...
             AudioManager.Instance.enabled = true;
-            GetComponent<MetaDataService>().enabled = true;
+
             NetworkStatus.Instance.enabled = true;
 
             XR.XRControl.Instance.enabled = true;

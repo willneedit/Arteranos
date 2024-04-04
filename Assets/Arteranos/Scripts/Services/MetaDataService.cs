@@ -18,6 +18,7 @@ using UnityEngine;
 
 namespace Arteranos.Services
 {
+#if false
     public class MetaDataService : MonoBehaviour
     {
         private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
@@ -148,4 +149,5 @@ namespace Arteranos.Services
             response.Close();
         }
     }
+#endif
 }
