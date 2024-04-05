@@ -320,5 +320,17 @@ namespace Arteranos.Core
             foreach(Transform transform in t)
                 CountGameObject(transform, counted);
         }
+
+
+        public static IEnumerator Async2Coroutine<T>(Task<T> taskActionResult, Action<T> callback = null)
+        {
+            yield return new WaitUntil(() => taskActionResult.IsCompleted);
+            callback?.Invoke(taskActionResult.Result);
+        }
+
+        public static IEnumerator Async2Coroutine(Task taskActionResult)
+        {
+            yield return new WaitUntil(() => taskActionResult.IsCompleted);
+        }
     }
 }

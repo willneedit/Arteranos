@@ -96,7 +96,7 @@ namespace Arteranos.PlayTest
     {
         static int nodeNumber;
 
-        public TempNode(int port = 0)
+        public TempNode(int port = 0, bool useBS = false)
             : base("xyzzy".ToCharArray())
         {
             Options.Repository.Folder = Path.Combine(Path.GetTempPath(), $"ipfs-{nodeNumber++}");
@@ -107,10 +107,13 @@ namespace Arteranos.PlayTest
                 JToken.FromObject(new string[] { $"/ip4/0.0.0.0/tcp/{port}" })
             ).Wait();
 
-            Options.Discovery.DisableMdns = true;
-            Options.Swarm.MinConnections = 0;
             Options.Swarm.PrivateNetworkKey = null;
-            Options.Discovery.BootstrapPeers = new Ipfs.MultiAddress[0];
+            if(!useBS)
+            {
+                Options.Swarm.MinConnections = 0;
+                Options.Discovery.DisableMdns = true;
+                Options.Discovery.BootstrapPeers = new Ipfs.MultiAddress[0];
+            }
         }
 
         /// <inheritdoc />

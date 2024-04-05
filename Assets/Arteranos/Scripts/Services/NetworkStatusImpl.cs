@@ -29,7 +29,9 @@ namespace Arteranos.Services
 {
     public partial class NetworkStatusImpl : NetworkStatus
     {
+
         private INatDevice device = null;
+        protected override IPAddress ExternalAddress_ { get; set; } = IPAddress.None;
         protected override MultiHash RemotePeerId_ { get; set; } = null;
 
         protected override event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
@@ -178,11 +180,11 @@ namespace Arteranos.Services
 
             device = e.Device;
 
-            IPAddress ExternalAddress = await device.GetExternalIPAsync();
+            ExternalAddress_ = await device.GetExternalIPAsync();
 
             Debug.Log($"Device found : {device.NatProtocol}");
             Debug.Log($"  Type       : {device.GetType().Name}");
-            Debug.Log($"  External IP: {ExternalAddress}");
+            Debug.Log($"  External IP: {ExternalAddress_}");
 
             OpenPortsAsync();
         }
