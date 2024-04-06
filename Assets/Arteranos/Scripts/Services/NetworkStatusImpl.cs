@@ -22,7 +22,6 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using Arteranos.Avatar;
 using System.Linq;
-using Arteranos.Core.Operations;
 using Ipfs;
 
 namespace Arteranos.Services
@@ -31,7 +30,8 @@ namespace Arteranos.Services
     {
 
         private INatDevice device = null;
-        protected override IPAddress ExternalAddress_ { get; set; } = IPAddress.None;
+        protected override IPAddress ExternalAddress_ { get; set; } = IPAddress.None; // External IP address when seen beyond the available router
+        protected override IPAddress PublicIPAddress_ { get; set; } = IPAddress.None; // Public IP address when seen as the contacting source
         protected override MultiHash RemotePeerId_ { get; set; } = null;
 
         protected override event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
@@ -134,6 +134,16 @@ namespace Arteranos.Services
                     NatUtility.StopDiscovery();
                 }
             }
+
+            IEnumerator GetMyIPCoroutine()
+            {
+                yield return null;
+
+                yield return Core.Utils.Async2Coroutine(GetMyIpAsync(), _addr => PublicIPAddress_ = _addr);
+                Debug.Log($"  Public IP Address: {PublicIPAddress}");
+            }
+
+            StartCoroutine(GetMyIPCoroutine());
 
             NatUtility.DeviceFound += DeviceFound;
 
@@ -249,6 +259,70 @@ namespace Arteranos.Services
 
             ServerPortPublic = false;
             MetadataPortPublic = false;
+        }
+
+        #endregion
+        // -------------------------------------------------------------------
+        #region IP Address determination
+
+        public async void GetMyIP(Action<IPAddress> callback)
+            => callback?.Invoke(await GetMyIpAsync());
+
+        private static CancellationTokenSource s_cts = null;
+
+        public static async Task<IPAddress> GetMyIpAsync()
+        {
+            // Services from https://stackoverflow.com/questions/3253701/get-public-external-ip-address
+            List<string> services = new()
+            {
+                "https://ipv4.icanhazip.com",
+                "https://api.ipify.org",
+                "https://ipinfo.io/ip",
+                "https://checkip.amazonaws.com",
+                "https://wtfismyip.com/text",
+                "http://icanhazip.com"
+            };
+
+            // Spread the load throughout on all of the services.
+            services.Shuffle();
+
+            s_cts = new CancellationTokenSource();
+
+            IPAddress result = null;
+
+            async Task GetOneMyIP(string service)
+            {
+                if (result != null || s_cts.Token.IsCancellationRequested) return;
+                result = await GetMyIPAsync(service);
+            }
+
+            TaskPool<string> pool = new(1);
+
+            foreach (string service in services)
+                pool.Schedule(service, GetOneMyIP);
+
+            await pool.Run(s_cts.Token);
+
+            return result;
+        }
+
+
+        public static async Task<IPAddress> GetMyIPAsync(string service)
+        {
+            try
+            {
+                using HttpClient webclient = new();
+
+                HttpResponseMessage response = await webclient.GetAsync(service, s_cts.Token);
+                string ipString = await response.Content.ReadAsStringAsync();
+
+                // https://ihateregex.io/expr/ip
+                Match m = Regex.Match(ipString, @"(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}");
+
+                return m.Success ? IPAddress.Parse(m.Value) : null;
+            }
+            catch { }
+            return null;
         }
 
         #endregion

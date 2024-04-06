@@ -509,14 +509,7 @@ namespace Arteranos.PlayTest.Services
         {
             yield return null;
 
-            IpfsEngine myserver = IPFSService.Instance.Ipfs_;
-            Core.Version version = Core.Version.Load();
-
-            // Put up the file
-            Cid cid = null;
-            yield return Utils.Async2Coroutine(myserver.FileSystem.AddTextAsync(version.Full), _fsn => cid = _fsn.Id);
-
-            yield return new WaitForSeconds(10);
+            yield return new WaitUntil(() => IPFSService.IdentifyCid != null);
 
             // Set up a node, with its complete bootstrap service
             using TempNode outsider = new(useBS: true);
@@ -525,18 +518,15 @@ namespace Arteranos.PlayTest.Services
             yield return Utils.Async2Coroutine(outsider.StartAsync());
             yield return Utils.Async2Coroutine(outsider.LocalPeer.Task, _peer => other = _peer);
 
-            // Announce its presence
-            yield return Utils.Async2Coroutine(myserver.Dht.ProvideAsync(cid, true));
-
-            Debug.Log($"Identify file CID: {cid}");
+            Debug.Log($"Identify file CID: {IPFSService.IdentifyCid}");
 
             using CancellationTokenSource cts = new(TimeSpan.FromSeconds(60));
 
-            int found = 0;
-            Task<IEnumerable<Peer>> taskPeers = outsider.Dht.FindProvidersAsync(cid, 1, _peer =>
+            MultiHash found_id = null;
+            Task<IEnumerable<Peer>> taskPeers = outsider.Dht.FindProvidersAsync(IPFSService.IdentifyCid, 20, _peer =>
             {
-                found++;
                 Debug.Log($"Found: {_peer.Id}");
+                found_id = _peer.Id;
                 foreach (MultiAddress address in _peer.Addresses)
                     Debug.Log($"  Address: {address}");
             }, cts.Token);
@@ -545,8 +535,7 @@ namespace Arteranos.PlayTest.Services
             // earlier.
             yield return new WaitUntil(() => taskPeers.IsCompleted);
 
-            Assert.IsTrue(found > 0);
+            Assert.IsNotNull( found_id );
         }
-
     }
 }

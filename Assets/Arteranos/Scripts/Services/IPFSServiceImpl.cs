@@ -22,6 +22,7 @@ using Arteranos.Core.Cryptography;
 using System.Linq;
 using Ipfs.Core.Cryptography.Proto;
 using System.Net;
+using System.Text;
 
 namespace Arteranos.Services
 {
@@ -30,6 +31,8 @@ namespace Arteranos.Services
         public override IpfsEngine Ipfs_ { get => ipfs; }
         public override Peer Self_ { get => self; }
         public override SignKey ServerKeyPair_ { get => serverKeyPair; }
+        public override Cid IdentifyCid_ { get; protected set; }
+
         public static string CachedPTOSNotice { get; private set; } = null;
 
         public override event Action<IPublishedMessage> OnReceivedHello_;
@@ -99,6 +102,32 @@ namespace Arteranos.Services
 
             self = await ipfsTmp.LocalPeer;
 
+            // Wait for the public IP address determination
+            DateTime tmo = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+            while (NetworkStatus.PublicIPAddress == IPAddress.None && DateTime.UtcNow < tmo)
+                await Task.Delay(500);
+
+            if (NetworkStatus.PublicIPAddress != IPAddress.None)
+            {
+                Debug.Log("Got the public IP address, setting up the IPFS node...");
+                StringBuilder sb = new();
+                sb.Append(NetworkStatus.PublicIPAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
+                    ? "/ip6/"
+                    : "/ip4/");
+                sb.Append(NetworkStatus.PublicIPAddress);
+                sb.Append("/tcp/");
+                sb.Append(port);
+                sb.Append("/p2p/");
+                sb.Append(self.Id);
+
+                MultiAddress[] newAddresses = new MultiAddress[]
+                {
+                    sb.ToString(),
+                };
+
+                self.Addresses = newAddresses;
+            }
+
             await ipfsTmp.PubSub.SubscribeAsync(topic_hello,
                 async msg =>
                 {
@@ -150,13 +179,22 @@ namespace Arteranos.Services
 
         private IEnumerator GetUserListCoroutine()
         {
-            while(true)
+            IdentifyCid_ = null;
+            StringBuilder sb = new();
+            sb.Append("Arteranos Server, built by willneedit\n");
+            sb.Append(Core.Version.VERSION_MIN);
+
+            yield return Utils.Async2Coroutine(ipfs.FileSystem.AddTextAsync(sb.ToString()), _fsn => IdentifyCid_ = _fsn.Id);
+
+            while (true)
             {
                 UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
                                              where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
                                              select CryptoHelpers.GetFingerprint(user.UserID)).ToList();
 
                 yield return new WaitForSeconds(heartbeatSeconds / 2);
+
+                yield return Utils.Async2Coroutine(ipfs.Dht.ProvideAsync(IdentifyCid_, true));
             }
         }
 

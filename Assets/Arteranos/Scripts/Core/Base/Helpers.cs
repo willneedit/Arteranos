@@ -144,6 +144,7 @@ namespace Arteranos.Services
     {
         protected abstract bool OpenPorts_ { get; set; }
         protected abstract IPAddress ExternalAddress_ { get; set; }
+        protected abstract IPAddress PublicIPAddress_ { get; set; }
         protected abstract Action<bool, string> OnClientConnectionResponse_ { get; set; }
         protected abstract MultiHash RemotePeerId_ { get; set; }
         protected abstract event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
@@ -162,6 +163,8 @@ namespace Arteranos.Services
         public static NetworkStatus Instance { get; set; }
 
         public static IPAddress ExternalAddress => Instance.ExternalAddress_;
+
+        public static IPAddress PublicIPAddress => Instance.PublicIPAddress_;
 
         public static bool OpenPorts
         {
@@ -286,6 +289,7 @@ namespace Arteranos.Services
         public abstract IpfsEngine Ipfs_ { get; }
         public abstract Peer Self_ { get; }
         public abstract SignKey ServerKeyPair_ { get; }
+        public abstract Cid IdentifyCid_ { get; protected set; }
 
         public abstract event Action<IPublishedMessage> OnReceivedHello_;
         public abstract event Action<IPublishedMessage> OnReceivedServerDirectMessage_;
@@ -305,6 +309,8 @@ namespace Arteranos.Services
             => Instance.ServerKeyPair_;
         public static PublicKey ServerPublicKey
             => ServerKeyPair.PublicKey;
+        public static Cid IdentifyCid
+            => Instance.IdentifyCid_;
         public static Task<IPAddress> GetPeerIPAddress(string PeerID, CancellationToken token = default)
             => Instance.GetPeerIPAddress_(PeerID, token);
         public static Task FlipServerDescription(bool reload)
