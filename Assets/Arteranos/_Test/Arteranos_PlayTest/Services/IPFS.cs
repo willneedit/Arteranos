@@ -520,20 +520,29 @@ namespace Arteranos.PlayTest.Services
 
             Debug.Log($"Identify file CID: {IPFSService.IdentifyCid}");
 
-            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(60));
-
             MultiHash found_id = null;
-            Task<IEnumerable<Peer>> taskPeers = outsider.Dht.FindProvidersAsync(IPFSService.IdentifyCid, 20, _peer =>
+            Task<IEnumerable<Peer>> taskPeers = outsider.Dht.FindProvidersAsync(IPFSService.IdentifyCid, 3, _peer =>
             {
                 Debug.Log($"Found: {_peer.Id}");
                 found_id = _peer.Id;
                 foreach (MultiAddress address in _peer.Addresses)
                     Debug.Log($"  Address: {address}");
-            }, cts.Token);
+            });
+
+
+            yield return new WaitForSeconds(60);
+
+            Debug.Log("Stopping IPFS node...");
+
+            yield return Utils.Async2Coroutine(outsider.StopAsync());
+
+            Debug.Log("Stopped IPFS node.");
 
             // Wait until we have it run through -- two minutes or 20 servers, whichever it's
             // earlier.
-            yield return new WaitUntil(() => taskPeers.IsCompleted);
+            // Warning -- Use Async2Coroutine<T>, even if the result can be discarded,
+            // else it doesn't terminate!
+            yield return Utils.Async2Coroutine(taskPeers);
 
             Assert.IsNotNull( found_id );
         }

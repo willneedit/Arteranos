@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -336,6 +337,58 @@ namespace Arteranos.Services
             => Instance.Ipfs_.FileSystem.ListFileAsync(path, cancel);
         public static Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
             => Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel);
+
+        public static MultiAddress GetMultiAddress(IPAddress addr, int port, MultiHash peer_id)
+        {
+            StringBuilder sb = new();
+            sb.Append(addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
+                ? "/ip6/"
+                : "/ip4/");
+            sb.Append(addr);
+            sb.Append("/tcp/");
+            sb.Append(port);
+            if(peer_id != null)
+            {
+                sb.Append("/p2p/");
+                sb.Append(peer_id);
+            }
+
+            return sb.ToString();
+        }
+
+        public static (IPAddress, int, MultiHash) ParseMultiAddress(MultiAddress maddr)
+        {
+            IPAddress addr = IPAddress.None;
+            int port = 0;
+            MultiHash peer_id = null;
+
+            string[] parts = maddr.ToString().Split('/');
+
+            for(int i = 1; i < parts.Length; i++)
+            {
+                switch(parts[i])
+                {
+                    case "ip4":
+                    case "ip6":
+                        i++;
+                        addr = IPAddress.Parse(parts[i]);
+                        break;
+                    case "tcp":
+                    case "udp":
+                        i++;
+                        port = int.Parse(parts[i]);
+                        break;
+                    case "p2p":
+                    case "ipfs":
+                        i++;
+                        peer_id = new(parts[i]);
+                        break;
+                    default:
+                        throw new ArgumentException("Unsupported or malformed Multiaddress");
+                }
+            }
+            return (addr, port, peer_id);
+        }
     }
 
     public abstract class TransitionProgressStatic : MonoBehaviour

@@ -95,7 +95,10 @@ namespace Arteranos.Services
             ipfsTmp.Options.KeyChain.DefaultKeySize = 2048;
             await ipfsTmp.Config.SetAsync(
                 "Addresses.Swarm",
-                JToken.FromObject(new string[] { $"/ip4/0.0.0.0/tcp/{port}" })
+                JToken.FromObject(new string[] { 
+                    $"/ip4/0.0.0.0/tcp/{port}",
+                    $"/ip6/::/tcp/{port}"
+                })
             );
 
             await ipfsTmp.StartAsync().ConfigureAwait(false);
@@ -107,25 +110,24 @@ namespace Arteranos.Services
             while (NetworkStatus.PublicIPAddress == IPAddress.None && DateTime.UtcNow < tmo)
                 await Task.Delay(500);
 
+            // The IPFS node has to advertise itself with its public IP(v4) address to deal
+            // with NAT - you wouldn't be able to connect.
+            // 
             if (NetworkStatus.PublicIPAddress != IPAddress.None)
             {
                 Debug.Log("Got the public IP address, setting up the IPFS node...");
-                StringBuilder sb = new();
-                sb.Append(NetworkStatus.PublicIPAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
-                    ? "/ip6/"
-                    : "/ip4/");
-                sb.Append(NetworkStatus.PublicIPAddress);
-                sb.Append("/tcp/");
-                sb.Append(port);
-                sb.Append("/p2p/");
-                sb.Append(self.Id);
 
-                MultiAddress[] newAddresses = new MultiAddress[]
-                {
-                    sb.ToString(),
-                };
+                // Filter out the local IPv4 addresses
+                List<MultiAddress> addresses = (from entry in self.Addresses
+                                                   where !entry.ToString().StartsWith("/ip4/")
+                                                   select entry).ToList();
 
-                self.Addresses = newAddresses;
+                // And add an entry with the external IPv4 address.
+                addresses.Add(                
+                    GetMultiAddress(NetworkStatus.PublicIPAddress, port, self.Id)
+                );
+
+                self.Addresses = addresses;
             }
 
             await ipfsTmp.PubSub.SubscribeAsync(topic_hello,
@@ -164,9 +166,11 @@ namespace Arteranos.Services
             SettingsManager.StartCoroutineAsync(GetUserListCoroutine);
         }
 
-        private async void OnDestroy()
+        private async void OnDisable()
         {
             await FlipServerDescription_(false);
+
+            Debug.Log("Shutting down the IPFS node.");
 
             await ipfs.StopAsync().ConfigureAwait(false);
 
@@ -226,15 +230,7 @@ namespace Arteranos.Services
             if (found.ConnectedAddress == null)
                 await ipfs.Swarm.ConnectAsync(found.Addresses.First(), token);
 
-            string[] parts = found.ConnectedAddress.ToString().Split('/');
-            if(parts.Length < 3)
-                throw new Exception($"Cannot work with {found.Id}'s address of {found.ConnectedAddress}");
-
-            return parts[1] switch
-            {
-                "ip6" or "ip4" => IPAddress.Parse(parts[2]),
-                _ => throw new Exception($"Peer address {found.ConnectedAddress} is unworkable"),
-            };
+            return ParseMultiAddress(found.ConnectedAddress).Item1;
         }
 
         #endregion

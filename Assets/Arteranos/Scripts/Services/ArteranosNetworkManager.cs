@@ -116,6 +116,8 @@ namespace Arteranos.Services
         public override void OnApplicationQuit()
         {
             base.OnApplicationQuit();
+
+            IPFSService.Instance.gameObject.SetActive(false);
         }
 
         #endregion
