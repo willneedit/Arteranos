@@ -295,7 +295,7 @@ namespace Arteranos.Services
         public abstract event Action<IPublishedMessage> OnReceivedHello_;
         public abstract event Action<IPublishedMessage> OnReceivedServerDirectMessage_;
 
-        public abstract Task<IPAddress> GetPeerIPAddress_(string PeerID, CancellationToken token = default);
+        public abstract Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default);
         public abstract Task FlipServerDescription_(bool reload);
         public abstract Task SendServerHello_();
         public abstract Task SendServerOnlineData_();
@@ -312,7 +312,7 @@ namespace Arteranos.Services
             => ServerKeyPair.PublicKey;
         public static Cid IdentifyCid
             => Instance.IdentifyCid_;
-        public static Task<IPAddress> GetPeerIPAddress(string PeerID, CancellationToken token = default)
+        public static Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
             => Instance.GetPeerIPAddress_(PeerID, token);
         public static Task FlipServerDescription(bool reload)
             => Instance.FlipServerDescription_(reload);

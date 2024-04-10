@@ -68,7 +68,7 @@ namespace Arteranos.Web
             Task<IPAddress> taskIPAddr = Task.Run(async () =>
             {
                 using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
-                return await IPFSService.GetPeerIPAddress(si.PeerID.ToString(), cts.Token);
+                return await IPFSService.GetPeerIPAddress(si.PeerID, cts.Token);
             });
 
             yield return new WaitUntil(() => taskIPAddr.IsCompleted);
@@ -86,7 +86,10 @@ namespace Arteranos.Web
             TransitionProgressStatic.Instance.OnProgressChanged(0.50f, "Connecting...");
 
             // FIXME Telepathy Transport specific.
-            Uri connectionUri = new($"tcp4://{addr}:{si.ServerPort}");
+            Uri connectionUri = addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
+                ? new($"tcp4://[{addr}]:{si.ServerPort}")
+                : new($"tcp4://{addr}:{si.ServerPort}");
+
             ExpectConnectionResponse_();
             NetworkStatus.StartClient(connectionUri);
 

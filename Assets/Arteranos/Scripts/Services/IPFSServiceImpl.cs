@@ -23,6 +23,7 @@ using System.Linq;
 using Ipfs.Core.Cryptography.Proto;
 using System.Net;
 using System.Text;
+using System.Collections.Concurrent;
 
 namespace Arteranos.Services
 {
@@ -63,6 +64,8 @@ namespace Arteranos.Services
 
         private List<byte[]> UserFingerprints = new();
 
+        private ConcurrentDictionary<MultiHash, Peer> DiscoveredPeers = null;
+
         // ---------------------------------------------------------------
         #region Start & Stop
         private async void Start()
@@ -70,6 +73,8 @@ namespace Arteranos.Services
             Instance = this;
 
             last = DateTime.MinValue;
+
+            DiscoveredPeers = new();
 
             cts = new();
 
@@ -164,6 +169,8 @@ namespace Arteranos.Services
             _ = EmitServerHeartbeat(cts.Token);
 
             SettingsManager.StartCoroutineAsync(GetUserListCoroutine);
+
+            SettingsManager.StartCoroutineAsync(DiscoverPeersCoroutine);
         }
 
         private async void OnDisable()
@@ -202,6 +209,21 @@ namespace Arteranos.Services
             }
         }
 
+        private IEnumerator DiscoverPeersCoroutine()
+        {
+            Debug.Log("Starting node discovery");
+
+            while(true)
+            {
+                Task<IEnumerable<Peer>> taskPeers = ipfs.Dht.FindProvidersAsync(IdentifyCid, 
+                    1000,
+                    _peer => _ = OnDiscoveredPeer(_peer));
+
+                yield return Utils.Async2Coroutine(taskPeers);
+            }
+            // NOTREACHED
+        }
+
         private async Task EmitServerHeartbeat(CancellationToken cancel)
         {
             while(!cancel.IsCancellationRequested)
@@ -223,10 +245,13 @@ namespace Arteranos.Services
             }
         }
 
-        public override async Task<IPAddress> GetPeerIPAddress_(string PeerID, CancellationToken token = default)
+        public override async Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default)
         {
-            Peer found = await ipfs.Dht.FindPeerAsync(PeerID, token).ConfigureAwait(false);
+            // Never seen before? Curious.
+            if(!DiscoveredPeers.TryGetValue(PeerID, out Peer found))
+                found = await ipfs.Dht.FindPeerAsync(PeerID, token).ConfigureAwait(false);
 
+            // Familiar, but disconnected?
             if (found.ConnectedAddress == null)
                 await ipfs.Swarm.ConnectAsync(found.Addresses.First(), token);
 
@@ -236,6 +261,7 @@ namespace Arteranos.Services
         #endregion
         // ---------------------------------------------------------------
         #region Peer communication and data exchange
+
         public override async Task FlipServerDescription_(bool reload)
         {
             if(currentSDCid != null)
@@ -421,6 +447,39 @@ namespace Arteranos.Services
             return true;
         }
 
+        private async Task OnDiscoveredPeer(Peer found)
+        {
+            Debug.Log($"Discovered node {found.Id}");
+
+            if (found.Id == self.Id)
+            {
+                Debug.Log("  Node is self, skipping.");
+                return;
+            }
+
+            if (DiscoveredPeers.ContainsKey(found.Id))
+            {
+                Debug.Log("  Node is already known, skipping");
+                return;
+            }
+
+            if (!found.Addresses.Any())
+            {
+                Debug.Log("  Node has no addresses, skipping.");
+                return;
+            }
+
+            Debug.Log("  Adding node as discovered.");
+            DiscoveredPeers[found.Id] = found;
+
+            ServerDescription serverDescription = ServerDescription.DBLookup(found.Id.ToString());
+            if(serverDescription == null)
+            {
+                Debug.Log("  New node - connecting and expecting its server description");
+                using CancellationTokenSource cts = new(1000);
+                await ipfs.Swarm.ConnectAsync(found.Addresses.First(), cts.Token);
+            }
+        }
         #endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface

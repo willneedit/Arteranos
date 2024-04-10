@@ -538,6 +538,8 @@ namespace Arteranos.PlayTest.Services
 
             Debug.Log("Stopped IPFS node.");
 
+            IPFSService.Instance.gameObject.SetActive(false);
+
             // Wait until we have it run through -- two minutes or 20 servers, whichever it's
             // earlier.
             // Warning -- Use Async2Coroutine<T>, even if the result can be discarded,
