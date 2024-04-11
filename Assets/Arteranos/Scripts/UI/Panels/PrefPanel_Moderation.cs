@@ -10,10 +10,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using UnityEngine;
-using UnityEngine.Networking;
-using System.Collections;
-using System;
 using System.IO;
 using Arteranos.Services;
 
@@ -26,9 +22,7 @@ namespace Arteranos.UI
         public TMP_InputField txt_MetdadataPort = null;
 
         public TMP_InputField txt_Description = null;
-        public Button btn_Icon = null;
-        public RawImage img_IconImage = null;
-        public TMP_InputField txt_IconURL = null;
+        public IconSelectorBar bar_IconSelector = null;
 
         public Button btn_WorldGallery = null;
         public Button btn_ContentPermissions = null;
@@ -58,7 +52,6 @@ namespace Arteranos.UI
             txt_MetdadataPort.onValueChanged.AddListener(SetDirty);
             //txt_MetdadataPort.onValidateInput += OnValidatePort;
 
-            btn_Icon.onClick.AddListener(OnIconClicked);
             chk_Public.onValueChanged.AddListener(SetDirty);
 
             btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
@@ -69,6 +62,13 @@ namespace Arteranos.UI
             chk_Guests.onValueChanged.AddListener(SetDirty);
 
             btn_ClearCaches.onClick.AddListener(OnClearCachesClicked);
+
+            bar_IconSelector.OnIconChanged += Bar_IconSelector_OnIconChanged;
+        }
+
+        private void Bar_IconSelector_OnIconChanged(byte[] obj)
+        {
+            dirty = true;
         }
 
         //private char OnValidatePort(string text, int charIndex, char addedChar)
@@ -81,9 +81,9 @@ namespace Arteranos.UI
         private void SetDirty(bool _) => dirty = true;
         private void SetDirty(string _) => dirty = true;
 
-        protected override void Start()
+        protected override void OnEnable()
         {
-            base.Start();
+            base.OnEnable();
 
             ss = SettingsManager.Server;
 
@@ -93,8 +93,7 @@ namespace Arteranos.UI
             txt_ServerName.text = ss.Name;
             txt_Description.text = ss.Description;
 
-            if(ss.Icon != null && ss.Icon.Length != 0)
-                StartCoroutine(UpdateIcon(ss.Icon));
+            bar_IconSelector.IconData = ss.Icon;
 
             chk_Flying.isOn = ss.Permissions.Flying ?? true;
 
@@ -118,6 +117,8 @@ namespace Arteranos.UI
 
                 ss.Name = txt_ServerName.text;
                 ss.Description = txt_Description.text;
+
+                ss.Icon = bar_IconSelector.IconData;
 
                 ss.Permissions.Flying = chk_Flying.isOn;
 
@@ -150,45 +151,6 @@ namespace Arteranos.UI
 
             cui.OnFinishConfiguring +=
                 () => SettingsManager.Server?.Save();
-        }
-
-        private void OnIconClicked()
-        {
-            IEnumerator GetTexture(string iconURL)
-            {
-                UnityWebRequest www = UnityWebRequestTexture.GetTexture(iconURL);
-                yield return www.SendWebRequest();
-
-                if(www.result == UnityWebRequest.Result.Success)
-                {
-                    DownloadHandler dh = www.downloadHandler;
-                    byte[] data = dh.nativeData.ToArray();
-
-                    Texture2D tex = new(2, 2);
-                    ImageConversion.LoadImage(tex, data);
-
-                    if(tex.width > 512 || tex.height > 512)
-                        yield break;
-
-                    if(tex.width < 128 || tex.height < 128)
-                        yield break;
-
-                    ss.Icon = data;
-                    yield return UpdateIcon(data);
-                    dirty = true;
-                }
-                else
-                {
-                    Debug.Log(www.error);
-                }
-            }
-
-            StartCoroutine(GetTexture(txt_IconURL.text));
-        }
-
-        private IEnumerator UpdateIcon(byte[] data)
-        {
-            yield return Utils.LoadImageCoroutine(data, _tex => img_IconImage.texture = _tex);
         }
 
         private void OnClearCachesClicked()

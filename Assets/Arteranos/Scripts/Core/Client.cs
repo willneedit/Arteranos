@@ -215,6 +215,9 @@ namespace Arteranos.Core
         // The display name of the user. Generate if null
         public virtual string Nickname { get; set; } = "Anonymous";
 
+        // The user's 2D Icon.
+        public virtual byte[] FlatIcon { get; set; } = null;
+
         // The user's login data
         public virtual LoginDataJSON Login { get; set; } = new();
 

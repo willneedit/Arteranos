@@ -216,7 +216,7 @@ namespace Arteranos.Services
             while(true)
             {
                 Task<IEnumerable<Peer>> taskPeers = ipfs.Dht.FindProvidersAsync(IdentifyCid, 
-                    1000,
+                    1000, // FIXME Maybe configurable.
                     _peer => _ = OnDiscoveredPeer(_peer));
 
                 yield return Utils.Async2Coroutine(taskPeers);
