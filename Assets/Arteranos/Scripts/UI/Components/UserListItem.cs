@@ -17,6 +17,8 @@ using System.Linq;
 using Arteranos.Social;
 using TMPro;
 using Arteranos.Services;
+using Ipfs;
+using System.IO;
 
 namespace Arteranos.UI
 {
@@ -71,14 +73,43 @@ namespace Arteranos.UI
             lbl_caption.text = targetUserID;
         }
 
+        private bool DownloadProgress = false;
         private void Update()
         {
-            // When it's active, watch for the status updates - both internal and external causes.
-            if(go_Overlay.activeSelf)
+            IEnumerator DownloadUserIcon(Cid icon)
             {
-                IEnumerable<KeyValuePair<UserID, ulong>> q = SettingsManager.Client.GetSocialList(targetUserID);
+                Stream stream = null;
+                yield return Utils.Async2Coroutine(IPFSService.ReadFile(icon), _stream => stream = _stream);
 
-                ulong currentState = (q.Count() > 0) ? q.First().Value : SocialState.None;
+                // Intentionally left on. Don't bother with repeated requests for nonexistent icons.
+                if (stream == null) yield break;
+
+                using MemoryStream ms = new();
+                yield return Utils.CopyWithProgress(stream, ms);
+                byte[] data = ms.ToArray();
+
+                Texture2D tex = null;
+                yield return Utils.LoadImageCoroutine(data, _tex => tex = _tex);
+
+                // Same as with broken image. 
+                if (tex == null) yield break;
+
+                // TODO image texture update
+
+                // Finished. Now we _can_ update when necessary.
+                DownloadProgress = false;
+            }
+
+            Cid Icon = null;
+            IAvatarBrain targetUser = null;
+
+            // When it's hovered, watch for the status updates - both internal and external causes.
+            if (go_Overlay.activeSelf)
+            {
+                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> q = SettingsManager.Client.GetSocialList(targetUserID);
+                
+                ulong currentState = q.Any() ? q.First().Value.state : SocialState.None;
+                Icon = q.Any() ? q.First().Value.Icon : null;
 
                 bool friends = SocialState.IsFriendRequested(currentState);
 
@@ -91,13 +122,29 @@ namespace Arteranos.UI
                 btn_Unblock.gameObject.SetActive(blocked && !friends);
 
                 // Connot send texts to offline users. They could want to deny them.
-                IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+                targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+
                 if (targetUser != null && XRControl.Me != null)
                     btn_SendText.gameObject.SetActive(Utils.IsAbleTo(UserCapabilities.CanSendText, targetUser));
                 else
                     btn_SendText.gameObject.SetActive(false);
+
+            }
+
+            if (targetUser != null)
+            {
+                // TODO Online User's icon
+                // Icon = targetUser.UserIconCID();
+            }
+
+            // Icons will be requested when it's saved or online users, but only hovered.
+            if (Icon != null && !DownloadProgress /* && texture == null */)
+            {
+                DownloadProgress = true;
+                StartCoroutine(DownloadUserIcon(Icon));
             }
         }
+
 
         private void OnAddFriendButtonClicked()
         {

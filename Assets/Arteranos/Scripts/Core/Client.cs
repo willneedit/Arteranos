@@ -16,6 +16,7 @@ using Arteranos.Social;
 using System.Linq;
 using Arteranos.Core.Cryptography;
 using Ipfs.Core.Cryptography.Proto;
+using Ipfs;
 
 namespace Arteranos.Core
 {
@@ -207,6 +208,15 @@ namespace Arteranos.Core
         public virtual ComfortBlindersType ComfortBlinders { get; set; } = ComfortBlindersType.Off;
     }
 
+    public class UserSocialEntryJSON
+    {
+        // The user's friend (or blocked) state
+        public ulong state { get; set; } = 0;
+
+        // The user's Icon file CID, if available
+        public Cid Icon { get; set; } = null;
+    }
+
     public class UserDataSettingsJSON
     {
         // User's signature key pair
@@ -232,7 +242,7 @@ namespace Arteranos.Core
         public virtual List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
 
         // The user's social state to others
-        public virtual Dictionary<UserID, ulong> SocialList { get; set; } = new();
+        public virtual Dictionary<UserID, UserSocialEntryJSON> SocialList { get; set; } = new();
     }
 
     public class UserHUDSettingsJSON
@@ -415,20 +425,25 @@ namespace Arteranos.Core
         // ---------------------------------------------------------------
         #region Social States
 
-        public void SaveSocialStates(UserID userID, ulong state)
+        public void SaveSocialStates(UserID userID, ulong state, Cid icon = null)
         {
             bool dirty = false;
 
-            if(Me.SocialList.TryGetValue(userID, out ulong oldstate))
+            if(Me.SocialList.TryGetValue(userID, out UserSocialEntryJSON oldstate_))
             {
+                ulong oldstate = oldstate_.state;
                 if (oldstate != state || oldstate != SocialState.None) dirty = true;
             }
             else if(state != SocialState.None) dirty = true;
 
             if (dirty)
             {
-                if(state != SocialState.None)
-                    Me.SocialList[userID] = state;
+                if (state != SocialState.None)
+                    Me.SocialList[userID] = new()
+                    {
+                        state = state,
+                        Icon = icon
+                    };
                 else
                     Me.SocialList.Remove(userID);
                 Save();
@@ -441,8 +456,8 @@ namespace Arteranos.Core
         /// <param name="userID">the targeted user, null if everyone</param>
         /// <param name="p">Additional search limitations</param>
         /// <returns>The matching entries with the equivalent UserIDs</returns>
-        public IEnumerable<KeyValuePair<UserID, ulong>> GetSocialList(
-            UserID userID = null, Func<KeyValuePair<UserID, ulong>, bool> p = null)
+        public IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> GetSocialList(
+            UserID userID = null, Func<KeyValuePair<UserID, UserSocialEntryJSON>, bool> p = null)
         {
             p ??= (x) => true;
 
@@ -453,13 +468,17 @@ namespace Arteranos.Core
 
         public void UpdateSocialListEntry(UserID userID, Func<ulong, ulong> modification)
         {
-            ulong state = Me.SocialList.ContainsKey(userID)
+            UserSocialEntryJSON state_ = Me.SocialList.ContainsKey(userID)
                 ? Me.SocialList[userID]
-                : SocialState.None;
+                : new()
+                {
+                    state = SocialState.None,
+                    Icon = null,
+                };
 
-            state = modification(state);
+            state_.state = modification(state_.state);
 
-            SaveSocialStates(userID, state);
+            SaveSocialStates(userID, state_.state, state_.Icon);
         }
 
 #endregion
