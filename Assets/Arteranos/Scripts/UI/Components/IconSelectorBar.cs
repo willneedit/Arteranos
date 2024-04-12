@@ -38,8 +38,12 @@ namespace Arteranos.UI
         protected override void OnEnable()
         {
             base.OnEnable();
+            TriggerUpdate();
+        }
 
-            StartCoroutine(UpdateIcon(IconData));
+        public void TriggerUpdate()
+        {
+            StartCoroutine(UpdateIconCoroutine(IconData));
         }
 
         private void OnIconClicked()
@@ -62,14 +66,14 @@ namespace Arteranos.UI
                     DownloadHandler dh = www.downloadHandler;
                     byte[] data = dh.nativeData.ToArray();
 
-                    yield return UpdateIcon(data);
+                    yield return UpdateIconCoroutine(data);
                 }
             }
 
             StartCoroutine(DownloadIcon(txt_IconURL.text));
         }
 
-        private IEnumerator UpdateIcon(byte[] data)
+        private IEnumerator UpdateIconCoroutine(byte[] data)
         {
             if (data == null) yield break;
 

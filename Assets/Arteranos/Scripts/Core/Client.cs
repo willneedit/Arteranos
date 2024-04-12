@@ -226,7 +226,7 @@ namespace Arteranos.Core
         public virtual string Nickname { get; set; } = "Anonymous";
 
         // The user's 2D Icon.
-        public virtual byte[] FlatIcon { get; set; } = null;
+        public virtual Cid UserIconCid { get; set; } = null;
 
         // The user's login data
         public virtual LoginDataJSON Login { get; set; } = new();

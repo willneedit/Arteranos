@@ -7,6 +7,11 @@ using UnityEngine;
 
 using Arteranos.Core;
 using System.Linq;
+using System.Collections;
+using Ipfs;
+using System.IO;
+using Arteranos.Services;
+using System.Threading.Tasks;
 
 namespace Arteranos.UI
 {
@@ -50,7 +55,20 @@ namespace Arteranos.UI
 
         private void Bar_IconSelector_OnIconChanged(byte[] obj)
         {
-            dirty = true;
+            IEnumerator UploadIcon(byte[] data)
+            {
+                Cid uploadedIcon = null;
+
+                using MemoryStream ms = new(obj);
+                ms.Position = 0;
+                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => uploadedIcon = _fsn.Id);
+
+                cs.Me.UserIconCid = uploadedIcon;
+
+                dirty = true;
+            }
+
+            StartCoroutine(UploadIcon(obj));
         }
 
         private void OnAvatarGalleryClicked()
@@ -69,6 +87,21 @@ namespace Arteranos.UI
         // outside means, like the Login panel.
         protected override void OnEnable()
         {
+            IEnumerator DownloadIcon(Cid icon)
+            {
+                if(icon == null) yield break;
+
+                Stream stream = null;
+                yield return Utils.Async2Coroutine(IPFSService.ReadFile(icon), _stream => stream = _stream);
+
+                if (stream == null) yield break;
+
+                using MemoryStream ms = new();
+                yield return Utils.CopyWithProgress(stream, ms);
+                bar_IconSelector.IconData = ms.ToArray();
+                bar_IconSelector.TriggerUpdate();
+            }
+
             base.OnEnable();
 
             cs = SettingsManager.Client;
@@ -83,7 +116,7 @@ namespace Arteranos.UI
             tro_UserID.text = cs.GetFingerprint(fpmode);
             sldn_AvatarHeight.value = cs.AvatarHeight;
 
-            bar_IconSelector.IconData = cs.Me.FlatIcon;
+            StartCoroutine(DownloadIcon(cs.Me.UserIconCid));
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
@@ -95,8 +128,6 @@ namespace Arteranos.UI
 
             cs.AvatarHeight = sldn_AvatarHeight.value;
             cs.Me.Nickname = txt_Nickname.text;
-
-            cs.Me.FlatIcon = bar_IconSelector.IconData;
 
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty) cs?.Save();
