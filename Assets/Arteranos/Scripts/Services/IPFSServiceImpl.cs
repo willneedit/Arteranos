@@ -71,11 +71,9 @@ namespace Arteranos.Services
         private async void Start()
         {
             Instance = this;
-
+            IdentifyCid_ = null;
             last = DateTime.MinValue;
-
             DiscoveredPeers = new();
-
             cts = new();
 
             // If it doesn't exist, write down the template in the config directory.
@@ -190,7 +188,6 @@ namespace Arteranos.Services
 
         private IEnumerator GetUserListCoroutine()
         {
-            IdentifyCid_ = null;
             StringBuilder sb = new();
             sb.Append("Arteranos Server, built by willneedit\n");
             sb.Append(Core.Version.VERSION_MIN);
@@ -211,7 +208,10 @@ namespace Arteranos.Services
 
         private IEnumerator DiscoverPeersCoroutine()
         {
-            Debug.Log("Starting node discovery");
+            // Wait for the identifier file's CID to come up.
+            yield return new WaitUntil(() => IdentifyCid != null);
+
+            Debug.Log($"Starting node discovery: Identifier file's CID is {IdentifyCid}");
 
             while(true)
             {
@@ -248,7 +248,8 @@ namespace Arteranos.Services
         public override async Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default)
         {
             // Never seen before? Curious.
-            if(!DiscoveredPeers.TryGetValue(PeerID, out Peer found))
+            // Or too late for being online for the initial FindProvidersAsync()?
+            if (!DiscoveredPeers.TryGetValue(PeerID, out Peer found) || !found.Addresses.Any())
                 found = await ipfs.Dht.FindPeerAsync(PeerID, token).ConfigureAwait(false);
 
             // Familiar, but disconnected?
