@@ -116,7 +116,9 @@ namespace Arteranos.UI
 
         private IEnumerator VisualizeServerData()
         {
-            yield return Utils.LoadImageCoroutine(si.Icon, _tex => img_Icon.texture = _tex);
+            byte[] data = null;
+            yield return Utils.DownloadDataCoroutine(si.ServerIcon, _data => data = _data);
+            yield return Utils.LoadImageCoroutine(data, _tex => img_Icon.texture = _tex);
 
             if(!si.IsOnline)
             {

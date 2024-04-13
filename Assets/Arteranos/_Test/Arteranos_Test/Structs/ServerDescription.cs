@@ -21,7 +21,7 @@ namespace Arteranos.Test.Structs
                 ServerPort = 1,
                 MetadataPort = 2,
                 Description = "Snake Oil Inc.",
-                Icon = new byte[0],
+                ServerIcon = null,
                 Version = "0.0.1",
                 MinVersion = "0.0.1",
                 Permissions = new(),

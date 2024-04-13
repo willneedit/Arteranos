@@ -12,6 +12,8 @@ using UnityEngine.UI;
 using Arteranos.Core;
 using System.IO;
 using Arteranos.Services;
+using System.Collections;
+using Ipfs;
 
 namespace Arteranos.UI
 {
@@ -68,7 +70,16 @@ namespace Arteranos.UI
 
         private void Bar_IconSelector_OnIconChanged(byte[] obj)
         {
-            dirty = true;
+            IEnumerator UploadIcon(byte[] data)
+            {
+                using MemoryStream ms = new(obj);
+                ms.Position = 0;
+                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => ss.ServerIcon = _fsn.Id);
+
+                dirty = true;
+            }
+
+            StartCoroutine(UploadIcon(obj));
         }
 
         //private char OnValidatePort(string text, int charIndex, char addedChar)
@@ -83,6 +94,12 @@ namespace Arteranos.UI
 
         protected override void OnEnable()
         {
+            IEnumerator DownloadIcon(Cid icon)
+            {
+                yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data);
+                bar_IconSelector.TriggerUpdate();
+            }
+
             base.OnEnable();
 
             ss = SettingsManager.Server;
@@ -93,11 +110,11 @@ namespace Arteranos.UI
             txt_ServerName.text = ss.Name;
             txt_Description.text = ss.Description;
 
-            bar_IconSelector.IconData = ss.Icon;
-
             chk_Flying.isOn = ss.Permissions.Flying ?? true;
 
             chk_Public.isOn = ss.Public;
+
+            StartCoroutine(DownloadIcon(ss.ServerIcon));
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
@@ -109,16 +126,11 @@ namespace Arteranos.UI
 
             if(ss != null)
             {
-                // Only when the world loading is committed, not only the entry of the URL.
-                // ss.WorldURL = txt_WorldURL.text;
-
                 ss.ServerPort = int.Parse(txt_ServerPort.text);
                 ss.MetadataPort = int.Parse(txt_MetdadataPort.text);
 
                 ss.Name = txt_ServerName.text;
                 ss.Description = txt_Description.text;
-
-                ss.Icon = bar_IconSelector.IconData;
 
                 ss.Permissions.Flying = chk_Flying.isOn;
 

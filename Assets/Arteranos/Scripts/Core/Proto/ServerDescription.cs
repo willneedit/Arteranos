@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Ipfs;
 using ProtoBuf;
 
 namespace Arteranos.Core
@@ -28,8 +29,8 @@ namespace Arteranos.Core
         [ProtoMember(4)]
         public string Description;
 
-        [ProtoMember(5)]
-        public byte[] Icon;
+        //[ProtoMember(5)]
+        //public byte[] Icon;
 
         [ProtoMember(7)]
         public string Version;
@@ -58,6 +59,9 @@ namespace Arteranos.Core
         [ProtoMember(15)]
         public string ServerDescriptionCid; // Only matches itself if it's null!
 
+        [ProtoMember(16)]
+        public string ServerIcon; // string, because CIDs are not proto-serializable
+
         public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
 
@@ -76,7 +80,7 @@ namespace Arteranos.Core
                    ServerPort == other.ServerPort &&
                    MetadataPort == other.MetadataPort &&
                    Description == other.Description &&
-                   Icon.SequenceEqual(other.Icon) &&
+                   ServerIcon == other.ServerIcon &&
                    Version == other.Version &&
                    MinVersion == other.MinVersion &&
                    EqualityComparer<ServerPermissions>.Default.Equals(Permissions, other.Permissions) &&
@@ -93,7 +97,7 @@ namespace Arteranos.Core
             hash.Add(ServerPort);
             hash.Add(MetadataPort);
             hash.Add(Description);
-            hash.Add(Icon);
+            hash.Add(ServerIcon);
             hash.Add(Version);
             hash.Add(MinVersion);
             hash.Add(Permissions);

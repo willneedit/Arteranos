@@ -6,6 +6,7 @@
  */
 
 using Arteranos.Core.Cryptography;
+using Ipfs;
 using Ipfs.Core.Cryptography.Proto;
 using Newtonsoft.Json;
 using ProtoBuf;
@@ -40,7 +41,7 @@ namespace Arteranos.Core
 
         // The server icon. PNG file bytes, at least 128x128, at most 512x512
         [ProtoMember(5)]
-        public byte[] Icon = new byte[] { };
+        public Cid ServerIcon = null;
 
         // Public server. True means that the server's data can be spread around.
         [ProtoMember(6)]
@@ -57,22 +58,6 @@ namespace Arteranos.Core
         [JsonIgnore]
         [ProtoMember(9)]
         public PublicKey ServerAgrPublicKey = null;
-
-        public ServerJSON Strip()
-        {
-            return new ServerJSON()
-            {
-                ServerPort = ServerPort,
-                MetadataPort = MetadataPort,
-                Name = Name,
-                Description = Description,
-                Public = Public,
-                Icon = new byte[0],         // Remove the icon to reduce the packet size
-                Permissions = Permissions,
-                ServerSignPublicKey = ServerSignPublicKey,
-                ServerAgrPublicKey = ServerAgrPublicKey
-            };
-        }
     }
 
     public class Server : ServerJSON

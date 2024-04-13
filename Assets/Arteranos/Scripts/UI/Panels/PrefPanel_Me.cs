@@ -57,13 +57,9 @@ namespace Arteranos.UI
         {
             IEnumerator UploadIcon(byte[] data)
             {
-                Cid uploadedIcon = null;
-
                 using MemoryStream ms = new(obj);
                 ms.Position = 0;
-                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => uploadedIcon = _fsn.Id);
-
-                cs.Me.UserIconCid = uploadedIcon;
+                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => cs.Me.UserIconCid = _fsn.Id);
 
                 dirty = true;
             }
@@ -89,16 +85,7 @@ namespace Arteranos.UI
         {
             IEnumerator DownloadIcon(Cid icon)
             {
-                if(icon == null) yield break;
-
-                Stream stream = null;
-                yield return Utils.Async2Coroutine(IPFSService.ReadFile(icon), _stream => stream = _stream);
-
-                if (stream == null) yield break;
-
-                using MemoryStream ms = new();
-                yield return Utils.CopyWithProgress(stream, ms);
-                bar_IconSelector.IconData = ms.ToArray();
+                yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data);
                 bar_IconSelector.TriggerUpdate();
             }
 

@@ -319,7 +319,7 @@ namespace Arteranos.Services
                     status = HttpStatusCode.OK,
                     message = "OK",
                     // Add the server settings and the signature of the client's public key.
-                    ServerSettings = SettingsManager.Server.Strip()
+                    ServerSettings = SettingsManager.Server
                 };
 
                 ServerUserState query = new()

@@ -20,6 +20,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections;
+using Arteranos.Services;
 
 namespace Arteranos.Core
 {
@@ -217,6 +218,8 @@ namespace Arteranos.Core
 
         public static IEnumerator LoadImageCoroutine(byte[] data, Action<Texture2D> callback)
         {
+            if (data == null || data.Length == 0) yield break;
+
             Texture2D tex = new(2, 2);
 
             Task<bool> t = AsyncImageLoader.LoadImageAsync(tex, data);
@@ -226,6 +229,20 @@ namespace Arteranos.Core
             if (!t.Result) Debug.LogWarning("LoadImageCoroutine() failed");
 
             callback?.Invoke(tex);
+        }
+
+        public static IEnumerator DownloadDataCoroutine(string icon, Action<byte[]> callback)
+        {
+            if (icon == null) yield break;
+
+            Stream stream = null;
+            yield return Utils.Async2Coroutine(IPFSService.ReadFile(icon), _stream => stream = _stream);
+
+            if (stream == null) yield break;
+
+            using MemoryStream ms = new();
+            yield return Utils.CopyWithProgress(stream, ms);
+            callback?.Invoke(ms.ToArray());
         }
 
         public static void ShowImage(Texture2D icon, Image image)

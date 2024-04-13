@@ -281,7 +281,7 @@ namespace Arteranos.Services
                 ServerPort = server.ServerPort,
                 MetadataPort = server.MetadataPort,
                 Description = server.Description,
-                Icon = server.Icon,
+                ServerIcon = server.ServerIcon,
                 Version = versionString,
                 MinVersion = minVersionString,
                 Permissions = server.Permissions,
