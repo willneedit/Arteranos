@@ -53,6 +53,8 @@ namespace Arteranos.Avatar
         public string DeviceID { get; set; } = string.Empty;
         public PublicKey AgreePublicKey { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+        public string UserIcon => throw new NotImplementedException();
+
         public event Action<int> OnAppearanceStatusChanged;
 
         [SerializeField] private int m_NetMuteStatus = 0;

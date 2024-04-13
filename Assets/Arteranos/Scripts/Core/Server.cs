@@ -41,7 +41,7 @@ namespace Arteranos.Core
 
         // The server icon. PNG file bytes, at least 128x128, at most 512x512
         [ProtoMember(5)]
-        public Cid ServerIcon = null;
+        public string ServerIcon = null; // string, because the CID is not proto-serializable
 
         // Public server. True means that the server's data can be spread around.
         [ProtoMember(6)]

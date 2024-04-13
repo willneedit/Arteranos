@@ -36,11 +36,14 @@ namespace Arteranos.Avatar
 
         public uint NetID => netIdentity.netId;
 
+        // Client-side settings
         public string AvatarCidString { get => m_AvatarCidString; private set => CmdPropagateAvatarURL(value); }
 
         public float AvatarHeight { get => m_AvatarHeight; private set => CmdPropagateAvatarHeight(value); }
 
         public UserPrivacy UserPrivacy { get => m_UserPrivacy; private set => CmdPropagateUserPrivacy(value); }
+
+        public string UserIcon { get => m_UserIcon; private set => CmdPropagateUserIcon(value); }
 
         // Okay to use the setter. The SyncVar would yell at you if you fiddle with the privilege client-side
         public UserID UserID { get => m_userID; set => m_userID = value; }
@@ -220,6 +223,8 @@ namespace Arteranos.Avatar
             CommitAvatarChanged(avatarCidString, cs.AvatarHeight);
 
             UserPrivacy = cs.UserPrivacy;
+
+            UserIcon = cs.Me.UserIconCid;
         }
 
         #endregion
@@ -260,6 +265,9 @@ namespace Arteranos.Avatar
 
         [SyncVar(hook = nameof(OnAvatarHeightChanged))]
         private float m_AvatarHeight = 175;
+
+        [SyncVar]
+        private string m_UserIcon = null;
 
         // No [SyncVar] - server only for privacy reasons
         private string m_Address = null;
@@ -304,6 +312,9 @@ namespace Arteranos.Avatar
 
         [Command]
         private void CmdPropagateAvatarHeight(float height) => m_AvatarHeight = height;
+
+        [Command]
+        private void CmdPropagateUserIcon(string icon) => m_UserIcon = icon;
 
         [Command]
         private void CmdPerformEmote(string emojiName) => RpcPerformEmote(emojiName);

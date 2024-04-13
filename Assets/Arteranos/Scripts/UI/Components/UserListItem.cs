@@ -18,13 +18,14 @@ using Arteranos.Social;
 using TMPro;
 using Arteranos.Services;
 using Ipfs;
-using System.IO;
+using UnityEngine.UI;
 
 namespace Arteranos.UI
 {
     public class UserListItem : ListItemBase
     {
         [SerializeField] private TMP_Text lbl_caption = null;
+        [SerializeField] private RawImage img_Icon = null;
 
         private HoverButton btn_AddFriend = null; // Offering Friend or accepting the request
         private HoverButton btn_DelFriend = null; // Revoking Friend offer or unfriend
@@ -78,23 +79,13 @@ namespace Arteranos.UI
         {
             IEnumerator DownloadUserIcon(Cid icon)
             {
-                Stream stream = null;
-                yield return Utils.Async2Coroutine(IPFSService.ReadFile(icon), _stream => stream = _stream);
+                byte[] data = null;
 
-                // Intentionally left on. Don't bother with repeated requests for nonexistent icons.
-                if (stream == null) yield break;
-
-                using MemoryStream ms = new();
-                yield return Utils.CopyWithProgress(stream, ms);
-                byte[] data = ms.ToArray();
-
-                Texture2D tex = null;
-                yield return Utils.LoadImageCoroutine(data, _tex => tex = _tex);
+                yield return Utils.DownloadDataCoroutine(icon, _data => data = _data);
+                yield return Utils.LoadImageCoroutine(data, _tex => img_Icon.texture = _tex);
 
                 // Same as with broken image. 
-                if (tex == null) yield break;
-
-                // TODO image texture update
+                if (img_Icon.texture == null) yield break;
 
                 // Finished. Now we _can_ update when necessary.
                 DownloadProgress = false;
@@ -131,14 +122,11 @@ namespace Arteranos.UI
 
             }
 
-            if (targetUser != null)
-            {
-                // TODO Online User's icon
-                // Icon = targetUser.UserIconCID();
-            }
+            // Online user, fetch actual icon.
+            if (targetUser != null) Icon = targetUser.UserIcon;
 
             // Icons will be requested when it's saved or online users, but only hovered.
-            if (Icon != null && !DownloadProgress /* && texture == null */)
+            if (Icon != null && !DownloadProgress && img_Icon.texture == null)
             {
                 DownloadProgress = true;
                 StartCoroutine(DownloadUserIcon(Icon));

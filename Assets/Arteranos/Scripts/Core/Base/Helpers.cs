@@ -312,31 +312,31 @@ namespace Arteranos.Services
             => ServerKeyPair.PublicKey;
         public static Cid IdentifyCid
             => Instance.IdentifyCid_;
-        public static Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
-            => Instance.GetPeerIPAddress_(PeerID, token);
-        public static Task FlipServerDescription(bool reload)
-            => Instance.FlipServerDescription_(reload);
-        public static Task SendServerHello()
-            => Instance.SendServerHello_();
-        public static Task SendServerOnlineData()
-            => Instance.SendServerOnlineData_();
-        public static Task SendServerDirectMessage(string peerId, PeerMessage message)
-            => Instance.SendServerDirectMessage_(peerId, message);
+        public static async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
+            => await Instance.GetPeerIPAddress_(PeerID, token);
+        public static async Task FlipServerDescription(bool reload)
+            => await Instance.FlipServerDescription_(reload);
+        public static async Task SendServerHello()
+            => await Instance.SendServerHello_();
+        public static async Task SendServerOnlineData()
+            => await Instance.SendServerOnlineData_();
+        public static async Task SendServerDirectMessage(string peerId, PeerMessage message)
+            => await Instance.SendServerDirectMessage_(peerId, message);
 
-        public static Task PinCid(Cid cid, bool pinned, CancellationToken cancel = default)
-            => Instance.PinCid_(cid, pinned, cancel);
-        public static Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
-            => Instance.Ipfs_.Pin.ListAsync(cancel);
-        public static Task<Stream> ReadFile(string path, CancellationToken cancel = default)
-            => Instance.Ipfs_.FileSystem.ReadFileAsync(path, cancel);
-        public static Task<Stream> Get(string path, CancellationToken cancel = default)
-            => Instance.Ipfs_.FileSystem.GetAsync(path, cancel: cancel);
-        public static Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
-            => Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel);
-        public static Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
-            => Instance.Ipfs_.FileSystem.ListFileAsync(path, cancel);
-        public static Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
-            => Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel);
+        public static async Task PinCid(Cid cid, bool pinned, CancellationToken cancel = default)
+            => await Instance.PinCid_(cid, pinned, cancel);
+        public static async Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
+            => await Instance.Ipfs_.Pin.ListAsync(cancel);
+        public static async Task<Stream> ReadFile(string path, CancellationToken cancel = default)
+            => await Instance.Ipfs_.FileSystem.ReadFileAsync(path, cancel);
+        public static async Task<Stream> Get(string path, CancellationToken cancel = default)
+            => await Instance.Ipfs_.FileSystem.GetAsync(path, cancel: cancel);
+        public static async Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
+            => await Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel);
+        public static async Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
+            => await Instance.Ipfs_.FileSystem.ListFileAsync(path, cancel);
+        public static async Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
+            => await Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel);
 
         public static MultiAddress GetMultiAddress(IPAddress addr, int port, MultiHash peer_id)
         {

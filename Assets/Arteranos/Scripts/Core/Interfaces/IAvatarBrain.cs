@@ -9,6 +9,7 @@
 
 using Arteranos.Core;
 using Arteranos.Social;
+using Ipfs;
 using Ipfs.Core.Cryptography.Proto;
 using System;
 using UnityEngine;
@@ -19,6 +20,7 @@ namespace Arteranos.Avatar
     {
         uint NetID { get; }
         string Nickname { get; }
+        string UserIcon {  get; }
         int AppearanceStatus { get; set; }
         IAvatarBody Body { get; }
         GameObject gameObject { get; }
