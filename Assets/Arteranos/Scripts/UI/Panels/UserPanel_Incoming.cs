@@ -22,8 +22,8 @@ namespace Arteranos.UI
 
         private bool IsFriendReceived(KeyValuePair<UserID, UserSocialEntryJSON> arg)
         {
-            return SocialState.IsFriendOffered(arg.Value.state)
-                && !SocialState.IsFriendRequested(arg.Value.state);
+            return SocialState.IsFriendOffered(arg.Value.State)
+                && !SocialState.IsFriendRequested(arg.Value.State);
         }
     }
 }

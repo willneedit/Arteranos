@@ -79,7 +79,7 @@ namespace Arteranos.Core
                 if (OnlineData?.UserFingerprints == null) return 0;
 
                 int friend = 0;
-                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.Value.state));
+                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.Value.State));
 
                 foreach (KeyValuePair<UserID, UserSocialEntryJSON> entry in friends)
                 {

@@ -416,7 +416,7 @@ namespace Arteranos.Avatar
                 throw new InvalidOperationException("Not owner");
 
             return SettingsManager.Client.Me.SocialList.TryGetValue(to, out UserSocialEntryJSON state)
-                        ? state.state : SocialState.None;
+                        ? state.State : SocialState.None;
         }
 
         public ulong GetSocialStateTo(IAvatarBrain receiver)

@@ -174,7 +174,7 @@ namespace Arteranos.Services
         }
         public static Action<bool, string> OnClientConnectionResponse
         {
-            get => Instance?.OnClientConnectionResponse_;
+            get => Instance ? Instance.OnClientConnectionResponse_ : null;
             set => Instance.OnClientConnectionResponse_ = value;
         }
 
@@ -192,7 +192,7 @@ namespace Arteranos.Services
         public static ConnectivityLevel GetConnectivityLevel() 
             => Instance.GetConnectivityLevel_();
         public static OnlineLevel GetOnlineLevel() 
-            => Instance?.GetOnlineLevel_() ?? OnlineLevel.Offline;
+            => Instance ? Instance.GetOnlineLevel_() : OnlineLevel.Offline;
         public static bool IsClientConnecting => Instance.IsClientConnecting_;
         public static bool IsClientConnected => Instance.IsClientConnected_;
         public static void StartClient(Uri connectionUri) 

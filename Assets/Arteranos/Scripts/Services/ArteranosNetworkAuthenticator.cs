@@ -544,7 +544,7 @@ namespace Arteranos.Services
         /// <param name="msg">The message payload</param>
         private void OnAuthResponseMessage(AuthResponseMessage encyptedMsg)
         {
-            Client.ReceiveMessage(encyptedMsg.Payload, out byte[] payloadBlob, out PublicKey signerPublicKey);
+            Client.ReceiveMessage(encyptedMsg.Payload, out byte[] payloadBlob, out _);
 
             using MemoryStream ms = new(payloadBlob);
             AuthResponsePayload msg = Serializer.Deserialize<AuthResponsePayload>(ms);

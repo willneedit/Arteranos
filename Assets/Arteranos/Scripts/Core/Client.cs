@@ -211,7 +211,7 @@ namespace Arteranos.Core
     public class UserSocialEntryJSON
     {
         // The user's friend (or blocked) state
-        public ulong state { get; set; } = 0;
+        public ulong State { get; set; } = 0;
 
         // The user's Icon file CID, if available
         public Cid Icon { get; set; } = null;
@@ -431,7 +431,7 @@ namespace Arteranos.Core
 
             if(Me.SocialList.TryGetValue(userID, out UserSocialEntryJSON oldstate_))
             {
-                ulong oldstate = oldstate_.state;
+                ulong oldstate = oldstate_.State;
                 if (oldstate != state || oldstate != SocialState.None) dirty = true;
             }
             else if(state != SocialState.None) dirty = true;
@@ -441,7 +441,7 @@ namespace Arteranos.Core
                 if (state != SocialState.None)
                     Me.SocialList[userID] = new()
                     {
-                        state = state,
+                        State = state,
                         Icon = icon
                     };
                 else
@@ -472,13 +472,13 @@ namespace Arteranos.Core
                 ? Me.SocialList[userID]
                 : new()
                 {
-                    state = SocialState.None,
+                    State = SocialState.None,
                     Icon = null,
                 };
 
-            state_.state = modification(state_.state);
+            state_.State = modification(state_.State);
 
-            SaveSocialStates(userID, state_.state, state_.Icon);
+            SaveSocialStates(userID, state_.State, state_.Icon);
         }
 
 #endregion

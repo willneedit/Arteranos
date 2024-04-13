@@ -236,12 +236,12 @@ namespace Arteranos.Core
             if (icon == null) yield break;
 
             Stream stream = null;
-            yield return Utils.Async2Coroutine(IPFSService.ReadFile(icon), _stream => stream = _stream);
+            yield return Async2Coroutine(IPFSService.ReadFile(icon), _stream => stream = _stream);
 
             if (stream == null) yield break;
 
             using MemoryStream ms = new();
-            yield return Utils.CopyWithProgress(stream, ms);
+            yield return CopyWithProgress(stream, ms);
             callback?.Invoke(ms.ToArray());
         }
 

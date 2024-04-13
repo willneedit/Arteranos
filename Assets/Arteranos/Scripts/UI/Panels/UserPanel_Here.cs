@@ -30,7 +30,7 @@ namespace Arteranos.UI
 
                 list[user.UserID] = new()
                 {
-                    state = SocialState.None,
+                    State = SocialState.None,
                     Icon = null // No matter, it's delayed load in the UserListItem.
                 };
             }

@@ -108,7 +108,7 @@ namespace Arteranos.UI
             {
                 IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> q = SettingsManager.Client.GetSocialList(targetUserID);
                 
-                ulong currentState = q.Any() ? q.First().Value.state : SocialState.None;
+                ulong currentState = q.Any() ? q.First().Value.State : SocialState.None;
                 Icon = q.Any() ? q.First().Value.Icon : null;
 
                 bool friends = SocialState.IsFriendRequested(currentState);
@@ -224,7 +224,7 @@ namespace Arteranos.UI
                 return;
             }
 
-            SysMenu.CloseSysMenus();
+            SysMenuStatic.CloseSysMenus();
             TextMessageUIFactory.New(targetUser);
         }
     }
