@@ -51,7 +51,7 @@ namespace Arteranos.Core
         {
             new WorldInfo()._DBDelete(cid);
             // Remove the pin, too, just in case.
-            IPFSService.PinCid(cid, false);
+            _ = IPFSService.PinCid(cid, false);
         }
 
         public static IEnumerable<WorldInfo> DBList()
@@ -76,12 +76,12 @@ namespace Arteranos.Core
 
         public void Favourite()
         {
-            IPFSService.PinCid(WorldCid, true);
+            _ = IPFSService.PinCid(WorldCid, true);
         }
 
         public void Unfavourite()
         {
-            IPFSService.PinCid(WorldCid, false);
+            _ = IPFSService.PinCid(WorldCid, false);
         }
 
         public static Task<List<Cid>> ListFavourites()

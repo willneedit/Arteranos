@@ -436,6 +436,7 @@ namespace Arteranos.Avatar
         private void ReactReceivedSSE(CTCPUserState received)
         {
             UserID sender = received.sender;
+            IAvatarBrain senderB = NetworkStatus.GetOnlineUser(sender);
 
             LogDebug($"{(string) sender} updated social status to (his view) {received.state}");
 
@@ -443,10 +444,12 @@ namespace Arteranos.Avatar
             ulong state = SocialState.ReflectSocialState(received.state, GetSocialStateTo(sender));
 
             // Save, for now.
-            SettingsManager.Client.SaveSocialStates(sender, state);
+            if (senderB != null)
+                SettingsManager.Client.SaveSocialStates(sender, state, senderB.UserIcon);
+            else
+                SettingsManager.Client.SaveSocialStates(sender, state);
 
             // And take it the immediate effects, like blocking.
-            IAvatarBrain senderB = NetworkStatus.GetOnlineUser(sender);
             UpdateSSEffects(senderB, state);
         }
 
@@ -503,7 +506,7 @@ namespace Arteranos.Avatar
             // Maybe the intended receiver logged off while you tried to send a goodbye message.
             if (receiver == null) return;
 
-            SettingsManager.Client.SaveSocialStates(receiver.UserID, state);
+            SettingsManager.Client.SaveSocialStates(receiver.UserID, state, receiver.UserIcon);
 
             SendCTCPacket(receiver, new CTCPUserState()
             {

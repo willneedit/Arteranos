@@ -425,7 +425,7 @@ namespace Arteranos.Core
         // ---------------------------------------------------------------
         #region Social States
 
-        public void SaveSocialStates(UserID userID, ulong state, Cid icon = null)
+        public void SaveSocialStates(UserID userID, ulong state, Cid icon /* = null */)
         {
             bool dirty = false;
 
@@ -448,6 +448,15 @@ namespace Arteranos.Core
                     Me.SocialList.Remove(userID);
                 Save();
             }
+        }
+
+        public void SaveSocialStates(UserID userID, ulong state)
+        {
+            Cid icon = null;
+            if(Me.SocialList.TryGetValue(userID, out UserSocialEntryJSON oldstate_))
+                icon = oldstate_.Icon;
+
+            SaveSocialStates(userID, state, icon);
         }
 
         /// <summary>

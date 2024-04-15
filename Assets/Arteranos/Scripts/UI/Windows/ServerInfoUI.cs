@@ -71,9 +71,7 @@ namespace Arteranos.UI
 
                 lbl_AdminList.text = string.Join(", ", si.AdminNames);
 
-                byte[] data = null;
-                yield return Utils.DownloadDataCoroutine(si.ServerIcon, _data => data = _data);
-                yield return Utils.LoadImageCoroutine(data, _tex => img_Icon.texture = _tex);
+                yield return Utils.DownloadIconCoroutine(si.ServerIcon, _tex => img_Icon.texture = _tex);
 
                 lbl_World.text = si.CurrentWorldName;
             }

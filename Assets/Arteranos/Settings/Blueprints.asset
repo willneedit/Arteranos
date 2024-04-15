@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Blueprints
   m_EditorClassIdentifier: 
   EmojiSettings: {fileID: 11400000, guid: f8e2d71e1f04e3340b93a752046a7468, type: 2}
+  Unknown_Icon: {fileID: 2800000, guid: 0d9f045a1d139854e894205778ec2450, type: 3}
   AudioMixer: {fileID: 24100000, guid: 3fc5c597681705246b1a6a09aebb2f36, type: 2}
   Avatar_Loading_StandIn: {fileID: 3985354216906982376, guid: 67b69500f6853f9409549929b49e4dc2,
     type: 3}

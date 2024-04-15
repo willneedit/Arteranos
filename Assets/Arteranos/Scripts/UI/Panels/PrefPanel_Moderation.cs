@@ -141,7 +141,7 @@ namespace Arteranos.UI
             if (dirty && ss != null)
             {
                 ss.Save();
-                IPFSService.FlipServerDescription(true);
+                IPFSService.FlipServerDescription(true).Wait();
             }
             dirty = false;
         }

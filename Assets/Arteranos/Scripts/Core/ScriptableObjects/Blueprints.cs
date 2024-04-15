@@ -21,6 +21,8 @@ namespace Arteranos.Core
     {
         public EmojiSettings EmojiSettings;
 
+        public Texture2D Unknown_Icon;
+
         public AudioMixer AudioMixer;
 
         public GameObject Avatar_Loading_StandIn;

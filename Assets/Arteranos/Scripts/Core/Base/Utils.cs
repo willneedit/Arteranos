@@ -218,7 +218,11 @@ namespace Arteranos.Core
 
         public static IEnumerator LoadImageCoroutine(byte[] data, Action<Texture2D> callback)
         {
-            if (data == null || data.Length == 0) yield break;
+            if (data == null || data.Length == 0)
+            {
+                callback?.Invoke(null);
+                yield break;
+            }
 
             Texture2D tex = new(2, 2);
 
@@ -228,7 +232,7 @@ namespace Arteranos.Core
 
             if (!t.Result) Debug.LogWarning("LoadImageCoroutine() failed");
 
-            callback?.Invoke(tex);
+            callback?.Invoke(t.Result ? tex : null);
         }
 
         public static IEnumerator DownloadDataCoroutine(string icon, Action<byte[]> callback)
@@ -243,6 +247,20 @@ namespace Arteranos.Core
             using MemoryStream ms = new();
             yield return CopyWithProgress(stream, ms);
             callback?.Invoke(ms.ToArray());
+        }
+
+        public static IEnumerator DownloadIconCoroutine(string icon, Action<Texture2D> callback)
+        {
+            byte[] data = null;
+            Texture2D tex = null;
+
+            yield return DownloadDataCoroutine(icon, _data => data = _data);
+            yield return LoadImageCoroutine(data, _tex => tex = _tex);
+
+            if (tex == null)
+                tex = BP.I.Unknown_Icon;
+
+            callback?.Invoke(tex);
         }
 
         public static void ShowImage(Texture2D icon, Image image)
