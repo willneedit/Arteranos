@@ -321,18 +321,7 @@ namespace Arteranos.Services
                     // Add the server settings and the signature of the client's public key.
                     // IMPORTANT: Need type ServerJSON, because inherited types make
                     // ProtoBuf choke on them.
-                    ServerSettings = new ServerJSON()
-                    {
-                        Name = SettingsManager.Server.Name,
-                        Description = SettingsManager.Server.Description,
-                        MetadataPort = SettingsManager.Server.MetadataPort,
-                        Permissions = SettingsManager.Server.Permissions,
-                        Public = SettingsManager.Server.Public,
-                        ServerAgrPublicKey = SettingsManager.Server.ServerAgrPublicKey,
-                        ServerIcon = SettingsManager.Server.ServerIcon,
-                        ServerPort = SettingsManager.Server.ServerPort,
-                        ServerSignPublicKey = SettingsManager.Server.ServerSignPublicKey,
-                    }
+                    ServerSettings = new ServerJSON(SettingsManager.Server)
                 };
 
                 ServerUserState query = new()

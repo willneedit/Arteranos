@@ -23,6 +23,7 @@ namespace Arteranos.Core
     [ProtoInclude(65538, typeof(CTSPWorldChangeAnnouncement))]
     [ProtoInclude(65539, typeof(STCUserInfo))]
     [ProtoInclude(65540, typeof(CTSMessage))]
+    [ProtoInclude(65541, typeof(CTSServerConfig))]
     public class CTSPacket
     {
         [ProtoMember(1)]
@@ -77,9 +78,20 @@ namespace Arteranos.Core
     }
 
     // S: Dialog message
+    [ProtoContract]
     public class CTSMessage : CTSPacket
     {
         [ProtoMember(1)]
         public string message;
+    }
+
+    // S: Server configuration update
+    // C: Server configuration info
+
+    [ProtoContract]
+    public class CTSServerConfig : CTSPacket
+    {
+        [ProtoMember(1)]
+        public ServerJSON config;
     }
 }

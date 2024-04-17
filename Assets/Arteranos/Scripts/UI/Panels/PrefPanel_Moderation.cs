@@ -14,6 +14,7 @@ using System.IO;
 using Arteranos.Services;
 using System.Collections;
 using Ipfs;
+using System;
 
 namespace Arteranos.UI
 {
@@ -37,7 +38,8 @@ namespace Arteranos.UI
 
         public Button btn_ClearCaches = null;
 
-        private Server ss = null;
+        private Cid ServerIcon = null;
+        private ServerPermissions Permissions = null;
 
         private bool dirty = false;
 
@@ -74,7 +76,7 @@ namespace Arteranos.UI
             {
                 using MemoryStream ms = new(obj);
                 ms.Position = 0;
-                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => ss.ServerIcon = _fsn.Id);
+                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => ServerIcon = _fsn.Id);
 
                 dirty = true;
             }
@@ -94,15 +96,27 @@ namespace Arteranos.UI
 
         protected override void OnEnable()
         {
+            base.OnEnable();
+
+            SettingsManager.OnClientReceivedServerConfigAnswer += UpdateServerConfigDisplay;
+
+            // Send the query.
+            SettingsManager.EmitToServerCTSPacket(new CTSServerConfig()
+            {
+                config = null
+            });
+        }
+
+        private void UpdateServerConfigDisplay(ServerJSON ss)
+        {
             IEnumerator DownloadIcon(Cid icon)
             {
                 yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data);
                 bar_IconSelector.TriggerUpdate();
             }
 
-            base.OnEnable();
-
-            ss = SettingsManager.Server;
+            ServerIcon = ss.ServerIcon;
+            Permissions = ss.Permissions;
 
             txt_ServerPort.text = ss.ServerPort.ToString();
             txt_MetdadataPort.text = ss.MetadataPort.ToString();
@@ -116,7 +130,6 @@ namespace Arteranos.UI
 
             StartCoroutine(DownloadIcon(ss.ServerIcon));
 
-            // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
         }
 
@@ -124,26 +137,28 @@ namespace Arteranos.UI
         {
             base.OnDisable();
 
-            if(ss != null)
-            {
-                ss.ServerPort = int.Parse(txt_ServerPort.text);
-                ss.MetadataPort = int.Parse(txt_MetdadataPort.text);
+            SettingsManager.OnClientReceivedServerConfigAnswer -= UpdateServerConfigDisplay;
 
-                ss.Name = txt_ServerName.text;
-                ss.Description = txt_Description.text;
-
-                ss.Permissions.Flying = chk_Flying.isOn;
-
-                ss.Public = chk_Public.isOn;
-            }
-
-            // Might be to disabled before it's really started, so cs may be null yet.
-            if (dirty && ss != null)
-            {
-                ss.Save();
-                IPFSService.FlipServerDescription(true).Wait();
-            }
+            if (!dirty) return;
             dirty = false;
+
+            ServerJSON ss = new();
+
+            ss.ServerIcon = ServerIcon;
+            ss.Permissions = Permissions;
+
+            ss.ServerPort = int.Parse(txt_ServerPort.text);
+            ss.MetadataPort = int.Parse(txt_MetdadataPort.text);
+
+            ss.Name = txt_ServerName.text;
+            ss.Description = txt_Description.text;
+
+            ss.Permissions.Flying = chk_Flying.isOn;
+
+            ss.Public = chk_Public.isOn;
+
+            // Send off the updated config to the server
+            SettingsManager.EmitToServerCTSPacket(new CTSServerConfig() { config = ss });
         }
 
         private void OnWorldGalleryClicked()
@@ -159,10 +174,9 @@ namespace Arteranos.UI
 
             ContentFilterUI cui = ContentFilterUI.New();
 
-            cui.spj = SettingsManager.Server.Permissions;
+            cui.spj = Permissions;
 
-            cui.OnFinishConfiguring +=
-                () => SettingsManager.Server?.Save();
+            cui.OnFinishConfiguring += () => dirty = true;
         }
 
         private void OnClearCachesClicked()

@@ -530,6 +530,8 @@ namespace Arteranos.Services
                 _ = ServerUpdateUserState(sender, uss);
             else if (packet is STCUserInfo userInfoQuery)
                 _ = ServerQueryUserState(sender, userInfoQuery);
+            else if (packet is CTSServerConfig serverConfig)
+                ServerUpdateServerConfiguration(sender, serverConfig);
             else
                 throw new NotImplementedException();
         }
@@ -545,6 +547,8 @@ namespace Arteranos.Services
                 _ = ClientInformUpdatedUserState(uss);
             else if (packet is STCUserInfo userInfo)
                 _ = ClientQueryUserState(userInfo);
+            else if (packet is CTSServerConfig serverConfig)
+                ClientGotServerConfiguration(serverConfig);
             else
                 throw new NotImplementedException();
         }
@@ -870,6 +874,52 @@ namespace Arteranos.Services
             // to bounce the results to.
             OnClientReceivedServerUserStateAnswer?.Invoke(userInfo.UserID, userInfo.State);
             return Task.CompletedTask;
+        }
+        #endregion
+        // ---------------------------------------------------------------
+        #region Server configuration (all)
+        private void ServerUpdateServerConfiguration(UserID invoker, CTSServerConfig serverConfig) 
+        {
+            serverConfig.invoker = invoker;
+            IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+
+            if (NetworkServer.active)
+            {
+                // User tries to write the config
+                if (!Core.Utils.IsAbleTo(sender, UserCapabilities.CanEditServer, null)
+                    && serverConfig.config != null)
+                    return;
+            }
+
+            if(serverConfig.config != null)
+            {
+                // Save and propagate the changed settings
+                ServerJSON conf = serverConfig.config;
+                Server ss = SettingsManager.Server;
+
+                ss.ServerPort = conf.ServerPort;
+                ss.MetadataPort = conf.MetadataPort;
+                ss.Name = conf.Name;
+                ss.Description = conf.Description;
+                ss.Permissions = conf.Permissions;
+                ss.Public = conf.Public;
+
+                ss.Save();
+                _ = IPFSService.FlipServerDescription(true);
+            }
+            else
+                // Report the current server's settings
+                serverConfig.config = new(SettingsManager.Server);
+
+            // Regardless, send ack with the updated config
+            EmitToClientCTSPacket(serverConfig, sender);
+        }
+
+        public event Action<ServerJSON> OnClientReceivedServerConfigAnswer = null;
+
+        private void ClientGotServerConfiguration(CTSServerConfig serverConfig)
+        {
+            OnClientReceivedServerConfigAnswer?.Invoke(serverConfig.config);
         }
         #endregion
     }

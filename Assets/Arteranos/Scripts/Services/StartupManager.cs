@@ -121,6 +121,12 @@ namespace Arteranos.Services
             add => ArteranosNetworkManager.Instance.OnClientReceivedServerUserStateAnswer += value;
             remove { if (ArteranosNetworkManager.Instance != null) ArteranosNetworkManager.Instance.OnClientReceivedServerUserStateAnswer -= value; }
         }
+
+        protected override event Action<ServerJSON> OnClientReceivedServerConfigAnswer_
+        {
+            add => ArteranosNetworkManager.Instance.OnClientReceivedServerConfigAnswer += value;
+            remove { if (ArteranosNetworkManager.Instance != null) ArteranosNetworkManager.Instance.OnClientReceivedServerConfigAnswer -= value;  }
+        }
     }
 }
 

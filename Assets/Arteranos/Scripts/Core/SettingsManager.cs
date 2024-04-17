@@ -135,7 +135,8 @@ namespace Arteranos.Core
         protected abstract void EmitToServerCTSPacket_(CTSPacket packet);
 
         protected abstract event Action<UserID, ServerUserState> OnClientReceivedServerUserStateAnswer_;
-            
+        protected abstract event Action<ServerJSON> OnClientReceivedServerConfigAnswer_;
+
         public static void StartCoroutineAsync(Func<IEnumerator> action)
             => Instance?.StartCoroutineAsync_(action);
         public static void EmitToClientCTSPacket(CTSPacket packet, IAvatarBrain to = null)
@@ -157,6 +158,12 @@ namespace Arteranos.Core
         {
             add => Instance.OnClientReceivedServerUserStateAnswer_ += value;
             remove { if (Instance != null) Instance.OnClientReceivedServerUserStateAnswer_ -= value; }
+        }
+
+        public static event Action<ServerJSON> OnClientReceivedServerConfigAnswer
+        {
+            add => Instance.OnClientReceivedServerConfigAnswer_ += value;
+            remove {  if (Instance != null) Instance.OnClientReceivedServerConfigAnswer_ -= value; }
         }
     }
 }

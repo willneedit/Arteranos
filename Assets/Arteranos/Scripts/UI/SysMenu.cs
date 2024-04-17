@@ -53,20 +53,6 @@ namespace Arteranos.UI
             ChoiceBook choiceBook = sysmenu.GetComponentInChildren<ChoiceBook>(true);
 
             choiceBook.gameObject.SetActive(true);
-
-            // For now, restricting working on the remote server.
-            if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
-                RestrictRemoteServerConfig(choiceBook);
-
-        }
-
-        private static void RestrictRemoteServerConfig(ChoiceBook choiceBook)
-        {
-            int found = -1;
-            for (int i = 0; i < choiceBook.ChoiceEntries.Length; i++)
-                if (choiceBook.ChoiceEntries[i].name == "Moderation") found = i;
-
-            choiceBook.SetPageActive(found, false);
         }
 
         public override void CloseSysMenus_()

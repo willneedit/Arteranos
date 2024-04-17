@@ -58,6 +58,21 @@ namespace Arteranos.Core
         [JsonIgnore]
         [ProtoMember(9)]
         public PublicKey ServerAgrPublicKey = null;
+
+        public ServerJSON() { }
+
+        public ServerJSON(ServerJSON other)
+        {
+            Name = other.Name;
+            Description = other.Description;
+            MetadataPort = other.MetadataPort;
+            Permissions = other.Permissions;
+            Public = other.Public;
+            ServerAgrPublicKey = other.ServerAgrPublicKey;
+            ServerIcon = other.ServerIcon;
+            ServerPort = other.ServerPort;
+            ServerSignPublicKey = other.ServerSignPublicKey;
+        }
     }
 
     public class Server : ServerJSON
