@@ -655,8 +655,8 @@ namespace Arteranos.Avatar
                 // Edit server's user base (server admins and its deputies)
                 UserCapabilities.CanAdminServerUsers => Core.UserState.IsSAdmin(UserState),
 
-                // Edit server configuration itself (only true server admins)
-                UserCapabilities.CanEditServer => Bit64field.IsAny(UserState, Core.UserState.Srv_admin),
+                // Edit server configuration itself (server admins and its deputies)
+                UserCapabilities.CanEditServer => Core.UserState.IsSAdmin(UserState),
 
                 // Admins can view user IDs, even if the users don't want to.
                 // Especially for the risk of user impersonation
