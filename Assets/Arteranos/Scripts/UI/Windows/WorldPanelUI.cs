@@ -48,9 +48,6 @@ namespace Arteranos.UI
 
         private string pageCountPattern = null;
 
-        private Client cs = null;
-
-        private readonly List<ServerInfo> serverInfos = new();
         private readonly ConcurrentDictionary<Cid, Collection> worldlist = new();
         private readonly List<Cid> sortedWorldList = new();
         private Mutex DictMutex = null;
@@ -105,8 +102,6 @@ namespace Arteranos.UI
             }
 
             base.Start();
-
-            cs = SettingsManager.Client;
 
             lbl_PageCount.text = "Loading...";
 

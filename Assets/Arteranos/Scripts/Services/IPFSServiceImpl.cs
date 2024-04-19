@@ -33,6 +33,7 @@ namespace Arteranos.Services
         public override Peer Self_ { get => self; }
         public override SignKey ServerKeyPair_ { get => serverKeyPair; }
         public override Cid IdentifyCid_ { get; protected set; }
+        public override Cid CurrentSDCid_ { get; protected set; } = null;
 
         public static string CachedPTOSNotice { get; private set; } = null;
 
@@ -58,7 +59,6 @@ namespace Arteranos.Services
         private string minVersionString = null;
 
         ServerDescription sd = null;
-        private Cid currentSDCid = null;
 
         private CancellationTokenSource cts = null;
 
@@ -265,8 +265,8 @@ namespace Arteranos.Services
 
         public override async Task FlipServerDescription_(bool reload)
         {
-            if(currentSDCid != null)
-                await Ipfs_.Block.RemoveAsync(currentSDCid);
+            if(CurrentSDCid_ != null)
+                await Ipfs_.Block.RemoveAsync(CurrentSDCid_);
 
             if (!reload) return;
 
@@ -296,7 +296,7 @@ namespace Arteranos.Services
             sd.Serialize(serverKeyPair, ms);
             ms.Position = 0;
             var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerDescription");
-            currentSDCid = fsn.Id;
+            CurrentSDCid_ = fsn.Id;
         }
 
         public override Task SendServerOnlineData_()
@@ -309,7 +309,7 @@ namespace Arteranos.Services
             {
                 CurrentWorldCid = SettingsManager.WorldCid,
                 CurrentWorldName = SettingsManager.WorldName,
-                ServerDescriptionCid = currentSDCid,
+                ServerDescriptionCid = CurrentSDCid_,
                 UserFingerprints = UserFingerprints,
                 LastOnline = last,
                 OnlineLevel = NetworkStatus.GetOnlineLevel()
@@ -326,7 +326,7 @@ namespace Arteranos.Services
         {
             ServerHello.SDLink selflink = new()
             {
-                ServerDescriptionCid = currentSDCid,
+                ServerDescriptionCid = CurrentSDCid_,
                 LastModified = SettingsManager.Server.ConfigTimestamp,
                 PeerID = self.Id.ToString(),
             };

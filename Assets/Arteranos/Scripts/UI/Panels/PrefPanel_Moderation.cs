@@ -15,6 +15,10 @@ using Arteranos.Services;
 using System.Collections;
 using Ipfs;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine;
+using System.Linq;
 
 namespace Arteranos.UI
 {
@@ -142,20 +146,18 @@ namespace Arteranos.UI
             if (!dirty) return;
             dirty = false;
 
-            ServerJSON ss = new();
-
-            ss.ServerIcon = ServerIcon;
-            ss.Permissions = Permissions;
-
-            ss.ServerPort = int.Parse(txt_ServerPort.text);
-            ss.MetadataPort = int.Parse(txt_MetdadataPort.text);
-
-            ss.Name = txt_ServerName.text;
-            ss.Description = txt_Description.text;
+            ServerJSON ss = new()
+            {
+                ServerIcon = ServerIcon,
+                Permissions = Permissions,
+                ServerPort = int.Parse(txt_ServerPort.text),
+                MetadataPort = int.Parse(txt_MetdadataPort.text),
+                Name = txt_ServerName.text,
+                Description = txt_Description.text,
+                Public = chk_Public.isOn,
+            };
 
             ss.Permissions.Flying = chk_Flying.isOn;
-
-            ss.Public = chk_Public.isOn;
 
             // Send off the updated config to the server
             SettingsManager.EmitToServerCTSPacket(new CTSServerConfig() { config = ss });
@@ -181,8 +183,81 @@ namespace Arteranos.UI
 
         private void OnClearCachesClicked()
         {
-            if(Directory.Exists(Utils.WorldCacheRootDir))
-                Directory.Delete(Utils.WorldCacheRootDir, true);
+            async Task SetPin(Cid toPin, bool state)
+            {
+                try
+                {
+                    await IPFSService.PinCid(toPin, state);
+                }
+                catch { }
+            }
+
+            IEnumerator ClearCacheCoroutine()
+            {
+                btn_ClearCaches.interactable = false;
+
+                HashSet<string> toPin = new();
+
+                // Favourited worlds
+                List<Cid> pinned = null;
+                yield return Utils.Async2Coroutine(WorldInfo.ListFavourites(), _pinned => pinned = _pinned);
+
+                int favouritedWorlds = 0;
+                foreach (WorldInfo wi in WorldInfo.DBList())
+                {
+                    if (pinned.Contains(wi.WorldCid))
+                    {
+                        favouritedWorlds++;
+                        toPin.Add(wi.WorldCid);
+                    }
+                }
+
+                // User and server icons
+                toPin.Add(SettingsManager.Client.Me.UserIconCid);
+                toPin.Add(SettingsManager.Server.ServerIcon);
+
+                // Current avatar
+                toPin.Add(SettingsManager.Client.Me.CurrentAvatar.AvatarCidString);
+
+                // Stored avatars
+                int storedAvatars = 0;
+                foreach(AvatarDescriptionJSON entry in SettingsManager.Client.Me.AvatarGallery)
+                {
+                    storedAvatars++;
+                    toPin.Add(entry.AvatarCidString);
+                }
+
+                // Identification file and current server description
+                toPin.Add(IPFSService.IdentifyCid);
+                toPin.Add(IPFSService.CurrentSDCid);
+
+                // Eat up any empty entries
+                toPin.Remove(null);
+
+                Debug.Log($"Total needs pinning: {toPin.Count}, out of {favouritedWorlds} worlds and {storedAvatars} stored avatars");
+
+                yield return Utils.Async2Coroutine(IPFSService.ListPinned(), _pinned => pinned = _pinned.ToList());
+
+                Debug.Log($"Actual pinned: {pinned.Count}");
+
+                // Unpin everything we don't want
+                foreach (Cid entry in pinned)
+                {
+                    if(!toPin.Contains(entry))
+                        yield return Utils.Async2Coroutine(SetPin(entry, false));
+                }
+
+                // Pin (or, re-pin) everything we need, even if they're not (yet) pinned
+                foreach(string entry in toPin)
+                    yield return Utils.Async2Coroutine(SetPin(entry, true));
+
+                // And, scrub...
+                yield return Utils.Async2Coroutine(IPFSService.RemoveGarbage());
+
+                btn_ClearCaches.interactable = true;
+            }
+
+            StartCoroutine(ClearCacheCoroutine());
         }
     }
 }

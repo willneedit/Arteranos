@@ -291,6 +291,7 @@ namespace Arteranos.Services
         public abstract Peer Self_ { get; }
         public abstract SignKey ServerKeyPair_ { get; }
         public abstract Cid IdentifyCid_ { get; protected set; }
+        public abstract Cid CurrentSDCid_ { get; protected set; }
 
         public abstract event Action<IPublishedMessage> OnReceivedHello_;
         public abstract event Action<IPublishedMessage> OnReceivedServerDirectMessage_;
@@ -312,6 +313,9 @@ namespace Arteranos.Services
             => ServerKeyPair.PublicKey;
         public static Cid IdentifyCid
             => Instance.IdentifyCid_;
+        public static Cid CurrentSDCid
+            => Instance.CurrentSDCid_;
+
         public static async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
             => await Instance.GetPeerIPAddress_(PeerID, token);
         public static async Task FlipServerDescription(bool reload)
@@ -337,6 +341,8 @@ namespace Arteranos.Services
             => await Instance.Ipfs_.FileSystem.ListFileAsync(path, cancel);
         public static async Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
             => await Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel);
+        public static async Task RemoveGarbage(CancellationToken cancel = default)
+            => await Instance.Ipfs_.BlockRepository.RemoveGarbageAsync(cancel);
 
         public static MultiAddress GetMultiAddress(IPAddress addr, int port, MultiHash peer_id)
         {
