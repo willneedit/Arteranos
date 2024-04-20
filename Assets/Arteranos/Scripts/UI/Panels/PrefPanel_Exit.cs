@@ -18,7 +18,6 @@ namespace Arteranos.UI
     public class PrefPanel_Exit : UIBehaviour
     {
         public Toggle chk_DesiredVRMode = null;
-        public Button btn_LoginUI = null;
         public Button btn_Exit = null;
 
         private Client cs = null;
@@ -29,7 +28,6 @@ namespace Arteranos.UI
             base.Awake();
 
             chk_DesiredVRMode.onValueChanged.AddListener(OnModeSwitchClick);
-            btn_LoginUI.onClick.AddListener(OnLoginUIClick);
             btn_Exit.onClick.AddListener(OnExitClick);
         }
 
@@ -59,17 +57,6 @@ namespace Arteranos.UI
         {
             cs.DesiredVRMode = isOn;
             dirty = true;
-        }
-
-        private async void OnLoginUIClick()
-        {
-            btn_LoginUI.interactable = false;
-            LoginUI go = LoginUI.New();
-            go.CancelEnabled = true;
-
-            await go.PerformLoginAsync();
-
-            btn_LoginUI.interactable = true;
         }
 
         private async void OnExitClick()

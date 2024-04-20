@@ -113,22 +113,6 @@ namespace Arteranos.Core
         public byte[] PrivacyTOSHash;
     }
 
-    public class LoginDataJSON
-    {
-        // The login provider the user logs in to
-        public virtual string LoginProvider { get; set; } = null;
-
-        // The bearer token bestowed during the last login. May use to verify unknown user's details
-        public virtual string LoginToken { get; set; } = null;
-
-        // The user name of the user, valid only for the selected login provider
-        // Has a random name if it's a guest.
-        public virtual string Username { get; set; } = null;
-
-        [JsonIgnore]
-        public bool IsGuest => string.IsNullOrEmpty(LoginProvider);
-    }
-
     public class AvatarDescriptionJSON : IEquatable<AvatarDescriptionJSON>
     {
         // Avatar designator, valid only for the selected avatar provider
@@ -227,9 +211,6 @@ namespace Arteranos.Core
 
         // The user's 2D Icon.
         public virtual Cid UserIconCid { get; set; } = null;
-
-        // The user's login data
-        public virtual LoginDataJSON Login { get; set; } = new();
 
         // Current avatar
         public virtual AvatarDescriptionJSON CurrentAvatar { get; set; } = new() 
@@ -494,27 +475,6 @@ namespace Arteranos.Core
         // ---------------------------------------------------------------
         #region Save & Load
 
-        public bool RefreshAuthentication()
-        {
-            bool dirty = false;
-
-            LoginDataJSON l = Me.Login;
-
-            if(l.LoginProvider == null)
-            {
-                int rnd = UnityEngine.Random.Range(100000000, 999999999);
-                l.Username = $"Guest{rnd}";
-
-                if(l.LoginToken != null)
-                {
-                    l.LoginToken = null;
-                    dirty = true;
-                }
-            }
-
-            return dirty;
-        }
-
         public void Save()
         {
             try
@@ -557,11 +517,6 @@ namespace Arteranos.Core
                     userKey = SignKey.ImportPrivateKey(cs.Me.UserSignKeyPair);
 
                 cs.CMH = new(userKey);
-
-                // Postprocessing to generate the derived values
-                if(cs.RefreshAuthentication())
-                    // Save the settings back if the randomized guest login occurs and the login token is deleted.
-                    cs.Save();
             }
 
             return cs;
