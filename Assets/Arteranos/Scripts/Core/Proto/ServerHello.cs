@@ -12,7 +12,7 @@ using ProtoBuf;
 
 namespace Arteranos.Core
 {
-
+#if USE_SERVER_HELLO
     [ProtoContract]
     public partial class ServerHello : PeerMessage
     {
@@ -35,4 +35,5 @@ namespace Arteranos.Core
         public override void Serialize(Stream stream) 
             => Serializer.Serialize(stream, this);
     }
+#endif
 }

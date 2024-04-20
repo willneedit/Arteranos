@@ -59,6 +59,9 @@ namespace Arteranos.Core
         [ProtoMember(9)]
         public PublicKey ServerAgrPublicKey = null;
 
+        [ProtoMember(10)]
+        public DateTime ConfigLastChanged = DateTime.MinValue;
+
         public ServerJSON() { }
 
         public ServerJSON(ServerJSON other)
@@ -72,14 +75,12 @@ namespace Arteranos.Core
             ServerIcon = other.ServerIcon;
             ServerPort = other.ServerPort;
             ServerSignPublicKey = other.ServerSignPublicKey;
+            ConfigLastChanged = other.ConfigLastChanged;
         }
     }
 
     public class Server : ServerJSON
     {
-        [JsonIgnore]
-        public DateTime ConfigTimestamp { get; private set; }
-
         [JsonIgnore]
         private CryptoMessageHandler CMH = null;
 
@@ -90,10 +91,9 @@ namespace Arteranos.Core
         {
             try
             {
+                ConfigLastChanged = DateTime.Now;
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
                 FileUtils.WriteTextConfig(PATH_SERVER_SETTINGS, json);
-
-                ConfigTimestamp = DateTime.Now;
             }
             catch (Exception e)
             {
@@ -118,12 +118,12 @@ namespace Arteranos.Core
                     ss.Name += " DS";
                 }
 
-                ss.ConfigTimestamp = FileUtils.ReadConfig(PATH_SERVER_SETTINGS, File.GetLastWriteTime);
+                FileUtils.ReadConfig(PATH_SERVER_SETTINGS, File.GetLastWriteTime);
             }
             catch (Exception e)
             {
                 Debug.LogWarning($"Failed to load server settings: {e.Message}");
-                ss = new() { ConfigTimestamp = DateTime.UnixEpoch };
+                ss = new();
             }
 
             return ss;

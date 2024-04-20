@@ -11,7 +11,9 @@ using ProtoBuf;
 namespace Arteranos.Core
 {
     [ProtoContract]
+#if USE_SERVER_HELLO
     [ProtoInclude(65537, typeof(ServerHello))]
+#endif
     [ProtoInclude(65538, typeof(ServerOnlineData))]
     public class PeerMessage
     {

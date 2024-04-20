@@ -56,7 +56,6 @@ namespace Arteranos.Services
         private DateTime last = DateTime.MinValue;
 
         private string versionString = null;
-        private string minVersionString = null;
 
         ServerDescription sd = null;
 
@@ -86,7 +85,6 @@ namespace Arteranos.Services
             CachedPTOSNotice = FileUtils.ReadTextConfig(PATH_USER_PRIVACY_NOTICE);
 
             versionString = Core.Version.Load().MMP;
-            minVersionString = Core.Version.VERSION_MIN;
 
             int port = SettingsManager.Server.MetadataPort;
 
@@ -283,12 +281,12 @@ namespace Arteranos.Services
                 Description = server.Description,
                 ServerIcon = server.ServerIcon,
                 Version = versionString,
-                MinVersion = minVersionString,
+                MinVersion = Core.Version.VERSION_MIN,
                 Permissions = server.Permissions,
                 PrivacyTOSNotice = CachedPTOSNotice,
                 AdminNames = q.ToArray(),
                 PeerID = self.Id.ToString(),
-                LastModified = server.ConfigTimestamp,
+                LastModified = server.ConfigLastChanged,
                 ServerDescriptionCid = null // Self-reference will be generated AFTER putting it to IPFS
             };
 
@@ -324,10 +322,11 @@ namespace Arteranos.Services
 
         public override Task SendServerHello_()
         {
+#if USE_SERVER_HELLO
             ServerHello.SDLink selflink = new()
             {
                 ServerDescriptionCid = CurrentSDCid_,
-                LastModified = SettingsManager.Server.ConfigTimestamp,
+                LastModified = SettingsManager.Server.ConfigLastChanged,
                 PeerID = self.Id.ToString(),
             };
 
@@ -343,6 +342,9 @@ namespace Arteranos.Services
             hello.Serialize(ms);
             ms.Position = 0;
             return ipfs.PubSub.PublishAsync(topic_hello, ms);
+#else
+            return Task.CompletedTask;
+#endif
         }
 
         public override Task SendServerDirectMessage_(string peerId, PeerMessage message)
@@ -360,10 +362,12 @@ namespace Arteranos.Services
             try
             {
                 PeerMessage peerMessage = PeerMessage.Deserialize(publishedMessage.DataStream);
-
+#if USE_SERVER_HELLO
                 if (peerMessage is ServerHello sh)
                     return ParseServerHelloAsync(sh);
-                else if (peerMessage is ServerOnlineData sod)
+                else 
+#endif
+                if (peerMessage is ServerOnlineData sod)
                     return ParseServerOnlineData(sod, publishedMessage.Sender);
                 else
                     throw new ArgumentException($"Unknown message from Peer {publishedMessage.Sender.Id}");
@@ -375,6 +379,7 @@ namespace Arteranos.Services
             }
         }
 
+#if USE_SERVER_HELLO
         private async Task<bool> ParseServerHelloAsync(ServerHello hello)
         {
             int enteredCount = 20;
@@ -411,6 +416,7 @@ namespace Arteranos.Services
 
             return true;
         }
+#endif
 
         private async Task<bool> ParseServerOnlineData(ServerOnlineData sod, Peer SenderPeer)
         {
@@ -481,7 +487,7 @@ namespace Arteranos.Services
                 await ipfs.Swarm.ConnectAsync(found.Addresses.First(), cts.Token);
             }
         }
-        #endregion
+#endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface
         public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)
