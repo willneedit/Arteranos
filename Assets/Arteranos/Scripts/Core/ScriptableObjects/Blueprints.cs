@@ -45,7 +45,6 @@ namespace Arteranos.Core
             public GameObject AddAvatar;
             public GameObject ContentFilter;
             public GameObject LicenseText;
-            public GameObject Login;
             public GameObject ServerInfo;
             public GameObject ServerList;
             public GameObject ServerUserList;
