@@ -235,12 +235,12 @@ namespace Arteranos.Core
             callback?.Invoke(t.Result ? tex : null);
         }
 
-        public static IEnumerator DownloadDataCoroutine(string icon, Action<byte[]> callback)
+        public static IEnumerator DownloadDataCoroutine(string dataPath, Action<byte[]> callback, CancellationToken cancel = default)
         {
-            if (icon == null) yield break;
+            if (dataPath == null) yield break;
 
             Stream stream = null;
-            yield return Async2Coroutine(IPFSService.ReadFile(icon), _stream => stream = _stream);
+            yield return Async2Coroutine(IPFSService.ReadFile(dataPath, cancel), _stream => stream = _stream);
 
             if (stream == null) yield break;
 
@@ -254,7 +254,9 @@ namespace Arteranos.Core
             byte[] data = null;
             Texture2D tex = null;
 
-            yield return DownloadDataCoroutine(icon, _data => data = _data);
+            using CancellationTokenSource cts = new(5000);
+
+            yield return DownloadDataCoroutine(icon, _data => data = _data, cts.Token);
             yield return LoadImageCoroutine(data, _tex => tex = _tex);
 
             if (tex == null)
@@ -360,7 +362,9 @@ namespace Arteranos.Core
         public static IEnumerator Async2Coroutine<T>(Task<T> taskActionResult, Action<T> callback = null)
         {
             yield return new WaitUntil(() => taskActionResult.IsCompleted);
-            callback?.Invoke(taskActionResult.Result);
+
+            if(taskActionResult.IsCompletedSuccessfully)
+                callback?.Invoke(taskActionResult.Result);
         }
 
         public static IEnumerator Async2Coroutine(Task taskActionResult)
