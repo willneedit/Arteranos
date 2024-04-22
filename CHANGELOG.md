@@ -1,3 +1,38 @@
+# Version 2.0.0
+
+## New Features
+
+- **Peer-to-peer data handling of avatars and worlds**
+  - No need to host files externally to show your creation
+- **Custom avatar uploading**
+  - Download a (RPM) avatar .glb file, **modify as you like**, and use it in Arteranos.
+- User icons
+  - 2D icons in the friend list to make users more distinguishable
+- Improved world hosting
+  - Build your world as ZIP file, **keep it in your PC**, start the server or host mode, and let it change the current world to your creation.
+- Full IPv6 support
+  - Curious. Even AAA MMO's still connectto their servers via IPv4....
+  - No need for NAT, port forwarding, and such hassles... Well, only if your ISP is up to date.
+- Remote server administration
+  - Better way to handle the dedicated server. Or to let your good(!) friend handle your server.
+
+
+# Fixes and improvements
+
+- Ready Player Me integration removed
+  - Too brittle, stopped working too often, now requiring registration to make it work at all.
+  - -> Just see in 'New Features'... :)
+- Metadata microserver removed
+  - Grew up into IPFS.
+- Third party login removed
+  - **Unneccessary**, with the passkey authentication.
+- Transition scene in world change
+  - Better progress indication. Server discovery, server connection, world downloading.
+- Improved avatar pose and animation handling
+- Keyboard/Mouse movement improvement: WASD+QE (turning/strafing)
+- **Many internal upgrades**
+  - ... And I mean, _many_. The migration to the peer-to-peer data management took me A LOT. Worlds, Avatars, Icons, Server data, User data... like, everything.
+
 # Version 1.4.0
 
 ## New Features
