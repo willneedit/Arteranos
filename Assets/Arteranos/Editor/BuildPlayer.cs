@@ -102,7 +102,7 @@ namespace Arteranos
             GetProjectGitVersion();
 
             Core.Version v = Core.Version.Load();
-            Debug.Log($"Version detected: {v.Full}");
+            Debug.Log($"Version detected: Full={v.Full}, M.M.P={v.MMP}");
 
             UpdateLicenseFiles();
         }
