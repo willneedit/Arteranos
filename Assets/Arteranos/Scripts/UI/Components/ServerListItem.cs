@@ -33,6 +33,8 @@ namespace Arteranos.UI
 
         private ServerInfo si = null;
 
+        private bool inProgress = false;
+
         public static ServerListItem New(Transform parent, string PeerID)
         {
             GameObject go = Instantiate(BP.I.UIComponents.ServerListItem);
@@ -70,6 +72,14 @@ namespace Arteranos.UI
 
         public void PopulateServerData()
         {
+            if(inProgress)
+            {
+                Debug.Log($"{lbl_Caption.text} already in progress, skipping");
+                return;
+            }
+
+            inProgress = true;
+
             // Could be that the list item bas been deleted in th meantime.
             // Or, the entire list.
             if(btn_Add == null) return;
@@ -117,6 +127,8 @@ namespace Arteranos.UI
         private IEnumerator VisualizeServerData()
         {
             yield return Utils.DownloadIconCoroutine(si.ServerIcon, _tex => img_Icon.texture = _tex);
+
+            inProgress = false;
 
             if(!si.IsOnline)
             {

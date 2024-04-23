@@ -21,6 +21,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Collections;
 using Arteranos.Services;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 namespace Arteranos.Core
 {
@@ -240,12 +242,18 @@ namespace Arteranos.Core
             if (dataPath == null) yield break;
 
             Stream stream = null;
+            // Stopwatch sw = Stopwatch.StartNew();
             yield return Async2Coroutine(IPFSService.ReadFile(dataPath, cancel), _stream => stream = _stream);
+            // Debug.Log($"ReadFile took {sw.ElapsedMilliseconds} ms");
+
 
             if (stream == null) yield break;
 
             using MemoryStream ms = new();
+            // sw.Restart();
             yield return CopyWithProgress(stream, ms);
+            // Debug.Log($"CopyWithProgress took {sw.ElapsedMilliseconds} ms");
+
             callback?.Invoke(ms.ToArray());
         }
 
