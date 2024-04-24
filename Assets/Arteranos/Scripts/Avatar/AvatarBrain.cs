@@ -145,8 +145,8 @@ namespace Arteranos.Avatar
 
                 ulong localState = XRControl.Me.GetSocialStateTo(this);
 
-                Debug.Log($"{(string) UserID} (remote) announcing its arrival (local state: {localState})");
-               
+                Debug.Log($"{(string)UserID} (remote) announcing its arrival (local state: {localState})");
+
                 // Now we're talking!
                 XRControl.Me.SendSocialState(this, localState);
 
@@ -160,7 +160,7 @@ namespace Arteranos.Avatar
             base.OnStartClient();
 
             SettingsManager.Client.OnAvatarChanged += CommitAvatarChanged;
-            SettingsManager.Client.OnUserPrivacyChanged += (x) => { if (isLocalPlayer) UserPrivacy = x; };
+            SettingsManager.Client.OnUserPrivacyChanged += UPChanged;
 
             if (isLocalPlayer)
             {
@@ -185,6 +185,11 @@ namespace Arteranos.Avatar
             }
         }
 
+        private void UPChanged(UserPrivacy x)
+        {
+            if (isLocalPlayer) UserPrivacy = x;
+        }
+
         private void CommitAvatarChanged(string CidString, float Height)
         {
             if (isLocalPlayer)
@@ -199,6 +204,7 @@ namespace Arteranos.Avatar
             // Maybe it isn't owned anymore, but it would be worse the other way round.
             if (isLocalPlayer) XRControl.Me = null;
 
+            SettingsManager.Client.OnUserPrivacyChanged -= UPChanged;
             SettingsManager.Client.OnAvatarChanged -= CommitAvatarChanged;
 
             base.OnStopClient();
