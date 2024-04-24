@@ -132,7 +132,7 @@ namespace Arteranos.Core.Operations
 
             // Clean out the unpacked files - IPFS takes care of the world data with its
             // sense of importance (pimmed/unpinned like favourited/unfavourited)
-            Directory.Delete(Utils.WorldCacheRootDir, true);
+            if(Directory.Exists(Utils.WorldCacheRootDir)) Directory.Delete(Utils.WorldCacheRootDir, true);
             Directory.CreateDirectory(Utils.WorldCacheRootDir);
 
             Stream tar = await IPFSService.Get(assetPath, token);
