@@ -5,20 +5,15 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
-using Arteranos.Core;
 
 using Debug = UnityEngine.Debug;
 using Newtonsoft.Json;
+using System;
 
 namespace Arteranos
 {
@@ -96,7 +91,7 @@ namespace Arteranos
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Arteranos/Update Project Version", false, 101)]
+        [MenuItem("Arteranos/Build/Update Project Version", false, 101)]
         public static void SetVersion()
         {
             GetProjectGitVersion();
@@ -117,7 +112,7 @@ namespace Arteranos
             };
         }
 
-        [MenuItem("Arteranos/Build Windows64", false, 110)]
+        [MenuItem("Arteranos/Build/Build Windows64", false, 110)]
         public static void BuildWin64()
         {
             GetProjectGitVersion();
@@ -140,7 +135,7 @@ namespace Arteranos
             CommenceBuild(bpo);
         }
 
-        [MenuItem("Arteranos/Build Windows Dedicated Server", false, 120)]
+        [MenuItem("Arteranos/Build/Build Windows Dedicated Server", false, 120)]
         public static void BuildWin64DedServ()
         {
             GetProjectGitVersion();
@@ -184,6 +179,87 @@ namespace Arteranos
         {
             // UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation(UnityEditor.Compilation.RequestScriptCompilationOptions.CleanBuildCache);
             // EditorUtility.RequestScriptReload();
+        }
+
+        [MenuItem("Arteranos/Build Installation Package", false, 80)]
+        public static void BuildInstallationPackage()
+        {
+            void Execute(string command, string argline)
+            {
+                ProcessStartInfo psi = new()
+                {
+                    FileName = command,
+                    Arguments = argline,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    WorkingDirectory = "build"
+                };
+
+                using Process process = Process.Start(psi);
+                using StreamReader reader = process.StandardOutput;
+
+                process.WaitForExit();
+                string data = reader.ReadToEnd();
+                Debug.Log(data);
+            }
+
+            void BuildSetup()
+            {
+                string wixroot = Environment.GetEnvironmentVariable("wix");
+
+                Execute($"{wixroot}bin\\heat", "dir Win64 -out Win64.wxi -scom -sfrag -sreg -svb6 -ag -dr AppDir -cg Pack_Win64 -srd -var var.BinDir");
+                Execute($"{wixroot}bin\\heat", "dir Win64-Server -out Win64-Server.wxi -scom -sfrag -sreg -svb6 -ag -dr ServerDir -cg Pack_Win64_Server -srd -var var.SrvBinDir");
+                Execute($"{wixroot}bin\\candle", "..\\Setup\\Main.wxs Win64-Server.wxi Win64.wxi -dBinDir=Win64 -dSrvBinDir=Win64-Server -arch x64");
+                Execute($"{wixroot}bin\\light", "Main.wixobj Win64.wixobj Win64-Server.wixobj -ext WixUIExtension -o ArteranosSetup");
+            }
+
+            void BuildSetupExe()
+            {
+                string wixroot = Environment.GetEnvironmentVariable("wix");
+
+                Execute($"{wixroot}bin\\candle", "-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension ..\\Setup\\MainBurn.wxs");
+                Execute($"{wixroot}bin\\light", "-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension MainBurn.wixobj -o ArteranosSetup");
+            }
+
+            void BuildArchive()
+            {
+                Execute("7z", "a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on ArteranosSetup.7z ArteranosSetup.exe");
+            }
+
+            int progressId = Progress.Start("Building...");
+
+            try
+            {
+                if (Directory.Exists("build")) Directory.Delete("build", true);
+
+                Progress.Report(progressId, 0.40f, "Build Win64 Dedicated Server");
+
+                BuildWin64DedServ();
+
+                Progress.Report(progressId, 0.60f, "Build Win64 Desktop");
+
+                BuildWin64();
+
+                Directory.Move("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", "build/Arteranos_BurstDebugInformation");
+                Directory.Move("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", "build/Arteranos-Server_BurstDebugInformation");
+
+                File.Move("build/Win64/Arteranos.exe", "build/Arteranos.exe");
+
+                Progress.Report(progressId, 0.80f, "Build setup wizard");
+
+                BuildSetup();
+
+                File.Move("build/Arteranos.exe", "build/Win64/Arteranos.exe");
+
+                BuildSetupExe();
+
+                BuildArchive();
+            }
+            finally
+            {
+                Progress.Remove(progressId);
+            }
         }
     }
 }
