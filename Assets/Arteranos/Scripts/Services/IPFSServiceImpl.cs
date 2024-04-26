@@ -67,106 +67,116 @@ namespace Arteranos.Services
 
         // ---------------------------------------------------------------
         #region Start & Stop
-        private async void Start()
+        private void Start()
         {
+            IEnumerator InitializeIPFSCoroutine()
+            {
+                yield return Utils.Async2Coroutine(InitializeIPFS());
+
+                StartCoroutine(EmitServerHeartbeat());
+
+                StartCoroutine(GetUserListCoroutine());
+
+                StartCoroutine(DiscoverPeersCoroutine());
+            }
+
+            async Task InitializeIPFS()
+            {
+                // If it doesn't exist, write down the template in the config directory.
+                if (!FileUtils.ReadConfig(PATH_USER_PRIVACY_NOTICE, File.Exists))
+                {
+                    FileUtils.WriteTextConfig(PATH_USER_PRIVACY_NOTICE, SettingsManager.DefaultTOStext);
+                    Debug.LogWarning("Privacy notice and Terms Of Service template written down - Read (and modify) according to your use case!");
+                }
+
+                CachedPTOSNotice = FileUtils.ReadTextConfig(PATH_USER_PRIVACY_NOTICE);
+
+                versionString = Core.Version.Load().MMP;
+
+                int port = SettingsManager.Server.MetadataPort;
+
+                IpfsEngine ipfsTmp;
+                ipfsTmp = new(passphrase.ToCharArray());
+
+                ipfsTmp.Options.Repository.Folder = Path.Combine(FileUtils.persistentDataPath, "IPFS");
+                ipfsTmp.Options.KeyChain.DefaultKeyType = "ed25519";
+                ipfsTmp.Options.KeyChain.DefaultKeySize = 2048;
+                await ipfsTmp.Config.SetAsync(
+                    "Addresses.Swarm",
+                    JToken.FromObject(new string[] {
+                    $"/ip4/0.0.0.0/tcp/{port}",
+                    $"/ip6/::/tcp/{port}"
+                    })
+                );
+
+                await ipfsTmp.StartAsync().ConfigureAwait(false);
+
+                self = await ipfsTmp.LocalPeer;
+
+                // Wait for the public IP address determination
+                DateTime tmo = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+                while (NetworkStatus.PublicIPAddress == IPAddress.None && DateTime.UtcNow < tmo)
+                    await Task.Delay(500);
+
+                // The IPFS node has to advertise itself with its public IP(v4) address to deal
+                // with NAT - you wouldn't be able to connect.
+                // 
+                if (NetworkStatus.PublicIPAddress != IPAddress.None)
+                {
+                    Debug.Log("Got the public IP address, setting up the IPFS node...");
+
+                    // Filter out the local IPv4 addresses
+                    List<MultiAddress> addresses = (from entry in self.Addresses
+                                                    where !entry.ToString().StartsWith("/ip4/")
+                                                    select entry).ToList();
+
+                    // And add an entry with the external IPv4 address.
+                    addresses.Add(
+                        GetMultiAddress(NetworkStatus.PublicIPAddress, port, self.Id)
+                    );
+
+                    self.Addresses = addresses;
+                }
+
+                await ipfsTmp.PubSub.SubscribeAsync(topic_hello,
+                    async msg =>
+                    {
+                        if (msg.Sender.Id == self.Id) return;
+                        bool success = await ParseIncomingIPFSMessageAsync(msg);
+                        if (success) OnReceivedHello_?.Invoke(msg);
+                    },
+                    cts.Token);
+
+                await ipfsTmp.PubSub.SubscribeAsync($"{topic_sdm}/{self.Id}",
+                    async msg =>
+                    {
+                        if (msg.Sender.Id == self.Id) return;
+                        bool success = await ParseIncomingIPFSMessageAsync(msg);
+                        if (success) OnReceivedServerDirectMessage_?.Invoke(msg);
+                    },
+                    cts.Token);
+
+                KeyChain kc = await ipfsTmp.KeyChainAsync();
+                var kcp = await kc.GetPrivateKeyAsync("self");
+                serverKeyPair = SignKey.ImportPrivateKey(kcp);
+
+                ipfs = ipfsTmp;
+
+                // Call back to update the server core data
+                SettingsManager.Server.UpdateServerKey(serverKeyPair);
+
+                await FlipServerDescription_(true);
+            }
+
             Instance = this;
             IdentifyCid_ = null;
             last = DateTime.MinValue;
             DiscoveredPeers = new();
             cts = new();
 
-            // If it doesn't exist, write down the template in the config directory.
-            if (!FileUtils.ReadConfig(PATH_USER_PRIVACY_NOTICE, File.Exists))
-            {
-                FileUtils.WriteTextConfig(PATH_USER_PRIVACY_NOTICE, SettingsManager.DefaultTOStext);
-                Debug.LogWarning("Privacy notice and Terms Of Service template written down - Read (and modify) according to your use case!");
-            }
-
-            CachedPTOSNotice = FileUtils.ReadTextConfig(PATH_USER_PRIVACY_NOTICE);
-
-            versionString = Core.Version.Load().MMP;
-
-            int port = SettingsManager.Server.MetadataPort;
-
-            IpfsEngine ipfsTmp;
-            ipfsTmp = new(passphrase.ToCharArray());
-
-            ipfsTmp.Options.Repository.Folder = Path.Combine(FileUtils.persistentDataPath, "IPFS");
-            ipfsTmp.Options.KeyChain.DefaultKeyType = "ed25519";
-            ipfsTmp.Options.KeyChain.DefaultKeySize = 2048;
-            await ipfsTmp.Config.SetAsync(
-                "Addresses.Swarm",
-                JToken.FromObject(new string[] { 
-                    $"/ip4/0.0.0.0/tcp/{port}",
-                    $"/ip6/::/tcp/{port}"
-                })
-            );
-
-            await ipfsTmp.StartAsync().ConfigureAwait(false);
-
-            self = await ipfsTmp.LocalPeer;
-
-            // Wait for the public IP address determination
-            DateTime tmo = DateTime.UtcNow + TimeSpan.FromSeconds(5);
-            while (NetworkStatus.PublicIPAddress == IPAddress.None && DateTime.UtcNow < tmo)
-                await Task.Delay(500);
-
-            // The IPFS node has to advertise itself with its public IP(v4) address to deal
-            // with NAT - you wouldn't be able to connect.
-            // 
-            if (NetworkStatus.PublicIPAddress != IPAddress.None)
-            {
-                Debug.Log("Got the public IP address, setting up the IPFS node...");
-
-                // Filter out the local IPv4 addresses
-                List<MultiAddress> addresses = (from entry in self.Addresses
-                                                   where !entry.ToString().StartsWith("/ip4/")
-                                                   select entry).ToList();
-
-                // And add an entry with the external IPv4 address.
-                addresses.Add(                
-                    GetMultiAddress(NetworkStatus.PublicIPAddress, port, self.Id)
-                );
-
-                self.Addresses = addresses;
-            }
-
-            await ipfsTmp.PubSub.SubscribeAsync(topic_hello,
-                async msg =>
-                {
-                    if (msg.Sender.Id == self.Id) return;
-                    bool success = await ParseIncomingIPFSMessageAsync(msg);
-                    if(success) OnReceivedHello_?.Invoke(msg);
-                }, 
-                cts.Token);
-
-            await ipfsTmp.PubSub.SubscribeAsync($"{topic_sdm}/{self.Id}",
-                async msg =>
-                {
-                    if (msg.Sender.Id == self.Id) return;
-                    bool success = await ParseIncomingIPFSMessageAsync(msg);
-                    if (success) OnReceivedServerDirectMessage_?.Invoke(msg);
-                }, 
-                cts.Token);
-
-            KeyChain kc = await ipfsTmp.KeyChainAsync();
-            var kcp = await kc.GetPrivateKeyAsync("self");
-            serverKeyPair = SignKey.ImportPrivateKey(kcp);
-
-            ipfs = ipfsTmp;
-
-            // Call back to update the server core data
-            SettingsManager.Server.UpdateServerKey(serverKeyPair);
-
-            await FlipServerDescription_(true);
-
             UserFingerprints = new List<byte[]>();
 
-            _ = EmitServerHeartbeat(cts.Token);
-
-            SettingsManager.StartCoroutineAsync(GetUserListCoroutine);
-
-            SettingsManager.StartCoroutineAsync(DiscoverPeersCoroutine);
+            StartCoroutine(InitializeIPFSCoroutine());
         }
 
         private async void OnDisable()
@@ -225,25 +235,19 @@ namespace Arteranos.Services
             // NOTREACHED
         }
 
-        private async Task EmitServerHeartbeat(CancellationToken cancel)
+        private IEnumerator EmitServerHeartbeat()
         {
-            while(!cancel.IsCancellationRequested)
+            while(true)
             {
                 if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Server || 
                     NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
                 {
-                    try
-                    {
-                        await SendServerOnlineData_();
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.LogException(ex);
-                    }
+                    yield return Utils.Async2Coroutine(SendServerOnlineData_());
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(heartbeatSeconds), cancel);
+                yield return new WaitForSeconds(heartbeatSeconds);
             }
+            // NOTREACHED
         }
 
         public override async Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default)
