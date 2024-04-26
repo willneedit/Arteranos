@@ -19,17 +19,18 @@ This is intended to be a VR social app - To meet and greet people in the metaver
 - For building you need:
   - **Unity 2021.3.15f1** with the installed modules for the desired target platform
   - **Visual Studio**, together installed with Unity
-  - **git** for Windows, _usable in the command line_, installed separately or with Visual Studio
+  - [git for Windows](https://gitforwindows.org/), _usable in the command line_, installed separately or with Visual Studio
   - [WiX Toolset 3.11.2](https://github.com/wixtoolset/wix3/releases/tag/wix3112rtm)
+  - [7zip](https://www.7-zip.org/download.html)
 
 <sup>*</sup>) This application both supports VR and 2D (aka Desktop) mode, and it's intended to smoothly switch the modes back and forth, _anytime_.
 
 ### Quick Building (Windows 64)
  1. Download the source using git: `git clone --recurse-submodules https://github.com/willneedit/Arteranos.git`
- 2. `cd Arteranos`
- 3. Edit the `build.bat` script to find the Unity Editor you've installed in your build machine
- 4. `build.bat`
- 5. If all goes well, please find the newly created `build` folder including the installation wizard, `ArteranosSetup.msi` (or `ArteranosSetup.exe` as an alternative), amongst other files.
+    - Of course you can use Github Desktop. But using a command line is much safer than a GUI where you'd surely prone to having misclicks and forgetting option checks... like using submodules. Or not.
+ 2. Open the Arteranos as the Unity project (adding Arteranos's directory in Unity Hub, then open it)
+ 3. In Unity's menu, there's a custom menu heading named `Arteranos`. From there, select `Build Installation Package`
+ 4. If all goes well, please find the newly created `build` folder including the installation wizard, `ArteranosSetup.msi` (or `ArteranosSetup.exe` as an alternative), amongst other files.
     - Also, you'll find the `Arteranos.exe` and `Arteranos-Server.exe`, respectively.
 
 ### Installing
