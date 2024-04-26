@@ -202,6 +202,7 @@ namespace Arteranos.Services
 
                 yield return Utils.Async2Coroutine(ipfs.Dht.ProvideAsync(IdentifyCid_, true));
             }
+            // NOTREACHED
         }
 
         private IEnumerator DiscoverPeersCoroutine()
@@ -218,6 +219,8 @@ namespace Arteranos.Services
                     _peer => _ = OnDiscoveredPeer(_peer));
 
                 yield return Utils.Async2Coroutine(taskPeers);
+
+                yield return new WaitForSeconds(heartbeatSeconds * 2);
             }
             // NOTREACHED
         }
@@ -456,38 +459,32 @@ namespace Arteranos.Services
 
         private async Task OnDiscoveredPeer(Peer found)
         {
-            Debug.Log($"Discovered node {found.Id}");
+            if (DiscoveredPeers.ContainsKey(found.Id)) return;
+            DiscoveredPeers[found.Id] = found;
 
             if (found.Id == self.Id)
             {
-                Debug.Log("  Node is self, skipping.");
-                return;
-            }
-
-            if (DiscoveredPeers.ContainsKey(found.Id))
-            {
-                Debug.Log("  Node is already known, skipping");
+                Debug.Log($"Discovered node {found.Id} is self, skipping.");
                 return;
             }
 
             if (!found.Addresses.Any())
             {
-                Debug.Log("  Node has no addresses, skipping.");
+                Debug.Log($"Discovered node {found.Id} has no addresses, skipping.");
                 return;
             }
-
-            Debug.Log("  Adding node as discovered.");
-            DiscoveredPeers[found.Id] = found;
 
             ServerDescription serverDescription = ServerDescription.DBLookup(found.Id.ToString());
             if(serverDescription == null)
             {
-                Debug.Log("  New node - connecting and expecting its server description");
+                Debug.Log($"Discovered node {found.Id} is new - connecting and expecting its server description");
                 using CancellationTokenSource cts = new(1000);
                 await ipfs.Swarm.ConnectAsync(found.Addresses.First(), cts.Token);
             }
+            else
+                Debug.Log($"Discovered node {found.Id} added.");
         }
-#endregion
+        #endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface
         public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)
