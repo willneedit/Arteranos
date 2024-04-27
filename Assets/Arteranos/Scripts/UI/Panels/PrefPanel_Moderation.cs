@@ -28,14 +28,14 @@ namespace Arteranos.UI
         public TMP_InputField txt_ServerPort = null;
         public TMP_InputField txt_MetdadataPort = null;
 
+        public Toggle chk_UseUPnP = null;
+
         public TMP_InputField txt_Description = null;
         public IconSelectorBar bar_IconSelector = null;
 
         public Button btn_WorldGallery = null;
         public Button btn_ContentPermissions = null;
 
-        public Toggle chk_Guests = null;
-        public Toggle chk_CustomAvatars = null;
         public Toggle chk_Flying = null;
 
         public Toggle chk_Public = null;
@@ -55,19 +55,15 @@ namespace Arteranos.UI
             txt_Description.onValueChanged.AddListener(SetDirty);
 
             txt_ServerPort.onValueChanged.AddListener(SetDirty);
-            //txt_ServerPort.onValidateInput += OnValidatePort;
-
             txt_MetdadataPort.onValueChanged.AddListener(SetDirty);
-            //txt_MetdadataPort.onValidateInput += OnValidatePort;
+            chk_UseUPnP.onValueChanged.AddListener(SetDirty);
 
             chk_Public.onValueChanged.AddListener(SetDirty);
 
             btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
             btn_ContentPermissions.onClick.AddListener(OnContentPermissionsClicked);
 
-            chk_CustomAvatars.onValueChanged.AddListener(SetDirty);
             chk_Flying.onValueChanged.AddListener(SetDirty);
-            chk_Guests.onValueChanged.AddListener(SetDirty);
 
             btn_ClearCaches.onClick.AddListener(OnClearCachesClicked);
 
@@ -88,13 +84,6 @@ namespace Arteranos.UI
             StartCoroutine(UploadIcon(obj));
         }
 
-        //private char OnValidatePort(string text, int charIndex, char addedChar)
-        //{
-        //    if(addedChar < '0' || addedChar > '9') return '\0';
-
-        //    return addedChar;
-        //}
-
         private void SetDirty(bool _) => dirty = true;
         private void SetDirty(string _) => dirty = true;
 
@@ -103,6 +92,15 @@ namespace Arteranos.UI
             base.OnEnable();
 
             SettingsManager.OnClientReceivedServerConfigAnswer += UpdateServerConfigDisplay;
+
+            bool networkConfig = NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline;
+
+            // Changing these settings remotely can pull the rug under you own feet.
+            // Like remotely (mis)configuring a department's firewall at work.
+            // Believe me. Fastest car ride he pulled off....
+            txt_ServerPort.interactable = networkConfig;
+            txt_MetdadataPort.interactable = networkConfig;
+            chk_UseUPnP.interactable = networkConfig;
 
             // Send the query.
             SettingsManager.EmitToServerCTSPacket(new CTSServerConfig()
@@ -124,6 +122,7 @@ namespace Arteranos.UI
 
             txt_ServerPort.text = ss.ServerPort.ToString();
             txt_MetdadataPort.text = ss.MetadataPort.ToString();
+            chk_UseUPnP.isOn = ss.UseUPnP;
 
             txt_ServerName.text = ss.Name;
             txt_Description.text = ss.Description;
@@ -152,6 +151,7 @@ namespace Arteranos.UI
                 Permissions = Permissions,
                 ServerPort = int.Parse(txt_ServerPort.text),
                 MetadataPort = int.Parse(txt_MetdadataPort.text),
+                UseUPnP = chk_UseUPnP.isOn,
                 Name = txt_ServerName.text,
                 Description = txt_Description.text,
                 Public = chk_Public.isOn,

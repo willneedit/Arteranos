@@ -6,7 +6,6 @@
  */
 
 using Arteranos.Core.Cryptography;
-using Ipfs;
 using Ipfs.Core.Cryptography.Proto;
 using Newtonsoft.Json;
 using ProtoBuf;
@@ -30,6 +29,10 @@ namespace Arteranos.Core
         // The server metadata retrieval port.
         [ProtoMember(2)]
         public int MetadataPort = 9779;
+
+        // Use UPnP port forwarding.
+        [ProtoMember(11)]
+        public bool UseUPnP = true;
 
         // The server nickname.
         [ProtoMember(3)]
@@ -69,6 +72,7 @@ namespace Arteranos.Core
             Name = other.Name;
             Description = other.Description;
             MetadataPort = other.MetadataPort;
+            UseUPnP = other.UseUPnP;
             Permissions = other.Permissions;
             Public = other.Public;
             ServerAgrPublicKey = other.ServerAgrPublicKey;

@@ -42,10 +42,11 @@ namespace Arteranos.Services
             get => m_OpenPorts;
             set
             {
-                bool old = m_OpenPorts;
-                if(old != value)
+                bool oldvalue = m_OpenPorts;
+                bool newvalue = value && (SettingsManager.Server?.UseUPnP ?? false);
+                if(oldvalue != newvalue)
                 {
-                    m_OpenPorts = value;
+                    m_OpenPorts = newvalue;
                     if(m_OpenPorts) OpenPortsAsync();
                     else ClosePortsAsync();
                 }

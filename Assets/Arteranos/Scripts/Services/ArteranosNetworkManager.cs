@@ -899,6 +899,7 @@ namespace Arteranos.Services
 
                 ss.ServerPort = conf.ServerPort;
                 ss.MetadataPort = conf.MetadataPort;
+                ss.UseUPnP = conf.UseUPnP;
                 ss.Name = conf.Name;
                 ss.Description = conf.Description;
                 ss.Permissions = conf.Permissions;
@@ -917,10 +918,9 @@ namespace Arteranos.Services
 
         public event Action<ServerJSON> OnClientReceivedServerConfigAnswer = null;
 
-        private void ClientGotServerConfiguration(CTSServerConfig serverConfig)
-        {
-            OnClientReceivedServerConfigAnswer?.Invoke(serverConfig.config);
-        }
+        private void ClientGotServerConfiguration(CTSServerConfig serverConfig) 
+            => OnClientReceivedServerConfigAnswer?.Invoke(serverConfig.config);
+
         #endregion
     }
 }
