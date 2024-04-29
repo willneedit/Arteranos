@@ -42,18 +42,11 @@ This is intended to be a VR social app - To meet and greet people in the metaver
 `Arteranos-Server.exe` is the dedicated server. It won't show anything, and it's intended to persist in the backgound and to consume minimal resouces and to be connected to from other's clients, maybe you.
 
 ### And now?
-1. Run `Arteranos.exe`.
-2. In the desktop mode, you can use the ESC button for the system menu.
-3. In the VR mode (Oh, rightly jumping in the deep end?), one of the controller buttons, besides the trigger or the grip buttons, should invoke the system menu, too.
-4. Explore :) At this stage, you're offline, but you're able to change it anytime with the "Travel" section.
-5. (Optional) Once you've set up your avatar or other settings like the intended server settings (like, server name, icon and description), you can run the `Arteranos-Server.exe` in the background to open the proverbial doors :)
-6. (Optional, part 2) You can copy the entire settings - residing in `%AppData%\..\LocalLow\willneedit\Arteranos` (YES, the "\\..\\" is intentional!) - into another computer in the same path to run the server in a separate computer.
 
-- You can use https://readyplayer.me/ , then **Enter Hub** , walk through that gauntlet, up to the **Claim it now** stage. Click the `Capture` button. For example, it shows a URL like https://models.readyplayer.me/646d042e5564349155f72651.glb is this what you'd be interested for.
-- You can download the avatar GLB file, and edit it to modify the avatar. Maybe with Blender.
-- Or, use a RPM avatar as a template and edit one yourself.
-- Avatars, 2D icons (user and server alike) and world ZIP files can be uploaded into Arteranos from local files on your PC as well as suitable web resources, like as with the URL mentioned above.
-  - Local files can be used with browsing with the **file** explorer, opening the context menu, select "Copy Path" and paste (CTRL-V) into the appropiate text field.
+You can jump into the deep end of the pool with starting Arteranos, or just read further a bit :)
+
+For those who look before leaping, you can [browse the documentation](https://arteranos.gitbook.io/arteranos-documentation) (in the works...)
+The documentation is meant both to be read end-to-end, and for looking up the needed information.
 
 ## Getting in Touch
 To report issues and feature requests: [Github issues page](https://github.com/willneedit/Arteranos/issues).
