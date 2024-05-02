@@ -132,7 +132,6 @@ namespace Arteranos.UI
             if(IsEmpty()) return;
 
             Me.AvatarGallery.RemoveAt(index);
-            // TODO Only unpin when it's not the cuurent avatar, too
             ShowAvatar();
 
             dirty = true;

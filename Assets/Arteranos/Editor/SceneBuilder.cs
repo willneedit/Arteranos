@@ -440,7 +440,7 @@ namespace Arteranos.Editor
                 {
                     IProgressUI pui = ProgressUIFactory.New();
 
-                    pui.SetupAsyncOperations(() => WorldDownloader.PrepareGetWorldAsset(WorldCid));
+                    pui.SetupAsyncOperations(() => WorldDownloader.PrepareGetWorldTemplate(WorldCid));
 
                     pui.Completed += (_context) =>
                     {

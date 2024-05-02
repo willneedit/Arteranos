@@ -126,7 +126,7 @@ namespace Arteranos.PlayTest.Services
             yield return TransitionProgress.TransitionFrom();
 
             (AsyncOperationExecutor<Context> ao, Context co) =
-                WorldDownloader.PrepareGetWorldAsset(WorldCid);
+                WorldDownloader.PrepareGetWorldTemplate(WorldCid);
 
             ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
 

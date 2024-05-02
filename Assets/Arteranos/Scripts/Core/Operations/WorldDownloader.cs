@@ -83,7 +83,7 @@ namespace Arteranos.Core.Operations
         }
     }
 
-    internal class DownloadWorldDataOp : IAsyncOperation<Context>
+    internal class DownloadTemplateOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 8.0f;
@@ -120,6 +120,7 @@ namespace Arteranos.Core.Operations
             // Invalidate the 'current' asset bundle path.
             WorldDownloader.CurrentWorldAssetBundlePath = null;
 
+            // TODO #115: context.TemplateCid != null will mean it's a decorated world
             string assetPath = $"{context.WorldCid}/{GetArchitectureDirName()}";
 
             IFileSystemNode fi = await IPFSService.ListFile(assetPath, token);
@@ -193,7 +194,7 @@ namespace Arteranos.Core.Operations
             return (executor, context);
         }
 
-        public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldAsset(Cid WorldCid, int timeout = 600)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldTemplate(Cid WorldCid, int timeout = 600)
         {
             WorldDownloadContext context = new()
             {
@@ -202,7 +203,8 @@ namespace Arteranos.Core.Operations
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
             {
-                new DownloadWorldDataOp(),
+                // TODO #115: Before: Check type: pure template or decorated world data (template + object list)
+                new DownloadTemplateOp(),
             })
             {
                 Timeout = timeout

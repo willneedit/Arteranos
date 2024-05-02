@@ -611,7 +611,7 @@ namespace Arteranos.Services
                 WorldName = wca.WorldInfo.WorldName;
 
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    WorldDownloader.PrepareGetWorldAsset(WorldCid);
+                    WorldDownloader.PrepareGetWorldTemplate(WorldCid);
 
                 ao.ProgressChanged += TransitionProgressStatic.Instance.OnProgressChanged;
 
@@ -680,7 +680,7 @@ namespace Arteranos.Services
                 if (success)
                 {
                     (AsyncOperationExecutor<Context> ao, Context co) =
-                        WorldDownloader.PrepareGetWorldAsset(WorldCid);
+                        WorldDownloader.PrepareGetWorldTemplate(WorldCid);
 
                     ao.ProgressChanged += TransitionProgressStatic.Instance.OnProgressChanged;
 

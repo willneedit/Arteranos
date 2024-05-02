@@ -87,7 +87,7 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator DownloadWorldCoroutine()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                WorldDownloader.PrepareGetWorldAsset(WorldCid);
+                WorldDownloader.PrepareGetWorldTemplate(WorldCid);
 
             ao.ProgressChanged += (ratio, msg) => UnityEngine.Debug.Log($"{ratio} - {msg}");
 
