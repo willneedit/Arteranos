@@ -4,3 +4,6 @@
 [submodule "Packages/UnityAsyncImageLoader"]
 	path = Packages/UnityAsyncImageLoader
 	url = https://github.com/willneedit/UnityAsyncImageLoader.git
+[submodule "Packages/Arteranos-IPFS-interface"]
+	path = Packages/Arteranos-IPFS-interface
+	url = https://github.com/willneedit/Arteranos-IPFS-interface.git
