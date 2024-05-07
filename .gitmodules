@@ -1,9 +1,6 @@
 [submodule "Packages/Mirror"]
 	path = Packages/Mirror
 	url = https://github.com/willneedit/Mirror.git
-[submodule "Packages/Unity-IPFS-Engine"]
-	path = Packages/Unity-IPFS-Engine
-	url = https://github.com/willneedit/Unity-IPFS-Engine.git
 [submodule "Packages/UnityAsyncImageLoader"]
 	path = Packages/UnityAsyncImageLoader
 	url = https://github.com/willneedit/UnityAsyncImageLoader.git

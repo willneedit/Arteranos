@@ -401,12 +401,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "ipfs.engine": {
-      "version": "file:Unity-IPFS-Engine",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "li.lightingtools.lightmapswitcher": {
       "version": "https://github.com/willneedit/lightmap-switching-tool.git#package",
       "depth": 0,
