@@ -400,6 +400,12 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.willneedit.ipfs.iface": {
+      "version": "file:Arteranos-IPFS-interface",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "li.lightingtools.lightmapswitcher": {
       "version": "https://github.com/willneedit/lightmap-switching-tool.git#package",
       "depth": 0,
