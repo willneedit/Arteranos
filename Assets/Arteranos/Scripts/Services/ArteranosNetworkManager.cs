@@ -7,7 +7,7 @@ using System;
 using System.Threading.Tasks;
 using Arteranos.UI;
 using Arteranos.Core.Operations;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using Arteranos.Core.Cryptography;
 using System.Collections;
 using Arteranos.Social;

@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Ipfs.Core.Cryptography.Proto;
 using ProtoBuf;
 using System.IO;
 

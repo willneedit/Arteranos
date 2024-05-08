@@ -6,7 +6,7 @@
  */
 
 using Arteranos.Core.Cryptography;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using Newtonsoft.Json;
 using ProtoBuf;
 using System;

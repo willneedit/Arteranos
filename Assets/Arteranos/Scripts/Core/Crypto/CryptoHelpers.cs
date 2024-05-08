@@ -1,5 +1,5 @@
 ﻿using Arteranos.Core;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using System;
 using System.Numerics;
 using System.Security.Cryptography;

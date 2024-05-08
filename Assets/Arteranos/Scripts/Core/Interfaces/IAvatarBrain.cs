@@ -10,7 +10,7 @@
 using Arteranos.Core;
 using Arteranos.Social;
 using Ipfs;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using System;
 using UnityEngine;
 

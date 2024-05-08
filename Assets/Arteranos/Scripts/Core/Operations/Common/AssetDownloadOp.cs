@@ -62,7 +62,7 @@ namespace Arteranos.Core.Operations
             {
                 // Extract directory
                 Stream tar = await IPFSService.Get(context.path, token);
-                using TarArchive archive = TarArchive.CreateInputTarArchive(tar, Encoding.UTF8);
+                using TarArchive archive = TarArchive.CreateInputTarArchive(tar);
                 archive.ProgressMessageEvent += (a, e, m) =>
                 {
                     actualBytes += e.Size;

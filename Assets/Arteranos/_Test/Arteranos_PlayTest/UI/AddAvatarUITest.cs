@@ -3,7 +3,6 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Engine;
 using Arteranos.Services;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,6 +12,7 @@ using Arteranos.Web;
 using Arteranos.Core.Operations;
 using Arteranos.UI;
 using UnityEditor;
+using Ipfs.Http;
 
 namespace Arteranos.PlayTest.UI
 {
@@ -22,7 +22,7 @@ namespace Arteranos.PlayTest.UI
 
 
         IPFSServiceImpl srv = null;
-        IpfsEngine ipfs = null;
+        IpfsClientEx ipfs = null;
         Peer self = null;
 
         Cid AvatarCid = null;
@@ -46,7 +46,7 @@ namespace Arteranos.PlayTest.UI
 
             ipfs = srv.Ipfs_;
 
-            self = Task.Run(async () => await ipfs.LocalPeer).Result;
+            //self = Task.Run(async () => await ipfs.LocalPeer).Result;
         }
 
         Camera ca = null;

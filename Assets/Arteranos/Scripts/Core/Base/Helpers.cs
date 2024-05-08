@@ -12,9 +12,8 @@ using Arteranos.Core.Cryptography;
 using Arteranos.UI;
 using Arteranos.XR;
 using Ipfs;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using Ipfs.CoreApi;
-using Ipfs.Engine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -287,7 +286,7 @@ namespace Arteranos.Services
 
     public abstract class IPFSService : MonoBehaviour
     {
-        public abstract IpfsEngine Ipfs_ { get; }
+        public abstract Ipfs.Http.IpfsClientEx Ipfs_ { get; }
         public abstract Peer Self_ { get; }
         public abstract SignKey ServerKeyPair_ { get; }
         public abstract Cid IdentifyCid_ { get; protected set; }
@@ -338,7 +337,7 @@ namespace Arteranos.Services
         public static async Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
             => await Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel);
         public static async Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.ListFileAsync(path, cancel);
+            => await Instance.Ipfs_.FileSystem.ListAsync(path, cancel);
         public static async Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
             => await Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel);
         public static async Task RemoveGarbage(CancellationToken cancel = default)

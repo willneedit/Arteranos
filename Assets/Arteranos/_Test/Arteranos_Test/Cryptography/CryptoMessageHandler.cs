@@ -1,9 +1,9 @@
 using NUnit.Framework;
-using Ipfs.Core.Cryptography.Proto;
 
 using Arteranos.Core.Cryptography;
 using System.Text;
 using System.Security.Cryptography;
+using Ipfs.Cryptography.Proto;
 
 namespace Arteranos.Test.Cryptography
 {

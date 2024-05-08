@@ -4,13 +4,12 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "ipfs.core",
-        "ipfs.engine",
-        "ipfs.peertalk",
         "Arteranos.Services",
         "Arteranos.Core",
         "Arteranos.Web",
-        "Arteranos.UI"
+        "Arteranos.UI",
+        "ipfs.Cryptography",
+        "ipfs.Http"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,11 +17,12 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "nunit.framework.dll",
-        "Nito.AsyncEx.Coordination.dll",
         "Newtonsoft.Json.dll",
         "BouncyCastle.Crypto.dll",
         "protobuf-net.dll",
-        "Google.Protobuf.dll"
+        "Google.Protobuf.dll",
+        "IpfsShipyard.Ipfs.Core.dll",
+        "IpfsShipyard.Ipfs.Http.Client.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

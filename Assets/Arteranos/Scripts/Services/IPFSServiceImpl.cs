@@ -10,17 +10,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Ipfs;
-using Ipfs.Engine;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Arteranos.Core;
 using System.Threading;
 using System;
 using System.Threading.Tasks;
-using Ipfs.Engine.Cryptography;
 using Arteranos.Core.Cryptography;
 using System.Linq;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
+using Ipfs.Http;
 using System.Net;
 using System.Text;
 using System.Collections.Concurrent;
@@ -29,7 +28,7 @@ namespace Arteranos.Services
 {
     public class IPFSServiceImpl : IPFSService
     {
-        public override IpfsEngine Ipfs_ { get => ipfs; }
+        public override IpfsClientEx Ipfs_ { get => ipfs; }
         public override Peer Self_ { get => self; }
         public override SignKey ServerKeyPair_ { get => serverKeyPair; }
         public override Cid IdentifyCid_ { get; protected set; }
@@ -49,7 +48,7 @@ namespace Arteranos.Services
 
         private const int heartbeatSeconds = 60;
 
-        private IpfsEngine ipfs = null;
+        private IpfsClientEx ipfs = null;
         private Peer self = null;
         private SignKey serverKeyPair = null;
 
@@ -71,7 +70,8 @@ namespace Arteranos.Services
         {
             IEnumerator InitializeIPFSCoroutine()
             {
-                yield return Utils.Async2Coroutine(InitializeIPFS());
+                // yield return Utils.Async2Coroutine(InitializeIPFS());
+                yield return null;
 
                 StartCoroutine(EmitServerHeartbeat());
 
@@ -80,6 +80,7 @@ namespace Arteranos.Services
                 StartCoroutine(DiscoverPeersCoroutine());
             }
 
+#if false
             async Task InitializeIPFS()
             {
                 // If it doesn't exist, write down the template in the config directory.
@@ -167,7 +168,7 @@ namespace Arteranos.Services
 
                 await FlipServerDescription_(true);
             }
-
+#endif
             Instance = this;
             IdentifyCid_ = null;
             last = DateTime.MinValue;
@@ -185,7 +186,7 @@ namespace Arteranos.Services
 
             Debug.Log("Shutting down the IPFS node.");
 
-            await ipfs.StopAsync().ConfigureAwait(false);
+            await ipfs.ShutdownAsync();
 
             cts?.Cancel();
 
@@ -366,6 +367,7 @@ namespace Arteranos.Services
 
         public Task<bool> ParseIncomingIPFSMessageAsync(IPublishedMessage publishedMessage)
         {
+#if false
             try
             {
                 PeerMessage peerMessage = PeerMessage.Deserialize(publishedMessage.DataStream);
@@ -384,6 +386,9 @@ namespace Arteranos.Services
                 Debug.LogException(ex);
                 return Task.FromResult(false);
             }
+#else
+            return Task.FromResult(true);
+#endif
         }
 
 #if USE_SERVER_HELLO
@@ -488,7 +493,7 @@ namespace Arteranos.Services
             else
                 Debug.Log($"Discovered node {found.Id} added.");
         }
-        #endregion
+#endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface
         public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)

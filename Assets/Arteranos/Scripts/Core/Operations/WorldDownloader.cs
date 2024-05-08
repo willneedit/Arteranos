@@ -153,7 +153,7 @@ namespace Arteranos.Core.Operations
                 }
             });
 
-            using TarArchive archive = TarArchive.CreateInputTarArchive(tar, Encoding.UTF8);
+            using TarArchive archive = TarArchive.CreateInputTarArchive(tar);
             archive.ExtractContents(Utils.WorldCacheRootDir);
             cts.Cancel(); // ... and he's done it.
 
