@@ -4,3 +4,6 @@
 [submodule "Packages/UnityAsyncImageLoader"]
 	path = Packages/UnityAsyncImageLoader
 	url = https://github.com/willneedit/UnityAsyncImageLoader.git
+[submodule "Packages/glTFast"]
+	path = Packages/glTFast
+	url = https://github.com/atteneder/glTFast.git

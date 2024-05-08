@@ -1,5 +1,16 @@
 {
   "dependencies": {
+    "com.atteneder.gltfast": {
+      "version": "file:glTFast",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.mathematics": "1.2.6",
+        "com.unity.burst": "1.6.6"
+      }
+    },
     "com.looooong.asyncimageloader": {
       "version": "file:UnityAsyncImageLoader",
       "depth": 0,
