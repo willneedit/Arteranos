@@ -16,10 +16,10 @@ namespace Arteranos.PlayTest
 {
     public class TestFixture
     {
-        private static IpfsEngine ipfs = null;
+        private static IpfsClientEx ipfs = null;
         private static IPFSServiceImpl iPFSService = null;
 
-        public static IpfsEngine Ipfs { get => ipfs; }
+        public static IpfsClientEx Ipfs { get => ipfs; }
         public static IPFSServiceImpl IPFSService { get => iPFSService; }
 
         public static GameObject SetupStartupManagerMock()
@@ -92,6 +92,7 @@ namespace Arteranos.PlayTest
         }
     }
 
+#if false
     class TempNode : IpfsClientEx
     {
         static int nodeNumber;
@@ -116,4 +117,6 @@ namespace Arteranos.PlayTest
             }
         }
     }
+
+#endif
 }

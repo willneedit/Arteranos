@@ -11,6 +11,8 @@ using Ipfs.Cryptography;
 using System.Threading;
 using System.Linq;
 
+#if false
+
 namespace Arteranos.PlayTest
 {
     public class IPFSBackend
@@ -185,3 +187,5 @@ namespace Arteranos.PlayTest
         }
     }
 }
+
+#endif

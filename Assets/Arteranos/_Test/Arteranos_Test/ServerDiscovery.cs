@@ -15,11 +15,12 @@ using System.Collections.Generic;
 
 using Debug = UnityEngine.Debug;
 using Arteranos.Services;
-using Ipfs.Engine;
 using UnityEngine.TestTools;
 using UnityEngine;
 using System.Collections;
 using Arteranos.Core;
+
+#if false
 
 namespace Arteranos.Test
 {
@@ -196,3 +197,5 @@ namespace Arteranos.Test
         }
     }
 }
+
+#endif

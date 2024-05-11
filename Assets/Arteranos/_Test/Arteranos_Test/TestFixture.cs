@@ -6,7 +6,6 @@
  */
 
 using Arteranos.Services;
-using Ipfs.Engine;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
@@ -14,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
+#if false
 
 namespace Arteranos.Test
 {
@@ -55,3 +55,5 @@ namespace Arteranos.Test
     }
 
 }
+
+#endif

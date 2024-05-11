@@ -9,7 +9,9 @@
         "Arteranos.Web",
         "Arteranos.UI",
         "ipfs.Cryptography",
-        "ipfs.Http"
+        "ipfs.Http",
+        "ipfs.Core",
+        "ipfs.HttpEx"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -20,9 +22,7 @@
         "Newtonsoft.Json.dll",
         "BouncyCastle.Crypto.dll",
         "protobuf-net.dll",
-        "Google.Protobuf.dll",
-        "IpfsShipyard.Ipfs.Core.dll",
-        "IpfsShipyard.Ipfs.Http.Client.dll"
+        "Google.Protobuf.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

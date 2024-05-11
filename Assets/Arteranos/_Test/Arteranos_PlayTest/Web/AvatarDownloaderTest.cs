@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Engine;
+using Ipfs.Http;
 using Arteranos.Services;
 using System.IO;
 using System.Threading.Tasks;
@@ -27,7 +27,7 @@ namespace Arteranos.PlayTest.Web
 
 
         IPFSServiceImpl srv = null;
-        IpfsEngine ipfs = null;
+        IpfsClientEx ipfs = null;
         Peer self = null;
 
         Cid AvatarCid = null;
@@ -50,7 +50,7 @@ namespace Arteranos.PlayTest.Web
 
             ipfs = srv.Ipfs_;
 
-            self = Task.Run(async () => await ipfs.LocalPeer).Result;
+            // self = Task.Run(async () => await ipfs.LocalPeer).Result;
 
             yield return UploadTestAvatar();
         }

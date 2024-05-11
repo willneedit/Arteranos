@@ -23,6 +23,8 @@ using Ipfs.Http;
 using System.Net;
 using System.Text;
 using System.Collections.Concurrent;
+using Ipfs.Cryptography;
+using Ipfs.CoreApi;
 
 namespace Arteranos.Services
 {
@@ -70,8 +72,7 @@ namespace Arteranos.Services
         {
             IEnumerator InitializeIPFSCoroutine()
             {
-                // yield return Utils.Async2Coroutine(InitializeIPFS());
-                yield return null;
+                yield return Utils.Async2Coroutine(InitializeIPFS());
 
                 StartCoroutine(EmitServerHeartbeat());
 
@@ -80,9 +81,58 @@ namespace Arteranos.Services
                 StartCoroutine(DiscoverPeersCoroutine());
             }
 
-#if false
             async Task InitializeIPFS()
             {
+                // TODO Daemon Startup
+                IpfsClientEx ipfsTmp;
+
+                ipfsTmp = new();
+
+                try
+                {
+                    self = await ipfsTmp.IdAsync();
+                    Debug.Log($"IPFS Daemon's ID: {self.Id}");
+                }
+                catch
+                {
+                    Debug.LogError($"Cannot create client RPC");
+                    SettingsManager.Quit();
+                    return;
+                }
+
+                PrivateKey pk = ipfsTmp.ReadDaemonPrivateKey();
+
+                try
+                {
+                    await ipfsTmp.VerifyDaemonAsync(pk);
+                }
+                catch (InvalidDataException)
+                {
+                    Debug.LogError("Daemon doesn't match with its supposed private key");
+                    SettingsManager.Quit();
+                    return;
+                }
+                catch
+                {
+                    Debug.LogError("Daemon communication");
+                    SettingsManager.Quit();
+                    return;
+                }
+
+                // Put up the identifier file
+                StringBuilder sb = new();
+                sb.Append("Arteranos Server, built by willneedit\n");
+                sb.Append(Core.Version.VERSION_MIN);
+
+                IdentifyCid_ = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString())).Id;
+
+                ipfs = ipfsTmp;
+
+                SignKey serverKeyPair = SignKey.ImportPrivateKey(pk);
+                SettingsManager.Server.UpdateServerKey(serverKeyPair);
+
+
+#if false
                 // If it doesn't exist, write down the template in the config directory.
                 if (!FileUtils.ReadConfig(PATH_USER_PRIVACY_NOTICE, File.Exists))
                 {
@@ -167,8 +217,9 @@ namespace Arteranos.Services
                 SettingsManager.Server.UpdateServerKey(serverKeyPair);
 
                 await FlipServerDescription_(true);
-            }
 #endif
+            }
+
             Instance = this;
             IdentifyCid_ = null;
             last = DateTime.MinValue;
@@ -186,7 +237,8 @@ namespace Arteranos.Services
 
             Debug.Log("Shutting down the IPFS node.");
 
-            await ipfs.ShutdownAsync();
+            // TODO Daemon Shutdown
+            // await ipfs.ShutdownAsync();
 
             cts?.Cancel();
 
@@ -197,11 +249,6 @@ namespace Arteranos.Services
 
         private IEnumerator GetUserListCoroutine()
         {
-            StringBuilder sb = new();
-            sb.Append("Arteranos Server, built by willneedit\n");
-            sb.Append(Core.Version.VERSION_MIN);
-
-            yield return Utils.Async2Coroutine(ipfs.FileSystem.AddTextAsync(sb.ToString()), _fsn => IdentifyCid_ = _fsn.Id);
 
             while (true)
             {
@@ -211,21 +258,19 @@ namespace Arteranos.Services
 
                 yield return new WaitForSeconds(heartbeatSeconds / 2);
 
-                yield return Utils.Async2Coroutine(ipfs.Dht.ProvideAsync(IdentifyCid_, true));
+                // yield return Utils.Async2Coroutine(ipfs.Dht.ProvideAsync(IdentifyCid_, true));
             }
             // NOTREACHED
         }
 
         private IEnumerator DiscoverPeersCoroutine()
         {
-            // Wait for the identifier file's CID to come up.
-            yield return new WaitUntil(() => IdentifyCid != null);
-
+            yield break;
             Debug.Log($"Starting node discovery: Identifier file's CID is {IdentifyCid}");
 
             while(true)
             {
-                Task<IEnumerable<Peer>> taskPeers = ipfs.Dht.FindProvidersAsync(IdentifyCid, 
+                Task<IEnumerable<Peer>> taskPeers = ipfs.Routing.FindProvidersAsync(IdentifyCid, 
                     1000, // FIXME Maybe configurable.
                     _peer => _ = OnDiscoveredPeer(_peer));
 
@@ -493,7 +538,7 @@ namespace Arteranos.Services
             else
                 Debug.Log($"Discovered node {found.Id} added.");
         }
-#endregion
+        #endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface
         public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)

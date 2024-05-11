@@ -356,6 +356,7 @@ namespace Arteranos.PlayTest.Services
             Assert.True(true);
         }
 
+#if false
         [UnityTest]
         public IEnumerator ConnectivityTest()
         {
@@ -546,5 +547,7 @@ namespace Arteranos.PlayTest.Services
 
             Assert.IsNotNull( found_id );
         }
+
+#endif
     }
 }

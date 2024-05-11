@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Engine;
+using Ipfs.Http;
 using Arteranos.Services;
 using System.IO;
 using System.Threading.Tasks;
@@ -25,7 +25,7 @@ namespace Arteranos.PlayTest.Web
         private string QuotedFileAsset => $"\"{PlainFileAsset}\"";
 
         IPFSServiceImpl srv = null;
-        IpfsEngine ipfs = null;
+        IpfsClientEx ipfs = null;
 
         [UnitySetUp]
         public IEnumerator SetupIPFS()
@@ -212,7 +212,7 @@ namespace Arteranos.PlayTest.Web
 
                 Assert.IsNotNull(AssetCid);
 
-                IFileSystemNode fsn = ipfs.FileSystem.ListFileAsync(AssetCid).Result;
+                IFileSystemNode fsn = ipfs.FileSystem.ListAsync(AssetCid).Result;
                 IFileSystemLink[] files = fsn.Links.ToArray();
 
                 Assert.IsTrue(fsn.IsDirectory);
@@ -226,7 +226,7 @@ namespace Arteranos.PlayTest.Web
 
                 // How to search for a specific file in an archive: ListFileAsync, then iterate
                 // Alternatively, using file[0].Id works as well.
-                IFileSystemNode fsn_AB = ipfs.FileSystem.ListFileAsync($"{AssetCid}/{files[0].Name}").Result;
+                IFileSystemNode fsn_AB = ipfs.FileSystem.ListAsync($"{AssetCid}/{files[0].Name}").Result;
                 IFileSystemLink[] files_AB = fsn_AB.Links.ToArray();
                 Assert.IsTrue(fsn_AB.IsDirectory);
                 Assert.AreEqual(4, files_AB.Length);

@@ -408,7 +408,7 @@ namespace Arteranos.Services
             yield return new WaitForSeconds(0.5f);
 
             AsyncOperation ao = SceneManager.LoadSceneAsync("Transition");
-            while (!ao.isDone) yield return null;
+            yield return new WaitUntil(() => ao.isDone);
 
 
             yield return new WaitForEndOfFrame();

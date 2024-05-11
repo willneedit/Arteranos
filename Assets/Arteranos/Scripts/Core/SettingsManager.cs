@@ -165,5 +165,14 @@ namespace Arteranos.Core
             add => Instance.OnClientReceivedServerConfigAnswer_ += value;
             remove {  if (Instance != null) Instance.OnClientReceivedServerConfigAnswer_ -= value; }
         }
+
+        public static void Quit()
+        {
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.ExitPlaymode();
+#else
+                UnityEngine.Application.Quit();
+#endif
+        }
     }
 }

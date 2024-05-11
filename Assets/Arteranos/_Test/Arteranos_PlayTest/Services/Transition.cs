@@ -37,14 +37,14 @@ namespace Arteranos.PlayTest.Services
             GameObject bp = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Prefabs/Core/_SceneEssentials.prefab");
             GameObject go = UnityEngine.Object.Instantiate(bp);
 
-            // Resynchronize with the background IPFS uploading processes
-            yield return new WaitUntil(() => SettingsManager.DefaultFemaleAvatar != null);
-
-            yield return UploadTestWorld();
+            yield return null;
         }
 
         private IEnumerator UploadTestWorld()
         {
+            // Resynchronize with the background IPFS uploading processes
+            yield return new WaitUntil(() => SettingsManager.DefaultFemaleAvatar != null);
+
             (AsyncOperationExecutor<Context> ao, Context co) =
                 AssetUploader.PrepareUploadToIPFS(FileURLAsset, true);
 
@@ -113,6 +113,8 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator TransitionWorld()
         {
+            yield return UploadTestWorld();
+
             yield return TransitionProgress.TransitionFrom();
 
             (AsyncOperationExecutor<Context> ao, Context co) =

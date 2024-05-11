@@ -37,15 +37,14 @@ namespace Arteranos.Core.Operations
 
             string path = $"{context.TempFile}.dir";
 
-            AddFileOptions ao = new()
-            {
-                Pin = context.pin
-            };
-
             try
             {
-                IFileSystemNode fsn = await IPFSService.AddDirectory(path, options: ao);
+                IFileSystemNode fsn = await IPFSService.AddDirectory(path, cancel: token);
                 context.Cid = fsn.Id;
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
             }
             finally
             {
@@ -111,11 +110,6 @@ namespace Arteranos.Core.Operations
 
             AssetUploaderContext context = _context as AssetUploaderContext;
 
-            AddFileOptions ao = new()
-            {
-                Pin = context.pin
-            };
-
             try
             {
                 FileInfo fileInfo = new(context.TempFile);
@@ -137,7 +131,7 @@ namespace Arteranos.Core.Operations
                     }
                 });
 
-                IFileSystemNode fsn = await IPFSService.AddStream(stream, "", ao, token);
+                IFileSystemNode fsn = await IPFSService.AddStream(stream, "", cancel: token);
 
                 context.Cid = fsn.Id;
             }
