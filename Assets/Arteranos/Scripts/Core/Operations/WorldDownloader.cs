@@ -123,6 +123,10 @@ namespace Arteranos.Core.Operations
             // TODO #115: context.TemplateCid != null will mean it's a decorated world
             string assetPath = $"{context.WorldCid}/{GetArchitectureDirName()}";
 
+            // HACK: ListFiles doesn't implicitly resolve, so do it by hand and strip the /ipfs/
+            assetPath = await IPFSService.ResolveAsync(assetPath);
+            assetPath = assetPath[6..];
+
             IFileSystemNode fi = await IPFSService.ListFile(assetPath, token);
             if (!fi.IsDirectory)
                 throw new InvalidDataException("World data packet is not a directory");

@@ -10,6 +10,7 @@ using UnityEngine;
 using Ipfs;
 using System.Collections.Generic;
 using System;
+using GLTFast;
 
 namespace Arteranos.Core.Operations
 {
@@ -96,6 +97,8 @@ namespace Arteranos.Core.Operations
         public int Triangles { get; set; }
         public int Materials { get; set; }
         public float Rating { get; set; }
+
+        public GltfImport GltfImport { get; set; }
     }
 
     internal class ServerSearcherContext : Context

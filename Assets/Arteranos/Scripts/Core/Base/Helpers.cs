@@ -207,7 +207,7 @@ namespace Arteranos.Services
         public static IAvatarBrain GetOnlineUser(uint netId) 
             => Instance.GetOnlineUser_(netId);
         public static IEnumerable<IAvatarBrain> GetOnlineUsers() 
-            => Instance.GetOnlineUsers_();
+            => Instance?.GetOnlineUsers_() ?? new IAvatarBrain[0];
     }
 
     public abstract class AudioManager : MonoBehaviour
@@ -336,6 +336,8 @@ namespace Arteranos.Services
             => await Instance.Ipfs_.FileSystem.GetAsync(path, cancel: cancel);
         public static async Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
             => await Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel);
+        public static async Task<string> ResolveAsync(string path, bool recursive = true, CancellationToken cancel = default)
+            => await Instance.Ipfs_.ResolveAsync(path, recursive, cancel);
         public static async Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
             => await Instance.Ipfs_.FileSystem.ListAsync(path, cancel);
         public static async Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)

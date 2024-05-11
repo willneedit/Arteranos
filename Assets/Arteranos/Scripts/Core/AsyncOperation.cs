@@ -77,7 +77,7 @@ namespace Arteranos.Core
                         throw new OperationCanceledException();
 
                     OnProgressChanged(0f);
-                    context = await operation.ExecuteAsync(context, tokenSource.Token);
+                    context = await operation.ExecuteAsync(context, tokenSource.Token); //.ConfigureAwait(false);
                     OnProgressChanged(1f);
 
                     weightSoFar += operation.Weight;

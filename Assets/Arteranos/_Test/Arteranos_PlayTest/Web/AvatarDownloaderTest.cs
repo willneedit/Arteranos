@@ -99,7 +99,8 @@ namespace Arteranos.PlayTest.Web
         {
             if (AvatarCid != null)
             {
-                ipfs.Block.RemoveAsync(AvatarCid).Wait();
+                // yield return Utils.Async2Coroutine(ipfs.Pin.RemoveAsync(AvatarCid));
+                // yield return Utils.Async2Coroutine(ipfs.Block.RemoveAsync(AvatarCid));
                 WorldInfo.DBDelete(AvatarCid);
             }
 
