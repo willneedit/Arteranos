@@ -59,6 +59,8 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator InAndOut()
         {
+            yield return new WaitForSeconds(10);
+
             yield return TransitionProgress.TransitionFrom();
 
             yield return new WaitForSeconds(5);
@@ -71,6 +73,8 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator ProgressMonitoring()
         {
+            yield return new WaitForSeconds(10);
+
             yield return TransitionProgress.TransitionFrom();
 
             for(int i = 0; i < 10; i++)
@@ -88,6 +92,8 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator ProgressMonitoringFromAsync()
         {
+            yield return new WaitForSeconds(10);
+
             yield return TransitionProgress.TransitionFrom();
 
             // Same as before, but in a worker thread, not in a Coroutine
@@ -113,6 +119,8 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator TransitionWorld()
         {
+            yield return new WaitForSeconds(10);
+
             yield return UploadTestWorld();
 
             yield return TransitionProgress.TransitionFrom();

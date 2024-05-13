@@ -61,7 +61,7 @@ namespace Arteranos.PlayTest.Web
         {
             if (WorldCid != null)
             {
-                ipfs.Block.RemoveAsync(WorldCid).Wait();
+                ipfs.Pin.RemoveAsync(WorldCid).Wait();
                 WorldInfo.DBDelete(WorldCid);
             }
 

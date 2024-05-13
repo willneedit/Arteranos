@@ -297,9 +297,6 @@ namespace Arteranos.Services
 
         public abstract Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default);
         public abstract Task FlipServerDescription_(bool reload);
-        public abstract Task SendServerHello_();
-        public abstract Task SendServerOnlineData_();
-        public abstract Task SendServerDirectMessage_(string peerId, PeerMessage message);
         public abstract Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);
 
         public static IPFSService Instance { get; protected set; }
@@ -319,13 +316,6 @@ namespace Arteranos.Services
             => await Instance.GetPeerIPAddress_(PeerID, token);
         public static async Task FlipServerDescription(bool reload)
             => await Instance.FlipServerDescription_(reload);
-        public static async Task SendServerHello()
-            => await Instance.SendServerHello_();
-        public static async Task SendServerOnlineData()
-            => await Instance.SendServerOnlineData_();
-        public static async Task SendServerDirectMessage(string peerId, PeerMessage message)
-            => await Instance.SendServerDirectMessage_(peerId, message);
-
         public static async Task PinCid(Cid cid, bool pinned, CancellationToken cancel = default)
             => await Instance.PinCid_(cid, pinned, cancel);
         public static async Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
@@ -344,6 +334,12 @@ namespace Arteranos.Services
             => await Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel);
         public static async Task RemoveGarbage(CancellationToken cancel = default)
             => await Instance.Ipfs_.BlockRepository.RemoveGarbageAsync(cancel);
+        public static async Task<Cid> ResolveToCid(string path, CancellationToken cancel = default)
+        {
+            string resolved = await Instance.Ipfs_.ResolveAsync(path, cancel: cancel);
+            if (resolved == null || resolved.Length < 6 || resolved[0..6] != "/ipfs/") return null;
+            return resolved[6..];
+        }
 
         public static MultiAddress GetMultiAddress(IPAddress addr, int port, MultiHash peer_id)
         {

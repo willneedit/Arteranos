@@ -60,7 +60,7 @@ namespace Arteranos.Test
             // Local clean up
             try
             {
-                await client.Block.RemoveAsync(cid);
+                await client.Pin.RemoveAsync(cid);
             } catch { }
 
             Debug.Log($"Version = {Core.Version.VERSION_MIN}, Cid = {cid}");

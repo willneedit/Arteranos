@@ -78,7 +78,7 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
+                if (AssetCid != null) ipfs.Pin.RemoveAsync(AssetCid).Wait();
             }
         }
 
@@ -104,7 +104,7 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
+                if (AssetCid != null) ipfs.Pin.RemoveAsync(AssetCid).Wait();
             }
         }
 
@@ -130,7 +130,7 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
+                if (AssetCid != null) ipfs.Pin.RemoveAsync(AssetCid).Wait();
             }
         }
 
@@ -155,7 +155,7 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
+                if (AssetCid != null) ipfs.Pin.RemoveAsync(AssetCid).Wait();
             }
         }
 
@@ -188,7 +188,7 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
+                if (AssetCid != null) ipfs.Pin.RemoveAsync(AssetCid).Wait();
             }
 
         }
@@ -226,7 +226,13 @@ namespace Arteranos.PlayTest.Web
 
                 // How to search for a specific file in an archive: ListFileAsync, then iterate
                 // Alternatively, using file[0].Id works as well.
-                IFileSystemNode fsn_AB = ipfs.FileSystem.ListAsync($"{AssetCid}/{files[0].Name}").Result;
+
+                Cid resolved = null;
+                yield return Utils.Async2Coroutine(IPFSService.ResolveToCid($"{AssetCid}/{files[0].Name}"), _r => resolved = _r);
+                Assert.IsNotNull(resolved);
+
+                IFileSystemNode fsn_AB = null;
+                yield return Utils.Async2Coroutine(ipfs.FileSystem.ListAsync(resolved), _r => fsn_AB = _r);
                 IFileSystemLink[] files_AB = fsn_AB.Links.ToArray();
                 Assert.IsTrue(fsn_AB.IsDirectory);
                 Assert.AreEqual(4, files_AB.Length);
@@ -236,7 +242,7 @@ namespace Arteranos.PlayTest.Web
             }
             finally
             {
-                if (AssetCid != null) ipfs.Block.RemoveAsync(AssetCid).Wait();
+                if (AssetCid != null) ipfs.Pin.RemoveAsync(AssetCid).Wait();
             }
         }
     }

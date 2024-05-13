@@ -59,7 +59,7 @@ namespace Arteranos.PlayTest.UI
         {
             if (AvatarCid != null)
             {
-                ipfs.Block.RemoveAsync(AvatarCid).Wait();
+                ipfs.Pin.RemoveAsync(AvatarCid).Wait();
                 WorldInfo.DBDelete(AvatarCid);
             }
 
