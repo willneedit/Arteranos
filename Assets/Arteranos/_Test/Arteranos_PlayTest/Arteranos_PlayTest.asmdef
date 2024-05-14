@@ -11,7 +11,8 @@
         "ipfs.Cryptography",
         "ipfs.Http",
         "ipfs.Core",
-        "ipfs.HttpEx"
+        "ipfs.HttpEx",
+        "ipfs.Unity"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

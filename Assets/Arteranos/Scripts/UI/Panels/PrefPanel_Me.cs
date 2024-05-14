@@ -9,9 +9,10 @@ using Arteranos.Core;
 using System.Linq;
 using System.Collections;
 using Ipfs;
+using Ipfs.Unity;
 using System.IO;
 using Arteranos.Services;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Arteranos.UI
 {
@@ -59,7 +60,7 @@ namespace Arteranos.UI
             {
                 using MemoryStream ms = new(obj);
                 ms.Position = 0;
-                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => cs.Me.UserIconCid = _fsn.Id);
+                yield return Asyncs.Async2Coroutine(IPFSService.AddStream(ms), _fsn => cs.Me.UserIconCid = _fsn.Id);
 
                 dirty = true;
             }
@@ -85,7 +86,9 @@ namespace Arteranos.UI
         {
             IEnumerator DownloadIcon(Cid icon)
             {
-                yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data);
+                using CancellationTokenSource cts = new(5000);
+
+                yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data, cts.Token);
                 bar_IconSelector.TriggerUpdate();
             }
 

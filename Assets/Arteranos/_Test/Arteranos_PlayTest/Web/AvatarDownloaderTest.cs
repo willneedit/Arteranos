@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 
 using Object = UnityEngine.Object;
 using System.Collections.Generic;
+using Ipfs.Unity;
 
 namespace Arteranos.PlayTest.Web
 {
@@ -98,7 +99,7 @@ namespace Arteranos.PlayTest.Web
         {
             if (AvatarCid != null)
             {
-                yield return Utils.Async2Coroutine(ipfs.Pin.RemoveAsync(AvatarCid));
+                yield return Asyncs.Async2Coroutine(ipfs.Pin.RemoveAsync(AvatarCid));
                 WorldInfo.DBDelete(AvatarCid);
             }
 

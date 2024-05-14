@@ -23,6 +23,7 @@ using System.Text.RegularExpressions;
 using Arteranos.Avatar;
 using System.Linq;
 using Ipfs;
+using Ipfs.Unity;
 
 namespace Arteranos.Services
 {
@@ -140,7 +141,7 @@ namespace Arteranos.Services
             {
                 yield return null;
 
-                yield return Core.Utils.Async2Coroutine(GetMyIpAsync(), _addr => PublicIPAddress_ = _addr);
+                yield return Asyncs.Async2Coroutine(GetMyIpAsync(), _addr => PublicIPAddress_ = _addr);
                 Debug.Log($"  Public IP Address: {PublicIPAddress}");
             }
 

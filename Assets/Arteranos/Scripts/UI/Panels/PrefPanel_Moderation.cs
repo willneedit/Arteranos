@@ -14,11 +14,13 @@ using System.IO;
 using Arteranos.Services;
 using System.Collections;
 using Ipfs;
+using Ipfs.Unity;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using System.Linq;
+using System.Threading;
 
 namespace Arteranos.UI
 {
@@ -76,7 +78,7 @@ namespace Arteranos.UI
             {
                 using MemoryStream ms = new(obj);
                 ms.Position = 0;
-                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => ServerIcon = _fsn.Id);
+                yield return Asyncs.Async2Coroutine(IPFSService.AddStream(ms), _fsn => ServerIcon = _fsn.Id);
 
                 dirty = true;
             }
@@ -113,7 +115,9 @@ namespace Arteranos.UI
         {
             IEnumerator DownloadIcon(Cid icon)
             {
-                yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data);
+                using CancellationTokenSource cts = new(5000);
+
+                yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data, cts.Token);
                 bar_IconSelector.TriggerUpdate();
             }
 
@@ -200,7 +204,7 @@ namespace Arteranos.UI
 
                 // Favourited worlds
                 List<Cid> pinned = null;
-                yield return Utils.Async2Coroutine(WorldInfo.ListFavourites(), _pinned => pinned = _pinned);
+                yield return Asyncs.Async2Coroutine(WorldInfo.ListFavourites(), _pinned => pinned = _pinned);
 
                 int favouritedWorlds = 0;
                 foreach (WorldInfo wi in WorldInfo.DBList())
@@ -236,7 +240,7 @@ namespace Arteranos.UI
 
                 Debug.Log($"Total needs pinning: {toPin.Count}, out of {favouritedWorlds} worlds and {storedAvatars} stored avatars");
 
-                yield return Utils.Async2Coroutine(IPFSService.ListPinned(), _pinned => pinned = _pinned.ToList());
+                yield return Asyncs.Async2Coroutine(IPFSService.ListPinned(), _pinned => pinned = _pinned.ToList());
 
                 Debug.Log($"Actual pinned: {pinned.Count}");
 
@@ -244,15 +248,15 @@ namespace Arteranos.UI
                 foreach (Cid entry in pinned)
                 {
                     if(!toPin.Contains(entry))
-                        yield return Utils.Async2Coroutine(SetPin(entry, false));
+                        yield return Asyncs.Async2Coroutine(SetPin(entry, false));
                 }
 
                 // Pin (or, re-pin) everything we need, even if they're not (yet) pinned
                 foreach(string entry in toPin)
-                    yield return Utils.Async2Coroutine(SetPin(entry, true));
+                    yield return Asyncs.Async2Coroutine(SetPin(entry, true));
 
                 // And, scrub...
-                yield return Utils.Async2Coroutine(IPFSService.RemoveGarbage());
+                yield return Asyncs.Async2Coroutine(IPFSService.RemoveGarbage());
 
                 btn_ClearCaches.interactable = true;
             }

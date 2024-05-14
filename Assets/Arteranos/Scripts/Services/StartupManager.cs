@@ -99,10 +99,12 @@ namespace Arteranos.Services
 
             }
 
+            Debug.Log("Uploading default avatars...");
             yield return UploadAvatar("resource:///Avatar/6394c1e69ef842b3a5112221.glb"); 
             DefaultMaleAvatar = cid;
             yield return UploadAvatar("resource:///Avatar/63c26702e5b9a435587fba51.glb");
             DefaultFemaleAvatar = cid;
+            Debug.Log("Upload default avatars done.");
         }
 
 

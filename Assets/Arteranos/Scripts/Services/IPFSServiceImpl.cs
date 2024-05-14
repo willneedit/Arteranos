@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Ipfs;
+using Ipfs.Unity;
 using System.IO;
 using Arteranos.Core;
 using System.Threading;
@@ -19,10 +20,8 @@ using Arteranos.Core.Cryptography;
 using System.Linq;
 using Ipfs.Cryptography.Proto;
 using Ipfs.Http;
-using System.Net;
 using System.Text;
 using System.Collections.Concurrent;
-using Org.BouncyCastle.Utilities.Net;
 using IPAddress = System.Net.IPAddress;
 
 namespace Arteranos.Services
@@ -67,7 +66,7 @@ namespace Arteranos.Services
             IEnumerator InitializeIPFSCoroutine()
             {
                 // Keep the IPFS synced - it needs the IPFS node alive.
-                yield return Utils.Async2Coroutine(InitializeIPFS());
+                yield return Asyncs.Async2Coroutine(InitializeIPFS());
 
                 // Initiate the Arteranos peer discovery.
                 StartCoroutine(DiscoverPeersCoroutine());
@@ -164,6 +163,8 @@ namespace Arteranos.Services
 
                 Debug.Log($"Server Online Data publish key: {sod_key_id}");
 
+                Debug.Log("IPFS Daemon init complete.");
+
                 ipfs = ipfsTmp;
 
                 // Reuse the IPFS peer key for the multiplayer server to ensure its association
@@ -219,14 +220,13 @@ namespace Arteranos.Services
         {
             yield break;
             Debug.Log($"Starting node discovery: Identifier file's CID is {IdentifyCid}");
-
             while(true)
             {
                 Task<IEnumerable<Peer>> taskPeers = ipfs.Routing.FindProvidersAsync(IdentifyCid, 
                     1000, // FIXME Maybe configurable.
-                    _peer => _ = OnDiscoveredPeer(_peer));
+                    _peer => OnDiscoveredPeer(_peer));
 
-                yield return Utils.Async2Coroutine(taskPeers);
+                yield return Asyncs.Async2Coroutine(taskPeers);
 
                 yield return new WaitForSeconds(heartbeatSeconds * 2);
             }
@@ -249,13 +249,13 @@ namespace Arteranos.Services
 
         #endregion
         // ---------------------------------------------------------------
-        #region Peer communication and data exchange
+        #region Server information publishing
 
         public IEnumerator EmitServerDescriptionCoroutine()
         {
             while(true)
             {
-                yield return Utils.Async2Coroutine(FlipServerDescription(true));
+                yield return Asyncs.Async2Coroutine(FlipServerDescription(true));
 
                 // One day
                 yield return new WaitForSeconds(24 * 60 * 60);
@@ -269,7 +269,7 @@ namespace Arteranos.Services
                 if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Server ||
                     NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
                 {
-                    yield return Utils.Async2Coroutine(FlipServerOnlineData_());
+                    yield return Asyncs.Async2Coroutine(FlipServerOnlineData_());
                 }
 
                 yield return new WaitForSeconds(heartbeatSeconds);
@@ -309,14 +309,14 @@ namespace Arteranos.Services
             using MemoryStream ms = new();
             ServerDescription.Serialize(serverKeyPair, ms);
             ms.Position = 0;
-            var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerDescription");
+            var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerDescription").ConfigureAwait(false);
             CurrentSDCid_ = fsn.Id;
 
             // Lasting for two day max, cache refresh needs one minute
             await ipfs.NameEx.PublishAsync(
                 CurrentSDCid,
                 lifetime: new TimeSpan(2, 0, 0, 0),
-                ttl: new TimeSpan(0, 0, 1, 0));
+                ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
 
             Debug.Log($"New server description CID: {CurrentSDCid_}");
         }
@@ -342,23 +342,27 @@ namespace Arteranos.Services
 
             sod.Serialize(ms);
             ms.Position = 0;
-            var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerOnlineData");
+            var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerOnlineData").ConfigureAwait(false);
 
             // Lasting for five minutes, ttl 30s, under the secondary key
             await ipfs.NameEx.PublishAsync(
                 CurrentSDCid,
                 key: "key_sod",
                 lifetime: new TimeSpan(0, 5, 0),
-                ttl: new TimeSpan(0, 0, 30));
+                ttl: new TimeSpan(0, 0, 30)).ConfigureAwait(false);
 
             Debug.Log($"Published server online data to {sod_key_id}");
         }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Peer communication and data exchange
 
         private async Task<bool> ParseServerOnlineData(ServerOnlineData sod, Peer SenderPeer)
         {
             // If necessary, update the server description, too.
             // IPNS caching will work against flooding.
-            await UpdateServerDescription(SenderPeer.Id.ToString());
+            await DownloadServerDescription(SenderPeer.Id.ToString());
 
             // Set on receive, no sense to transmit the actual time.
             // In this context, latencies don't matter.
@@ -370,7 +374,7 @@ namespace Arteranos.Services
             return true;
         }
 
-        private async Task UpdateServerDescription(string SenderPeerID)
+        private async Task DownloadServerDescription(MultiHash SenderPeerID)
         {
             using CancellationTokenSource cts = new(500);
 
@@ -386,32 +390,32 @@ namespace Arteranos.Services
             sd.DBUpdate();
         }
 
-        private async Task OnDiscoveredPeer(Peer found)
+        private void OnDiscoveredPeer(Peer found)
         {
-            if (DiscoveredPeers.ContainsKey(found.Id)) return;
-            DiscoveredPeers[found.Id] = found;
+            MultiHash peerId = found.Id;
+            if (DiscoveredPeers.ContainsKey(peerId)) return;
+            DiscoveredPeers[peerId] = found;
 
-            if (found.Id == self.Id)
+            if (peerId == self.Id)
             {
-                Debug.Log($"Discovered node {found.Id} is self, skipping.");
+                Debug.Log($"Discovered node {peerId} is self, skipping.");
                 return;
             }
 
             if (!found.Addresses.Any())
             {
-                Debug.Log($"Discovered node {found.Id} has no addresses, skipping.");
+                Debug.Log($"Discovered node {peerId} has no addresses, skipping.");
                 return;
             }
 
-            ServerDescription serverDescription = ServerDescription.DBLookup(found.Id.ToString());
+            ServerDescription serverDescription = ServerDescription.DBLookup(peerId.ToString());
             if(serverDescription == null)
             {
-                Debug.Log($"Discovered node {found.Id} is new - connecting and expecting its server description");
-                using CancellationTokenSource cts = new(1000);
-                await ipfs.Swarm.ConnectAsync(found.Addresses.First(), cts.Token);
+                Debug.Log($"Discovered node {peerId} is new, downloading data");
+                _ = DownloadServerDescription(peerId).ConfigureAwait(false);
             }
             else
-                Debug.Log($"Discovered node {found.Id} added.");
+                Debug.Log($"Discovered node {peerId} added.");
         }
         #endregion
         // ---------------------------------------------------------------
