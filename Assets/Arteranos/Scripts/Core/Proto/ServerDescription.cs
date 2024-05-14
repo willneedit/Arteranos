@@ -56,8 +56,8 @@ namespace Arteranos.Core
         [ProtoMember(14)]
         public byte[] signature;
 
-        [ProtoMember(15)]
-        public string ServerDescriptionCid; // Only matches itself if it's null!
+        //[ProtoMember(15)]
+        //public string ServerDescriptionCid; // Only matches itself if it's null!
 
         [ProtoMember(16)]
         public string ServerIcon; // string, because CIDs are not proto-serializable

@@ -50,7 +50,7 @@ namespace Arteranos.Services
 
         private string versionString = null;
 
-        ServerDescription ServerDescription = null;
+        private Cid sod_key_id = null;
 
         private CancellationTokenSource cts = null;
 
@@ -74,8 +74,7 @@ namespace Arteranos.Services
                 StartCoroutine(EmitServerDescriptionCoroutine());
 
                 // Start to emit the server online data.
-                // TODO Implement key generation first
-                // StartCoroutine(EmitServerOnlineDataCoroutine());
+                StartCoroutine(EmitServerOnlineDataCoroutine());
             }
 
             async Task InitializeIPFS()
@@ -142,6 +141,26 @@ namespace Arteranos.Services
                 sb.Append(Core.Version.VERSION_MIN);
 
                 IdentifyCid_ = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString())).Id;
+
+                IEnumerable<IKey> keychain = await ipfsTmp.Key.ListAsync();
+
+                foreach (IKey key in keychain)
+                {
+                    if(key.Name == "key_sod")
+                    {
+                        Debug.Log($"Using existing key for Server Online Data publishing");
+                        sod_key_id = key.Id; break;
+                    }
+                }
+
+                if(sod_key_id == null) 
+                {
+                    Debug.Log($"Generating key for Server Online Data publishing");
+                    IKey key = await ipfsTmp.Key.CreateAsync("key_sod", "ed25519", 0);
+                    sod_key_id = key.Id;
+                }
+
+                Debug.Log($"Server Online Data publish key: {sod_key_id}");
 
                 ipfs = ipfsTmp;
 
@@ -302,7 +321,7 @@ namespace Arteranos.Services
                                     where UserState.IsSAdmin(entry.userState)
                                     select ((string)entry.userID);
 
-            ServerDescription = new()
+            ServerDescription ServerDescription = new()
             {
                 Name = server.Name,
                 ServerPort = server.ServerPort,
@@ -316,8 +335,7 @@ namespace Arteranos.Services
                 AdminNames = q.ToArray(),
                 PeerID = self.Id.ToString(),
                 LastModified = server.ConfigLastChanged,
-                ServerOnlineDataLinkCid = null, // TODO key_sod's key CIO
-                ServerDescriptionCid = null // Self-reference will be generated AFTER putting it to IPFS
+                ServerOnlineDataLinkCid = sod_key_id
             };
 
             using MemoryStream ms = new();
@@ -327,7 +345,6 @@ namespace Arteranos.Services
             CurrentSDCid_ = fsn.Id;
 
             // Lasting for two day max, cache refresh needs one minute
-            // TODO: NameEx needs work!
             await ipfs.NameEx.PublishAsync(
                 CurrentSDCid,
                 lifetime: new TimeSpan(2, 0, 0, 0),
@@ -364,42 +381,40 @@ namespace Arteranos.Services
                 key: "key_sod",
                 lifetime: new TimeSpan(0, 5, 0),
                 ttl: new TimeSpan(0, 0, 30));
+
+            Debug.Log($"Published server online data to {sod_key_id}");
         }
 
         private async Task<bool> ParseServerOnlineData(ServerOnlineData sod, Peer SenderPeer)
         {
-            async Task UpdateSD(ServerOnlineData sod, string SenderPeerID)
-            {
-                using CancellationTokenSource cts = new(500);
-
-                Stream s = await ipfs.FileSystem.ReadFileAsync(sod.ServerDescriptionCid, cts.Token);
-
-                PublicKey pk = PublicKey.FromId(SenderPeerID);
-                ServerDescription sd = ServerDescription.Deserialize(pk, s);
-
-                // Save the self-reference in the internal storage to detect the changes
-                sd.ServerDescriptionCid = sod.ServerDescriptionCid;
-                sd.DBUpdate();
-            }
-
-            string SenderPeerID = SenderPeer.Id.ToString();
-
-            // Maybe it's the first time where we've met. Need to check the background.
-            // Or, the server changed its face.
-            ServerDescription savedDescription = ServerDescription.DBLookup(SenderPeerID);
-            if (savedDescription == null)
-                await UpdateSD(sod, SenderPeerID);
-            else if (savedDescription.ServerDescriptionCid != sod.ServerDescriptionCid)
-                await UpdateSD(sod, SenderPeerID);
+            // If necessary, update the server description, too.
+            // IPNS caching will work against flooding.
+            await UpdateServerDescription(SenderPeer.Id.ToString());
 
             // Set on receive, no sense to transmit the actual time.
             // In this context, latencies don't matter.
             sod.LastOnline = DateTime.Now;
 
             // Put it in the memory mapping.
-            sod.DBInsert(SenderPeerID);
+            sod.DBInsert(SenderPeer.Id.ToString());
 
             return true;
+        }
+
+        private async Task UpdateServerDescription(string SenderPeerID)
+        {
+            using CancellationTokenSource cts = new(500);
+
+            // Server description is published under the peer ID. (= self)
+            // If it's cached, it's already in the local repo.
+            // And the TTL reduce the traffic.
+            Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID, cts.Token);
+
+            // TODO Maybe unneccessary?
+            PublicKey pk = PublicKey.FromId(SenderPeerID);
+            ServerDescription sd = ServerDescription.Deserialize(pk, s);
+
+            sd.DBUpdate();
         }
 
         private async Task OnDiscoveredPeer(Peer found)

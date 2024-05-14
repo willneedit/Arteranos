@@ -28,7 +28,6 @@ namespace Arteranos.PlayTest.Web
 
         IPFSServiceImpl srv = null;
         IpfsClientEx ipfs = null;
-        Peer self = null;
 
         Cid AvatarCid = null;
 
@@ -105,7 +104,6 @@ namespace Arteranos.PlayTest.Web
 
             srv = null;
             ipfs = null;
-            self = null;
             AvatarCid = null;
 
             StartupManagerMock go1 = Object.FindObjectOfType<StartupManagerMock>();
