@@ -243,7 +243,9 @@ namespace Arteranos.Core
 
             byte[] contents = null;
             // Stopwatch sw = Stopwatch.StartNew();
-            yield return Ipfs.Unity.Asyncs.Async2Coroutine(IPFSService.ReadBinary(dataPath, cancel: cancel), _data => contents = _data);
+            yield return Ipfs.Unity.Asyncs.Async2Coroutine(IPFSService.ReadBinary(dataPath, cancel: cancel),
+                _data => contents = _data,
+                _e => Debug.LogWarning($"Exception while loading {dataPath}: {_e}"));
             // Debug.Log($"ReadBinary took {sw.ElapsedMilliseconds} ms");
 
             if (contents == null) yield break;
