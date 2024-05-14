@@ -218,7 +218,6 @@ namespace Arteranos.Services
 
         private IEnumerator DiscoverPeersCoroutine()
         {
-            yield break;
             Debug.Log($"Starting node discovery: Identifier file's CID is {IdentifyCid}");
             while(true)
             {
@@ -318,7 +317,7 @@ namespace Arteranos.Services
                 lifetime: new TimeSpan(2, 0, 0, 0),
                 ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
 
-            Debug.Log($"New server description CID: {CurrentSDCid_}");
+            Debug.Log($"Published server description CID: {CurrentSDCid_}");
         }
 
         private async Task FlipServerOnlineData_()
@@ -332,7 +331,6 @@ namespace Arteranos.Services
             {
                 CurrentWorldCid = SettingsManager.WorldCid,
                 CurrentWorldName = SettingsManager.WorldName,
-                ServerDescriptionCid = CurrentSDCid_,
                 UserFingerprints = UserFingerprints,
                 LastOnline = last,
                 OnlineLevel = NetworkStatus.GetOnlineLevel()
