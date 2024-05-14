@@ -241,20 +241,14 @@ namespace Arteranos.Core
         {
             if (dataPath == null) yield break;
 
-            Stream stream = null;
-            Stopwatch sw = Stopwatch.StartNew();
-            yield return Ipfs.Unity.Asyncs.Async2Coroutine(IPFSService.ReadFile(dataPath, cancel), _stream => stream = _stream);
-            Debug.Log($"ReadFile took {sw.ElapsedMilliseconds} ms");
+            byte[] contents = null;
+            // Stopwatch sw = Stopwatch.StartNew();
+            yield return Ipfs.Unity.Asyncs.Async2Coroutine(IPFSService.ReadBinary(dataPath, cancel: cancel), _data => contents = _data);
+            // Debug.Log($"ReadBinary took {sw.ElapsedMilliseconds} ms");
 
+            if (contents == null) yield break;
 
-            if (stream == null) yield break;
-
-            using MemoryStream ms = new();
-            sw.Restart();
-            yield return Ipfs.Unity.Asyncs.Async2Coroutine(CopyWithProgress(stream, ms));
-            Debug.Log($"CopyWithProgress took {sw.ElapsedMilliseconds} ms");
-
-            callback?.Invoke(ms.ToArray());
+            callback?.Invoke(contents);
         }
 
         public static IEnumerator DownloadIconCoroutine(string icon, Action<Texture2D> callback)

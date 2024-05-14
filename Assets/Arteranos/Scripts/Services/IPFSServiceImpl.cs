@@ -425,6 +425,30 @@ namespace Arteranos.Services
             else
                 return ipfs.Pin.RemoveAsync(cid, cancel: token);
         }
+
+        public override async Task<byte[]> ReadBinary_(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
+        {
+            using MemoryStream ms = new();
+            using Stream instr = await ipfs.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
+            byte[] buffer = new byte[128 * 1024];
+
+            // No cancel. We have to do it until the end, else the RPC client would choke.
+            long totalBytes = 0;
+            while (true)
+            {
+                int n = instr.Read(buffer, 0, buffer.Length);
+                if (n <= 0) break;
+                totalBytes += n;
+                try
+                {
+                    reportProgress?.Invoke(totalBytes);
+                }
+                catch { } // Whatever may come, the show must go on.
+                ms.Write(buffer, 0, n);
+            }
+
+            return ms.ToArray();
+        }
         #endregion
     }
 }
