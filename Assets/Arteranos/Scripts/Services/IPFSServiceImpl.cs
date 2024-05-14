@@ -22,6 +22,8 @@ using Ipfs.Http;
 using System.Net;
 using System.Text;
 using System.Collections.Concurrent;
+using Org.BouncyCastle.Utilities.Net;
+using IPAddress = System.Net.IPAddress;
 
 namespace Arteranos.Services
 {
@@ -167,38 +169,6 @@ namespace Arteranos.Services
                 // Reuse the IPFS peer key for the multiplayer server to ensure its association
                 serverKeyPair = SignKey.ImportPrivateKey(pk);
                 SettingsManager.Server.UpdateServerKey(serverKeyPair);
-
-
-#if false
-
-                await ipfsTmp.PubSub.SubscribeAsync(topic_hello,
-                    async msg =>
-                    {
-                        if (msg.Sender.Id == self.Id) return;
-                        bool success = await ParseIncomingIPFSMessageAsync(msg);
-                        if (success) OnReceivedHello_?.Invoke(msg);
-                    },
-                    cts.Token);
-
-                await ipfsTmp.PubSub.SubscribeAsync($"{topic_sdm}/{self.Id}",
-                    async msg =>
-                    {
-                        if (msg.Sender.Id == self.Id) return;
-                        bool success = await ParseIncomingIPFSMessageAsync(msg);
-                        if (success) OnReceivedServerDirectMessage_?.Invoke(msg);
-                    },
-                    cts.Token);
-
-                KeyChain kc = await ipfsTmp.KeyChainAsync();
-                var kcp = await kc.GetPrivateKeyAsync("self");
-                serverKeyPair = SignKey.ImportPrivateKey(kcp);
-
-                ipfs = ipfsTmp;
-
-                // Call back to update the server core data
-                SettingsManager.Server.UpdateServerKey(serverKeyPair);
-
-#endif
             }
 
             Instance = this;
@@ -241,8 +211,6 @@ namespace Arteranos.Services
                                              select CryptoHelpers.GetFingerprint(user.UserID)).ToList();
 
                 yield return new WaitForSeconds(heartbeatSeconds / 2);
-
-                // yield return Utils.Async2Coroutine(ipfs.Dht.ProvideAsync(IdentifyCid_, true));
             }
             // NOTREACHED
         }
@@ -267,16 +235,16 @@ namespace Arteranos.Services
 
         public override async Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default)
         {
-            // Never seen before? Curious.
-            // Or too late for being online for the initial FindProvidersAsync()?
-            if (!DiscoveredPeers.TryGetValue(PeerID, out Peer found) || !found.Addresses.Any())
-                found = await ipfs.Dht.FindPeerAsync(PeerID, token).ConfigureAwait(false);
+            IEnumerable<IPAddress> ipAddresses = await ipfs.Routing.FindPeerAddressesAsync(PeerID, token).ConfigureAwait(false);
 
-            // Familiar, but disconnected?
-            if (found.ConnectedAddress == null)
-                await ipfs.Swarm.ConnectAsync(found.Addresses.First(), token);
+            if (!ipAddresses.Any()) return null;
 
-            return ParseMultiAddress(found.ConnectedAddress).Item1;
+            // Prefer IPv6 - less NAT or port forwarding issues
+            foreach (IPAddress ipAddress in ipAddresses)
+                if(ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                    return ipAddress;
+
+            return ipAddresses.FirstOrDefault();
         }
 
         #endregion
@@ -359,6 +327,7 @@ namespace Arteranos.Services
             if (last > DateTime.Now - TimeSpan.FromSeconds(30)) return;
             last = DateTime.Now;
 
+            // TODO - WARNING - UserFingerprints potential concurrency issues
             ServerOnlineData sod = new()
             {
                 CurrentWorldCid = SettingsManager.WorldCid,
