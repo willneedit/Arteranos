@@ -37,8 +37,8 @@ namespace Arteranos.Core
         public static string WorldName { get; set; }
         public static string DefaultTOStext { get; private set; } = null;
 
-        public static Cid DefaultMaleAvatar { get; protected set; } = null;
-        public static Cid DefaultFemaleAvatar { get; protected set; } = null;
+        public static Cid DefaultMaleAvatar { get; set; } = null;
+        public static Cid DefaultFemaleAvatar { get; set; } = null;
 
         public static ServerJSON ActiveServerData =>
             NetworkStatus.GetOnlineLevel() == OnlineLevel.Client

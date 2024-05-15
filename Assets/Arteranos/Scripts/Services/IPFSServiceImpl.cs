@@ -23,6 +23,7 @@ using Ipfs.Http;
 using System.Text;
 using System.Collections.Concurrent;
 using IPAddress = System.Net.IPAddress;
+using Arteranos.Core.Operations;
 
 namespace Arteranos.Services
 {
@@ -61,12 +62,20 @@ namespace Arteranos.Services
 
         // ---------------------------------------------------------------
         #region Start & Stop
+        private void Awake()
+        {
+            Instance = this;
+        }
+
         private void Start()
         {
             IEnumerator InitializeIPFSCoroutine()
             {
                 // Keep the IPFS synced - it needs the IPFS node alive.
                 yield return Asyncs.Async2Coroutine(InitializeIPFS());
+
+                // Default avatars
+                yield return UploadDefaultAvatars();
 
                 // Initiate the Arteranos peer discovery.
                 StartCoroutine(DiscoverPeersCoroutine());
@@ -136,6 +145,8 @@ namespace Arteranos.Services
                     Debug.LogException(ex);
                 }
 
+                TransitionProgressStatic.Instance.OnProgressChanged(0.30f, "Announcing its service");
+
                 // Put up the identifier file
                 StringBuilder sb = new();
                 sb.Append("Arteranos Server, built by willneedit\n");
@@ -170,9 +181,10 @@ namespace Arteranos.Services
                 // Reuse the IPFS peer key for the multiplayer server to ensure its association
                 serverKeyPair = SignKey.ImportPrivateKey(pk);
                 SettingsManager.Server.UpdateServerKey(serverKeyPair);
+
+                TransitionProgressStatic.Instance.OnProgressChanged(0.40f, "Connected to IPFS");
             }
 
-            Instance = this;
             IdentifyCid_ = null;
             last = DateTime.MinValue;
             DiscoveredPeers = new();
@@ -198,7 +210,10 @@ namespace Arteranos.Services
             cts?.Cancel();
 
             cts?.Dispose();
+        }
 
+        private void OnDestroy()
+        {
             Instance = null;
         }
 
@@ -218,6 +233,8 @@ namespace Arteranos.Services
 
         private IEnumerator DiscoverPeersCoroutine()
         {
+            TransitionProgressStatic.Instance.OnProgressChanged(0.70f, "Discovering other servers");
+
             Debug.Log($"Starting node discovery: Identifier file's CID is {IdentifyCid}");
             while(true)
             {
@@ -231,6 +248,28 @@ namespace Arteranos.Services
             }
             // NOTREACHED
         }
+        private IEnumerator UploadDefaultAvatars()
+        {
+            TransitionProgressStatic.Instance.OnProgressChanged(0.50f, "Uploading default resources");
+
+            Cid cid = null;
+            IEnumerator UploadAvatar(string resourceMA)
+            {
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    AssetUploader.PrepareUploadToIPFS(resourceMA, false); // Plsin GLB files
+
+                yield return ao.ExecuteCoroutine(co);
+
+                cid = AssetUploader.GetUploadedCid(co);
+
+            }
+
+            yield return UploadAvatar("resource:///Avatar/6394c1e69ef842b3a5112221.glb");
+            SettingsManager.DefaultMaleAvatar = cid;
+            yield return UploadAvatar("resource:///Avatar/63c26702e5b9a435587fba51.glb");
+            SettingsManager.DefaultFemaleAvatar = cid;
+        }
+
 
         public override async Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default)
         {
@@ -252,13 +291,16 @@ namespace Arteranos.Services
 
         public IEnumerator EmitServerDescriptionCoroutine()
         {
-            while(true)
+            TransitionProgressStatic.Instance?.OnProgressChanged(0.80f, "Publishing server information");
+
+            while (true)
             {
                 yield return Asyncs.Async2Coroutine(FlipServerDescription(true));
 
                 // One day
                 yield return new WaitForSeconds(24 * 60 * 60);
             }
+            // NOTREACHED
         }
 
         private IEnumerator EmitServerOnlineDataCoroutine()

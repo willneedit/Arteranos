@@ -235,6 +235,10 @@ namespace Arteranos.UI
                 toPin.Add(IPFSService.IdentifyCid);
                 toPin.Add(IPFSService.CurrentSDCid);
 
+                // Default avatars
+                toPin.Add(SettingsManager.DefaultMaleAvatar);
+                toPin.Add(SettingsManager.DefaultFemaleAvatar);
+
                 // Eat up any empty entries
                 toPin.Remove(null);
 
@@ -242,7 +246,7 @@ namespace Arteranos.UI
 
                 yield return Asyncs.Async2Coroutine(IPFSService.ListPinned(), _pinned => pinned = _pinned.ToList());
 
-                Debug.Log($"Actual pinned: {pinned.Count}");
+                Debug.Log($"Actual pinned (including indirect): {pinned.Count}");
 
                 // Unpin everything we don't want
                 foreach (Cid entry in pinned)
@@ -251,10 +255,7 @@ namespace Arteranos.UI
                         yield return Asyncs.Async2Coroutine(SetPin(entry, false));
                 }
 
-                // Pin (or, re-pin) everything we need, even if they're not (yet) pinned
-                foreach(string entry in toPin)
-                    yield return Asyncs.Async2Coroutine(SetPin(entry, true));
-
+                Debug.Log("Now, garbage collection.");
                 // And, scrub...
                 yield return Asyncs.Async2Coroutine(IPFSService.RemoveGarbage());
 
