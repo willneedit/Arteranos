@@ -24,6 +24,7 @@ using System.Text;
 using System.Collections.Concurrent;
 using IPAddress = System.Net.IPAddress;
 using Arteranos.Core.Operations;
+using System.Net.Sockets;
 
 namespace Arteranos.Services
 {
@@ -282,16 +283,16 @@ namespace Arteranos.Services
 
         public override async Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default)
         {
-            IEnumerable<IPAddress> ipAddresses = await ipfs.Routing.FindPeerAddressesAsync(PeerID, token).ConfigureAwait(false);
+            IEnumerable<(IPAddress, ProtocolType, int)> ipAddresses = await ipfs.Routing.FindPeerAddressesAsync(PeerID, token).ConfigureAwait(false);
 
             if (!ipAddresses.Any()) return null;
 
             // Prefer IPv6 - less NAT or port forwarding issues
-            foreach (IPAddress ipAddress in ipAddresses)
-                if(ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
-                    return ipAddress;
+            foreach (var ipAddress in ipAddresses)
+                if(ipAddress.Item1.AddressFamily == AddressFamily.InterNetworkV6)
+                    return ipAddress.Item1;
 
-            return ipAddresses.FirstOrDefault();
+            return ipAddresses.First().Item1;
         }
 
         #endregion
