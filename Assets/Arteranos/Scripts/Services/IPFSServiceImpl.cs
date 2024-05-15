@@ -233,16 +233,25 @@ namespace Arteranos.Services
 
         private IEnumerator DiscoverPeersCoroutine()
         {
-            TransitionProgressStatic.Instance.OnProgressChanged(0.70f, "Discovering other servers");
+            async Task<List<Peer>> DoDiscovery()
+            {
+                IEnumerable<Peer> peers = await ipfs.Routing.FindProvidersAsync(IdentifyCid,
+                    1000, // FIXME Maybe configurable.
+                    _peer => OnDiscoveredPeer(_peer)).ConfigureAwait(false);
+
+                return peers.ToList();
+            }
+
+            TransitionProgressStatic.Instance?.OnProgressChanged(0.70f, "Discovering other servers");
 
             Debug.Log($"Starting node discovery: Identifier file's CID is {IdentifyCid}");
             while(true)
             {
-                Task<IEnumerable<Peer>> taskPeers = ipfs.Routing.FindProvidersAsync(IdentifyCid, 
-                    1000, // FIXME Maybe configurable.
-                    _peer => OnDiscoveredPeer(_peer));
+                Debug.Log("Deploying peer search");
 
-                yield return Asyncs.Async2Coroutine(taskPeers);
+                List<Peer> peers = null;
+                yield return Asyncs.Async2Coroutine(DoDiscovery(), _p => peers = _p);
+                Debug.Log($"Finished peer search, overall discovered peer: {peers.Count()}");
 
                 yield return new WaitForSeconds(heartbeatSeconds * 2);
             }
