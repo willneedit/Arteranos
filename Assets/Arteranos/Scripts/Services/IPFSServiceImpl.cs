@@ -428,7 +428,7 @@ namespace Arteranos.Services
                 // Server description is published under the peer ID. (= self)
                 // If it's cached, it's already in the local repo.
                 // And the TTL reduce the traffic.
-                Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID, cts.Token).ConfigureAwait(false);
+                using Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID, cts.Token).ConfigureAwait(false);
 
                 // TODO Maybe unneccessary?
                 PublicKey pk = PublicKey.FromId(SenderPeerID);

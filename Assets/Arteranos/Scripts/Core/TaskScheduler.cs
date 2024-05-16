@@ -21,7 +21,7 @@ namespace Arteranos.Core
 
         public int PoolSize { get; set; } = 10;
 
-        private ConcurrentQueue<Func<Task>> Queued = new();
+        private readonly ConcurrentQueue<Func<Task>> Queued = new();
         private int Current = 0;
 
         private void Awake() => Instance = this;
