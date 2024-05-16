@@ -108,6 +108,9 @@ namespace Arteranos.UI
             StartCoroutine(ExecuteCoroutine());
         }
 
+        private float _progress = 0.0f;
+        private string _caption = "";
+
         protected void Update()
         {
             TimeSpan elapsed = DateTime.Now - startTime;
@@ -134,6 +137,11 @@ namespace Arteranos.UI
                 // Then, it could be still taking a while...
                 Panel.gameObject.SetActive(true);
             }
+            else
+            {
+                sld_progress.value = _progress;
+                txt_caption.text = _caption;
+            }
         }
 
         public void SetupAsyncOperations(Func<(AsyncOperationExecutor<Context>, Context)> setupFunc, bool cancelable = true, string tip = null)
@@ -145,8 +153,8 @@ namespace Arteranos.UI
 
         private void OnProgressChanged(float progress, string caption)
         {
-            sld_progress.value= progress;
-            txt_caption.text= caption;
+            _progress = progress;
+            _caption = caption;
         }
 
         private void OnCompleted(Context context) => Completed?.Invoke(context);
