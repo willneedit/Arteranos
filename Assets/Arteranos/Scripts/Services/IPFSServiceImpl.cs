@@ -452,12 +452,7 @@ namespace Arteranos.Services
                 return;
             }
 
-            if (!found.Addresses.Any())
-            {
-                Debug.Log($"Discovered node {peerId} has no addresses, skipping.");
-                return;
-            }
-
+            // TODO Better task pool to simply dump the tasks to be served.
             ServerDescription serverDescription = ServerDescription.DBLookup(peerId.ToString());
             if(serverDescription == null)
             {
