@@ -25,6 +25,7 @@ using System.Collections.Concurrent;
 using IPAddress = System.Net.IPAddress;
 using Arteranos.Core.Operations;
 using System.Net.Sockets;
+using TaskScheduler = Arteranos.Core.TaskScheduler;
 
 namespace Arteranos.Services
 {
@@ -37,9 +38,6 @@ namespace Arteranos.Services
         public override Cid CurrentSDCid_ { get; protected set; } = null;
 
         public static string CachedPTOSNotice { get; private set; } = null;
-
-        public override event Action<IPublishedMessage> OnReceivedHello_;
-        public override event Action<IPublishedMessage> OnReceivedServerDirectMessage_;
 
         private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
 
@@ -248,11 +246,8 @@ namespace Arteranos.Services
             Debug.Log($"Starting node discovery: Identifier file's CID is {IdentifyCid}");
             while(true)
             {
-                Debug.Log("Deploying peer search");
-
                 List<Peer> peers = null;
                 yield return Asyncs.Async2Coroutine(DoDiscovery(), _p => peers = _p);
-                Debug.Log($"Finished peer search, overall discovered peer: {peers.Count()}");
 
                 yield return new WaitForSeconds(heartbeatSeconds * 2);
             }
@@ -408,11 +403,11 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region Peer communication and data exchange
 
-        private async Task<bool> ParseServerOnlineData(ServerOnlineData sod, Peer SenderPeer)
+        private bool ParseServerOnlineData(ServerOnlineData sod, Peer SenderPeer)
         {
             // If necessary, update the server description, too.
             // IPNS caching will work against flooding.
-            await DownloadServerDescription(SenderPeer.Id.ToString());
+            DownloadServerDescription(SenderPeer.Id.ToString());
 
             // Set on receive, no sense to transmit the actual time.
             // In this context, latencies don't matter.
@@ -424,20 +419,31 @@ namespace Arteranos.Services
             return true;
         }
 
-        private async Task DownloadServerDescription(MultiHash SenderPeerID)
+        private void DownloadServerDescription(MultiHash SenderPeerID)
         {
-            using CancellationTokenSource cts = new(500);
+            async Task DownloadTask(MultiHash SenderPeerID)
+            {
+                CancellationTokenSource cts = new(5000);
 
-            // Server description is published under the peer ID. (= self)
-            // If it's cached, it's already in the local repo.
-            // And the TTL reduce the traffic.
-            Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID, cts.Token);
+                // Server description is published under the peer ID. (= self)
+                // If it's cached, it's already in the local repo.
+                // And the TTL reduce the traffic.
+                Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID, cts.Token).ConfigureAwait(false);
 
-            // TODO Maybe unneccessary?
-            PublicKey pk = PublicKey.FromId(SenderPeerID);
-            ServerDescription sd = ServerDescription.Deserialize(pk, s);
+                // TODO Maybe unneccessary?
+                PublicKey pk = PublicKey.FromId(SenderPeerID);
+                ServerDescription sd = ServerDescription.Deserialize(pk, s);
 
-            sd.DBUpdate();
+                sd.DBUpdate();
+            }
+
+            Func<Task> MakeDownloadTask(MultiHash SenderPeerID)
+            {
+                Task a() => DownloadTask(SenderPeerID);
+                return a;
+            }
+
+            TaskScheduler.Schedule(MakeDownloadTask(SenderPeerID));
         }
 
         private void OnDiscoveredPeer(Peer found)
@@ -457,10 +463,10 @@ namespace Arteranos.Services
             if(serverDescription == null)
             {
                 Debug.Log($"Discovered node {peerId} is new, downloading data");
-                _ = DownloadServerDescription(peerId).ConfigureAwait(false);
+                DownloadServerDescription(peerId);
             }
             else
-                Debug.Log($"Discovered node {peerId} added.");
+                Debug.Log($"Rediscovered node {peerId}.");
         }
         #endregion
         // ---------------------------------------------------------------

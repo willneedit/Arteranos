@@ -43,7 +43,7 @@ namespace Arteranos.PlayTest
             Func<Task> NewMethod(int number)
             {
                 int duration = Random.Range(200, 1000);
-                Func<Task> a = () => TestTask(number, duration);
+                Task a() => TestTask(number, duration);
                 return a;
             }
 
@@ -59,8 +59,6 @@ namespace Arteranos.PlayTest
             yield return new WaitUntil(() => numfinished == 100);
 
             Debug.Log("All tasks accounted for.");
-
-            Assert.False(Core.TaskScheduler.Instance.isActiveAndEnabled);
 
         }
     }

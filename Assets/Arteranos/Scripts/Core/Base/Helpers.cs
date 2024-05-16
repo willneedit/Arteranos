@@ -292,9 +292,6 @@ namespace Arteranos.Services
         public abstract Cid IdentifyCid_ { get; protected set; }
         public abstract Cid CurrentSDCid_ { get; protected set; }
 
-        public abstract event Action<IPublishedMessage> OnReceivedHello_;
-        public abstract event Action<IPublishedMessage> OnReceivedServerDirectMessage_;
-
         public abstract Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default);
         public abstract Task FlipServerDescription_(bool reload);
         public abstract Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);

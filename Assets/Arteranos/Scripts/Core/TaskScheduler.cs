@@ -5,7 +5,9 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using JetBrains.Annotations;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,16 +30,18 @@ namespace Arteranos.Core
 
         void Update()
         {
-            if(!DequeueTask())
-                gameObject.SetActive(false);
+            DequeueTask();
         }
 
+        /// <summary>
+        /// Queue a task to be executed in an opportune time.
+        /// </summary>
+        /// <param name="task"><see langword="async"/>function returning <see cref="Task"/>.</param>
         public static void Schedule(Func<Task> task) => Instance.Schedule_(task);
 
         private void Schedule_(Func<Task> task)
         {
             Queued.Enqueue(task);
-            gameObject.SetActive(true);
         }
 
         private Task ExecuteTask(Func<Task> task)
