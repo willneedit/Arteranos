@@ -5,13 +5,14 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using JetBrains.Annotations;
+using Codice.CM.Common;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Arteranos.Core
 {
@@ -20,17 +21,19 @@ namespace Arteranos.Core
         public static TaskScheduler Instance = null;
 
         public int PoolSize { get; set; } = 10;
+        public int DequeuesPerUpdate { get; set; } = 10;
 
-        private readonly ConcurrentQueue<Func<Task>> Queued = new();
+        private readonly ConcurrentQueue<Func<Task>> TaskQueued = new();
+        private readonly ConcurrentQueue<Action> CallbackQueued = new();
         private int Current = 0;
 
         private void Awake() => Instance = this;
-
         private void OnDestroy() => Instance = null;
-
         void Update()
         {
             DequeueTask();
+
+            DequeueCallback();
         }
 
         /// <summary>
@@ -39,10 +42,16 @@ namespace Arteranos.Core
         /// <param name="task"><see langword="async"/>function returning <see cref="Task"/>.</param>
         public static void Schedule(Func<Task> task) => Instance.Schedule_(task);
 
-        private void Schedule_(Func<Task> task)
-        {
-            Queued.Enqueue(task);
-        }
+        /// <summary>
+        /// Place a callback action from an async task.
+        /// </summary>
+        /// <param name="callback">The callback to be placed within the next couple of frames</param>
+        public static void ScheduleCallback(Action callback) => Instance.ScheduleCallback_(callback);
+
+
+
+        private void Schedule_(Func<Task> task) => TaskQueued.Enqueue(task);
+        private void ScheduleCallback_(Action callback) => CallbackQueued.Enqueue(callback);
 
         private Task ExecuteTask(Func<Task> task)
         {
@@ -63,17 +72,40 @@ namespace Arteranos.Core
 
         private bool DequeueTask()
         {
-            if (Current >= PoolSize) return true; // Still needed to check.
+            for (int i = 0; i < DequeuesPerUpdate; i++)
+            {
 
-            if (!Queued.TryDequeue(out Func<Task> task)) return false; // Running empty, the scheduler itself can be switched off
+                if (Current >= PoolSize) return true; // Still needed to check.
 
-            Interlocked.Increment(ref Current);
+                if (!TaskQueued.TryDequeue(out Func<Task> task)) return false; // Running empty, the scheduler itself can be switched off
 
-            // Send off the soon-to-be-active task
-            _ = ExecuteTask(task).ConfigureAwait(false);
+                Interlocked.Increment(ref Current);
+
+                // Send off the soon-to-be-active task
+                _ = ExecuteTask(task).ConfigureAwait(false);
+            }
 
             return true;
         }
 
+        private void DequeueCallback()
+        {
+            for(int i = 0; i < DequeuesPerUpdate; i++)
+            {
+                if (!CallbackQueued.TryDequeue(out Action callback)) return;
+
+                try
+                {
+                    Stopwatch sw = Stopwatch.StartNew();
+                    callback?.Invoke();
+                    if (sw.ElapsedMilliseconds > 2)
+                        Debug.LogWarning($"Callback took more than 2 ms from the main thread!");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
+        }
     }
 }

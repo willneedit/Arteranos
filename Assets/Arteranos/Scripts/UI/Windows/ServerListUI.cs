@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -71,7 +70,10 @@ namespace Arteranos.UI
         private void OnReloadClicked()
         {
             static Task DoUpdate(ServerListItem server)
-                => server.UpdateServerData();
+            {
+                server.UpdateServerData();
+                return Task.CompletedTask;
+            }
 
             IEnumerator ReloadCoroutine()
             {

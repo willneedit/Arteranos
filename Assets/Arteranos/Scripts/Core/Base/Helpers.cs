@@ -296,7 +296,7 @@ namespace Arteranos.Services
         public abstract Task FlipServerDescription_(bool reload);
         public abstract Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);
         public abstract Task<byte[]> ReadBinary_(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
-
+        public abstract void DownloadServerOnlineData_(MultiHash SenderPeerID, Action callback = null);
         public static IPFSService Instance { get; protected set; }
 
         public static Peer Self 
@@ -323,6 +323,9 @@ namespace Arteranos.Services
             => await Instance.Ipfs_.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
         public static async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
             => await Instance.ReadBinary_(path, reportProgress, cancel).ConfigureAwait(false);
+        public static void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null)
+            => Instance.DownloadServerOnlineData_(SenderPeerID, callback);
+
         public static async Task<Stream> Get(string path, CancellationToken cancel = default)
             => await Instance.Ipfs_.FileSystem.GetAsync(path, cancel: cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
