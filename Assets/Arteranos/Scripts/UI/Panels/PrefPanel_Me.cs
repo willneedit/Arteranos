@@ -84,12 +84,14 @@ namespace Arteranos.UI
         // outside means, like the Login panel.
         protected override void OnEnable()
         {
-            IEnumerator DownloadIcon(Cid icon)
+            void DownloadIcon(Cid icon)
             {
                 using CancellationTokenSource cts = new(5000);
 
-                yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data, cts.Token);
-                bar_IconSelector.TriggerUpdate();
+                Utils.DownloadData(icon, _data => {
+                    bar_IconSelector.IconData = _data;
+                    bar_IconSelector.TriggerUpdate();
+                }, cts.Token);
             }
 
             base.OnEnable();
@@ -106,7 +108,7 @@ namespace Arteranos.UI
             tro_UserID.text = cs.GetFingerprint(fpmode);
             sldn_AvatarHeight.value = cs.AvatarHeight;
 
-            StartCoroutine(DownloadIcon(cs.Me.UserIconCid));
+            DownloadIcon(cs.Me.UserIconCid);
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;

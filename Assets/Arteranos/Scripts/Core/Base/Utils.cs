@@ -237,7 +237,27 @@ namespace Arteranos.Core
             callback?.Invoke(t.Result ? tex : null);
         }
 
-        public static IEnumerator DownloadDataCoroutine(string dataPath, Action<byte[]> callback, CancellationToken cancel = default)
+        public static void DownloadData(string dataPath, Action<byte[]> callback, CancellationToken cancel = default)
+        {
+            async Task DownloadTask(string dataPath)
+            {
+                byte[] contents = await IPFSService.ReadBinary(dataPath, cancel: cancel);
+
+                TaskScheduler.ScheduleCallback(() => callback?.Invoke(contents));
+            }
+
+            Func<Task> MakeDownloadTask(string dataPath)
+            {
+                Task a() => DownloadTask(dataPath);
+                return a;
+            }
+
+            if (string.IsNullOrEmpty(dataPath)) return;
+
+            TaskScheduler.Schedule(MakeDownloadTask(dataPath));
+        }
+
+        private static IEnumerator DownloadDataCoroutine(string dataPath, Action<byte[]> callback, CancellationToken cancel = default)
         {
             if (dataPath == null) yield break;
 
