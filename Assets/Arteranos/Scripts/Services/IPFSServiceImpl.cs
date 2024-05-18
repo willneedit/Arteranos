@@ -262,7 +262,7 @@ namespace Arteranos.Services
                 return peers.ToList();
             }
 
-            TransitionProgressStatic.Instance?.OnProgressChanged(0.70f, "Discovering other servers");
+            // TransitionProgressStatic.Instance?.OnProgressChanged(0.70f, "Discovering other servers");
 
             Debug.Log($"Starting node discovery");
             while(true)
@@ -317,7 +317,7 @@ namespace Arteranos.Services
 
         public IEnumerator EmitServerDescriptionCoroutine()
         {
-            TransitionProgressStatic.Instance?.OnProgressChanged(0.80f, "Publishing server information");
+            // TransitionProgressStatic.Instance?.OnProgressChanged(0.80f, "Publishing server information");
 
             while (true)
             {

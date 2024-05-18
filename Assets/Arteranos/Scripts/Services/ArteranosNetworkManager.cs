@@ -904,6 +904,7 @@ namespace Arteranos.Services
                 ss.Description = conf.Description;
                 ss.Permissions = conf.Permissions;
                 ss.Public = conf.Public;
+                ss.ServerIcon = conf.ServerIcon;
 
                 ss.Save();
                 _ = IPFSService.FlipServerDescription(true);
