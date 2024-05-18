@@ -26,8 +26,8 @@ using IPAddress = System.Net.IPAddress;
 using Arteranos.Core.Operations;
 using System.Net.Sockets;
 using TaskScheduler = Arteranos.Core.TaskScheduler;
-using PlasticGui.Help.NewVersions;
 using ProtoBuf;
+using Ipfs.CoreApi;
 
 namespace Arteranos.Services
 {
@@ -99,7 +99,6 @@ namespace Arteranos.Services
                 try
                 {
                     self = await ipfsTmp.IdAsync();
-                    Debug.Log($"IPFS Node's ID: {self.Id}");
                 }
                 catch
                 {
@@ -148,12 +147,28 @@ namespace Arteranos.Services
 
                 TransitionProgressStatic.Instance.OnProgressChanged(0.30f, "Announcing its service");
 
-                // Put up the identifier file
                 StringBuilder sb = new();
                 sb.Append("Arteranos Server, built by willneedit\n");
                 sb.Append(Core.Version.VERSION_MIN);
 
-                IdentifyCid_ = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString())).Id;
+                // Put up the identifier file
+                if (SettingsManager.Server.Public)
+                {
+                    IdentifyCid_ = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString())).Id;
+                }
+                else
+                {
+                    // rm -f the identifier file
+                    AddFileOptions ao = new() { OnlyHash = true };
+                    IdentifyCid_ = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString(), ao)).Id;
+
+                    try
+                    {
+                        await ipfsTmp.Pin.RemoveAsync(IdentifyCid_).ConfigureAwait(false);
+                        await ipfsTmp.Block.RemoveAsync(IdentifyCid_, true).ConfigureAwait(false);
+                    }
+                    catch { }
+                }
 
                 IEnumerable<IKey> keychain = await ipfsTmp.Key.ListAsync();
 
@@ -173,9 +188,13 @@ namespace Arteranos.Services
                     sod_key_id = key.Id;
                 }
 
-                Debug.Log($"Server Online Data publish key: {sod_key_id}");
-
-                Debug.Log("IPFS Daemon init complete.");
+                Debug.Log("---- IPFS Daemon init complete ----\n" +
+                    $"IPFS Node's ID\n" +
+                    $"   {self.Id}\n" +
+                    $"Discovery identifier file's CID\n" +
+                    $"   {IdentifyCid}\n" +
+                    $"Server Online Data publish key\n" +
+                    $"   {sod_key_id}\n");
 
                 ipfs = ipfsTmp;
 
@@ -245,7 +264,7 @@ namespace Arteranos.Services
 
             TransitionProgressStatic.Instance?.OnProgressChanged(0.70f, "Discovering other servers");
 
-            Debug.Log($"Starting node discovery: Identifier file's CID is {IdentifyCid}");
+            Debug.Log($"Starting node discovery");
             while(true)
             {
                 List<Peer> peers = null;
@@ -360,13 +379,18 @@ namespace Arteranos.Services
             var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerDescription").ConfigureAwait(false);
             CurrentSDCid_ = fsn.Id;
 
-            // Lasting for two day max, cache refresh needs one minute
-            await ipfs.NameEx.PublishAsync(
-                CurrentSDCid,
-                lifetime: new TimeSpan(2, 0, 0, 0),
-                ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
+            if(SettingsManager.Server.Public)
+            {
+                // Lasting for two days max, cache refresh needs one minute
+                await ipfs.NameEx.PublishAsync(
+                    CurrentSDCid,
+                    lifetime: new TimeSpan(2, 0, 0, 0),
+                    ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
 
-            Debug.Log($"Published server description CID: {CurrentSDCid_}");
+                Debug.Log($"Published server description CID: {CurrentSDCid_}");
+            }
+            else
+                Debug.Log($"Server description CID would be: {CurrentSDCid_}");
         }
 
         private async Task FlipServerOnlineData_()
@@ -381,7 +405,7 @@ namespace Arteranos.Services
                 CurrentWorldCid = SettingsManager.WorldCid,
                 CurrentWorldName = SettingsManager.WorldName,
                 UserFingerprints = UserFingerprints,
-                LastOnline = last,
+                // LastOnline = last, // Not serialized - set on receive
                 OnlineLevel = NetworkStatus.GetOnlineLevel()
             };
 
@@ -393,12 +417,12 @@ namespace Arteranos.Services
 
             // Lasting for five minutes, ttl 30s, under the secondary key
             await ipfs.NameEx.PublishAsync(
-                CurrentSDCid,
+                fsn.Id,
                 key: "key_sod",
                 lifetime: new TimeSpan(0, 5, 0),
                 ttl: new TimeSpan(0, 0, 30)).ConfigureAwait(false);
 
-            Debug.Log($"Published server online data to {sod_key_id}");
+            // Debug.Log($"Published server online data to {sod_key_id}");
         }
 
         #endregion
@@ -445,6 +469,9 @@ namespace Arteranos.Services
 
                     using Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + sd.ServerOnlineDataLinkCid).ConfigureAwait(false);
                     ServerOnlineData sod = Serializer.Deserialize<ServerOnlineData>(s);
+
+                    sod.LastOnline = DateTime.UtcNow; // Not serialized
+
                     sod.DBInsert(SenderPeerID.ToString());
                 }
                 catch (Exception e)

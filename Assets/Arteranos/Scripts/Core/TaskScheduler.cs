@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Codice.CM.Common;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
