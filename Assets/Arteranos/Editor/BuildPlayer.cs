@@ -14,6 +14,12 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Newtonsoft.Json;
 using System;
+using Unity.EditorCoroutines.Editor;
+using System.Collections.Generic;
+using System.Collections;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.IO.Compression;
 
 namespace Arteranos
 {
@@ -31,7 +37,7 @@ namespace Arteranos
                 Arguments = "describe --tags --long",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
-                WindowStyle = ProcessWindowStyle.Hidden
+                CreateNoWindow = true,
             };
 
             using Process process = Process.Start(psi);
@@ -90,6 +96,80 @@ namespace Arteranos
 
             AssetDatabase.Refresh();
         }
+
+        [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon", false, 90)]
+        public static void RetrieveIPFSDaemon()
+            => RetrieveIPFSDaemon(false);
+
+        public static void RetrieveIPFSDaemon(bool silent)
+        {
+            string IPFSExe = "ipfs.exe";
+
+            IEnumerator AcquireIPFSExecutable()
+            {
+                string source = "https://github.com/ipfs/kubo/releases/download/v0.28.0/kubo_v0.28.0_windows-amd64.zip";
+                // TODO sha512
+                string target = $"{Application.temporaryCachePath}/downloaded-kubo-ipfs.zip";
+                string targetDir = $"{target}.dir";
+                string desired = $"{targetDir}/kubo/ipfs.exe";
+                long totalBytes = 0;
+
+                Debug.Log(Directory.GetCurrentDirectory());
+
+                // Earlier sessions may have it.
+                if (File.Exists(IPFSExe))
+                {
+                    if(!silent) Debug.Log($"ipfs.exe is already there, maybe you want to manually delete it?");
+                    IPFSExe = desired;
+                    yield break;
+                }
+
+                Debug.Log($"Downloading {source}...");
+
+                Task taskDownload = Task.Run(async () =>
+                {
+                    if (File.Exists(target)) File.Delete(target);
+
+                    using HttpClient client = new();
+                    client.Timeout = TimeSpan.FromSeconds(60);
+                    using HttpResponseMessage response = await client.GetAsync(source).ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+                    totalBytes = response.Content.Headers.ContentLength ?? -1;
+                    byte[] binary = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                    using Stream s = File.Create(target);
+                    s.Write(binary, 0, binary.Length);
+                    s.Flush();
+                    s.Close();
+                });
+
+                yield return new WaitUntil(() => taskDownload.IsCompleted);
+
+                Debug.Log($"Unzipping {targetDir}...");
+
+                Task taskUnzip = Task.Run(() =>
+                {
+                    if (Directory.Exists(targetDir)) Directory.Delete(targetDir, true);
+
+                    try
+                    {
+                        ZipFile.ExtractToDirectory(target, targetDir);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogException(ex);
+                    }
+                });
+
+                yield return new WaitUntil(() => taskDownload.IsCompleted);
+
+                if (File.Exists(desired)) File.Copy(desired, IPFSExe);
+
+                Debug.Log("Done.");
+            }
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(AcquireIPFSExecutable());
+        }
+
 
         [MenuItem("Arteranos/Build/Update Project Version", false, 101)]
         public static void SetVersion()
@@ -192,8 +272,8 @@ namespace Arteranos
                     Arguments = argline,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    WorkingDirectory = "build"
+                    WorkingDirectory = "build",
+                    CreateNoWindow = true,
                 };
 
                 using Process process = Process.Start(psi);

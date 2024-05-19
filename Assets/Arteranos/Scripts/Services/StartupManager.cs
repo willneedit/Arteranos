@@ -46,7 +46,7 @@ namespace Arteranos.Services
 
             yield return new WaitUntil(() => TransitionProgressStatic.Instance != null);
 
-            TransitionProgressStatic.Instance.OnProgressChanged(0.10f, "Starting up");
+            TransitionProgressStatic.Instance.OnProgressChanged(0.00f, "Starting up");
 
             IPFSService.Instance.enabled = true;
 

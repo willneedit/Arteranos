@@ -29,6 +29,8 @@ using TaskScheduler = Arteranos.Core.TaskScheduler;
 using ProtoBuf;
 using Ipfs.CoreApi;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 namespace Arteranos.Services
 {
@@ -49,6 +51,8 @@ namespace Arteranos.Services
         private IpfsClientEx ipfs = null;
         private Peer self = null;
         private SignKey serverKeyPair = null;
+
+        private string IPFSExe = "ipfs.exe";
 
         private DateTime last = DateTime.MinValue;
 
@@ -71,8 +75,44 @@ namespace Arteranos.Services
 
         private void Start()
         {
+            IpfsClientEx ipfsTmp = new();
+
             IEnumerator InitializeIPFSCoroutine()
             {
+                // First, see if there is an already running and accessible IPFS daemon.
+                {
+                    self = null;
+                    yield return Asyncs.Async2Coroutine(ipfsTmp.IdAsync(), _self => self = _self, _e =>
+                    {
+                        // No daemon, but that's okay. Yet.
+                    });
+                }
+
+                // If not....
+                if (self == null)
+                {
+                    IPFSExe = "ipfs.exe";
+
+                    // In App: Next to the Arteranos (dedicated server) executable
+                    // In Editor: Project root, ignored in Git repo, generated along with the project build
+                    yield return FindIPFSExecutable();
+
+                    // Even worse...
+                    if (IPFSExe == null)
+                    {
+                        TransitionProgressStatic.Instance.OnProgressChanged(0.00f, "No IPFS daemon -- aborting!");
+
+                        yield return new WaitForSeconds(10);
+
+                        Debug.LogError("Cannot find any ipfs executable!");
+                        SettingsManager.Quit();
+                        yield break;
+                    }
+
+                    // If there isn't a repo, initialize it, and start the daenon afterwards.
+                    yield return StartupIPFSExeCoroutine();
+                }
+
                 // Keep the IPFS synced - it needs the IPFS node alive.
                 yield return Asyncs.Async2Coroutine(InitializeIPFS());
 
@@ -88,25 +128,143 @@ namespace Arteranos.Services
                 // Start to emit the server online data.
                 StartCoroutine(EmitServerOnlineDataCoroutine());
             }
-
-            async Task InitializeIPFS()
+            
+            IEnumerator FindIPFSExecutable()
             {
-                // TODO Daemon Startup
-                IpfsClientEx ipfsTmp;
+                bool IPFSAccessible()
+                {
+                    ProcessStartInfo psi = new()
+                    {
+                        FileName = IPFSExe,
+                        Arguments = "",
+                        UseShellExecute = false,
+                        RedirectStandardError = false,
+                        RedirectStandardInput = false,
+                        RedirectStandardOutput = false,
+                        CreateNoWindow = true,
+                    };
 
-                ipfs = null;
-                ipfsTmp = new();
+                    try
+                    {
+                        Process process = Process.Start(psi);
+                        return true;
+                    }
+                    catch
+                    {
+                        Debug.LogWarning("No installed IPFS daemon available - needs to be acquired");
+                    }
+
+                    return false;
+                }
+
+                if (!IPFSAccessible())
+                {
+                    IPFSExe = null;
+                    yield break;
+                }
+            }
+
+            IEnumerator StartupIPFSExeCoroutine()
+            {
+                PrivateKey pk = null;
 
                 try
                 {
-                    self = await ipfsTmp.IdAsync();
+                    pk = ipfsTmp.ReadDaemonPrivateKey();
                 }
                 catch
                 {
-                    Debug.LogError($"Cannot create client RPC");
-                    SettingsManager.Quit();
-                    return;
                 }
+
+                if(pk == null)
+                {
+                    Debug.LogWarning("No IPFS repo, initializing...");
+                    TransitionProgressStatic.Instance.OnProgressChanged(0.15f, "Initializing IPFS repository");
+                    TryInitIPFS();
+
+                    yield return new WaitForSeconds(2);
+                }
+
+                TransitionProgressStatic.Instance.OnProgressChanged(0.20f, "Starting IPFS daemon");
+
+                TryStartIPFS();
+
+                for(int i = 0; i < 5; i++)
+                {
+                    yield return new WaitForSeconds(1);
+
+                    Task<Peer> t = ipfsTmp.IdAsync();
+
+                    yield return new WaitUntil(() => t.IsCompleted);
+
+                    if (t.IsCompletedSuccessfully)
+                    {
+                        self = t.Result;
+                        yield break;
+                    }
+                }
+
+                TransitionProgressStatic.Instance.OnProgressChanged(0.00f, "Failed to start daemon");
+                yield return new WaitForSeconds(10);
+                SettingsManager.Quit();
+            }
+
+            bool TryStartIPFS()
+            {
+                ProcessStartInfo psi = new()
+                {
+                    FileName = IPFSExe,
+                    Arguments = "daemon",
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardInput = false,
+                    RedirectStandardOutput = false,
+                    CreateNoWindow = true,
+                };
+
+                try
+                {
+                    Process process = Process.Start(psi);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                    return false;
+                }
+
+                return true;
+            }
+
+            bool TryInitIPFS()
+            {
+                ProcessStartInfo psi = new()
+                {
+                    FileName = IPFSExe,
+                    Arguments = "init",
+                    UseShellExecute = false,
+                    RedirectStandardError = false,
+                    RedirectStandardInput = false,
+                    RedirectStandardOutput = false,
+                    CreateNoWindow = true,
+                };
+
+                try
+                {
+                    Process process = Process.Start(psi);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                    return false;
+                }
+
+                return true;
+            }
+
+            async Task InitializeIPFS()
+            {
+                ipfs = null;
+                if (self == null) throw new InvalidOperationException("Dead daemon");
 
                 PrivateKey pk = ipfsTmp.ReadDaemonPrivateKey();
 
@@ -206,6 +364,7 @@ namespace Arteranos.Services
                 TransitionProgressStatic.Instance?.OnProgressChanged(0.40f, "Connected to IPFS");
             }
 
+            ipfs = null;
             IdentifyCid_ = null;
             last = DateTime.MinValue;
             DiscoveredPeers = new();
@@ -312,7 +471,7 @@ namespace Arteranos.Services
             return ipAddresses.First().Item1;
         }
 
-        #endregion
+#endregion
         // ---------------------------------------------------------------
         #region Server information publishing
 
