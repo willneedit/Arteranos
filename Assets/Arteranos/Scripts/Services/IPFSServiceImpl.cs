@@ -347,44 +347,87 @@ namespace Arteranos.Services
 
         public override async Task FlipServerDescription_(bool reload)
         {
+            async Task<IFileSystemNode> CreateSDFile()
+            {
+                Server server = SettingsManager.Server;
+                IEnumerable<string> q = from entry in SettingsManager.ServerUsers.Base
+                                        where UserState.IsSAdmin(entry.userState)
+                                        select ((string)entry.userID);
+
+                ServerDescription ServerDescription = new()
+                {
+                    Name = server.Name,
+                    ServerPort = server.ServerPort,
+                    MetadataPort = server.MetadataPort,
+                    Description = server.Description,
+                    ServerIcon = server.ServerIcon,
+                    Version = versionString,
+                    MinVersion = Core.Version.VERSION_MIN,
+                    Permissions = server.Permissions,
+                    PrivacyTOSNotice = CachedPTOSNotice,
+                    AdminNames = q.ToArray(),
+                    PeerID = self.Id.ToString(),
+                    LastModified = server.ConfigLastChanged,
+                    ServerOnlineDataLinkCid = sod_key_id
+                };
+
+                using MemoryStream ms = new();
+                ServerDescription.Serialize(serverKeyPair, ms);
+                ms.Position = 0;
+                return await ipfs.FileSystem.AddAsync(ms, "ServerDescription").ConfigureAwait(false);
+            }
+
+            async Task<IFileSystemNode> CreateTOSFile()
+            {
+                using MemoryStream ms = new(Encoding.UTF8.GetBytes(CachedPTOSNotice));
+                ms.Position = 0;
+                return await ipfs.FileSystem.AddAsync(ms, "Privacy_TOS_Notice.md").ConfigureAwait(!false);
+            }
+
+            async Task<IFileSystemNode> CreateLauncherHTMLFile()
+            {
+                string linkto = $"arteranos://{self.Id}/";
+                string html
+    = "<html>\n"
+    + "<head>\n"
+    + "<title>Launch Arteranos connection</title>\n"
+    + $"<meta http-equiv=\"refresh\" content=\"0; url={linkto}\" />\n"
+    + "</head>\n"
+    + "<body>\n"
+    + $"Trouble with redirection? <a href=\"{linkto}\">Click here.</a>\n"
+    + "</body>\n"
+    + "</html>\n";
+
+                using MemoryStream ms = new(Encoding.UTF8.GetBytes(html));
+                ms.Position = 0;
+                return await ipfs.FileSystem.AddAsync(ms, "launcher.html").ConfigureAwait(!false);
+            }
+
+            async Task<IFileSystemNode> CreateServerDescription()
+            {
+                List<IFileSystemLink> list = new()
+                {
+                    (await CreateSDFile().ConfigureAwait(false)).ToLink(),
+                    (await CreateTOSFile().ConfigureAwait(false)).ToLink(),
+                    (await CreateLauncherHTMLFile().ConfigureAwait(false)).ToLink()
+                };
+
+                return await CreateDirectoryAsync(list).ConfigureAwait(false);
+            }
+
             if (CurrentSDCid_ != null)
                 _ = Ipfs_.Pin.RemoveAsync(CurrentSDCid_);
 
             if (!reload) return;
 
-            Server server = SettingsManager.Server;
-            IEnumerable<string> q = from entry in SettingsManager.ServerUsers.Base
-                                    where UserState.IsSAdmin(entry.userState)
-                                    select ((string)entry.userID);
-
-            ServerDescription ServerDescription = new()
-            {
-                Name = server.Name,
-                ServerPort = server.ServerPort,
-                MetadataPort = server.MetadataPort,
-                Description = server.Description,
-                ServerIcon = server.ServerIcon,
-                Version = versionString,
-                MinVersion = Core.Version.VERSION_MIN,
-                Permissions = server.Permissions,
-                PrivacyTOSNotice = CachedPTOSNotice,
-                AdminNames = q.ToArray(),
-                PeerID = self.Id.ToString(),
-                LastModified = server.ConfigLastChanged,
-                ServerOnlineDataLinkCid = sod_key_id
-            };
-
-            using MemoryStream ms = new();
-            ServerDescription.Serialize(serverKeyPair, ms);
-            ms.Position = 0;
-            var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerDescription").ConfigureAwait(false);
+            IFileSystemNode fsn = await CreateServerDescription().ConfigureAwait(false);
             CurrentSDCid_ = fsn.Id;
 
-            if(SettingsManager.Server.Public)
+            if (SettingsManager.Server.Public)
             {
                 // Lasting for two days max, cache refresh needs one minute
                 await ipfs.NameEx.PublishAsync(
-                    CurrentSDCid,
+                    CurrentSDCid_,
                     lifetime: new TimeSpan(2, 0, 0, 0),
                     ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
 
@@ -392,6 +435,7 @@ namespace Arteranos.Services
             }
             else
                 Debug.Log($"Server description CID would be: {CurrentSDCid_}");
+
         }
 
         private async Task FlipServerOnlineData_()
@@ -475,7 +519,7 @@ namespace Arteranos.Services
                 // Server description is published under the peer ID. (= self)
                 // If it's cached, it's already in the local repo.
                 // And the TTL reduce the traffic.
-                using Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID, cts.Token).ConfigureAwait(false);
+                using Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID + "/ServerDescription", cts.Token).ConfigureAwait(false);
 
                 // TODO Maybe unneccessary?
                 PublicKey pk = PublicKey.FromId(SenderPeerID);
@@ -543,7 +587,6 @@ namespace Arteranos.Services
                 return;
             }
 
-            // TODO Better task pool to simply dump the tasks to be served.
             ServerDescription serverDescription = ServerDescription.DBLookup(peerId.ToString());
             if(serverDescription == null)
             {
