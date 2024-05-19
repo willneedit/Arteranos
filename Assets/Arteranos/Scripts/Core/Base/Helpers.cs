@@ -29,6 +29,7 @@ using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using AsyncOperation = UnityEngine.AsyncOperation;
+using Ipfs.Http;
 
 namespace Arteranos.Avatar
 {
@@ -297,6 +298,7 @@ namespace Arteranos.Services
         public abstract Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);
         public abstract Task<byte[]> ReadBinary_(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
         public abstract void DownloadServerOnlineData_(MultiHash SenderPeerID, Action callback = null);
+        public abstract Task<FileSystemNode> CreateDirectoryAsync_(IEnumerable<IFileSystemLink> links, CancellationToken cancel);
         public static IPFSService Instance { get; protected set; }
 
         public static Peer Self 
@@ -338,6 +340,9 @@ namespace Arteranos.Services
             => await Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel).ConfigureAwait(false);
         public static async Task RemoveGarbage(CancellationToken cancel = default)
             => await Instance.Ipfs_.BlockRepository.RemoveGarbageAsync(cancel).ConfigureAwait(false);
+        public static async Task<FileSystemNode> CreateDirectoryAsync(IEnumerable<IFileSystemLink> links, CancellationToken cancel = default)
+            => await Instance.CreateDirectoryAsync_(links, cancel).ConfigureAwait(false);
+
         public static async Task<Cid> ResolveToCid(string path, CancellationToken cancel = default)
         {
             string resolved = await Instance.Ipfs_.ResolveAsync(path, cancel: cancel).ConfigureAwait(false);
