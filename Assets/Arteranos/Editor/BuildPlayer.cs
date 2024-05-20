@@ -302,8 +302,8 @@ namespace Arteranos
 
                 yield return Execute($"{wixroot}bin\\heat", "dir Win64 -out Win64.wxi -scom -sfrag -sreg -svb6 -ag -dr AppDir -cg Pack_Win64 -srd -var var.BinDir");
                 yield return Execute($"{wixroot}bin\\heat", "dir Win64-Server -out Win64-Server.wxi -scom -sfrag -sreg -svb6 -ag -dr ServerDir -cg Pack_Win64_Server -srd -var var.SrvBinDir");
-                yield return Execute($"{wixroot}bin\\candle", "..\\Setup\\Main.wxs Win64-Server.wxi Win64.wxi -dBinDir=Win64 -dSrvBinDir=Win64-Server -arch x64");
-                yield return Execute($"{wixroot}bin\\light", "Main.wixobj Win64.wixobj Win64-Server.wixobj -ext WixUIExtension -o ArteranosSetup");
+                yield return Execute($"{wixroot}bin\\candle", "..\\Setup\\Main.wxs Win64-Server.wxi Win64.wxi -ext WixFirewallExtension -dBinDir=Win64 -dSrvBinDir=Win64-Server -arch x64");
+                yield return Execute($"{wixroot}bin\\light", "Main.wixobj Win64.wixobj Win64-Server.wixobj -ext WixUIExtension -ext WixFirewallExtension -o ArteranosSetup");
             }
 
             IEnumerator BuildSetupExe()
@@ -323,7 +323,6 @@ namespace Arteranos
 
             try
             {
-#if true
                 if (Directory.Exists("build")) Directory.Delete("build", true);
 
                 GetProjectGitVersion();
@@ -338,7 +337,7 @@ namespace Arteranos
 
                 Directory.Move("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", "build/Arteranos_BurstDebugInformation");
                 Directory.Move("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", "build/Arteranos-Server_BurstDebugInformation");
-#endif
+
                 File.Move("build/Win64/Arteranos.exe", "build/Arteranos.exe");
                 File.Move("build/Win64-Server/Arteranos-Server.exe", "build/Arteranos-Server.exe");
                 File.Copy("ipfs.exe", "build/ipfs.exe");
