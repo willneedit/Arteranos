@@ -15,7 +15,6 @@ using Debug = UnityEngine.Debug;
 using Newtonsoft.Json;
 using System;
 using Unity.EditorCoroutines.Editor;
-using System.Collections.Generic;
 using System.Collections;
 using System.Threading.Tasks;
 using System.Net.Http;
@@ -103,71 +102,7 @@ namespace Arteranos
 
         public static void RetrieveIPFSDaemon(bool silent)
         {
-            string IPFSExe = "ipfs.exe";
-
-            IEnumerator AcquireIPFSExecutable()
-            {
-                string source = "https://github.com/ipfs/kubo/releases/download/v0.28.0/kubo_v0.28.0_windows-amd64.zip";
-                // TODO sha512
-                string target = $"{Application.temporaryCachePath}/downloaded-kubo-ipfs.zip";
-                string targetDir = $"{target}.dir";
-                string desired = $"{targetDir}/kubo/ipfs.exe";
-                long totalBytes = 0;
-
-                Debug.Log(Directory.GetCurrentDirectory());
-
-                // Earlier sessions may have it.
-                if (File.Exists(IPFSExe))
-                {
-                    if(!silent) Debug.Log($"ipfs.exe is already there, maybe you want to manually delete it?");
-                    IPFSExe = desired;
-                    yield break;
-                }
-
-                Debug.Log($"Downloading {source}...");
-
-                Task taskDownload = Task.Run(async () =>
-                {
-                    if (File.Exists(target)) File.Delete(target);
-
-                    using HttpClient client = new();
-                    client.Timeout = TimeSpan.FromSeconds(60);
-                    using HttpResponseMessage response = await client.GetAsync(source).ConfigureAwait(false);
-                    response.EnsureSuccessStatusCode();
-                    totalBytes = response.Content.Headers.ContentLength ?? -1;
-                    byte[] binary = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                    using Stream s = File.Create(target);
-                    s.Write(binary, 0, binary.Length);
-                    s.Flush();
-                    s.Close();
-                });
-
-                yield return new WaitUntil(() => taskDownload.IsCompleted);
-
-                Debug.Log($"Unzipping {targetDir}...");
-
-                Task taskUnzip = Task.Run(() =>
-                {
-                    if (Directory.Exists(targetDir)) Directory.Delete(targetDir, true);
-
-                    try
-                    {
-                        ZipFile.ExtractToDirectory(target, targetDir);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.LogException(ex);
-                    }
-                });
-
-                yield return new WaitUntil(() => taskDownload.IsCompleted);
-
-                if (File.Exists(desired)) File.Copy(desired, IPFSExe);
-
-                Debug.Log("Done.");
-            }
-
-            EditorCoroutineUtility.StartCoroutineOwnerless(AcquireIPFSExecutable());
+            EditorCoroutineUtility.StartCoroutineOwnerless(AcquireIPFSExecutableCoroutine(silent));
         }
 
 
@@ -182,6 +117,107 @@ namespace Arteranos
             UpdateLicenseFiles();
         }
 
+        [MenuItem("Arteranos/Build/Build Windows64", false, 110)]
+        public static void BuildWin64()
+        {
+            static IEnumerator SingleTask()
+            {
+                GetProjectGitVersion();
+                yield return BuildWin64Coroutine();
+            }
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
+        }
+
+        [MenuItem("Arteranos/Build/Build Windows Dedicated Server", false, 120)]
+        public static void BuildWin64DedServ()
+        {
+            static IEnumerator SingleTask()
+            {
+                GetProjectGitVersion();
+                yield return BuildWin64DSCoroutine();
+            }
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
+        }
+
+        [MenuItem("Arteranos/Build Installation Package", false, 80)]
+        public static void BuildInstallationPackage()
+        {
+            static IEnumerator SingleTask()
+            {
+                // Build Package wipes the build/ directory, and builds
+                // the version files itself.
+                yield return AcquireIPFSExecutableCoroutine(true);
+                yield return BuildInstallationPackageCoroutine();
+            }
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
+        }
+
+        private static IEnumerator AcquireIPFSExecutableCoroutine(bool silent)
+        {
+            string IPFSExe = "ipfs.exe";
+
+            string source = "https://github.com/ipfs/kubo/releases/download/v0.28.0/kubo_v0.28.0_windows-amd64.zip";
+            // TODO sha512
+            string target = $"{Application.temporaryCachePath}/downloaded-kubo-ipfs.zip";
+            string targetDir = $"{target}.dir";
+            string desired = $"{targetDir}/kubo/ipfs.exe";
+            long totalBytes = 0;
+
+            Debug.Log(Directory.GetCurrentDirectory());
+
+            // Earlier sessions may have it.
+            if (File.Exists(IPFSExe))
+            {
+                if (!silent) Debug.Log($"ipfs.exe is already there, maybe you want to manually delete it?");
+                IPFSExe = desired;
+                yield break;
+            }
+
+            Debug.Log($"Downloading {source}...");
+
+            Task taskDownload = Task.Run(async () =>
+            {
+                if (File.Exists(target)) File.Delete(target);
+
+                using HttpClient client = new();
+                client.Timeout = TimeSpan.FromSeconds(60);
+                using HttpResponseMessage response = await client.GetAsync(source).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                totalBytes = response.Content.Headers.ContentLength ?? -1;
+                byte[] binary = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                using Stream s = File.Create(target);
+                s.Write(binary, 0, binary.Length);
+                s.Flush();
+                s.Close();
+            });
+
+            yield return new WaitUntil(() => taskDownload.IsCompleted);
+
+            Debug.Log($"Unzipping {targetDir}...");
+
+            Task taskUnzip = Task.Run(() =>
+            {
+                if (Directory.Exists(targetDir)) Directory.Delete(targetDir, true);
+
+                try
+                {
+                    ZipFile.ExtractToDirectory(target, targetDir);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            });
+
+            yield return new WaitUntil(() => taskDownload.IsCompleted);
+
+            if (File.Exists(desired)) File.Copy(desired, IPFSExe);
+
+            Debug.Log("Done.");
+        }
         public static string[] GetSceneNames()
         {
             return new[] { 
@@ -192,11 +228,8 @@ namespace Arteranos
             };
         }
 
-        [MenuItem("Arteranos/Build/Build Windows64", false, 110)]
-        public static void BuildWin64()
+        private static IEnumerator BuildWin64Coroutine()
         {
-            GetProjectGitVersion();
-
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
             EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
             EditorUserBuildSettings.SetBuildLocation(BuildTarget.StandaloneWindows64, "build/Win64/");
@@ -206,20 +239,19 @@ namespace Arteranos
                 scenes = GetSceneNames(),
                 locationPathName = $"build/Win64/{appName}.exe",
                 target = BuildTarget.StandaloneWindows64,
-                subtarget = (int) StandaloneBuildSubtarget.Player,
+                subtarget = (int)StandaloneBuildSubtarget.Player,
 
                 extraScriptingDefines = new string[0],
                 options = BuildOptions.CleanBuildCache
             };
 
+            yield return null;
+
             CommenceBuild(bpo);
         }
 
-        [MenuItem("Arteranos/Build/Build Windows Dedicated Server", false, 120)]
-        public static void BuildWin64DedServ()
+        private static IEnumerator BuildWin64DSCoroutine()
         {
-            GetProjectGitVersion();
-
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
             EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Server;
             EditorUserBuildSettings.SetBuildLocation(BuildTarget.StandaloneWindows64, "build/Win64-Server/");
@@ -229,42 +261,20 @@ namespace Arteranos
                 scenes = GetSceneNames(),
                 locationPathName = $"build/Win64-Server/{appName}-Server.exe",
                 target = BuildTarget.StandaloneWindows64,
-                subtarget = (int) StandaloneBuildSubtarget.Server,
+                subtarget = (int)StandaloneBuildSubtarget.Server,
 
                 extraScriptingDefines = new[] { "UNITY_SERVER" },
                 options = BuildOptions.CleanBuildCache
             };
 
+            yield return null;
+
             CommenceBuild(bpo);
         }
 
-        private static void CommenceBuild(BuildPlayerOptions bpo)
+        public static IEnumerator BuildInstallationPackageCoroutine()
         {
-            BuildReport report = BuildPipeline.BuildPlayer(bpo);
-            BuildSummary summary = report.summary;
-
-            if(summary.result == BuildResult.Succeeded)
-            {
-                Debug.Log($"Build succeeded: {summary.totalSize} bytes, {summary.totalTime} time.");
-            }
-            else
-            {
-                Debug.LogError($"Build unsuccesful: {summary.result}");
-            }
-
-            ForceRecompile();
-        }
-
-        private static void ForceRecompile()
-        {
-            // UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation(UnityEditor.Compilation.RequestScriptCompilationOptions.CleanBuildCache);
-            // EditorUtility.RequestScriptReload();
-        }
-
-        [MenuItem("Arteranos/Build Installation Package", false, 80)]
-        public static void BuildInstallationPackage()
-        {
-            void Execute(string command, string argline)
+            IEnumerator Execute(string command, string argline)
             {
                 ProcessStartInfo psi = new()
                 {
@@ -282,29 +292,31 @@ namespace Arteranos
                 process.WaitForExit();
                 string data = reader.ReadToEnd();
                 Debug.Log(data);
+
+                yield return null;
             }
 
-            void BuildSetup()
+            IEnumerator BuildSetup()
             {
                 string wixroot = Environment.GetEnvironmentVariable("wix");
 
-                Execute($"{wixroot}bin\\heat", "dir Win64 -out Win64.wxi -scom -sfrag -sreg -svb6 -ag -dr AppDir -cg Pack_Win64 -srd -var var.BinDir");
-                Execute($"{wixroot}bin\\heat", "dir Win64-Server -out Win64-Server.wxi -scom -sfrag -sreg -svb6 -ag -dr ServerDir -cg Pack_Win64_Server -srd -var var.SrvBinDir");
-                Execute($"{wixroot}bin\\candle", "..\\Setup\\Main.wxs Win64-Server.wxi Win64.wxi -dBinDir=Win64 -dSrvBinDir=Win64-Server -arch x64");
-                Execute($"{wixroot}bin\\light", "Main.wixobj Win64.wixobj Win64-Server.wixobj -ext WixUIExtension -o ArteranosSetup");
+                yield return Execute($"{wixroot}bin\\heat", "dir Win64 -out Win64.wxi -scom -sfrag -sreg -svb6 -ag -dr AppDir -cg Pack_Win64 -srd -var var.BinDir");
+                yield return Execute($"{wixroot}bin\\heat", "dir Win64-Server -out Win64-Server.wxi -scom -sfrag -sreg -svb6 -ag -dr ServerDir -cg Pack_Win64_Server -srd -var var.SrvBinDir");
+                yield return Execute($"{wixroot}bin\\candle", "..\\Setup\\Main.wxs Win64-Server.wxi Win64.wxi -dBinDir=Win64 -dSrvBinDir=Win64-Server -arch x64");
+                yield return Execute($"{wixroot}bin\\light", "Main.wixobj Win64.wixobj Win64-Server.wixobj -ext WixUIExtension -o ArteranosSetup");
             }
 
-            void BuildSetupExe()
+            IEnumerator BuildSetupExe()
             {
                 string wixroot = Environment.GetEnvironmentVariable("wix");
 
-                Execute($"{wixroot}bin\\candle", "-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension ..\\Setup\\MainBurn.wxs");
-                Execute($"{wixroot}bin\\light", "-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension MainBurn.wixobj -o ArteranosSetup");
+                yield return Execute($"{wixroot}bin\\candle", "-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension ..\\Setup\\MainBurn.wxs");
+                yield return Execute($"{wixroot}bin\\light", "-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension MainBurn.wixobj -o ArteranosSetup");
             }
 
-            void BuildArchive()
+            IEnumerator BuildArchive()
             {
-                Execute("7z", "a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on ArteranosSetup.7z ArteranosSetup.exe");
+                yield return Execute("7z", "a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on ArteranosSetup.7z ArteranosSetup.exe");
             }
 
             int progressId = Progress.Start("Building...");
@@ -313,13 +325,15 @@ namespace Arteranos
             {
                 if (Directory.Exists("build")) Directory.Delete("build", true);
 
+                GetProjectGitVersion();
+
                 Progress.Report(progressId, 0.40f, "Build Win64 Dedicated Server");
 
-                BuildWin64DedServ();
+                yield return BuildWin64DSCoroutine();
 
                 Progress.Report(progressId, 0.60f, "Build Win64 Desktop");
 
-                BuildWin64();
+                yield return BuildWin64Coroutine();
 
                 Directory.Move("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", "build/Arteranos_BurstDebugInformation");
                 Directory.Move("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", "build/Arteranos-Server_BurstDebugInformation");
@@ -328,17 +342,39 @@ namespace Arteranos
 
                 Progress.Report(progressId, 0.80f, "Build setup wizard");
 
-                BuildSetup();
+                yield return BuildSetup();
 
                 File.Move("build/Arteranos.exe", "build/Win64/Arteranos.exe");
 
-                BuildSetupExe();
+                yield return BuildSetupExe();
 
-                BuildArchive();
+                if(!File.Exists("build/ArteranosSetup.exe"))
+                {
+                    Debug.LogError("Installation wizard build failed - see logs");
+                    yield break;
+                }
+
+                yield return BuildArchive();
+
+                Debug.Log("Build task finished.");
             }
             finally
             {
                 Progress.Remove(progressId);
+            }
+        }
+        private static void CommenceBuild(BuildPlayerOptions bpo)
+        {
+            BuildReport report = BuildPipeline.BuildPlayer(bpo);
+            BuildSummary summary = report.summary;
+
+            if(summary.result == BuildResult.Succeeded)
+            {
+                Debug.Log($"Build succeeded: {summary.totalSize} bytes, {summary.totalTime} time.");
+            }
+            else
+            {
+                Debug.LogError($"Build unsuccesful: {summary.result}");
             }
         }
     }
