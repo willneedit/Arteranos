@@ -77,6 +77,10 @@ namespace Arteranos.Services
         {
             IpfsClientEx ipfsTmp = new();
 
+            // Shared directory between Desktop and Dedicated Server - one node, one daemon.
+            string repodir = $"{Application.persistentDataPath}/.ipfs";
+
+
             IEnumerator InitializeIPFSCoroutine()
             {
                 // First, see if there is an already running and accessible IPFS daemon.
@@ -170,7 +174,7 @@ namespace Arteranos.Services
 
                 try
                 {
-                    pk = ipfsTmp.ReadDaemonPrivateKey();
+                    pk = ipfsTmp.ReadDaemonPrivateKey(repodir);
                 }
                 catch
                 {
@@ -214,7 +218,7 @@ namespace Arteranos.Services
                 ProcessStartInfo psi = new()
                 {
                     FileName = IPFSExe,
-                    Arguments = "daemon",
+                    Arguments = $"--repo-dir={repodir} daemon",
                     UseShellExecute = false,
                     RedirectStandardError = false,
                     RedirectStandardInput = false,
@@ -240,7 +244,7 @@ namespace Arteranos.Services
                 ProcessStartInfo psi = new()
                 {
                     FileName = IPFSExe,
-                    Arguments = "init",
+                    Arguments = $"--repo-dir={repodir} init",
                     UseShellExecute = false,
                     RedirectStandardError = false,
                     RedirectStandardInput = false,
@@ -251,6 +255,8 @@ namespace Arteranos.Services
                 try
                 {
                     Process process = Process.Start(psi);
+
+                    process.WaitForExit();
                 }
                 catch (Exception ex)
                 {
@@ -266,7 +272,7 @@ namespace Arteranos.Services
                 ipfs = null;
                 if (self == null) throw new InvalidOperationException("Dead daemon");
 
-                PrivateKey pk = ipfsTmp.ReadDaemonPrivateKey();
+                PrivateKey pk = ipfsTmp.ReadDaemonPrivateKey(repodir);
 
                 try
                 {
@@ -673,18 +679,25 @@ namespace Arteranos.Services
         {
             async Task DownloadTask(MultiHash SenderPeerID)
             {
-                using CancellationTokenSource cts = new(10000);
+                try
+                {
+                    using CancellationTokenSource cts = new(30000);
 
-                // Server description is published under the peer ID. (= self)
-                // If it's cached, it's already in the local repo.
-                // And the TTL reduce the traffic.
-                using Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID + "/ServerDescription", cts.Token).ConfigureAwait(false);
+                    // Server description is published under the peer ID. (= self)
+                    // If it's cached, it's already in the local repo.
+                    // And the TTL reduce the traffic.
+                    using Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID + "/ServerDescription", cts.Token).ConfigureAwait(false);
 
-                // TODO Maybe unneccessary?
-                PublicKey pk = PublicKey.FromId(SenderPeerID);
-                ServerDescription sd = ServerDescription.Deserialize(pk, s);
+                    // TODO Maybe unneccessary?
+                    PublicKey pk = PublicKey.FromId(SenderPeerID);
+                    ServerDescription sd = ServerDescription.Deserialize(pk, s);
 
-                sd.DBUpdate();
+                    sd.DBUpdate();
+                }
+                catch
+                {
+                    Debug.Log($"Timeout while downloading server online data from {SenderPeerID} - likely offline.");
+                }
             }
 
             Func<Task> MakeDownloadTask(MultiHash SenderPeerID)
