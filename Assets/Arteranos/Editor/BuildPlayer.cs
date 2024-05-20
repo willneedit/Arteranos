@@ -323,6 +323,7 @@ namespace Arteranos
 
             try
             {
+#if true
                 if (Directory.Exists("build")) Directory.Delete("build", true);
 
                 GetProjectGitVersion();
@@ -337,14 +338,17 @@ namespace Arteranos
 
                 Directory.Move("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", "build/Arteranos_BurstDebugInformation");
                 Directory.Move("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", "build/Arteranos-Server_BurstDebugInformation");
-
+#endif
                 File.Move("build/Win64/Arteranos.exe", "build/Arteranos.exe");
+                File.Move("build/Win64-Server/Arteranos-Server.exe", "build/Arteranos-Server.exe");
+                File.Copy("ipfs.exe", "build/ipfs.exe");
 
                 Progress.Report(progressId, 0.80f, "Build setup wizard");
 
                 yield return BuildSetup();
 
                 File.Move("build/Arteranos.exe", "build/Win64/Arteranos.exe");
+                File.Move("build/Arteranos-Server.exe", "build/Win64-Server/Arteranos-Server.exe");
 
                 yield return BuildSetupExe();
 
