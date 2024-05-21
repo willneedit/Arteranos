@@ -75,7 +75,7 @@ namespace Arteranos.Services
 
         private void Start()
         {
-            IpfsClientEx ipfsTmp = new();
+            IpfsClientEx ipfsTmp = null;
 
             // Shared directory between Desktop and Dedicated Server - one node, one daemon.
             string repodir = $"{Application.persistentDataPath}/.ipfs";
@@ -83,6 +83,28 @@ namespace Arteranos.Services
 
             IEnumerator InitializeIPFSCoroutine()
             {
+                MultiAddress apiAddr = null;
+
+                try
+                {
+                    apiAddr = IpfsClientEx.ReadDaemonAPIAddress(repodir);
+                    int port = -1;
+                    foreach(NetworkProtocol protocol in apiAddr.Protocols)
+                        if(protocol.Code == 6)
+                        {
+                            port = int.Parse(protocol.Value);
+                            break;
+                        }
+
+                    Debug.Log($"Present configuration says API port {port}");
+                    ipfsTmp = new($"http://localhost:{port}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"No usable API address, assuming default one. Or, initializing a new repo.");
+                    ipfsTmp = new();
+                }
+
                 // First, see if there is an already running and accessible IPFS daemon.
                 {
                     self = null;
@@ -174,7 +196,7 @@ namespace Arteranos.Services
 
                 try
                 {
-                    pk = ipfsTmp.ReadDaemonPrivateKey(repodir);
+                    pk = IpfsClientEx.ReadDaemonPrivateKey(repodir);
                 }
                 catch
                 {
@@ -272,7 +294,7 @@ namespace Arteranos.Services
                 ipfs = null;
                 if (self == null) throw new InvalidOperationException("Dead daemon");
 
-                PrivateKey pk = ipfsTmp.ReadDaemonPrivateKey(repodir);
+                PrivateKey pk = IpfsClientEx.ReadDaemonPrivateKey(repodir);
 
                 try
                 {
