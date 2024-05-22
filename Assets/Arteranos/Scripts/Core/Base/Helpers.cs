@@ -292,6 +292,8 @@ namespace Arteranos.Services
         public abstract SignKey ServerKeyPair_ { get; }
         public abstract Cid IdentifyCid_ { get; protected set; }
         public abstract Cid CurrentSDCid_ { get; protected set; }
+        public abstract bool UsingPubsub_ { get; protected set; }
+
 
         public abstract Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default);
         public abstract Task FlipServerDescription_(bool reload);
@@ -311,7 +313,8 @@ namespace Arteranos.Services
             => Instance.IdentifyCid_;
         public static Cid CurrentSDCid
             => Instance.CurrentSDCid_;
-
+        public static bool UsingPubsub
+            => Instance.UsingPubsub_;
         public static async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
             => await Instance.GetPeerIPAddress_(PeerID, token).ConfigureAwait(false);
         public static async Task FlipServerDescription(bool reload)

@@ -118,7 +118,11 @@ namespace Arteranos.UI
 
             StartCoroutine(Utils.DownloadIconCoroutine(si.ServerIcon, ShowIcon));
 
-            IPFSService.DownloadServerOnlineData(PeerID, ShowOnlineDetails);
+            // With Pubsub, we get the data delivered. Without Pubsub, we need to ask for it.
+            if(IPFSService.UsingPubsub)
+                ShowOnlineDetails();
+            else
+                IPFSService.DownloadServerOnlineData(PeerID, ShowOnlineDetails);
         }
 
         private void OnVisitClicked()

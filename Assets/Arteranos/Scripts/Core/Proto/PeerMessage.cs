@@ -11,10 +11,8 @@ using ProtoBuf;
 namespace Arteranos.Core
 {
     [ProtoContract]
-#if USE_SERVER_HELLO
-    [ProtoInclude(65537, typeof(ServerHello))]
-#endif
     [ProtoInclude(65538, typeof(ServerOnlineData))]
+    [ProtoInclude(65539, typeof(ServerDescriptionLink))]
     public class PeerMessage
     {
         public virtual void Serialize(Stream stream)

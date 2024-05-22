@@ -5,6 +5,11 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+// Use Pubsub. kubo's implementation is deemed to be experimental but
+// it persists in 0.28.0 and works fine and yields a better accuracy of
+// the server online data.
+#define USE_PUBSUB
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -41,13 +46,19 @@ namespace Arteranos.Services
         public override SignKey ServerKeyPair_ { get => serverKeyPair; }
         public override Cid IdentifyCid_ { get; protected set; }
         public override Cid CurrentSDCid_ { get; protected set; } = null;
-
+        public override bool UsingPubsub_ { get; protected set; } =
+#if USE_PUBSUB
+            true
+#else
+            false
+#endif
+            ;
         public static string CachedPTOSNotice { get; private set; } = null;
 
         private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
 
         private const int heartbeatSeconds = 60;
-
+        private const string AnnouncerTopic = "/X-Arteranos";
         private IpfsClientEx ipfs = null;
         private Peer self = null;
         private SignKey serverKeyPair = null;
@@ -237,10 +248,13 @@ namespace Arteranos.Services
 
             bool TryStartIPFS()
             {
+
                 ProcessStartInfo psi = new()
                 {
                     FileName = IPFSExe,
-                    Arguments = $"--repo-dir={repodir} daemon",
+                    Arguments = UsingPubsub_
+                    ? $"--repo-dir={repodir} daemon --enable-pubsub-experiment"
+                    : $"--repo-dir={repodir} daemon",
                     UseShellExecute = false,
                     RedirectStandardError = false,
                     RedirectStandardInput = false,
@@ -328,7 +342,7 @@ namespace Arteranos.Services
                 }
                 catch(Exception ex)
                 {
-                    Debug.LogError("Internal error: Missing version information - use Arteeranos->Build->Update version");
+                    Debug.LogError("Internal error: Missing version information - use Arteranos->Build->Update version");
                     Debug.LogException(ex);
                 }
 
@@ -375,6 +389,9 @@ namespace Arteranos.Services
                     sod_key_id = key.Id;
                 }
 
+                if(UsingPubsub_)
+                    _ = ipfsTmp.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
+
                 Debug.Log("---- IPFS Daemon init complete ----\n" +
                     $"IPFS Node's ID\n" +
                     $"   {self.Id}\n" +
@@ -412,10 +429,10 @@ namespace Arteranos.Services
 
             Debug.Log("Shutting down the IPFS node.");
 
+            cts?.Cancel();
+
             // TODO Daemon Shutdown
             // await ipfs.ShutdownAsync();
-
-            cts?.Cancel();
 
             cts?.Dispose();
         }
@@ -499,14 +516,12 @@ namespace Arteranos.Services
             return ipAddresses.First().Item1;
         }
 
-#endregion
+        #endregion
         // ---------------------------------------------------------------
         #region Server information publishing
 
         public IEnumerator EmitServerDescriptionCoroutine()
         {
-            // TransitionProgressStatic.Instance?.OnProgressChanged(0.80f, "Publishing server information");
-
             while (true)
             {
                 yield return Asyncs.Async2Coroutine(FlipServerDescription(true));
@@ -617,6 +632,17 @@ namespace Arteranos.Services
                     lifetime: new TimeSpan(2, 0, 0, 0),
                     ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
 
+                if(UsingPubsub_)
+                {
+                    // Submit the announce in Pubsub as well, for all who's listening
+                    ServerDescriptionLink sdl = new() { ServerDescriptionCid = CurrentSDCid_ };
+                    using MemoryStream ms = new();
+                    sdl.Serialize(ms);
+                    ms.Position = 0;
+
+                    await ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
+                }
+
                 Debug.Log($"Published server description CID: {CurrentSDCid_}");
             }
             else
@@ -624,7 +650,6 @@ namespace Arteranos.Services
 
         }
 
-        // TODO Overloading IPNS?
         private async Task FlipServerOnlineData_()
         {
             // Flood mitigation
@@ -647,21 +672,21 @@ namespace Arteranos.Services
             ms.Position = 0;
             var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerOnlineData").ConfigureAwait(false);
 
-            // Lasting for five minutes, ttl 60s, under the secondary key
-            try
+            // No IPNS together with Pubsub, because latecomers get updated online data at max. one minute.
+            if (UsingPubsub_)
             {
+                // Announce the server online data, too
+                await ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
+            }
+            else
+            {
+                // Lasting for five minutes, ttl 60s, under the secondary key
                 await ipfs.NameEx.PublishAsync(
                     fsn.Id,
                     key: "key_sod",
                     lifetime: new TimeSpan(2, 0, 0, 0),
                     ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
             }
-            catch (Exception ex)
-            {
-                Debug.Log($"Failed to publish the server online data: {ex.Message}");
-            }
-
-            // Debug.Log($"Published server online data to {sod_key_id}");
         }
 
         /// <summary>
@@ -752,10 +777,40 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region Peer communication and data exchange
 
-        // Server description are generated by the Server Discovery
-        private void DownloadServerDescription(MultiHash SenderPeerID)
+        private void ParseArteranosMessage(IPublishedMessage message)
         {
-            async Task DownloadTask(MultiHash SenderPeerID)
+            MultiHash SenderPeerID = message.Sender.Id;
+
+            try
+            {
+                using MemoryStream ms = new(message.DataBytes);
+                PeerMessage pm = PeerMessage.Deserialize(ms);
+
+                if (pm is ServerDescriptionLink sdl) // Too big for pubsub, this is only a link
+                {
+                    Debug.Log($"New server description from {SenderPeerID}");
+                    DownloadServerDescription(SenderPeerID, sdl.ServerDescriptionCid);
+                }
+                else if (pm is ServerOnlineData sod) // As-is.
+                {
+                    Debug.Log($"New server online data from {SenderPeerID}");
+                    sod.LastOnline = DateTime.UtcNow; // Not serialized
+                    sod.DBInsert(SenderPeerID.ToString());
+                }
+                else
+                    Debug.LogWarning($"Discarding unknown message from {SenderPeerID}");
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        // Server description are generated by the Server Discovery
+        private void DownloadServerDescription(MultiHash SenderPeerID, string sddPath = null)
+        {
+
+            async Task DownloadSDAsync(MultiHash SenderPeerID, string sddPath)
             {
                 try
                 {
@@ -764,7 +819,7 @@ namespace Arteranos.Services
                     // Server description is published under the peer ID. (= self)
                     // If it's cached, it's already in the local repo.
                     // And the TTL reduce the traffic.
-                    using Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + SenderPeerID + "/ServerDescription", cts.Token).ConfigureAwait(false);
+                    using Stream s = await ipfs.FileSystem.ReadFileAsync(sddPath + "/ServerDescription", cts.Token).ConfigureAwait(false);
 
                     // TODO Maybe unneccessary?
                     PublicKey pk = PublicKey.FromId(SenderPeerID);
@@ -778,26 +833,28 @@ namespace Arteranos.Services
                 }
             }
 
-            Func<Task> MakeDownloadTask(MultiHash SenderPeerID)
+            Func<Task> MakeDownloadTask(MultiHash SenderPeerID, string sddPath)
             {
-                Task a() => DownloadTask(SenderPeerID);
+                Task a() => DownloadSDAsync(SenderPeerID, sddPath);
                 return a;
             }
 
-            TaskScheduler.Schedule(MakeDownloadTask(SenderPeerID));
+            // If we have the CID, okay. If not, use the IPNS resolver.
+            sddPath = sddPath ?? "/ipns/" + SenderPeerID;
+            TaskScheduler.Schedule(MakeDownloadTask(SenderPeerID, sddPath));
         }
 
         // Server Online Data are generated on demand from the server list and the world
         // panel generation.
         public override void DownloadServerOnlineData_(MultiHash SenderPeerID, Action callback = null)
         {
-            async Task DownloadTask(ServerDescription sd)
+            async Task DownloadTask(string sodPath)
             {
                 try
                 {
                     using CancellationTokenSource cts = new(10000);
 
-                    using Stream s = await ipfs.FileSystem.ReadFileAsync("/ipns/" + sd.ServerOnlineDataLinkCid).ConfigureAwait(false);
+                    using Stream s = await ipfs.FileSystem.ReadFileAsync(sodPath).ConfigureAwait(false);
                     ServerOnlineData sod = Serializer.Deserialize<ServerOnlineData>(s);
 
                     sod.LastOnline = DateTime.UtcNow; // Not serialized
@@ -807,22 +864,24 @@ namespace Arteranos.Services
                 catch (Exception e)
                 {
                     // Seems to be offline.
-                    Debug.LogWarning($"No SOD from {sd.ServerOnlineDataLinkCid} ({SenderPeerID}): {e.Message}");
+                    Debug.LogWarning($"No SOD from {sodPath} ({SenderPeerID}): {e.Message}");
                 }
 
                 TaskScheduler.ScheduleCallback(callback);
             }
 
-            Func<Task> MakeDownloadTask(ServerDescription sd)
+            Func<Task> MakeDownloadTask(string sodPath)
             {
-                Task a() => DownloadTask(sd);
+                Task a() => DownloadTask(sodPath);
                 return a;
             }
 
             ServerDescription sd = ServerDescription.DBLookup(SenderPeerID.ToString());
             if (sd == null) return;
 
-            TaskScheduler.Schedule(MakeDownloadTask(sd));
+            string sodPath = "/ipns/" + sd.ServerOnlineDataLinkCid;
+
+            TaskScheduler.Schedule(MakeDownloadTask(sodPath));
         }
 
         private void OnDiscoveredPeer(Peer found)
@@ -852,7 +911,7 @@ namespace Arteranos.Services
                 Debug.Log($"Rediscovered node {peerId}.");
 
         }
-#endregion
+        #endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface
         public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)

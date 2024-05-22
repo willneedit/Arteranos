@@ -8,8 +8,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Ipfs;
 using ProtoBuf;
 
 namespace Arteranos.Core
@@ -118,5 +116,12 @@ namespace Arteranos.Core
         {
             return !(left == right);
         }
+    }
+
+    [ProtoContract]
+    public partial class ServerDescriptionLink : PeerMessage
+    {
+        [ProtoMember(1)]
+        public string ServerDescriptionCid;
     }
 }
