@@ -171,7 +171,7 @@ namespace Arteranos.Services
                     ProcessStartInfo psi = new()
                     {
                         FileName = IPFSExe,
-                        Arguments = "",
+                        Arguments = "help",
                         UseShellExecute = false,
                         RedirectStandardError = false,
                         RedirectStandardInput = false,
@@ -765,6 +765,11 @@ namespace Arteranos.Services
         private void ParseArteranosMessage(IPublishedMessage message)
         {
             MultiHash SenderPeerID = message.Sender.Id;
+
+#if !UNITY_EDITOR
+            // No self-gratification.
+            if (SenderPeerID == self.Id) return;
+#endif
 
             try
             {
