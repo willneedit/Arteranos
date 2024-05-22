@@ -64,7 +64,6 @@ namespace Arteranos.Core
         public string PrivacyTOSNotice => DescriptionStruct?.PrivacyTOSNotice;
         public Cid ServerIcon => DescriptionStruct?.ServerIcon;
         public string[] AdminNames => DescriptionStruct?.AdminNames ?? new string[0];
-        public int MDPort => DescriptionStruct?.MetadataPort ?? 0;
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
         public string SPKDBKey => DescriptionStruct.PeerID;
         public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new();

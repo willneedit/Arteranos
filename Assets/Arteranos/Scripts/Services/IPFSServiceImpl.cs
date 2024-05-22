@@ -99,7 +99,7 @@ namespace Arteranos.Services
                     Debug.Log($"Present configuration says API port {port}");
                     ipfsTmp = new($"http://localhost:{port}");
                 }
-                catch (Exception ex)
+                catch
                 {
                     Debug.LogWarning($"No usable API address, assuming default one. Or, initializing a new repo.");
                     ipfsTmp = new();
@@ -545,7 +545,6 @@ namespace Arteranos.Services
                 {
                     Name = server.Name,
                     ServerPort = server.ServerPort,
-                    MetadataPort = server.MetadataPort,
                     Description = server.Description,
                     ServerIcon = server.ServerIcon,
                     Version = versionString,
@@ -625,11 +624,12 @@ namespace Arteranos.Services
 
         }
 
+        // TODO Overloading IPNS?
         private async Task FlipServerOnlineData_()
         {
             // Flood mitigation
-            if (last > DateTime.Now - TimeSpan.FromSeconds(30)) return;
-            last = DateTime.Now;
+            if (last > DateTime.UtcNow - TimeSpan.FromSeconds(30)) return;
+            last = DateTime.UtcNow;
 
             // TODO - WARNING - UserFingerprints potential concurrency issues
             ServerOnlineData sod = new()
@@ -647,12 +647,19 @@ namespace Arteranos.Services
             ms.Position = 0;
             var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerOnlineData").ConfigureAwait(false);
 
-            // Lasting for five minutes, ttl 30s, under the secondary key
-            await ipfs.NameEx.PublishAsync(
-                fsn.Id,
-                key: "key_sod",
-                lifetime: new TimeSpan(0, 5, 0),
-                ttl: new TimeSpan(0, 0, 30)).ConfigureAwait(false);
+            // Lasting for five minutes, ttl 60s, under the secondary key
+            try
+            {
+                await ipfs.NameEx.PublishAsync(
+                    fsn.Id,
+                    key: "key_sod",
+                    lifetime: new TimeSpan(2, 0, 0, 0),
+                    ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"Failed to publish the server online data: {ex.Message}");
+            }
 
             // Debug.Log($"Published server online data to {sod_key_id}");
         }
@@ -690,6 +697,55 @@ namespace Arteranos.Services
                 Links = links,
                 IsDirectory = true
             };
+        }
+
+        /// <summary>
+        /// Double checked PublishAsync.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="key"></param>
+        /// <param name="lifetime"></param>
+        /// <param name="ttl"></param>
+        /// <param name="cancel"></param>
+        /// <returns></returns>
+        public async Task<NamedContent> PublishAsync(Cid id,
+            string key = "self",
+            TimeSpan? lifetime = null,
+            TimeSpan? ttl = null,
+            CancellationToken cancel = default)
+        {
+            IEnumerable<IKey> keys = await ipfs.Key.ListAsync().ConfigureAwait(false);
+
+            IKey thiskey = keys.Where(_k => _k.Name == key).FirstOrDefault();
+
+            string result = await ipfs.Name.ResolveAsync("/ipns/" + thiskey.Id, false, cancel: cancel).ConfigureAwait(false);
+
+            if (result[6..] == id)
+            {
+                Debug.Log("Publish skipped -- already present.");
+                return new NamedContent { ContentPath = result, NamePath = "/ipns/" + thiskey.Id };
+            }
+
+            NamedContent nc = await ipfs.NameEx.PublishAsync(id, key, lifetime, ttl, cancel).ConfigureAwait(false);
+
+            // This needs some time before the IPNS update comes through.
+            bool tmo = true;
+            for(int i = 0; i < 10; i++)
+            {
+                result = await ipfs.Name.ResolveAsync("/ipns/" + thiskey.Id, false, cancel: cancel).ConfigureAwait(false);
+
+                if (result[6..] == id)
+                {
+                    tmo = false;
+                    break;
+                }
+
+                await Task.Delay(1000).ConfigureAwait(false);
+            }
+
+            if (tmo) Debug.LogWarning("IPNS propagation excessively delayed");
+
+            return nc;
         }
 
         #endregion
@@ -777,8 +833,13 @@ namespace Arteranos.Services
 
             if (peerId == self.Id)
             {
+#if !UNITY_EDITOR
                 Debug.Log($"Discovered node {peerId} is self, skipping.");
                 return;
+#else
+                // Enable loopback for debugging
+                Debug.Log($"Discovered node {peerId} is self, adding for debugging purposes.");
+#endif
             }
 
             ServerDescription serverDescription = ServerDescription.DBLookup(peerId.ToString());
@@ -789,8 +850,9 @@ namespace Arteranos.Services
             }
             else
                 Debug.Log($"Rediscovered node {peerId}.");
+
         }
-        #endregion
+#endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface
         public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)

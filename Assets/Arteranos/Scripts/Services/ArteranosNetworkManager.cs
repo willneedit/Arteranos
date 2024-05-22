@@ -898,7 +898,6 @@ namespace Arteranos.Services
                 Server ss = SettingsManager.Server;
 
                 ss.ServerPort = conf.ServerPort;
-                ss.MetadataPort = conf.MetadataPort;
                 ss.UseUPnP = conf.UseUPnP;
                 ss.Name = conf.Name;
                 ss.Description = conf.Description;

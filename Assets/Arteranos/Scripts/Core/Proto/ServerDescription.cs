@@ -23,8 +23,8 @@ namespace Arteranos.Core
         [ProtoMember(2)]
         public int ServerPort;
 
-        [ProtoMember(3)]
-        public int MetadataPort;
+        //[ProtoMember(3)]
+        //public int MetadataPort;
 
         [ProtoMember(4)]
         public string Description;
@@ -81,7 +81,6 @@ namespace Arteranos.Core
             return other is not null &&
                    Name == other.Name &&
                    ServerPort == other.ServerPort &&
-                   MetadataPort == other.MetadataPort &&
                    Description == other.Description &&
                    ServerIcon == other.ServerIcon &&
                    Version == other.Version &&
@@ -98,7 +97,6 @@ namespace Arteranos.Core
             HashCode hash = new();
             hash.Add(Name);
             hash.Add(ServerPort);
-            hash.Add(MetadataPort);
             hash.Add(Description);
             hash.Add(ServerIcon);
             hash.Add(Version);
