@@ -287,7 +287,7 @@ namespace Arteranos.Services
 
     public abstract class IPFSService : MonoBehaviour
     {
-        public abstract Ipfs.Http.IpfsClientEx Ipfs_ { get; }
+        public abstract IpfsClientEx Ipfs_ { get; }
         public abstract Peer Self_ { get; }
         public abstract SignKey ServerKeyPair_ { get; }
         public abstract Cid IdentifyCid_ { get; protected set; }

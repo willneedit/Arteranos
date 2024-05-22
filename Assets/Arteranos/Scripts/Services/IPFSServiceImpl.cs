@@ -73,8 +73,6 @@ namespace Arteranos.Services
 
         private CancellationTokenSource cts = null;
 
-        private List<byte[]> UserFingerprints = new();
-
         private ConcurrentDictionary<MultiHash, Peer> DiscoveredPeers = null;
 
         // ---------------------------------------------------------------
@@ -398,7 +396,9 @@ namespace Arteranos.Services
                     $"Discovery identifier file's CID\n" +
                     $"   {IdentifyCid}\n" +
                     $"Server Online Data publish key\n" +
-                    $"   {sod_key_id}\n");
+                    $"   {sod_key_id}\n" +
+                    $"Using Pubsub\n" +
+                    $"   {UsingPubsub_}");
 
                 ipfs = ipfsTmp;
 
@@ -414,10 +414,6 @@ namespace Arteranos.Services
             last = DateTime.MinValue;
             DiscoveredPeers = new();
             cts = new();
-
-            UserFingerprints = new List<byte[]>();
-
-            StartCoroutine(GetUserListCoroutine());
 
             StartCoroutine(InitializeIPFSCoroutine());
 
@@ -440,20 +436,6 @@ namespace Arteranos.Services
         private void OnDestroy()
         {
             Instance = null;
-        }
-
-        private IEnumerator GetUserListCoroutine()
-        {
-
-            while (true)
-            {
-                UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
-                                             where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
-                                             select CryptoHelpers.GetFingerprint(user.UserID)).ToList();
-
-                yield return new WaitForSeconds(heartbeatSeconds / 2);
-            }
-            // NOTREACHED
         }
 
         private IEnumerator DiscoverPeersCoroutine()
@@ -656,7 +638,10 @@ namespace Arteranos.Services
             if (last > DateTime.UtcNow - TimeSpan.FromSeconds(30)) return;
             last = DateTime.UtcNow;
 
-            // TODO - WARNING - UserFingerprints potential concurrency issues
+            List<byte[]> UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
+                                where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
+                                select CryptoHelpers.GetFingerprint(user.UserID)).ToList();
+
             ServerOnlineData sod = new()
             {
                 CurrentWorldCid = SettingsManager.WorldCid,
@@ -788,12 +773,12 @@ namespace Arteranos.Services
 
                 if (pm is ServerDescriptionLink sdl) // Too big for pubsub, this is only a link
                 {
-                    Debug.Log($"New server description from {SenderPeerID}");
+                    // Debug.Log($"New server description from {SenderPeerID}");
                     DownloadServerDescription(SenderPeerID, sdl.ServerDescriptionCid);
                 }
                 else if (pm is ServerOnlineData sod) // As-is.
                 {
-                    Debug.Log($"New server online data from {SenderPeerID}");
+                    // Debug.Log($"New server online data from {SenderPeerID}");
                     sod.LastOnline = DateTime.UtcNow; // Not serialized
                     sod.DBInsert(SenderPeerID.ToString());
                 }
@@ -840,7 +825,7 @@ namespace Arteranos.Services
             }
 
             // If we have the CID, okay. If not, use the IPNS resolver.
-            sddPath = sddPath ?? "/ipns/" + SenderPeerID;
+            sddPath ??= "/ipns/" + SenderPeerID;
             TaskScheduler.Schedule(MakeDownloadTask(SenderPeerID, sddPath));
         }
 
