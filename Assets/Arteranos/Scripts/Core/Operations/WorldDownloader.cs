@@ -45,39 +45,30 @@ namespace Arteranos.Core.Operations
                     break;
                 }
 
-            byte[] screenshotBytes = null;
-            using (Stream stream = await IPFSService.ReadFile($"{context.WorldCid}/{screenshotName}"))
-            {
-                using MemoryStream ms = new();
-                await Utils.CopyWithProgress(stream, ms);
-                screenshotBytes = ms.ToArray();
-            }
+            byte[] screenshotBytes = await IPFSService.ReadBinary($"{context.WorldCid}/{screenshotName}");
 
-            using (Stream stream = await IPFSService.ReadFile($"{context.WorldCid}/Metadata.json"))
-            {
-                using MemoryStream ms = new();
-                await Utils.CopyWithProgress(stream, ms);
-                string json = Encoding.UTF8.GetString(ms.ToArray());
-                WorldMetaData metaData = WorldMetaData.Deserialize(json);
+            byte[] mdbytes = await IPFSService.ReadBinary($"{context.WorldCid}/Metadata.json");
 
-                WorldInfo wi = new()
+            string json = Encoding.UTF8.GetString(mdbytes);
+            WorldMetaData metaData = WorldMetaData.Deserialize(json);
+
+            WorldInfo wi = new()
+            {
+                win = new()
                 {
-                    win = new()
-                    {
-                        WorldCid = context.WorldCid,
-                        WorldName = metaData.WorldName,
-                        WorldDescription = metaData.WorldDescription,
-                        Author = metaData.AuthorID,
-                        ContentRating = metaData.ContentRating,
-                        Signature = null,
-                        ScreenshotPNG = screenshotBytes,
-                        Created = metaData.Created,
-                    },
-                    Updated = DateTime.MinValue
-                };
-                context.WorldInfo = wi;
-                wi.DBUpdate();
-            }
+                    WorldCid = context.WorldCid,
+                    WorldName = metaData.WorldName,
+                    WorldDescription = metaData.WorldDescription,
+                    Author = metaData.AuthorID,
+                    ContentRating = metaData.ContentRating,
+                    Signature = null,
+                    ScreenshotPNG = screenshotBytes,
+                    Created = metaData.Created,
+                },
+                Updated = DateTime.MinValue
+            };
+            context.WorldInfo = wi;
+            wi.DBUpdate();
 
             return context;
         }
@@ -123,6 +114,9 @@ namespace Arteranos.Core.Operations
             // TODO #115: context.TemplateCid != null will mean it's a decorated world
             string assetPath = $"{context.WorldCid}/{GetArchitectureDirName()}";
 
+            // HACK: Kubo's ListFiles doesn't implicitly resolve.
+            assetPath = await IPFSService.ResolveToCid(assetPath);
+
             IFileSystemNode fi = await IPFSService.ListFile(assetPath, token);
             if (!fi.IsDirectory)
                 throw new InvalidDataException("World data packet is not a directory");
@@ -153,7 +147,7 @@ namespace Arteranos.Core.Operations
                 }
             });
 
-            using TarArchive archive = TarArchive.CreateInputTarArchive(tar, Encoding.UTF8);
+            using TarArchive archive = TarArchive.CreateInputTarArchive(tar);
             archive.ExtractContents(Utils.WorldCacheRootDir);
             cts.Cancel(); // ... and he's done it.
 

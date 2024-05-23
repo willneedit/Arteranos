@@ -7,7 +7,7 @@ using System;
 using System.Threading.Tasks;
 using Arteranos.UI;
 using Arteranos.Core.Operations;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using Arteranos.Core.Cryptography;
 using System.Collections;
 using Arteranos.Social;
@@ -898,12 +898,12 @@ namespace Arteranos.Services
                 Server ss = SettingsManager.Server;
 
                 ss.ServerPort = conf.ServerPort;
-                ss.MetadataPort = conf.MetadataPort;
                 ss.UseUPnP = conf.UseUPnP;
                 ss.Name = conf.Name;
                 ss.Description = conf.Description;
                 ss.Permissions = conf.Permissions;
                 ss.Public = conf.Public;
+                ss.ServerIcon = conf.ServerIcon;
 
                 ss.Save();
                 _ = IPFSService.FlipServerDescription(true);

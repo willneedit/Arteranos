@@ -1,23 +1,13 @@
 using System.Collections;
-using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Engine;
 using Arteranos.Services;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using Arteranos.Core;
 using Ipfs;
-using System.Linq;
-using System.Threading;
-using System.Text;
-using Ipfs.Core.Cryptography.Proto;
-using Ipfs.Engine.Cryptography;
-using Arteranos.Core.Cryptography;
-using System.Net;
 using UnityEditor;
 using Arteranos.Core.Operations;
 
@@ -47,14 +37,14 @@ namespace Arteranos.PlayTest.Services
             GameObject bp = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Prefabs/Core/_SceneEssentials.prefab");
             GameObject go = UnityEngine.Object.Instantiate(bp);
 
-            // Resynchronize with the background IPFS uploading processes
-            yield return new WaitUntil(() => SettingsManager.DefaultFemaleAvatar != null);
-
-            yield return UploadTestWorld();
+            yield return null;
         }
 
         private IEnumerator UploadTestWorld()
         {
+            // Resynchronize with the background IPFS uploading processes
+            yield return new WaitUntil(() => SettingsManager.DefaultFemaleAvatar != null);
+
             (AsyncOperationExecutor<Context> ao, Context co) =
                 AssetUploader.PrepareUploadToIPFS(FileURLAsset, true);
 
@@ -69,6 +59,8 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator InAndOut()
         {
+            yield return new WaitForSeconds(10);
+
             yield return TransitionProgress.TransitionFrom();
 
             yield return new WaitForSeconds(5);
@@ -81,6 +73,8 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator ProgressMonitoring()
         {
+            yield return new WaitForSeconds(10);
+
             yield return TransitionProgress.TransitionFrom();
 
             for(int i = 0; i < 10; i++)
@@ -98,6 +92,8 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator ProgressMonitoringFromAsync()
         {
+            yield return new WaitForSeconds(10);
+
             yield return TransitionProgress.TransitionFrom();
 
             // Same as before, but in a worker thread, not in a Coroutine
@@ -123,6 +119,10 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator TransitionWorld()
         {
+            yield return new WaitForSeconds(10);
+
+            yield return UploadTestWorld();
+
             yield return TransitionProgress.TransitionFrom();
 
             (AsyncOperationExecutor<Context> ao, Context co) =

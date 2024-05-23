@@ -6,7 +6,7 @@
  */
 
 using Arteranos.Core.Cryptography;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using Newtonsoft.Json;
 using ProtoBuf;
 using System;
@@ -26,9 +26,9 @@ namespace Arteranos.Core
         [ProtoMember(1)]
         public int ServerPort = 9777;
 
-        // The server metadata retrieval port.
-        [ProtoMember(2)]
-        public int MetadataPort = 9779;
+        // Obsolete. IPFS uses dynamic port allocation, or it's using its own config file.
+        //[ProtoMember(2)]
+        //public int MetadataPort = 9779;
 
         // Use UPnP port forwarding.
         [ProtoMember(11)]
@@ -71,7 +71,6 @@ namespace Arteranos.Core
         {
             Name = other.Name;
             Description = other.Description;
-            MetadataPort = other.MetadataPort;
             UseUPnP = other.UseUPnP;
             Permissions = other.Permissions;
             Public = other.Public;
@@ -95,7 +94,7 @@ namespace Arteranos.Core
         {
             try
             {
-                ConfigLastChanged = DateTime.Now;
+                ConfigLastChanged = DateTime.UtcNow;
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
                 FileUtils.WriteTextConfig(PATH_SERVER_SETTINGS, json);
             }
@@ -118,7 +117,6 @@ namespace Arteranos.Core
                 {
                     Debug.LogWarning("Modifying server settings: Ports, Name, Server Key");
                     ss.ServerPort -= 100;
-                    ss.MetadataPort -= 100;
                     ss.Name += " DS";
                 }
 

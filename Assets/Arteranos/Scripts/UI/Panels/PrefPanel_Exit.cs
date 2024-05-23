@@ -68,11 +68,7 @@ namespace Arteranos.UI
                 new string[] {"OK", "Cancel"});
 
             if(rc == 0)
-#if UNITY_EDITOR
-                EditorApplication.ExitPlaymode();
-#else
-                UnityEngine.Application.Quit();
-#endif
+                SettingsManager.Quit();
             else
                 btn_Exit.interactable = true;
         }

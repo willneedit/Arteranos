@@ -9,9 +9,10 @@ using Arteranos.Core;
 using System.Linq;
 using System.Collections;
 using Ipfs;
+using Ipfs.Unity;
 using System.IO;
 using Arteranos.Services;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Arteranos.UI
 {
@@ -59,7 +60,7 @@ namespace Arteranos.UI
             {
                 using MemoryStream ms = new(obj);
                 ms.Position = 0;
-                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => cs.Me.UserIconCid = _fsn.Id);
+                yield return Asyncs.Async2Coroutine(IPFSService.AddStream(ms), _fsn => cs.Me.UserIconCid = _fsn.Id);
 
                 dirty = true;
             }
@@ -83,10 +84,14 @@ namespace Arteranos.UI
         // outside means, like the Login panel.
         protected override void OnEnable()
         {
-            IEnumerator DownloadIcon(Cid icon)
+            void DownloadIcon(Cid icon)
             {
-                yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data);
-                bar_IconSelector.TriggerUpdate();
+                using CancellationTokenSource cts = new(5000);
+
+                Utils.DownloadData(icon, _data => {
+                    bar_IconSelector.IconData = _data;
+                    bar_IconSelector.TriggerUpdate();
+                }, cts.Token);
             }
 
             base.OnEnable();
@@ -103,7 +108,7 @@ namespace Arteranos.UI
             tro_UserID.text = cs.GetFingerprint(fpmode);
             sldn_AvatarHeight.value = cs.AvatarHeight;
 
-            StartCoroutine(DownloadIcon(cs.Me.UserIconCid));
+            DownloadIcon(cs.Me.UserIconCid);
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;

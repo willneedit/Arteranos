@@ -12,9 +12,8 @@ using Arteranos.Core.Cryptography;
 using Arteranos.UI;
 using Arteranos.XR;
 using Ipfs;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using Ipfs.CoreApi;
-using Ipfs.Engine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -30,6 +29,7 @@ using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using AsyncOperation = UnityEngine.AsyncOperation;
+using Ipfs.Http;
 
 namespace Arteranos.Avatar
 {
@@ -208,7 +208,7 @@ namespace Arteranos.Services
         public static IAvatarBrain GetOnlineUser(uint netId) 
             => Instance.GetOnlineUser_(netId);
         public static IEnumerable<IAvatarBrain> GetOnlineUsers() 
-            => Instance.GetOnlineUsers_();
+            => Instance?.GetOnlineUsers_() ?? new IAvatarBrain[0];
     }
 
     public abstract class AudioManager : MonoBehaviour
@@ -287,22 +287,20 @@ namespace Arteranos.Services
 
     public abstract class IPFSService : MonoBehaviour
     {
-        public abstract IpfsEngine Ipfs_ { get; }
+        public abstract IpfsClientEx Ipfs_ { get; }
         public abstract Peer Self_ { get; }
         public abstract SignKey ServerKeyPair_ { get; }
         public abstract Cid IdentifyCid_ { get; protected set; }
         public abstract Cid CurrentSDCid_ { get; protected set; }
+        public abstract bool UsingPubsub_ { get; protected set; }
 
-        public abstract event Action<IPublishedMessage> OnReceivedHello_;
-        public abstract event Action<IPublishedMessage> OnReceivedServerDirectMessage_;
 
         public abstract Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default);
         public abstract Task FlipServerDescription_(bool reload);
-        public abstract Task SendServerHello_();
-        public abstract Task SendServerOnlineData_();
-        public abstract Task SendServerDirectMessage_(string peerId, PeerMessage message);
         public abstract Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);
-
+        public abstract Task<byte[]> ReadBinary_(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
+        public abstract void DownloadServerOnlineData_(MultiHash SenderPeerID, Action callback = null);
+        public abstract Task<FileSystemNode> CreateDirectoryAsync_(IEnumerable<IFileSystemLink> links, CancellationToken cancel);
         public static IPFSService Instance { get; protected set; }
 
         public static Peer Self 
@@ -315,85 +313,44 @@ namespace Arteranos.Services
             => Instance.IdentifyCid_;
         public static Cid CurrentSDCid
             => Instance.CurrentSDCid_;
-
+        public static bool UsingPubsub
+            => Instance.UsingPubsub_;
         public static async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
-            => await Instance.GetPeerIPAddress_(PeerID, token);
+            => await Instance.GetPeerIPAddress_(PeerID, token).ConfigureAwait(false);
         public static async Task FlipServerDescription(bool reload)
-            => await Instance.FlipServerDescription_(reload);
-        public static async Task SendServerHello()
-            => await Instance.SendServerHello_();
-        public static async Task SendServerOnlineData()
-            => await Instance.SendServerOnlineData_();
-        public static async Task SendServerDirectMessage(string peerId, PeerMessage message)
-            => await Instance.SendServerDirectMessage_(peerId, message);
-
+            => await Instance.FlipServerDescription_(reload).ConfigureAwait(false);
         public static async Task PinCid(Cid cid, bool pinned, CancellationToken cancel = default)
-            => await Instance.PinCid_(cid, pinned, cancel);
+            => await Instance.PinCid_(cid, pinned, cancel).ConfigureAwait(false);
         public static async Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
-            => await Instance.Ipfs_.Pin.ListAsync(cancel);
+            => await Instance.Ipfs_.Pin.ListAsync(cancel).ConfigureAwait(false);
+        [Obsolete("DANGEROUS - interrupted stream may cause IPFS API client to hang!", true)]
         public static async Task<Stream> ReadFile(string path, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.ReadFileAsync(path, cancel);
+            => await Instance.Ipfs_.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
+        public static async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
+            => await Instance.ReadBinary_(path, reportProgress, cancel).ConfigureAwait(false);
+        public static void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null)
+            => Instance.DownloadServerOnlineData_(SenderPeerID, callback);
+
         public static async Task<Stream> Get(string path, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.GetAsync(path, cancel: cancel);
+            => await Instance.Ipfs_.FileSystem.GetAsync(path, cancel: cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel);
+            => await Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel).ConfigureAwait(false);
+        public static async Task<string> ResolveAsync(string path, bool recursive = true, CancellationToken cancel = default)
+            => await Instance.Ipfs_.ResolveAsync(path, recursive, cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.ListFileAsync(path, cancel);
+            => await Instance.Ipfs_.FileSystem.ListAsync(path, cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel);
+            => await Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel).ConfigureAwait(false);
         public static async Task RemoveGarbage(CancellationToken cancel = default)
-            => await Instance.Ipfs_.BlockRepository.RemoveGarbageAsync(cancel);
+            => await Instance.Ipfs_.BlockRepository.RemoveGarbageAsync(cancel).ConfigureAwait(false);
+        public static async Task<FileSystemNode> CreateDirectoryAsync(IEnumerable<IFileSystemLink> links, CancellationToken cancel = default)
+            => await Instance.CreateDirectoryAsync_(links, cancel).ConfigureAwait(false);
 
-        public static MultiAddress GetMultiAddress(IPAddress addr, int port, MultiHash peer_id)
+        public static async Task<Cid> ResolveToCid(string path, CancellationToken cancel = default)
         {
-            StringBuilder sb = new();
-            sb.Append(addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
-                ? "/ip6/"
-                : "/ip4/");
-            sb.Append(addr);
-            sb.Append("/tcp/");
-            sb.Append(port);
-            if(peer_id != null)
-            {
-                sb.Append("/p2p/");
-                sb.Append(peer_id);
-            }
-
-            return sb.ToString();
-        }
-
-        public static (IPAddress, int, MultiHash) ParseMultiAddress(MultiAddress maddr)
-        {
-            IPAddress addr = IPAddress.None;
-            int port = 0;
-            MultiHash peer_id = null;
-
-            string[] parts = maddr.ToString().Split('/');
-
-            for(int i = 1; i < parts.Length; i++)
-            {
-                switch(parts[i])
-                {
-                    case "ip4":
-                    case "ip6":
-                        i++;
-                        addr = IPAddress.Parse(parts[i]);
-                        break;
-                    case "tcp":
-                    case "udp":
-                        i++;
-                        port = int.Parse(parts[i]);
-                        break;
-                    case "p2p":
-                    case "ipfs":
-                        i++;
-                        peer_id = new(parts[i]);
-                        break;
-                    default:
-                        throw new ArgumentException("Unsupported or malformed Multiaddress");
-                }
-            }
-            return (addr, port, peer_id);
+            string resolved = await Instance.Ipfs_.ResolveAsync(path, cancel: cancel).ConfigureAwait(false);
+            if (resolved == null || resolved.Length < 6 || resolved[0..6] != "/ipfs/") return null;
+            return resolved[6..];
         }
     }
 
@@ -409,7 +366,7 @@ namespace Arteranos.Services
             yield return new WaitForSeconds(0.5f);
 
             AsyncOperation ao = SceneManager.LoadSceneAsync("Transition");
-            while (!ao.isDone) yield return null;
+            yield return new WaitUntil(() => ao.isDone);
 
 
             yield return new WaitForEndOfFrame();

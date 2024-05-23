@@ -15,7 +15,7 @@ using System.Linq;
 using Ipfs;
 using Random = UnityEngine.Random;
 using Arteranos.Core.Cryptography;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 
 namespace Arteranos.Avatar
 {

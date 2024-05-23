@@ -9,7 +9,6 @@ using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.Core.Operations;
 using Arteranos.Web;
-using Ipfs;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -43,10 +42,16 @@ namespace Arteranos.Services
 
             XR.XRControl.Instance.enabled = true;
 
+            yield return TransitionProgressStatic.TransitionFrom();
+
+            yield return new WaitUntil(() => TransitionProgressStatic.Instance != null);
+
+            TransitionProgressStatic.Instance.OnProgressChanged(0.00f, "Starting up");
+
+            IPFSService.Instance.enabled = true;
+
             // First, wait for IPFS to come up.
             yield return new WaitUntil(() => IPFSService.Instance?.Ipfs_ != null);
-
-            yield return UploadDefaultAvatars();
 
             if (DesiredWorldCid != null)
                 ServerSearcher.InitiateServerTransition(DesiredWorldCid);
@@ -84,27 +89,6 @@ namespace Arteranos.Services
 
             StartCoroutine(StartupCoroutine());
         }
-
-        private IEnumerator UploadDefaultAvatars()
-        {
-            Cid cid = null;
-            IEnumerator UploadAvatar(string resourceMA)
-            {
-                (AsyncOperationExecutor<Context> ao, Context co) =
-                    AssetUploader.PrepareUploadToIPFS(resourceMA, false); // Plsin GLB files
-
-                yield return ao.ExecuteCoroutine(co);
-
-                cid = AssetUploader.GetUploadedCid(co);
-
-            }
-
-            yield return UploadAvatar("resource:///Avatar/6394c1e69ef842b3a5112221.glb"); 
-            DefaultMaleAvatar = cid;
-            yield return UploadAvatar("resource:///Avatar/63c26702e5b9a435587fba51.glb");
-            DefaultFemaleAvatar = cid;
-        }
-
 
         protected override void StartCoroutineAsync_(Func<IEnumerator> action) 
             => QueuedCoroutine.Enqueue(action);

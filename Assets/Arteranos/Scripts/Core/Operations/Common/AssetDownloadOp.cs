@@ -49,20 +49,15 @@ namespace Arteranos.Core.Operations
             if(!context.isTarred)
             {
                 // Read plain file
-                using Stream inStream = await IPFSService.ReadFile(context.path, cancel: token);
-                using FileStream outStream = File.Create(context.TargetFile);
+                byte[] contents = await IPFSService.ReadBinary(context.path, cancel: token);
 
-                await Utils.CopyWithProgress(inStream, outStream,
-                    bytes => {
-                        actualBytes = bytes;
-                        ProgressChanged((float)bytes / context.Size);
-                    }, token);
+                File.WriteAllBytes(context.TargetFile, contents);
             }
             else
             {
                 // Extract directory
                 Stream tar = await IPFSService.Get(context.path, token);
-                using TarArchive archive = TarArchive.CreateInputTarArchive(tar, Encoding.UTF8);
+                using TarArchive archive = TarArchive.CreateInputTarArchive(tar);
                 archive.ProgressMessageEvent += (a, e, m) =>
                 {
                     actualBytes += e.Size;

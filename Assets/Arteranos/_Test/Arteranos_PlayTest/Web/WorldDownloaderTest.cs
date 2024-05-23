@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Engine;
+using Ipfs.Http;
 using Arteranos.Services;
 using System;
 using System.IO;
@@ -22,7 +22,7 @@ namespace Arteranos.PlayTest.Web
         private string FileURLAsset => $"file:///{PlainFileAsset}";
 
         IPFSServiceImpl srv = null;
-        IpfsEngine ipfs = null;
+        IpfsClientEx ipfs = null;
 
         Cid WorldCid = null;
 
@@ -61,7 +61,7 @@ namespace Arteranos.PlayTest.Web
         {
             if (WorldCid != null)
             {
-                ipfs.Block.RemoveAsync(WorldCid).Wait();
+                ipfs.Pin.RemoveAsync(WorldCid).Wait();
                 WorldInfo.DBDelete(WorldCid);
             }
 

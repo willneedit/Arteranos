@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using Mirror;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 
 namespace Arteranos.Core
 {

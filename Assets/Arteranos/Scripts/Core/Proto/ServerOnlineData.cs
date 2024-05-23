@@ -22,8 +22,8 @@ namespace Arteranos.Core
         [ProtoMember(2)]
         public string CurrentWorldName;
 
-        [ProtoMember(3)]
-        public string ServerDescriptionCid; // Just in case if we don't have the SD at all.
+        //[ProtoMember(3)]
+        //public string ServerDescriptionCid; // Just in case if we don't have the SD at all.
 
         [ProtoMember(4)]
         public List<byte[]> UserFingerprints = new();

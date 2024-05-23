@@ -2,7 +2,7 @@
 
 <?include ..\Setup\Data.wxi ?>
 
-<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi' xmlns:fw="http://schemas.microsoft.com/wix/FirewallExtension">
   <Product Name='$(var.product)' Manufacturer='$(var.manufacturer)'
            Id='3EEADABD-310E-4EA1-95F5-C1574118AC44'
            UpgradeCode='$(var.UpgradeCode)'
@@ -41,9 +41,14 @@
                             WorkingDirectory='INSTALLDIR' Icon="DefaultAppIcon.ico" IconIndex="0" Advertise="yes" />
                   <Shortcut Id="desktopDefaultApp" Directory="DesktopFolder" Name="$(var.product)"
                             WorkingDirectory='INSTALLDIR' Icon="DefaultAppIcon.ico" IconIndex="0" Advertise="yes" />
+				  <fw:FirewallException Id='MainAppFW' Name='Arteranos Desktop' Scope='any' />						
                 </File>
               </Component>
-
+			  <Component Id='MainAppCompanionExecutable' Guid='C6E64BF6-BAF6-43BB-BEF7-DD83E4F704EB'>
+				<File Id='ipfsEXE1' Name='ipfs.exe' DiskId='1' Source='ipfs.exe'>
+				  <fw:FirewallException Id='MainAppCompFW' Name='Arteranos Desktop IPFS' Scope='any' />
+		        </File>
+			  </Component>
               <Component Id='ProtocolIntegration' Guid='CB5FFA88-1580-44B7-A422-664E52E94A46'>
                 <RegistryKey Root='HKCR' Key='arteranos'>
                   <RegistryValue Type='string' Value='URL:arteranos protocol' KeyPath='yes' />
@@ -51,11 +56,19 @@
                   <RegistryValue Key='shell\open\command' Type='string' Value='"[AppDir]Arteranos.exe" "%1"' />
                 </RegistryKey>
               </Component>
-
             </Directory>
             <Directory Id='ServerDir' Name='DedicatedServer'>
-
-            </Directory>
+				<Component Id='ServerExecutable' Guid='C50204F6-1BEE-455F-B04A-5B1F6E356FCE'>
+					<File Id='ArteranosDSEXE' Name='Arteranos-Server.exe' DiskId='1' Source='Arteranos-Server.exe' KeyPath='yes'>
+						<fw:FirewallException Id='ServerAppFW' Name='Arteranos Dedicated Server' Scope='any' />
+					</File>
+				</Component>
+				<Component Id='ServerCompanionExecutable' Guid='C637EAD7-82C1-4A6F-9FC1-376CC1735581'>
+					<File Id='ipfsEXE2' Name='ipfs.exe' DiskId='1' Source='ipfs.exe'>
+						<fw:FirewallException Id='ServerAppCompFW' Name='Arteranos Dedicated Server IPFS' Scope='any' />
+					</File>
+				</Component>
+			</Directory>
             <!--<Component Id='HelperLibrary' Guid='YOURGUID-6BE3-460D-A14F-75658D16550B'>
               <File Id='HelperDLL' Name='Helper.dll' DiskId='1' Source='Helper.dll' KeyPath='yes' />
             </Component>
@@ -83,6 +96,9 @@
     </Directory>
     <Feature Id='Complete' Level='1'>
       <ComponentRef Id='MainExecutable' />
+	  <ComponentRef Id='MainAppCompanionExecutable' />
+      <ComponentRef Id='ServerExecutable' />
+	  <ComponentRef Id='ServerCompanionExecutable' />
       <ComponentRef Id='ProgramMenuDir' />
       <ComponentRef Id='ProtocolIntegration' />
       <ComponentGroupRef Id="Pack_Win64_Server" />

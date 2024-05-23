@@ -8,8 +8,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Ipfs;
 using ProtoBuf;
 
 namespace Arteranos.Core
@@ -23,8 +21,8 @@ namespace Arteranos.Core
         [ProtoMember(2)]
         public int ServerPort;
 
-        [ProtoMember(3)]
-        public int MetadataPort;
+        //[ProtoMember(3)]
+        //public int MetadataPort;
 
         [ProtoMember(4)]
         public string Description;
@@ -56,11 +54,14 @@ namespace Arteranos.Core
         [ProtoMember(14)]
         public byte[] signature;
 
-        [ProtoMember(15)]
-        public string ServerDescriptionCid; // Only matches itself if it's null!
+        //[ProtoMember(15)]
+        //public string ServerDescriptionCid; // Only matches itself if it's null!
 
         [ProtoMember(16)]
         public string ServerIcon; // string, because CIDs are not proto-serializable
+
+        [ProtoMember(17)]
+        public string ServerOnlineDataLinkCid; // /ipns/<SOD-Key>
 
         public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
@@ -78,7 +79,6 @@ namespace Arteranos.Core
             return other is not null &&
                    Name == other.Name &&
                    ServerPort == other.ServerPort &&
-                   MetadataPort == other.MetadataPort &&
                    Description == other.Description &&
                    ServerIcon == other.ServerIcon &&
                    Version == other.Version &&
@@ -95,7 +95,6 @@ namespace Arteranos.Core
             HashCode hash = new();
             hash.Add(Name);
             hash.Add(ServerPort);
-            hash.Add(MetadataPort);
             hash.Add(Description);
             hash.Add(ServerIcon);
             hash.Add(Version);
@@ -117,5 +116,12 @@ namespace Arteranos.Core
         {
             return !(left == right);
         }
+    }
+
+    [ProtoContract]
+    public partial class ServerDescriptionLink : PeerMessage
+    {
+        [ProtoMember(1)]
+        public string ServerDescriptionCid;
     }
 }

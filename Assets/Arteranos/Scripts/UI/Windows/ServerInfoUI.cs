@@ -58,8 +58,6 @@ namespace Arteranos.UI
         {
             IEnumerator Visualize()
             {
-                yield return null;
-
                 lbl_Name.text = si.Name;
                 lbl_Address.text = ""; // Maybe an abbreviated PeerID?
                 lbl_LastUpdated.text = si.LastUpdated.HumanReadable();
@@ -76,7 +74,7 @@ namespace Arteranos.UI
                 lbl_World.text = si.CurrentWorldName;
             }
 
-            SettingsManager.StartCoroutineAsync(Visualize);
+            StartCoroutine(Visualize());
         }
     }
 }

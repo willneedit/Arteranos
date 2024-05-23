@@ -741,6 +741,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7255308184707867998, guid: 0c924ef8e01e2974ba2fde7066698900,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7940587785708425646, guid: 0c924ef8e01e2974ba2fde7066698900,
         type: 3}
       propertyPath: offlineScene

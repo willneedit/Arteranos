@@ -23,6 +23,7 @@ using System.Text.RegularExpressions;
 using Arteranos.Avatar;
 using System.Linq;
 using Ipfs;
+using Ipfs.Unity;
 
 namespace Arteranos.Services
 {
@@ -56,7 +57,6 @@ namespace Arteranos.Services
         private Action<bool, string> m_OnClientConnectionResponse = null;
 
         public bool ServerPortPublic = false;
-        public bool MetadataPortPublic = false;
 
         private ConnectivityLevel CurrentConnectivityLevel = ConnectivityLevel.Unconnected;
         private OnlineLevel CurrentOnlineLevel = OnlineLevel.Offline;
@@ -85,7 +85,7 @@ namespace Arteranos.Services
             if(Application.internetReachability == NetworkReachability.NotReachable)
                 return ConnectivityLevel.Unconnected;
 
-            return (ServerPortPublic && MetadataPortPublic)
+            return (ServerPortPublic)
                 ? ConnectivityLevel.Unrestricted
                 : ConnectivityLevel.Restricted;
         }
@@ -140,7 +140,7 @@ namespace Arteranos.Services
             {
                 yield return null;
 
-                yield return Core.Utils.Async2Coroutine(GetMyIpAsync(), _addr => PublicIPAddress_ = _addr);
+                yield return Asyncs.Async2Coroutine(GetMyIpAsync(), _addr => PublicIPAddress_ = _addr);
                 Debug.Log($"  Public IP Address: {PublicIPAddress}");
             }
 
@@ -243,7 +243,6 @@ namespace Arteranos.Services
             Server ss = SettingsManager.Server;
 
             ServerPortPublic = await OpenPortAsync(ss.ServerPort);
-            MetadataPortPublic = await OpenPortAsync(ss.MetadataPort);
         }
 
         public void ClosePortsAsync()
@@ -255,11 +254,7 @@ namespace Arteranos.Services
             if(ServerPortPublic)
                 ClosePortAsync(ss.ServerPort);
 
-            if(MetadataPortPublic)
-                ClosePortAsync(ss.MetadataPort);
-
             ServerPortPublic = false;
-            MetadataPortPublic = false;
         }
 
         #endregion

@@ -1,13 +1,14 @@
-## This package contains third-party software components governed by the license(s) indicated below:
+# This package contains third-party software components governed by the license(s) indicated below:
 
- - [FastIK](#fastik---mit-license)
- - [Mirror Networking](#mirror-networking---mit-license)
- - [Ready Player Me Avatar Core](#ready-player-me-avatar-core---mit-license)
- - [glTFast](#gltfast---apache-20-license)
- - [Opus Audio Codec](#opus-audio-codec---bsd-license)
- - [Mono.Nat](#mononat---mit-license)
- - [Emojis](#emojis----cc-by-sa-40)
- - [Unity Runtime components](#unity-runtime-components---unity-companion-license)
+- [This package contains third-party software components governed by the license(s) indicated below:](#this-package-contains-third-party-software-components-governed-by-the-licenses-indicated-below)
+  - [FastIK - MIT License](#fastik---mit-license)
+  - [Mirror Networking - MIT License](#mirror-networking---mit-license)
+  - [kubo - MIT License](#kubo---mit-license)
+  - [glTFast - Apache-2.0 License](#gltfast---apache-20-license)
+  - [Opus Audio Codec - BSD License](#opus-audio-codec---bsd-license)
+  - [Mono.Nat - MIT License](#mononat---mit-license)
+  - [Emojis -  CC BY-SA 4.0](#emojis----cc-by-sa-40)
+  - [Unity Runtime components - Unity Companion License](#unity-runtime-components---unity-companion-license)
   
 ---
 ## [FastIK](https://github.com/ditzel/SimpleIK) - MIT License
@@ -64,11 +65,9 @@ THE SOFTWARE.
 ```
 
 ---
-## [Ready Player Me Avatar Core](https://github.com/readyplayerme/rpm-unity-sdk-core) - MIT License
+## [kubo](https://github.com/ipfs/kubo/blob/master/LICENSE-MIT) - MIT License
 ```
-MIT License
-
-Copyright (c) 2022 Ready Player Me
+The MIT License (MIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -77,16 +76,16 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 ```
 
 ---

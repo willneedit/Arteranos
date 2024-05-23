@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Engine;
+using Ipfs.Http;
 using Arteranos.Services;
 using System.IO;
 using System.Threading.Tasks;
@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 
 using Object = UnityEngine.Object;
 using System.Collections.Generic;
+using Ipfs.Unity;
 
 namespace Arteranos.PlayTest.Web
 {
@@ -27,8 +28,7 @@ namespace Arteranos.PlayTest.Web
 
 
         IPFSServiceImpl srv = null;
-        IpfsEngine ipfs = null;
-        Peer self = null;
+        IpfsClientEx ipfs = null;
 
         Cid AvatarCid = null;
 
@@ -50,7 +50,7 @@ namespace Arteranos.PlayTest.Web
 
             ipfs = srv.Ipfs_;
 
-            self = Task.Run(async () => await ipfs.LocalPeer).Result;
+            // self = Task.Run(async () => await ipfs.LocalPeer).Result;
 
             yield return UploadTestAvatar();
         }
@@ -99,13 +99,12 @@ namespace Arteranos.PlayTest.Web
         {
             if (AvatarCid != null)
             {
-                ipfs.Block.RemoveAsync(AvatarCid).Wait();
+                yield return Asyncs.Async2Coroutine(ipfs.Pin.RemoveAsync(AvatarCid));
                 WorldInfo.DBDelete(AvatarCid);
             }
 
             srv = null;
             ipfs = null;
-            self = null;
             AvatarCid = null;
 
             StartupManagerMock go1 = Object.FindObjectOfType<StartupManagerMock>();

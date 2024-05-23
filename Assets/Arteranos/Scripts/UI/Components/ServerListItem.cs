@@ -11,9 +11,9 @@ using UnityEngine.UI;
 
 using Arteranos.Core;
 using Arteranos.Web;
-using System.Threading.Tasks;
 using System.Collections;
 using System;
+using Arteranos.Services;
 
 namespace Arteranos.UI
 {
@@ -32,8 +32,6 @@ namespace Arteranos.UI
         private HoverButton btn_Delete = null;
 
         private ServerInfo si = null;
-
-        private bool inProgress = false;
 
         public static ServerListItem New(Transform parent, string PeerID)
         {
@@ -65,80 +63,66 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            si = new(PeerID);
-
-            PopulateServerData();
+            UpdateServerData();
         }
 
-        public void PopulateServerData()
+        public void UpdateServerData()
         {
-            if(inProgress)
+            void ShowOnlineDetails()
             {
-                Debug.Log($"{lbl_Caption.text} already in progress, skipping");
-                return;
-            }
-
-            inProgress = true;
-
-            // Could be that the list item bas been deleted in th meantime.
-            // Or, the entire list.
-            if(btn_Add == null) return;
-
-            btn_Add.gameObject.SetActive(false);
-            btn_Visit.gameObject.SetActive(si.IsOnline);
-            btn_Delete.gameObject.SetActive(false);
-
-            btn_Background.image.color = (si.UsesCustomTOS && !SettingsManager.Client.AllowCustomTOS)
-                ? BgndWarning
-                : BgndRegular;
-
-            if(si.IsValid)
-            {
-                StartCoroutine(VisualizeServerData());
-
-                btn_Add.gameObject.SetActive(false);
-                btn_Delete.gameObject.SetActive(true);
-                return;
-            }
-
-
-            lbl_Caption.text = $"({PeerID}) (Unknown)";
-
-            btn_Add.gameObject.SetActive(true);
-            btn_Delete.gameObject.SetActive(true);
-        }
-
-        public Task UpdateServerData()
-        {
-            IEnumerator PSDCoroutine()
-            {
+                // Refresh data
                 si = new(PeerID);
 
-                yield return null;
+                btn_Visit.gameObject.SetActive(si.IsOnline);
 
-                PopulateServerData();
+                if (!si.IsOnline)
+                    lbl_Caption.text = $"{si.Name} (Offline)";
+                else
+                    lbl_Caption.text =
+                        $"Server: {$"{si.Name}"} (Users: {si.UserCount}, Friends: {si.FriendCount})\n" +
+                        $"Current World: {si.CurrentWorldName}";
             }
 
-            SettingsManager.StartCoroutineAsync(PSDCoroutine);
-
-            return Task.CompletedTask;
-        }
-
-        private IEnumerator VisualizeServerData()
-        {
-            yield return Utils.DownloadIconCoroutine(si.ServerIcon, _tex => img_Icon.texture = _tex);
-
-            inProgress = false;
-
-            if(!si.IsOnline)
+            void ShowServerDetails()
             {
-                lbl_Caption.text = $"{si.Name} (Offline)";
-                yield break;
+                // Refresh data
+                si = new(PeerID);
+
+                btn_Add.gameObject.SetActive(false);
+                btn_Delete.gameObject.SetActive(false);
+
+                btn_Background.image.color = (si.UsesCustomTOS && !SettingsManager.Client.AllowCustomTOS)
+                    ? BgndWarning
+                    : BgndRegular;
+
+                if (si.IsValid)
+                {
+                    lbl_Caption.text = $"{si.Name} (Unknown)";
+
+                    btn_Add.gameObject.SetActive(false);
+                    btn_Delete.gameObject.SetActive(true);
+                    return;
+                }
+
+
+                lbl_Caption.text = $"({PeerID}) (Unknown)";
+
+                btn_Add.gameObject.SetActive(true);
+                btn_Delete.gameObject.SetActive(true);
+
             }
 
-            lbl_Caption.text = 
-                $"Server: {$"{si.Name}"} (Users: {si.UserCount}, Friends: {si.FriendCount})\n" +
-                $"Current World: {si.CurrentWorldName}";
+            void ShowIcon(Texture2D tex) => img_Icon.texture = tex;
+
+            ShowServerDetails();
+
+            StartCoroutine(Utils.DownloadIconCoroutine(si.ServerIcon, ShowIcon));
+
+            // With Pubsub, we get the data delivered. Without Pubsub, we need to ask for it.
+            if(IPFSService.UsingPubsub)
+                ShowOnlineDetails();
+            else
+                IPFSService.DownloadServerOnlineData(PeerID, ShowOnlineDetails);
         }
 
         private void OnVisitClicked()
@@ -151,7 +135,7 @@ namespace Arteranos.UI
             if(btn_Visit != null) btn_Visit.interactable = true;
         }
 
-        private async void OnAddClicked()
+        private void OnAddClicked()
         {
             Client cs = SettingsManager.Client;
 
@@ -162,7 +146,7 @@ namespace Arteranos.UI
                 cs.Save();
             }
 
-            await UpdateServerData();
+            UpdateServerData();
         }
 
         private void OnDeleteClicked()
@@ -188,12 +172,8 @@ namespace Arteranos.UI
             Destroy(gameObject);
         }
 
-        private async void OnInfoClicked()
+        private void OnInfoClicked()
         {
-            btn_Info.interactable = false;
-            await UpdateServerData();
-            btn_Info.interactable = true;
-
             ServerInfoUI.New(si);
         }
     }

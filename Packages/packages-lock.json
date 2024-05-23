@@ -1,16 +1,15 @@
 {
   "dependencies": {
     "com.atteneder.gltfast": {
-      "version": "https://github.com/atteneder/glTFast.git#v5.0.0",
+      "version": "file:glTFast",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
         "com.unity.modules.jsonserialize": "1.0.0",
         "com.unity.modules.unitywebrequest": "1.0.0",
         "com.unity.mathematics": "1.2.6",
         "com.unity.burst": "1.6.6"
-      },
-      "hash": "76f76584a113b240a4ec11f324b17302bde9a53a"
+      }
     },
     "com.looooong.asyncimageloader": {
       "version": "file:UnityAsyncImageLoader",
@@ -401,8 +400,8 @@
       },
       "url": "https://packages.unity.com"
     },
-    "ipfs.engine": {
-      "version": "file:Unity-IPFS-Engine",
+    "com.willneedit.ipfs.iface": {
+      "version": "file:Arteranos-IPFS-interface",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

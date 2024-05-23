@@ -20,7 +20,7 @@ using System.Linq;
 using Arteranos.UI;
 using System.Collections.Concurrent;
 using Arteranos.Web;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using ProtoBuf;
 using System.IO;
 using Arteranos.Core.Cryptography;

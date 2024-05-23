@@ -4,7 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Engine;
+using Ipfs.Http;
 using Arteranos.Services;
 using System;
 using System.IO;
@@ -16,10 +16,10 @@ namespace Arteranos.PlayTest
 {
     public class TestFixture
     {
-        private static IpfsEngine ipfs = null;
+        private static IpfsClientEx ipfs = null;
         private static IPFSServiceImpl iPFSService = null;
 
-        public static IpfsEngine Ipfs { get => ipfs; }
+        public static IpfsClientEx Ipfs { get => ipfs; }
         public static IPFSServiceImpl IPFSService { get => iPFSService; }
 
         public static GameObject SetupStartupManagerMock()
@@ -92,7 +92,8 @@ namespace Arteranos.PlayTest
         }
     }
 
-    class TempNode : IpfsEngine
+#if false
+    class TempNode : IpfsClientEx
     {
         static int nodeNumber;
 
@@ -115,18 +116,7 @@ namespace Arteranos.PlayTest
                 Options.Discovery.BootstrapPeers = new Ipfs.MultiAddress[0];
             }
         }
-
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            if (Directory.Exists(Options.Repository.Folder))
-            {
-                Directory.Delete(Options.Repository.Folder, true);
-            }
-        }
     }
 
-
+#endif
 }

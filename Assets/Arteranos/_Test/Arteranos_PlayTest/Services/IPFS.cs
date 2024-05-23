@@ -4,7 +4,6 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Engine;
 using Arteranos.Services;
 using System;
 using System.IO;
@@ -14,11 +13,12 @@ using Ipfs;
 using System.Linq;
 using System.Threading;
 using System.Text;
-using Ipfs.Core.Cryptography.Proto;
-using Ipfs.Engine.Cryptography;
+using Ipfs.Cryptography.Proto;
 using Arteranos.Core.Cryptography;
 using System.Net;
 using UnityEditor;
+using Ipfs.Http;
+using Ipfs.Unity;
 
 namespace Arteranos.PlayTest.Services
 {
@@ -358,195 +358,50 @@ namespace Arteranos.PlayTest.Services
             Assert.True(true);
         }
 
+        // How to construct a directory without using temporary files.
         [UnityTest]
-        public IEnumerator ConnectivityTest()
+        public IEnumerator CreateDirectory()
         {
-            try
+            List<IFileSystemLink> list = new();
+
             {
-                yield return null;
-
-                MultiHash RemotePeerId = IPFSService.Self.Id;
-
-                MultiAddress selfExternalAddress = $"/ip4/{NetworkStatus.ExternalAddress}/tcp/{SettingsManager.Server.MetadataPort}/p2p/{RemotePeerId}";
-
-                Debug.Log($"IPFS server multiaddress: {selfExternalAddress}");
-
-                NetworkStatus.OpenPorts = true;
-
-                yield return new WaitForSeconds(5);
-
-                using TempNode outsider = new();
-                Task t0 = outsider.StartAsync();
-                yield return new WaitUntil(() => t0.IsCompleted);
-
-                Peer other = outsider.LocalPeer.Task.Result;
-
-                using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
-                Task t1 = outsider.Swarm.ConnectAsync(selfExternalAddress, cts.Token);
-                yield return new WaitUntil(() => t1.IsCompleted);
-
-                Peer[] peers = IPFSService.Instance.Ipfs_.Swarm.PeersAsync().Result.ToArray();
-
-                Assert.IsNotNull(peers.Length);
-
-                int i = 0, j = 0;
-                int found_i = -1;
-                foreach (Peer peer in peers)
-                {
-                    i++;
-                    j = 0;
-                    foreach (MultiAddress address in peer.Addresses)
-                    {
-                        j++;
-                        Debug.Log($"IPFS server's peer {i}, Address {j}: {address}");
-                    }
-                    if (peer.Id == other.Id) found_i = i;
-                }
-                Assert.IsTrue(found_i >= 0);
-                Debug.Log($"Outsider's contact was found in {found_i}");
-
-                i = 0;
-                found_i = -1;
-                Peer[] peers2 = outsider.Swarm.PeersAsync().Result.ToArray();
-                foreach (Peer peer in peers2)
-                {
-                    i++;
-                    j = 0;
-                    foreach(MultiAddress address in peer.Addresses)
-                    {
-                        j++;
-                        Debug.Log($"Outsider's peer {i}, Address {j}: {address}");
-                    }
-                }
+                using MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes("Hello World B"));
+                stream.Position = 0;
+                yield return Asyncs.Async2Coroutine(IPFSService.AddStream(stream, "Beta.txt"), _fsn => list.Add(_fsn.ToLink()));
             }
-            finally 
+
             {
-                NetworkStatus.OpenPorts = false;
+                using MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes("Hello World A"));
+                stream.Position = 0;
+                yield return Asyncs.Async2Coroutine(IPFSService.AddStream(stream, "Alpha.txt"), _fsn => list.Add(_fsn.ToLink()));
+            }
+
+            Assert.AreEqual(2, list.Count);
+
+            FileSystemNode fsn = null;
+            yield return Asyncs.Async2Coroutine(IPFSService.CreateDirectoryAsync(list), _fsn => fsn = _fsn);
+
+            Assert.IsNotNull(fsn);
+            Assert.AreEqual(2, fsn.Links.Count());
+
+            List<IFileSystemLink> list2 = fsn.Links.ToList();
+            Assert.AreEqual("Beta.txt", list2[0].Name);
+            Assert.AreEqual("Alpha.txt", list2[1].Name);
+
+            Assert.IsNotNull(fsn.Id);
+
+            {
+                string result = null;
+                yield return Asyncs.Async2Coroutine(IPFSService.ReadBinary(fsn.Id + "/Alpha.txt"), _result => result = Encoding.UTF8.GetString(_result));
+                Assert.AreEqual("Hello World A", result);
+            }
+
+            {
+                string result = null;
+                yield return Asyncs.Async2Coroutine(IPFSService.ReadBinary(fsn.Id + "/Beta.txt"), _result => result = Encoding.UTF8.GetString(_result));
+                Assert.AreEqual("Hello World B", result);
             }
         }
 
-        [UnityTest]
-        public IEnumerator LoopbackConnectivityTest()
-        {
-            yield return null;
-
-            MultiHash RemotePeerId = IPFSService.Self.Id;
-
-            MultiAddress selfExternalAddress = $"/ip4/127.0.0.1/tcp/{SettingsManager.Server.MetadataPort}/p2p/{RemotePeerId}";
-
-            Debug.Log($"IPFS server multiaddress: {selfExternalAddress}");
-
-            using TempNode outsider = new();
-            Task t0 = outsider.StartAsync();
-            yield return new WaitUntil(() => t0.IsCompleted);
-
-            Peer other = outsider.LocalPeer.Task.Result;
-
-            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
-            Task t1 = outsider.Swarm.ConnectAsync(selfExternalAddress, cts.Token);
-            yield return new WaitUntil(() => t1.IsCompleted);
-
-            Peer[] peers = IPFSService.Instance.Ipfs_.Swarm.PeersAsync().Result.ToArray();
-
-            Assert.IsNotNull(peers.Length);
-
-            bool found = false;
-            int i = 0, j = 0;
-            foreach (Peer peer in peers)
-            {
-                i++;
-                j = 0;
-                if (peer.Id == other.Id) found = true;
-                foreach (MultiAddress address in peer.Addresses)
-                {
-                    j++;
-                    Debug.Log($"IPFS server's peer {i}, Address {j}: {address}");
-                }
-            }
-            Assert.IsTrue(found);
-        }
-
-        [UnityTest]
-        public IEnumerator FindExistingServerTest()
-        {
-            yield return null;
-
-            IpfsEngine myserver = IPFSService.Instance.Ipfs_;
-
-            // Put up the file
-            Task<IFileSystemNode> taskFsn = myserver.FileSystem.AddTextAsync(Core.Version.VERSION_MIN);
-            yield return new WaitUntil(() => taskFsn.IsCompleted);
-            IFileSystemNode fileSystemNode = taskFsn.Result;
-            Cid cid = fileSystemNode.Id;
-
-            yield return new WaitForSeconds(10);
-
-            // Set up a node, with its complete bootstrap service
-            using TempNode outsider = new(useBS: true);
-            Task t0 = outsider.StartAsync();
-            yield return new WaitUntil(() => t0.IsCompleted);
-            Peer other = outsider.LocalPeer.Task.Result;
-
-            // Announce its presence
-            Task taskProvide = myserver.Dht.ProvideAsync(cid, true);
-            yield return new WaitUntil(() => taskProvide.IsCompleted);
-
-            Debug.Log($"Identify file CID: {cid}");
-
-
-            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(120));
-
-            // Try to find the requested file, independent with its prior knowledge
-            // save for its Cid.
-            Task<string> taskContent = outsider.FileSystem.ReadAllTextAsync(cid, cts.Token);
-            yield return new WaitUntil(() => taskContent.IsCompleted);
-            string content = taskContent.Result;
-            Assert.AreEqual(content, Core.Version.VERSION_MIN);
-        }
-
-        [UnityTest]
-        public IEnumerator FindServersTest()
-        {
-            yield return null;
-
-            yield return new WaitUntil(() => IPFSService.IdentifyCid != null);
-
-            // Set up a node, with its complete bootstrap service
-            using TempNode outsider = new(useBS: true);
-            Peer other = null;
-
-            yield return Utils.Async2Coroutine(outsider.StartAsync());
-            yield return Utils.Async2Coroutine(outsider.LocalPeer.Task, _peer => other = _peer);
-
-            Debug.Log($"Identify file CID: {IPFSService.IdentifyCid}");
-
-            MultiHash found_id = null;
-            Task<IEnumerable<Peer>> taskPeers = outsider.Dht.FindProvidersAsync(IPFSService.IdentifyCid, 3, _peer =>
-            {
-                Debug.Log($"Found: {_peer.Id}");
-                found_id = _peer.Id;
-                foreach (MultiAddress address in _peer.Addresses)
-                    Debug.Log($"  Address: {address}");
-            });
-
-
-            yield return new WaitForSeconds(60);
-
-            Debug.Log("Stopping IPFS node...");
-
-            yield return Utils.Async2Coroutine(outsider.StopAsync());
-
-            Debug.Log("Stopped IPFS node.");
-
-            IPFSService.Instance.gameObject.SetActive(false);
-
-            // Wait until we have it run through -- two minutes or 20 servers, whichever it's
-            // earlier.
-            // Warning -- Use Async2Coroutine<T>, even if the result can be discarded,
-            // else it doesn't terminate!
-            yield return Utils.Async2Coroutine(taskPeers);
-
-            Assert.IsNotNull( found_id );
-        }
     }
 }

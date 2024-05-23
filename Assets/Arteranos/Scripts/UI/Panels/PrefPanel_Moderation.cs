@@ -14,11 +14,13 @@ using System.IO;
 using Arteranos.Services;
 using System.Collections;
 using Ipfs;
+using Ipfs.Unity;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using System.Linq;
+using System.Threading;
 
 namespace Arteranos.UI
 {
@@ -26,7 +28,6 @@ namespace Arteranos.UI
     {
         public TMP_InputField txt_ServerName = null;
         public TMP_InputField txt_ServerPort = null;
-        public TMP_InputField txt_MetdadataPort = null;
 
         public Toggle chk_UseUPnP = null;
 
@@ -55,7 +56,6 @@ namespace Arteranos.UI
             txt_Description.onValueChanged.AddListener(SetDirty);
 
             txt_ServerPort.onValueChanged.AddListener(SetDirty);
-            txt_MetdadataPort.onValueChanged.AddListener(SetDirty);
             chk_UseUPnP.onValueChanged.AddListener(SetDirty);
 
             chk_Public.onValueChanged.AddListener(SetDirty);
@@ -76,7 +76,7 @@ namespace Arteranos.UI
             {
                 using MemoryStream ms = new(obj);
                 ms.Position = 0;
-                yield return Utils.Async2Coroutine(IPFSService.AddStream(ms), _fsn => ServerIcon = _fsn.Id);
+                yield return Asyncs.Async2Coroutine(IPFSService.AddStream(ms), _fsn => ServerIcon = _fsn.Id);
 
                 dirty = true;
             }
@@ -95,11 +95,10 @@ namespace Arteranos.UI
 
             bool networkConfig = NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline;
 
-            // Changing these settings remotely can pull the rug under you own feet.
-            // Like remotely (mis)configuring a department's firewall at work.
+            // Changing these settings remotely can pull the rug under your own feet.
+            // Like remotely (mis)configuring a department's firewall on his workplace.
             // Believe me. Fastest car ride he pulled off....
             txt_ServerPort.interactable = networkConfig;
-            txt_MetdadataPort.interactable = networkConfig;
             chk_UseUPnP.interactable = networkConfig;
 
             // Send the query.
@@ -111,17 +110,20 @@ namespace Arteranos.UI
 
         private void UpdateServerConfigDisplay(ServerJSON ss)
         {
-            IEnumerator DownloadIcon(Cid icon)
+            void DownloadIcon(Cid icon)
             {
-                yield return Utils.DownloadDataCoroutine(icon, _data => bar_IconSelector.IconData = _data);
-                bar_IconSelector.TriggerUpdate();
+                using CancellationTokenSource cts = new(5000);
+
+                Utils.DownloadData(icon, _data => {
+                    bar_IconSelector.IconData = _data;
+                    bar_IconSelector.TriggerUpdate();
+                }, cts.Token);
             }
 
             ServerIcon = ss.ServerIcon;
             Permissions = ss.Permissions;
 
             txt_ServerPort.text = ss.ServerPort.ToString();
-            txt_MetdadataPort.text = ss.MetadataPort.ToString();
             chk_UseUPnP.isOn = ss.UseUPnP;
 
             txt_ServerName.text = ss.Name;
@@ -131,7 +133,7 @@ namespace Arteranos.UI
 
             chk_Public.isOn = ss.Public;
 
-            StartCoroutine(DownloadIcon(ss.ServerIcon));
+            DownloadIcon(ss.ServerIcon);
 
             dirty = false;
         }
@@ -150,7 +152,6 @@ namespace Arteranos.UI
                 ServerIcon = ServerIcon,
                 Permissions = Permissions,
                 ServerPort = int.Parse(txt_ServerPort.text),
-                MetadataPort = int.Parse(txt_MetdadataPort.text),
                 UseUPnP = chk_UseUPnP.isOn,
                 Name = txt_ServerName.text,
                 Description = txt_Description.text,
@@ -200,7 +201,7 @@ namespace Arteranos.UI
 
                 // Favourited worlds
                 List<Cid> pinned = null;
-                yield return Utils.Async2Coroutine(WorldInfo.ListFavourites(), _pinned => pinned = _pinned);
+                yield return Asyncs.Async2Coroutine(WorldInfo.ListFavourites(), _pinned => pinned = _pinned);
 
                 int favouritedWorlds = 0;
                 foreach (WorldInfo wi in WorldInfo.DBList())
@@ -231,28 +232,29 @@ namespace Arteranos.UI
                 toPin.Add(IPFSService.IdentifyCid);
                 toPin.Add(IPFSService.CurrentSDCid);
 
+                // Default avatars
+                toPin.Add(SettingsManager.DefaultMaleAvatar);
+                toPin.Add(SettingsManager.DefaultFemaleAvatar);
+
                 // Eat up any empty entries
                 toPin.Remove(null);
 
                 Debug.Log($"Total needs pinning: {toPin.Count}, out of {favouritedWorlds} worlds and {storedAvatars} stored avatars");
 
-                yield return Utils.Async2Coroutine(IPFSService.ListPinned(), _pinned => pinned = _pinned.ToList());
+                yield return Asyncs.Async2Coroutine(IPFSService.ListPinned(), _pinned => pinned = _pinned.ToList());
 
-                Debug.Log($"Actual pinned: {pinned.Count}");
+                Debug.Log($"Actual pinned (including indirect): {pinned.Count}");
 
                 // Unpin everything we don't want
                 foreach (Cid entry in pinned)
                 {
                     if(!toPin.Contains(entry))
-                        yield return Utils.Async2Coroutine(SetPin(entry, false));
+                        yield return Asyncs.Async2Coroutine(SetPin(entry, false));
                 }
 
-                // Pin (or, re-pin) everything we need, even if they're not (yet) pinned
-                foreach(string entry in toPin)
-                    yield return Utils.Async2Coroutine(SetPin(entry, true));
-
+                Debug.Log("Now, garbage collection.");
                 // And, scrub...
-                yield return Utils.Async2Coroutine(IPFSService.RemoveGarbage());
+                yield return Asyncs.Async2Coroutine(IPFSService.RemoveGarbage());
 
                 btn_ClearCaches.interactable = true;
             }

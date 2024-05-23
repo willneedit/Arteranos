@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using Arteranos.Core;
 using Arteranos.Core.Cryptography;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 
 namespace Arteranos.Test.Structs
 {

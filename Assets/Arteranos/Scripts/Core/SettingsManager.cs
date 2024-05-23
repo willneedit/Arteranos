@@ -37,8 +37,8 @@ namespace Arteranos.Core
         public static string WorldName { get; set; }
         public static string DefaultTOStext { get; private set; } = null;
 
-        public static Cid DefaultMaleAvatar { get; protected set; } = null;
-        public static Cid DefaultFemaleAvatar { get; protected set; } = null;
+        public static Cid DefaultMaleAvatar { get; set; } = null;
+        public static Cid DefaultFemaleAvatar { get; set; } = null;
 
         public static ServerJSON ActiveServerData =>
             NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
@@ -164,6 +164,15 @@ namespace Arteranos.Core
         {
             add => Instance.OnClientReceivedServerConfigAnswer_ += value;
             remove {  if (Instance != null) Instance.OnClientReceivedServerConfigAnswer_ -= value; }
+        }
+
+        public static void Quit()
+        {
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.ExitPlaymode();
+#else
+                UnityEngine.Application.Quit();
+#endif
         }
     }
 }

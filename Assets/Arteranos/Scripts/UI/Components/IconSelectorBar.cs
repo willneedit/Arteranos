@@ -43,7 +43,8 @@ namespace Arteranos.UI
 
         public void TriggerUpdate()
         {
-            StartCoroutine(UpdateIconCoroutine(IconData));
+            if(isActiveAndEnabled)
+                StartCoroutine(UpdateIconCoroutine(IconData));
         }
 
         private void OnIconClicked()

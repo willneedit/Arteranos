@@ -3,7 +3,6 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Engine;
 using Arteranos.Services;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,6 +12,7 @@ using Arteranos.Web;
 using Arteranos.Core.Operations;
 using Arteranos.UI;
 using UnityEditor;
+using Ipfs.Http;
 
 namespace Arteranos.PlayTest.UI
 {
@@ -22,8 +22,7 @@ namespace Arteranos.PlayTest.UI
 
 
         IPFSServiceImpl srv = null;
-        IpfsEngine ipfs = null;
-        Peer self = null;
+        IpfsClientEx ipfs = null;
 
         Cid AvatarCid = null;
 
@@ -46,7 +45,7 @@ namespace Arteranos.PlayTest.UI
 
             ipfs = srv.Ipfs_;
 
-            self = Task.Run(async () => await ipfs.LocalPeer).Result;
+            //self = Task.Run(async () => await ipfs.LocalPeer).Result;
         }
 
         Camera ca = null;
@@ -59,13 +58,12 @@ namespace Arteranos.PlayTest.UI
         {
             if (AvatarCid != null)
             {
-                ipfs.Block.RemoveAsync(AvatarCid).Wait();
+                ipfs.Pin.RemoveAsync(AvatarCid).Wait();
                 WorldInfo.DBDelete(AvatarCid);
             }
 
             srv = null;
             ipfs = null;
-            self = null;
             AvatarCid = null;
 
             StartupManagerMock go1 = Object.FindObjectOfType<StartupManagerMock>();

@@ -237,24 +237,40 @@ namespace Arteranos.Core
             callback?.Invoke(t.Result ? tex : null);
         }
 
-        public static IEnumerator DownloadDataCoroutine(string dataPath, Action<byte[]> callback, CancellationToken cancel = default)
+        public static void DownloadData(string dataPath, Action<byte[]> callback, CancellationToken cancel = default)
+        {
+            async Task DownloadTask(string dataPath)
+            {
+                byte[] contents = await IPFSService.ReadBinary(dataPath, cancel: cancel);
+
+                TaskScheduler.ScheduleCallback(() => callback?.Invoke(contents));
+            }
+
+            Func<Task> MakeDownloadTask(string dataPath)
+            {
+                Task a() => DownloadTask(dataPath);
+                return a;
+            }
+
+            if (string.IsNullOrEmpty(dataPath)) return;
+
+            TaskScheduler.Schedule(MakeDownloadTask(dataPath));
+        }
+
+        private static IEnumerator DownloadDataCoroutine(string dataPath, Action<byte[]> callback, CancellationToken cancel = default)
         {
             if (dataPath == null) yield break;
 
-            Stream stream = null;
+            byte[] contents = null;
             // Stopwatch sw = Stopwatch.StartNew();
-            yield return Async2Coroutine(IPFSService.ReadFile(dataPath, cancel), _stream => stream = _stream);
-            // Debug.Log($"ReadFile took {sw.ElapsedMilliseconds} ms");
+            yield return Ipfs.Unity.Asyncs.Async2Coroutine(IPFSService.ReadBinary(dataPath, cancel: cancel),
+                _data => contents = _data,
+                _e => Debug.LogWarning($"Exception while loading {dataPath}: {_e}"));
+            // Debug.Log($"ReadBinary took {sw.ElapsedMilliseconds} ms");
 
+            if (contents == null) yield break;
 
-            if (stream == null) yield break;
-
-            using MemoryStream ms = new();
-            // sw.Restart();
-            yield return CopyWithProgress(stream, ms);
-            // Debug.Log($"CopyWithProgress took {sw.ElapsedMilliseconds} ms");
-
-            callback?.Invoke(ms.ToArray());
+            callback?.Invoke(contents);
         }
 
         public static IEnumerator DownloadIconCoroutine(string icon, Action<Texture2D> callback)
@@ -291,20 +307,24 @@ namespace Arteranos.Core
         public static async Task CopyWithProgress(Stream inStream, Stream outStream, Action<long> reportProgress = null, CancellationToken token = default)
         {
             long totalBytes = 0;
+            long lastreported = 0;
             // 0.5MB. Should be a compromise between of too few progress reports and bandwidth bottlenecking
             byte[] buffer = new byte[512 * 1024];
 
             while (!token.IsCancellationRequested)
             {
-                int bytesRead = await inStream.ReadAsync(buffer, 0, buffer.Length, token);
+                int bytesRead = await inStream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
 
                 if (bytesRead == 0) break;
 
                 totalBytes += bytesRead;
-                reportProgress?.Invoke(totalBytes);
+                if(totalBytes >= lastreported + 512*1024)
+                {
+                    reportProgress?.Invoke(totalBytes);
+                    lastreported = totalBytes;
+                }
 
-                await outStream.WriteAsync(buffer, 0, bytesRead);
-                await Task.Delay(1);
+                await outStream.WriteAsync(buffer, 0, bytesRead).ConfigureAwait(false);
             }
             outStream.Flush();
             outStream.Close();
@@ -366,7 +386,7 @@ namespace Arteranos.Core
                 CountGameObject(transform, counted);
         }
 
-
+#if false
         public static IEnumerator Async2Coroutine<T>(Task<T> taskActionResult, Action<T> callback = null)
         {
             yield return new WaitUntil(() => taskActionResult.IsCompleted);
@@ -379,5 +399,6 @@ namespace Arteranos.Core
         {
             yield return new WaitUntil(() => taskActionResult.IsCompleted);
         }
+#endif
     }
 }

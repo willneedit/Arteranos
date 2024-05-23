@@ -5,14 +5,14 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using KeyPair = Ipfs.Core.Cryptography.KeyPair;
+using KeyPair = Ipfs.Cryptography.KeyPair;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.OpenSsl;
-using Ipfs.Core.Cryptography.Proto;
+using Ipfs.Cryptography.Proto;
 using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Asn1.Sec;

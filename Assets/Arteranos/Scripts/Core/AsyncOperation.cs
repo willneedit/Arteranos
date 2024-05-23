@@ -77,7 +77,7 @@ namespace Arteranos.Core
                         throw new OperationCanceledException();
 
                     OnProgressChanged(0f);
-                    context = await operation.ExecuteAsync(context, tokenSource.Token);
+                    context = await operation.ExecuteAsync(context, tokenSource.Token); //.ConfigureAwait(false);
                     OnProgressChanged(1f);
 
                     weightSoFar += operation.Weight;
@@ -124,7 +124,7 @@ namespace Arteranos.Core
         {
             // Convert the range of the single task's progress of 0.0...1.0 into the greater picture.
             float currentProgress = (weightSoFar + progress * currentOperation.Weight) / totalWeight;
-            ProgressChanged?.Invoke(currentProgress, currentOperation.Caption);
+            TaskScheduler.ScheduleCallback(() => ProgressChanged?.Invoke(currentProgress, currentOperation.Caption));
         }
     }
 }
