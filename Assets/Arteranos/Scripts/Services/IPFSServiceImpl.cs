@@ -655,7 +655,6 @@ namespace Arteranos.Services
 
             sod.Serialize(ms);
             ms.Position = 0;
-            var fsn = await ipfs.FileSystem.AddAsync(ms, "ServerOnlineData").ConfigureAwait(false);
 
             // No IPNS together with Pubsub, because latecomers get updated online data at max. one minute.
             if (UsingPubsub_)
@@ -665,6 +664,8 @@ namespace Arteranos.Services
             }
             else
             {
+                IFileSystemNode fsn = await ipfs.FileSystem.AddAsync(ms, "ServerOnlineData").ConfigureAwait(false);
+
                 // Lasting for five minutes, ttl 60s, under the secondary key
                 await ipfs.NameEx.PublishAsync(
                     fsn.Id,
