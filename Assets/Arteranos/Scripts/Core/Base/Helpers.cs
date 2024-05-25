@@ -323,7 +323,6 @@ namespace Arteranos.Services
             => await Instance.PinCid_(cid, pinned, cancel).ConfigureAwait(false);
         public static async Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
             => await Instance.Ipfs_.Pin.ListAsync(cancel).ConfigureAwait(false);
-        [Obsolete("DANGEROUS - interrupted stream may cause IPFS API client to hang!", true)]
         public static async Task<Stream> ReadFile(string path, CancellationToken cancel = default)
             => await Instance.Ipfs_.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
         public static async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)

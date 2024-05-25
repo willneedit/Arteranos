@@ -7,7 +7,6 @@
 
 using System;
 using System.IO;
-using System.IO.Compression;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -16,7 +15,6 @@ using Ipfs;
 using Arteranos.Services;
 using System.Collections.Generic;
 using System.Text;
-using ICSharpCode.SharpZipLib.Tar;
 
 namespace Arteranos.Core.Operations
 {
@@ -94,6 +92,47 @@ namespace Arteranos.Core.Operations
 
         public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
+
+            WorldDownloadContext context = _context as WorldDownloadContext;
+
+            // Invalidate the 'current' asset bundle path.
+            WorldDownloader.CurrentWorldAssetBundlePath = null;
+
+            IFileSystemLink found = await ExtractAssetArchive(context.WorldCid, token);
+
+            totalBytes = found.Size;
+            totalBytesMag = Utils.Magnitude(totalBytes);
+            Cid assetBundleCid = found.Id;
+
+            // Clean out the unpacked files - IPFS takes care of the world data with its
+            // sense of importance (pinned/unpinned like favourited/unfavourited)
+            if (Directory.Exists(Utils.WorldCacheRootDir)) Directory.Delete(Utils.WorldCacheRootDir, true);
+            Directory.CreateDirectory(Utils.WorldCacheRootDir);
+            context.WorldAssetBundlePath = $"{Utils.WorldCacheRootDir}/{assetBundleCid}";
+
+            using Stream instr = await IPFSService.ReadFile(assetBundleCid, token);
+            using Stream outstr = File.Create(context.WorldAssetBundlePath);
+
+            await Utils.CopyWithProgress(instr, outstr, _actual =>
+            {
+                actualBytes = _actual;
+                ProgressChanged((float)_actual / totalBytes);
+            });
+
+            WorldDownloader.CurrentWorldAssetBundlePath = context.WorldAssetBundlePath;
+            return context;
+        }
+
+        /// <summary>
+        /// Find the matching asset bundle within the who world/kit archive
+        /// </summary>
+        /// <param name="archiveCid">root Cid of the archive, containing all thge architecture asset bundles and additional data</param>
+        /// <param name="token"></param>
+        /// <returns>Cid, Name, Size</returns>
+        /// <exception cref="InvalidDataException">archiveCid points to a malformed archive (e.g. a Zip archive, not a directory)</exception>
+        /// <exception cref="FileNotFoundException">archive has no matching assetBundle</exception>
+        public static async Task<IFileSystemLink> ExtractAssetArchive(Cid archiveCid, CancellationToken token)
+        {
             static string GetArchitectureDirName()
             {
                 string archPath = "AssetBundles";
@@ -106,63 +145,29 @@ namespace Arteranos.Core.Operations
                 return archPath;
             }
 
-            WorldDownloadContext context = _context as WorldDownloadContext;
-
-            // Invalidate the 'current' asset bundle path.
-            WorldDownloader.CurrentWorldAssetBundlePath = null;
-
-            // TODO #115: context.TemplateCid != null will mean it's a decorated world
-            string assetPath = $"{context.WorldCid}/{GetArchitectureDirName()}";
+            string assetPath = $"{archiveCid}/{GetArchitectureDirName()}";
 
             // HACK: Kubo's ListFiles doesn't implicitly resolve.
-            assetPath = await IPFSService.ResolveToCid(assetPath);
+            assetPath = await IPFSService.ResolveToCid(assetPath, token);
 
             IFileSystemNode fi = await IPFSService.ListFile(assetPath, token);
             if (!fi.IsDirectory)
-                throw new InvalidDataException("World data packet is not a directory");
+                throw new InvalidDataException("Asset Archive is not a directory");
 
             IEnumerable<IFileSystemLink> files = fi.Links;
-            foreach (IFileSystemLink file in files) totalBytes += file.Size;
-            totalBytesMag = Utils.Magnitude(totalBytes);
 
-            // Clean out the unpacked files - IPFS takes care of the world data with its
-            // sense of importance (pimmed/unpinned like favourited/unfavourited)
-            if(Directory.Exists(Utils.WorldCacheRootDir)) Directory.Delete(Utils.WorldCacheRootDir, true);
-            Directory.CreateDirectory(Utils.WorldCacheRootDir);
-
-            Stream tar = await IPFSService.Get(assetPath, token);
-
-            // Worker task to observe the progress...
-            using CancellationTokenSource cts = new();
-            _ = Task.Run(async () =>
-            {
-                while (!cts.Token.IsCancellationRequested)
+            IFileSystemLink found = null;
+            foreach (IFileSystemLink file in files)
+                if (file.Name.EndsWith(".unity"))
                 {
-                    if(actualBytes != tar.Position)
-                    {
-                        actualBytes = tar.Position;
-                        ProgressChanged((float)actualBytes / totalBytes);
-                    }
-                    await Task.Delay(10);
+                    found = file;
+                    break;
                 }
-            });
 
-            using TarArchive archive = TarArchive.CreateInputTarArchive(tar);
-            archive.ExtractContents(Utils.WorldCacheRootDir);
-            cts.Cancel(); // ... and he's done it.
+            if (found == null)
+                throw new FileNotFoundException("No usable Asset Bundle found");
 
-            context.WorldAssetBundlePath = null;
-            foreach (string file in Directory.EnumerateFiles($"{Utils.WorldCacheRootDir}/{fi.Id}", "*.unity"))
-            {
-                context.WorldAssetBundlePath = file;
-                break;
-            }
-
-            if (context.WorldAssetBundlePath == null)
-                throw new FileNotFoundException("World Asset Bundle not found");
-
-            WorldDownloader.CurrentWorldAssetBundlePath = context.WorldAssetBundlePath;
-            return context;
+            return found;
         }
     }
  
