@@ -656,8 +656,8 @@ namespace Arteranos.Services
             // No IPNS together with Pubsub, because latecomers get updated online data at max. one minute.
             if (UsingPubsub_)
             {
-                // Announce the server online data, too
-                await ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
+                // Announce the server online data, too - fire and forget.
+                _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
             }
             else
             {
