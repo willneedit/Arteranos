@@ -595,11 +595,8 @@ namespace Arteranos.Services
                     (await CreateLauncherHTMLFile().ConfigureAwait(false)).ToLink()
                 };
 
-                return await CreateDirectoryAsync(list).ConfigureAwait(false);
+                return await ipfs.FileSystemEx.CreateDirectoryAsync(list).ConfigureAwait(false);
             }
-
-            if (CurrentSDCid_ != null)
-                _ = Ipfs_.Pin.RemoveAsync(CurrentSDCid_);
 
             if (!reload) return;
 
@@ -673,41 +670,6 @@ namespace Arteranos.Services
                     lifetime: new TimeSpan(2, 0, 0, 0),
                     ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
             }
-        }
-
-        /// <summary>
-        /// Taken from FileSystemApi, tie a bunch of files into a directory.
-        /// </summary>
-        /// <param name="links">A collection files</param>
-        /// <param name="cancel"></param>
-        /// <returns>The <see cref="FileSystemNode"/> of the newly created directory</returns>
-        public override async Task<FileSystemNode> CreateDirectoryAsync_(IEnumerable<IFileSystemLink> links, CancellationToken cancel)
-        {
-            List<JToken> linkList = new();
-
-            void AddFileLink(IFileSystemLink node)
-            {
-                JToken newLink = JToken.Parse(@"{ ""Hash"": { ""/"": """" }, ""Name"": """", ""Tsize"": 0 }");
-                newLink["Hash"]["/"] = node.Id.ToString();
-                newLink["Name"] = node.Name;
-                newLink["Tsize"] = node.Size;
-
-                linkList.Add(newLink);
-            }
-
-            JToken dir = JToken.Parse(@"{ ""Data"": { ""/"": { ""bytes"": ""CAE"" } }, ""Links"": [] }");
-            foreach (var link in links)
-                AddFileLink(link);
-
-            dir["Links"] = JToken.FromObject(linkList);
-            var id = await ipfs.Dag.PutAsync(dir, "dag-pb", cancel: cancel).ConfigureAwait(false);
-
-            return new FileSystemNode
-            {
-                Id = id,
-                Links = links,
-                IsDirectory = true
-            };
         }
 
         /// <summary>
