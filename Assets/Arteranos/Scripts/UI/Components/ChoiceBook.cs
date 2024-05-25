@@ -48,8 +48,8 @@ public class ChoiceBook : UIBehaviour
 
         for(int j = 0; j < ChoiceEntries.Length; j++)
         {
+            ChoiceEntries[j].UI.gameObject.SetActive(false);
             GameObject go = Instantiate(ChoiceEntries[j].UI.gameObject, PaneList);
-            go.SetActive(false);
         }
 
         PaneList.GetChild(CurrentChoice).gameObject.SetActive(true);
