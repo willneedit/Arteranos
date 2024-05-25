@@ -98,7 +98,7 @@ namespace Arteranos.Core.Operations
             // Invalidate the 'current' asset bundle path.
             WorldDownloader.CurrentWorldAssetBundlePath = null;
 
-            IFileSystemLink found = await ExtractAssetArchive(context.WorldCid, token);
+            IFileSystemLink found = await OpUtils.ExtractAssetArchive(context.WorldCid, token);
 
             totalBytes = found.Size;
             totalBytesMag = Utils.Magnitude(totalBytes);
@@ -121,53 +121,6 @@ namespace Arteranos.Core.Operations
 
             WorldDownloader.CurrentWorldAssetBundlePath = context.WorldAssetBundlePath;
             return context;
-        }
-
-        /// <summary>
-        /// Find the matching asset bundle within the who world/kit archive
-        /// </summary>
-        /// <param name="archiveCid">root Cid of the archive, containing all thge architecture asset bundles and additional data</param>
-        /// <param name="token"></param>
-        /// <returns>Cid, Name, Size</returns>
-        /// <exception cref="InvalidDataException">archiveCid points to a malformed archive (e.g. a Zip archive, not a directory)</exception>
-        /// <exception cref="FileNotFoundException">archive has no matching assetBundle</exception>
-        public static async Task<IFileSystemLink> ExtractAssetArchive(Cid archiveCid, CancellationToken token)
-        {
-            static string GetArchitectureDirName()
-            {
-                string archPath = "AssetBundles";
-                RuntimePlatform p = Application.platform;
-                if (p == RuntimePlatform.OSXEditor || p == RuntimePlatform.OSXPlayer)
-                    archPath = "Mac";
-                if (p == RuntimePlatform.Android)
-                    archPath = "Android";
-
-                return archPath;
-            }
-
-            string assetPath = $"{archiveCid}/{GetArchitectureDirName()}";
-
-            // HACK: Kubo's ListFiles doesn't implicitly resolve.
-            assetPath = await IPFSService.ResolveToCid(assetPath, token);
-
-            IFileSystemNode fi = await IPFSService.ListFile(assetPath, token);
-            if (!fi.IsDirectory)
-                throw new InvalidDataException("Asset Archive is not a directory");
-
-            IEnumerable<IFileSystemLink> files = fi.Links;
-
-            IFileSystemLink found = null;
-            foreach (IFileSystemLink file in files)
-                if (file.Name.EndsWith(".unity"))
-                {
-                    found = file;
-                    break;
-                }
-
-            if (found == null)
-                throw new FileNotFoundException("No usable Asset Bundle found");
-
-            return found;
         }
     }
  

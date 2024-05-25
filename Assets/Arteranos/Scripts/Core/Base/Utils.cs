@@ -21,8 +21,6 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Collections;
 using Arteranos.Services;
-using System.Diagnostics;
-using Debug = UnityEngine.Debug;
 
 namespace Arteranos.Core
 {

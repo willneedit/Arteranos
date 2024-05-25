@@ -12,7 +12,6 @@ using System.Threading;
 using Ipfs;
 using Arteranos.Services;
 using ICSharpCode.SharpZipLib.Tar;
-using System.Text;
 
 namespace Arteranos.Core.Operations
 {
