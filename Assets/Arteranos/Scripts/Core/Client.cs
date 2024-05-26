@@ -133,63 +133,64 @@ namespace Arteranos.Core
 
     public class ClientAudioSettingsJSON
     {
+        // Reminder: Unity measures volumes as -80..+20 dB. So 80 means 0 dB.
         // Master Volume, 0 to 100
-        public virtual float MasterVolume { get; set; } = 100;
+        public float MasterVolume { get; set; } = 80;
 
         // Voice volume, 0 to 100
-        public virtual float VoiceVolume { get; set; } = 100;
+        public float VoiceVolume { get; set; } = 80;
 
         // Environment volume, 0 to 100
-        public virtual float EnvVolume { get; set; } = 100;
+        public float EnvVolume { get; set; } = 80;
 
         // Mic Input Device, null means system default device
-        public virtual string InputDevice { get; set; } = null;
+        public string InputDevice { get; set; } = null;
 
         // Mic Input Gain in dB, -6 to +6, meaning factor 0.5 to 2
-        public virtual float MicInputGain { get; set; } = 0;
+        public float MicInputGain { get; set; } = 0;
 
         // Automatic Gain Control level, from none to high
-        public virtual int AGCLevel { get; set; } = 0;
+        public int AGCLevel { get; set; } = 0;
     }
 
     public class ControlSettingsJSON
     {
-        public virtual VKUsage VK_Usage { get; set; } = VKUsage.VROnly;
+        public VKUsage VK_Usage { get; set; } = VKUsage.VROnly;
 
-        public virtual VKLayout VK_Layout { get; set; } = VKLayout.de_DE_full;
+        public VKLayout VK_Layout { get; set; } = VKLayout.de_DE_full;
 
-        public virtual float NameplateIn { get; set; } = 0.5f;
+        public float NameplateIn { get; set; } = 0.5f;
 
-        public virtual float NameplateOut { get; set; } = 4.0f;
+        public float NameplateOut { get; set; } = 4.0f;
 
-        public virtual bool Controller_left { get; set; } = true;
+        public bool Controller_left { get; set; } = true;
 
-        public virtual bool Controller_right { get; set; } = true;
+        public bool Controller_right { get; set; } = true;
 
-        public virtual bool Controller_active_left { get; set; } = true;
+        public bool Controller_active_left { get; set; } = true;
 
-        public virtual bool Controller_active_right { get; set; } = true;
+        public bool Controller_active_right { get; set; } = true;
 
-        public virtual StickType StickType_Left { get; set; } = StickType.Strafe;
+        public StickType StickType_Left { get; set; } = StickType.Strafe;
 
-        public virtual StickType StickType_Right { get; set; } = StickType.Turn;
+        public StickType StickType_Right { get; set; } = StickType.Turn;
 
-        public virtual RayType Controller_Type_left { get; set; } = RayType.Straight;
+        public RayType Controller_Type_left { get; set; } = RayType.Straight;
 
-        public virtual RayType Controller_Type_right { get; set; } = RayType.Straight;
+        public RayType Controller_Type_right { get; set; } = RayType.Straight;
     }
 
     public class MovementSettingsJSON
     {
-        public virtual TurnType Turn { get; set; } = TurnType.Snap45;
+        public TurnType Turn { get; set; } = TurnType.Snap45;
 
-        public virtual float SmoothTurnSpeed { get; set; } = 60.0f;
+        public float SmoothTurnSpeed { get; set; } = 60.0f;
 
-        public virtual TeleportType Teleport { get; set; } = TeleportType.Instant;
+        public TeleportType Teleport { get; set; } = TeleportType.Instant;
 
-        public virtual float ZipLineDuration { get; set; } = 1.0f;
+        public float ZipLineDuration { get; set; } = 1.0f;
 
-        public virtual ComfortBlindersType ComfortBlinders { get; set; } = ComfortBlindersType.Off;
+        public ComfortBlindersType ComfortBlinders { get; set; } = ComfortBlindersType.Off;
     }
 
     public class UserSocialEntryJSON
@@ -207,40 +208,40 @@ namespace Arteranos.Core
         public byte[] UserSignKeyPair = null;
 
         // The display name of the user. Generate if null
-        public virtual string Nickname { get; set; } = "Anonymous";
+        public string Nickname { get; set; } = "Anonymous";
 
         // The user's 2D Icon.
-        public virtual Cid UserIconCid { get; set; } = null;
+        public Cid UserIconCid { get; set; } = null;
 
         // Current avatar
-        public virtual AvatarDescriptionJSON CurrentAvatar { get; set; } = new() 
+        public AvatarDescriptionJSON CurrentAvatar { get; set; } = new() 
         {
             AvatarCidString = null, // First-time startup will load a dafault avatar
             AvatarHeight = 175
         };
 
         // Avatar storage
-        public virtual List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
+        public List<AvatarDescriptionJSON> AvatarGallery { get; set; } = new();
 
         // The user's social state to others
-        public virtual Dictionary<UserID, UserSocialEntryJSON> SocialList { get; set; } = new();
+        public Dictionary<UserID, UserSocialEntryJSON> SocialList { get; set; } = new();
     }
 
     public class UserHUDSettingsJSON
     {
-        public virtual float AxisX { get; set; } = -1.3f;   // * 10
+        public float AxisX { get; set; } = -1.3f;   // * 10
 
-        public virtual float AxisY { get; set; } = -0.6f;   // * 10
+        public float AxisY { get; set; } = -0.6f;   // * 10
 
-        public virtual float Log2Size { get; set; } = 0;    // 2^x (-2 ... 2 <=> 0.25 ... 4 )
+        public float Log2Size { get; set; } = 0;    // 2^x (-2 ... 2 <=> 0.25 ... 4 )
 
-        public virtual float Tightness { get; set; } = 0.1f;
+        public float Tightness { get; set; } = 0.1f;
 
-        public virtual float Delay { get; set; } = 2;
+        public float Delay { get; set; } = 2;
 
-        public virtual int ClockDisplay { get; set; } = 2;  // 0 to 2 should be self explanatory, right?
+        public int ClockDisplay { get; set; } = 2;  // 0 to 2 should be self explanatory, right?
 
-        public virtual bool Seconds { get; set; } = false;
+        public bool Seconds { get; set; } = false;
     }
 
     public class ClientSettingsJSON
@@ -296,6 +297,9 @@ namespace Arteranos.Core
         // Same hash: User does know.
         // Inequal hash: User does know outdated default TOS.
         public virtual byte[] KnowsDefaultTOS { get; set; } = null;
+
+        // Favourited worlds
+        public List<Cid> FavouritedWorlds { get; set; } = new();
 
         // The text message templates
         public virtual List<string> PresetStrings { get; set; } = new();

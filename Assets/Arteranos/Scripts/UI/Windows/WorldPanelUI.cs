@@ -18,7 +18,6 @@ using System.Collections;
 using Ipfs;
 using Arteranos.Core.Operations;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 namespace Arteranos.UI
 {
@@ -29,6 +28,7 @@ namespace Arteranos.UI
         public int usersCount;
         public int friendsMax;
         public bool favourited;
+        public bool current;
     }
 
     public class WorldPanelUI : UIBehaviour
@@ -91,6 +91,9 @@ namespace Arteranos.UI
             {
                 worldlist.Clear();
 
+                if(SettingsManager.WorldCid != null)
+                    yield return AddManualWorldCoroutine(SettingsManager.WorldCid, false, true);
+
                 yield return GatherServeredWorlds();
 
                 yield return GatherFavouritedWorlds();
@@ -117,6 +120,7 @@ namespace Arteranos.UI
                 worldlist.AddOrUpdate(si.CurrentWorldCid, new Collection()
                 {
                     favourited = false,
+                    current = false,
                     friendsMax = 0,
                     serversCount = 1,
                     usersCount = si.UserCount,
@@ -136,28 +140,22 @@ namespace Arteranos.UI
 
         private IEnumerator GatherFavouritedWorlds()
         {
-            Task<List<Cid>> taskPinned = WorldInfo.ListFavourites();
+            List<Cid> pinned = WorldInfo.ListFavourites();
 
-            yield return new WaitUntil(() => taskPinned.IsCompleted);
-
-            List<Cid> pinned = taskPinned.Result;
-
-            // The WorldInfo contains ALL the cached worlds so far. We have to see for
-            // the only pinned (= favourited) ones.
-            foreach (WorldInfo wi in WorldInfo.DBList())
+            foreach(Cid cid in pinned)
             {
-                if (pinned.Contains(wi.WorldCid))
-                    yield return AddManualWorldCoroutine(wi.WorldCid);
+                yield return AddManualWorldCoroutine(cid, true, null);
 
                 yield return new WaitForEndOfFrame();
             }
         }
 
-        private IEnumerator AddManualWorldCoroutine(Cid WorldCid)
+        private IEnumerator AddManualWorldCoroutine(Cid WorldCid, bool? favourited, bool? current)
         {
             worldlist.AddOrUpdate(WorldCid, new Collection()
             {
-                favourited = true,
+                favourited = favourited ?? true,
+                current = current ?? false,
                 friendsMax = 0,
                 serversCount = 0,
                 usersCount = 0,
@@ -165,7 +163,8 @@ namespace Arteranos.UI
             },
             (cid, coll) =>
             {
-                coll.favourited = true;
+                coll.favourited = favourited ?? coll.favourited;
+                coll.current = current ?? coll.current;
                 return coll;
             });
 
@@ -190,7 +189,7 @@ namespace Arteranos.UI
         {
             IEnumerator DoAdd()
             {
-                yield return AddManualWorldCoroutine(WorldCid);
+                yield return AddManualWorldCoroutine(WorldCid, true, null);
 
                 CreateSortedWorldList();
 
@@ -213,6 +212,8 @@ namespace Arteranos.UI
             score += list.friendsMax * 20; // Friends get twenty points.
 
             score += list.favourited ? 100000 : 0; // A class for its own.
+
+            score += list.current ? 100000 : 0; // Always first.
 
             return score;
         }

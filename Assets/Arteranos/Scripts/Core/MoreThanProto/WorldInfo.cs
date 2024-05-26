@@ -76,21 +76,24 @@ namespace Arteranos.Core
 
         public void Favourite()
         {
-            _ = IPFSService.PinCid(WorldCid, true);
+            Client cs = SettingsManager.Client;
+            if (!cs.FavouritedWorlds.Contains(WorldCid))
+                cs.FavouritedWorlds.Add(WorldCid);
+
+            cs.Save();
         }
 
         public void Unfavourite()
         {
-            _ = IPFSService.PinCid(WorldCid, false);
+            Client cs = SettingsManager.Client;
+            cs.FavouritedWorlds.Remove(WorldCid);
+
+            cs.Save();
         }
 
-        public static Task<List<Cid>> ListFavourites()
+        public static List<Cid> ListFavourites()
         {
-            return Task.Run(async () =>
-            {
-                IEnumerable<Cid> res = await IPFSService.ListPinned();
-                return res.ToList();
-            });
+            return SettingsManager.Client.FavouritedWorlds;
         }
 
         public void BumpWI()

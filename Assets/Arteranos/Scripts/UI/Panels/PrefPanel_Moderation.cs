@@ -15,7 +15,6 @@ using Arteranos.Services;
 using System.Collections;
 using Ipfs;
 using Ipfs.Unity;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -201,16 +200,11 @@ namespace Arteranos.UI
 
                 // Favourited worlds
                 List<Cid> pinned = null;
-                yield return Asyncs.Async2Coroutine(WorldInfo.ListFavourites(), _pinned => pinned = _pinned);
-
                 int favouritedWorlds = 0;
-                foreach (WorldInfo wi in WorldInfo.DBList())
+                foreach (Cid cid in WorldInfo.ListFavourites())
                 {
-                    if (pinned.Contains(wi.WorldCid))
-                    {
-                        favouritedWorlds++;
-                        toPin.Add(wi.WorldCid);
-                    }
+                    favouritedWorlds++;
+                    toPin.Add(cid);
                 }
 
                 // User and server icons
