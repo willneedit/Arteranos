@@ -137,6 +137,7 @@ namespace Arteranos.Core
         protected abstract event Action<UserID, ServerUserState> OnClientReceivedServerUserStateAnswer_;
         protected abstract event Action<ServerJSON> OnClientReceivedServerConfigAnswer_;
 
+        [Obsolete("Use TaskScheduler.ScheduleCoroutine()")]
         public static void StartCoroutineAsync(Func<IEnumerator> action)
             => Instance?.StartCoroutineAsync_(action);
         public static void EmitToClientCTSPacket(CTSPacket packet, IAvatarBrain to = null)

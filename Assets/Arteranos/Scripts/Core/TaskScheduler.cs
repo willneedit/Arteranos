@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
@@ -47,10 +48,22 @@ namespace Arteranos.Core
         /// <param name="callback">The callback to be placed within the next couple of frames</param>
         public static void ScheduleCallback(Action callback) => Instance.ScheduleCallback_(callback);
 
-
+        /// <summary>
+        /// Place a coroutine from an async task.
+        /// </summary>
+        /// <param name="coroutine">The coroutine to be placed within the next couple of frames</param>
+        public static void ScheduleCoroutine(Func<IEnumerator> coroutine)
+            => Instance.ScheduleCoroutine_(coroutine);
 
         private void Schedule_(Func<Task> task) => TaskQueued.Enqueue(task);
         private void ScheduleCallback_(Action callback) => CallbackQueued.Enqueue(callback);
+        private void ScheduleCoroutine_(Func<IEnumerator> coroutine)
+        {
+            void wrapper(Func<IEnumerator> coroutine) 
+                => StartCoroutine(coroutine?.Invoke());
+
+            ScheduleCallback_(() => wrapper(coroutine));
+        }
 
         private Task ExecuteTask(Func<Task> task)
         {
@@ -69,22 +82,18 @@ namespace Arteranos.Core
             });
         }
 
-        private bool DequeueTask()
+        private void DequeueTask()
         {
             for (int i = 0; i < DequeuesPerUpdate; i++)
             {
-
-                if (Current >= PoolSize) return true; // Still needed to check.
-
-                if (!TaskQueued.TryDequeue(out Func<Task> task)) return false; // Running empty, the scheduler itself can be switched off
+                if (Current >= PoolSize) return;
+                if (!TaskQueued.TryDequeue(out Func<Task> task)) return;
 
                 Interlocked.Increment(ref Current);
 
                 // Send off the soon-to-be-active task
                 _ = ExecuteTask(task).ConfigureAwait(false);
             }
-
-            return true;
         }
 
         private void DequeueCallback()
