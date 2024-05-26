@@ -120,6 +120,14 @@ namespace Arteranos.Core.Operations
             });
 
             WorldDownloader.CurrentWorldAssetBundlePath = context.WorldAssetBundlePath;
+
+            // As an afterthought, pin the world in the local IPFS node.
+            try
+            {
+                await IPFSService.PinCid(context.WorldCid, true);
+            }
+            catch { }
+
             return context;
         }
     }

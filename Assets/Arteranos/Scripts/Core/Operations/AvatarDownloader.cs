@@ -10,9 +10,7 @@ using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
-using Arteranos.Core;
 using System.Threading;
-using Utils = Arteranos.Core.Utils;
 using Ipfs;
 using GLTFast;
 using System.Collections.Generic;
@@ -20,6 +18,7 @@ using System.Text.RegularExpressions;
 using Arteranos.Avatar;
 using DitzelGames.FastIK;
 using Newtonsoft.Json;
+using Arteranos.Services;
 
 namespace Arteranos.Core.Operations
 {
@@ -428,8 +427,15 @@ namespace Arteranos.Core.Operations
                 GameObjectInstantiator customInstantiator = new(gltf, context.Avatar.transform);
 
                 await gltf.InstantiateMainSceneAsync(customInstantiator);
-            }
 
+                // As an afterthought, pin the avatar in the local IPFS node.
+                try
+                {
+                    await IPFSService.PinCid(context.path, true);
+                }
+                catch { }
+
+            }
 
             return context;
         }
