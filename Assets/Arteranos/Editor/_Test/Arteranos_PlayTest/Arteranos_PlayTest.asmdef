@@ -8,6 +8,7 @@
         "Arteranos.Core",
         "Arteranos.Web",
         "Arteranos.UI",
+        "Arteranos.WorldEdit",
         "ipfs.Cryptography",
         "ipfs.Http",
         "ipfs.Core",
