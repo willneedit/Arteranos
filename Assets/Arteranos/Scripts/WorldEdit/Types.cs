@@ -154,7 +154,7 @@ namespace Arteranos.WorldEdit
         public WorldObject(PrimitiveType primitive)
         {
             Init();
-            asset = new WOPrimitive { primitive = primitive, name = string.Empty };
+            asset = new WOPrimitive { primitive = primitive, name = "Primitive" };
         }
 
         private void Init()
@@ -162,6 +162,8 @@ namespace Arteranos.WorldEdit
             position = Vector3.zero;
             rotation = Quaternion.identity;
             scale = Vector3.one;
+            color = Color.white;
+
             components = new();
             children = new();
         }

@@ -11,9 +11,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Vector3 = Arteranos.WorldEdit.WOVector3;
-using Quaternion = Arteranos.WorldEdit.WOQuaternion;
-using Color = Arteranos.WorldEdit.WOColor;
+
 using Arteranos.WorldEdit;
 
 namespace Arteranos.PlayTest.WorldEdit
@@ -31,7 +29,7 @@ namespace Arteranos.PlayTest.WorldEdit
             ca.transform.position = new(0, 1.75f, 0.2f);
 
             li = new GameObject("Light").AddComponent<Light>();
-            li.transform.SetPositionAndRotation(new(0, 3, 0), UnityEngine.Quaternion.Euler(50, -30, 0));
+            li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
             li.type = LightType.Directional;
             li.color = UnityEngine.Color.white;
 
@@ -53,20 +51,28 @@ namespace Arteranos.PlayTest.WorldEdit
 
         public WorldObject BuildPrimitives()
         {
-            WorldObject cube = new(PrimitiveType.Cube);
-            cube.position = new UnityEngine.Vector3(0, 1, 5);
+            WorldObject cube = new(PrimitiveType.Cube)
+            {
+                position = new Vector3(0, 1, 5)
+            };
             cube.asset.name = "Test Cube";
 
-            WorldObject cube2 = new(PrimitiveType.Cube);
-            cube2.position = new UnityEngine.Vector3(1.5f, 0, 0);
+            WorldObject cube2 = new(PrimitiveType.Cube)
+            {
+                position = new Vector3(1.5f, 0, 0)
+            };
             cube2.asset.name = "Test Cube Right";
 
-            WorldObject sphere = new(PrimitiveType.Sphere);
-            sphere.position = new UnityEngine.Vector3(0, 1.5f, 0);
+            WorldObject sphere = new(PrimitiveType.Sphere)
+            {
+                position = new Vector3(0, 1.5f, 0)
+            };
             sphere.asset.name = "Test Sphere";
 
-            WorldObject capsule = new(PrimitiveType.Capsule);
-            capsule.position = new UnityEngine.Vector3(0, 1.5f, 0);
+            WorldObject capsule = new(PrimitiveType.Capsule)
+            {
+                position = new Vector3(0, 1.5f, 0)
+            };
             capsule.asset.name = "Test Capsule";
 
             sphere.children.Add(capsule);
@@ -90,21 +96,63 @@ namespace Arteranos.PlayTest.WorldEdit
 
                 Transform t = gob.transform;
                 t.SetParent(parent);
-                t.localPosition = wob.position;
-                t.localRotation = wob.rotation;
+                t.SetLocalPositionAndRotation(wob.position, wob.rotation);
                 t.localScale = wob.scale;
+                
+                if (t.TryGetComponent(out Renderer renderer))
+                    renderer.material.color = wob.color;
 
                 foreach(WorldObject child in wob.children)
                     yield return ShowObject(child, t);
             }
 
-            yield return new WaitForEndOfFrame();
+            yield return null;
         }
 
         [UnityTest]
         public IEnumerator DefaultTestObject()
         {
             WorldObject wob = BuildPrimitives();
+
+            yield return ShowObject(wob, pl.transform);
+        }
+
+        [UnityTest]
+        public IEnumerator Position()
+        {
+            WorldObject wob = BuildPrimitives();
+
+            wob.position += new Vector3(2, 0, 0);
+
+            yield return ShowObject(wob, pl.transform);
+        }
+
+        [UnityTest]
+        public IEnumerator Rotation()
+        {
+            WorldObject wob = BuildPrimitives();
+
+            wob.rotation *= Quaternion.Euler(0, 45, 0);
+
+            yield return ShowObject(wob, pl.transform);
+        }
+
+        [UnityTest]
+        public IEnumerator Scale()
+        {
+            WorldObject wob = BuildPrimitives();
+
+            wob.scale = new Vector3(0.5f, 0.5f, 0.5f);
+
+            yield return ShowObject(wob, pl.transform);
+        }
+
+        [UnityTest]
+        public IEnumerator Color()
+        {
+            WorldObject wob = BuildPrimitives();
+
+            wob.color = UnityEngine.Color.red;
 
             yield return ShowObject(wob, pl.transform);
         }
