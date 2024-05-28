@@ -110,8 +110,6 @@ namespace Arteranos.WorldEdit
     [ProtoInclude(65539, typeof(WOPrimitive))]
     public class WorldObjectAsset
     {
-        [ProtoMember(1)]
-        public string name;
     }
 
     [ProtoContract]
@@ -129,6 +127,9 @@ namespace Arteranos.WorldEdit
     {
         [ProtoMember(1)]
         public WorldObjectAsset asset;      // see above
+
+        [ProtoMember(2)]
+        public string name;
 
         [ProtoMember(3)]
         public WOVector3 position;            // local to parent
@@ -156,7 +157,7 @@ namespace Arteranos.WorldEdit
         public WorldObject(PrimitiveType primitive)
         {
             Init();
-            asset = new WOPrimitive { primitive = primitive, name = "Primitive" };
+            asset = new WOPrimitive { primitive = primitive };
         }
 
         private void Init()
@@ -185,8 +186,7 @@ namespace Arteranos.WorldEdit
             else 
                 gob = new GameObject("Empty");
 
-            if (asset != null)
-                gob.name = asset.name;
+            gob.name = name;
 
             gob.AddComponent<AssetComponent>().Asset = asset;
 
@@ -225,6 +225,7 @@ namespace Arteranos.WorldEdit
             if (t.TryGetComponent(out AssetComponent asset))
                 wo.asset = asset.Asset;
 
+            wo.name = t.name;
             wo.position = t.localPosition;
             wo.rotation = t.localRotation;
             wo.scale = t.localScale;

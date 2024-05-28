@@ -55,41 +55,40 @@ namespace Arteranos.PlayTest.WorldEdit
 
         // Must match the sample constructed with the following routine
 
-        public const string sampleWOB =
-            "ChGagCACCAMKCVRlc3QgQ3ViZRoKFQAAgD8dAACgQCIFJQAAgD8qDw0AA" +
-            "IA/FQAAgD8dAACAPzIUDQAAgD8VAACAPx0AAIA/JQAAgD9ClQEKEZqAIA" +
-            "AKC1Rlc3QgU3BoZXJlGgUVAADAPyIFJQAAgD8qDw0AAIA/FQAAgD8dAAC" +
-            "APzIUDQAAgD8VAACAPx0AAIA/JQAAgD9CSwoUmoAgAggBCgxUZXN0IENh" +
-            "cHN1bGUaBRUAAMA/IgUlAACAPyoPDQAAgD8VAACAPx0AAIA/MhQNAACAP" +
-            "xUAAIA/HQAAgD8lAACAP0JOCheagCACCAMKD1Rlc3QgQ3ViZSBSaWdodB" +
-            "oFDQAAwD8iBSUAAIA/Kg8NAACAPxUAAIA/HQAAgD8yFA0AAIA/FQAAgD8" +
-            "dAACAPyUAAIA/";
+        public const string sampleWOB = 
+            "CgaagCACCAMSCVRlc3QgQ3ViZRoKFQAAgD8dAACgQCIFJQAAgD8qDw0AAIA/F" +
+            "QAAgD8dAACAPzIUDQAAgD8VAACAPx0AAIA/JQAAgD9ClQEKBJqAIAASC1Rlc3" +
+            "QgU3BoZXJlGgUVAADAPyIFJQAAgD8qDw0AAIA/FQAAgD8dAACAPzIUDQAAgD8" +
+            "VAACAPx0AAIA/JQAAgD9CSwoGmoAgAggBEgxUZXN0IENhcHN1bGUaBRUAAMA/" +
+            "IgUlAACAPyoPDQAAgD8VAACAPx0AAIA/MhQNAACAPxUAAIA/HQAAgD8lAACAP" +
+            "0JOCgaagCACCAMSD1Rlc3QgQ3ViZSBSaWdodBoFDQAAwD8iBSUAAIA/Kg8NAA" +
+            "CAPxUAAIA/HQAAgD8yFA0AAIA/FQAAgD8dAACAPyUAAIA/";
 
         public WorldObject BuildSample()
         {
             WorldObject cube = new(PrimitiveType.Cube)
             {
-                position = new Vector3(0, 1, 5)
+                position = new Vector3(0, 1, 5),
+                name = "Test Cube"
             };
-            cube.asset.name = "Test Cube";
 
             WorldObject cube2 = new(PrimitiveType.Cube)
             {
-                position = new Vector3(1.5f, 0, 0)
+                position = new Vector3(1.5f, 0, 0),
+                name = "Test Cube Right"
             };
-            cube2.asset.name = "Test Cube Right";
 
             WorldObject sphere = new(PrimitiveType.Sphere)
             {
-                position = new Vector3(0, 1.5f, 0)
+                position = new Vector3(0, 1.5f, 0),
+                name = "Test Sphere"
             };
-            sphere.asset.name = "Test Sphere";
 
             WorldObject capsule = new(PrimitiveType.Capsule)
             {
-                position = new Vector3(0, 1.5f, 0)
+                position = new Vector3(0, 1.5f, 0),
+                name = "Test Capsule"
             };
-            capsule.asset.name = "Test Capsule";
 
             sphere.children.Add(capsule);
             cube.children.Add(sphere);
