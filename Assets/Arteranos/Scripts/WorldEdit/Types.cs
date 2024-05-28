@@ -11,6 +11,8 @@ using ProtoBuf;
 
 using Arteranos.Core;
 using UnityEngine;
+using System.IO;
+using System;
 
 namespace Arteranos.WorldEdit
 {
@@ -167,11 +169,78 @@ namespace Arteranos.WorldEdit
             components = new();
             children = new();
         }
+
+        public void Serialize(Stream stream)
+            => Serializer.Serialize(stream, this);
+
+        public static WorldObject Deserialize(Stream stream)
+            => Serializer.Deserialize<WorldObject>(stream);
+
+        public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
+        {
+            GameObject gob;
+
+            if (asset is WOPrimitive wopr)
+                gob = GameObject.CreatePrimitive(wopr.primitive);
+            else 
+                gob = new GameObject("Empty");
+
+            if (asset != null)
+                gob.name = asset.name;
+
+            gob.AddComponent<AssetComponent>().Asset = asset;
+
+            Transform t = gob.transform;
+            t.SetParent(parent);
+            t.SetLocalPositionAndRotation(position, rotation);
+            t.localScale = scale;
+
+            if (t.TryGetComponent(out Renderer renderer))
+                renderer.material.color = color;
+
+            // Assembling the GameObjects components from WOComponents
+
+            foreach (WorldObject child in children)
+                yield return child.Instantiate(t);
+
+            yield return null;
+
+            callback?.Invoke(gob);
+        }
+
     }
 
     [ProtoContract]
     public class WOComponent
     {
         // Extensible with subclassing done by ProtoInclude
+    }
+
+    public static class GameObjectExtensions
+    {
+        public static WorldObject MakeWorldObject(this Transform t)
+        {
+            WorldObject wo = new();
+
+            if (t.TryGetComponent(out AssetComponent asset))
+                wo.asset = asset.Asset;
+
+            wo.position = t.localPosition;
+            wo.rotation = t.localRotation;
+            wo.scale = t.localScale;
+
+            if (t.TryGetComponent(out Renderer renderer))
+                wo.color = renderer.material.color;
+
+            // Disassembling the GameObject components to WOComponents
+
+            for (int i = 0; i < t.childCount; ++i)
+                wo.children.Add(MakeWorldObject(t.GetChild(i)));
+
+            return wo;
+        }
+
+        public static WorldObject MakeWorldObject(this GameObject go)
+            => go.transform.MakeWorldObject();
     }
 }

@@ -13,14 +13,18 @@ using UnityEngine.TestTools;
 
 
 using Arteranos.WorldEdit;
+using System.IO;
+using System;
+using Object = UnityEngine.Object;
 
 namespace Arteranos.PlayTest.WorldEdit
 {
     public class WorldEditFixture
     {
+        public GameObject pl = null;
+
         Camera ca = null;
         Light li = null;
-        GameObject pl = null;
 
         [UnitySetUp]
         public IEnumerator SetUp()
@@ -31,7 +35,7 @@ namespace Arteranos.PlayTest.WorldEdit
             li = new GameObject("Light").AddComponent<Light>();
             li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
             li.type = LightType.Directional;
-            li.color = UnityEngine.Color.white;
+            li.color = Color.white;
 
             GameObject bpl = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/Plane.prefab");
             pl = Object.Instantiate(bpl);
@@ -42,14 +46,26 @@ namespace Arteranos.PlayTest.WorldEdit
         [UnityTearDown]
         public IEnumerator TearDown()
         {
-            yield return new WaitForSeconds(5);
-
             Object.Destroy(pl);
             Object.Destroy(ca.gameObject);
             Object.Destroy(li.gameObject);
+
+            yield return null;
         }
 
-        public WorldObject BuildPrimitives()
+        // Must match the sample constructed with the following routine
+
+        public const string sampleWOB =
+            "ChGagCACCAMKCVRlc3QgQ3ViZRoKFQAAgD8dAACgQCIFJQAAgD8qDw0AA" +
+            "IA/FQAAgD8dAACAPzIUDQAAgD8VAACAPx0AAIA/JQAAgD9ClQEKEZqAIA" +
+            "AKC1Rlc3QgU3BoZXJlGgUVAADAPyIFJQAAgD8qDw0AAIA/FQAAgD8dAAC" +
+            "APzIUDQAAgD8VAACAPx0AAIA/JQAAgD9CSwoUmoAgAggBCgxUZXN0IENh" +
+            "cHN1bGUaBRUAAMA/IgUlAACAPyoPDQAAgD8VAACAPx0AAIA/MhQNAACAP" +
+            "xUAAIA/HQAAgD8lAACAP0JOCheagCACCAMKD1Rlc3QgQ3ViZSBSaWdodB" +
+            "oFDQAAwD8iBSUAAIA/Kg8NAACAPxUAAIA/HQAAgD8yFA0AAIA/FQAAgD8" +
+            "dAACAPyUAAIA/";
+
+        public WorldObject BuildSample()
         {
             WorldObject cube = new(PrimitiveType.Cube)
             {
@@ -82,79 +98,12 @@ namespace Arteranos.PlayTest.WorldEdit
             return cube;
         }
 
-        public IEnumerator ShowObject(WorldObject wob, Transform parent)
+        public IEnumerator ShowObject(WorldObject wob)
         {
-            GameObject gob = null;
+            yield return wob.Instantiate(pl.transform);
 
-            if (wob.asset is WOPrimitive wopr)
-                gob = GameObject.CreatePrimitive(wopr.primitive);
+            yield return new WaitForSeconds(5);
 
-            if (gob != null)
-            {
-                if (wob.asset != null)
-                    gob.name = wob.asset.name;
-
-                Transform t = gob.transform;
-                t.SetParent(parent);
-                t.SetLocalPositionAndRotation(wob.position, wob.rotation);
-                t.localScale = wob.scale;
-                
-                if (t.TryGetComponent(out Renderer renderer))
-                    renderer.material.color = wob.color;
-
-                foreach(WorldObject child in wob.children)
-                    yield return ShowObject(child, t);
-            }
-
-            yield return null;
-        }
-
-        [UnityTest]
-        public IEnumerator DefaultTestObject()
-        {
-            WorldObject wob = BuildPrimitives();
-
-            yield return ShowObject(wob, pl.transform);
-        }
-
-        [UnityTest]
-        public IEnumerator Position()
-        {
-            WorldObject wob = BuildPrimitives();
-
-            wob.position += new Vector3(2, 0, 0);
-
-            yield return ShowObject(wob, pl.transform);
-        }
-
-        [UnityTest]
-        public IEnumerator Rotation()
-        {
-            WorldObject wob = BuildPrimitives();
-
-            wob.rotation *= Quaternion.Euler(0, 45, 0);
-
-            yield return ShowObject(wob, pl.transform);
-        }
-
-        [UnityTest]
-        public IEnumerator Scale()
-        {
-            WorldObject wob = BuildPrimitives();
-
-            wob.scale = new Vector3(0.5f, 0.5f, 0.5f);
-
-            yield return ShowObject(wob, pl.transform);
-        }
-
-        [UnityTest]
-        public IEnumerator Color()
-        {
-            WorldObject wob = BuildPrimitives();
-
-            wob.color = UnityEngine.Color.red;
-
-            yield return ShowObject(wob, pl.transform);
         }
     }
 }
