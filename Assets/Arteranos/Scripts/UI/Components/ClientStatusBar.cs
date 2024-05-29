@@ -68,7 +68,7 @@ namespace Arteranos.UI
                 case OnlineLevel.Client:
                     btn_Offline.gameObject.SetActive(true);
                     // btn_Server.gameObject.SetActive(false);
-                    btn_Host.gameObject.SetActive(true);
+                    btn_Host.gameObject.SetActive(false);
                     break;
                 case OnlineLevel.Server:
                     btn_Offline.gameObject.SetActive(true);
