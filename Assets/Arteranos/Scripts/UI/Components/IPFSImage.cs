@@ -49,7 +49,10 @@ namespace Arteranos.UI
         {
             base.OnEnable();
 
-            RestartLoader();
+#if UNITY_EDITOR
+            if(Application.isPlaying)
+#endif
+                RestartLoader();
         }
 
         private void RestartLoader()
@@ -77,7 +80,9 @@ namespace Arteranos.UI
                         _r => result = _r);
                 }
 
-                texture = result ? tex : BP.I.Unknown_Icon;
+                texture = result 
+                    ? tex 
+                    : BP.I.Unknown_Icon;
             }
 
             StopAllCoroutines();

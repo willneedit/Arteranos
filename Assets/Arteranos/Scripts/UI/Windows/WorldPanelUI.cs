@@ -292,7 +292,7 @@ namespace Arteranos.UI
             pui.Faulted += (ex, context) =>
             {
                 btn_AddWorld.interactable = true;
-                SettingsManager.StartCoroutineAsync(() => ShowPage(0));
+                TaskScheduler.ScheduleCoroutine(() => ShowPage(0));
             };
         }
 
