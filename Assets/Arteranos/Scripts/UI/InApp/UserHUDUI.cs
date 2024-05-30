@@ -38,7 +38,7 @@ namespace Arteranos.UI
         private const int btn_unmute = 1;
         private const int btn_callcd = 2;
         private const int btn_disconnect = 3;
-        private const int btn_emotes = 4;
+        // private const int btn_emotes = 4;
         private const int btn_takephoto = 5;
         private const int btn_dismisscd = 6;
         private UnityAction[] Actions;

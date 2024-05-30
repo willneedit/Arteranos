@@ -127,7 +127,7 @@ namespace Arteranos.UI
         {
             btn_Visit.interactable = false;                
             // NOTE: Initiating transition, needs to be unhooked from the server list item, which will vanish!
-            SettingsManager.StartCoroutineAsync(() => ConnectionManager.ConnectToServer(PeerID, null));
+            TaskScheduler.ScheduleCoroutine(() => ConnectionManager.ConnectToServer(PeerID, null));
 
             // Can be removed because of the TOS afreement window, ot other things.
             if(btn_Visit != null) btn_Visit.interactable = true;

@@ -54,7 +54,7 @@ namespace Arteranos.Services
                 yield return null;
             }
 
-            SettingsManager.StartCoroutineAsync(() => ProgessCoroutine(progress, progressText));
+            TaskScheduler.ScheduleCoroutine(() => ProgessCoroutine(progress, progressText));
         }
 
     }
