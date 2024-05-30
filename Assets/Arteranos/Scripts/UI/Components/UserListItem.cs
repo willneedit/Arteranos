@@ -25,7 +25,7 @@ namespace Arteranos.UI
     public class UserListItem : ListItemBase
     {
         [SerializeField] private TMP_Text lbl_caption = null;
-        [SerializeField] private RawImage img_Icon = null;
+        [SerializeField] private IPFSImage img_Icon = null;
 
         private HoverButton btn_AddFriend = null; // Offering Friend or accepting the request
         private HoverButton btn_DelFriend = null; // Revoking Friend offer or unfriend
@@ -88,7 +88,7 @@ namespace Arteranos.UI
                 Icon = targetUser.UserIcon;
             }
 
-            StartCoroutine(Utils.DownloadIconCoroutine(Icon, _tex => img_Icon.texture = _tex));
+            img_Icon.Path = Icon;
         }
 
         private void Update()

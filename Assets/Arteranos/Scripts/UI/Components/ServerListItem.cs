@@ -20,7 +20,7 @@ namespace Arteranos.UI
     public class ServerListItem : ListItemBase
     {
         public string PeerID = null;
-        public RawImage img_Icon = null;
+        public IPFSImage img_Icon = null;
         public TMP_Text lbl_Caption = null;
 
         public Color BgndRegular;
@@ -112,11 +112,9 @@ namespace Arteranos.UI
 
             }
 
-            void ShowIcon(Texture2D tex) => img_Icon.texture = tex;
-
             ShowServerDetails();
 
-            StartCoroutine(Utils.DownloadIconCoroutine(si.ServerIcon, ShowIcon));
+            img_Icon.Path = si.ServerIcon;
 
             // With Pubsub, we get the data delivered. Without Pubsub, we need to ask for it.
             if(IPFSService.UsingPubsub)

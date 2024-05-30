@@ -216,77 +216,6 @@ namespace Arteranos.Core
             return string.Format("{0:F1} {1}{2}", val, prefixes[^1], suffix);
         }
 
-        public static IEnumerator LoadImageCoroutine(byte[] data, Action<Texture2D> callback)
-        {
-            if (data == null || data.Length == 0)
-            {
-                callback?.Invoke(null);
-                yield break;
-            }
-
-            Texture2D tex = new(2, 2);
-
-            Task<bool> t = AsyncImageLoader.LoadImageAsync(tex, data);
-
-            yield return new WaitUntil(() => t.IsCompleted);
-
-            if (!t.Result) Debug.LogWarning("LoadImageCoroutine() failed");
-
-            callback?.Invoke(t.Result ? tex : null);
-        }
-
-        public static void DownloadData(string dataPath, Action<byte[]> callback, CancellationToken cancel = default)
-        {
-            async Task DownloadTask(string dataPath)
-            {
-                byte[] contents = await IPFSService.ReadBinary(dataPath, cancel: cancel);
-
-                TaskScheduler.ScheduleCallback(() => callback?.Invoke(contents));
-            }
-
-            Func<Task> MakeDownloadTask(string dataPath)
-            {
-                Task a() => DownloadTask(dataPath);
-                return a;
-            }
-
-            if (string.IsNullOrEmpty(dataPath)) return;
-
-            TaskScheduler.Schedule(MakeDownloadTask(dataPath));
-        }
-
-        private static IEnumerator DownloadDataCoroutine(string dataPath, Action<byte[]> callback, CancellationToken cancel = default)
-        {
-            if (dataPath == null) yield break;
-
-            byte[] contents = null;
-            // Stopwatch sw = Stopwatch.StartNew();
-            yield return Ipfs.Unity.Asyncs.Async2Coroutine(IPFSService.ReadBinary(dataPath, cancel: cancel),
-                _data => contents = _data,
-                _e => Debug.LogWarning($"Exception while loading {dataPath}: {_e}"));
-            // Debug.Log($"ReadBinary took {sw.ElapsedMilliseconds} ms");
-
-            if (contents == null) yield break;
-
-            callback?.Invoke(contents);
-        }
-
-        public static IEnumerator DownloadIconCoroutine(string icon, Action<Texture2D> callback)
-        {
-            byte[] data = null;
-            Texture2D tex = null;
-
-            using CancellationTokenSource cts = new(5000);
-
-            yield return DownloadDataCoroutine(icon, _data => data = _data, cts.Token);
-            yield return LoadImageCoroutine(data, _tex => tex = _tex);
-
-            if (tex == null)
-                tex = BP.I.Unknown_Icon;
-
-            callback?.Invoke(tex);
-        }
-
         public static void ShowImage(Texture2D icon, Image image)
         {
             image.sprite = Sprite.Create(icon,
@@ -383,20 +312,5 @@ namespace Arteranos.Core
             foreach(Transform transform in t)
                 CountGameObject(transform, counted);
         }
-
-#if false
-        public static IEnumerator Async2Coroutine<T>(Task<T> taskActionResult, Action<T> callback = null)
-        {
-            yield return new WaitUntil(() => taskActionResult.IsCompleted);
-
-            if(taskActionResult.IsCompletedSuccessfully)
-                callback?.Invoke(taskActionResult.Result);
-        }
-
-        public static IEnumerator Async2Coroutine(Task taskActionResult)
-        {
-            yield return new WaitUntil(() => taskActionResult.IsCompleted);
-        }
-#endif
     }
 }

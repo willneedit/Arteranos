@@ -30,7 +30,7 @@ namespace Arteranos.UI
         [SerializeField] private Button btn_Close;
         [SerializeField] private TMP_Text lbl_Name;
         [SerializeField] private TMP_Text lbl_Address;
-        [SerializeField] private RawImage img_Icon;
+        [SerializeField] private IPFSImage img_Icon;
         [SerializeField] private TMP_Text lbl_LastUpdated;
         [SerializeField] private TMP_Text lbl_LastOnline;
         [SerializeField] private TMP_Text lbl_MatchIndex;
@@ -56,25 +56,20 @@ namespace Arteranos.UI
 
         private void Populate()
         {
-            IEnumerator Visualize()
-            {
-                lbl_Name.text = si.Name;
-                lbl_Address.text = ""; // Maybe an abbreviated PeerID?
-                lbl_LastUpdated.text = si.LastUpdated.HumanReadable();
-                lbl_LastOnline.text = si.SeenOnline ? si.LastOnline.HumanReadable() : "Never seen so far";
-                lbl_MatchIndex.text = si.Permissions.HumanReadableMI(
-                    SettingsManager.Client.ContentFilterPreferences
-                    ).ToString();
-                lbl_Description.text = si.Description.ToString();
+            lbl_Name.text = si.Name;
+            lbl_Address.text = ""; // Maybe an abbreviated PeerID?
+            lbl_LastUpdated.text = si.LastUpdated.HumanReadable();
+            lbl_LastOnline.text = si.SeenOnline ? si.LastOnline.HumanReadable() : "Never seen so far";
+            lbl_MatchIndex.text = si.Permissions.HumanReadableMI(
+                SettingsManager.Client.ContentFilterPreferences
+                ).ToString();
+            lbl_Description.text = si.Description.ToString();
 
-                lbl_AdminList.text = string.Join(", ", si.AdminNames);
+            lbl_AdminList.text = string.Join(", ", si.AdminNames);
 
-                yield return Utils.DownloadIconCoroutine(si.ServerIcon, _tex => img_Icon.texture = _tex);
+            img_Icon.Path = si.ServerIcon;
 
-                lbl_World.text = si.CurrentWorldName;
-            }
-
-            StartCoroutine(Visualize());
+            lbl_World.text = si.CurrentWorldName;
         }
     }
 }

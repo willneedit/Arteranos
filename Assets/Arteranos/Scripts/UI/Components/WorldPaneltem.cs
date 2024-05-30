@@ -25,7 +25,7 @@ namespace Arteranos.UI
         private HoverButton btn_Delete = null;
         private HoverButton btn_ChangeWorld = null;
 
-        public RawImage img_Screenshot = null;
+        public IPFSImage img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
 
         public Cid WorldCid { get; internal set; } = null;
@@ -82,7 +82,7 @@ namespace Arteranos.UI
                 ServerPermissions permission = WorldInfo.win.ContentRating;
                 AllowedForThis = permission != null && !permission.IsInViolation(SettingsManager.ActiveServerData.Permissions);
 
-                yield return VisualizeWorldData();
+                VisualizeWorldData();
             }
 
             if(WorldCid == null)
@@ -96,7 +96,7 @@ namespace Arteranos.UI
             StartCoroutine(VisCoroutine());
         }
 
-        private IEnumerator VisualizeWorldData()
+        private void VisualizeWorldData()
         {
             // If we're in Host mode, you're the admin of your own server, so we're able to
             // change the world. And you still have the great responsibility...
@@ -120,9 +120,7 @@ namespace Arteranos.UI
                 FriendsMax);
 
             if (WorldInfo.win.ScreenshotPNG != null)
-                yield return Utils.LoadImageCoroutine(WorldInfo.win.ScreenshotPNG, _tex => img_Screenshot.texture = _tex);
-
-            yield return null;
+                img_Screenshot.ImageData = WorldInfo.win.ScreenshotPNG;
         }
 
         private void OnVisitClicked(bool inPlace)

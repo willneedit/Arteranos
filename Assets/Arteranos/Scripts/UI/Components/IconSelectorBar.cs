@@ -6,6 +6,7 @@
  */
 
 using Arteranos.Core;
+using Ipfs.Unity;
 using System;
 using System.Collections;
 using System.Linq;
@@ -76,10 +77,14 @@ namespace Arteranos.UI
         {
             if (data == null) yield break;
 
-            Texture2D tex = null;
-            yield return Utils.LoadImageCoroutine(data, _tex => tex = _tex);
+            Texture2D tex = new(2, 2);
+            bool result = false;
 
-            if (tex == null) yield break;
+            yield return Asyncs.Async2Coroutine(
+                AsyncImageLoader.LoadImageAsync(tex, IconData),
+                _r => result = _r);
+
+            if (tex == null || !result) yield break;
 
             if (tex.width > 512 || tex.height > 512)
                 yield break;
