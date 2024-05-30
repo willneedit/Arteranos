@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6595510000850821082}
   - component: {fileID: 1629495479545284422}
-  - component: {fileID: 7015261720109464867}
+  - component: {fileID: 8755293866946712272}
   - component: {fileID: 8064136766761328717}
   - component: {fileID: 2232532268414904159}
   m_Layer: 5
@@ -48,7 +48,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1024997721286812270}
   m_CullTransparentMesh: 1
---- !u!114 &7015261720109464867
+--- !u!114 &8755293866946712272
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -57,10 +57,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1024997721286812270}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Script: {fileID: 11500000, guid: 20b3b024288692a45b171f57ae9311b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: ccc2f5fd25ceee045bb0d53a24e14ce2, type: 2}
+  m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -115,7 +115,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 7015261720109464867}
+  m_TargetGraphic: {fileID: 8755293866946712272}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []

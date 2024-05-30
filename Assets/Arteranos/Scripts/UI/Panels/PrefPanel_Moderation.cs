@@ -109,16 +109,6 @@ namespace Arteranos.UI
 
         private void UpdateServerConfigDisplay(ServerJSON ss)
         {
-            void DownloadIcon(Cid icon)
-            {
-                using CancellationTokenSource cts = new(5000);
-
-                Utils.DownloadData(icon, _data => {
-                    bar_IconSelector.IconData = _data;
-                    bar_IconSelector.TriggerUpdate();
-                }, cts.Token);
-            }
-
             ServerIcon = ss.ServerIcon;
             Permissions = ss.Permissions;
 
@@ -132,7 +122,7 @@ namespace Arteranos.UI
 
             chk_Public.isOn = ss.Public;
 
-            DownloadIcon(ss.ServerIcon);
+            bar_IconSelector.IconPath = ss.ServerIcon;
 
             dirty = false;
         }

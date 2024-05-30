@@ -21,9 +21,19 @@ namespace Arteranos.UI
     {
         public TMP_InputField txt_IconURL = null;
         public Button btn_Icon = null;
-        public RawImage img_IconImage = null;
+        public IPFSImage img_IconImage = null;
 
-        public byte[] IconData { get; set; } = null;
+        public string IconPath
+        {
+            get => img_IconImage.Path;
+            set => img_IconImage.Path = value;
+        }
+
+        public byte[] IconData
+        {
+            get => img_IconImage.ImageData;
+            set => img_IconImage.ImageData = value;
+        }
 
         public event Action<byte[]> OnIconChanged;
 
@@ -33,18 +43,6 @@ namespace Arteranos.UI
 
             btn_Icon.onClick.AddListener(OnIconClicked);
             txt_IconURL.onSubmit.AddListener(_ => OnIconClicked());
-        }
-
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-            TriggerUpdate();
-        }
-
-        public void TriggerUpdate()
-        {
-            if(isActiveAndEnabled)
-                StartCoroutine(UpdateIconCoroutine(IconData));
         }
 
         private void OnIconClicked()
@@ -89,15 +87,8 @@ namespace Arteranos.UI
             if (tex.width < 128 || tex.height < 128)
                 yield break;
 
-            if(img_IconImage.texture == null)
-                img_IconImage.texture = tex;
-
-            if (IconData == null || !IconData.SequenceEqual(data))
-            {
-                IconData = data;
-                img_IconImage.texture = tex;
-                OnIconChanged?.Invoke(IconData);
-            }
+            IconData = data;
+            OnIconChanged?.Invoke(IconData);
         }
     }
 }

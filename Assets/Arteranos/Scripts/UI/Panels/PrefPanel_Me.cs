@@ -84,16 +84,6 @@ namespace Arteranos.UI
         // outside means, like the Login panel.
         protected override void OnEnable()
         {
-            void DownloadIcon(Cid icon)
-            {
-                using CancellationTokenSource cts = new(5000);
-
-                Utils.DownloadData(icon, _data => {
-                    bar_IconSelector.IconData = _data;
-                    bar_IconSelector.TriggerUpdate();
-                }, cts.Token);
-            }
-
             base.OnEnable();
 
             cs = SettingsManager.Client;
@@ -108,7 +98,7 @@ namespace Arteranos.UI
             tro_UserID.text = cs.GetFingerprint(fpmode);
             sldn_AvatarHeight.value = cs.AvatarHeight;
 
-            DownloadIcon(cs.Me.UserIconCid);
+            bar_IconSelector.IconPath = cs.Me.UserIconCid;
 
             // Reset the state as it's the initial state, not the blank slate.
             dirty = false;
