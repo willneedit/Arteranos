@@ -57,7 +57,11 @@ namespace Arteranos.UI
 
             pageCountPattern = lbl_PageCount.text;
 
-            btn_AddItem.onClick.AddListener(() => OnAddingItem?.Invoke(txt_AddItemURL.text));
+            btn_AddItem.onClick.AddListener(() =>
+            {
+                btn_AddItem.interactable = false;
+                OnAddingItem?.Invoke(txt_AddItemURL.text);
+            });
 
             btn_First.onClick.AddListener(() => SwitchToPage(0, -1));
             btn_FRev.onClick.AddListener(() => SwitchToPage(-10, 0));
@@ -81,6 +85,11 @@ namespace Arteranos.UI
         {
             itemCount = count;
             maxPage = (itemCount + ItemsPerPage - 1) / ItemsPerPage;
+        }
+
+        public void FinishAdding()
+        {
+            btn_AddItem.interactable = true;
         }
 
         public void ShowPage(int currentPage)
