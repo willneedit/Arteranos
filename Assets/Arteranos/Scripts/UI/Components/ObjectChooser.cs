@@ -16,7 +16,7 @@ namespace Arteranos.UI
 {
     public class ObjectChooser : UIBehaviour
     {
-        [SerializeField] private GameObject grp_TileSample;
+        // [SerializeField] private GameObject grp_TileSample;
 
         [SerializeField] private TMP_Text lbl_PageCount;
         [SerializeField] private Button btn_First;
@@ -29,6 +29,8 @@ namespace Arteranos.UI
         [SerializeField] private TMP_InputField txt_AddItemURL;
         [SerializeField] private Button btn_AddItem;
         [SerializeField] private int ItemsPerPage = 2;
+
+        [SerializeField] private GameObject TileBlueprint = null;
 
 
         // Page x is about to be shown. Recommend to call UpdateItemCount(), too.
@@ -63,8 +65,6 @@ namespace Arteranos.UI
             btn_Next.onClick.AddListener(() => SwitchToPage(1, 0));
             btn_FFwd.onClick.AddListener(() => SwitchToPage(10, 0));
             btn_Last.onClick.AddListener(() => SwitchToPage(0, 1));
-
-            grp_TileSample.SetActive(false);
         }
 
         protected override void Start()
@@ -89,9 +89,9 @@ namespace Arteranos.UI
             this.currentPage = currentPage;
             lbl_PageCount.text = string.Format(pageCountPattern, currentPage + 1, maxPage);
 
-            Transform panels = grp_TileSample.transform.parent;
+            Transform panels = transform.GetChild(1);
 
-            for (int i = 1; i < panels.childCount; i++)
+            for (int i = 0; i < panels.childCount; i++)
                 Destroy(panels.GetChild(i).gameObject);
 
             int startIndex = currentPage * ItemsPerPage;
@@ -100,9 +100,8 @@ namespace Arteranos.UI
 
             for (int i = startIndex; i < endIndex; i++)
             {
-                GameObject go = Instantiate(grp_TileSample, panels);
+                GameObject go = Instantiate(TileBlueprint, panels);
                 OnPopulateTile?.Invoke(i, go);
-                go.SetActive(true);
             }
 
             lbl_PageCount.text = string.Format(pageCountPattern, currentPage + 1, maxPage);
