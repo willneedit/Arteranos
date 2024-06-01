@@ -388,7 +388,7 @@ namespace Arteranos.Services
 
             Debug.Log($"[Server] sending world CID '{SettingsManager.WorldCid}' to latecoming conn {conn.connectionId}");
 
-            SettingsManager.StartCoroutineAsync(() => SendWCAJustForTheLaggard(conn, agreePublicKey));
+            Core.TaskScheduler.ScheduleCoroutine(() => SendWCAJustForTheLaggard(conn, agreePublicKey));
         }
 
 

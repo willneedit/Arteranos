@@ -32,11 +32,6 @@ namespace Arteranos.PlayTest
         {
             Instance = null;
         }
-
-        protected override void StartCoroutineAsync_(Func<IEnumerator> action)
-        {
-            return;
-        }
     }
 
 

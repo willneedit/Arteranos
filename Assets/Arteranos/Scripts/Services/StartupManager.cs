@@ -21,9 +21,6 @@ namespace Arteranos.Services
     {
         private bool initialized = false;
 
-        private readonly ConcurrentQueue<Func<IEnumerator>> QueuedCoroutine = new();
-
-
         protected override void Awake()
         {
             Instance = this;
@@ -70,18 +67,12 @@ namespace Arteranos.Services
                 yield return new WaitForSeconds(5);
                 Debug.Log($"Server is running, launch argument is: arteranos://{IPFSService.Self.Id}/");
             }
+
+            enabled = false;
         }
 
         protected void Update()
         {
-            if(QueuedCoroutine.TryDequeue(out Func<IEnumerator> action))
-            {
-                if (action != null)
-                    StartCoroutine(action?.Invoke());
-                else
-                    Debug.LogWarning("Asynced Coroutine: Coroutine's underlying object == null");
-            }
-
             if (initialized) return;
 
             // Very first frame, every Awake() has been called, everything is a go.
@@ -89,9 +80,6 @@ namespace Arteranos.Services
 
             StartCoroutine(StartupCoroutine());
         }
-
-        protected override void StartCoroutineAsync_(Func<IEnumerator> action) 
-            => QueuedCoroutine.Enqueue(action);
 
         protected override void EmitToClientCTSPacket_(CTSPacket packet, IAvatarBrain to = null) 
             => ArteranosNetworkManager.Instance.EmitToClientCTSPacket(packet, to);
