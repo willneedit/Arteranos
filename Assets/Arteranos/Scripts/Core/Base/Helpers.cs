@@ -144,8 +144,6 @@ namespace Arteranos.Services
     public abstract class NetworkStatus : MonoBehaviour
     {
         protected abstract bool OpenPorts_ { get; set; }
-        protected abstract IPAddress ExternalAddress_ { get; set; }
-        protected abstract IPAddress PublicIPAddress_ { get; set; }
         protected abstract Action<bool, string> OnClientConnectionResponse_ { get; set; }
         protected abstract MultiHash RemotePeerId_ { get; set; }
         protected abstract event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
@@ -162,10 +160,6 @@ namespace Arteranos.Services
         protected abstract Task StopHost_(bool loadOfflineScene);
 
         public static NetworkStatus Instance { get; set; }
-
-        public static IPAddress ExternalAddress => Instance.ExternalAddress_;
-
-        public static IPAddress PublicIPAddress => Instance.PublicIPAddress_;
 
         public static bool OpenPorts
         {
