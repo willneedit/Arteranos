@@ -13,7 +13,8 @@
         "ipfs.Http",
         "ipfs.Core",
         "ipfs.HttpEx",
-        "ipfs.Unity"
+        "ipfs.Unity",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

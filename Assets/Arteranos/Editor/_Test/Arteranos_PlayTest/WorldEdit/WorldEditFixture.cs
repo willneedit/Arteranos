@@ -39,6 +39,7 @@ namespace Arteranos.PlayTest.WorldEdit
 
             GameObject bpl = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/Plane.prefab");
             pl = Object.Instantiate(bpl);
+            pl.tag = "WorldObjectsRoot";
 
             yield return new WaitForEndOfFrame();
         }
@@ -54,7 +55,6 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         // Must match the sample constructed with the following routine
-
         public const string sampleWOB = 
             "CgaagCACCAMSCVRlc3QgQ3ViZRoKFQAAgD8dAACgQCIFJQAAgD8qDw0AAIA/F" +
             "QAAgD8dAACAPzIUDQAAgD8VAACAPx0AAIA/JQAAgD9ClQEKBJqAIAASC1Rlc3" +

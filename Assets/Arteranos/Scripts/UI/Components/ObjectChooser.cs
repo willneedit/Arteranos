@@ -33,6 +33,9 @@ namespace Arteranos.UI
         [SerializeField] private GameObject TileBlueprint = null;
 
 
+        public int currentPage { get; private set; } = 0;
+        public int maxPage { get; private set; } = 0;
+
         // Page x is about to be shown. Recommend to call UpdateItemCount(), too.
         public event Action<int> OnShowingPage;
 
@@ -47,8 +50,6 @@ namespace Arteranos.UI
         private string pageCountPattern = null;
         private int itemCount = 0;
 
-        private int currentPage = 0;
-        private int maxPage = 0;
 
 
         protected override void Awake()
@@ -90,6 +91,15 @@ namespace Arteranos.UI
         public void FinishAdding()
         {
             btn_AddItem.interactable = true;
+        }
+
+        public GameObject GetChooserItem(int index)
+        {
+            Transform panels = transform.GetChild(1);
+
+            return index < panels.childCount 
+                ? panels.GetChild(index).gameObject 
+                : null;
         }
 
         public void ShowPage(int currentPage)
