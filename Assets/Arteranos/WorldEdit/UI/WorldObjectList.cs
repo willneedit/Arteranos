@@ -56,6 +56,12 @@ namespace Arteranos.WorldEdit
             Chooser.ShowPage(0);
         }
 
+        public void ChangeFolder(GameObject folder)
+        {
+            CurrentRoot = folder;
+            Chooser.ShowPage(0);
+        }
+
         private readonly List<GameObject> WorldObjects = new();
 
         private void PreparePage(int _ /* page index */)
@@ -65,7 +71,11 @@ namespace Arteranos.WorldEdit
             WorldObjects.Add( CurrentRoot );
 
             for(int i = 0; i < CurrentRoot.transform.childCount; ++i)
-                WorldObjects.Add(WORoot.transform.GetChild(i).gameObject);
+            {
+                GameObject go = CurrentRoot.transform.GetChild(i).gameObject;
+                if (go == null) continue;
+                WorldObjects.Add(go);
+            }
 
             Chooser.UpdateItemCount(WorldObjects.Count);
         }
@@ -88,10 +98,11 @@ namespace Arteranos.WorldEdit
             woli.IsParentLink = isParent;
             woli.IsRoot = isRoot;
             woli.WorldObject = WorldObjects[index];
-            woli.OnRequestUpdateList += RequestUpdateList;
+
+            woli.Container = this;
         }
 
-        private void RequestUpdateList()
+        public void RequestUpdateList()
         {
             Chooser.ShowPage(Chooser.currentPage);
         }

@@ -22,7 +22,7 @@ namespace Arteranos.PlayTest.WorldEdit
     public class Basics : WorldEditFixture
     {
         [UnityTest]
-        public IEnumerator DefaultTestObject()
+        public IEnumerator T000_DefaultTestObject()
         {
             WorldObject wob = BuildSample();
 
@@ -30,7 +30,7 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         [UnityTest]
-        public IEnumerator Position()
+        public IEnumerator T001_Position()
         {
             WorldObject wob = BuildSample();
 
@@ -40,7 +40,7 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         [UnityTest]
-        public IEnumerator Rotation()
+        public IEnumerator T002_Rotation()
         {
             WorldObject wob = BuildSample();
 
@@ -50,7 +50,7 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         [UnityTest]
-        public IEnumerator Scale()
+        public IEnumerator T003_Scale()
         {
             WorldObject wob = BuildSample();
 
@@ -60,11 +60,26 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         [UnityTest]
-        public IEnumerator Color()
+        public IEnumerator T004_Color()
         {
             WorldObject wob = BuildSample();
 
             wob.color = UnityEngine.Color.red;
+
+            yield return ShowObject(wob);
+        }
+
+        [UnityTest]
+        public IEnumerator T005_ReRoot()
+        {
+            WorldObject wob = BuildSample();
+
+            WorldObject newroot = new()
+            {
+                position = new Vector3(-2, 0, 0),
+                rotation = Quaternion.Euler(0, 0, -45),
+            };
+            newroot.children.Add(wob);
 
             yield return ShowObject(wob);
         }

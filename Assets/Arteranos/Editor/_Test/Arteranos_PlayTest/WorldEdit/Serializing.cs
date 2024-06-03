@@ -22,7 +22,7 @@ namespace Arteranos.PlayTest.WorldEdit
     public class Serializing : WorldEditFixture
     {
         [UnityTest]
-        public IEnumerator Serialize()
+        public IEnumerator T001_Serialize()
         {
             WorldObject wob = BuildSample();
 
@@ -38,7 +38,7 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         [UnityTest]
-        public IEnumerator Deserialize()
+        public IEnumerator T002_Deserialize()
         {
             using MemoryStream ms = new(Convert.FromBase64String(sampleWOB));
             WorldObject wob = WorldObject.Deserialize(ms);
@@ -47,22 +47,7 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         [UnityTest]
-        public IEnumerator ReRoot()
-        {
-            WorldObject wob = BuildSample();
-
-            WorldObject newroot = new()
-            {
-                position = new Vector3(-2, 0, 0),
-                rotation = Quaternion.Euler(0, 0, -45),
-            };
-            newroot.children.Add(wob);
-
-            yield return ShowObject(wob);
-        }
-
-        [UnityTest]
-        public IEnumerator Disassemble()
+        public IEnumerator T003_Disassemble()
         {
             WorldObject wob = BuildSample();
 

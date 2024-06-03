@@ -15,9 +15,10 @@ using System.IO;
 
 namespace Arteranos.WorldEdit
 {
-    // Just for keeping the data for converting the gameobject to a serializabl world object.
+    // Just for keeping the data for converting the gameobject to a serializable world object.
     public class AssetComponent : MonoBehaviour
     {
         public WorldObjectAsset Asset { get; set; } = null;
+        public bool IsLocked { get; set; } = false;
     }
 }

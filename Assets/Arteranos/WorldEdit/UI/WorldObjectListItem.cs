@@ -5,15 +5,12 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
-using Unity.Plastic.Newtonsoft.Json.Serialization;
 
-namespace Arteranos
+namespace Arteranos.WorldEdit
 {
     public class WorldObjectListItem : UIBehaviour
     {
@@ -26,16 +23,20 @@ namespace Arteranos
         public Button btn_Delete;
 
         public GameObject WorldObject { get; set; }
-        public bool IsLocked { get; set; }
         public bool IsParentLink { get; set; }
         public bool IsRoot {  get; set; }
+        public WorldObjectList Container { get; set; }
 
-        // Requesting to change the list (adding/deleting items), not just the single item
-        public event Action OnRequestUpdateList;
 
         protected override void Awake()
         {
             base.Awake();
+
+            btn_ToParent.onClick.AddListener(OnToParentClicked);
+            btn_ToChild.onClick.AddListener(OnToChildClicked);
+            btn_Lock.onClick.AddListener(() => OnSetLockState(true));
+            btn_Unlock.onClick.AddListener(() => OnSetLockState(false));
+            btn_Delete.onClick.AddListener(OnDelete);
         }
 
         protected override void Start()
@@ -52,6 +53,10 @@ namespace Arteranos
 
         public void Populate()
         {
+            bool IsLocked = false;
+            if(WorldObject.TryGetComponent(out AssetComponent asset))
+                IsLocked = asset.IsLocked;
+
             if (IsRoot)
             {
                 btn_Lock.gameObject.SetActive(false);
@@ -68,9 +73,40 @@ namespace Arteranos
             btn_Lock.gameObject.SetActive(!IsLocked);
             btn_Unlock.gameObject.SetActive(IsLocked);
             btn_ToParent.gameObject.SetActive(IsParentLink);
-            btn_ToChild.gameObject.SetActive(transform.childCount > 0);
+            btn_ToChild.gameObject.SetActive(!IsParentLink);
+            btn_Property.interactable = !IsLocked;
+            txt_Name.interactable = !IsLocked;
             txt_Name.text = WorldObject.name;
-            btn_Delete.interactable = !IsLocked;
+            btn_Delete.interactable = !IsLocked && !IsParentLink;
+        }
+
+        public void OnToChildClicked()
+        {
+            Container.ChangeFolder(WorldObject);
+        }
+
+        public void OnToParentClicked()
+        {
+            Container.ChangeFolder(WorldObject.transform.parent.gameObject);
+        }
+
+        public void OnSetLockState(bool locked)
+        {
+            if (WorldObject.TryGetComponent(out AssetComponent asset))
+                asset.IsLocked = locked;
+
+            Populate();
+        }
+
+        public void OnDelete()
+        {
+            // Unhook this object from the hierarchy
+            WorldObject.transform.SetParent(null);
+            Container.RequestUpdateList();
+
+            // Slate it for destruction
+            Destroy(WorldObject); 
+            WorldObject = null;
         }
     }
 }
