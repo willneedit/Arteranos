@@ -36,7 +36,7 @@ namespace Arteranos.WorldEdit
             btn_ToChild.onClick.AddListener(OnToChildClicked);
             btn_Lock.onClick.AddListener(() => OnSetLockState(true));
             btn_Unlock.onClick.AddListener(() => OnSetLockState(false));
-            btn_Delete.onClick.AddListener(OnDelete);
+            btn_Delete.onClick.AddListener(OnDeleteClicked);
         }
 
         protected override void Start()
@@ -51,7 +51,7 @@ namespace Arteranos.WorldEdit
             base.OnDestroy();
         }
 
-        public void Populate()
+        private void Populate()
         {
             bool IsLocked = false;
             if(WorldObject.TryGetComponent(out AssetComponent asset))
@@ -80,17 +80,17 @@ namespace Arteranos.WorldEdit
             btn_Delete.interactable = !IsLocked && !IsParentLink;
         }
 
-        public void OnToChildClicked()
+        private void OnToChildClicked()
         {
             Container.ChangeFolder(WorldObject);
         }
 
-        public void OnToParentClicked()
+        private void OnToParentClicked()
         {
             Container.ChangeFolder(WorldObject.transform.parent.gameObject);
         }
 
-        public void OnSetLockState(bool locked)
+        private void OnSetLockState(bool locked)
         {
             if (WorldObject.TryGetComponent(out AssetComponent asset))
                 asset.IsLocked = locked;
@@ -98,7 +98,7 @@ namespace Arteranos.WorldEdit
             Populate();
         }
 
-        public void OnDelete()
+        private void OnDeleteClicked()
         {
             // Unhook this object from the hierarchy
             WorldObject.transform.SetParent(null);
@@ -108,5 +108,12 @@ namespace Arteranos.WorldEdit
             Destroy(WorldObject); 
             WorldObject = null;
         }
+#if UNITY_EDITOR
+        // Unit test backdoors
+        public void Test_OnToChildClicked() => OnToChildClicked();
+        public void Test_OnToParentClicked() => OnToParentClicked();
+        public void Test_OnSetLockState(bool locked) => OnSetLockState(locked);
+        public void Test_OnDeleteClicked() => OnDeleteClicked();
+#endif
     }
 }

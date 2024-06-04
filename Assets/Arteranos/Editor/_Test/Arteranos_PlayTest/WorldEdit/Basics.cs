@@ -81,7 +81,7 @@ namespace Arteranos.PlayTest.WorldEdit
             };
             newroot.children.Add(wob);
 
-            yield return ShowObject(wob);
+            yield return ShowObject(newroot);
         }
 
 

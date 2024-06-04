@@ -24,6 +24,27 @@ namespace Arteranos.PlayTest.WorldEdit
         private GameObject panel = null;
         private Transform ItemContainer = null;
 
+        WorldObject wob = null;
+
+        [UnitySetUp]
+        public IEnumerator SetUp1()
+        {
+            wob = BuildSample();
+
+            yield return wob.Instantiate(pl.transform);
+
+            yield return ShowPanel();
+        }
+
+
+        [UnityTearDown]
+        public IEnumerator TearDown1()
+        {
+            yield return null;
+
+            Object.Destroy(panel);
+        }
+
         public IEnumerator ShowPanel()
         {
             GameObject canvasBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/Canvas_Preferences_Edit.prefab");
@@ -50,12 +71,6 @@ namespace Arteranos.PlayTest.WorldEdit
         [UnityTest]
         public IEnumerator T001_Show()
         {
-            WorldObject wob = BuildSample();
-
-            yield return wob.Instantiate(pl.transform);
-
-            yield return ShowPanel();
-
             Assert.AreEqual(2, ItemContainer.childCount);
             Assert.AreEqual("(Root)", GetWOChooserItem(0).txt_Name.text);
             Assert.AreEqual("Test Cube", GetWOChooserItem(1).txt_Name.text);
@@ -66,20 +81,12 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.True(GetWOChooserItem(1).btn_ToChild.isActiveAndEnabled);   // Item 1 does have children
 
             yield return new WaitForEndOfFrame();
-
-            Object.Destroy(panel);
         }
 
         [UnityTest]
         public IEnumerator T002_Descend() 
         {
-            WorldObject wob = BuildSample();
-
-            yield return wob.Instantiate(pl.transform);
-
-            yield return ShowPanel();
-
-            GetWOChooserItem(1).OnToChildClicked();     // Select first child, down a level
+            GetWOChooserItem(1).Test_OnToChildClicked();     // Select first child, down a level
             yield return new WaitForEndOfFrame();
 
             Assert.AreEqual(3, ItemContainer.childCount);
@@ -95,26 +102,17 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.True(GetWOChooserItem(1).btn_ToChild.isActiveAndEnabled);    // Sphere has the Capsule as child
             Assert.True(GetWOChooserItem(2).btn_ToChild.isActiveAndEnabled);    // Right Cube has no children, but allow to add a new leaf
 
-            GetWOChooserItem(0).OnToParentClicked();    // Select parent link, up a level
+            GetWOChooserItem(0).Test_OnToParentClicked();    // Select parent link, up a level
             yield return new WaitForEndOfFrame();
 
             Assert.AreEqual(2, ItemContainer.childCount);
             Assert.AreEqual("(Root)", GetWOChooserItem(0).txt_Name.text);
             Assert.AreEqual("Test Cube", GetWOChooserItem(1).txt_Name.text);
-
-            Object.Destroy(panel);
-
         }
 
         [UnityTest]
         public IEnumerator T003_Lock_Unlock()
         {
-            WorldObject wob = BuildSample();
-
-            yield return wob.Instantiate(pl.transform);
-
-            yield return ShowPanel();
-
             // Initial state
             Assert.True(GetWOChooserItem(1).btn_Property.interactable);
             Assert.True(GetWOChooserItem(1).txt_Name.interactable);
@@ -122,7 +120,7 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.True(GetWOChooserItem(1).btn_Lock.isActiveAndEnabled);
             Assert.False(GetWOChooserItem(1).btn_Unlock.isActiveAndEnabled);
 
-            GetWOChooserItem(1).OnSetLockState(true); 
+            GetWOChooserItem(1).Test_OnSetLockState(true); 
             yield return new WaitForEndOfFrame();
 
             // Locked - no modifying or deletion
@@ -132,7 +130,7 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.False(GetWOChooserItem(1).btn_Lock.isActiveAndEnabled);
             Assert.True(GetWOChooserItem(1).btn_Unlock.isActiveAndEnabled);
 
-            GetWOChooserItem(1).OnSetLockState(false);
+            GetWOChooserItem(1).Test_OnSetLockState(false);
             yield return new WaitForEndOfFrame();
 
             // Unlocked - just as before
@@ -141,20 +139,12 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.True(GetWOChooserItem(1).btn_Delete.interactable);
             Assert.True(GetWOChooserItem(1).btn_Lock.isActiveAndEnabled);
             Assert.False(GetWOChooserItem(1).btn_Unlock.isActiveAndEnabled);
-
-            Object.Destroy(panel);
         }
 
         [UnityTest]
         public IEnumerator T004_Delete()
         {
-            WorldObject wob = BuildSample();
-
-            yield return wob.Instantiate(pl.transform);
-
-            yield return ShowPanel();
-
-            GetWOChooserItem(1).OnToChildClicked();     // Select first child, down a level
+            GetWOChooserItem(1).Test_OnToChildClicked();     // Select first child, down a level
             yield return new WaitForEndOfFrame();
 
             Assert.AreEqual(3, ItemContainer.childCount);
@@ -162,14 +152,12 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.AreEqual("Test Sphere", GetWOChooserItem(1).txt_Name.text);
             Assert.AreEqual("Test Cube Right", GetWOChooserItem(2).txt_Name.text);
 
-            GetWOChooserItem(1).OnDelete();             // Delete the sphere _and its children_
+            GetWOChooserItem(1).Test_OnDeleteClicked();             // Delete the sphere _and its children_
             yield return new WaitForEndOfFrame();
 
             Assert.AreEqual(2, ItemContainer.childCount);
             Assert.AreEqual("Test Cube", GetWOChooserItem(0).txt_Name.text);
             Assert.AreEqual("Test Cube Right", GetWOChooserItem(1).txt_Name.text);
-
-            Object.Destroy(panel);
         }
     }
 }

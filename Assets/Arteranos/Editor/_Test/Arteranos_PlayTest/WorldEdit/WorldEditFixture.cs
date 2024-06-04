@@ -27,7 +27,7 @@ namespace Arteranos.PlayTest.WorldEdit
         Light li = null;
 
         [UnitySetUp]
-        public IEnumerator SetUp()
+        public IEnumerator SetUp0()
         {
             ca = new GameObject("Camera").AddComponent<Camera>();
             ca.transform.position = new(0, 1.75f, 0.2f);
@@ -45,7 +45,7 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         [UnityTearDown]
-        public IEnumerator TearDown()
+        public IEnumerator TearDown0()
         {
             Object.Destroy(pl);
             Object.Destroy(ca.gameObject);
