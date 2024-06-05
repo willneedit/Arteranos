@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using System;
 
 namespace Arteranos.WorldEdit
 {
@@ -37,6 +38,7 @@ namespace Arteranos.WorldEdit
             btn_Lock.onClick.AddListener(() => OnSetLockState(true));
             btn_Unlock.onClick.AddListener(() => OnSetLockState(false));
             btn_Delete.onClick.AddListener(OnDeleteClicked);
+            btn_Property.onClick.AddListener(OnPropertyPageClicked);
         }
 
         protected override void Start()
@@ -108,12 +110,18 @@ namespace Arteranos.WorldEdit
             Destroy(WorldObject); 
             WorldObject = null;
         }
+
+        private void OnPropertyPageClicked() 
+            => Container.SwitchToPropertyPage(this);
+
+
 #if UNITY_EDITOR
         // Unit test backdoors
         public void Test_OnToChildClicked() => OnToChildClicked();
         public void Test_OnToParentClicked() => OnToParentClicked();
         public void Test_OnSetLockState(bool locked) => OnSetLockState(locked);
         public void Test_OnDeleteClicked() => OnDeleteClicked();
+        public void Test_OnPropertyPageClicked() => OnPropertyPageClicked();
 #endif
     }
 }

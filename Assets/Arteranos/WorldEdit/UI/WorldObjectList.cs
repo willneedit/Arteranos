@@ -17,14 +17,15 @@ namespace Arteranos.WorldEdit
 {
     public class WorldObjectList : UIBehaviour
     {
-        [SerializeField] private ObjectChooser Chooser;
-
+        private ObjectChooser Chooser = null;
         private GameObject WORoot = null;
         private GameObject CurrentRoot = null;
 
         protected override void Awake()
         {
             base.Awake();
+
+            Chooser = GetComponent<ObjectChooser>();
 
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
@@ -105,6 +106,18 @@ namespace Arteranos.WorldEdit
         public void RequestUpdateList()
         {
             Chooser.ShowPage(Chooser.currentPage);
+        }
+
+        public void SwitchToPropertyPage(WorldObjectListItem woli)
+        {
+            PropertyPanel PropertyPanel = null;
+
+            if (transform.parent.childCount > 1)
+                PropertyPanel = transform.parent.GetChild(1).GetComponent<PropertyPanel>();
+
+            gameObject.SetActive(false);
+            PropertyPanel.WorldObject = woli.WorldObject;
+            PropertyPanel.gameObject.SetActive(true);
         }
 
         private void RequestToAdd(string obj)

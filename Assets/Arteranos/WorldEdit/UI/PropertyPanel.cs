@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using System;
 
 namespace Arteranos.WorldEdit
 {
@@ -44,6 +45,7 @@ namespace Arteranos.WorldEdit
         {
             base.Awake();
 
+            btn_ReturnToList.onClick.AddListener(OnReturnToChooserClicked);
             chk_Local.onValueChanged.AddListener(_ => SetLocalMode(true));
             chk_Global.onValueChanged.AddListener(_ => SetLocalMode(false));
         }
@@ -72,21 +74,21 @@ namespace Arteranos.WorldEdit
             Transform t = WorldObject.transform;
             Vector3 p = chk_Local.isOn ? t.localPosition : t.position;
             Quaternion q = chk_Local.isOn ? t.localRotation : t.rotation;
-            Vector3 s = t.localPosition;
+            Vector3 s = t.localScale;
 
             Vector3 r = q.eulerAngles;
 
-            txt_Pos_X.text = p.x.ToString();
-            txt_Pos_Y.text = p.y.ToString();
-            txt_Pos_Z.text = p.z.ToString();
+            txt_Pos_X.text = p.x.ToStringInvariant("0.000");
+            txt_Pos_Y.text = p.y.ToStringInvariant("0.000");
+            txt_Pos_Z.text = p.z.ToStringInvariant("0.000");
 
-            txt_Rot_X.text = r.x.ToString();
-            txt_Rot_Y.text = r.y.ToString();
-            txt_Rot_Z.text = r.z.ToString();
+            txt_Rot_X.text = r.x.ToStringInvariant("0.000");
+            txt_Rot_Y.text = r.y.ToStringInvariant("0.000");
+            txt_Rot_Z.text = r.z.ToStringInvariant("0.000");
 
-            txt_Scale_X.text = s.x.ToString();
-            txt_Scale_Y.text = s.y.ToString();
-            txt_Scale_Z.text = s.z.ToString();
+            txt_Scale_X.text = s.x.ToStringInvariant("0.000");
+            txt_Scale_Y.text = s.y.ToStringInvariant("0.000");
+            txt_Scale_Z.text = s.z.ToStringInvariant("0.000");
 
             Color col;
             if (t.TryGetComponent(out Renderer renderer))
@@ -94,9 +96,9 @@ namespace Arteranos.WorldEdit
             else
                 col = Color.white;
 
-            txt_Col_R.text = col.r.ToString();
-            txt_Col_G.text = col.g.ToString();
-            txt_Col_B.text = col.b.ToString();
+            txt_Col_R.text = col.r.ToStringInvariant("0.000");
+            txt_Col_G.text = col.g.ToStringInvariant("0.000");
+            txt_Col_B.text = col.b.ToStringInvariant("0.000");
 
             // TODO Adjust hue slider and color gradient square
             img_Color_Swatch.color = col;
@@ -110,6 +112,30 @@ namespace Arteranos.WorldEdit
             chk_Global.SetIsOnWithoutNotify(!local);
 
             Populate();
+        }
+
+        private void OnReturnToChooserClicked()
+        {
+            gameObject.SetActive(false);
+            transform.parent.GetChild(0).gameObject.SetActive(true);
+        }
+
+#if UNITY_EDITOR
+        public void Test_OnReturnToChooserClicked() => OnReturnToChooserClicked();
+#endif
+    }
+
+    // A POX ON THEM FOR THEIR DEFAULT INT-TO-STRING CONVERSION....!!
+    // Seriously. I've seen it as a bug in a product from Microsoft itself --- Altspace!
+    public static class ConversionExtension
+    {
+        private static IFormatProvider inv
+                       = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
+
+        public static string ToStringInvariant<T>(this T obj, string format = null)
+        {
+            return (format == null) ? FormattableString.Invariant($"{obj}")
+                                    : String.Format(inv, $"{{0:{format}}}", obj);
         }
     }
 }

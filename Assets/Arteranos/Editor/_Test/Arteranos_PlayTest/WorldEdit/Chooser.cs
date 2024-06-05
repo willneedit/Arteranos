@@ -21,6 +21,7 @@ namespace Arteranos.PlayTest.WorldEdit
 {
     public class Chooser : WorldEditFixture
     {
+        private GameObject canvas = null;
         private GameObject panel = null;
         private Transform ItemContainer = null;
 
@@ -42,13 +43,13 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             yield return null;
 
-            Object.Destroy(panel);
+            Object.Destroy(canvas);
         }
 
         public IEnumerator ShowPanel()
         {
             GameObject canvasBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/Canvas_Preferences_Edit.prefab");
-            GameObject canvas = Object.Instantiate(canvasBlueprint);
+            canvas = Object.Instantiate(canvasBlueprint);
 
             GameObject panelBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/WorldEdit/UI/WorldObjectList.prefab");
             panel = Object.Instantiate(panelBlueprint, canvas.transform, false);
