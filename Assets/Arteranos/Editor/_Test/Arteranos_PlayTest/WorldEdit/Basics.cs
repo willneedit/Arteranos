@@ -64,7 +64,7 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             WorldObject wob = BuildSample();
 
-            wob.color = UnityEngine.Color.red;
+            wob.color = Color.red;
 
             yield return ShowObject(wob);
         }

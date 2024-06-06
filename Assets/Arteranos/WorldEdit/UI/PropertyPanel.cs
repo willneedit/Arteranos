@@ -39,7 +39,19 @@ namespace Arteranos.WorldEdit
         public Toggle chk_Global;
         public Slider sld_Hue;
 
-        public GameObject WorldObject { get; set; }
+        public GameObject WorldObject
+        {
+            get => m_WorldObject;
+            set
+            {
+                m_WorldObject = value;
+                Woc = m_WorldObject.GetComponent<WorldObjectComponent>();
+            }
+        }
+
+        public WorldObjectComponent Woc { get; private set; }
+
+        private GameObject m_WorldObject;
 
         protected override void Awake()
         {
@@ -48,6 +60,18 @@ namespace Arteranos.WorldEdit
             btn_ReturnToList.onClick.AddListener(OnReturnToChooserClicked);
             chk_Local.onValueChanged.AddListener(_ => SetLocalMode(true));
             chk_Global.onValueChanged.AddListener(_ => SetLocalMode(false));
+
+            txt_Pos_X.onValueChanged.AddListener(CommitChangedValues);
+            txt_Pos_Y.onValueChanged.AddListener(CommitChangedValues);
+            txt_Pos_Z.onValueChanged.AddListener(CommitChangedValues);
+
+            txt_Rot_X.onValueChanged.AddListener(CommitChangedValues);
+            txt_Rot_Y.onValueChanged.AddListener(CommitChangedValues);
+            txt_Rot_Z.onValueChanged.AddListener(CommitChangedValues);
+
+            txt_Scale_X.onValueChanged.AddListener(CommitChangedValues);
+            txt_Scale_Y.onValueChanged.AddListener(CommitChangedValues);
+            txt_Scale_Z.onValueChanged.AddListener(CommitChangedValues);
         }
 
         protected override void OnEnable()
@@ -57,10 +81,14 @@ namespace Arteranos.WorldEdit
             SetLocalMode(true);
 
             Populate();
+
+            Woc.OnStateChanged += Populate;
         }
 
         protected override void OnDisable()
         {
+            Woc.OnStateChanged -= Populate;
+
             base.OnDisable();
         }
 
@@ -78,17 +106,17 @@ namespace Arteranos.WorldEdit
 
             Vector3 r = q.eulerAngles;
 
-            txt_Pos_X.text = p.x.ToStringInvariant("0.000");
-            txt_Pos_Y.text = p.y.ToStringInvariant("0.000");
-            txt_Pos_Z.text = p.z.ToStringInvariant("0.000");
+            txt_Pos_X.SetTextWithoutNotify(p.x.ToStringInvariant("0.000"));
+            txt_Pos_Y.SetTextWithoutNotify(p.y.ToStringInvariant("0.000"));
+            txt_Pos_Z.SetTextWithoutNotify(p.z.ToStringInvariant("0.000"));
 
-            txt_Rot_X.text = r.x.ToStringInvariant("0.000");
-            txt_Rot_Y.text = r.y.ToStringInvariant("0.000");
-            txt_Rot_Z.text = r.z.ToStringInvariant("0.000");
+            txt_Rot_X.SetTextWithoutNotify(r.x.ToStringInvariant("0.000"));
+            txt_Rot_Y.SetTextWithoutNotify(r.y.ToStringInvariant("0.000"));
+            txt_Rot_Z.SetTextWithoutNotify(r.z.ToStringInvariant("0.000"));
 
-            txt_Scale_X.text = s.x.ToStringInvariant("0.000");
-            txt_Scale_Y.text = s.y.ToStringInvariant("0.000");
-            txt_Scale_Z.text = s.z.ToStringInvariant("0.000");
+            txt_Scale_X.SetTextWithoutNotify(s.x.ToStringInvariant("0.000"));
+            txt_Scale_Y.SetTextWithoutNotify(s.y.ToStringInvariant("0.000"));
+            txt_Scale_Z.SetTextWithoutNotify(s.z.ToStringInvariant("0.000"));
 
             Color col;
             if (t.TryGetComponent(out Renderer renderer))
@@ -96,14 +124,41 @@ namespace Arteranos.WorldEdit
             else
                 col = Color.white;
 
-            txt_Col_R.text = col.r.ToStringInvariant("0.000");
-            txt_Col_G.text = col.g.ToStringInvariant("0.000");
-            txt_Col_B.text = col.b.ToStringInvariant("0.000");
+            txt_Col_R.SetTextWithoutNotify(col.r.ToStringInvariant("0.000"));
+            txt_Col_G.SetTextWithoutNotify(col.g.ToStringInvariant("0.000"));
+            txt_Col_B.SetTextWithoutNotify(col.b.ToStringInvariant("0.000"));
 
             // TODO Adjust hue slider and color gradient square
             img_Color_Swatch.color = col;
 
             lbl_Heading.text = WorldObject.name;
+        }
+
+        private void CommitChangedValues(string arg0)
+        {
+            Vector3 p = new(
+                txt_Pos_X.text.ParseInvariant(),
+                txt_Pos_Y.text.ParseInvariant(),
+                txt_Pos_Z.text.ParseInvariant());
+            Quaternion r = Quaternion.Euler(
+                txt_Rot_X.text.ParseInvariant(),
+                txt_Rot_Y.text.ParseInvariant(),
+                txt_Rot_Z.text.ParseInvariant());
+            Vector3 s = new(
+                txt_Scale_X.text.ParseInvariant(),
+                txt_Scale_Y.text.ParseInvariant(),
+                txt_Scale_Z.text.ParseInvariant());
+
+            Transform t = WorldObject.transform;
+
+            if (chk_Local.isOn)
+                t.SetLocalPositionAndRotation(p, r);
+            else
+                t.SetPositionAndRotation(p, r);
+            t.localScale = s;
+
+            // Prevent the loopback of the updated world object
+            Woc.UpdateOldStates();
         }
 
         private void SetLocalMode(bool local)
@@ -136,6 +191,12 @@ namespace Arteranos.WorldEdit
         {
             return (format == null) ? FormattableString.Invariant($"{obj}")
                                     : String.Format(inv, $"{{0:{format}}}", obj);
+        }
+
+        public static float ParseInvariant(this string str)
+        {
+            return float.Parse(str, 
+                System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
         }
     }
 }

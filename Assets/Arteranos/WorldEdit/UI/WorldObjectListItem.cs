@@ -56,7 +56,7 @@ namespace Arteranos.WorldEdit
         private void Populate()
         {
             bool IsLocked = false;
-            if(WorldObject.TryGetComponent(out AssetComponent asset))
+            if(WorldObject.TryGetComponent(out WorldObjectComponent asset))
                 IsLocked = asset.IsLocked;
 
             if (IsRoot)
@@ -94,7 +94,7 @@ namespace Arteranos.WorldEdit
 
         private void OnSetLockState(bool locked)
         {
-            if (WorldObject.TryGetComponent(out AssetComponent asset))
+            if (WorldObject.TryGetComponent(out WorldObjectComponent asset))
                 asset.IsLocked = locked;
 
             Populate();

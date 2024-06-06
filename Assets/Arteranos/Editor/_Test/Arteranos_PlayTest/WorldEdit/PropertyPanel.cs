@@ -179,5 +179,45 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.False(propertyPanel.activeSelf);
 
         }
+
+        [UnityTest]
+        public IEnumerator T007_MovingByObject()
+        {
+            WorldObjectListItem woli = GetWOChooserItem(1);
+            Transform t = woli.WorldObject.transform;
+
+            woli.Test_OnPropertyPageClicked(); // Select the Test Cube's property page
+            yield return new WaitForEndOfFrame();
+
+            // And now, we're moving the object.
+            t.localPosition = new Vector3(2, 3, 4);
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            Assert.AreEqual("2.000", panel.txt_Pos_X.text);
+            Assert.AreEqual("3.000", panel.txt_Pos_Y.text);
+            Assert.AreEqual("4.000", panel.txt_Pos_Z.text);
+        }
+
+        [UnityTest]
+        public IEnumerator T008_MovingByPanel()
+        {
+            WorldObjectListItem woli = GetWOChooserItem(1);
+            Transform t = woli.WorldObject.transform;
+
+            woli.Test_OnPropertyPageClicked(); // Select the Test Cube's property page
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            // Moving the object as you type
+            panel.txt_Pos_X.text = "1.5";
+
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            Assert.AreEqual(1.5f, t.localPosition.x);
+            Assert.AreEqual(1.0f, t.localPosition.y);
+            Assert.AreEqual(5.0f, t.localPosition.z);
+        }
     }
 }

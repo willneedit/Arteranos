@@ -188,7 +188,7 @@ namespace Arteranos.WorldEdit
 
             gob.name = name;
 
-            gob.AddComponent<AssetComponent>().Asset = asset;
+            gob.AddComponent<WorldObjectComponent>().Asset = asset;
 
             Transform t = gob.transform;
             t.SetParent(parent);
@@ -222,7 +222,7 @@ namespace Arteranos.WorldEdit
         {
             WorldObject wo = new();
 
-            if (t.TryGetComponent(out AssetComponent asset))
+            if (t.TryGetComponent(out WorldObjectComponent asset))
                 wo.asset = asset.Asset;
 
             wo.name = t.name;
