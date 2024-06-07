@@ -181,10 +181,13 @@ namespace Arteranos.WorldEdit
         {
             GameObject gob;
 
+            // TODO: Implement glTF and kit item asset instanciation
             if (asset is WOPrimitive wopr)
                 gob = GameObject.CreatePrimitive(wopr.primitive);
             else 
                 gob = new GameObject("Empty");
+
+            // More complex constructs can be put as a child of an empty GameObject.
 
             gob.name = name;
 
@@ -198,7 +201,7 @@ namespace Arteranos.WorldEdit
             if (t.TryGetComponent(out Renderer renderer))
                 renderer.material.color = color;
 
-            // Assembling the GameObjects components from WOComponents
+            // TODO: Assembling the GameObjects components from WOComponents
 
             foreach (WorldObject child in children)
                 yield return child.Instantiate(t);
@@ -224,6 +227,7 @@ namespace Arteranos.WorldEdit
 
             if (t.TryGetComponent(out WorldObjectComponent asset))
                 wo.asset = asset.Asset;
+            else return null; // filter out alien GameObjects
 
             wo.name = t.name;
             wo.position = t.localPosition;
@@ -236,7 +240,10 @@ namespace Arteranos.WorldEdit
             // Disassembling the GameObject components to WOComponents
 
             for (int i = 0; i < t.childCount; ++i)
-                wo.children.Add(MakeWorldObject(t.GetChild(i)));
+            {
+                WorldObject item = MakeWorldObject(t.GetChild(i));
+                if(item != null) wo.children.Add(item);
+            }
 
             return wo;
         }

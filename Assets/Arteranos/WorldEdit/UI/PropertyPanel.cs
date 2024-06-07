@@ -72,6 +72,10 @@ namespace Arteranos.WorldEdit
             txt_Scale_X.onValueChanged.AddListener(CommitChangedValues);
             txt_Scale_Y.onValueChanged.AddListener(CommitChangedValues);
             txt_Scale_Z.onValueChanged.AddListener(CommitChangedValues);
+
+            txt_Col_R.onValueChanged.AddListener(CommitChangedValues);
+            txt_Col_G.onValueChanged.AddListener(CommitChangedValues);
+            txt_Col_B.onValueChanged.AddListener(CommitChangedValues);
         }
 
         protected override void OnEnable()
@@ -106,17 +110,17 @@ namespace Arteranos.WorldEdit
 
             Vector3 r = q.eulerAngles;
 
-            txt_Pos_X.SetTextWithoutNotify(p.x.ToStringInvariant("0.000"));
-            txt_Pos_Y.SetTextWithoutNotify(p.y.ToStringInvariant("0.000"));
-            txt_Pos_Z.SetTextWithoutNotify(p.z.ToStringInvariant("0.000"));
+            txt_Pos_X.SetTextWithoutNotify(p.x.ToStringInvariant("N"));
+            txt_Pos_Y.SetTextWithoutNotify(p.y.ToStringInvariant("N"));
+            txt_Pos_Z.SetTextWithoutNotify(p.z.ToStringInvariant("N"));
 
-            txt_Rot_X.SetTextWithoutNotify(r.x.ToStringInvariant("0.000"));
-            txt_Rot_Y.SetTextWithoutNotify(r.y.ToStringInvariant("0.000"));
-            txt_Rot_Z.SetTextWithoutNotify(r.z.ToStringInvariant("0.000"));
+            txt_Rot_X.SetTextWithoutNotify(r.x.ToStringInvariant("N"));
+            txt_Rot_Y.SetTextWithoutNotify(r.y.ToStringInvariant("N"));
+            txt_Rot_Z.SetTextWithoutNotify(r.z.ToStringInvariant("N"));
 
-            txt_Scale_X.SetTextWithoutNotify(s.x.ToStringInvariant("0.000"));
-            txt_Scale_Y.SetTextWithoutNotify(s.y.ToStringInvariant("0.000"));
-            txt_Scale_Z.SetTextWithoutNotify(s.z.ToStringInvariant("0.000"));
+            txt_Scale_X.SetTextWithoutNotify(s.x.ToStringInvariant("N"));
+            txt_Scale_Y.SetTextWithoutNotify(s.y.ToStringInvariant("N"));
+            txt_Scale_Z.SetTextWithoutNotify(s.z.ToStringInvariant("N"));
 
             Color col;
             if (t.TryGetComponent(out Renderer renderer))
@@ -124,9 +128,9 @@ namespace Arteranos.WorldEdit
             else
                 col = Color.white;
 
-            txt_Col_R.SetTextWithoutNotify(col.r.ToStringInvariant("0.000"));
-            txt_Col_G.SetTextWithoutNotify(col.g.ToStringInvariant("0.000"));
-            txt_Col_B.SetTextWithoutNotify(col.b.ToStringInvariant("0.000"));
+            txt_Col_R.SetTextWithoutNotify(col.r.ToStringInvariant("N"));
+            txt_Col_G.SetTextWithoutNotify(col.g.ToStringInvariant("N"));
+            txt_Col_B.SetTextWithoutNotify(col.b.ToStringInvariant("N"));
 
             // TODO Adjust hue slider and color gradient square
             img_Color_Swatch.color = col;
@@ -157,6 +161,12 @@ namespace Arteranos.WorldEdit
                 t.SetPositionAndRotation(p, r);
             t.localScale = s;
 
+            if (t.TryGetComponent(out Renderer renderer))
+                renderer.material.color = new Color(
+                    txt_Col_R.text.ParseInvariant(),
+                    txt_Col_G.text.ParseInvariant(),
+                    txt_Col_B.text.ParseInvariant());
+
             // Prevent the loopback of the updated world object
             Woc.UpdateOldStates();
         }
@@ -177,14 +187,15 @@ namespace Arteranos.WorldEdit
 
 #if UNITY_EDITOR
         public void Test_OnReturnToChooserClicked() => OnReturnToChooserClicked();
+        public void Test_SetLocalMode(bool local) => SetLocalMode(local);
 #endif
     }
 
-    // A POX ON THEM FOR THEIR DEFAULT INT-TO-STRING CONVERSION....!!
+    // Culture variant conversions by default is BAD - Broken As Designed.
     // Seriously. I've seen it as a bug in a product from Microsoft itself --- Altspace!
     public static class ConversionExtension
     {
-        private static IFormatProvider inv
+        private static readonly IFormatProvider inv
                        = System.Globalization.CultureInfo.InvariantCulture.NumberFormat;
 
         public static string ToStringInvariant<T>(this T obj, string format = null)

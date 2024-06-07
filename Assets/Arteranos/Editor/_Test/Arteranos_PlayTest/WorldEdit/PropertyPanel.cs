@@ -95,21 +95,21 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.False(panel.chk_Global.isOn);
 
             Assert.AreEqual("Test Cube", panel.lbl_Heading.text);
-            Assert.AreEqual("0.000", panel.txt_Pos_X.text);
-            Assert.AreEqual("1.000", panel.txt_Pos_Y.text);
-            Assert.AreEqual("5.000", panel.txt_Pos_Z.text);
+            Assert.AreEqual("0.00", panel.txt_Pos_X.text);
+            Assert.AreEqual("1.00", panel.txt_Pos_Y.text);
+            Assert.AreEqual("5.00", panel.txt_Pos_Z.text);
 
-            Assert.AreEqual("0.000", panel.txt_Rot_X.text);
-            Assert.AreEqual("0.000", panel.txt_Rot_Y.text);
-            Assert.AreEqual("0.000", panel.txt_Rot_Z.text);
+            Assert.AreEqual("0.00", panel.txt_Rot_X.text);
+            Assert.AreEqual("0.00", panel.txt_Rot_Y.text);
+            Assert.AreEqual("0.00", panel.txt_Rot_Z.text);
 
-            Assert.AreEqual("1.000", panel.txt_Scale_X.text);
-            Assert.AreEqual("1.000", panel.txt_Scale_Y.text);
-            Assert.AreEqual("1.000", panel.txt_Scale_Z.text);
+            Assert.AreEqual("1.00", panel.txt_Scale_X.text);
+            Assert.AreEqual("1.00", panel.txt_Scale_Y.text);
+            Assert.AreEqual("1.00", panel.txt_Scale_Z.text);
 
-            Assert.AreEqual("1.000", panel.txt_Col_R.text);
-            Assert.AreEqual("1.000", panel.txt_Col_G.text);
-            Assert.AreEqual("1.000", panel.txt_Col_B.text);
+            Assert.AreEqual("1.00", panel.txt_Col_R.text);
+            Assert.AreEqual("1.00", panel.txt_Col_G.text);
+            Assert.AreEqual("1.00", panel.txt_Col_B.text);
         }
 
         [UnityTest]
@@ -120,9 +120,9 @@ namespace Arteranos.PlayTest.WorldEdit
             GetWOChooserItem(1).Test_OnPropertyPageClicked(); // Select the Test Cube's property page
             yield return new WaitForEndOfFrame();
 
-            Assert.AreEqual("1.000", panel.txt_Pos_X.text);
-            Assert.AreEqual("2.000", panel.txt_Pos_Y.text);
-            Assert.AreEqual("3.000", panel.txt_Pos_Z.text);
+            Assert.AreEqual("1.00", panel.txt_Pos_X.text);
+            Assert.AreEqual("2.00", panel.txt_Pos_Y.text);
+            Assert.AreEqual("3.00", panel.txt_Pos_Z.text);
         }
 
         [UnityTest]
@@ -133,9 +133,9 @@ namespace Arteranos.PlayTest.WorldEdit
             GetWOChooserItem(1).Test_OnPropertyPageClicked(); // Select the Test Cube's property page
             yield return new WaitForEndOfFrame();
 
-            Assert.AreEqual("10.000", panel.txt_Rot_X.text);
-            Assert.AreEqual("20.000", panel.txt_Rot_Y.text);
-            Assert.AreEqual("0.000", panel.txt_Rot_Z.text);
+            Assert.AreEqual("10.00", panel.txt_Rot_X.text);
+            Assert.AreEqual("20.00", panel.txt_Rot_Y.text);
+            Assert.AreEqual("0.00", panel.txt_Rot_Z.text);
         }
 
         [UnityTest]
@@ -146,9 +146,9 @@ namespace Arteranos.PlayTest.WorldEdit
             GetWOChooserItem(1).Test_OnPropertyPageClicked(); // Select the Test Cube's property page
             yield return new WaitForEndOfFrame();
 
-            Assert.AreEqual("0.100", panel.txt_Scale_X.text);
-            Assert.AreEqual("0.200", panel.txt_Scale_Y.text);
-            Assert.AreEqual("0.300", panel.txt_Scale_Z.text);
+            Assert.AreEqual("0.10", panel.txt_Scale_X.text);
+            Assert.AreEqual("0.20", panel.txt_Scale_Y.text);
+            Assert.AreEqual("0.30", panel.txt_Scale_Z.text);
         }
 
         [UnityTest]
@@ -160,9 +160,9 @@ namespace Arteranos.PlayTest.WorldEdit
             GetWOChooserItem(1).Test_OnPropertyPageClicked(); // Select the Test Cube's property page
             yield return new WaitForEndOfFrame();
 
-            Assert.AreEqual("0.200", panel.txt_Col_R.text);
-            Assert.AreEqual("0.400", panel.txt_Col_G.text);
-            Assert.AreEqual("0.600", panel.txt_Col_B.text);
+            Assert.AreEqual("0.20", panel.txt_Col_R.text);
+            Assert.AreEqual("0.40", panel.txt_Col_G.text);
+            Assert.AreEqual("0.60", panel.txt_Col_B.text);
         }
 
         [UnityTest]
@@ -194,9 +194,9 @@ namespace Arteranos.PlayTest.WorldEdit
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
 
-            Assert.AreEqual("2.000", panel.txt_Pos_X.text);
-            Assert.AreEqual("3.000", panel.txt_Pos_Y.text);
-            Assert.AreEqual("4.000", panel.txt_Pos_Z.text);
+            Assert.AreEqual("2.00", panel.txt_Pos_X.text);
+            Assert.AreEqual("3.00", panel.txt_Pos_Y.text);
+            Assert.AreEqual("4.00", panel.txt_Pos_Z.text);
         }
 
         [UnityTest]
@@ -218,6 +218,75 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.AreEqual(1.5f, t.localPosition.x);
             Assert.AreEqual(1.0f, t.localPosition.y);
             Assert.AreEqual(5.0f, t.localPosition.z);
+        }
+
+        [UnityTest]
+        public IEnumerator T009_ChangeColorByPanel()
+        {
+            WorldObjectListItem woli = GetWOChooserItem(1);
+            Transform t = woli.WorldObject.transform;
+
+            woli.Test_OnPropertyPageClicked(); // Select the Test Cube's property page
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            panel.txt_Col_R.text = "0";
+            panel.txt_Col_G.text = "1";
+            panel.txt_Col_B.text = "0.50";
+
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            Color col = Color.white;
+            if (t.TryGetComponent(out Renderer renderer))
+                col = renderer.material.color;
+
+            Assert.AreEqual(0, col.r);
+            Assert.AreEqual(1, col.g);
+            Assert.AreEqual(0.50f, col.b);
+        }
+
+        [UnityTest]
+        public IEnumerator T010_TransformModes()
+        {
+            GetWOChooserItem(1).Test_OnToChildClicked();     // Select first child, down a level
+            yield return new WaitForEndOfFrame();
+
+            GetWOChooserItem(1).Test_OnPropertyPageClicked(); // Select the Test Sphere's property page
+            yield return new WaitForEndOfFrame();
+
+            // Default: Local to Parent
+            Assert.AreEqual("Test Sphere", panel.lbl_Heading.text);
+            Assert.AreEqual("0.00", panel.txt_Pos_X.text);
+            Assert.AreEqual("1.50", panel.txt_Pos_Y.text);
+            Assert.AreEqual("0.00", panel.txt_Pos_Z.text);
+
+            // Switch to Global
+            panel.Test_SetLocalMode(false);
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            // Relative to origin (0, 0, 0) (= Test Cube -> Test Sphere)
+            Assert.AreEqual("0.00", panel.txt_Pos_X.text);
+            Assert.AreEqual("2.50", panel.txt_Pos_Y.text);
+            Assert.AreEqual("5.00", panel.txt_Pos_Z.text);
+
+
+            // Move the sphere
+            panel.txt_Pos_X.text = "-1";
+            panel.txt_Pos_Y.text = "3";
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            // Switch to Local
+            panel.Test_SetLocalMode(true);
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
+            // Local coordinates reflect the movement
+            Assert.AreEqual("-1.00", panel.txt_Pos_X.text);
+            Assert.AreEqual("2.00", panel.txt_Pos_Y.text);
+            Assert.AreEqual("0.00", panel.txt_Pos_Z.text);
         }
     }
 }
