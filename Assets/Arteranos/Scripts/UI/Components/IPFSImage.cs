@@ -80,9 +80,10 @@ namespace Arteranos.UI
                         _r => result = _r);
                 }
 
-                texture = result 
-                    ? tex 
-                    : BP.I.Unknown_Icon;
+                if (result)
+                    texture = tex;
+                else if (texture == null)
+                    texture = BP.I != null ? BP.I.Unknown_Icon : null;
             }
 
             StopAllCoroutines();

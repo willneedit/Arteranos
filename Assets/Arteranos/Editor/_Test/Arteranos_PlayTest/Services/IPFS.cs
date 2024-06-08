@@ -365,13 +365,13 @@ namespace Arteranos.PlayTest.Services
             List<IFileSystemLink> list = new();
 
             {
-                using MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes("Hello World B"));
+                using MemoryStream stream = new(Encoding.UTF8.GetBytes("Hello World B"));
                 stream.Position = 0;
                 yield return Asyncs.Async2Coroutine(IPFSService.AddStream(stream, "Beta.txt"), _fsn => list.Add(_fsn.ToLink()));
             }
 
             {
-                using MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes("Hello World A"));
+                using MemoryStream stream = new(Encoding.UTF8.GetBytes("Hello World A"));
                 stream.Position = 0;
                 yield return Asyncs.Async2Coroutine(IPFSService.AddStream(stream, "Alpha.txt"), _fsn => list.Add(_fsn.ToLink()));
             }

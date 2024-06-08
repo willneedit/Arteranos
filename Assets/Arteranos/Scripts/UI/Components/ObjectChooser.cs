@@ -33,8 +33,8 @@ namespace Arteranos.UI
         [SerializeField] private GameObject TileBlueprint = null;
 
 
-        public int currentPage { get; private set; } = 0;
-        public int maxPage { get; private set; } = 0;
+        public int CurrentPage { get; private set; } = 0;
+        public int MaxPage { get; private set; } = 0;
 
         // Page x is about to be shown. Recommend to call UpdateItemCount(), too.
         public event Action<int> OnShowingPage;
@@ -58,6 +58,8 @@ namespace Arteranos.UI
 
             pageCountPattern = lbl_PageCount.text;
 
+            lbl_PageCount.text = "Loading...";
+
             btn_AddItem.onClick.AddListener(() =>
             {
                 btn_AddItem.interactable = false;
@@ -76,8 +78,6 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            lbl_PageCount.text = "Loading...";
-
             // Intentionally no ShowPage() here. We still need to build up the
             // list in question right now.
         }
@@ -85,7 +85,7 @@ namespace Arteranos.UI
         public void UpdateItemCount(int count)
         {
             itemCount = count;
-            maxPage = (itemCount + ItemsPerPage - 1) / ItemsPerPage;
+            MaxPage = (itemCount + ItemsPerPage - 1) / ItemsPerPage;
         }
 
         public void FinishAdding()
@@ -105,8 +105,8 @@ namespace Arteranos.UI
         public void ShowPage(int currentPage)
         {
             OnShowingPage?.Invoke(currentPage);
-            this.currentPage = currentPage;
-            lbl_PageCount.text = string.Format(pageCountPattern, currentPage + 1, maxPage);
+            this.CurrentPage = currentPage;
+            lbl_PageCount.text = string.Format(pageCountPattern, currentPage + 1, MaxPage);
 
             Transform panels = transform.GetChild(1);
 
@@ -123,7 +123,7 @@ namespace Arteranos.UI
                 OnPopulateTile?.Invoke(i, go);
             }
 
-            lbl_PageCount.text = string.Format(pageCountPattern, currentPage + 1, maxPage);
+            lbl_PageCount.text = string.Format(pageCountPattern, currentPage + 1, MaxPage);
 
         }
         private void SwitchToPage(int difference, int location)
@@ -131,11 +131,11 @@ namespace Arteranos.UI
             int newPage = location switch
             {
                 < 0 => difference,
-                0 => currentPage + difference,
-                > 0 => maxPage - 1 - difference
+                0 => CurrentPage + difference,
+                > 0 => MaxPage - 1 - difference
             };
 
-            if (newPage >= maxPage) newPage = maxPage - 1;
+            if (newPage >= MaxPage) newPage = MaxPage - 1;
             else if (newPage < 0) newPage = 0;
 
             ShowPage(newPage);
