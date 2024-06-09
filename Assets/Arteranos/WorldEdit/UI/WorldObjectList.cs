@@ -17,8 +17,10 @@ namespace Arteranos.WorldEdit
 {
     public class WorldObjectList : UIBehaviour
     {
+        public event Action OnWantsToAddItem;
+        public event Action<WorldObjectListItem> OnWantsToModify;
+
         private ObjectChooser Chooser = null;
-        private PropertyPanel PropertyPanel = null;
 
         private GameObject WORoot = null;
         private GameObject CurrentRoot = null;
@@ -46,8 +48,6 @@ namespace Arteranos.WorldEdit
         protected override void Start()
         {
             base.Start();
-
-            PropertyPanel = transform.parent.GetComponentInChildren<PropertyPanel>(true);
 
             WORoot = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
             if( WORoot == null )
@@ -111,14 +111,12 @@ namespace Arteranos.WorldEdit
 
         public void SwitchToPropertyPage(WorldObjectListItem woli)
         {
-            gameObject.SetActive(false);
-            PropertyPanel.WorldObject = woli.WorldObject;
-            PropertyPanel.gameObject.SetActive(true);
+            OnWantsToModify?.Invoke( woli );
         }
 
         private void RequestToAdd(string obj)
         {
-            throw new NotImplementedException();
+            OnWantsToAddItem?.Invoke();
         }
 
         public void OnAddingWorldObject(WorldObject wo)

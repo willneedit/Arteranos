@@ -160,6 +160,13 @@ namespace Arteranos.WorldEdit
             asset = new WOPrimitive { primitive = primitive };
         }
 
+        public WorldObject(WorldObjectAsset asset, string name)
+        {
+            Init();
+            this.asset = asset;
+            this.name = name;
+        }
+
         private void Init()
         {
             position = Vector3.zero;

@@ -22,6 +22,7 @@ namespace Arteranos.PlayTest.WorldEdit
     public class PropertyPanel : WorldEditFixture
     {
         private GameObject canvas = null;
+        private GameObject editorUI = null;
         private GameObject chooserPanel = null;
         private GameObject propertyPanel = null;
         private Transform ItemContainer = null;
@@ -54,17 +55,25 @@ namespace Arteranos.PlayTest.WorldEdit
             GameObject canvasBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/Canvas_Preferences_Edit.prefab");
             canvas = Object.Instantiate(canvasBlueprint);
 
-            GameObject chooserPanelBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/WorldEdit/UI/WorldObjectList.prefab");
-            chooserPanel = Object.Instantiate(chooserPanelBlueprint, canvas.transform, false);
-            ItemContainer = chooserPanel.transform.GetChild(1);
+            GameObject editorUIBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/WorldEdit/UI/WorldEditorUI.prefab");
+            editorUI = Object.Instantiate(editorUIBlueprint, canvas.transform, false);
 
-            GameObject PPBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/WorldEdit/UI/PropertyPanel.prefab");
-            PPBlueprint.SetActive(false);
-            propertyPanel = Object.Instantiate(PPBlueprint, canvas.transform, false);
-            PPBlueprint.SetActive(true);
+            WorldObjectList list = editorUI.GetComponent<WorldEditorUI>().WorldObjectList;
 
-            Assert.True(propertyPanel.TryGetComponent(out panel));
+            ItemContainer = list.transform.GetChild(1);
 
+            Assert.IsNotNull(ItemContainer);
+
+            chooserPanel = editorUI.GetComponent<WorldEditorUI>().WorldObjectList.gameObject;
+            propertyPanel = editorUI.GetComponent<WorldEditorUI>().PropertyPanel.gameObject;
+            panel = editorUI.GetComponent<WorldEditorUI>().PropertyPanel;
+
+            Assert.IsNotNull(chooserPanel);
+            Assert.IsNotNull(propertyPanel);
+            Assert.IsNotNull(panel);
+            Assert.AreEqual("ObjectGallery", ItemContainer.name);
+
+            yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
 
             Assert.True(GetWOChooserItem(1).btn_Property.isActiveAndEnabled);

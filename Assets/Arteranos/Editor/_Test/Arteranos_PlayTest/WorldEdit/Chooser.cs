@@ -22,7 +22,7 @@ namespace Arteranos.PlayTest.WorldEdit
     public class Chooser : WorldEditFixture
     {
         private GameObject canvas = null;
-        private GameObject panel = null;
+        private GameObject editorUI = null;
         private Transform ItemContainer = null;
 
         WorldObject wob = null;
@@ -51,9 +51,15 @@ namespace Arteranos.PlayTest.WorldEdit
             GameObject canvasBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/Canvas_Preferences_Edit.prefab");
             canvas = Object.Instantiate(canvasBlueprint);
 
-            GameObject panelBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/WorldEdit/UI/WorldObjectList.prefab");
-            panel = Object.Instantiate(panelBlueprint, canvas.transform, false);
-            ItemContainer = panel.transform.GetChild(1);
+            GameObject editorUIBlueprint = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/WorldEdit/UI/WorldEditorUI.prefab");
+            editorUI = Object.Instantiate(editorUIBlueprint, canvas.transform, false);
+
+            WorldObjectList list = editorUI.GetComponent<WorldEditorUI>().WorldObjectList;
+
+            ItemContainer = list.transform.GetChild(1);
+
+            Assert.IsNotNull(ItemContainer);
+            Assert.AreEqual("ObjectGallery", ItemContainer.name);
 
             yield return null;
         }

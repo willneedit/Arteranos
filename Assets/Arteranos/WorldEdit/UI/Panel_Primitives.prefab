@@ -11,12 +11,12 @@ GameObject:
   - component: {fileID: 2196078734424936988}
   - component: {fileID: 2196078734424936989}
   m_Layer: 5
-  m_Name: Pane_Primitives
+  m_Name: Panel_Primitives
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2196078734424936988
 RectTransform:
   m_ObjectHideFlags: 0

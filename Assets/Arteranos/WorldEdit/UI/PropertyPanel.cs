@@ -52,8 +52,9 @@ namespace Arteranos.WorldEdit
 
         public WorldObjectComponent Woc { get; private set; }
 
+        public event Action OnReturnToList;
+
         private GameObject m_WorldObject;
-        private ObjectChooser Chooser = null;
 
         protected override void Awake()
         {
@@ -78,13 +79,6 @@ namespace Arteranos.WorldEdit
             txt_Col_R.onValueChanged.AddListener(CommitChangedValues);
             txt_Col_G.onValueChanged.AddListener(CommitChangedValues);
             txt_Col_B.onValueChanged.AddListener(CommitChangedValues);
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-
-            Chooser = transform.parent.GetComponentInChildren<ObjectChooser>(true);
         }
 
         protected override void OnEnable()
@@ -190,8 +184,7 @@ namespace Arteranos.WorldEdit
 
         private void OnReturnToChooserClicked()
         {
-            gameObject.SetActive(false);
-            Chooser.gameObject.SetActive(true);
+            OnReturnToList?.Invoke();
         }
 
 #if UNITY_EDITOR
