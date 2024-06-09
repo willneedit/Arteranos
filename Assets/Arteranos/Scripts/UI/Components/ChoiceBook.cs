@@ -19,8 +19,8 @@ public class ChoiceBook : UIBehaviour
 
     public event Action<int, int> OnChoicePageChanged;
 
-    private Transform ButtonList = null;
-    private Transform PaneList = null;
+    public Transform ButtonList { get; private set; } = null;
+    public Transform PaneList { get; private set; } = null;
 
     protected override void Awake()
     {

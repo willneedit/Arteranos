@@ -126,6 +126,9 @@ namespace Arteranos.WorldEdit
                 yield return wo.Instantiate(CurrentRoot.transform);
 
                 RequestUpdateList();
+
+                // Finished with adding.
+                Chooser.btn_AddItem.interactable = true;
             }
 
             StartCoroutine(AdderCoroutine());

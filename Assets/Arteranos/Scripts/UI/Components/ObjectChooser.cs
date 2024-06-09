@@ -18,19 +18,19 @@ namespace Arteranos.UI
     {
         // [SerializeField] private GameObject grp_TileSample;
 
-        [SerializeField] private TMP_Text lbl_PageCount;
-        [SerializeField] private Button btn_First;
-        [SerializeField] private Button btn_FRev;
-        [SerializeField] private Button btn_Previous;
-        [SerializeField] private Button btn_Next;
-        [SerializeField] private Button btn_FFwd;
-        [SerializeField] private Button btn_Last;
+        public TMP_Text lbl_PageCount;
+        public Button btn_First;
+        public Button btn_FRev;
+        public Button btn_Previous;
+        public Button btn_Next;
+        public Button btn_FFwd;
+        public Button btn_Last;
 
-        [SerializeField] private TMP_InputField txt_AddItemURL;
-        [SerializeField] private Button btn_AddItem;
-        [SerializeField] private int ItemsPerPage = 2;
+        public TMP_InputField txt_AddItemURL;
+        public Button btn_AddItem;
+        public int ItemsPerPage = 2;
 
-        [SerializeField] private GameObject TileBlueprint = null;
+        public GameObject TileBlueprint = null;
 
 
         public int CurrentPage { get; private set; } = 0;

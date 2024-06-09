@@ -23,11 +23,9 @@ namespace Arteranos.WorldEdit
         public Texture2D texture;
     }
 
-    public class Panel_Primitives : UIBehaviour
+    public class Panel_Primitives : NewObjectPanel
     {
         public Primitive[] primitives;
-
-        public WorldObjectList wol { get; set; } = null;
 
         private ObjectChooser Chooser = null;
         
@@ -78,8 +76,7 @@ namespace Arteranos.WorldEdit
                 primitive = primitives[index].prim
             };
 
-            wol.OnAddingWorldObject(new WorldObject(newWOP, primitives[index].name));
+            AddingNewObject(new WorldObject(newWOP, primitives[index].name));
         }
-
     }
 }

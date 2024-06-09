@@ -21,6 +21,8 @@ namespace Arteranos.WorldEdit
         public PropertyPanel PropertyPanel;
         public GameObject NewObjectPicker;
 
+        private NewObjectPanel[] NewObjectPanels = null;
+
         protected override void Start()
         {
             base.Start();
@@ -32,6 +34,11 @@ namespace Arteranos.WorldEdit
             WorldObjectList.OnWantsToAddItem += SwitchToAdder;
             WorldObjectList.OnWantsToModify += ModifyObject;
             PropertyPanel.OnReturnToList += SwitchToList;
+
+            //ChoiceBook choiceBook = NewObjectPicker.GetComponent<ChoiceBook>();
+            //NewObjectPanels = choiceBook.PaneList.GetComponentsInChildren<NewObjectPanel>(true);
+            //foreach(NewObjectPanel panel in NewObjectPanels)
+            //    panel.WorldEditorUI = this;
         }
 
         protected override void OnDestroy()
@@ -48,6 +55,21 @@ namespace Arteranos.WorldEdit
             WorldObjectList.gameObject.SetActive(false);
             PropertyPanel.gameObject.SetActive(false);
             NewObjectPicker.SetActive(true);
+
+            ChoiceBook choiceBook = NewObjectPicker.GetComponent<ChoiceBook>();
+            NewObjectPanels = choiceBook.PaneList.GetComponentsInChildren<NewObjectPanel>(true);
+            foreach (NewObjectPanel panel in NewObjectPanels)
+            {
+                // Prevent double entries, maybe...?
+                panel.OnAddingNewObject -= Panel_OnAddingNewObject;
+                panel.OnAddingNewObject += Panel_OnAddingNewObject;
+            }
+        }
+
+        private void Panel_OnAddingNewObject(WorldObject obj)
+        {
+            SwitchToList();
+            WorldObjectList.OnAddingWorldObject(obj);
         }
 
         private void SwitchToList()
