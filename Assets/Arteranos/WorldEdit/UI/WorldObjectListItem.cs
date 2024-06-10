@@ -39,6 +39,8 @@ namespace Arteranos.WorldEdit
             btn_Unlock.onClick.AddListener(() => OnSetLockState(false));
             btn_Delete.onClick.AddListener(OnDeleteClicked);
             btn_Property.onClick.AddListener(OnPropertyPageClicked);
+
+            txt_Name.onValueChanged.AddListener(OnChangedName);
         }
 
         protected override void Start()
@@ -110,6 +112,9 @@ namespace Arteranos.WorldEdit
             Destroy(WorldObject); 
             WorldObject = null;
         }
+
+        private void OnChangedName(string name) 
+            => WorldObject.name = name;
 
         private void OnPropertyPageClicked() 
             => Container.SwitchToPropertyPage(this);

@@ -166,10 +166,10 @@ namespace Arteranos.WorldEdit
 
             if (t.TryGetComponent(out Renderer renderer))
             {
-                Color col = new Color(
-                                    txt_Col_R.text.ParseInvariant(),
-                                    txt_Col_G.text.ParseInvariant(),
-                                    txt_Col_B.text.ParseInvariant());
+                Color col = new(
+                    txt_Col_R.text.ParseInvariant(),
+                    txt_Col_G.text.ParseInvariant(),
+                    txt_Col_B.text.ParseInvariant());
 
                 renderer.material.color = col;
 

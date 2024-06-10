@@ -297,5 +297,20 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.AreEqual("2.00", panel.txt_Pos_Y.text);
             Assert.AreEqual("0.00", panel.txt_Pos_Z.text);
         }
+
+        [UnityTest]
+        public IEnumerator T011_Remaning()
+        {
+            GetWOChooserItem(1).Test_OnToChildClicked();     // Select first child, down a level
+            yield return new WaitForEndOfFrame();
+
+            WorldObjectListItem woli = GetWOChooserItem(1);
+            Assert.AreEqual("Test Sphere", woli.txt_Name.text);
+
+            woli.txt_Name.text = "Test Sphere Renamed";
+            yield return new WaitForEndOfFrame();
+
+            Assert.AreEqual("Test Sphere Renamed" , woli.WorldObject.name);
+        }
     }
 }
