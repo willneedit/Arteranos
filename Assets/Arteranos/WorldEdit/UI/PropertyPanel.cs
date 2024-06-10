@@ -165,10 +165,17 @@ namespace Arteranos.WorldEdit
             t.localScale = s;
 
             if (t.TryGetComponent(out Renderer renderer))
-                renderer.material.color = new Color(
-                    txt_Col_R.text.ParseInvariant(),
-                    txt_Col_G.text.ParseInvariant(),
-                    txt_Col_B.text.ParseInvariant());
+            {
+                Color col = new Color(
+                                    txt_Col_R.text.ParseInvariant(),
+                                    txt_Col_G.text.ParseInvariant(),
+                                    txt_Col_B.text.ParseInvariant());
+
+                renderer.material.color = col;
+
+                // TODO Adjust hue slider and color gradient square
+                img_Color_Swatch.color = col;
+            }
 
             // Prevent the loopback of the updated world object
             Woc.UpdateOldStates();
@@ -208,8 +215,16 @@ namespace Arteranos.WorldEdit
 
         public static float ParseInvariant(this string str)
         {
-            return float.Parse(str, 
-                System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+            try
+            {
+                return float.Parse(str,
+                    System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+            }
+            catch
+            {
+                return 0.0f;
+
+            }
         }
     }
 }
