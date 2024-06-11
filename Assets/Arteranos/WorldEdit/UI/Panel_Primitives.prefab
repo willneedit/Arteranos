@@ -66,6 +66,7 @@ MonoBehaviour:
   - prim: 4
     name: Plane
     texture: {fileID: 2800000, guid: d0f7f1cbe5f31404f8f2aaced41a47a6, type: 3}
+  Chooser: {fileID: 1342486449318903041}
 --- !u!1001 &2196078734974005103
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -265,6 +266,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5f74316ace369d94ca4665ea31f1ef8c, type: 3}
+--- !u!114 &1342486449318903041 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 926459121023554158, guid: 5f74316ace369d94ca4665ea31f1ef8c,
+    type: 3}
+  m_PrefabInstance: {fileID: 2196078734974005103}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e964269b405b6c943bb588cd0adb1a77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!224 &3669564544748072887 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3213002205258416344, guid: 5f74316ace369d94ca4665ea31f1ef8c,

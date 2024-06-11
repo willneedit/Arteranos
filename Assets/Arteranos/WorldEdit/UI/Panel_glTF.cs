@@ -15,20 +15,14 @@ using UnityEngine.Events;
 
 namespace Arteranos.WorldEdit
 {
-    [Serializable]
-    public struct Primitive
-    {
-        public PrimitiveType prim;
-        public string name;
-        public Texture2D texture;
-    }
 
-    public class Panel_Primitives : NewObjectPanel
+    public class Panel_glTF : NewObjectPanel
     {
-        public Primitive[] primitives;
+        public TMP_Text lbl_IPFSPath;
+        public TMP_Text lbl_FriendlyName;
 
         public ObjectChooser Chooser;
-        
+
         protected override void Awake()
         {
             base.Awake();
@@ -56,34 +50,17 @@ namespace Arteranos.WorldEdit
 
         private void PreparePage(int obj)
         {
-            Chooser.UpdateItemCount(primitives.Length);
+            throw new NotImplementedException();
         }
 
-        private void PopulateTile(int index, GameObject @object)
+        private void PopulateTile(int arg1, GameObject @object)
         {
-            IPFSImage image = @object.GetComponentInChildren<IPFSImage>();
-            TMP_Text text = @object.GetComponentInChildren<TMP_Text>();
-            Button button = @object.GetComponentInChildren<Button>();
-
-            image.texture = primitives[index].texture;
-            text.text = primitives[index].name;
-
-            button.onClick.AddListener(() => OnTileClicked(index));
+            throw new NotImplementedException();
         }
 
         private void RequestToAdd(string obj)
         {
-            throw new NotSupportedException();
-        }
-
-        private void OnTileClicked(int index)
-        {
-            WOPrimitive newWOP = new()
-            {
-                primitive = primitives[index].prim
-            };
-
-            AddingNewObject(new WorldObject(newWOP, primitives[index].name));
+            throw new NotImplementedException();
         }
     }
 }
