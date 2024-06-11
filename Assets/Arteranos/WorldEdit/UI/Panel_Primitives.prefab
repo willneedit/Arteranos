@@ -53,22 +53,19 @@ MonoBehaviour:
   primitives:
   - prim: 0
     name: Sphere
-    texture: {fileID: 0}
+    texture: {fileID: 2800000, guid: 053174d09d55b184888064d49fc45c73, type: 3}
   - prim: 1
     name: Capsule
-    texture: {fileID: 0}
+    texture: {fileID: 2800000, guid: ebd15763181d05744b87650e04899b32, type: 3}
   - prim: 2
     name: Cylinder
-    texture: {fileID: 0}
+    texture: {fileID: 2800000, guid: 3fd883116bc5c6a458983e049c3feab2, type: 3}
   - prim: 3
     name: Cube
-    texture: {fileID: 0}
+    texture: {fileID: 2800000, guid: 1751b6ee40f75fe46a991932988a6a25, type: 3}
   - prim: 4
     name: Plane
-    texture: {fileID: 0}
-  - prim: 5
-    name: Quad
-    texture: {fileID: 0}
+    texture: {fileID: 2800000, guid: d0f7f1cbe5f31404f8f2aaced41a47a6, type: 3}
 --- !u!1001 &2196078734974005103
 PrefabInstance:
   m_ObjectHideFlags: 0
