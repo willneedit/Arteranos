@@ -114,7 +114,7 @@ namespace Arteranos.UI
                 Destroy(panels.GetChild(i).gameObject);
 
             int startIndex = currentPage * ItemsPerPage;
-            int endIndex = startIndex + ItemsPerPage - 1;
+            int endIndex = (currentPage + 1) * ItemsPerPage;
             if (endIndex > itemCount) endIndex = itemCount;
 
             for (int i = startIndex; i < endIndex; i++)

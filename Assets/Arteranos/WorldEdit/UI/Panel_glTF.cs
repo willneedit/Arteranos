@@ -6,18 +6,27 @@
  */
 
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
-using UnityEngine.EventSystems;
 using System;
 using Arteranos.UI;
-using UnityEngine.Events;
+using System.Collections;
+using Arteranos.Core;
+using Arteranos.Core.Operations;
+using Ipfs;
+using System.Collections.Generic;
 
 namespace Arteranos.WorldEdit
 {
+    public struct glTFObjectsEntry
+    {
+        public string IPFSPath;
+        public string FriendlyName;
+    }
 
     public class Panel_glTF : NewObjectPanel
     {
+        public List<glTFObjectsEntry> GLTFEntries { get; private set; } = new();
+
         public TMP_Text lbl_IPFSPath;
         public TMP_Text lbl_FriendlyName;
 
@@ -27,6 +36,14 @@ namespace Arteranos.WorldEdit
         {
             base.Awake();
 
+#if UNITY_INCLUDE_TESTS
+            GLTFEntries.Add(new()
+            {
+                IPFSPath = "QmZncpVVWKBGH44PUDpAcANnRUPtwraUfuSwnqkKDqvUgj",
+                FriendlyName = "Iwontsay avatar"
+            });
+#else
+#endif
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
             Chooser.OnAddingItem += RequestToAdd;
@@ -50,17 +67,54 @@ namespace Arteranos.WorldEdit
 
         private void PreparePage(int obj)
         {
-            throw new NotImplementedException();
+            Chooser.UpdateItemCount(GLTFEntries.Count);
         }
 
-        private void PopulateTile(int arg1, GameObject @object)
+        private void PopulateTile(int index, GameObject @object)
         {
-            throw new NotImplementedException();
+            glTFObjectsEntry entry = GLTFEntries[index];
+            lbl_IPFSPath.text = entry.IPFSPath;
+            lbl_FriendlyName.text = entry.FriendlyName;
+
+            if (!@object.TryGetComponent(out glTFChooserTile tile)) return;
+
+            tile.GLTFObjectPath = entry.IPFSPath;
+            tile.btn_PaneButton.onClick.AddListener(() => OnTileClicked(index));
         }
 
-        private void RequestToAdd(string obj)
+        private void RequestToAdd(string sourceURL)
         {
-            throw new NotImplementedException();
+            IEnumerator Cor()
+            {
+                Chooser.btn_AddItem.interactable = false;
+
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    AssetUploader.PrepareUploadToIPFS(sourceURL, false); // Plain GLB file
+
+                ao.ProgressChanged += (ratio, msg) => Chooser.lbl_PageCount.text = $"{msg}";
+
+                AggregateException ex = null;
+                yield return ao.ExecuteCoroutine(co, (_status, _) => ex = _status);
+
+                Cid cid = AssetUploader.GetUploadedCid(co);
+
+                // TODO: Add glTF to the list
+
+                Chooser.btn_AddItem.interactable = true;
+
+                Chooser.ShowPage(0);
+            }
+
+            StartCoroutine(Cor());
+        }
+        private void OnTileClicked(int index)
+        {
+            WOglTF newWOglTF = new()
+            { 
+                glTFCid = GLTFEntries[index].IPFSPath 
+            };
+
+            AddingNewObject(new WorldObject(newWOglTF, GLTFEntries[index].FriendlyName));
         }
     }
 }
