@@ -76,6 +76,9 @@ namespace Arteranos.WorldEdit
             {
                 GameObject go = CurrentRoot.transform.GetChild(i).gameObject;
                 if (go == null) continue;
+
+                // Alien (aka unmanaged world objects) needs to be skipped.
+                if (!go.TryGetComponent(out WorldObjectComponent _)) continue;
                 WorldObjects.Add(go);
             }
 

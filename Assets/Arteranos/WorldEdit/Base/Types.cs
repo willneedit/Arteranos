@@ -13,6 +13,10 @@ using Arteranos.Core;
 using UnityEngine;
 using System.IO;
 using System;
+using System.Threading;
+using Ipfs.Unity;
+using Arteranos.Services;
+using GLTFast;
 
 namespace Arteranos.WorldEdit
 {
@@ -186,11 +190,45 @@ namespace Arteranos.WorldEdit
 
         public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
         {
+            IEnumerator LoadglTF(string GLTFObjectPath, GameObject LoadedObject)
+            {
+                using CancellationTokenSource cts = new(60000);
+                byte[] data = null;
+                yield return Asyncs.Async2Coroutine(
+                    IPFSService.ReadBinary(GLTFObjectPath, cancel: cts.Token),
+                    _data => data = _data);
+
+                if (data == null)
+                    yield break;
+
+                GltfImport gltf = new(deferAgent: new UninterruptedDeferAgent());
+
+                bool success = false;
+
+                yield return Asyncs.Async2Coroutine(
+                    gltf.LoadGltfBinary(data, cancellationToken: cts.Token),
+                    _success => success = _success);
+
+                if (success)
+                {
+                    GameObjectInstantiator instantiator = new(gltf, LoadedObject.transform);
+
+                    yield return Asyncs.Async2Coroutine(
+                        gltf.InstantiateMainSceneAsync(instantiator));
+                }
+            }
+
             GameObject gob;
 
             // TODO: Implement glTF and kit item asset instanciation
             if (asset is WOPrimitive wopr)
+                // Easy.
                 gob = GameObject.CreatePrimitive(wopr.primitive);
+            else if(asset is WOglTF wOglTF)
+            {
+                gob = new GameObject("Unleaded glTF woeld object"); // :)
+                yield return LoadglTF(wOglTF.glTFCid, gob);
+            }
             else 
                 gob = new GameObject("Empty");
 
