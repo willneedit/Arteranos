@@ -864,6 +864,26 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8713646139101012672, guid: 0c924ef8e01e2974ba2fde7066698900,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8713646139101012672, guid: 0c924ef8e01e2974ba2fde7066698900,
+        type: 3}
+      propertyPath: EnableServerDiscovery
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8713646139101012672, guid: 0c924ef8e01e2974ba2fde7066698900,
+        type: 3}
+      propertyPath: EnablePublishServerData
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8713646139101012672, guid: 0c924ef8e01e2974ba2fde7066698900,
+        type: 3}
+      propertyPath: EnableUploadDefaultAvatars
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0c924ef8e01e2974ba2fde7066698900, type: 3}
 --- !u!850595691 &1544942567

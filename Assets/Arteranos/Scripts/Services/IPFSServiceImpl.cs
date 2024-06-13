@@ -53,6 +53,11 @@ namespace Arteranos.Services
             false
 #endif
             ;
+
+        public bool EnableUploadDefaultAvatars = true;
+        public bool EnablePublishServerData = true;
+        public bool EnableServerDiscovery = true;
+
         public static string CachedPTOSNotice { get; private set; } = null;
 
         private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
@@ -135,7 +140,7 @@ namespace Arteranos.Services
                     // Even worse...
                     if (IPFSExe == null)
                     {
-                        TransitionProgressStatic.Instance.OnProgressChanged(0.00f, "No IPFS daemon -- aborting!");
+                        TransitionProgressStatic.Instance?.OnProgressChanged(0.00f, "No IPFS daemon -- aborting!");
 
                         yield return new WaitForSeconds(10);
 
@@ -344,7 +349,7 @@ namespace Arteranos.Services
                     Debug.LogException(ex);
                 }
 
-                TransitionProgressStatic.Instance.OnProgressChanged(0.30f, "Announcing its service");
+                TransitionProgressStatic.Instance?.OnProgressChanged(0.30f, "Announcing its service");
 
                 StringBuilder sb = new();
                 sb.Append("Arteranos Server, built by willneedit\n");
@@ -451,15 +456,18 @@ namespace Arteranos.Services
 
             // TransitionProgressStatic.Instance?.OnProgressChanged(0.70f, "Discovering other servers");
 
-            Debug.Log($"Starting node discovery");
-            while(true)
+            if(EnableServerDiscovery)
             {
-                List<Peer> peers = null;
-                yield return Asyncs.Async2Coroutine(DoDiscovery(), _p => peers = _p);
+                Debug.Log($"Starting node discovery");
+                while (true)
+                {
+                    List<Peer> peers = null;
+                    yield return Asyncs.Async2Coroutine(DoDiscovery(), _p => peers = _p);
 
-                yield return new WaitForSeconds(heartbeatSeconds * 2);
+                    yield return new WaitForSeconds(heartbeatSeconds * 2);
+                }
+                // NOTREACHED
             }
-            // NOTREACHED
         }
         private IEnumerator UploadDefaultAvatars()
         {
@@ -477,10 +485,13 @@ namespace Arteranos.Services
 
             }
 
-            yield return UploadAvatar("resource:///Avatar/6394c1e69ef842b3a5112221.glb");
-            SettingsManager.DefaultMaleAvatar = cid;
-            yield return UploadAvatar("resource:///Avatar/63c26702e5b9a435587fba51.glb");
-            SettingsManager.DefaultFemaleAvatar = cid;
+            if(EnableUploadDefaultAvatars)
+            {
+                yield return UploadAvatar("resource:///Avatar/6394c1e69ef842b3a5112221.glb");
+                SettingsManager.DefaultMaleAvatar = cid;
+                yield return UploadAvatar("resource:///Avatar/63c26702e5b9a435587fba51.glb");
+                SettingsManager.DefaultFemaleAvatar = cid;
+            }
         }
 
 
@@ -605,13 +616,16 @@ namespace Arteranos.Services
 
             if (SettingsManager.Server.Public)
             {
-                // Lasting for two days max, cache refresh needs one minute
-                await ipfs.NameEx.PublishAsync(
-                    CurrentSDCid_,
-                    lifetime: new TimeSpan(2, 0, 0, 0),
-                    ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
+                if(EnablePublishServerData)
+                {
+                    // Lasting for two days max, cache refresh needs one minute
+                    await ipfs.NameEx.PublishAsync(
+                        CurrentSDCid_,
+                        lifetime: new TimeSpan(2, 0, 0, 0),
+                        ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
+                }
 
-                if(UsingPubsub_)
+                if (UsingPubsub_)
                 {
                     // Submit the announce in Pubsub as well, for all who's listening
                     ServerDescriptionLink sdl = new() { ServerDescriptionCid = CurrentSDCid_ };
@@ -663,62 +677,16 @@ namespace Arteranos.Services
             {
                 IFileSystemNode fsn = await ipfs.FileSystem.AddAsync(ms, "ServerOnlineData").ConfigureAwait(false);
 
-                // Lasting for five minutes, ttl 60s, under the secondary key
-                await ipfs.NameEx.PublishAsync(
-                    fsn.Id,
-                    key: "key_sod",
-                    lifetime: new TimeSpan(2, 0, 0, 0),
-                    ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
-            }
-        }
-
-        /// <summary>
-        /// Double checked PublishAsync.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="key"></param>
-        /// <param name="lifetime"></param>
-        /// <param name="ttl"></param>
-        /// <param name="cancel"></param>
-        /// <returns></returns>
-        public async Task<NamedContent> PublishAsync(Cid id,
-            string key = "self",
-            TimeSpan? lifetime = null,
-            TimeSpan? ttl = null,
-            CancellationToken cancel = default)
-        {
-            IEnumerable<IKey> keys = await ipfs.Key.ListAsync().ConfigureAwait(false);
-
-            IKey thiskey = keys.Where(_k => _k.Name == key).FirstOrDefault();
-
-            string result = await ipfs.Name.ResolveAsync("/ipns/" + thiskey.Id, false, cancel: cancel).ConfigureAwait(false);
-
-            if (result[6..] == id)
-            {
-                Debug.Log("Publish skipped -- already present.");
-                return new NamedContent { ContentPath = result, NamePath = "/ipns/" + thiskey.Id };
-            }
-
-            NamedContent nc = await ipfs.NameEx.PublishAsync(id, key, lifetime, ttl, cancel).ConfigureAwait(false);
-
-            // This needs some time before the IPNS update comes through.
-            bool tmo = true;
-            for(int i = 0; i < 10; i++)
-            {
-                result = await ipfs.Name.ResolveAsync("/ipns/" + thiskey.Id, false, cancel: cancel).ConfigureAwait(false);
-
-                if (result[6..] == id)
+                if(EnablePublishServerData)
                 {
-                    tmo = false;
-                    break;
+                    // Lasting for five minutes, ttl 60s, under the secondary key
+                    await ipfs.NameEx.PublishAsync(
+                        fsn.Id,
+                        key: "key_sod",
+                        lifetime: new TimeSpan(2, 0, 0, 0),
+                        ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
                 }
-
-                await Task.Delay(1000).ConfigureAwait(false);
             }
-
-            if (tmo) Debug.LogWarning("IPNS propagation excessively delayed");
-
-            return nc;
         }
 
         #endregion

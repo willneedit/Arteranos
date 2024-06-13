@@ -17,7 +17,7 @@ using System.Collections.Generic;
 
 namespace Arteranos.WorldEdit
 {
-    public struct glTFObjectsEntry
+    public struct GlTFObjectsEntry
     {
         public string IPFSPath;
         public string FriendlyName;
@@ -25,7 +25,7 @@ namespace Arteranos.WorldEdit
 
     public class Panel_glTF : NewObjectPanel
     {
-        public List<glTFObjectsEntry> GLTFEntries { get; private set; } = new();
+        public List<GlTFObjectsEntry> GLTFEntries { get; private set; } = new();
 
         public TMP_Text lbl_IPFSPath;
         public TMP_Text lbl_FriendlyName;
@@ -72,11 +72,11 @@ namespace Arteranos.WorldEdit
 
         private void PopulateTile(int index, GameObject @object)
         {
-            glTFObjectsEntry entry = GLTFEntries[index];
+            GlTFObjectsEntry entry = GLTFEntries[index];
             lbl_IPFSPath.text = entry.IPFSPath;
             lbl_FriendlyName.text = entry.FriendlyName;
 
-            if (!@object.TryGetComponent(out glTFChooserTile tile)) return;
+            if (!@object.TryGetComponent(out GlTFChooserTile tile)) return;
 
             tile.GLTFObjectPath = entry.IPFSPath;
             tile.btn_PaneButton.onClick.AddListener(() => OnTileClicked(index));

@@ -16,7 +16,7 @@ using GLTFast;
 
 namespace Arteranos.WorldEdit
 {
-    public class glTFChooserTile : UIBehaviour
+    public class GlTFChooserTile : UIBehaviour
     {
         public string GLTFObjectPath { get; set; } = null;
         public GameObject LoadedObject { get; private set; } = null;
@@ -26,8 +26,6 @@ namespace Arteranos.WorldEdit
 
         protected override void Start()
         {
-            base.Start();
-
             IEnumerator Cor()
             {
                 using CancellationTokenSource cts = new(10000);
@@ -52,20 +50,53 @@ namespace Arteranos.WorldEdit
                     LoadedObject = new();
                     LoadedObject.SetActive(false);
 
-
                     GameObjectBoundsInstantiator instantiator = new(gltf, LoadedObject.transform);
 
                     yield return Asyncs.Async2Coroutine(
                         gltf.InstantiateMainSceneAsync(instantiator));
 
                     Bounds? b = instantiator.CalculateBounds();
+                    // Debug.Log($"Bounds: Center={b.Value.center}, Extent={b.Value.extents}, Max={b.Value.max}");
 
-                    LoadedObject.transform.SetParent(grp_ObjectAnchor.transform);
+                    float largestAxis = b.Value.max.x;
+                    if (b.Value.max.y > largestAxis) largestAxis = b.Value.max.y;
+                    if (b.Value.max.z > largestAxis) largestAxis = b.Value.max.z;
+
+                    Transform t = LoadedObject.transform;
+                    grp_ObjectAnchor.transform.localScale *= largestAxis / 6.0f;
+                    t.SetParent(grp_ObjectAnchor.transform, false);
+
+                    t.localPosition = -b.Value.center;
+
                     LoadedObject.SetActive(true);
                 }
             }
 
+            base.Start();
+
             StartCoroutine(Cor());
+        }
+
+        protected override void OnEnable()
+        {
+            IEnumerator RotatePreviewCoroutine()
+            {
+                float angle = 0.0f;
+
+                while (true)
+                {
+                    angle += Time.deltaTime * 45.0f;
+                    if (angle > 350.0f) angle -= 360.0f;
+                    if (LoadedObject)
+                        LoadedObject.transform.localRotation = Quaternion.Euler(0.0f, angle, 0.0f);
+
+                    yield return new WaitForEndOfFrame();
+                }
+            }
+
+            base.OnEnable();
+
+            StartCoroutine(RotatePreviewCoroutine());
         }
     }
 }
