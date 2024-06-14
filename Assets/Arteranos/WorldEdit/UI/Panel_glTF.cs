@@ -12,7 +12,6 @@ using Arteranos.UI;
 using System.Collections;
 using Arteranos.Core;
 using Arteranos.Core.Operations;
-using Ipfs;
 using System.Collections.Generic;
 
 namespace Arteranos.WorldEdit
@@ -32,18 +31,12 @@ namespace Arteranos.WorldEdit
 
         public ObjectChooser Chooser;
 
+        // TODO On Awake: Retrieve the glTF gallery list from the user settings
+        // TODO On Disable and dirty list: Save the glTF gallery list back to the user settings
         protected override void Awake()
         {
             base.Awake();
 
-#if UNITY_INCLUDE_TESTS
-            GLTFEntries.Add(new()
-            {
-                IPFSPath = "QmZncpVVWKBGH44PUDpAcANnRUPtwraUfuSwnqkKDqvUgj",
-                FriendlyName = "Iwontsay avatar"
-            });
-#else
-#endif
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
             Chooser.OnAddingItem += RequestToAdd;
@@ -96,9 +89,11 @@ namespace Arteranos.WorldEdit
                 AggregateException ex = null;
                 yield return ao.ExecuteCoroutine(co, (_status, _) => ex = _status);
 
-                Cid cid = AssetUploader.GetUploadedCid(co);
-
-                // TODO: Add glTF to the list
+                GLTFEntries.Add(new()
+                {
+                    IPFSPath = AssetUploader.GetUploadedCid(co),
+                    FriendlyName = AssetUploader.GetUploadedFilename(co),
+                });
 
                 Chooser.btn_AddItem.interactable = true;
 

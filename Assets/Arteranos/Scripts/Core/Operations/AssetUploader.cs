@@ -173,7 +173,10 @@ namespace Arteranos.Core.Operations
 
             // Strip quotes
             if (assetURL.StartsWith("\"") && assetURL.EndsWith("\""))
+            {
                 assetURL = assetURL[1..^1];
+                context.AssetURL = assetURL;
+            }
 
             // Strip 'file:///' prefix
             if (assetURL.StartsWith("file:///"))
@@ -261,5 +264,8 @@ namespace Arteranos.Core.Operations
 
         public static Cid GetUploadedCid(Context _context)
             => (_context as AssetUploaderContext).Cid;
+
+        public static string GetUploadedFilename(Context _context) 
+            => Path.GetFileName((_context as AssetUploaderContext).AssetURL);
     }
 }
