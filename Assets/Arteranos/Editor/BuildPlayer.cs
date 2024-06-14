@@ -20,10 +20,10 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.IO.Compression;
 
-namespace Arteranos
+namespace Arteranos.Editor
 {
 
-    public class BuildPlayers : MonoBehaviour
+    public class BuildPlayers
     {
         // public static string appName = Application.productName;
         public static readonly string appName = "Arteranos";
