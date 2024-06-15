@@ -244,6 +244,21 @@ namespace Arteranos.Core
         public bool Seconds { get; set; } = false;
     }
 
+    public struct WOCEntry
+    {
+        public string IPFSPath;
+        public string FriendlyName;
+    }
+
+    public class WorldEditorAC
+    {
+        // world objects collection (glTF files)
+        public List<WOCEntry> WorldObjectsGLTF { get; set; } = new();
+
+        // world objects collection (kits a.k.a asset bundles)
+        public List<WOCEntry> WorldObjectsKits { get; set; } = new();
+    }
+
     public class ClientSettingsJSON
     {
         // More personal data
@@ -300,6 +315,9 @@ namespace Arteranos.Core
 
         // Favourited worlds
         public List<Cid> FavouritedWorlds { get; set; } = new();
+
+        // World Editor Assets Collections
+        public WorldEditorAC WEAC { get; set; } = new();
 
         // The text message templates
         public virtual List<string> PresetStrings { get; set; } = new();

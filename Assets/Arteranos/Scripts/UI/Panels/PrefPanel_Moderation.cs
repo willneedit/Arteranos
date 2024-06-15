@@ -220,6 +220,14 @@ namespace Arteranos.UI
                 toPin.Add(SettingsManager.DefaultMaleAvatar);
                 toPin.Add(SettingsManager.DefaultFemaleAvatar);
 
+                // World Editor Assets Collections: glTF models
+                foreach (WOCEntry item in SettingsManager.Client.WEAC.WorldObjectsGLTF)
+                    toPin.Add(item.IPFSPath);
+
+                // World Editor Assets Collections: Kits
+                foreach (WOCEntry item in SettingsManager.Client.WEAC.WorldObjectsKits)
+                    toPin.Add(item.IPFSPath);
+
                 // Eat up any empty entries
                 toPin.Remove(null);
 

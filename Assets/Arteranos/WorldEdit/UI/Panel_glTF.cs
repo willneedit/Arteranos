@@ -16,22 +16,18 @@ using System.Collections.Generic;
 
 namespace Arteranos.WorldEdit
 {
-    public struct GlTFObjectsEntry
-    {
-        public string IPFSPath;
-        public string FriendlyName;
-    }
-
     public class Panel_glTF : NewObjectPanel
     {
-        public List<GlTFObjectsEntry> GLTFEntries { get; private set; } = new();
+        public List<WOCEntry> GLTFEntries { get; private set; } = null;
 
         public TMP_Text lbl_IPFSPath;
         public TMP_Text lbl_FriendlyName;
 
         public ObjectChooser Chooser;
 
-        // TODO On Awake: Retrieve the glTF gallery list from the user settings
+        private Client Client = null;
+        private bool dirty = false;
+
         // TODO On Disable and dirty list: Save the glTF gallery list back to the user settings
         protected override void Awake()
         {
@@ -51,6 +47,28 @@ namespace Arteranos.WorldEdit
             base.OnDestroy();
         }
 
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            Client = SettingsManager.Client;
+            if (Client != null)
+                GLTFEntries = Client.WEAC.WorldObjectsGLTF;
+            else
+                GLTFEntries = new();
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            if (Client != null && dirty)
+            {
+                Client.WEAC.WorldObjectsGLTF = GLTFEntries;
+                Client.Save();
+            }
+        }
+
         protected override void Start()
         {
             base.Start();
@@ -65,7 +83,7 @@ namespace Arteranos.WorldEdit
 
         private void PopulateTile(int index, GameObject @object)
         {
-            GlTFObjectsEntry entry = GLTFEntries[index];
+            WOCEntry entry = GLTFEntries[index];
             lbl_IPFSPath.text = entry.IPFSPath;
             lbl_FriendlyName.text = entry.FriendlyName;
 
@@ -96,6 +114,7 @@ namespace Arteranos.WorldEdit
                 });
 
                 Chooser.btn_AddItem.interactable = true;
+                dirty = true;
 
                 Chooser.ShowPage(0);
             }
