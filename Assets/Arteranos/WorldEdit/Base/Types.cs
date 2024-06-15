@@ -192,6 +192,10 @@ namespace Arteranos.WorldEdit
         {
             IEnumerator LoadglTF(string GLTFObjectPath, GameObject LoadedObject)
             {
+                // Need to be disabled until its completion, because the animation
+                // wouldn't start
+                LoadedObject.SetActive(false);
+
                 using CancellationTokenSource cts = new(60000);
                 byte[] data = null;
                 yield return Asyncs.Async2Coroutine(
@@ -216,21 +220,22 @@ namespace Arteranos.WorldEdit
                     yield return Asyncs.Async2Coroutine(
                         gltf.InstantiateMainSceneAsync(instantiator));
                 }
+
+                LoadedObject.SetActive(true);
             }
 
             GameObject gob;
 
-            // TODO: Implement glTF and kit item asset instanciation
-            if (asset is WOPrimitive wopr)
-                // Easy.
-                gob = GameObject.CreatePrimitive(wopr.primitive);
-            else if(asset is WOglTF wOglTF)
+            // TODO: Implement kit item asset instantiation
+            if (asset is WOPrimitive WOPR)                          // Pun intended :)
+                gob = GameObject.CreatePrimitive(WOPR.primitive);
+            else if(asset is WOglTF WOglTF)
             {
                 gob = new GameObject("Unleaded glTF woeld object"); // :)
-                yield return LoadglTF(wOglTF.glTFCid, gob);
+                yield return LoadglTF(WOglTF.glTFCid, gob);
             }
             else 
-                gob = new GameObject("Empty");
+                gob = new GameObject("Empty or unsupported world object");
 
             // More complex constructs can be put as a child of an empty GameObject.
 
