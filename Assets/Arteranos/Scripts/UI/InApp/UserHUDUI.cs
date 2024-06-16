@@ -41,6 +41,7 @@ namespace Arteranos.UI
         // private const int btn_emotes = 4;
         private const int btn_takephoto = 5;
         private const int btn_dismisscd = 6;
+        private const int btn_editworld = 7;
         private UnityAction[] Actions;
 
         private bool cameraCalled = false;
@@ -64,7 +65,8 @@ namespace Arteranos.UI
                 () => NetworkStatus.StopHost(true),
                 () => StartCoroutine(ToggleFlyout(EmojiFlyout)),
                 () => SysMenu.FindGadget<CameraDroneUI>(SysMenu.GADGET_CAMERA_DRONE).TakePhoto(),
-                OnDismissCameraClicked
+                OnDismissCameraClicked,
+                () => SysMenu.OpenSysMenu(SysMenuStatic.MenuKind.WorldEdit),
             };
 
             CameraUITracker ct = GetComponent<CameraUITracker>();
@@ -93,7 +95,7 @@ namespace Arteranos.UI
             ToolTipText.text = " "; // Empty, but still taking some vertical space.
 
             SystemMenuButton.Button.onHover += makeHoverTip(SystemMenuButton.HoverTip);
-            SystemMenuButton.Button.onClick.AddListener(SysMenu.OpenSysMenu);
+            SystemMenuButton.Button.onClick.AddListener(() => SysMenu.OpenSysMenu(SysMenuStatic.MenuKind.System));
 
             for(int i = 0; i < HUDButtons.Length; i++)
             {
@@ -182,6 +184,7 @@ namespace Arteranos.UI
             HUDButtons[btn_callcd].Button.gameObject.SetActive(!cameraCalled);
             HUDButtons[btn_takephoto].Button.gameObject.SetActive(cameraCalled);
             HUDButtons[btn_dismisscd].Button.gameObject.SetActive(cameraCalled);
+            HUDButtons[btn_editworld].Button.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanEditWorld, null));
         }
 
         private void DownloadUserHUDSettings(UserHUDSettingsJSON obj)
@@ -234,7 +237,7 @@ namespace Arteranos.UI
 
         private void OnSummonCameraClicked()
         {
-            SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
+            SysMenuStatic.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
 
             GameObject go = Instantiate(BP.I.InApp.CameraDrone);
 
@@ -248,7 +251,7 @@ namespace Arteranos.UI
 
         private void OnDismissCameraClicked()
         {
-            SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
+            SysMenuStatic.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
             cameraCalled = false;
         }
     }
