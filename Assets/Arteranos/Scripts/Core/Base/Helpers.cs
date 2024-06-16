@@ -596,6 +596,12 @@ namespace Arteranos.UI
 
     public abstract class SysMenuStatic : MonoBehaviour
     {
+        public enum MenuKind
+        {
+            System,
+            WorldEdit
+        }
+
         public static SysMenuStatic Instance = null;
 
         public abstract bool HUDEnabled { get; set; }

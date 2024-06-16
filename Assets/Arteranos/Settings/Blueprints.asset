@@ -34,13 +34,14 @@ MonoBehaviour:
       type: 3}
     SysMenu: {fileID: 4193041269047191700, guid: cc0253c76cfe89d428cb1feef9f9861f,
       type: 3}
+    WorldEditor: {fileID: 4193041269047191700, guid: cbe39bcf4d0a1164f9c749a18f894bbf,
+      type: 3}
     AddAvatar: {fileID: 1889180529585697687, guid: 15a025e4ea26c034e8217fba633838d8,
       type: 3}
     ContentFilter: {fileID: 4304480360161841479, guid: 68f66881523bc704daf73f87819e7367,
       type: 3}
     LicenseText: {fileID: 7130032338797606157, guid: 821df0f4d152ed64e9d2f4d4a402c0a4,
       type: 3}
-    Login: {fileID: 745566904668032620, guid: e303604ab17822a40ab4b0d976e1769e, type: 3}
     ServerInfo: {fileID: 1889180529585697687, guid: bcddff2582d86f7448cf9d773fa3ae52,
       type: 3}
     ServerList: {fileID: 1889180529585697687, guid: de980c2889ea78249a5ed23529eca106,

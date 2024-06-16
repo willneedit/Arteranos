@@ -26,7 +26,7 @@ namespace Arteranos.UI
 
         public void Awake()
         {
-            SystemMenu.PerformCallback = (InputAction.CallbackContext obj) => OpenSysMenu();
+            SystemMenu.PerformCallback = (InputAction.CallbackContext obj) => OpenSysMenu(MenuKind.System);
             Instance = this;
         }
 
@@ -35,7 +35,7 @@ namespace Arteranos.UI
         public void OnDisable() => SystemMenu.UnbindAction();
 
 
-        public static void OpenSysMenu()
+        public static void OpenSysMenu(MenuKind kind)
         {
             if(FindObjectOfType<SysMenuKind>() != null)
             {
@@ -45,14 +45,25 @@ namespace Arteranos.UI
 
             if (!Instance.HUDEnabled) return;
 
-            GameObject original = BP.I.UI.SysMenu;
-            // NB: The resource is _cached_, the blueprint itself is modified and couldn't find the component
-            // because it's already disabled the second time around!
-            original.GetComponentInChildren<ChoiceBook>(true).gameObject.SetActive(false);
-            GameObject sysmenu = Instantiate(original);
-            ChoiceBook choiceBook = sysmenu.GetComponentInChildren<ChoiceBook>(true);
-
-            choiceBook.gameObject.SetActive(true);
+            switch(kind)
+            {
+                case MenuKind.System:
+                    {
+                        GameObject blueprint = BP.I.UI.SysMenu;
+                        // NB: The resource is _cached_, the blueprint itself is modified and couldn't find the component
+                        // because it's already disabled the second time around!
+                        blueprint.GetComponentInChildren<ChoiceBook>(true).gameObject.SetActive(false);
+                        GameObject sysmenu = Instantiate(blueprint);
+                        ChoiceBook choiceBook = sysmenu.GetComponentInChildren<ChoiceBook>(true);
+                        choiceBook.gameObject.SetActive(true);
+                    }
+                    break;
+                case MenuKind.WorldEdit:
+                    Instantiate(BP.I.UI.WorldEditor);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         public override void CloseSysMenus_()

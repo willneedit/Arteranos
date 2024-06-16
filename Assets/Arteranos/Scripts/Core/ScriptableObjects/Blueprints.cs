@@ -42,6 +42,7 @@ namespace Arteranos.Core
             public GameObject Progress;
             public GameObject TextMessage;
             public GameObject SysMenu;
+            public GameObject WorldEditor;
             public GameObject AddAvatar;
             public GameObject ContentFilter;
             public GameObject LicenseText;
