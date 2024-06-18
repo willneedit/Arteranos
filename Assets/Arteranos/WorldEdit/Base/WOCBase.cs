@@ -69,11 +69,14 @@ namespace Arteranos.WorldEdit
         public WOVector3 scale;
 
         private Transform transform = null;
+        private WorldEditorData editorData = null;
 
         public override void Awake(GameObject gameObject)
         {
             base.Awake(gameObject);
             transform = gameObject.transform;
+            gameObject.TryGetComponent(out WorldObjectComponent woc);
+            editorData = woc.EditorData;
         }
 
         public override void Init()
@@ -91,9 +94,46 @@ namespace Arteranos.WorldEdit
             transform.localScale = scale;
         }
 
+        private Vector3? oldPosition = null;
+        private Vector3? oldEulerRotation = null;
+
         public override void CheckState()
         {
-            if(transform.localPosition != position)
+            // Pull back the movement if it's constrained, no matter how.
+            Vector3 globalPosition = transform.position;
+            Vector3 globalEulerRotation = transform.rotation.eulerAngles;
+
+            if (editorData != null 
+                && oldPosition.HasValue 
+                && oldEulerRotation.HasValue 
+                && editorData.IsInEditMode
+                && (editorData.LockXAxis || editorData.LockYAxis || editorData.LockZAxis))
+            {
+                if(editorData.LockXAxis)
+                {
+                    globalPosition.x = oldPosition.Value.x;
+                    globalEulerRotation.x = oldEulerRotation.Value.x;
+                }
+
+                if (editorData.LockYAxis)
+                {
+                    globalPosition.y = oldPosition.Value.y;
+                    globalEulerRotation.y = oldEulerRotation.Value.y;
+                }
+
+                if (editorData.LockYAxis)
+                {
+                    globalPosition.z = oldPosition.Value.z;
+                    globalEulerRotation.z = oldEulerRotation.Value.z;
+                }
+
+                transform.SetPositionAndRotation(globalPosition, Quaternion.Euler(globalEulerRotation));
+            }
+
+            oldPosition = globalPosition;
+            oldEulerRotation = globalEulerRotation;
+ 
+            if (transform.localPosition != position)
                 Dirty = true;
             if(transform.localRotation != rotation)
                 Dirty = true;

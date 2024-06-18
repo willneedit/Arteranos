@@ -24,6 +24,7 @@ namespace Arteranos.WorldEdit
 
         private GameObject WORoot = null;
         private GameObject CurrentRoot = null;
+        private WorldEditorData EditorData = null;
 
         protected override void Awake()
         {
@@ -50,9 +51,7 @@ namespace Arteranos.WorldEdit
             base.Start();
 
             WORoot = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
-            if( WORoot == null )
-                WORoot = new("World Objects Root") { tag = "WorldObjectsRoot" };
-
+            WORoot.TryGetComponent(out EditorData);
             CurrentRoot = WORoot;
 
             Chooser.ShowPage(0);
@@ -126,7 +125,7 @@ namespace Arteranos.WorldEdit
         { 
             IEnumerator AdderCoroutine()
             {
-                yield return wo.Instantiate(CurrentRoot.transform);
+                yield return wo.Instantiate(CurrentRoot.transform, editorData: EditorData);
 
                 RequestUpdateList();
 

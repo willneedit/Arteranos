@@ -89,7 +89,7 @@ namespace Arteranos.WorldEdit
         public static WorldObject Deserialize(Stream stream)
             => Serializer.Deserialize<WorldObject>(stream);
 
-        public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
+        public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null, WorldEditorData editorData = null)
         {
             IEnumerator LoadglTF(string GLTFObjectPath, GameObject LoadedObject)
             {
@@ -146,6 +146,7 @@ namespace Arteranos.WorldEdit
             WorldObjectComponent woc = gob.AddComponent<WorldObjectComponent>();  
             woc.Asset = asset;
             woc.WOComponents = components;
+            woc.EditorData = editorData;
 
             Transform t = gob.transform;
             t.SetParent(parent);
@@ -160,7 +161,7 @@ namespace Arteranos.WorldEdit
             gob.SetActive(true);
 
             foreach (WorldObject child in children)
-                yield return child.Instantiate(t);
+                yield return child.Instantiate(t, editorData: editorData);
 
             yield return null;
 

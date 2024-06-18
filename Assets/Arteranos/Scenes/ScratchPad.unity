@@ -1432,6 +1432,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2098720241}
+  - component: {fileID: 2098720242}
   m_Layer: 0
   m_Name: WorldObjectRoot
   m_TagString: WorldObjectsRoot
@@ -1454,6 +1455,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2098720242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2098720240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a6bec223e9b1cc4d8ddf3f3b4f6d7d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsInEditMode: 0
+  LockXAxis: 1
+  LockYAxis: 1
+  LockZAxis: 1
 --- !u!114 &6642253553766238805
 MonoBehaviour:
   m_ObjectHideFlags: 0
