@@ -20,6 +20,12 @@ using GLTFast;
 
 namespace Arteranos.WorldEdit
 {
+    public enum ColliderType
+    {
+        Ghostly = 5,     // (Layer: UI) Collides nothing, passable
+        Intangible = 14, // (Layer: RigidBody): Collides likewise and solids, passable
+        Solid = 0,       // (Layer: Default): Collides likewise and intangibles, stops avatars
+    }
 
     [ProtoContract]
     public class WorldDecoration
@@ -87,10 +93,6 @@ namespace Arteranos.WorldEdit
         {
             IEnumerator LoadglTF(string GLTFObjectPath, GameObject LoadedObject)
             {
-                // Need to be disabled until its completion, because the animation
-                // wouldn't start
-                LoadedObject.SetActive(false);
-
                 using CancellationTokenSource cts = new(60000);
                 byte[] data = null;
                 yield return Asyncs.Async2Coroutine(
@@ -115,22 +117,27 @@ namespace Arteranos.WorldEdit
                     yield return Asyncs.Async2Coroutine(
                         gltf.InstantiateMainSceneAsync(instantiator));
                 }
-
-                LoadedObject.SetActive(true);
             }
 
             GameObject gob;
 
             // TODO: Implement kit item asset instantiation
             if (asset is WOPrimitive WOPR)                          // Pun intended :)
+            {
                 gob = GameObject.CreatePrimitive(WOPR.primitive);
+                gob.SetActive(false);
+            }
             else if(asset is WOglTF WOglTF)
             {
                 gob = new GameObject("Unleaded glTF world object"); // :)
+                gob.SetActive(false);
                 yield return LoadglTF(WOglTF.glTFCid, gob);
             }
-            else 
+            else
+            {
                 gob = new GameObject("Empty or unsupported world object");
+                gob.SetActive(false);
+            }
 
             // More complex constructs can be put as a child of an empty GameObject.
 
@@ -149,6 +156,8 @@ namespace Arteranos.WorldEdit
                 w.Awake(gob);
                 w.CommitState();
             }
+
+            gob.SetActive(true);
 
             foreach (WorldObject child in children)
                 yield return child.Instantiate(t);

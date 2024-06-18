@@ -14,16 +14,69 @@ using UnityEngine;
 using System.IO;
 using System;
 
+using UnityEngine.XR.Interaction.Toolkit;
+
 namespace Arteranos.WorldEdit
 {
     // Just for keeping the data for converting the gameobject to a serializable world object.
     public class WorldObjectComponent : MonoBehaviour
     {
+
         public WorldObjectAsset Asset { get; set; } = null;
         public List<WOCBase> WOComponents { get; set; } = null;
-        public bool IsLocked { get; set; } = false;
+        public bool IsLocked
+        {
+            get => isLocked;
+            set
+            {
+                isLocked = value;
+                SetIsMovable();
+            }
+        }
+        public bool IsCollidable
+        {
+            get => isCollidable;
+            set
+            {
+                isCollidable = value;
+                gameObject.layer = (int) (value ? ColliderType.Solid : ColliderType.Ghostly);
+            }
+        }
+        public bool IsGrabbable
+        {
+            get => isGrabbable;
+            set
+            {
+                isGrabbable = value;
+                SetIsMovable();
+            }
+        }
+
 
         public event Action OnStateChanged;
+
+        private bool isCollidable = false;
+        private bool isLocked = false;
+        private bool isGrabbable = false;
+
+        Rigidbody body = null;
+        XRGrabInteractable mover = null;
+
+        private void Awake()
+        {
+            body = gameObject.AddComponent<Rigidbody>();
+            body.useGravity = false;
+            body.drag = 0.5f;
+            body.angularDrag = 0.5f;
+
+            mover = gameObject.AddComponent<XRGrabInteractable>();
+            mover.throwOnDetach = false;
+            mover.smoothPosition = true;
+            mover.smoothRotation = true;
+
+            IsCollidable = false;
+            IsLocked = false;
+        }
 
         private void Update()
         {
@@ -56,6 +109,11 @@ namespace Arteranos.WorldEdit
                 }
             woComponent = null;
             return false;
+        }
+
+        private void SetIsMovable()
+        {
+            mover.enabled = !IsLocked;
         }
     }
 }
