@@ -55,40 +55,41 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         // Must match the sample constructed with the following routine
-        public const string sampleWOB = 
-            "CgaagCACCAMSCVRlc3QgQ3ViZRoKFQAAgD8dAACgQCIFJQAAgD8qDw0AAIA/F" +
-            "QAAgD8dAACAPzIUDQAAgD8VAACAPx0AAIA/JQAAgD9ClQEKBJqAIAASC1Rlc3" +
-            "QgU3BoZXJlGgUVAADAPyIFJQAAgD8qDw0AAIA/FQAAgD8dAACAPzIUDQAAgD8" +
-            "VAACAPx0AAIA/JQAAgD9CSwoGmoAgAggBEgxUZXN0IENhcHN1bGUaBRUAAMA/" +
-            "IgUlAACAPyoPDQAAgD8VAACAPx0AAIA/MhQNAACAPxUAAIA/HQAAgD8lAACAP" +
-            "0JOCgaagCACCAMSD1Rlc3QgQ3ViZSBSaWdodBoFDQAAwD8iBSUAAIA/Kg8NAA" +
-            "CAPxUAAIA/HQAAgD8yFA0AAIA/FQAAgD8dAACAPyUAAIA/";
+        public const string sampleWOB =
+            "CgaagCACCAMSCVRlc3QgQ3ViZTooioAgJAoKFQAAgD8dAACgQBIFJQAAgD8aD" +
+            "w0AAIA/FQAAgD8dAACAPzoakoAgFgoUDQAAgD8VAACAPx0AAIA/JQAAgD9CrQ" +
+            "EKBJqAIAASC1Rlc3QgU3BoZXJlOiOKgCAfCgUVAADAPxIFJQAAgD8aDw0AAIA" +
+            "/FQAAgD8dAACAPzoakoAgFgoUDQAAgD8VAACAPx0AAIA/JQAAgD9CVwoGmoAg" +
+            "AggBEgxUZXN0IENhcHN1bGU6I4qAIB8KBRUAAMA/EgUlAACAPxoPDQAAgD8VA" +
+            "ACAPx0AAIA/OhqSgCAWChQNAACAPxUAAIA/HQAAgD8lAACAP0JaCgaagCACCA" +
+            "MSD1Rlc3QgQ3ViZSBSaWdodDojioAgHwoFDQAAwD8SBSUAAIA/Gg8NAACAPxU" +
+            "AAIA/HQAAgD86GpKAIBYKFA0AAIA/FQAAgD8dAACAPyUAAIA/";
 
         public WorldObject BuildSample()
         {
             WorldObject cube = new(PrimitiveType.Cube)
             {
-                position = new Vector3(0, 1, 5),
                 name = "Test Cube"
             };
+            cube.GetWComponent<WOCTransform>().position = new Vector3(0, 1, 5);
 
             WorldObject cube2 = new(PrimitiveType.Cube)
             {
-                position = new Vector3(1.5f, 0, 0),
                 name = "Test Cube Right"
             };
+            cube2.GetWComponent<WOCTransform>().position = new Vector3(1.5f, 0, 0);
 
             WorldObject sphere = new(PrimitiveType.Sphere)
             {
-                position = new Vector3(0, 1.5f, 0),
                 name = "Test Sphere"
             };
+            sphere.GetWComponent<WOCTransform>().position = new Vector3(0, 1.5f, 0);
 
             WorldObject capsule = new(PrimitiveType.Capsule)
             {
-                position = new Vector3(0, 1.5f, 0),
                 name = "Test Capsule"
             };
+            capsule.GetWComponent<WOCTransform>().position = new Vector3(0, 1.5f, 0);
 
             sphere.children.Add(capsule);
             cube.children.Add(sphere);

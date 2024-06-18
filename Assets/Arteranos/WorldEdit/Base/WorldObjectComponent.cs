@@ -20,37 +20,22 @@ namespace Arteranos.WorldEdit
     public class WorldObjectComponent : MonoBehaviour
     {
         public WorldObjectAsset Asset { get; set; } = null;
+        public List<WOCBase> WOComponents { get; set; } = null;
         public bool IsLocked { get; set; } = false;
 
         public event Action OnStateChanged;
 
-        private Vector3 oldPosition;
-        private Quaternion oldRotation;
-        private Vector3 oldScale;
-
-        private void Start()
-        {
-            UpdateOldStates();
-        }
-
         private void Update()
         {
-            if (oldPosition != transform.position)
-                TriggerStateChanged();
-            if (oldRotation != transform.rotation)
-                TriggerStateChanged();
-            if (oldScale != transform.localScale)
-                TriggerStateChanged();
-        }
+            bool dirty = false;
+            foreach(WOCBase w in WOComponents)
+            {
+                w.Update();
+                dirty |= w.Dirty;
+            }
 
-        /// <summary>
-        /// Clean the 'dirty' state of the object
-        /// </summary>
-        public void UpdateOldStates()
-        {
-            oldPosition = transform.position;
-            oldRotation = transform.rotation;
-            oldScale = transform.localScale;
+
+            if (dirty) TriggerStateChanged();
         }
 
         /// <summary>
@@ -59,7 +44,18 @@ namespace Arteranos.WorldEdit
         public void TriggerStateChanged()
         {
             OnStateChanged?.Invoke();
-            UpdateOldStates();
+        }
+
+        public bool TryGetWOC<T>(out T woComponent) where T : WOCBase
+        {
+            foreach (WOCBase w in WOComponents)
+                if(w is T woc)
+                {
+                    woComponent = woc;
+                    return true;
+                }
+            woComponent = null;
+            return false;
         }
     }
 }

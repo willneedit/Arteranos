@@ -34,7 +34,7 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             WorldObject wob = BuildSample();
 
-            wob.position += new Vector3(2, 0, 0);
+            wob.GetWComponent<WOCTransform>().position += new Vector3(2, 0, 0);
 
             yield return ShowObject(wob);
         }
@@ -44,7 +44,7 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             WorldObject wob = BuildSample();
 
-            wob.rotation *= Quaternion.Euler(0, 45, 0);
+            wob.GetWComponent<WOCTransform>().rotation *= Quaternion.Euler(0, 45, 0);
 
             yield return ShowObject(wob);
         }
@@ -54,7 +54,7 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             WorldObject wob = BuildSample();
 
-            wob.scale = new Vector3(0.5f, 0.5f, 0.5f);
+            wob.GetWComponent<WOCTransform>().scale = new Vector3(0.5f, 0.5f, 0.5f);
 
             yield return ShowObject(wob);
         }
@@ -64,7 +64,7 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             WorldObject wob = BuildSample();
 
-            wob.color = Color.red;
+            wob.GetWComponent<WOCColor>().color = Color.red;
 
             yield return ShowObject(wob);
         }
@@ -74,11 +74,9 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             WorldObject wob = BuildSample();
 
-            WorldObject newroot = new()
-            {
-                position = new Vector3(-2, 0, 0),
-                rotation = Quaternion.Euler(0, 0, -45),
-            };
+            WorldObject newroot = new();
+            newroot.GetWComponent<WOCTransform>().position = new Vector3(-2, 0, 0);
+            newroot.GetWComponent<WOCTransform>().rotation = Quaternion.Euler(0, 0, -45);
             newroot.children.Add(wob);
 
             yield return ShowObject(newroot);

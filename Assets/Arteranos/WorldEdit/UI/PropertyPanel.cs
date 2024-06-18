@@ -143,6 +143,9 @@ namespace Arteranos.WorldEdit
 
         private void CommitChangedValues(string arg0)
         {
+            Woc.TryGetWOC(out WOCTransform woct);
+            Woc.TryGetWOC(out WOCColor wocc);
+
             Vector3 p = new(
                 txt_Pos_X.text.ParseInvariant(),
                 txt_Pos_Y.text.ParseInvariant(),
@@ -155,30 +158,18 @@ namespace Arteranos.WorldEdit
                 txt_Scale_X.text.ParseInvariant(),
                 txt_Scale_Y.text.ParseInvariant(),
                 txt_Scale_Z.text.ParseInvariant());
+            Color col = new(
+                txt_Col_R.text.ParseInvariant(),
+                txt_Col_G.text.ParseInvariant(),
+                txt_Col_B.text.ParseInvariant());
 
-            Transform t = WorldObject.transform;
+            woct.SetState(p, r, s, chk_Global.isOn);
+            woct.CommitState();
+            wocc.SetState(col);
+            wocc.CommitState();
 
-            if (chk_Local.isOn)
-                t.SetLocalPositionAndRotation(p, r);
-            else
-                t.SetPositionAndRotation(p, r);
-            t.localScale = s;
-
-            if (t.TryGetComponent(out Renderer renderer))
-            {
-                Color col = new(
-                    txt_Col_R.text.ParseInvariant(),
-                    txt_Col_G.text.ParseInvariant(),
-                    txt_Col_B.text.ParseInvariant());
-
-                renderer.material.color = col;
-
-                // TODO Adjust hue slider and color gradient square
-                img_Color_Swatch.color = col;
-            }
-
-            // Prevent the loopback of the updated world object
-            Woc.UpdateOldStates();
+            // TODO Adjust hue slider and color gradient square
+            img_Color_Swatch.color = col;
         }
 
         private void SetLocalMode(bool local)

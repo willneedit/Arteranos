@@ -7,7 +7,6 @@
 
 using System.Collections;
 using NUnit.Framework;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -15,7 +14,6 @@ using UnityEngine.TestTools;
 using Arteranos.WorldEdit;
 using System.IO;
 using System;
-using Object = UnityEngine.Object;
 
 namespace Arteranos.PlayTest.WorldEdit
 {
@@ -59,6 +57,10 @@ namespace Arteranos.PlayTest.WorldEdit
             yield return wob.Instantiate(pl.transform, _go => result = _go);
 
             WorldObject wob2 = result.MakeWorldObject();
+
+            //yield return wob2.Instantiate(pl.transform);
+            //yield return new WaitForSeconds(180);
+
             using MemoryStream ms2 = new();
             wob2.Serialize(ms2);
             string s2 = Convert.ToBase64String(ms2.ToArray());

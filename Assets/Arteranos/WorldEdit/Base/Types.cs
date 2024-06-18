@@ -20,101 +20,6 @@ using GLTFast;
 
 namespace Arteranos.WorldEdit
 {
-    // Protobuf serializable version
-    [ProtoContract]
-    public struct WOVector3
-    {
-        [ProtoMember(1)]
-        public float x;
-
-        [ProtoMember(2)]
-        public float y;
-
-        [ProtoMember(3)]
-        public float z;
-
-        public static implicit operator WOVector3(Vector3 v)
-            => new() { x = v.x, y = v.y, z = v.z };
-
-        public static implicit operator Vector3(WOVector3 v) 
-            => new() { x = v.x, y = v.y, z = v.z };
-    }
-
-    [ProtoContract]
-    public struct WOColor
-    {
-        [ProtoMember(1)]
-        public float r;
-
-        [ProtoMember(2)]
-        public float g;
-
-        [ProtoMember(3)]
-        public float b;
-
-        [ProtoMember(4)]
-        public float a;
-
-        public static implicit operator WOColor(Color c)
-            => new() { r = c.r, g = c.g, b = c.b, a = c.a };
-
-        public static implicit operator Color(WOColor c)
-            => new() { r = c.r, g = c.g, b = c.b, a = c.a };
-    }
-
-    [ProtoContract]
-    public struct WOQuaternion
-    {
-        [ProtoMember(1)]
-        public float x;
-
-        [ProtoMember(2)]
-        public float y;
-
-        [ProtoMember(3)]
-        public float z;
-
-        [ProtoMember(4)]
-        public float w;
-
-        public static implicit operator WOQuaternion(Quaternion q)
-            => new() {x = q.x, y = q.y, z = q.z, w = q.w };
-
-        public static implicit operator Quaternion(WOQuaternion q)
-            => new() { x = q.x, y = q.y, z = q.z, w = q.w };
-    }
-
-    [ProtoContract]
-    public class WOglTF : WorldObjectAsset
-    {
-        [ProtoMember(1)]
-        public string glTFCid;  // 1. Single glTF file
-    }
-
-    [ProtoContract]
-    public class WOKitItem : WorldObjectAsset
-    {
-        [ProtoMember(1)]
-        public string kitCid;   // 2a. Kit (collection of objects) file
-
-        [ProtoMember(2)]
-        public string kitName;  // 2b. File, referring to an object im AssetBundle
-    }
-
-    [ProtoContract]
-    public class WOPrimitive : WorldObjectAsset
-    {
-        [ProtoMember(1)]
-        public PrimitiveType primitive;
-    }
-
-    [ProtoContract]
-    [ProtoInclude(65537, typeof(WOglTF))]
-    [ProtoInclude(65538, typeof(WOKitItem))]
-    [ProtoInclude(65539, typeof(WOPrimitive))]
-    public class WorldObjectAsset
-    {
-    }
 
     [ProtoContract]
     public class WorldDecoration
@@ -135,20 +40,8 @@ namespace Arteranos.WorldEdit
         [ProtoMember(2)]
         public string name;
 
-        [ProtoMember(3)]
-        public WOVector3 position;            // local to parent
-
-        [ProtoMember(4)]
-        public WOQuaternion rotation;         // local to parent
-
-        [ProtoMember(5)]
-        public WOVector3 scale;               // local to parent
-
-        [ProtoMember(6)]
-        public WOColor color;
-
         [ProtoMember(7)]
-        public List<WOComponent> components;  // Additional properties (like teleport marker, ...)
+        public List<WOCBase> components;  // Additional properties (like teleport marker, ...)
 
         [ProtoMember(8)]
         public List<WorldObject> children;  // grouped objects
@@ -173,12 +66,14 @@ namespace Arteranos.WorldEdit
 
         private void Init()
         {
-            position = Vector3.zero;
-            rotation = Quaternion.identity;
-            scale = Vector3.one;
-            color = Color.white;
+            components = new()
+            {
+                new WOCTransform(),
+                new WOCColor()
+            };
 
-            components = new();
+            foreach(WOCBase w in components) w.Init();
+
             children = new();
         }
 
@@ -231,7 +126,7 @@ namespace Arteranos.WorldEdit
                 gob = GameObject.CreatePrimitive(WOPR.primitive);
             else if(asset is WOglTF WOglTF)
             {
-                gob = new GameObject("Unleaded glTF woeld object"); // :)
+                gob = new GameObject("Unleaded glTF world object"); // :)
                 yield return LoadglTF(WOglTF.glTFCid, gob);
             }
             else 
@@ -241,17 +136,19 @@ namespace Arteranos.WorldEdit
 
             gob.name = name;
 
-            gob.AddComponent<WorldObjectComponent>().Asset = asset;
+            WorldObjectComponent woc = gob.AddComponent<WorldObjectComponent>();  
+            woc.Asset = asset;
+            woc.WOComponents = components;
 
             Transform t = gob.transform;
             t.SetParent(parent);
-            t.SetLocalPositionAndRotation(position, rotation);
-            t.localScale = scale;
-
-            if (t.TryGetComponent(out Renderer renderer))
-                renderer.material.color = color;
 
             // TODO: Assembling the GameObjects components from WOComponents
+            foreach (WOCBase w in woc.WOComponents)
+            {
+                w.Awake(gob);
+                w.CommitState();
+            }
 
             foreach (WorldObject child in children)
                 yield return child.Instantiate(t);
@@ -261,12 +158,13 @@ namespace Arteranos.WorldEdit
             callback?.Invoke(gob);
         }
 
-    }
+        public T GetWComponent<T>() where T : WOCBase
+        {
+            foreach(WOCBase w in components)
+                if(w is T woc) return woc;
+            return null;
+        }
 
-    [ProtoContract]
-    public class WOComponent
-    {
-        // Extensible with subclassing done by ProtoInclude
     }
 
     public static class GameObjectExtensions
@@ -279,15 +177,8 @@ namespace Arteranos.WorldEdit
                 wo.asset = asset.Asset;
             else return null; // filter out alien GameObjects
 
+            wo.components = asset.WOComponents;
             wo.name = t.name;
-            wo.position = t.localPosition;
-            wo.rotation = t.localRotation;
-            wo.scale = t.localScale;
-
-            if (t.TryGetComponent(out Renderer renderer))
-                wo.color = renderer.material.color;
-
-            // Disassembling the GameObject components to WOComponents
 
             for (int i = 0; i < t.childCount; ++i)
             {
