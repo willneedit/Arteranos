@@ -17,6 +17,7 @@ using System.Threading;
 using Ipfs.Unity;
 using Arteranos.Services;
 using GLTFast;
+using UnityEditor;
 
 namespace Arteranos.WorldEdit
 {
@@ -46,11 +47,17 @@ namespace Arteranos.WorldEdit
         [ProtoMember(2)]
         public string name;
 
+        [ProtoMember(3)]
+        public Guid id;
+
         [ProtoMember(7)]
         public List<WOCBase> components;  // Additional properties (like teleport marker, ...)
 
         [ProtoMember(8)]
         public List<WorldObject> children;  // grouped objects
+
+
+        public GameObject GameObject { get; private set; } = null;
 
         public WorldObject()
         {
@@ -72,6 +79,8 @@ namespace Arteranos.WorldEdit
 
         private void Init()
         {
+            id = Guid.NewGuid();
+
             components = new()
             {
                 new WOCTransform(),
@@ -145,19 +154,20 @@ namespace Arteranos.WorldEdit
 
             WorldObjectComponent woc = gob.AddComponent<WorldObjectComponent>();  
             woc.Asset = asset;
+            woc.Id = id;
             woc.WOComponents = components;
             woc.EditorData = editorData;
 
             Transform t = gob.transform;
             t.SetParent(parent);
 
-            // TODO: Assembling the GameObjects components from WOComponents
             foreach (WOCBase w in woc.WOComponents)
             {
                 w.Awake(gob);
                 w.CommitState();
             }
 
+            GameObject = gob;
             gob.SetActive(true);
 
             foreach (WorldObject child in children)
@@ -166,6 +176,24 @@ namespace Arteranos.WorldEdit
             yield return null;
 
             callback?.Invoke(gob);
+        }
+
+        public void Patch()
+        {
+            GameObject gob = GameObject;
+
+            if(gob == null)
+                throw new ArgumentNullException(nameof(gob));
+
+            if (!gob.TryGetComponent(out WorldObjectComponent woc))
+                throw new ArgumentException("GameObject is not a World Object's instantiation");
+
+            if (id != woc.Id)
+                throw new ArgumentException("Mismatched object ID in patching");
+
+            gob.name = name;
+            for (int i = 0; i < components.Count; i++)
+                woc.ReplaceComponent(components[i]);
         }
 
         public T GetWComponent<T>() where T : WOCBase
@@ -179,27 +207,31 @@ namespace Arteranos.WorldEdit
 
     public static class GameObjectExtensions
     {
-        public static WorldObject MakeWorldObject(this Transform t)
+        public static WorldObject MakeWorldObject(this Transform t, bool includeChildren = true)
         {
             WorldObject wo = new();
 
-            if (t.TryGetComponent(out WorldObjectComponent asset))
-                wo.asset = asset.Asset;
+            if (t.TryGetComponent(out WorldObjectComponent woc))
+                wo.asset = woc.Asset;
             else return null; // filter out alien GameObjects
 
-            wo.components = asset.WOComponents;
             wo.name = t.name;
+            wo.components = woc.WOComponents;
+            wo.id = woc.Id;
 
-            for (int i = 0; i < t.childCount; ++i)
+            if(includeChildren)
             {
-                WorldObject item = MakeWorldObject(t.GetChild(i));
-                if(item != null) wo.children.Add(item);
+                for (int i = 0; i < t.childCount; ++i)
+                {
+                    WorldObject item = MakeWorldObject(t.GetChild(i));
+                    if (item != null) wo.children.Add(item);
+                }
             }
 
             return wo;
         }
 
-        public static WorldObject MakeWorldObject(this GameObject go)
-            => go.transform.MakeWorldObject();
+        public static WorldObject MakeWorldObject(this GameObject go, bool includeChildren = true)
+            => go.transform.MakeWorldObject(includeChildren);
     }
 }

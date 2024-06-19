@@ -98,6 +98,13 @@ namespace Arteranos.PlayTest.WorldEdit
             return cube;
         }
 
+        public void ClearGUIDs(WorldObject wob)
+        {
+            wob.id = new();
+            foreach(var child in wob.children)
+                ClearGUIDs(child);
+        }
+
         public IEnumerator ShowObject(WorldObject wob)
         {
             yield return wob.Instantiate(pl.transform);

@@ -23,6 +23,7 @@ namespace Arteranos.WorldEdit
     {
         public WorldEditorData EditorData { get; set; } = null;
         public WorldObjectAsset Asset { get; set; } = null;
+        public Guid Id { get; set; } = new();
         public List<WOCBase> WOComponents { get; set; } = null;
         public bool IsLocked
         {
@@ -108,6 +109,26 @@ namespace Arteranos.WorldEdit
                     return true;
                 }
             woComponent = null;
+            return false;
+        }
+
+        public bool ReplaceComponent(WOCBase wocb)
+        {
+            for (int i = 0; i < WOComponents.Count; i++)
+            {
+                WOCBase w = WOComponents[i];
+                if (wocb.GetType() == w.GetType())
+                {
+                    WOComponents[i] = wocb;
+                    wocb.Awake(gameObject);
+                    wocb.CommitState();
+                    return true;
+                }
+            }
+
+            WOComponents.Add(wocb);
+            wocb.Awake(gameObject);
+            wocb.CommitState();
             return false;
         }
 
