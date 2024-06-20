@@ -10,6 +10,11 @@ using UnityEngine;
 
 namespace Arteranos.WorldEdit
 {
+    /// <summary>
+    /// World Object Component - lightweight component system, keeping in sync with
+    /// the GameObject components and being serializable and supporting incremental patching.
+    /// </summary>
+
     [ProtoContract]
     [ProtoInclude(65537, typeof(WOCTransform))]
     [ProtoInclude(65538, typeof(WOCColor))]
@@ -35,14 +40,6 @@ namespace Arteranos.WorldEdit
         public abstract void CheckState();
 
         /// <summary>
-        /// To stage the changes, but not to commit yet
-        /// </summary>
-        public void SetState()
-        {
-            Dirty = true;
-        }
-
-        /// <summary>
         /// Set as in default state
         /// </summary>
         public abstract void Init();
@@ -51,6 +48,8 @@ namespace Arteranos.WorldEdit
         {
             this.gameObject = gameObject;
         }
+
+        public virtual void OnDestroy() { }
 
         public void Update()
         {
@@ -132,7 +131,8 @@ namespace Arteranos.WorldEdit
 
             oldPosition = globalPosition;
             oldEulerRotation = globalEulerRotation;
- 
+
+            Dirty = false;
             if (transform.localPosition != position)
                 Dirty = true;
             if(transform.localRotation != rotation)
@@ -143,8 +143,6 @@ namespace Arteranos.WorldEdit
 
         public void SetState(Vector3 position, Quaternion rotation, Vector3 scale, bool global = false)
         {
-            SetState();
-
             if(!global)
             {
                 this.position = position;
@@ -194,14 +192,13 @@ namespace Arteranos.WorldEdit
 
         public override void CheckState()
         {
+            Dirty = false;
             if(renderer != null && renderer.material.color != color)
                 Dirty = true;
         }
 
         public void SetState(Color color)
         {
-            SetState();
-
             this.color = color;
         }
     }

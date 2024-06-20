@@ -193,7 +193,7 @@ namespace Arteranos.WorldEdit
 
             gob.name = name;
             for (int i = 0; i < components.Count; i++)
-                woc.ReplaceComponent(components[i]);
+                woc.AddOrReplaceComponent(components[i]);
         }
 
         public T GetWComponent<T>() where T : WOCBase
@@ -203,6 +203,52 @@ namespace Arteranos.WorldEdit
             return null;
         }
 
+    }
+
+    [ProtoContract]
+    public class WorldObjectPatch
+    {
+        [ProtoMember(1)]
+        public List<Guid> path;
+
+        [ProtoMember(2)]
+        public List<WOCBase> components;
+
+        public void Serialize(Stream stream)
+            => Serializer.Serialize(stream, this);
+
+        public static WorldObjectPatch Deserialize(Stream stream)
+            => Serializer.Deserialize<WorldObjectPatch>(stream);
+
+        public void Apply()
+        {
+            Transform t = GameObject.FindGameObjectWithTag("WorldObjectsRoot").transform;
+
+            foreach (Guid id in path)
+            {
+                Transform found = null;
+                for (int i = 0; i < t.childCount; i++)
+                {
+                    if(!t.GetChild(i).TryGetComponent(out WorldObjectComponent woc)) continue;
+
+                    if(id == woc.Id)
+                    {
+                        found = t.GetChild(i);
+                        break;
+                    }
+                }
+
+                if (!found)
+                    throw new ArgumentException($"Unknown path element: {id}");
+
+                t = found;
+            }
+
+            t.TryGetComponent(out WorldObjectComponent cur_woc);
+
+            for (int i = 0; i < components.Count; i++)
+                cur_woc.AddOrReplaceComponent(components[i]);
+        }
     }
 
     public static class GameObjectExtensions
@@ -231,7 +277,40 @@ namespace Arteranos.WorldEdit
             return wo;
         }
 
+        public static WorldObjectPatch MakePatch(this Transform t, bool complete = false)
+        {
+            if (!t.TryGetComponent(out WorldObjectComponent woc))
+                throw new ArgumentException("GameObject is not in the world object hierarchy");
+
+            WorldObjectPatch wop = new()
+            {
+                path = new(),
+            };
+
+            if(complete)
+                wop.components = woc.WOComponents;
+            else
+            {
+                wop.components = new();
+                foreach(WOCBase component in woc.WOComponents)
+                    if(component.Dirty) wop.components.Add(component);
+            }
+
+            Transform current = t;
+            while(current.TryGetComponent(out woc))
+            {
+                wop.path.Add(woc.Id);
+                current = current.parent;
+            }
+            wop.path.Reverse();
+
+            return wop;
+        }
+
         public static WorldObject MakeWorldObject(this GameObject go, bool includeChildren = true)
             => go.transform.MakeWorldObject(includeChildren);
+
+        public static WorldObjectPatch MakePatch(this GameObject go, bool complete = false)
+            => go.transform.MakePatch(complete);
     }
 }

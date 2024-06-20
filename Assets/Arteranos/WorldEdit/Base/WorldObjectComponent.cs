@@ -112,7 +112,7 @@ namespace Arteranos.WorldEdit
             return false;
         }
 
-        public bool ReplaceComponent(WOCBase wocb)
+        public bool AddOrReplaceComponent(WOCBase wocb)
         {
             for (int i = 0; i < WOComponents.Count; i++)
             {

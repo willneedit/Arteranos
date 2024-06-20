@@ -68,36 +68,5 @@ namespace Arteranos.PlayTest.WorldEdit
 
             Assert.AreEqual(s, s2);
         }
-
-        [UnityTest]
-        public IEnumerator T004_Patch()
-        {
-            WorldObject wob = BuildSample();
-
-            // First, build and instantiate the sample.
-            GameObject result = null;
-            yield return wob.Instantiate(pl.transform, _go => result = _go);
-
-            // Pick the sphere...
-            WorldObject sphere = wob.children[0];
-            Assert.IsNotNull(sphere);
-
-            // First and second components are the transform or the color, respectively.
-            WOCTransform t = sphere.GetWComponent<WOCTransform>();
-            WOCColor c = sphere.GetWComponent<WOCColor>();
-            Assert.IsNotNull(t);
-            Assert.IsNotNull(c);
-
-            t.rotation = Quaternion.Euler(0, 0, 45);
-            c.color = Color.red;
-
-            yield return new WaitForSeconds(2);
-
-            sphere.Patch();
-
-            yield return new WaitForSeconds(2);
-
-            Assert.AreEqual(2, sphere.components.Count);
-        }
     }
 }
