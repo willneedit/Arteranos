@@ -132,9 +132,44 @@ namespace Arteranos.WorldEdit
             return false;
         }
 
+        public void CommitStates()
+        {
+            foreach(WOCBase w in WOComponents)
+                w.CommitState();
+        }
+
         private void SetIsMovable()
         {
             mover.enabled = !IsLocked;
         }
+
+        public WorldObjectPatch MakePatch(bool complete = false)
+        {
+            WorldObjectPatch wop = new()
+            {
+                path = new(),
+            };
+
+            if (complete)
+                wop.components = WOComponents;
+            else
+            {
+                wop.components = new();
+                foreach (WOCBase component in WOComponents)
+                    if (component.Dirty) wop.components.Add(component);
+            }
+
+            Transform current = transform;
+            while (current.TryGetComponent(out WorldObjectComponent woc))
+            {
+                wop.path.Add(woc.Id);
+                current = current.parent;
+            }
+            wop.path.Reverse();
+
+            return wop;
+        }
+
+
     }
 }

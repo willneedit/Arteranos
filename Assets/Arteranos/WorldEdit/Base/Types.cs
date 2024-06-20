@@ -282,29 +282,7 @@ namespace Arteranos.WorldEdit
             if (!t.TryGetComponent(out WorldObjectComponent woc))
                 throw new ArgumentException("GameObject is not in the world object hierarchy");
 
-            WorldObjectPatch wop = new()
-            {
-                path = new(),
-            };
-
-            if(complete)
-                wop.components = woc.WOComponents;
-            else
-            {
-                wop.components = new();
-                foreach(WOCBase component in woc.WOComponents)
-                    if(component.Dirty) wop.components.Add(component);
-            }
-
-            Transform current = t;
-            while(current.TryGetComponent(out woc))
-            {
-                wop.path.Add(woc.Id);
-                current = current.parent;
-            }
-            wop.path.Reverse();
-
-            return wop;
+            return woc.MakePatch(complete);
         }
 
         public static WorldObject MakeWorldObject(this GameObject go, bool includeChildren = true)
