@@ -532,6 +532,8 @@ namespace Arteranos.Services
                 _ = ServerQueryUserState(sender, userInfoQuery);
             else if (packet is CTSServerConfig serverConfig)
                 ServerUpdateServerConfiguration(sender, serverConfig);
+            else if (packet is CTSWorldObjectChange wc)
+                ServerCommitWorldObjectChange(sender, wc);
             else
                 throw new NotImplementedException();
         }
@@ -549,6 +551,8 @@ namespace Arteranos.Services
                 _ = ClientQueryUserState(userInfo);
             else if (packet is CTSServerConfig serverConfig)
                 ClientGotServerConfiguration(serverConfig);
+            else if (packet is CTSWorldObjectChange wc)
+                ClientGotWorldObjectChange(wc);
             else
                 throw new NotImplementedException();
         }
@@ -920,6 +924,28 @@ namespace Arteranos.Services
 
         private void ClientGotServerConfiguration(CTSServerConfig serverConfig) 
             => OnClientReceivedServerConfigAnswer?.Invoke(serverConfig.config);
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region World Editing propagation (all)
+        private void ServerCommitWorldObjectChange(UserID sender, CTSWorldObjectChange wc)
+        {
+            IAvatarBrain senderB = NetworkStatus.GetOnlineUser(sender);
+
+            if (NetworkServer.active)
+            {
+                // User tries to edit the world
+                if (!Core.Utils.IsAbleTo(senderB, UserCapabilities.CanEditWorld, null))
+                    return;
+            }
+
+            throw new NotImplementedException();
+        }
+
+        private void ClientGotWorldObjectChange(CTSWorldObjectChange wc)
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
     }

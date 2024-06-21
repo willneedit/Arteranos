@@ -24,6 +24,7 @@ namespace Arteranos.Core
     [ProtoInclude(65539, typeof(STCUserInfo))]
     [ProtoInclude(65540, typeof(CTSMessage))]
     [ProtoInclude(65541, typeof(CTSServerConfig))]
+    [ProtoInclude(65542, typeof(CTSWorldObjectChange))]
     public class CTSPacket
     {
         [ProtoMember(1)]
@@ -87,11 +88,19 @@ namespace Arteranos.Core
 
     // S: Server configuration update
     // C: Server configuration info
-
     [ProtoContract]
     public class CTSServerConfig : CTSPacket
     {
         [ProtoMember(1)]
         public ServerJSON config;
+    }
+
+    // C: World builder sends a change request about a world object
+    // S: Server broadcasts the world object change to everyone (including the world builder)
+    [ProtoContract]
+    public class CTSWorldObjectChange : CTSPacket
+    {
+        [ProtoMember(1)]
+        public byte[] changerequest; // Arteranos.WorldEdit.WorldChange, serialized
     }
 }

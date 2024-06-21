@@ -102,7 +102,7 @@ namespace Arteranos.PlayTest.WorldEdit
                 }
             };
 
-            wop.Apply();
+            yield return wop.Apply();
 
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();

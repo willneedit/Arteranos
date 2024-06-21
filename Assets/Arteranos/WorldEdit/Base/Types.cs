@@ -17,7 +17,6 @@ using System.Threading;
 using Ipfs.Unity;
 using Arteranos.Services;
 using GLTFast;
-using UnityEditor;
 
 namespace Arteranos.WorldEdit
 {
@@ -205,12 +204,42 @@ namespace Arteranos.WorldEdit
 
     }
 
+    // -------------------------------------------------------------------
+
     [ProtoContract]
-    public class WorldObjectPatch
+    public class WorldObjectInsertion : WorldChange
     {
         [ProtoMember(1)]
-        public List<Guid> path;
+        public WorldObjectAsset asset;      // see above
 
+        [ProtoMember(2)]
+        public string name;
+
+        [ProtoMember(3)]
+        public Guid id;                     // ID of the new object, assigned by the server
+
+        [ProtoMember(7)]
+        public List<WOCBase> components;  // Additional properties (like teleport marker, ...)
+
+        public override IEnumerator Apply()
+        {
+            Transform t = FindObjectByPath();
+
+            WorldObject worldObject = new()
+            {
+                asset = asset,
+                name = name,
+                id = id,
+                components = components
+            };
+
+            yield return worldObject.Instantiate(t);
+        }
+    }
+
+    [ProtoContract]
+    public class WorldObjectPatch : WorldChange
+    {
         [ProtoMember(2)]
         public List<WOCBase> components;
 
@@ -220,7 +249,45 @@ namespace Arteranos.WorldEdit
         public static WorldObjectPatch Deserialize(Stream stream)
             => Serializer.Deserialize<WorldObjectPatch>(stream);
 
-        public void Apply()
+        public override IEnumerator Apply()
+        {
+            Transform t = FindObjectByPath();
+
+            t.TryGetComponent(out WorldObjectComponent cur_woc);
+
+            for (int i = 0; i < components.Count; i++)
+                cur_woc.AddOrReplaceComponent(components[i]);
+
+            yield return null;
+        }
+    }
+
+    [ProtoContract]
+    public class WorldObjectDeletion : WorldChange
+    {
+        // Nothing more to need
+        public override IEnumerator Apply()
+        {
+            Transform t = FindObjectByPath();
+
+            UnityEngine.Object.Destroy(t.gameObject);
+
+            yield return null;
+        }
+    }
+
+    // -------------------------------------------------------------------
+
+    [ProtoContract]
+    [ProtoInclude(65537, typeof(WorldObjectInsertion))]
+    [ProtoInclude(65538, typeof(WorldObjectPatch))]
+    [ProtoInclude(65539, typeof(WorldObjectDeletion))]
+    public abstract class WorldChange
+    {
+        [ProtoMember(1)]
+        public List<Guid> path;
+
+        protected Transform FindObjectByPath()
         {
             Transform t = GameObject.FindGameObjectWithTag("WorldObjectsRoot").transform;
 
@@ -229,9 +296,9 @@ namespace Arteranos.WorldEdit
                 Transform found = null;
                 for (int i = 0; i < t.childCount; i++)
                 {
-                    if(!t.GetChild(i).TryGetComponent(out WorldObjectComponent woc)) continue;
+                    if (!t.GetChild(i).TryGetComponent(out WorldObjectComponent woc)) continue;
 
-                    if(id == woc.Id)
+                    if (id == woc.Id)
                     {
                         found = t.GetChild(i);
                         break;
@@ -244,13 +311,13 @@ namespace Arteranos.WorldEdit
                 t = found;
             }
 
-            t.TryGetComponent(out WorldObjectComponent cur_woc);
-
-            for (int i = 0; i < components.Count; i++)
-                cur_woc.AddOrReplaceComponent(components[i]);
+            return t;
         }
+
+        public abstract IEnumerator Apply();
     }
 
+    // -------------------------------------------------------------------
     public static class GameObjectExtensions
     {
         public static WorldObject MakeWorldObject(this Transform t, bool includeChildren = true)

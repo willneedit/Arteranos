@@ -164,9 +164,8 @@ namespace Arteranos.WorldEdit
                 txt_Col_B.text.ParseInvariant());
 
             woct.SetState(p, r, s, chk_Global.isOn);
-            woct.CommitState();
             wocc.SetState(col);
-            wocc.CommitState();
+            Woc.CommitStates();
 
             // TODO Adjust hue slider and color gradient square
             img_Color_Swatch.color = col;
