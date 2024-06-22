@@ -66,7 +66,7 @@ namespace Arteranos.WorldEdit
             }
         }
 
-        private void Panel_OnAddingNewObject(WorldObject obj)
+        private void Panel_OnAddingNewObject(WorldObjectInsertion obj)
         {
             SwitchToList();
             WorldObjectList.OnAddingWorldObject(obj);

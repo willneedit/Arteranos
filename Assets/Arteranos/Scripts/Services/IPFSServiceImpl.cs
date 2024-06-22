@@ -225,7 +225,7 @@ namespace Arteranos.Services
                     yield return new WaitForSeconds(2);
                 }
 
-                TransitionProgressStatic.Instance.OnProgressChanged(0.20f, "Starting IPFS daemon");
+                TransitionProgressStatic.Instance?.OnProgressChanged(0.20f, "Starting IPFS daemon");
 
                 TryStartIPFS();
 

@@ -83,7 +83,11 @@ namespace Arteranos.WorldEdit
                 primitive = primitives[index].prim
             };
 
-            AddingNewObject(new WorldObject(newWOP, primitives[index].name));
+            AddingNewObject(new() 
+            { 
+                asset = newWOP, 
+                name = primitives[index].name 
+            });
         }
     }
 }

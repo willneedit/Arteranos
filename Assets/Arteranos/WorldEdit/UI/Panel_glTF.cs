@@ -128,7 +128,11 @@ namespace Arteranos.WorldEdit
                 glTFCid = GLTFEntries[index].IPFSPath 
             };
 
-            AddingNewObject(new WorldObject(newWOglTF, GLTFEntries[index].FriendlyName));
+            AddingNewObject(new()
+            {
+                asset = newWOglTF,
+                name = GLTFEntries[index].FriendlyName
+            });
         }
     }
 }

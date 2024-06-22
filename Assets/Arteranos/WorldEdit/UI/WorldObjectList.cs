@@ -121,12 +121,38 @@ namespace Arteranos.WorldEdit
             OnWantsToAddItem?.Invoke();
         }
 
-        public void OnAddingWorldObject(WorldObject wo)
+        public void OnAddingWorldObject(WorldObjectInsertion woi)
         { 
             IEnumerator AdderCoroutine()
             {
-                yield return wo.Instantiate(CurrentRoot.transform, editorData: EditorData);
+                // Put the new object into the greater picture.
+                // Path in its hierarchy....
+                Transform current = CurrentRoot.transform;
+                woi.path = new();
+                while (current.TryGetComponent(out WorldObjectComponent woc))
+                {
+                    woi.path.Add(woc.Id);
+                    current = current.parent;
+                }
+                woi.path.Reverse();
 
+                woi.components = new()
+                {
+                    // ...the default transform...
+                    new WOCTransform()
+                    {
+                        position = Vector3.zero,
+                        rotation = Quaternion.identity,
+                        scale = Vector3.one
+                    },
+
+                    // ...and color.
+                    new WOCColor() { color = Color.white }
+                };
+
+                // TODO Not to directly adding, but to send the packet to the server,
+                // and let the UI been notified by the network manager for the server's response.
+                yield return woi.Apply();
                 RequestUpdateList();
 
                 // Finished with adding.

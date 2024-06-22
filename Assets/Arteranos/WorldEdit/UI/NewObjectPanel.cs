@@ -17,9 +17,9 @@ namespace Arteranos.WorldEdit
 {
     public class NewObjectPanel : UIBehaviour
     {
-        public event Action<WorldObject> OnAddingNewObject;
+        public event Action<WorldObjectInsertion> OnAddingNewObject;
 
-        protected void AddingNewObject(WorldObject obj)
+        protected void AddingNewObject(WorldObjectInsertion obj)
             => OnAddingNewObject?.Invoke(obj);
     }
 }
