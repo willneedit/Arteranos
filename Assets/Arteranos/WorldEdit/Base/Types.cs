@@ -291,6 +291,8 @@ namespace Arteranos.WorldEdit
         {
             Transform t = GameObject.FindGameObjectWithTag("WorldObjectsRoot").transform;
 
+            if (path == null) return t;
+
             foreach (Guid id in path)
             {
                 Transform found = null;

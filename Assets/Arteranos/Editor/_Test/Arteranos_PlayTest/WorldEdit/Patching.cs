@@ -12,11 +12,10 @@ using UnityEngine.TestTools;
 
 
 using Arteranos.WorldEdit;
-using System.IO;
 using System;
 using System.Collections.Generic;
 
-namespace Arteranos.PlayTest.WorldEdit
+namespace Arteranos.PlayTest.WorldEdit.WorldChange
 {
     public class Patching : WorldEditFixture
     {
@@ -165,13 +164,13 @@ namespace Arteranos.PlayTest.WorldEdit
             WorldObjectPatch goinghome = new()
             { path = path, components = new() { green } };
 
-            turningnine.Apply();
+            yield return turningnine.Apply();
             yield return new WaitForSeconds(1);
-            goingtowork.Apply();
+            yield return goingtowork.Apply();
             yield return new WaitForSeconds(1);
-            turningmidday.Apply();
+            yield return turningmidday.Apply();
             yield return new WaitForSeconds(1);
-            goinghome.Apply();
+            yield return goinghome.Apply();
             yield return new WaitForSeconds(1);
         }
 
