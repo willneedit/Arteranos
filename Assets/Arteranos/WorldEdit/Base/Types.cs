@@ -354,10 +354,21 @@ namespace Arteranos.WorldEdit
             return woc.MakePatch(complete);
         }
 
+        public static WorldObjectInsertion MakeInsertion(this Transform t)
+        {
+            if (!t.TryGetComponent(out WorldObjectComponent woc))
+                throw new ArgumentException("GameObject is not in the world object hierarchy");
+
+            return woc.MakeInsertion();
+        }
+
         public static WorldObject MakeWorldObject(this GameObject go, bool includeChildren = true)
             => go.transform.MakeWorldObject(includeChildren);
 
         public static WorldObjectPatch MakePatch(this GameObject go, bool complete = false)
             => go.transform.MakePatch(complete);
+
+        public static WorldObjectInsertion MakeInsertion(this GameObject go)
+            => go.transform.MakeInsertion();
     }
 }

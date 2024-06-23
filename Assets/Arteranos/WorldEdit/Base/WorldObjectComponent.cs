@@ -170,6 +170,28 @@ namespace Arteranos.WorldEdit
             return wop;
         }
 
+        public WorldObjectInsertion MakeInsertion()
+        {
+            transform.TryGetComponent(out WorldObjectComponent woc);
+            WorldObjectInsertion woi = new()
+            {
+                asset = woc.Asset,
+                components = woc.WOComponents,
+                name = transform.name,
+                id = Guid.NewGuid(), // Creating a copy of an existing one, so spawn a new guid
+                path = new(),
+            };
+
+            Transform current = transform.parent;
+            while (current.TryGetComponent(out WorldObjectComponent path_woc))
+            {
+                woi.path.Add(path_woc.Id);
+                current = current.parent;
+            }
+            woi.path.Reverse();
+
+            return woi;
+        }
 
     }
 }

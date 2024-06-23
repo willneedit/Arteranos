@@ -169,5 +169,19 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
             }
         }
 
+        [UnityTest]
+        public IEnumerator T004_Copy()
+        {
+            yield return Default();
+
+            WorldObjectInsertion woi = sphere.GameObject.MakeInsertion();
+            Assert.AreEqual(1, woi.path.Count);
+            Assert.AreEqual(wob.id, woi.path[0]);
+            Assert.AreNotEqual(sphere.id, woi.id);
+            Assert.AreSame(sphere.asset, woi.asset);
+            Assert.AreEqual(sphere.name, woi.name);
+            Assert.AreEqual(2, woi.components.Count);
+
+        }
     }
 }
