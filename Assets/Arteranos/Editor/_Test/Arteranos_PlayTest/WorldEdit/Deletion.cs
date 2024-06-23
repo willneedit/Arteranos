@@ -42,15 +42,6 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
         {
             yield return Default();
 
-            WOCTransform wot = new()
-            {
-                position = new Vector3(1, 1, 0),
-                rotation = Quaternion.Euler(0, 0, 45),
-                scale = Vector3.one
-            };
-
-            WOPrimitive wop = new() { primitive = PrimitiveType.Cube };
-
             WorldObjectDeletion wod = new()
             {
                 path = new()

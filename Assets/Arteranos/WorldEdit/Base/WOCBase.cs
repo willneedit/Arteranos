@@ -74,8 +74,9 @@ namespace Arteranos.WorldEdit
         {
             base.Awake(gameObject);
             transform = gameObject.transform;
-            gameObject.TryGetComponent(out WorldObjectComponent woc);
-            editorData = woc.EditorData;
+
+            GameObject root = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
+            if (root) root.TryGetComponent(out editorData);
         }
 
         public override void Init()

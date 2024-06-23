@@ -21,7 +21,6 @@ namespace Arteranos.WorldEdit
     // Just for keeping the data for converting the gameobject to a serializable world object.
     public class WorldObjectComponent : MonoBehaviour
     {
-        public WorldEditorData EditorData { get; set; } = null;
         public WorldObjectAsset Asset { get; set; } = null;
         public Guid Id { get; set; } = new();
         public List<WOCBase> WOComponents { get; set; } = null;

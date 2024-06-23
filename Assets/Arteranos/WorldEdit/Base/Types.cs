@@ -97,7 +97,7 @@ namespace Arteranos.WorldEdit
         public static WorldObject Deserialize(Stream stream)
             => Serializer.Deserialize<WorldObject>(stream);
 
-        public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null, WorldEditorData editorData = null)
+        public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
         {
             IEnumerator LoadglTF(string GLTFObjectPath, GameObject LoadedObject)
             {
@@ -155,7 +155,6 @@ namespace Arteranos.WorldEdit
             woc.Asset = asset;
             woc.Id = id;
             woc.WOComponents = components;
-            woc.EditorData = editorData;
 
             Transform t = gob.transform;
             t.SetParent(parent);
@@ -170,7 +169,7 @@ namespace Arteranos.WorldEdit
             gob.SetActive(true);
 
             foreach (WorldObject child in children)
-                yield return child.Instantiate(t, editorData: editorData);
+                yield return child.Instantiate(t);
 
             yield return null;
 
@@ -243,12 +242,6 @@ namespace Arteranos.WorldEdit
         [ProtoMember(2)]
         public List<WOCBase> components;
 
-        public void Serialize(Stream stream)
-            => Serializer.Serialize(stream, this);
-
-        public static WorldObjectPatch Deserialize(Stream stream)
-            => Serializer.Deserialize<WorldObjectPatch>(stream);
-
         public override IEnumerator Apply()
         {
             Transform t = FindObjectByPath();
@@ -286,6 +279,13 @@ namespace Arteranos.WorldEdit
     {
         [ProtoMember(1)]
         public List<Guid> path;
+
+        public void Serialize(Stream stream)
+            => Serializer.Serialize(stream, this);
+
+        public static WorldChange Deserialize(Stream stream)
+            => Serializer.Deserialize<WorldChange>(stream);
+
 
         protected Transform FindObjectByPath()
         {
