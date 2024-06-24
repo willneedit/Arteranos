@@ -215,7 +215,7 @@ namespace Arteranos.WorldEdit
         public string name;
 
         [ProtoMember(3)]
-        public Guid id;                     // ID of the new object, assigned by the server
+        public Guid id = Guid.NewGuid();
 
         [ProtoMember(7)]
         public List<WOCBase> components;  // Additional properties (like teleport marker, ...)
@@ -263,6 +263,9 @@ namespace Arteranos.WorldEdit
         {
             Transform t = FindObjectByPath();
 
+            // Unhook the object from the hierarchy first because we consider it deleted,
+            // even if it's not yet destroyed in the current frame.
+            t.SetParent(null);
             UnityEngine.Object.Destroy(t.gameObject);
 
             yield return null;
@@ -316,7 +319,35 @@ namespace Arteranos.WorldEdit
             return t;
         }
 
+        public void SetPathFromThere(Transform t)
+        {
+            path = new();
+            while (t.TryGetComponent(out WorldObjectComponent woc))
+            {
+                path.Add(woc.Id);
+                t = t.parent;
+            }
+            path.Reverse();
+        }
+
         public abstract IEnumerator Apply();
+
+        public void EmitToServer()
+        {
+#if UNITY_EDITOR
+            // Shortcut in 'lean' setup/test scene.
+            if(SettingsManager.Instance == null)
+            {
+                GameObject WORoot = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
+                WORoot.TryGetComponent(out WorldEditorData EditorData);
+                EditorData.DoApply(this);
+            }
+#endif
+            using MemoryStream ms = new();
+            Serialize(ms);
+            CTSWorldObjectChange cts_wc = new() { changerequest = ms.ToArray() };
+            SettingsManager.EmitToServerCTSPacket(cts_wc);
+        }
     }
 
     // -------------------------------------------------------------------

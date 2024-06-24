@@ -104,12 +104,10 @@ namespace Arteranos.WorldEdit
 
         private void OnDeleteClicked()
         {
-            // Unhook this object from the hierarchy
-            WorldObject.transform.SetParent(null);
-            Container.RequestUpdateList();
+            WorldObjectDeletion wod = new();
+            wod.SetPathFromThere(WorldObject.transform);
 
-            // Slate it for destruction
-            Destroy(WorldObject); 
+            wod.EmitToServer();
             WorldObject = null;
         }
 

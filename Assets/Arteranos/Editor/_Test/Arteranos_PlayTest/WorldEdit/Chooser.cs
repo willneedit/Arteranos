@@ -161,6 +161,9 @@ namespace Arteranos.PlayTest.WorldEdit
 
             GetWOChooserItem(1).Test_OnDeleteClicked();             // Delete the sphere _and its children_
             yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
 
             Assert.AreEqual(2, ItemContainer.childCount);
             Assert.AreEqual("Test Cube", GetWOChooserItem(0).txt_Name.text);

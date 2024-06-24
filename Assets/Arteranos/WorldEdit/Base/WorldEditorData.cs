@@ -26,5 +26,22 @@ namespace Arteranos.WorldEdit
         public bool LockXAxis = false;
         public bool LockYAxis = false;
         public bool LockZAxis = false;
+
+        public event Action<WorldChange> OnWorldChanged;
+
+        public void NotifyWorldChanged(WorldChange worldChange)
+            => OnWorldChanged?.Invoke(worldChange);
+
+        public void DoApply(WorldChange worldChange)
+        {
+            IEnumerator Cor()
+            {
+                yield return worldChange.Apply();
+
+                NotifyWorldChanged(worldChange);
+            }
+
+            StartCoroutine(Cor());
+        }
     }
 }

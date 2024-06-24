@@ -144,10 +144,7 @@ namespace Arteranos.WorldEdit
 
         public WorldObjectPatch MakePatch(bool complete = false)
         {
-            WorldObjectPatch wop = new()
-            {
-                path = new(),
-            };
+            WorldObjectPatch wop = new();
 
             if (complete)
                 wop.components = WOComponents;
@@ -158,14 +155,7 @@ namespace Arteranos.WorldEdit
                     if (component.Dirty) wop.components.Add(component);
             }
 
-            Transform current = transform;
-            while (current.TryGetComponent(out WorldObjectComponent woc))
-            {
-                wop.path.Add(woc.Id);
-                current = current.parent;
-            }
-            wop.path.Reverse();
-
+            wop.SetPathFromThere(transform);
             return wop;
         }
 
@@ -178,17 +168,9 @@ namespace Arteranos.WorldEdit
                 components = woc.WOComponents,
                 name = transform.name,
                 id = Guid.NewGuid(), // Creating a copy of an existing one, so spawn a new guid
-                path = new(),
             };
 
-            Transform current = transform.parent;
-            while (current.TryGetComponent(out WorldObjectComponent path_woc))
-            {
-                woi.path.Add(path_woc.Id);
-                current = current.parent;
-            }
-            woi.path.Reverse();
-
+            woi.SetPathFromThere(transform.parent);
             return woi;
         }
 

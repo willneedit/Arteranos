@@ -25,6 +25,7 @@ namespace Arteranos.PlayTest.WorldEdit
 
         Camera ca = null;
         Light li = null;
+        WorldEditorData editorData = null;
 
         [UnitySetUp]
         public IEnumerator SetUp0()
@@ -37,9 +38,10 @@ namespace Arteranos.PlayTest.WorldEdit
             li.type = LightType.Directional;
             li.color = Color.white;
 
-            GameObject bpl = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/Plane.prefab");
-            pl = Object.Instantiate(bpl);
+            pl = GameObject.CreatePrimitive(PrimitiveType.Plane);
             pl.tag = "WorldObjectsRoot";
+
+            editorData = pl.AddComponent<WorldEditorData>();
 
             yield return new WaitForEndOfFrame();
         }

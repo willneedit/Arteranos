@@ -24,6 +24,7 @@ namespace Arteranos.WorldEdit
 
         private GameObject WORoot = null;
         private GameObject CurrentRoot = null;
+        private WorldEditorData EditorData = null;
 
         protected override void Awake()
         {
@@ -34,6 +35,16 @@ namespace Arteranos.WorldEdit
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
             Chooser.OnAddingItem += RequestToAdd;
+
+            WORoot = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
+            WORoot.TryGetComponent(out EditorData);
+
+            EditorData.OnWorldChanged += GotWorldChanged;
+        }
+
+        private void GotWorldChanged(WorldChange change)
+        {
+            RequestUpdateList();
         }
 
         protected override void OnDestroy()
@@ -42,6 +53,8 @@ namespace Arteranos.WorldEdit
             Chooser.OnAddingItem -= RequestToAdd;
             Chooser.OnShowingPage -= PreparePage;
 
+            EditorData.OnWorldChanged -= GotWorldChanged;
+
             base.OnDestroy();
         }
 
@@ -49,7 +62,6 @@ namespace Arteranos.WorldEdit
         {
             base.Start();
 
-            WORoot = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
             CurrentRoot = WORoot;
 
             Chooser.ShowPage(0);
@@ -121,46 +133,30 @@ namespace Arteranos.WorldEdit
 
         public void OnAddingWorldObject(WorldObjectInsertion woi)
         { 
-            IEnumerator AdderCoroutine()
+            // Put the new object into the greater picture.
+            // Path in its hierarchy....
+            Transform current = CurrentRoot.transform;
+            woi.SetPathFromThere(current);
+            woi.components = new()
             {
-                // Put the new object into the greater picture.
-                // Path in its hierarchy....
-                Transform current = CurrentRoot.transform;
-                woi.path = new();
-                while (current.TryGetComponent(out WorldObjectComponent woc))
+                // ...the default transform...
+                new WOCTransform()
                 {
-                    woi.path.Add(woc.Id);
-                    current = current.parent;
-                }
-                woi.path.Reverse();
+                    position = Vector3.zero,
+                    rotation = Quaternion.identity,
+                    scale = Vector3.one
+                },
 
-                woi.components = new()
-                {
-                    // ...the default transform...
-                    new WOCTransform()
-                    {
-                        position = Vector3.zero,
-                        rotation = Quaternion.identity,
-                        scale = Vector3.one
-                    },
+                // ...and color.
+                new WOCColor() { color = Color.white }
+            };
 
-                    // ...and color.
-                    new WOCColor() { color = Color.white }
-                };
+            // Post the insertion request to the server, it should come back.
+            // If you have the rights to do this.
+            woi.EmitToServer();
 
-                // TODO Not to directly adding, but to send the packet to the server,
-                // and let the UI been notified by the network manager for the server's response.
-                yield return woi.Apply();
-                RequestUpdateList();
-
-                // Finished with adding.
-                Chooser.btn_AddItem.interactable = true;
-            }
-
-            StartCoroutine(AdderCoroutine());
+            // Finished with adding.
+            Chooser.btn_AddItem.interactable = true;
         }
-
     }
-
-
 }

@@ -14,6 +14,8 @@ using Arteranos.Social;
 using Arteranos.Web;
 using System.Linq;
 using Ipfs;
+using Arteranos.WorldEdit;
+using System.IO;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -648,8 +650,7 @@ namespace Arteranos.Services
 
         private IEnumerator MakeClientWorldTransition(CTSPWorldChangeAnnouncement wca)
         {
-            OnlineLevel onlineLevel = NetworkStatus.GetOnlineLevel();
-            if(onlineLevel == OnlineLevel.Host)
+            if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
             {
                 Debug.Log("[Client] Server wants to change the world, but we are in the host mode.");
                 yield break;
@@ -939,12 +940,29 @@ namespace Arteranos.Services
                     return;
             }
 
-            throw new NotImplementedException();
+            // TBD: Do we have to?
+            //using MemoryStream ms = new(wc.changerequest);
+            //WorldChange worldChange = WorldChange.Deserialize(ms);
+
+            //StartCoroutine(worldChange.Apply());
+
+            EmitToClientCTSPacket(wc, null);
         }
 
         private void ClientGotWorldObjectChange(CTSWorldObjectChange wc)
         {
-            throw new NotImplementedException();
+            // Already made in server side, no sense to do it again?
+            //if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host) return;
+
+            using MemoryStream ms = new(wc.changerequest);
+            WorldChange worldChange = WorldChange.Deserialize(ms);
+
+            StartCoroutine(worldChange.Apply());
+
+            // As an afterthought, let the observers to know of the change.
+            GameObject WORoot = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
+            WORoot.TryGetComponent(out WorldEditorData EditorData);
+            EditorData.NotifyWorldChanged(worldChange);
         }
 
         #endregion
