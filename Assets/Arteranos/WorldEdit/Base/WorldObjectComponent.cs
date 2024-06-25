@@ -139,7 +139,9 @@ namespace Arteranos.WorldEdit
 
         private void SetIsMovable()
         {
-            mover.enabled = !IsLocked;
+            mover.enabled = EditorData.IsInEditMode 
+                ? !IsLocked
+                : IsGrabbable;
         }
 
         public WorldObjectPatch MakePatch(bool complete = false)

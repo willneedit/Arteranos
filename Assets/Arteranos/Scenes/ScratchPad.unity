@@ -1467,10 +1467,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a6bec223e9b1cc4d8ddf3f3b4f6d7d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsInEditMode: 0
-  LockXAxis: 1
-  LockYAxis: 1
-  LockZAxis: 1
+  LockXAxis: 0
+  LockYAxis: 0
+  LockZAxis: 0
+  isInEditMode: 1
 --- !u!114 &6642253553766238805
 MonoBehaviour:
   m_ObjectHideFlags: 0
