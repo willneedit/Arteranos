@@ -203,9 +203,10 @@ namespace Arteranos.PlayTest.WorldEdit
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
 
-            Assert.AreEqual("2.00", panel.txt_Pos_X.text);
-            Assert.AreEqual("3.00", panel.txt_Pos_Y.text);
-            Assert.AreEqual("4.00", panel.txt_Pos_Z.text);
+            // Only local; not propagated and not set in the WorldObject.
+            Assert.AreEqual("0.00", panel.txt_Pos_X.text);
+            Assert.AreEqual("1.00", panel.txt_Pos_Y.text);
+            Assert.AreEqual("5.00", panel.txt_Pos_Z.text);
         }
 
         [UnityTest]

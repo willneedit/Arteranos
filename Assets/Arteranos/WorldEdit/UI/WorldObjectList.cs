@@ -36,7 +36,7 @@ namespace Arteranos.WorldEdit
             Chooser.OnPopulateTile += PopulateTile;
             Chooser.OnAddingItem += RequestToAdd;
 
-            WORoot = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
+            WORoot = WorldChange.FindObjectByPath(null).gameObject;
             WORoot.TryGetComponent(out EditorData);
 
             EditorData.OnWorldChanged += GotWorldChanged;
@@ -44,6 +44,7 @@ namespace Arteranos.WorldEdit
 
         private void GotWorldChanged(WorldChange change)
         {
+            // TODO Filter out changes which are invisible in the current list of objects
             RequestUpdateList();
         }
 

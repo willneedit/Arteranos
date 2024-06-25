@@ -248,7 +248,8 @@ namespace Arteranos.WorldEdit
 
             t.TryGetComponent(out WorldObjectComponent cur_woc);
 
-            for (int i = 0; i < components.Count; i++)
+            // NB: Protobuf omits empty lists, rendering them as null while deserialization.
+            for (int i = 0; i < components?.Count; i++)
                 cur_woc.AddOrReplaceComponent(components[i]);
 
             yield return null;
@@ -289,8 +290,9 @@ namespace Arteranos.WorldEdit
         public static WorldChange Deserialize(Stream stream)
             => Serializer.Deserialize<WorldChange>(stream);
 
+        protected Transform FindObjectByPath() => FindObjectByPath(path);
 
-        protected Transform FindObjectByPath()
+        public static Transform FindObjectByPath(List <Guid> path)
         {
             Transform t = GameObject.FindGameObjectWithTag("WorldObjectsRoot").transform;
 

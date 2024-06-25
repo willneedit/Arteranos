@@ -42,11 +42,11 @@ namespace Arteranos.WorldEdit
 
         public GameObject WorldObject
         {
-            get => m_WorldObject;
+            get => worldObject;
             set
             {
-                m_WorldObject = value;
-                Woc = m_WorldObject.GetComponent<WorldObjectComponent>();
+                worldObject = value;
+                Woc = worldObject.GetComponent<WorldObjectComponent>();
             }
         }
 
@@ -54,7 +54,8 @@ namespace Arteranos.WorldEdit
 
         public event Action OnReturnToList;
 
-        private GameObject m_WorldObject;
+        private GameObject worldObject;
+        private WorldEditorData EditorData = null;
 
         protected override void Awake()
         {
@@ -89,12 +90,26 @@ namespace Arteranos.WorldEdit
 
             Populate();
 
-            Woc.OnStateChanged += Populate;
+            Transform root = WorldChange.FindObjectByPath(null);
+            root.TryGetComponent(out EditorData);
+            EditorData.OnWorldChanged += GotWorldChanged;
+        }
+
+        private void GotWorldChanged(WorldChange change)
+        {
+            // Skip if it isn't an object modification
+            if (change is not WorldObjectPatch wop) return;
+
+            // Same as with a different object.
+            // Maybe another user fiddled with another object. Think collaborative editing.
+            if(wop.path[^1] != Woc.Id) return;
+
+            Populate();
         }
 
         protected override void OnDisable()
         {
-            Woc.OnStateChanged -= Populate;
+            EditorData.OnWorldChanged -= GotWorldChanged;
 
             base.OnDisable();
         }
@@ -165,10 +180,7 @@ namespace Arteranos.WorldEdit
 
             woct.SetState(p, r, s, chk_Global.isOn);
             wocc.SetState(col);
-            Woc.CommitStates();
-
-            // TODO Adjust hue slider and color gradient square
-            img_Color_Swatch.color = col;
+            worldObject.MakePatch(true).EmitToServer();
         }
 
         private void SetLocalMode(bool local)

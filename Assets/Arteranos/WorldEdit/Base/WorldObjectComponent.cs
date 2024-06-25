@@ -52,15 +52,13 @@ namespace Arteranos.WorldEdit
             }
         }
 
-
-        public event Action OnStateChanged;
-
         private bool isCollidable = false;
         private bool isLocked = false;
         private bool isGrabbable = false;
 
-        Rigidbody body = null;
-        XRGrabInteractable mover = null;
+        private WorldEditorData EditorData = null;
+        private Rigidbody body = null;
+        private XRGrabInteractable mover = null;
 
         private void Awake()
         {
@@ -74,29 +72,31 @@ namespace Arteranos.WorldEdit
             mover.smoothPosition = true;
             mover.smoothRotation = true;
 
+            mover.lastSelectExited.AddListener(GotObjectRelease);
+
+            Transform root = WorldChange.FindObjectByPath(null);
+            root.TryGetComponent(out EditorData);
+
             IsCollidable = false;
             IsLocked = false;
         }
 
-        private void Update()
+        private void GotObjectRelease(SelectExitEventArgs arg0)
         {
-            bool dirty = false;
-            foreach(WOCBase w in WOComponents)
+            if(EditorData.IsInEditMode)
             {
-                w.Update();
-                dirty |= w.Dirty;
+                // We're in edit mode, we are actually changing the world.
+                TryGetWOC(out WOCTransform woct);
+                woct.SetState(
+                    transform.localPosition, 
+                    transform.localRotation, 
+                    transform.localScale);
+
+                WorldObjectPatch wop = new();
+                wop.SetPathFromThere(transform);
+                wop.components = new() { woct };
+                wop.EmitToServer();
             }
-
-
-            if (dirty) TriggerStateChanged();
-        }
-
-        /// <summary>
-        /// Notify obserevers about the changed state
-        /// </summary>
-        public void TriggerStateChanged()
-        {
-            OnStateChanged?.Invoke();
         }
 
         public bool TryGetWOC<T>(out T woComponent) where T : WOCBase
