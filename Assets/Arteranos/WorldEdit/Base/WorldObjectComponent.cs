@@ -87,9 +87,12 @@ namespace Arteranos.WorldEdit
             {
                 // We're in edit mode, we are actually changing the world.
                 TryGetWOC(out WOCTransform woct);
+
+                (Vector3 position, Vector3 eulerAngles) = ConstrainMovement(woct.position, ((Quaternion)woct.rotation).eulerAngles);
+
                 woct.SetState(
-                    transform.localPosition, 
-                    transform.localRotation, 
+                    position, 
+                    Quaternion.Euler(eulerAngles), 
                     transform.localScale);
 
                 WorldObjectPatch wop = new();
@@ -98,6 +101,36 @@ namespace Arteranos.WorldEdit
                 wop.EmitToServer();
             }
         }
+
+        private (Vector3, Vector3) ConstrainMovement(Vector3 oldPosition, Vector3 oldEulerRotation)
+        {
+            if(!EditorData.LockXAxis && !EditorData.LockYAxis && !EditorData.LockZAxis)
+                return (transform.localPosition, transform.localEulerAngles);
+
+            Vector3 position = transform.localPosition;
+            Vector3 eulerRotation = transform.localEulerAngles;
+
+            if(EditorData.LockXAxis)
+            {
+                position.x = oldPosition.x;
+                eulerRotation.x = oldEulerRotation.x;
+            }
+
+            if(EditorData.LockYAxis)
+            {
+                position.y = oldPosition.y;
+                eulerRotation.y = oldEulerRotation.y;
+            }
+
+            if(EditorData.LockZAxis)
+            {
+                position.z = oldPosition.z;
+                eulerRotation.z = oldEulerRotation.z;
+            }
+
+            return (position, eulerRotation);
+        }
+
 
         public bool TryGetWOC<T>(out T woComponent) where T : WOCBase
         {
