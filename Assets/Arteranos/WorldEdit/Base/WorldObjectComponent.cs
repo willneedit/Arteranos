@@ -81,6 +81,12 @@ namespace Arteranos.WorldEdit
             IsLocked = false;
         }
 
+        private void Update()
+        {
+            foreach (WOCBase component in WOComponents)
+                component.Update();
+        }
+
         private void GotObjectRelease(SelectExitEventArgs arg0)
         {
             if(EditorData.IsInEditMode)
