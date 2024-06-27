@@ -273,12 +273,23 @@ namespace Arteranos.WorldEdit
         }
     }
 
+    [ProtoContract]
+    public class WorldRollbackRequest : WorldChange
+    {
+        public override IEnumerator Apply()
+        {
+            // single GUID in path, meaning the ID to identify the particular snapshot.
+            throw new NotImplementedException();
+        }
+    }
+
     // -------------------------------------------------------------------
 
     [ProtoContract]
     [ProtoInclude(65537, typeof(WorldObjectInsertion))]
     [ProtoInclude(65538, typeof(WorldObjectPatch))]
     [ProtoInclude(65539, typeof(WorldObjectDeletion))]
+    [ProtoInclude(65540, typeof(WorldRollbackRequest))]
     public abstract class WorldChange
     {
         [ProtoMember(1)]
@@ -340,9 +351,8 @@ namespace Arteranos.WorldEdit
             // Shortcut in 'lean' setup/test scene.
             if(SettingsManager.Instance == null)
             {
-                GameObject WORoot = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
-                WORoot.TryGetComponent(out WorldEditorData EditorData);
-                EditorData.DoApply(this);
+                WorldEditorData.DoApply(this);
+                return;
             }
 #endif
             using MemoryStream ms = new();

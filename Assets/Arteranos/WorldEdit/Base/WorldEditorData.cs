@@ -19,6 +19,8 @@ namespace Arteranos.WorldEdit
 {
     public class WorldEditorData : MonoBehaviour
     {
+        public static WorldEditorData Instance;
+
         // Are we in the edit mode at all?
         public bool IsInEditMode
         {
@@ -46,10 +48,23 @@ namespace Arteranos.WorldEdit
         public void NotifyEditorModeChanged()
             => OnEditorModeChanged?.Invoke(IsInEditMode);
 
-        public void DoApply(WorldChange worldChange)
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        public static void DoApply(WorldChange worldChange)
+            => Instance.DoApply_(worldChange);
+
+        public void DoApply_(WorldChange worldChange)
         {
             IEnumerator Cor()
             {
+                // TODO First, if it isn't a Rollback Request, snapshot the World Objects
+                // in the undo stack.
+
+                // Make the changes real.
+                // Rollback request will recall an arbitrary snapshot from the stack.
                 yield return worldChange.Apply();
 
                 NotifyWorldChanged(worldChange);

@@ -6,6 +6,7 @@
  */
 
 using ProtoBuf;
+using System;
 using UnityEngine;
 
 namespace Arteranos.WorldEdit
@@ -18,7 +19,7 @@ namespace Arteranos.WorldEdit
     [ProtoContract]
     [ProtoInclude(65537, typeof(WOCTransform))]
     [ProtoInclude(65538, typeof(WOCColor))]
-    public abstract class WOCBase
+    public abstract class WOCBase : ICloneable
     {
         public bool Dirty { get; protected set; } = false;
 
@@ -55,6 +56,8 @@ namespace Arteranos.WorldEdit
         {
             CheckState();
         }
+
+        public abstract object Clone();
     }
 
     [ProtoContract]
@@ -121,6 +124,11 @@ namespace Arteranos.WorldEdit
                 this.scale = scale;
             }
         }
+
+        public override object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 
     [ProtoContract]
@@ -160,6 +168,11 @@ namespace Arteranos.WorldEdit
         public void SetState(Color color)
         {
             this.color = color;
+        }
+
+        public override object Clone()
+        {
+            return MemberwiseClone();
         }
     }
 }

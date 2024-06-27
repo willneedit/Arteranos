@@ -957,12 +957,8 @@ namespace Arteranos.Services
             using MemoryStream ms = new(wc.changerequest);
             WorldChange worldChange = WorldChange.Deserialize(ms);
 
-            StartCoroutine(worldChange.Apply());
-
-            // As an afterthought, let the observers to know of the change.
-            GameObject WORoot = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
-            WORoot.TryGetComponent(out WorldEditorData EditorData);
-            EditorData.NotifyWorldChanged(worldChange);
+            // Make the changes real and notify the observers
+            WorldEditorData.DoApply(worldChange);
         }
 
         #endregion
