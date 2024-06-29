@@ -276,10 +276,11 @@ namespace Arteranos.WorldEdit
     [ProtoContract]
     public class WorldRollbackRequest : WorldChange
     {
+        [ProtoMember(2)]
+        public string hash;
         public override IEnumerator Apply()
         {
-            // single GUID in path, meaning the ID to identify the particular snapshot.
-            throw new NotImplementedException();
+            yield return WorldEditorData.RecallUndoState(hash);
         }
     }
 

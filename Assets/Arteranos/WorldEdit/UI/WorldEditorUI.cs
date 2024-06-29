@@ -12,6 +12,7 @@ using UnityEngine.EventSystems;
 
 using Arteranos.UI;
 using System;
+using UnityEngine.UI;
 
 namespace Arteranos.WorldEdit
 {
@@ -20,6 +21,10 @@ namespace Arteranos.WorldEdit
         public WorldObjectList WorldObjectList;
         public PropertyPanel PropertyPanel;
         public GameObject NewObjectPicker;
+
+        public Button btn_AddNew;
+        public Button btn_Undo;
+        public Button btn_Redo;
 
         private NewObjectPanel[] NewObjectPanels = null;
 
@@ -31,7 +36,10 @@ namespace Arteranos.WorldEdit
             PropertyPanel.gameObject.SetActive(false);
             NewObjectPicker.SetActive(false);
 
-            WorldObjectList.OnWantsToAddItem += SwitchToAdder;
+            btn_AddNew.onClick.AddListener(SwitchToAdder);
+            btn_Undo.onClick.AddListener(WorldEditorData.Instance.BuilderRequestsUndo);
+            btn_Redo.onClick.AddListener(WorldEditorData.Instance.BuilderRequestedRedo);
+
             WorldObjectList.OnWantsToModify += ModifyObject;
             PropertyPanel.OnReturnToList += SwitchToList;
 
@@ -45,7 +53,6 @@ namespace Arteranos.WorldEdit
         {
             base.OnDestroy();
 
-            WorldObjectList.OnWantsToAddItem -= SwitchToAdder;
             WorldObjectList.OnWantsToModify -= ModifyObject;
             PropertyPanel.OnReturnToList -= SwitchToList;
         }
