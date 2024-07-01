@@ -958,7 +958,7 @@ namespace Arteranos.Services
             WorldChange worldChange = WorldChange.Deserialize(ms);
 
             // Make the changes real and notify the observers
-            WorldEditorData.DoApply(worldChange);
+            WorldEditorData.Instance.DoApply(worldChange);
         }
 
         #endregion

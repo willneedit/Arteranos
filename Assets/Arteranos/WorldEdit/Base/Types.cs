@@ -280,7 +280,7 @@ namespace Arteranos.WorldEdit
         public string hash;
         public override IEnumerator Apply()
         {
-            yield return WorldEditorData.RecallUndoState(hash);
+            yield return WorldEditorData.Instance.RecallUndoState(hash);
         }
     }
 
@@ -352,7 +352,7 @@ namespace Arteranos.WorldEdit
             // Shortcut in 'lean' setup/test scene.
             if(SettingsManager.Instance == null)
             {
-                WorldEditorData.DoApply(this);
+                WorldEditorData.Instance.DoApply(this);
                 return;
             }
 #endif

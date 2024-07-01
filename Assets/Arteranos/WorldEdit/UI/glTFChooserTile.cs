@@ -56,7 +56,7 @@ namespace Arteranos.WorldEdit
                         gltf.InstantiateMainSceneAsync(instantiator));
 
                     Bounds? b = instantiator.CalculateBounds();
-                    Debug.Log($"Bounds: Center={b.Value.center}, Extent={b.Value.extents}, Max={b.Value.max}");
+                    // Debug.Log($"Bounds: Center={b.Value.center}, Extent={b.Value.extents}, Max={b.Value.max}");
 
                     // Center is locked to the preview anchors, now only extents matter.
                     float largestAxis = b.Value.extents.x;

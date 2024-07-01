@@ -114,7 +114,7 @@ namespace Arteranos.WorldEdit
             request.EmitToServer();
         }
 
-        private IEnumerator RecallUndoState_(string hash)
+        public IEnumerator RecallUndoState(string hash)
         {
             static IEnumerator Cor(List<byte[]> serialized)
             {
@@ -154,7 +154,7 @@ namespace Arteranos.WorldEdit
             yield return Cor(found.Value.SerializedWorldObjects);
         }
 
-        private void DoApply_(WorldChange worldChange)
+        public void DoApply(WorldChange worldChange)
         {
             IEnumerator Cor()
             {
@@ -194,11 +194,5 @@ namespace Arteranos.WorldEdit
 
             EmitUndoRedo();
         }
-
-        public static void DoApply(WorldChange worldChange)
-            => Instance.DoApply_(worldChange);
-
-        public static IEnumerator RecallUndoState(string hash)
-            => Instance.RecallUndoState_(hash);
     }
 }
