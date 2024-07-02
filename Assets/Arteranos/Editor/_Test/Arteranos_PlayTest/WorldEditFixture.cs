@@ -11,7 +11,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-
 using Arteranos.WorldEdit;
 using System.IO;
 using System;
@@ -22,26 +21,18 @@ namespace Arteranos.PlayTest.WorldEdit
     public class WorldEditFixture
     {
         public GameObject pl = null;
+        public WorldEditorData editorData = null;
 
         Camera ca = null;
         Light li = null;
-        WorldEditorData editorData = null;
 
         [UnitySetUp]
         public IEnumerator SetUp0()
         {
-            ca = new GameObject("Camera").AddComponent<Camera>();
-            ca.transform.position = new(0, 1.75f, 0.2f);
+            TestFixtures.SceneFixture(ref ca, ref li, ref pl);
 
-            li = new GameObject("Light").AddComponent<Light>();
-            li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
-            li.type = LightType.Directional;
-            li.color = Color.white;
-
-            pl = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            pl.tag = "WorldObjectsRoot";
-
-            editorData = pl.AddComponent<WorldEditorData>();
+            if (!pl.TryGetComponent(out editorData))
+                Assert.Fail("No EditorData component");
 
             yield return new WaitForEndOfFrame();
         }
@@ -50,8 +41,8 @@ namespace Arteranos.PlayTest.WorldEdit
         public IEnumerator TearDown0()
         {
             Object.Destroy(pl);
-            Object.Destroy(ca.gameObject);
-            Object.Destroy(li.gameObject);
+            //Object.Destroy(ca.gameObject);
+            //Object.Destroy(li.gameObject);
 
             yield return null;
         }

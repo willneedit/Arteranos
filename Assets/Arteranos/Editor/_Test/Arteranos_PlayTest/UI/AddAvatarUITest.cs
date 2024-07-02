@@ -41,7 +41,7 @@ namespace Arteranos.PlayTest.UI
 
             yield return null;
 
-            yield return TestFixture.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
+            yield return TestFixtures.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
 
             ipfs = srv.Ipfs_;
 

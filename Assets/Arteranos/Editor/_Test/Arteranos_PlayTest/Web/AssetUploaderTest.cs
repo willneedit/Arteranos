@@ -31,7 +31,7 @@ namespace Arteranos.PlayTest.Web
         [UnitySetUp]
         public IEnumerator SetupIPFS()
         {
-            GameObject go1 = TestFixture.SetupStartupManagerMock();
+            GameObject go1 = TestFixtures.SetupStartupManagerMock();
 
             yield return null;
 
@@ -39,7 +39,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return null;
 
-            yield return TestFixture.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
+            yield return TestFixtures.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
 
             ipfs = srv.Ipfs_;
 

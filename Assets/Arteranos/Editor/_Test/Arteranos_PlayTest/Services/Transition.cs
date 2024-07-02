@@ -15,36 +15,23 @@ namespace Arteranos.PlayTest.Services
 {
     public class TransitionTest
     {
-        private const string PlainFileAsset = "Assets/Arteranos/_Test/Sceelix_Abbey.zip";
+        private const string PlainFileAsset = "Assets/Arteranos/Editor/_Test/Sceelix_Abbey.zip";
         private string FileURLAsset => $"file:///{PlainFileAsset}";
         Cid WorldCid = null;
 
 
+        IPFSServiceImpl service = null;
+
         [UnitySetUp]
-        public IEnumerator SetupIPFS()
+        public IEnumerator Setup0()
         {
-            //Camera ca;
-            //Light li;
+            TestFixtures.IPFSServiceFixture(ref service);
 
-            //ca = new GameObject("Camera").AddComponent<Camera>();
-            //ca.transform.position = new(0, 1.75f, 0.2f);
-
-            //li = new GameObject("Light").AddComponent<Light>();
-            //li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
-            //li.type = LightType.Directional;
-            //li.color = Color.white;
-
-            GameObject bp = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Prefabs/Core/_SceneEssentials.prefab");
-            GameObject go = UnityEngine.Object.Instantiate(bp);
-
-            yield return null;
+            yield return TestFixtures.StartIPFSAndWait(service);
         }
 
         private IEnumerator UploadTestWorld()
         {
-            // Resynchronize with the background IPFS uploading processes
-            yield return new WaitUntil(() => SettingsManager.DefaultFemaleAvatar != null);
-
             (AsyncOperationExecutor<Context> ao, Context co) =
                 AssetUploader.PrepareUploadToIPFS(FileURLAsset, true);
 
@@ -59,7 +46,7 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator InAndOut()
         {
-            yield return new WaitForSeconds(10);
+            yield return new WaitForSeconds(1);
 
             yield return TransitionProgress.TransitionFrom();
 
