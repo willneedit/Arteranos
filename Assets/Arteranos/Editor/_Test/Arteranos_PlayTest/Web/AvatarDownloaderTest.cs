@@ -66,8 +66,6 @@ namespace Arteranos.PlayTest.Web
         }
         private GameObject CreateSteppingStone(bool right)
         {
-            //GameObject ob = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/SteppingStone.prefab");
-            //GameObject go = Object.Instantiate(ob);
             stepstone = GameObject.CreatePrimitive(PrimitiveType.Cube);
             stepstone.transform.localScale = Vector3.one * 0.25f;
             stepstone.transform.position = new(right ? 0.20f : -0.20f, 0);

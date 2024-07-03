@@ -12,36 +12,6 @@ namespace Arteranos.PlayTest
     public class TestFixtures
     {
 
-        public static GameObject SetupStartupManagerMock()
-        {
-            GameObject bp = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/_Test/Arteranos_PlayTest/SceneEssentialsMock.prefab");
-            return UnityEngine.Object.Instantiate(bp);
-        }
-
-        public static IEnumerator WaitForCondition(int timeoutSeconds, Func<bool> condition, string message)
-        {
-            DateTime expiry = DateTime.Now + TimeSpan.FromSeconds(timeoutSeconds);
-            while(!condition())
-            {
-                if (expiry < DateTime.Now) Assert.Fail(message);
-                yield return new WaitForEndOfFrame();
-            }
-        }
-
-        public static async Task WaitForConditionAsync(int timeoutSeconds, Func<bool> condition, string message)
-        {
-            DateTime expiry = DateTime.Now + TimeSpan.FromSeconds(timeoutSeconds);
-            while (!condition())
-            {
-                if (expiry < DateTime.Now)
-                {
-                    Debug.LogError(message);
-                    Assert.Fail(message);
-                }
-                await Task.Delay(8);
-            }
-        }
-
         public static void SceneFixture(ref Camera ca, ref Light li, ref GameObject pl)
         {
             ca = UnityEngine.Object.FindObjectOfType<Camera>();
