@@ -18,28 +18,19 @@ namespace Arteranos.PlayTest.Web
 {
     public class WorldDownloaderTest
     {
-        private const string PlainFileAsset = "Assets/Arteranos/_Test/Sceelix_Abbey.zip";
+        private const string PlainFileAsset = "Assets/Arteranos/Editor/_Test/Sceelix_Abbey.zip";
         private string FileURLAsset => $"file:///{PlainFileAsset}";
 
-        IPFSServiceImpl srv = null;
-        IpfsClientEx ipfs = null;
+        IPFSServiceImpl service = null;
 
         Cid WorldCid = null;
 
         [UnitySetUp]
-        public IEnumerator SetupIPFS()
+        public IEnumerator Setup0()
         {
-            GameObject go1 = TestFixtures.SetupStartupManagerMock();
+            TestFixtures.IPFSServiceFixture(ref service);
 
-            yield return null;
-
-            srv = go1.AddComponent<IPFSServiceImpl>();
-
-            yield return null;
-
-            yield return TestFixtures.WaitForCondition(5, () => srv && srv.Ipfs_ != null, "IPFS server timeout");
-
-            ipfs = srv.Ipfs_;
+            yield return TestFixtures.StartIPFSAndWait(service);
 
             yield return UploadTestWorld();
         }
@@ -54,25 +45,6 @@ namespace Arteranos.PlayTest.Web
             WorldCid = AssetUploader.GetUploadedCid(co);
 
             Assert.IsNotNull(WorldCid);
-        }
-
-        [UnityTearDown]
-        public IEnumerator TeardownIPFS()
-        {
-            if (WorldCid != null)
-            {
-                ipfs.Pin.RemoveAsync(WorldCid).Wait();
-                WorldInfo.DBDelete(WorldCid);
-            }
-
-            srv = null;
-            ipfs = null;
-            WorldCid = null;
-
-            StartupManagerMock go1 = UnityEngine.Object.FindObjectOfType<StartupManagerMock>();
-            UnityEngine.Object.Destroy(go1.gameObject);
-
-            yield return new WaitForSeconds(1);
         }
 
         [UnityTest]
@@ -126,7 +98,7 @@ namespace Arteranos.PlayTest.Web
             UserID userID = wi.win.Author;
             Assert.AreEqual("Ancient Iwontsay", (string)userID);
 
-            Stream stream = File.OpenRead("Assets/Arteranos/_Test/Screenshot.png");
+            Stream stream = File.OpenRead("Assets/Arteranos/Editor/_Test/Screenshot.png");
             byte[] data = new byte[stream.Length];
             stream.Read(data, 0, data.Length);
             long length = data.Length < stream.Length ? data.Length : stream.Length;

@@ -1,14 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
-using Ipfs.Http;
 using Arteranos.Services;
 using System;
-using System.IO;
-using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
 
@@ -49,21 +44,17 @@ namespace Arteranos.PlayTest
 
         public static void SceneFixture(ref Camera ca, ref Light li, ref GameObject pl)
         {
-            ca = GameObject.FindObjectOfType<Camera>();
-            if (ca == null)
-            {
-                ca = new GameObject("Camera").AddComponent<Camera>();
-                ca.transform.position = new(0, 1.75f, 0.2f);
-            }
+            ca = UnityEngine.Object.FindObjectOfType<Camera>();
+            if (ca == null) ca = new GameObject("Camera").AddComponent<Camera>();
 
-            li = GameObject.FindObjectOfType<Light>();
-            if (li == null)
-            {
-                li = new GameObject("Light").AddComponent<Light>();
-                li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
-                li.type = LightType.Directional;
-                li.color = Color.white;
-            }
+            ca.transform.position = new(0, 1.75f, 0.2f);
+
+            li = UnityEngine.Object.FindObjectOfType<Light>();
+            if (li == null) li = new GameObject("Light").AddComponent<Light>();
+
+            li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
+            li.type = LightType.Directional;
+            li.color = Color.white;
 
             pl = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
             if (pl == null)
@@ -76,12 +67,12 @@ namespace Arteranos.PlayTest
 
         public static void IPFSServiceFixture(ref IPFSServiceImpl service)
         {
-            service = GameObject.FindObjectOfType<IPFSServiceImpl>(true);
+            service = UnityEngine.Object.FindObjectOfType<IPFSServiceImpl>(true);
             if(service == null)
             {
                 GameObject sce_bp = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/_SceneEssentials Variant.prefab");
                 sce_bp.SetActive(false);
-                GameObject sce = GameObject.Instantiate(sce_bp);
+                GameObject sce = UnityEngine.Object.Instantiate(sce_bp);
                 if (!sce.TryGetComponent(out service))
                     Assert.Fail("No IPFS service implementation");
 

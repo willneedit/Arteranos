@@ -18,80 +18,30 @@ namespace Arteranos.PlayTest.UI
 {
     public class AddAvatarUITest
     {
-        private const string Asset_iws = "file:///Assets/Arteranos/_Test/Iwontsay.glb";
+        private const string Asset_iws = "file:///Assets/Arteranos/Editor/_Test/6394c1e69ef842b3a5112221.glb";
 
-
-        IPFSServiceImpl srv = null;
-        IpfsClientEx ipfs = null;
-
-        Cid AvatarCid = null;
-
+        IPFSServiceImpl service = null;
+        AddAvatarUI aaui = null;
 
         [UnitySetUp]
-        public IEnumerator SetupIPFS()
+        public IEnumerator Setup0()
         {
-            SetupScene();
+            TestFixtures.SceneFixture(ref ca, ref li, ref pl);
 
-            GameObject go1 = new("SettingsManager");
-            StartupManagerMock sm = go1.AddComponent<StartupManagerMock>();
+            TestFixtures.IPFSServiceFixture(ref service);
 
-            yield return null;
-
-            srv = go1.AddComponent<IPFSServiceImpl>();
-
-            yield return null;
-
-            yield return TestFixtures.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
-
-            ipfs = srv.Ipfs_;
-
-            //self = Task.Run(async () => await ipfs.LocalPeer).Result;
+            yield return TestFixtures.StartIPFSAndWait(service);
         }
 
+        [UnityTearDown]
+        public IEnumerator TearDown0()
+        {
+            if (aaui != null) Object.Destroy(aaui.gameObject);
+            yield return null;
+        }
         Camera ca = null;
         Light li = null;
         GameObject pl = null;
-
-
-        [UnityTearDown]
-        public IEnumerator TeardownIPFS()
-        {
-            if (AvatarCid != null)
-            {
-                ipfs.Pin.RemoveAsync(AvatarCid).Wait();
-                WorldInfo.DBDelete(AvatarCid);
-            }
-
-            srv = null;
-            ipfs = null;
-            AvatarCid = null;
-
-            StartupManagerMock go1 = Object.FindObjectOfType<StartupManagerMock>();
-            Object.Destroy(go1.gameObject);
-
-            yield return null;
-
-            Object.Destroy(ca.gameObject);
-            Object.Destroy(li.gameObject);
-            Object.Destroy(pl);
-            yield return new WaitForSeconds(1);
-        }
-
-        private void SetupScene()
-        {
-            ca = new GameObject("Camera").AddComponent<Camera>();
-            ca.transform.position = new(0, 1.75f, 0.2f);
-
-            li = new GameObject("Light").AddComponent<Light>();
-            li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
-            li.type = LightType.Directional;
-            li.color = Color.white;
-
-            GameObject bpl = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/_Test/Plane.prefab");
-            pl = Object.Instantiate(bpl);
-        }
-
-
 
         public IEnumerator UnityPAK()
         {
@@ -105,7 +55,7 @@ namespace Arteranos.PlayTest.UI
         {
             yield return null;
 
-            AddAvatarUI aaui = AddAvatarUI.New();
+            aaui = AddAvatarUI.New();
             yield return new WaitForSeconds(5);
             Object.Destroy(aaui.gameObject);
         }
@@ -113,7 +63,7 @@ namespace Arteranos.PlayTest.UI
         [UnityTest]
         public IEnumerator LoadAvatar()
         {
-            AddAvatarUI aaui = AddAvatarUI.New();
+            aaui = AddAvatarUI.New();
             yield return new WaitForSeconds(1);
 
             aaui.Test_AvatarURL = Asset_iws;
@@ -122,13 +72,13 @@ namespace Arteranos.PlayTest.UI
 
             aaui.Test_OnAddAvatarClicked();
 
-            yield return UnityPAK();
+            // yield return UnityPAK();
         }
 
         [UnityTest]
         public IEnumerator LoadAvatarUndecided()
         {
-            AddAvatarUI aaui = AddAvatarUI.New();
+            aaui = AddAvatarUI.New();
             yield return new WaitForSeconds(1);
 
             aaui.Test_AvatarURL = Asset_iws;
@@ -153,7 +103,7 @@ namespace Arteranos.PlayTest.UI
         {
             LogAssert.Expect(LogType.Exception, "FileNotFoundException: Could not find file 'C:\\Does.Not.exist'.");
 
-            AddAvatarUI aaui = AddAvatarUI.New();
+            aaui = AddAvatarUI.New();
             yield return null;
 
             aaui.Test_AvatarURL = "C:\\Does.Not.exist";

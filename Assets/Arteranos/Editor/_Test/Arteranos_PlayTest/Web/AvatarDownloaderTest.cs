@@ -3,54 +3,36 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-using Ipfs.Http;
 using Arteranos.Services;
-using System.IO;
-using System.Threading.Tasks;
 using Arteranos.Core;
 using Ipfs;
-using Arteranos.Web;
 using Arteranos.Core.Operations;
-using System;
 using Arteranos.Avatar;
-using UnityEditor;
-using Newtonsoft.Json;
 
 using Object = UnityEngine.Object;
 using System.Collections.Generic;
-using Ipfs.Unity;
 
 namespace Arteranos.PlayTest.Web
 {
     public class AvatarDownloaderTest
     {
-        private const string Asset_iws = "file:///Assets/Arteranos/_Test/6394c1e69ef842b3a5112221.glb";
+        private const string Asset_iws = "file:///Assets/Arteranos/Editor/_Test/6394c1e69ef842b3a5112221.glb";
 
 
-        IPFSServiceImpl srv = null;
-        IpfsClientEx ipfs = null;
+        IPFSServiceImpl service = null;
 
         Cid AvatarCid = null;
 
 
         [UnitySetUp]
-        public IEnumerator SetupIPFS()
+        public IEnumerator Setup0()
         {
-            SetupScene();
+            TestFixtures.SceneFixture(ref ca, ref li, ref pl);
+            ca.transform.localPosition = new Vector3(0, 1.75f, -3.5f);
 
-            GameObject go1 = TestFixtures.SetupStartupManagerMock();
+            TestFixtures.IPFSServiceFixture(ref service);
 
-            yield return null;
-
-            srv = go1.AddComponent<IPFSServiceImpl>();
-
-            yield return null;
-
-            yield return TestFixtures.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
-
-            ipfs = srv.Ipfs_;
-
-            // self = Task.Run(async () => await ipfs.LocalPeer).Result;
+            yield return TestFixtures.StartIPFSAndWait(service);
 
             yield return UploadTestAvatar();
         }
@@ -59,19 +41,8 @@ namespace Arteranos.PlayTest.Web
         Light li = null;
         GameObject pl = null;
 
-        private void SetupScene()
-        {
-            ca = new GameObject("Camera").AddComponent<Camera>();
-            ca.transform.position = new(0, 1, -2);
-
-            li = new GameObject("Light").AddComponent<Light>();
-            li.transform.SetPositionAndRotation(new(0, 3, 0), Quaternion.Euler(50, -30, 0));
-            li.type = LightType.Directional;
-            li.color = Color.white;
-
-            GameObject bpl = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/_Test/Plane.prefab");
-            pl = Object.Instantiate(bpl);
-        }
+        GameObject avatar = null;
+        GameObject stepstone = null;
 
         private IEnumerator UploadTestAvatar()
         {
@@ -85,38 +56,24 @@ namespace Arteranos.PlayTest.Web
             Assert.IsNotNull(AvatarCid);
         }
 
-        private GameObject CreateSteppingStone(bool right)
-        {
-            GameObject ob = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/_Test/SteppingStone.prefab");
-            GameObject go = Object.Instantiate(ob);
-            go.transform.position = new(right ? 0.20f : -0.20f, 0);
-            return go;
-        }
-
-
         [UnityTearDown]
-        public IEnumerator TeardownIPFS()
+        public IEnumerator Teardown0()
         {
-            if (AvatarCid != null)
-            {
-                yield return Asyncs.Async2Coroutine(ipfs.Pin.RemoveAsync(AvatarCid));
-                WorldInfo.DBDelete(AvatarCid);
-            }
-
-            srv = null;
-            ipfs = null;
-            AvatarCid = null;
-
-            StartupManagerMock go1 = Object.FindObjectOfType<StartupManagerMock>();
-            Object.Destroy(go1.gameObject);
+            if (avatar != null) Object.Destroy(avatar);
+            if (stepstone != null) Object.Destroy(stepstone);
 
             yield return null;
-
-            Object.Destroy(ca.gameObject);
-            Object.Destroy(li.gameObject);
-            Object.Destroy(pl);
-            yield return new WaitForSeconds(1);
         }
+        private GameObject CreateSteppingStone(bool right)
+        {
+            //GameObject ob = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/SteppingStone.prefab");
+            //GameObject go = Object.Instantiate(ob);
+            stepstone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            stepstone.transform.localScale = Vector3.one * 0.25f;
+            stepstone.transform.position = new(right ? 0.20f : -0.20f, 0);
+            return stepstone;
+        }
+
 
         public IEnumerator UnityPAK()
         {
@@ -139,7 +96,7 @@ namespace Arteranos.PlayTest.Web
 
             Assert.IsNotNull(AvatarDownloader.GetLoadedAvatar(co));
 
-            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = AvatarDownloader.GetLoadedAvatar(co);
             // avatar.SetActive(true);
             // avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
@@ -202,7 +159,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
 
             Assert.IsNotNull(avatar.GetComponent<AvatarEyeAnimator>());
@@ -222,7 +179,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
 
             IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
@@ -244,7 +201,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
 
             IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
@@ -266,7 +223,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
             avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
@@ -292,7 +249,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
             avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
@@ -325,7 +282,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
             avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
@@ -377,7 +334,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            GameObject avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
             avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
@@ -395,15 +352,17 @@ namespace Arteranos.PlayTest.Web
             // yield return UnityPAK();
         }
 
-        struct boneTranslation
+        struct BoneTranslation
         {
             public string BoneName;
             public string HumanName;
         }
-        class table
+        class Table
         {
             public Dictionary<string, string> translationTable;
         }
+
+#if false
         [UnityTest]
         [Ignore("To convert Ready Player Me's skeleton structure to JSON")]
         public IEnumerator SaveBoneTranslationTable()
@@ -416,12 +375,13 @@ namespace Arteranos.PlayTest.Web
                 Resources.Load<UnityEngine.Avatar>(femaleAvatarResource);
 
 
-            table table = new() { translationTable = new() };
+            Table table = new() { translationTable = new() };
             foreach (HumanBone bone in avatar_bp.humanDescription.human)
                 table.translationTable.Add(bone.boneName, bone.humanName);
 
             string json = JsonConvert.SerializeObject(table, Formatting.Indented);
             File.WriteAllText("RPMBoneTranslations.json", json);
         }
+#endif
     }
 }

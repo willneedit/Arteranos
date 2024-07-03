@@ -10,6 +10,7 @@ using Arteranos.Core;
 using Ipfs;
 using UnityEditor;
 using Arteranos.Core.Operations;
+using Arteranos.XR;
 
 namespace Arteranos.PlayTest.Services
 {
@@ -28,6 +29,13 @@ namespace Arteranos.PlayTest.Services
             TestFixtures.IPFSServiceFixture(ref service);
 
             yield return TestFixtures.StartIPFSAndWait(service);
+        }
+
+        [UnityTearDown]
+        public IEnumerator TearDown0()
+        {
+            ScreenFader.StartFading(0, 0);
+            yield return null;
         }
 
         private IEnumerator UploadTestWorld()

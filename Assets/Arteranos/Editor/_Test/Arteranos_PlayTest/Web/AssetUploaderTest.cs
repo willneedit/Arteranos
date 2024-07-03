@@ -21,41 +21,23 @@ namespace Arteranos.PlayTest.Web
     public class AssetUploaderTest
     {
         private const string WebURLAsset = "https://github.com/willneedit/willneedit.github.io/raw/master/Abbey.zip";
-        private const string PlainFileAsset = "Assets/Arteranos/_Test/Sceelix_Abbey.zip";
+        private const string PlainFileAsset = "Assets/Arteranos/Editor/_Test/Sceelix_Abbey.zip";
         private string FileURLAsset => $"file:///{PlainFileAsset}";
         private string QuotedFileAsset => $"\"{PlainFileAsset}\"";
 
-        IPFSServiceImpl srv = null;
+        IPFSServiceImpl service = null;
         IpfsClientEx ipfs = null;
 
         [UnitySetUp]
-        public IEnumerator SetupIPFS()
+        public IEnumerator Setup0()
         {
-            GameObject go1 = TestFixtures.SetupStartupManagerMock();
+            TestFixtures.IPFSServiceFixture(ref service);
 
-            yield return null;
+            yield return TestFixtures.StartIPFSAndWait(service);
 
-            srv = go1.AddComponent<IPFSServiceImpl>();
-
-            yield return null;
-
-            yield return TestFixtures.WaitForCondition(5, () => srv?.Ipfs_ != null, "IPFS server timeout");
-
-            ipfs = srv.Ipfs_;
-
+            ipfs = service.Ipfs_;
         }
 
-        [UnityTearDown]
-        public IEnumerator TeardownIPFS()
-        {
-            srv = null;
-            ipfs = null;
-
-            StartupManagerMock go1 = Object.FindObjectOfType<StartupManagerMock>();
-            Object.Destroy(go1.gameObject);
-
-            yield return new WaitForSeconds(1);
-        }
 
         [UnityTest]
         public IEnumerator UploadLocalFile()
