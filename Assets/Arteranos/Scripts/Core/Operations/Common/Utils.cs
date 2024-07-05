@@ -55,5 +55,23 @@ namespace Arteranos.Core.Operations
             return archPath;
         }
 
+        public static async Task<(Cid template, Cid decoration)> GetWorldLinks(Cid worldCid, CancellationToken cancel = default)
+        {
+            Dictionary<string, IFileSystemLink> dir = new();
+
+            IFileSystemNode fsn = await IPFSService.ListFile(worldCid, cancel);
+            if (!fsn.IsDirectory)
+                throw new InvalidDataException($"{worldCid} is not a directory");
+            foreach(IFileSystemLink file in fsn.Links)
+                dir.Add(file.Name, file);
+
+            return (
+                template: dir.ContainsKey("Template")
+                ? dir["Template"].Id
+                : worldCid, 
+                decoration: dir.ContainsKey("Decoration")
+                ? dir["Decoration"].Id
+                : null);            
+        }
     }
 }

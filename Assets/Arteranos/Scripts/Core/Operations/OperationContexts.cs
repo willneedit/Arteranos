@@ -25,9 +25,15 @@ namespace Arteranos.Core.Operations
 
     internal class WorldDownloadContext : Context
     {
-        public Cid WorldCid;
-        public WorldInfo WorldInfo;
+        // Active data, with or without decoration
+        public Cid WorldCid;                    // Complete or Blank world
+        public WorldInfo WorldInfo;             // Complete or Blank world, with hand-editor's credentials
+
+        public Cid TemplateCid;                 // Blank world
+        public WorldInfo TemplateInfo;          // Blank World, with template builder's credentials
+
         public string WorldAssetBundlePath;
+        public string Decoration;               // nonempty: WorldDecoration
     }
 
     public interface IAvatarDownloaderOptions

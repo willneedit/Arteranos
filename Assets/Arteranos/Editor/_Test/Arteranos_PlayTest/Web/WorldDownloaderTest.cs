@@ -50,66 +50,66 @@ namespace Arteranos.PlayTest.Web
         [UnityTest]
         public IEnumerator DownloadWorld()
         {
+            IEnumerator DownloadWorldCoroutine()
+            {
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    WorldDownloader.PrepareGetWorldTemplate(WorldCid);
+
+                ao.ProgressChanged += (ratio, msg) => UnityEngine.Debug.Log($"{ratio} - {msg}");
+
+                yield return ao.ExecuteCoroutine(co);
+
+                string file = WorldDownloader.GetWorldDataFile(co);
+
+                Assert.IsNotNull(file);
+                Assert.IsTrue(File.Exists(file));
+            }
+
             Stopwatch sw = Stopwatch.StartNew();
             yield return DownloadWorldCoroutine();
             sw.Stop();
             UnityEngine.Debug.Log($"DownloadWorld elapsed time: {sw.Elapsed.Milliseconds} milliseconds");
         }
 
-        public IEnumerator DownloadWorldCoroutine()
-        {
-            (AsyncOperationExecutor<Context> ao, Context co) =
-                WorldDownloader.PrepareGetWorldTemplate(WorldCid);
-
-            ao.ProgressChanged += (ratio, msg) => UnityEngine.Debug.Log($"{ratio} - {msg}");
-
-            yield return ao.ExecuteCoroutine(co);
-
-            string file = WorldDownloader.GetWorldDataFile(co);
-
-            Assert.IsNotNull(file);
-            Assert.IsTrue(File.Exists(file));
-        }
-
         [UnityTest]
         public IEnumerator GetWorldInfo()
         {
+            IEnumerator GetWorldInfoCoroutine()
+            {
+                (AsyncOperationExecutor<Context> ao, Context co) =
+                    WorldDownloader.PrepareGetWorldInfo(WorldCid);
+
+                yield return ao.ExecuteCoroutine(co);
+
+                WorldInfo wi = WorldDownloader.GetWorldInfo(co);
+
+                Assert.IsNotNull(wi);
+                Assert.IsNotNull(wi.win.ScreenshotPNG);
+
+                Assert.IsNotNull(wi.WorldName);
+                Assert.IsNotNull(wi.win.Author);
+
+                UserID userID = wi.win.Author;
+                Assert.AreEqual("Ancient Iwontsay", (string)userID);
+
+                Stream stream = File.OpenRead("Assets/Arteranos/Editor/_Test/Screenshot.png");
+                byte[] data = new byte[stream.Length];
+                stream.Read(data, 0, data.Length);
+                long length = data.Length < stream.Length ? data.Length : stream.Length;
+
+                if (wi.win.ScreenshotPNG.Length != stream.Length)
+                    UnityEngine.Debug.Log($"Screenshot length mismatch, original={data.Length}, retrieved={wi.win.ScreenshotPNG.Length}");
+
+                for (long i = 0; i < length; i++)
+                    if (data[i] != wi.win.ScreenshotPNG[i])
+                        Assert.Fail($"Screenshot doesn't match: offset={i}, original={data[i]}, retrieved={wi.win.ScreenshotPNG[i]}");
+            }
+
             Stopwatch sw = Stopwatch.StartNew();
             yield return GetWorldInfoCoroutine();
             sw.Stop();
             UnityEngine.Debug.Log($"GetWorldInfo elapsed time: {sw.Elapsed.Milliseconds} milliseconds");
         }
 
-        public IEnumerator GetWorldInfoCoroutine()
-        {
-            (AsyncOperationExecutor<Context> ao, Context co) =
-                WorldDownloader.PrepareGetWorldInfo(WorldCid);
-
-            yield return ao.ExecuteCoroutine(co);
-
-            WorldInfo wi = WorldDownloader.GetWorldInfo(co);
-
-            Assert.IsNotNull(wi);
-            Assert.IsNotNull(wi.win.ScreenshotPNG);
-
-            Assert.IsNotNull(wi.WorldName);
-            Assert.IsNotNull(wi.win.Author);
-
-            UserID userID = wi.win.Author;
-            Assert.AreEqual("Ancient Iwontsay", (string)userID);
-
-            Stream stream = File.OpenRead("Assets/Arteranos/Editor/_Test/Screenshot.png");
-            byte[] data = new byte[stream.Length];
-            stream.Read(data, 0, data.Length);
-            long length = data.Length < stream.Length ? data.Length : stream.Length;
-
-            if (wi.win.ScreenshotPNG.Length != stream.Length)
-               UnityEngine.Debug.Log($"Screenshot length mismatch, original={data.Length}, retrieved={wi.win.ScreenshotPNG.Length}");
-
-            for (long i = 0; i < length; i++)
-                if (data[i] != wi.win.ScreenshotPNG[i])
-                    Assert.Fail($"Screenshot doesn't match: offset={i}, original={data[i]}, retrieved={wi.win.ScreenshotPNG[i]}");
-
-        }
     }
 }
