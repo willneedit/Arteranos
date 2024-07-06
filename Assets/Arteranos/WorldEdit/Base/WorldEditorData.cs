@@ -17,7 +17,7 @@ using System;
 
 namespace Arteranos.WorldEdit
 {
-    public class WorldEditorData : MonoBehaviour
+    public class WorldEditorDataImpl : WorldEditorData
     {
         struct UndoBuffer
         {
@@ -25,33 +25,13 @@ namespace Arteranos.WorldEdit
             public List<byte[]> SerializedWorldObjects;
         }
 
-        public static WorldEditorData Instance;
+        public override event Action<WorldChange> OnWorldChanged;
+        public override event Action<bool> OnEditorModeChanged;
 
-        // Are we in the edit mode at all?
-        public bool IsInEditMode
-        {
-            get => isInEditMode;
-            set
-            {
-                bool old = isInEditMode;
-                isInEditMode = value;
-                if (old != value) NotifyEditorModeChanged();
-            }
-        }
-
-        // Movement and rotation constraints
-        public bool LockXAxis = false;
-        public bool LockYAxis = false;
-        public bool LockZAxis = false;
-        public bool isInEditMode = false;
-
-        public event Action<WorldChange> OnWorldChanged;
-        public event Action<bool> OnEditorModeChanged;
-
-        public void NotifyWorldChanged(WorldChange worldChange)
+        public override void NotifyWorldChanged(WorldChange worldChange)
             => OnWorldChanged?.Invoke(worldChange);
 
-        public void NotifyEditorModeChanged()
+        public override void NotifyEditorModeChanged()
             => OnEditorModeChanged?.Invoke(IsInEditMode);
 
         private List<UndoBuffer> undoStack = new();
@@ -64,7 +44,7 @@ namespace Arteranos.WorldEdit
 
         private IEnumerable<WorldObject> MakeSnapshot()
         {
-            Transform t = WorldChange.FindObjectByPath(null);
+            Transform t = WorldChangeImpl.FindObjectByPath(null);
             for (int i = 0; i < t.childCount; i++)
             {
                 WorldObject wo = t.GetChild(i).MakeWorldObject();
@@ -114,11 +94,11 @@ namespace Arteranos.WorldEdit
             request.EmitToServer();
         }
 
-        public IEnumerator RecallUndoState(string hash)
+        public override IEnumerator RecallUndoState(string hash)
         {
             static IEnumerator Cor(List<byte[]> serialized)
             {
-                Transform t = WorldChange.FindObjectByPath(null);
+                Transform t = WorldChangeImpl.FindObjectByPath(null);
 
                 // First, try to remember the previous gameobjects.
                 List<Transform> old = new();
@@ -154,7 +134,7 @@ namespace Arteranos.WorldEdit
             yield return Cor(found.Value.SerializedWorldObjects);
         }
 
-        public void DoApply(WorldChange worldChange)
+        public override void DoApply(WorldChange worldChange)
         {
             IEnumerator Cor()
             {
@@ -171,7 +151,7 @@ namespace Arteranos.WorldEdit
             StartCoroutine(Cor());
         }
 
-        public void BuilderRequestsUndo()
+        public override void BuilderRequestsUndo()
         {
             // Before navigating back and forth through the undo stack, we need to add the _current_ statw
             // on top of the stack.
@@ -187,12 +167,18 @@ namespace Arteranos.WorldEdit
             EmitUndoRedo();
         }
 
-        public void BuilderRequestedRedo()
+        public override void BuilderRequestedRedo()
         {
             if (undoCount <= 1) return;
             undoCount--;
 
             EmitUndoRedo();
+        }
+
+        public override void DoApply(Stream stream)
+        {
+            WorldChangeImpl worldChange = WorldChangeImpl.Deserialize(stream);
+            DoApply(worldChange);
         }
     }
 }

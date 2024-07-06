@@ -48,7 +48,7 @@ namespace Arteranos.PlayTest.WorldEdit
         }
 
         // Must match the sample constructed with the following routine
-        public const string sampleWOB =
+        public static readonly string sampleWOB =
             "CgaagCACCAMSCVRlc3QgQ3ViZTooioAgJAoKFQAAgD8dAACgQBIFJQAAgD8aD" +
             "w0AAIA/FQAAgD8dAACAPzoakoAgFgoUDQAAgD8VAACAPx0AAIA/JQAAgD9CrQ" +
             "EKBJqAIAASC1Rlc3QgU3BoZXJlOiOKgCAfCgUVAADAPxIFJQAAgD8aDw0AAIA" +
@@ -58,7 +58,7 @@ namespace Arteranos.PlayTest.WorldEdit
             "MSD1Rlc3QgQ3ViZSBSaWdodDojioAgHwoFDQAAwD8SBSUAAIA/Gg8NAACAPxU" +
             "AAIA/HQAAgD86GpKAIBYKFA0AAIA/FQAAgD8dAACAPyUAAIA/";
 
-        public WorldObject BuildSample()
+        public static WorldObject BuildSample()
         {
             WorldObject cube = new(PrimitiveType.Cube)
             {
@@ -91,7 +91,7 @@ namespace Arteranos.PlayTest.WorldEdit
             return cube;
         }
 
-        public void ClearGUIDs(WorldObject wob)
+        public static void ClearGUIDs(WorldObject wob)
         {
             wob.id = new();
             foreach(var child in wob.children)

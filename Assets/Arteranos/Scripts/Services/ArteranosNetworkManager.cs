@@ -954,11 +954,9 @@ namespace Arteranos.Services
             // Already made in server side, no sense to do it again?
             //if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host) return;
 
-            using MemoryStream ms = new(wc.changerequest);
-            WorldChange worldChange = WorldChange.Deserialize(ms);
-
             // Make the changes real and notify the observers
-            WorldEditorData.Instance.DoApply(worldChange);
+            using MemoryStream ms = new(wc.changerequest);
+            WorldEditorData.Instance.DoApply(ms);
         }
 
         #endregion

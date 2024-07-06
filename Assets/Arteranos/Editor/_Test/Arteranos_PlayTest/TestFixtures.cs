@@ -30,7 +30,7 @@ namespace Arteranos.PlayTest
             if (pl == null)
             {
                 pl = GameObject.CreatePrimitive(PrimitiveType.Plane);
-                pl.AddComponent<Arteranos.WorldEdit.WorldEditorData>();
+                pl.AddComponent<Arteranos.WorldEdit.WorldEditorDataImpl>();
                 pl.tag = "WorldObjectsRoot";
             }
         }

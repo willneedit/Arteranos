@@ -36,7 +36,7 @@ namespace Arteranos.WorldEdit
             Chooser.OnPopulateTile += PopulateTile;
             Chooser.OnAddingItem += RequestToAdd;
 
-            WORoot = WorldChange.FindObjectByPath(null).gameObject;
+            WORoot = WorldChangeImpl.FindObjectByPath(null).gameObject;
             WORoot.TryGetComponent(out EditorData);
 
             EditorData.OnWorldChanged += GotWorldChanged;

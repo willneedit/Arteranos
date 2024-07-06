@@ -30,6 +30,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using AsyncOperation = UnityEngine.AsyncOperation;
 using Ipfs.Http;
+using ProtoBuf;
 
 namespace Arteranos.Avatar
 {
@@ -434,7 +435,7 @@ namespace Arteranos.Services
     // -------------------------------------------------------------------
 }
 
-    namespace Arteranos.Web
+namespace Arteranos.Web
 {
     // -------------------------------------------------------------------
     #region Web helpers
@@ -652,6 +653,70 @@ namespace Arteranos.XR
 
         public static void StartFading(float opacity, float duration = 0.5f)
             => Instance?.StartFading(opacity, duration);
+    }
+    #endregion
+    // -------------------------------------------------------------------
+}
+
+namespace Arteranos.WorldEdit
+{
+    // -------------------------------------------------------------------
+    #region WorldEdit classes
+
+    [ProtoContract]
+    public abstract class WorldDecoration
+    {
+        [ProtoMember(1)]
+        public WorldInfoNetwork info;
+
+        [ProtoMember(2)]
+        public List<byte[]> serializedObjects;
+
+        public abstract void TakeSnapshot();
+        public abstract IEnumerator BuildWorld();
+    }
+
+    public abstract class WorldChange
+    {
+        public abstract void Serialize(Stream stream);
+        public abstract IEnumerator Apply();
+        public abstract void EmitToServer();
+        public abstract void SetPathFromThere(Transform t);
+    }
+
+    public abstract class WorldEditorData : MonoBehaviour
+    {
+        public static WorldEditorData Instance { get; protected set; }
+
+        public abstract event Action<WorldChange> OnWorldChanged;
+        public abstract event Action<bool> OnEditorModeChanged;
+
+        // Movement and rotation constraints
+        public bool LockXAxis { get; set; } = false;
+        public bool LockYAxis { get; set; } = false;
+        public bool LockZAxis { get; set; } = false;
+
+        protected bool isInEditMode = false;
+
+        // Are we in the edit mode at all?
+        public bool IsInEditMode
+        {
+            get => isInEditMode;
+            set
+            {
+                bool old = isInEditMode;
+                isInEditMode = value;
+                if (old != value) NotifyEditorModeChanged();
+            }
+        }
+
+        public abstract void NotifyEditorModeChanged();
+        public abstract IEnumerator RecallUndoState(string hash);
+        public abstract void DoApply(Stream stream);
+        public abstract void DoApply(WorldChange worldChange);
+        public abstract void NotifyWorldChanged(WorldChange worldChange);
+        public abstract void BuilderRequestsUndo();
+        public abstract void BuilderRequestedRedo();
     }
     #endregion
     // -------------------------------------------------------------------

@@ -74,7 +74,7 @@ namespace Arteranos.WorldEdit
 
             mover.lastSelectExited.AddListener(GotObjectRelease);
 
-            Transform root = WorldChange.FindObjectByPath(null);
+            Transform root = WorldChangeImpl.FindObjectByPath(null);
             root.TryGetComponent(out EditorData);
 
             IsCollidable = false;
@@ -94,11 +94,11 @@ namespace Arteranos.WorldEdit
                 // We're in edit mode, we are actually changing the world.
                 TryGetWOC(out WOCTransform woct);
 
-                (Vector3 position, Vector3 eulerAngles) = ConstrainMovement(woct.position, ((Quaternion)woct.rotation).eulerAngles);
+                var (position, eulerRotation) = ConstrainMovement(woct.position, ((Quaternion)woct.rotation).eulerAngles);
 
                 woct.SetState(
                     position, 
-                    Quaternion.Euler(eulerAngles), 
+                    Quaternion.Euler(eulerRotation), 
                     transform.localScale);
 
                 WorldObjectPatch wop = new();
@@ -108,7 +108,7 @@ namespace Arteranos.WorldEdit
             }
         }
 
-        private (Vector3, Vector3) ConstrainMovement(Vector3 oldPosition, Vector3 oldEulerRotation)
+        private (Vector3 position, Vector3 eulerRotation) ConstrainMovement(Vector3 oldPosition, Vector3 oldEulerRotation)
         {
             if(!EditorData.LockXAxis && !EditorData.LockYAxis && !EditorData.LockZAxis)
                 return (transform.localPosition, transform.localEulerAngles);

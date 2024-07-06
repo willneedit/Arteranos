@@ -27,15 +27,40 @@ namespace Arteranos.WorldEdit
         Solid = 0,       // (Layer: Default): Collides likewise and intangibles, stops avatars
     }
 
-    [ProtoContract]
-    public class WorldDecoration
+    // -------------------------------------------------------------------
+    #region World Edit Snapshot and Restore
+    public class WorldDecorationImpl : WorldDecoration
     {
-        [ProtoMember(1)]
-        public WorldInfoNetwork info;
+        public override IEnumerator BuildWorld()
+        {
+            Transform t = WorldChangeImpl.FindObjectByPath(null);
+            foreach (byte[] swo in serializedObjects)
+            {
+                using MemoryStream ms = new(swo);
+                WorldObject wo = WorldObject.Deserialize(ms);
+                yield return wo.Instantiate(t);
+            }
+        }
 
-        [ProtoMember(2)]
-        public List<WorldObject> objects;
+        public override void TakeSnapshot()
+        {
+            serializedObjects = new();
+            Transform t = WorldChangeImpl.FindObjectByPath(null);
+            for (int i = 0; i < t.childCount; i++)
+            {
+                WorldObject wo = t.GetChild(i).MakeWorldObject();
+                if (wo != null)
+                {
+                    using MemoryStream ms = new();
+                    wo.Serialize(ms);
+                    serializedObjects.Add(ms.ToArray());
+                }
+            }
+        }
     }
+    #endregion
+    // -------------------------------------------------------------------
+    #region Generalized World Object description
 
     [ProtoContract]
     public class WorldObject
@@ -203,10 +228,12 @@ namespace Arteranos.WorldEdit
 
     }
 
+    #endregion
     // -------------------------------------------------------------------
+    #region World Edit Patch operations
 
     [ProtoContract]
-    public class WorldObjectInsertion : WorldChange
+    public class WorldObjectInsertion : WorldChangeImpl
     {
         [ProtoMember(1)]
         public WorldObjectAsset asset;      // see above
@@ -237,7 +264,7 @@ namespace Arteranos.WorldEdit
     }
 
     [ProtoContract]
-    public class WorldObjectPatch : WorldChange
+    public class WorldObjectPatch : WorldChangeImpl
     {
         [ProtoMember(2)]
         public List<WOCBase> components;
@@ -257,7 +284,7 @@ namespace Arteranos.WorldEdit
     }
 
     [ProtoContract]
-    public class WorldObjectDeletion : WorldChange
+    public class WorldObjectDeletion : WorldChangeImpl
     {
         // Nothing more to need
         public override IEnumerator Apply()
@@ -274,7 +301,7 @@ namespace Arteranos.WorldEdit
     }
 
     [ProtoContract]
-    public class WorldRollbackRequest : WorldChange
+    public class WorldRollbackRequest : WorldChangeImpl
     {
         [ProtoMember(2)]
         public string hash;
@@ -284,23 +311,25 @@ namespace Arteranos.WorldEdit
         }
     }
 
+    #endregion
     // -------------------------------------------------------------------
+    #region World Edit Patch root
 
     [ProtoContract]
     [ProtoInclude(65537, typeof(WorldObjectInsertion))]
     [ProtoInclude(65538, typeof(WorldObjectPatch))]
     [ProtoInclude(65539, typeof(WorldObjectDeletion))]
     [ProtoInclude(65540, typeof(WorldRollbackRequest))]
-    public abstract class WorldChange
+    public abstract class WorldChangeImpl : WorldChange
     {
         [ProtoMember(1)]
         public List<Guid> path;
 
-        public void Serialize(Stream stream)
+        public override void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
 
-        public static WorldChange Deserialize(Stream stream)
-            => Serializer.Deserialize<WorldChange>(stream);
+        public static WorldChangeImpl Deserialize(Stream stream)
+            => Serializer.Deserialize<WorldChangeImpl>(stream);
 
         protected Transform FindObjectByPath() => FindObjectByPath(path);
 
@@ -333,7 +362,7 @@ namespace Arteranos.WorldEdit
             return t;
         }
 
-        public void SetPathFromThere(Transform t)
+        public override void SetPathFromThere(Transform t)
         {
             path = new();
             while (t.TryGetComponent(out WorldObjectComponent woc))
@@ -344,9 +373,7 @@ namespace Arteranos.WorldEdit
             path.Reverse();
         }
 
-        public abstract IEnumerator Apply();
-
-        public void EmitToServer()
+        public override void EmitToServer()
         {
 #if UNITY_EDITOR
             // Shortcut in 'lean' setup/test scene.
@@ -363,6 +390,7 @@ namespace Arteranos.WorldEdit
         }
     }
 
+    #endregion
     // -------------------------------------------------------------------
     public static class GameObjectExtensions
     {
