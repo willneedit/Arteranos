@@ -11,6 +11,7 @@ using Ipfs;
 using System.Collections.Generic;
 using System;
 using GLTFast;
+using Arteranos.WorldEdit;
 
 namespace Arteranos.Core.Operations
 {
@@ -33,7 +34,7 @@ namespace Arteranos.Core.Operations
         public WorldInfo TemplateInfo;          // Blank World, with template builder's credentials
 
         public string WorldAssetBundlePath;
-        public string Decoration;               // nonempty: WorldDecoration
+        public WorldDecoration Decoration;      // !null: WorldDecoration
     }
 
     public interface IAvatarDownloaderOptions

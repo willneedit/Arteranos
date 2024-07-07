@@ -180,5 +180,22 @@ namespace Arteranos.WorldEdit
             WorldChangeImpl worldChange = WorldChangeImpl.Deserialize(stream);
             DoApply(worldChange);
         }
+
+        public override WorldDecoration TakeSnapshot()
+        {
+            WorldDecorationImpl worldDecoration = new() 
+            { 
+                info = null, 
+                objects = new() 
+            };
+            worldDecoration.TakeSnapshot();
+            return worldDecoration;
+        }
+
+        public override IEnumerator BuildWorld(WorldDecoration worldDecoration)
+            => worldDecoration.BuildWorld();
+
+        public override WorldDecoration DeserializeWD(Stream stream)
+            => Serializer.Deserialize<WorldDecorationImpl>(stream);
     }
 }

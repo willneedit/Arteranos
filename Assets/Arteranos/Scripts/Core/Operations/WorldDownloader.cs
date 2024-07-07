@@ -8,13 +8,12 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using UnityEngine;
-
 using System.Threading;
 using Ipfs;
 using Arteranos.Services;
 using System.Collections.Generic;
 using System.Text;
+using Arteranos.WorldEdit;
 
 namespace Arteranos.Core.Operations
 {
@@ -29,44 +28,23 @@ namespace Arteranos.Core.Operations
         {
             WorldDownloadContext context = _context as WorldDownloadContext;
 
-            IFileSystemNode fsn = await IPFSService.ListFile(context.WorldCid);
-            IEnumerable<IFileSystemLink> links = fsn.Links;
+            var (templateCid, decorationCid) = await OpUtils.GetWorldLinks(context.WorldCid, token);
+            context.TemplateInfo = await WorldDownloader.ExtractTemplateInfo(templateCid, token);
+            context.TemplateCid = templateCid;
 
-            string screenshotName = null;
-            long screenshotSize = 0;
-
-            foreach(IFileSystemLink link in links)
-                if (link.Name.StartsWith("Screenshot"))
-                {
-                    screenshotName = link.Name;
-                    screenshotSize = link.Size;
-                    break;
-                }
-
-            byte[] screenshotBytes = await IPFSService.ReadBinary($"{context.WorldCid}/{screenshotName}");
-
-            byte[] mdbytes = await IPFSService.ReadBinary($"{context.WorldCid}/Metadata.json");
-
-            string json = Encoding.UTF8.GetString(mdbytes);
-            WorldMetaData metaData = WorldMetaData.Deserialize(json);
-
-            WorldInfo wi = new()
+            if (decorationCid == null)
+                context.WorldInfo = context.TemplateInfo;
+            else
             {
-                win = new()
+                WorldDecoration wd = await WorldDownloader.ExtractDecoration(decorationCid, token);
+                context.WorldInfo = new()
                 {
-                    WorldCid = context.WorldCid,
-                    WorldName = metaData.WorldName,
-                    WorldDescription = metaData.WorldDescription,
-                    Author = metaData.AuthorID,
-                    ContentRating = metaData.ContentRating,
-                    Signature = null,
-                    ScreenshotPNG = screenshotBytes,
-                    Created = metaData.Created,
-                },
-                Updated = DateTime.MinValue
-            };
-            context.WorldInfo = wi;
-            wi.DBUpdate();
+                    win = wd.Info,
+                    Updated = DateTime.MinValue
+                };
+            }
+
+            context.WorldInfo.DBUpdate();
 
             return context;
         }
@@ -98,7 +76,14 @@ namespace Arteranos.Core.Operations
             // Invalidate the 'current' asset bundle path.
             WorldDownloader.CurrentWorldAssetBundlePath = null;
 
-            IFileSystemLink found = await OpUtils.ExtractAssetArchive(context.WorldCid, token);
+            Cid worldCid = context.WorldCid;
+            var (templateCid, decorationCid) = await OpUtils.GetWorldLinks(worldCid, token);
+            context.TemplateCid = templateCid;
+
+            if(decorationCid != null)
+                context.Decoration = await WorldDownloader.ExtractDecoration(decorationCid, token);
+
+            IFileSystemLink found = await OpUtils.ExtractAssetArchive(context.TemplateCid, token);
 
             totalBytes = found.Size;
             totalBytesMag = Utils.Magnitude(totalBytes);
@@ -124,7 +109,7 @@ namespace Arteranos.Core.Operations
             // As an afterthought, pin the world in the local IPFS node.
             try
             {
-                await IPFSService.PinCid(context.WorldCid, true);
+                await IPFSService.PinCid(worldCid, true);
             }
             catch { }
 
@@ -134,6 +119,54 @@ namespace Arteranos.Core.Operations
  
     public static class WorldDownloader
     {
+        internal static async Task<WorldDecoration> ExtractDecoration(Cid decoration, CancellationToken cancel)
+        {
+            byte[] decorationData = await IPFSService.ReadBinary(decoration, cancel: cancel);
+            using MemoryStream ms = new(decorationData);
+            return WorldEditorData.Instance.DeserializeWD(ms);
+        }
+
+        internal static async Task<WorldInfo> ExtractTemplateInfo(Cid templateCid, CancellationToken cancel)
+        {
+            IFileSystemNode fsn = await IPFSService.ListFile(templateCid, cancel);
+            IEnumerable<IFileSystemLink> links = fsn.Links;
+
+            string screenshotName = null;
+            long screenshotSize = 0;
+
+            foreach (IFileSystemLink link in links)
+                if (link.Name.StartsWith("Screenshot"))
+                {
+                    screenshotName = link.Name;
+                    screenshotSize = link.Size;
+                    break;
+                }
+
+            byte[] screenshotBytes = await IPFSService.ReadBinary($"{templateCid}/{screenshotName}", cancel: cancel);
+
+            byte[] mdbytes = await IPFSService.ReadBinary($"{templateCid}/Metadata.json", cancel: cancel);
+
+            string json = Encoding.UTF8.GetString(mdbytes);
+            WorldMetaData metaData = WorldMetaData.Deserialize(json);
+
+            WorldInfo wi = new()
+            {
+                win = new()
+                {
+                    WorldCid = templateCid,
+                    WorldName = metaData.WorldName,
+                    WorldDescription = metaData.WorldDescription,
+                    Author = metaData.AuthorID,
+                    ContentRating = metaData.ContentRating,
+                    Signature = null,
+                    ScreenshotPNG = screenshotBytes,
+                    Created = metaData.Created,
+                },
+                Updated = DateTime.MinValue
+            };
+            return wi;
+        }
+
         public static string CurrentWorldAssetBundlePath { get; internal set; } = null;
 
         public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldInfo(Cid WorldCid, int timeout = 600)
@@ -178,5 +211,8 @@ namespace Arteranos.Core.Operations
 
         public static string GetWorldDataFile(Context _context)
             => (_context as WorldDownloadContext).WorldAssetBundlePath;
+
+        public static WorldDecoration GetWorldDecoration(Context _context)
+            => (_context as WorldDownloadContext).Decoration;
     }
 }

@@ -29,33 +29,29 @@ namespace Arteranos.WorldEdit
 
     // -------------------------------------------------------------------
     #region World Edit Snapshot and Restore
+
+    [ProtoContract]
     public class WorldDecorationImpl : WorldDecoration
     {
+        [ProtoMember(1)]
+        public WorldInfoNetwork info;
+
+        [ProtoMember(2)]
+        public List<WorldObjectOpaque> objects;
+
+        public override WorldInfoNetwork Info { get => info; set => info = value; }
         public override IEnumerator BuildWorld()
         {
             Transform t = WorldChangeImpl.FindObjectByPath(null);
-            foreach (byte[] swo in serializedObjects)
-            {
-                using MemoryStream ms = new(swo);
-                WorldObject wo = WorldObject.Deserialize(ms);
-                yield return wo.Instantiate(t);
-            }
+            for (int i = 0; i < objects.Count; i++)
+                yield return objects[i].Instantiate(t);
         }
 
-        public override void TakeSnapshot()
+        public void TakeSnapshot()
         {
-            serializedObjects = new();
             Transform t = WorldChangeImpl.FindObjectByPath(null);
             for (int i = 0; i < t.childCount; i++)
-            {
-                WorldObject wo = t.GetChild(i).MakeWorldObject();
-                if (wo != null)
-                {
-                    using MemoryStream ms = new();
-                    wo.Serialize(ms);
-                    serializedObjects.Add(ms.ToArray());
-                }
-            }
+                objects.Add(t.GetChild(i).MakeWorldObject());
         }
     }
     #endregion
@@ -63,7 +59,7 @@ namespace Arteranos.WorldEdit
     #region Generalized World Object description
 
     [ProtoContract]
-    public class WorldObject
+    public class WorldObject : WorldObjectOpaque
     {
         [ProtoMember(1)]
         public WorldObjectAsset asset;      // see above
@@ -122,7 +118,7 @@ namespace Arteranos.WorldEdit
         public static WorldObject Deserialize(Stream stream)
             => Serializer.Deserialize<WorldObject>(stream);
 
-        public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
+        public override IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
         {
             IEnumerator LoadglTF(string GLTFObjectPath, GameObject LoadedObject)
             {
@@ -325,7 +321,7 @@ namespace Arteranos.WorldEdit
         [ProtoMember(1)]
         public List<Guid> path;
 
-        public override void Serialize(Stream stream)
+        public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
 
         public static WorldChangeImpl Deserialize(Stream stream)

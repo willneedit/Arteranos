@@ -21,7 +21,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -30,7 +29,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using AsyncOperation = UnityEngine.AsyncOperation;
 using Ipfs.Http;
-using ProtoBuf;
 
 namespace Arteranos.Avatar
 {
@@ -663,22 +661,19 @@ namespace Arteranos.WorldEdit
     // -------------------------------------------------------------------
     #region WorldEdit classes
 
-    [ProtoContract]
     public abstract class WorldDecoration
     {
-        [ProtoMember(1)]
-        public WorldInfoNetwork info;
-
-        [ProtoMember(2)]
-        public List<byte[]> serializedObjects;
-
-        public abstract void TakeSnapshot();
+        public abstract WorldInfoNetwork Info {  get; set; }
         public abstract IEnumerator BuildWorld();
+    }
+
+    public abstract class WorldObjectOpaque
+    {
+        public abstract IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null);
     }
 
     public abstract class WorldChange
     {
-        public abstract void Serialize(Stream stream);
         public abstract IEnumerator Apply();
         public abstract void EmitToServer();
         public abstract void SetPathFromThere(Transform t);
@@ -696,7 +691,7 @@ namespace Arteranos.WorldEdit
         public bool LockYAxis { get; set; } = false;
         public bool LockZAxis { get; set; } = false;
 
-        protected bool isInEditMode = false;
+        private bool isInEditMode = false;
 
         // Are we in the edit mode at all?
         public bool IsInEditMode
@@ -717,6 +712,9 @@ namespace Arteranos.WorldEdit
         public abstract void NotifyWorldChanged(WorldChange worldChange);
         public abstract void BuilderRequestsUndo();
         public abstract void BuilderRequestedRedo();
+        public abstract WorldDecoration TakeSnapshot();
+        public abstract IEnumerator BuildWorld(WorldDecoration worldDecoration);
+        public abstract WorldDecoration DeserializeWD(Stream stream);
     }
     #endregion
     // -------------------------------------------------------------------
