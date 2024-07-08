@@ -29,6 +29,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using AsyncOperation = UnityEngine.AsyncOperation;
 using Ipfs.Http;
+using Arteranos.WorldEdit;
 
 namespace Arteranos.Avatar
 {
@@ -406,29 +407,31 @@ namespace Arteranos.Services
         public static IEnumerator EnterDownloadedWorld()
         {
             string worldABF = Core.Operations.WorldDownloader.CurrentWorldAssetBundlePath;
+            WorldDecoration worldDecoration = Core.Operations.WorldDownloader.CurrentWorldDecoration;
 
             Debug.Log($"Download complete, world={worldABF}");
 
-            yield return null;
+            yield return SceneLoader.Instance.LoadScene(worldABF);
 
-            bool done = false;
-
-            // Deploy the scene loader.
-            GameObject go = new("_SceneLoader");
-            go.AddComponent<Persistence>();
-            Web.SceneLoader sl = go.AddComponent<Web.SceneLoader>();
-            sl.OnFinishingSceneChange += () =>
+            if (worldDecoration != null)
             {
-                XRControl.Instance.MoveRig();
-                done = true;
-            };
+                Debug.Log("World Decoration detected, building hand-edited world");
+                yield return WorldEditorData.Instance.BuildWorld(worldDecoration);
+            }
+            else
+                Debug.Log("World is a bare template");
 
-            sl.Name = worldABF;
-
-            yield return new WaitUntil(() => done);
+            XRControl.Instance.MoveRig();
         }
-
     }
+
+    public abstract class SceneLoader : MonoBehaviour
+    {
+        public static SceneLoader Instance;
+
+        public abstract IEnumerator LoadScene(string name);
+    }
+
     #endregion
     // -------------------------------------------------------------------
 }

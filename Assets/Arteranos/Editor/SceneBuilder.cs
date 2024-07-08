@@ -399,7 +399,6 @@ namespace Arteranos.Editor
 
         }
 
-        // Wipe off the scene loader in the saved scene in Edit mode on reentering it.
         [InitializeOnLoad]
         public static class OnEditModeChanged
         {
@@ -410,12 +409,6 @@ namespace Arteranos.Editor
 
             private static void LogPlayModeState(PlayModeStateChange state)
             {
-                if(state == PlayModeStateChange.EnteredEditMode)
-                {
-                    SceneLoader sl = FindObjectOfType<SceneLoader>();
-                    if(sl != null) DestroyImmediate(sl.gameObject);
-                }
-
                 if(state == PlayModeStateChange.EnteredPlayMode)
                 {
                     string testWorldZip = SessionState.GetString("ENTER_TEST_WORLD", string.Empty);
@@ -445,7 +438,7 @@ namespace Arteranos.Editor
                     pui.Completed += (_context) =>
                     {
                         Debug.Log("World data file loading and unpacking succeeded.");
-                        TransitionProgress.EnterDownloadedWorld();
+                        EditorCoroutineUtility.StartCoroutineOwnerless(TransitionProgressStatic.EnterDownloadedWorld());
                     };
 
                     pui.Faulted += (Exception ex, Context _context) => 

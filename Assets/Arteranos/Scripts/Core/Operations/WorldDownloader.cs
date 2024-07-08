@@ -75,6 +75,7 @@ namespace Arteranos.Core.Operations
 
             // Invalidate the 'current' asset bundle path.
             WorldDownloader.CurrentWorldAssetBundlePath = null;
+            WorldDownloader.CurrentWorldDecoration = null;
 
             Cid worldCid = context.WorldCid;
             var (templateCid, decorationCid) = await OpUtils.GetWorldLinks(worldCid, token);
@@ -104,6 +105,7 @@ namespace Arteranos.Core.Operations
                 ProgressChanged((float)_actual / totalBytes);
             });
 
+            WorldDownloader.CurrentWorldDecoration = context.Decoration;
             WorldDownloader.CurrentWorldAssetBundlePath = context.WorldAssetBundlePath;
 
             // As an afterthought, pin the world in the local IPFS node.
@@ -168,6 +170,7 @@ namespace Arteranos.Core.Operations
         }
 
         public static string CurrentWorldAssetBundlePath { get; internal set; } = null;
+        public static WorldDecoration CurrentWorldDecoration { get; internal set; } = null;
 
         public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldInfo(Cid WorldCid, int timeout = 600)
         {

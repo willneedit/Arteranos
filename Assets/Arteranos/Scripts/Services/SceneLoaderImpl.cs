@@ -13,14 +13,10 @@ using UnityEngine.SceneManagement;
 using System.IO;
 using System;
 
-using Arteranos.Services;
-
-namespace Arteranos.Web
+namespace Arteranos.Services
 {
-    public class SceneLoader : MonoBehaviour
+    public class SceneLoaderImpl : SceneLoader
     {
-        public string Name = null;
-
         public event Action OnFinishingSceneChange;
 
         private readonly List<string> TNWhitelist = new()
@@ -55,13 +51,9 @@ namespace Arteranos.Web
 
         };
 
-        void Start()
+        private void Awake()
         {
-            Debug.Log($"Loader deployed, name={Name}");
-            if(Name != null)
-            {
-                StartCoroutine(LoadScene(Name));
-            }
+            Instance = this;
         }
 
         private bool MatchWith(string name, List<string> patterns)
@@ -124,10 +116,8 @@ namespace Arteranos.Web
             for(int i = 0, c = transform.childCount; i < c; ++i)
                 RouteAudio(transform.GetChild(i));
         }
-        public IEnumerator LoadScene(string name)
+        public override IEnumerator LoadScene(string name)
         {
-            Name = null;
-
             yield return null;
 
             AssetBundle loadedAB = AssetBundle.LoadFromFile(name);
@@ -211,14 +201,10 @@ namespace Arteranos.Web
             loadedAB.Unload(false);
 
             // Give the chance to move the own avatar BEFORE to unload the old scene
-            // to prevent to pull the rug away fom under your feet.
+            // to prevent to pull the rug away from under your feet.
             OnFinishingSceneChange?.Invoke();
 
             SceneManager.UnloadSceneAsync(prev);
-
-            Destroy(gameObject);
-
         }
-
     }
 }
