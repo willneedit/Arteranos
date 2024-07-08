@@ -37,8 +37,8 @@ namespace Arteranos.WorldEdit
             NewObjectPicker.SetActive(false);
 
             btn_AddNew.onClick.AddListener(SwitchToAdder);
-            btn_Undo.onClick.AddListener(WorldEditorData.Instance.BuilderRequestsUndo);
-            btn_Redo.onClick.AddListener(WorldEditorData.Instance.BuilderRequestedRedo);
+            btn_Undo.onClick.AddListener(G.WorldEditorData.BuilderRequestsUndo);
+            btn_Redo.onClick.AddListener(G.WorldEditorData.BuilderRequestedRedo);
 
             WorldObjectList.OnWantsToModify += ModifyObject;
             PropertyPanel.OnReturnToList += SwitchToList;

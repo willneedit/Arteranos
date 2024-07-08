@@ -34,7 +34,7 @@ namespace Arteranos.Core.Operations
         public WorldInfo TemplateInfo;          // Blank World, with template builder's credentials
 
         public string WorldAssetBundlePath;
-        public WorldDecoration Decoration;      // !null: WorldDecoration
+        public IWorldDecoration Decoration;      // !null: WorldDecoration
     }
 
     public interface IAvatarDownloaderOptions

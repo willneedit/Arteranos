@@ -407,7 +407,7 @@ namespace Arteranos.Services
         public static IEnumerator EnterDownloadedWorld()
         {
             string worldABF = Core.Operations.WorldDownloader.CurrentWorldAssetBundlePath;
-            WorldDecoration worldDecoration = Core.Operations.WorldDownloader.CurrentWorldDecoration;
+            IWorldDecoration worldDecoration = Core.Operations.WorldDownloader.CurrentWorldDecoration;
 
             Debug.Log($"Download complete, world={worldABF}");
 
@@ -416,7 +416,7 @@ namespace Arteranos.Services
             if (worldDecoration != null)
             {
                 Debug.Log("World Decoration detected, building hand-edited world");
-                yield return WorldEditorData.Instance.BuildWorld(worldDecoration);
+                yield return G.WorldEditorData.BuildWorld(worldDecoration);
             }
             else
                 Debug.Log("World is a bare template");
@@ -654,70 +654,6 @@ namespace Arteranos.XR
 
         public static void StartFading(float opacity, float duration = 0.5f)
             => Instance?.StartFading(opacity, duration);
-    }
-    #endregion
-    // -------------------------------------------------------------------
-}
-
-namespace Arteranos.WorldEdit
-{
-    // -------------------------------------------------------------------
-    #region WorldEdit classes
-
-    public abstract class WorldDecoration
-    {
-        public abstract WorldInfoNetwork Info {  get; set; }
-        public abstract IEnumerator BuildWorld();
-    }
-
-    public abstract class WorldObjectOpaque
-    {
-        public abstract IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null);
-    }
-
-    public abstract class WorldChange
-    {
-        public abstract IEnumerator Apply();
-        public abstract void EmitToServer();
-        public abstract void SetPathFromThere(Transform t);
-    }
-
-    public abstract class WorldEditorData : MonoBehaviour
-    {
-        public static WorldEditorData Instance { get; protected set; }
-
-        public abstract event Action<WorldChange> OnWorldChanged;
-        public abstract event Action<bool> OnEditorModeChanged;
-
-        // Movement and rotation constraints
-        public bool LockXAxis { get; set; } = false;
-        public bool LockYAxis { get; set; } = false;
-        public bool LockZAxis { get; set; } = false;
-
-        private bool isInEditMode = false;
-
-        // Are we in the edit mode at all?
-        public bool IsInEditMode
-        {
-            get => isInEditMode;
-            set
-            {
-                bool old = isInEditMode;
-                isInEditMode = value;
-                if (old != value) NotifyEditorModeChanged();
-            }
-        }
-
-        public abstract void NotifyEditorModeChanged();
-        public abstract IEnumerator RecallUndoState(string hash);
-        public abstract void DoApply(Stream stream);
-        public abstract void DoApply(WorldChange worldChange);
-        public abstract void NotifyWorldChanged(WorldChange worldChange);
-        public abstract void BuilderRequestsUndo();
-        public abstract void BuilderRequestedRedo();
-        public abstract WorldDecoration TakeSnapshot();
-        public abstract IEnumerator BuildWorld(WorldDecoration worldDecoration);
-        public abstract WorldDecoration DeserializeWD(Stream stream);
     }
     #endregion
     // -------------------------------------------------------------------

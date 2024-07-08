@@ -24,7 +24,7 @@ namespace Arteranos.WorldEdit
 
         private GameObject WORoot = null;
         private GameObject CurrentRoot = null;
-        private WorldEditorData EditorData = null;
+        private IWorldEditorData EditorData = null;
 
         protected override void Awake()
         {
@@ -36,13 +36,13 @@ namespace Arteranos.WorldEdit
             Chooser.OnPopulateTile += PopulateTile;
             Chooser.OnAddingItem += RequestToAdd;
 
-            WORoot = WorldChangeImpl.FindObjectByPath(null).gameObject;
+            WORoot = WorldChange.FindObjectByPath(null).gameObject;
             WORoot.TryGetComponent(out EditorData);
 
             EditorData.OnWorldChanged += GotWorldChanged;
         }
 
-        private void GotWorldChanged(WorldChange change)
+        private void GotWorldChanged(IWorldChange change)
         {
             // TODO Filter out changes which are invisible in the current list of objects
             RequestUpdateList();

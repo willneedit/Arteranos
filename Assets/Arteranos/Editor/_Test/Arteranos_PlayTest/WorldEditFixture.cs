@@ -7,13 +7,10 @@
 
 using System.Collections;
 using NUnit.Framework;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
 using Arteranos.WorldEdit;
-using System.IO;
-using System;
 using Object = UnityEngine.Object;
 
 namespace Arteranos.PlayTest.WorldEdit
@@ -21,7 +18,7 @@ namespace Arteranos.PlayTest.WorldEdit
     public class WorldEditFixture
     {
         public GameObject pl = null;
-        public WorldEditorData editorData = null;
+        public IWorldEditorData editorData = null;
 
         Camera ca = null;
         Light li = null;

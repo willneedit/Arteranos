@@ -56,7 +56,7 @@ namespace Arteranos.WorldEdit
         private bool isLocked = false;
         private bool isGrabbable = false;
 
-        private WorldEditorData EditorData = null;
+        private IWorldEditorData EditorData = null;
         private Rigidbody body = null;
         private XRGrabInteractable mover = null;
 
@@ -74,7 +74,7 @@ namespace Arteranos.WorldEdit
 
             mover.lastSelectExited.AddListener(GotObjectRelease);
 
-            Transform root = WorldChangeImpl.FindObjectByPath(null);
+            Transform root = WorldChange.FindObjectByPath(null);
             root.TryGetComponent(out EditorData);
 
             IsCollidable = false;

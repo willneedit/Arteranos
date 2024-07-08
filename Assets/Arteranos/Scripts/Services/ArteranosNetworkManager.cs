@@ -956,7 +956,7 @@ namespace Arteranos.Services
 
             // Make the changes real and notify the observers
             using MemoryStream ms = new(wc.changerequest);
-            WorldEditorData.Instance.DoApply(ms);
+            G.WorldEditorData.DoApply(ms);
         }
 
         #endregion

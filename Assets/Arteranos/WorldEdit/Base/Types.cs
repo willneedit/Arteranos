@@ -31,25 +31,25 @@ namespace Arteranos.WorldEdit
     #region World Edit Snapshot and Restore
 
     [ProtoContract]
-    public class WorldDecorationImpl : WorldDecoration
+    public class WorldDecoration : IWorldDecoration
     {
         [ProtoMember(1)]
         public WorldInfoNetwork info;
 
         [ProtoMember(2)]
-        public List<WorldObjectOpaque> objects;
+        public List<WorldObject> objects;
 
-        public override WorldInfoNetwork Info { get => info; set => info = value; }
-        public override IEnumerator BuildWorld()
+        public WorldInfoNetwork Info { get => info; set => info = value; }
+        public IEnumerator BuildWorld()
         {
-            Transform t = WorldChangeImpl.FindObjectByPath(null);
+            Transform t = WorldChange.FindObjectByPath(null);
             for (int i = 0; i < objects.Count; i++)
                 yield return objects[i].Instantiate(t);
         }
 
         public void TakeSnapshot()
         {
-            Transform t = WorldChangeImpl.FindObjectByPath(null);
+            Transform t = WorldChange.FindObjectByPath(null);
             for (int i = 0; i < t.childCount; i++)
                 objects.Add(t.GetChild(i).MakeWorldObject());
         }
@@ -59,7 +59,7 @@ namespace Arteranos.WorldEdit
     #region Generalized World Object description
 
     [ProtoContract]
-    public class WorldObject : WorldObjectOpaque
+    public class WorldObject
     {
         [ProtoMember(1)]
         public WorldObjectAsset asset;      // see above
@@ -118,7 +118,7 @@ namespace Arteranos.WorldEdit
         public static WorldObject Deserialize(Stream stream)
             => Serializer.Deserialize<WorldObject>(stream);
 
-        public override IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
+        public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
         {
             IEnumerator LoadglTF(string GLTFObjectPath, GameObject LoadedObject)
             {
@@ -229,7 +229,7 @@ namespace Arteranos.WorldEdit
     #region World Edit Patch operations
 
     [ProtoContract]
-    public class WorldObjectInsertion : WorldChangeImpl
+    public class WorldObjectInsertion : WorldChange
     {
         [ProtoMember(1)]
         public WorldObjectAsset asset;      // see above
@@ -260,7 +260,7 @@ namespace Arteranos.WorldEdit
     }
 
     [ProtoContract]
-    public class WorldObjectPatch : WorldChangeImpl
+    public class WorldObjectPatch : WorldChange
     {
         [ProtoMember(2)]
         public List<WOCBase> components;
@@ -280,7 +280,7 @@ namespace Arteranos.WorldEdit
     }
 
     [ProtoContract]
-    public class WorldObjectDeletion : WorldChangeImpl
+    public class WorldObjectDeletion : WorldChange
     {
         // Nothing more to need
         public override IEnumerator Apply()
@@ -297,13 +297,13 @@ namespace Arteranos.WorldEdit
     }
 
     [ProtoContract]
-    public class WorldRollbackRequest : WorldChangeImpl
+    public class WorldRollbackRequest : WorldChange
     {
         [ProtoMember(2)]
         public string hash;
         public override IEnumerator Apply()
         {
-            yield return WorldEditorData.Instance.RecallUndoState(hash);
+            yield return G.WorldEditorData.RecallUndoState(hash);
         }
     }
 
@@ -316,7 +316,7 @@ namespace Arteranos.WorldEdit
     [ProtoInclude(65538, typeof(WorldObjectPatch))]
     [ProtoInclude(65539, typeof(WorldObjectDeletion))]
     [ProtoInclude(65540, typeof(WorldRollbackRequest))]
-    public abstract class WorldChangeImpl : WorldChange
+    public abstract class WorldChange : IWorldChange
     {
         [ProtoMember(1)]
         public List<Guid> path;
@@ -324,10 +324,12 @@ namespace Arteranos.WorldEdit
         public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
 
-        public static WorldChangeImpl Deserialize(Stream stream)
-            => Serializer.Deserialize<WorldChangeImpl>(stream);
+        public static WorldChange Deserialize(Stream stream)
+            => Serializer.Deserialize<WorldChange>(stream);
 
         protected Transform FindObjectByPath() => FindObjectByPath(path);
+
+        public abstract IEnumerator Apply();
 
         public static Transform FindObjectByPath(List <Guid> path)
         {
@@ -358,7 +360,7 @@ namespace Arteranos.WorldEdit
             return t;
         }
 
-        public override void SetPathFromThere(Transform t)
+        public void SetPathFromThere(Transform t)
         {
             path = new();
             while (t.TryGetComponent(out WorldObjectComponent woc))
@@ -369,13 +371,13 @@ namespace Arteranos.WorldEdit
             path.Reverse();
         }
 
-        public override void EmitToServer()
+        public void EmitToServer()
         {
 #if UNITY_EDITOR
             // Shortcut in 'lean' setup/test scene.
             if(SettingsManager.Instance == null)
             {
-                WorldEditorData.Instance.DoApply(this);
+                G.WorldEditorData.DoApply(this);
                 return;
             }
 #endif
@@ -390,7 +392,7 @@ namespace Arteranos.WorldEdit
     // -------------------------------------------------------------------
     public static class GameObjectExtensions
     {
-        public static WorldObject MakeWorldObject(this Transform t, bool includeChildren = true)
+        internal static WorldObject MakeWorldObject(this Transform t, bool includeChildren = true)
         {
             WorldObject wo = new();
 

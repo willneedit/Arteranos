@@ -36,7 +36,7 @@ namespace Arteranos.Core.Operations
                 context.WorldInfo = context.TemplateInfo;
             else
             {
-                WorldDecoration wd = await WorldDownloader.ExtractDecoration(decorationCid, token);
+                IWorldDecoration wd = await WorldDownloader.ExtractDecoration(decorationCid, token);
                 context.WorldInfo = new()
                 {
                     win = wd.Info,
@@ -121,11 +121,11 @@ namespace Arteranos.Core.Operations
  
     public static class WorldDownloader
     {
-        internal static async Task<WorldDecoration> ExtractDecoration(Cid decoration, CancellationToken cancel)
+        internal static async Task<IWorldDecoration> ExtractDecoration(Cid decoration, CancellationToken cancel)
         {
             byte[] decorationData = await IPFSService.ReadBinary(decoration, cancel: cancel);
             using MemoryStream ms = new(decorationData);
-            return WorldEditorData.Instance.DeserializeWD(ms);
+            return G.WorldEditorData.DeserializeWD(ms);
         }
 
         internal static async Task<WorldInfo> ExtractTemplateInfo(Cid templateCid, CancellationToken cancel)
@@ -170,7 +170,7 @@ namespace Arteranos.Core.Operations
         }
 
         public static string CurrentWorldAssetBundlePath { get; internal set; } = null;
-        public static WorldDecoration CurrentWorldDecoration { get; internal set; } = null;
+        public static IWorldDecoration CurrentWorldDecoration { get; internal set; } = null;
 
         public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldInfo(Cid WorldCid, int timeout = 600)
         {
@@ -215,7 +215,7 @@ namespace Arteranos.Core.Operations
         public static string GetWorldDataFile(Context _context)
             => (_context as WorldDownloadContext).WorldAssetBundlePath;
 
-        public static WorldDecoration GetWorldDecoration(Context _context)
+        public static IWorldDecoration GetWorldDecoration(Context _context)
             => (_context as WorldDownloadContext).Decoration;
     }
 }
