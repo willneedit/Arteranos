@@ -7,16 +7,13 @@
 
 using UnityEngine;
 
-#pragma warning disable IDE1006 // Because Unity's more relaxed naming convention
-
 namespace Arteranos.Avatar
 {
-    public interface IHitBox
+    public interface IHitBox : IMonoBehaviour
     {
-        GameObject gameObject { get; }
         IAvatarBrain Brain { get; set; }
 
-        bool interactable { get; set; }
+        bool Interactable { get; set; }
 
         void OnTargeted(bool inSight);
     }

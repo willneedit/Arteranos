@@ -13,7 +13,7 @@ namespace Arteranos.Avatar
     public class HitBox : MonoBehaviour, IHitBox
     {
         public IAvatarBrain Brain { get; set; } = null;
-        public bool interactable 
+        public bool Interactable 
         {
             get => VisibleCollider.activeSelf;
             set
