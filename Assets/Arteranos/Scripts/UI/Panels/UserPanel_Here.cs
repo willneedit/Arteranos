@@ -26,7 +26,7 @@ namespace Arteranos.UI
             // Get the currently logged-in users with the default state....
             foreach(IAvatarBrain user in NetworkStatus.GetOnlineUsers())
             {
-                if(user.UserID == XRControl.Me.UserID) continue;
+                if(user.UserID == G.XRControl.Me.UserID) continue;
 
                 list[user.UserID] = new()
                 {

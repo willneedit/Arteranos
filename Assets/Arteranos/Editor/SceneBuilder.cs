@@ -299,7 +299,7 @@ namespace Arteranos.Editor
                 DestroyImmediate(camera.gameObject);
 
             IXRControl xrc;
-            if((xrc = XRControl.Instance) != null)
+            if((xrc = G.XRControl) != null)
                 DestroyImmediate(xrc.gameObject);
 
             Persistence p;

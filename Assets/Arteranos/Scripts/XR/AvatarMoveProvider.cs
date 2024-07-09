@@ -172,7 +172,7 @@ namespace Arteranos.XR
                 //
                 // Just like with games when the character is stuck, unable to move while
                 // being in the eternal falling animation.
-                XRControl.Instance.MoveRig();
+                G.XRControl.MoveRig();
                 saved = true;
             }
 

@@ -70,7 +70,7 @@ namespace Arteranos.UI
 
             // LookAt can take a second vector as the Up vector.
             // Seems that we'd use _the client's_ Up vector, not the targeted avatar's.
-            transform.LookAt(XRControl.Instance.cameraTransform);
+            transform.LookAt(G.XRControl.cameraTransform);
             transform.Rotate(aboutFace);
         }
 
@@ -143,13 +143,13 @@ Core.Utils.IsAbleTo(UserCapabilities.CanBanUser, Bearer)
 
         private void OnBlockButtonClicked()
         {
-            XRControl.Me.BlockUser(Bearer);
+            G.XRControl.Me.BlockUser(Bearer);
             OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 
         private void OnFriendAddButtonClicked()
         {
-            XRControl.Me.OfferFriendship(Bearer);
+            G.XRControl.Me.OfferFriendship(Bearer);
             OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 

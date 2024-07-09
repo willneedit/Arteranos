@@ -10,7 +10,6 @@ using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.Core.Cryptography;
 using Arteranos.UI;
-using Arteranos.XR;
 using Ipfs;
 using Ipfs.Cryptography.Proto;
 using Ipfs.CoreApi;
@@ -352,7 +351,7 @@ namespace Arteranos.Services
 
         public static IEnumerator TransitionFrom()
         {
-            ScreenFader.StartFading(1.0f);
+            G.XRVisualConfigurator.StartFading(1.0f);
             yield return new WaitForSeconds(0.5f);
 
             AsyncOperation ao = SceneManager.LoadSceneAsync("Transition");
@@ -362,9 +361,9 @@ namespace Arteranos.Services
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
 
-            XRControl.Instance.MoveRig();
+            G.XRControl.MoveRig();
 
-            ScreenFader.StartFading(0.0f);
+            G.XRVisualConfigurator.StartFading(0.0f);
 
             yield return new WaitUntil(() => Instance);
 
@@ -375,12 +374,12 @@ namespace Arteranos.Services
         // the current preloaded world asset bundle!
         public static IEnumerator TransitionTo(Cid WorldCid, string WorldName)
         {
-            ScreenFader.StartFading(1.0f);
+            G.XRVisualConfigurator.StartFading(1.0f);
             yield return new WaitForSeconds(0.5f);
 
             yield return MoveToPreloadedWorld(WorldCid, WorldName);
 
-            ScreenFader.StartFading(0.0f);
+            G.XRVisualConfigurator.StartFading(0.0f);
 
             SysMenuStatic.EnableHUD(true);
         }
@@ -395,7 +394,7 @@ namespace Arteranos.Services
                 yield return new WaitForEndOfFrame();
                 yield return new WaitForEndOfFrame();
 
-                XRControl.Instance.MoveRig();
+                G.XRControl.MoveRig();
             }
             else
                 yield return EnterDownloadedWorld();
@@ -421,7 +420,7 @@ namespace Arteranos.Services
             else
                 Debug.Log("World is a bare template");
 
-            XRControl.Instance.MoveRig();
+            G.XRControl.MoveRig();
         }
     }
 
@@ -526,7 +525,7 @@ namespace Arteranos.UI
     {
         public static IAvatarGalleryUI New()
         {
-            Transform t = XRControl.Instance.rigTransform;
+            Transform t = G.XRControl.rigTransform;
             Vector3 position = t.position;
             Quaternion rotation= t.rotation;
             position += rotation * Vector3.forward * 2f;
@@ -622,32 +621,6 @@ namespace Arteranos.UI
         public static void DismissGadget(string name = null) => Instance.DismissGadget_(name);
     }
 
-    #endregion
-    // -------------------------------------------------------------------
-}
-
-namespace Arteranos.XR
-{
-    // -------------------------------------------------------------------
-    #region XR helpers
-    public static class XRControl
-    {
-        public static IXRControl Instance { get; set; }
-
-        public static IAvatarBrain Me
-        {
-            get => Instance?.Me;
-            set => Instance.Me = value;
-        }
-    }
-
-    public static class ScreenFader
-    {
-        public static IXRVisualConfigurator Instance { get; set; }
-
-        public static void StartFading(float opacity, float duration = 0.5f)
-            => Instance?.StartFading(opacity, duration);
-    }
     #endregion
     // -------------------------------------------------------------------
 }

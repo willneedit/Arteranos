@@ -33,7 +33,7 @@ namespace Arteranos.XR
 
         private void Awake()
         {
-            ScreenFader.Instance = this;
+            G.XRVisualConfigurator = this;
             FadeTargetStrength = 1.0f;
             FadeStrength = 1.0f; // Start with opaque
         }
@@ -41,7 +41,7 @@ namespace Arteranos.XR
         private void OnDestroy()
         {
             SettingsManager.Client.OnXRControllerChanged -= DownloadControlSettings;
-            ScreenFader.Instance = null;
+            G.XRVisualConfigurator = null;
         }
 
         void Start()

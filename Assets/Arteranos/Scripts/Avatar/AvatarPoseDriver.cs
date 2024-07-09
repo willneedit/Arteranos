@@ -61,7 +61,7 @@ namespace Arteranos.Avatar
 
         private void OnXRChanged(bool useXR)
         {
-            Transform xrot = XRControl.Instance.rigTransform;
+            Transform xrot = G.XRControl.rigTransform;
 
             // And, move the XR (or 2D) rig to the own avatar's position.
             Debug.Log("Moving rig");
@@ -76,7 +76,7 @@ namespace Arteranos.Avatar
 
             if (isLocalPlayer)
             {
-                IXRControl xrc = XRControl.Instance;
+                IXRControl xrc = G.XRControl;
 
                 xrc.EyeHeight = am.EyeHeight;
                 xrc.BodyHeight = am.FullHeight;
@@ -95,12 +95,12 @@ namespace Arteranos.Avatar
             {
                 if(!AvatarMeasures.CenterEye || !AvatarMeasures.Head) return;
 
-                Transform cam = XRControl.Instance.cameraTransform;                
+                Transform cam = G.XRControl.cameraTransform;                
                 AvatarMeasures.Head.rotation = cam.rotation;
             }
 
             // VR + 2D: Walking animation (only with loaded avatars)
-            GameObject xro = XRControl.Instance.rigTransform.gameObject;
+            GameObject xro = G.XRControl.rigTransform.gameObject;
             CharacterController cc = xro.GetComponent<CharacterController>();
 
             Vector3 moveSpeed = Quaternion.Inverse(transform.rotation) * cc.velocity;
@@ -149,7 +149,7 @@ namespace Arteranos.Avatar
             // Avatars from other clients are slaved by the NetworkTransform and -Pose.
             if(isLocalPlayer)
             {
-                IXRControl instance = XRControl.Instance;
+                IXRControl instance = G.XRControl;
                 Transform xro = instance.rigTransform;
                 Transform cam = instance.cameraTransform;
 

@@ -37,7 +37,7 @@ namespace Arteranos.Services
 
             NetworkStatus.Instance.enabled = true;
 
-            XR.XRControl.Instance.enabled = true;
+            G.XRControl.enabled = true;
 
             yield return TransitionProgressStatic.TransitionFrom();
 

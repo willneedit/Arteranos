@@ -25,7 +25,7 @@ namespace Arteranos.UI
             }
         }
 
-        protected override void OnDisable() => XR.XRControl.Instance?.FreezeControls(false);
+        protected override void OnDisable() => G.XRControl.FreezeControls(false);
 
         private void FindHookableTextFields(GameObject go)
         {
@@ -33,14 +33,14 @@ namespace Arteranos.UI
                 => (string x) =>
                 {
                     HookVirtualKB(field);
-                    XR.XRControl.Instance.FreezeControls(true);
+                    G.XRControl.FreezeControls(true);
                 };
 
             UnityAction<string> makeDetachmentFunc(TMP_InputField field)
                 => (string x) =>
                 {
                     HookVirtualKB(field);
-                    XR.XRControl.Instance.FreezeControls(false);
+                    G.XRControl.FreezeControls(false);
                 };
 
             if(go.TryGetComponent(out TMP_InputField text))

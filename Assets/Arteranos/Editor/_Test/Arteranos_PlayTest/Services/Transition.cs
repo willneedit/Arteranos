@@ -34,7 +34,7 @@ namespace Arteranos.PlayTest.Services
         [UnityTearDown]
         public IEnumerator TearDown0()
         {
-            ScreenFader.StartFading(0, 0);
+            G.XRVisualConfigurator.StartFading(0, 0);
             yield return null;
         }
 

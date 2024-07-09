@@ -135,7 +135,7 @@ namespace Arteranos.UI
             if(already) return;
             already = true;
             SysMenu.CloseSysMenus();
-            XRControl.Me.SendTextMessage(Receiver, text);
+            G.XRControl.Me.SendTextMessage(Receiver, text);
         }
 
         private void OnSendButtonClicked()
@@ -143,7 +143,7 @@ namespace Arteranos.UI
             if(already) return;
             already = true;
             SysMenu.CloseSysMenus();
-            XRControl.Me.SendTextMessage(Receiver, txt_Message.text);
+            G.XRControl.Me.SendTextMessage(Receiver, txt_Message.text);
         }
     }
 }

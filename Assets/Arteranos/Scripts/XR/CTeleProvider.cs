@@ -48,13 +48,13 @@ namespace UnityEngine.XR.Interaction.Toolkit
 
         private IEnumerator BlinkToDestination(Vector3 dest)
         {
-            ScreenFader.StartFading(1.0f, 0.25f);
+            G.XRVisualConfigurator.StartFading(1.0f, 0.25f);
             yield return new WaitForSeconds(0.25f);
 
             system.xrOrigin.MoveCameraToWorldLocation(dest);
             Physics.SyncTransforms();
 
-            ScreenFader.StartFading(0.0f, 0.25f);
+            G.XRVisualConfigurator.StartFading(0.0f, 0.25f);
             yield return new WaitForSeconds(0.25f);
 
             EndLocomotion();

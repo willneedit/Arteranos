@@ -15,7 +15,7 @@ using UnityEngine.XR.Management;
 
 namespace Arteranos.XR
 {
-    public class XRControlImpl : MonoBehaviour, IXRControl
+    public class XRControl : MonoBehaviour, IXRControl
     {
         public XROrigin VRRig;
 
@@ -40,11 +40,11 @@ namespace Arteranos.XR
 
         public void Awake()
         {
-            XRControl.Instance = this;
+            G.XRControl = this;
             CurrentVRRig = FindObjectOfType<XROrigin>();
         }
 
-        public void OnDestroy() => XRControl.Instance = null;
+        public void OnDestroy() => G.XRControl = null;
 
         bool quitting = false;
         public IEnumerator VRLoopCoroutine()
@@ -212,7 +212,7 @@ namespace Arteranos.XR
                 startRotation = spawn.rotation;
             }
 
-            startPosition += XRControl.Instance.heightAdjustment;
+            startPosition += G.XRControl.heightAdjustment;
 
             XROrigin xro = CurrentVRRig;
 

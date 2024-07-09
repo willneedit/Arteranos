@@ -7,6 +7,7 @@
 
 using Arteranos.Services;
 using Arteranos.WorldEdit;
+using Arteranos.XR;
 
 namespace Arteranos
 {
@@ -15,5 +16,9 @@ namespace Arteranos
         public static IWorldEditorData WorldEditorData { get; set; }
 
         public static ISceneLoader SceneLoader { get; set; }
+
+        public static IXRControl XRControl { get; set; }
+
+        public static IXRVisualConfigurator XRVisualConfigurator { get; set; }
     }
 }

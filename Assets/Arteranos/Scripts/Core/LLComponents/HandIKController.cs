@@ -46,13 +46,13 @@ namespace Arteranos.Avatar
         {
             if(useXR)
             {
-                Transform xrot = XRControl.Instance.rigTransform;
+                Transform xrot = G.XRControl.rigTransform;
 
                 ControllerTransform = xrot.FindRecursive(RightSide
                     ? "RightHand Controller"
                     : "LeftHand Controller");
 
-                CameraTransform = XRControl.Instance.cameraTransform;
+                CameraTransform = G.XRControl.cameraTransform;
             }
             else
             {
