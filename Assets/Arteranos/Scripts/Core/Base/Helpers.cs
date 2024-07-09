@@ -411,7 +411,7 @@ namespace Arteranos.Services
 
             Debug.Log($"Download complete, world={worldABF}");
 
-            yield return SceneLoader.Instance.LoadScene(worldABF);
+            yield return G.SceneLoader.LoadScene(worldABF);
 
             if (worldDecoration != null)
             {
@@ -423,13 +423,6 @@ namespace Arteranos.Services
 
             XRControl.Instance.MoveRig();
         }
-    }
-
-    public abstract class SceneLoader : MonoBehaviour
-    {
-        public static SceneLoader Instance;
-
-        public abstract IEnumerator LoadScene(string name);
     }
 
     #endregion

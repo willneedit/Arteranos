@@ -15,7 +15,7 @@ using System;
 
 namespace Arteranos.Services
 {
-    public class SceneLoaderImpl : SceneLoader
+    public class SceneLoader : MonoBehaviour, ISceneLoader
     {
         public event Action OnFinishingSceneChange;
 
@@ -53,7 +53,7 @@ namespace Arteranos.Services
 
         private void Awake()
         {
-            Instance = this;
+            G.SceneLoader = this;
         }
 
         private bool MatchWith(string name, List<string> patterns)
@@ -116,7 +116,7 @@ namespace Arteranos.Services
             for(int i = 0, c = transform.childCount; i < c; ++i)
                 RouteAudio(transform.GetChild(i));
         }
-        public override IEnumerator LoadScene(string name)
+        public IEnumerator LoadScene(string name)
         {
             yield return null;
 
