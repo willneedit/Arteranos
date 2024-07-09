@@ -59,8 +59,8 @@ namespace Arteranos.UI
 
             Actions = new UnityAction[]
             {
-                () => G.XRControl.Me.AppearanceStatus |= AppearanceStatus.Muting,
-                () => G.XRControl.Me.AppearanceStatus &= ~AppearanceStatus.Muting,
+                () => G.Me.AppearanceStatus |= AppearanceStatus.Muting,
+                () => G.Me.AppearanceStatus &= ~AppearanceStatus.Muting,
                 OnSummonCameraClicked,
                 () => NetworkStatus.StopHost(true),
                 () => StartCoroutine(ToggleFlyout(EmojiFlyout)),
@@ -86,7 +86,7 @@ namespace Arteranos.UI
                 };
 
             UnityAction makeClickedEmoji(EmojiButton but) =>
-                () => G.XRControl.Me.PerformEmote(but.Image.name);
+                () => G.Me.PerformEmote(but.Image.name);
 
             base.Start();
 
@@ -169,8 +169,8 @@ namespace Arteranos.UI
                 oldDTstring = null;
             }
 
-            bool avatarOn = G.XRControl.Me != null;
-            bool muted = AppearanceStatus.IsSilent(G.XRControl.Me?.AppearanceStatus ?? AppearanceStatus.OK);
+            bool avatarOn = G.Me != null;
+            bool muted = AppearanceStatus.IsSilent(G.Me?.AppearanceStatus ?? AppearanceStatus.OK);
 
             // Safety measure, to prevent accidental shut down a hosted session.
             bool online = NetworkStatus.GetOnlineLevel() == OnlineLevel.Client;

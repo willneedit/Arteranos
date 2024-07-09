@@ -15,7 +15,6 @@ namespace Arteranos.XR
 {
     public interface IXRControl
     {
-        IAvatarBrain Me { get; set; }
         Vector3 CameraLocalOffset { get; }
         bool enabled { get; set; }
         public float EyeHeight { get; set; }

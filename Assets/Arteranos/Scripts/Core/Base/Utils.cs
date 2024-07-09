@@ -127,7 +127,7 @@ namespace Arteranos.Core
         /// <param name="target">The targeted user you want to do for (or, against)</param>
         /// <returns>Self explanatory.</returns>
         public static bool IsAbleTo(UserCapabilities cap, IAvatarBrain target) 
-            => IsAbleTo(G.XRControl.Me, cap, target);
+            => IsAbleTo(G.Me, cap, target);
 
         public static bool IsAbleTo(IAvatarBrain source, UserCapabilities cap, IAvatarBrain target)
         {

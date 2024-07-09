@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Avatar;
 using Arteranos.Services;
 using Arteranos.WorldEdit;
 using Arteranos.XR;
@@ -20,5 +21,7 @@ namespace Arteranos
         public static IXRControl XRControl { get; set; }
 
         public static IXRVisualConfigurator XRVisualConfigurator { get; set; }
+
+        public static IAvatarBrain Me {  get; set; }
     }
 }

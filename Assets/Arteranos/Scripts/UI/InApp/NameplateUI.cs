@@ -143,13 +143,13 @@ Core.Utils.IsAbleTo(UserCapabilities.CanBanUser, Bearer)
 
         private void OnBlockButtonClicked()
         {
-            G.XRControl.Me.BlockUser(Bearer);
+            G.Me.BlockUser(Bearer);
             OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 
         private void OnFriendAddButtonClicked()
         {
-            G.XRControl.Me.OfferFriendship(Bearer);
+            G.Me.OfferFriendship(Bearer);
             OnAppearanceStatusChanged(Bearer.AppearanceStatus);
         }
 

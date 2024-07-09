@@ -44,8 +44,6 @@ namespace Arteranos.XR
             CurrentVRRig = FindObjectOfType<XROrigin>();
         }
 
-        public void OnDestroy() => G.XRControl = null;
-
         bool quitting = false;
         public IEnumerator VRLoopCoroutine()
         {

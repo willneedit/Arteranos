@@ -140,15 +140,15 @@ namespace Arteranos.Avatar
             IEnumerator HelloFromRemoteAvatar()
             {
                 // I'm a remote avatar, and we haven't seen the local user yet.
-                while (G.XRControl.Me == null)
+                while (G.Me == null)
                     yield return new WaitForSeconds(1);
 
-                ulong localState = G.XRControl.Me.GetSocialStateTo(this);
+                ulong localState = G.Me.GetSocialStateTo(this);
 
                 Debug.Log($"{(string)UserID} (remote) announcing its arrival (local state: {localState})");
 
                 // Now we're talking!
-                G.XRControl.Me.SendSocialState(this, localState);
+                G.Me.SendSocialState(this, localState);
 
                 // The other way round?
                 // In the other client, this remote avatar would be the local avatar, and
@@ -165,7 +165,7 @@ namespace Arteranos.Avatar
             if (isLocalPlayer)
             {
                 // That's me, set aside from the unwashed crowd. :)
-                G.XRControl.Me = this;
+                G.Me = this;
 
                 DownloadClientSettings();
 
@@ -202,7 +202,7 @@ namespace Arteranos.Avatar
         public override void OnStopClient()
         {
             // Maybe it isn't owned anymore, but it would be worse the other way round.
-            if (isLocalPlayer) G.XRControl.Me = null;
+            if (isLocalPlayer) G.Me = null;
 
             SettingsManager.Client.OnUserPrivacyChanged -= UPChanged;
             SettingsManager.Client.OnAvatarChanged -= CommitAvatarChanged;

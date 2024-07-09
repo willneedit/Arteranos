@@ -63,7 +63,7 @@ namespace Arteranos.UI
             btn_Unblock.onClick.AddListener(OnUnblockButtonClicked);
             btn_SendText.onClick.AddListener(OnSendTextButtonClicked);
 
-            Me = G.XRControl.Me;
+            Me = G.Me;
             cs = SettingsManager.Client;
         }
 
@@ -113,7 +113,7 @@ namespace Arteranos.UI
                 btn_Unblock.gameObject.SetActive(blocked && !friends);
 
                 // Connot send texts to offline users. They could want to deny them.
-                if (targetUser != null && G.XRControl.Me != null)
+                if (targetUser != null && G.Me != null)
                     btn_SendText.gameObject.SetActive(Utils.IsAbleTo(UserCapabilities.CanSendText, targetUser));
                 else
                     btn_SendText.gameObject.SetActive(false);
