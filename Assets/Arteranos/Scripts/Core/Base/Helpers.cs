@@ -26,91 +26,10 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
-using AsyncOperation = UnityEngine.AsyncOperation;
 using Ipfs.Http;
 using Arteranos.WorldEdit;
 
-namespace Arteranos.Avatar
-{
-    // -------------------------------------------------------------------
-    #region Avatar constants
-
-    public static class AppearanceStatus
-    {
-        public const int OK = 0;
-
-        // Muted by the user himself
-        public const int Muting = (1 << 0);
-
-        // (Local only) Muted by you
-        public const int Muted = (1 << 1);
-
-        // Muted by the administrator/event host/...
-        public const int Gagged = (1 << 2);
-
-
-        // Reasons for a user is silent
-        public const int MASK_AUDIO = 0x0000FFFF;
-
-
-        // (Local Only) Invisible because of being too close
-        public const int Bubbled = (1 << 16);
-
-        // (Local Only) User is blocked by you
-        public const int Blocked = (1 << 17);
-
-        // (Local Only) User is blocking you, therefore he's invisible to you too.
-        public const int Blocking = (1 << 18);
-
-        // Made invisible by the administrator/event host/...
-        public const int Ghosted = (1 << 19);
-
-
-        // Reasons fot a user is invisible
-        public const int MASK_VIDEO = 0x7FFF0000;
-
-
-        // Reasons which are individual causes, not net-wide ones
-        public const int MASK_LOCAL = (Muted | Bubbled | Blocked | Blocking);
-
-        public static bool IsSilent(int status) => (status != OK); // Being invisible implies being silent, too.
-
-        public static bool IsInvisible(int status) => ((status & MASK_VIDEO) != OK);
-
-        public static bool IsLocal(int status) => ((status & MASK_LOCAL) != OK);
-    }
-
-    #endregion
-    // -------------------------------------------------------------------
-    #region Avatar factories
-
-    public class AvatarHitBoxFactory : MonoBehaviour
-    {
-        public static IHitBox New(IAvatarBrain brain)
-        {
-            GameObject go = Instantiate(
-                BP.I.InApp.AvatarHitBox, brain.transform);
-            IHitBox hitBox = go.GetComponent<IHitBox>();
-            hitBox.Brain = brain;
-
-            return hitBox;
-        }
-    }
-
-    public class BubbleCoordinatorFactory : MonoBehaviour
-    {
-        public static IBubbleCoordinator New(IAvatarBrain brain)
-        {
-            GameObject go = Instantiate(
-                BP.I.InApp.PrivacyBubble, brain.transform);
-            IBubbleCoordinator bc = go.GetComponent<IBubbleCoordinator>();
-            bc.Brain = brain;
-            return bc;
-        }
-    }
-    #endregion
-    // -------------------------------------------------------------------
-}
+using AsyncOperation = UnityEngine.AsyncOperation;
 
 namespace Arteranos.Services
 {

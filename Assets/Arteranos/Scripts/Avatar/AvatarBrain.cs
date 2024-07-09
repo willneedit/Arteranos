@@ -169,7 +169,7 @@ namespace Arteranos.Avatar
 
                 DownloadClientSettings();
 
-                _ = BubbleCoordinatorFactory.New(this);
+                _ = Factories.NewBubbleCoordinator(this);
 
                 PostOffice.Load();
 
@@ -178,7 +178,7 @@ namespace Arteranos.Avatar
             else
             {
                 // Alien avatars get the hit capsules to target them to call up the nameplates.
-                HitBox = AvatarHitBoxFactory.New(this);
+                HitBox = Factories.NewHitBox(this);
 
                 // Greet the local user and sync his social state as soon as it arrived
                 StartCoroutine(HelloFromRemoteAvatar());
