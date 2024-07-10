@@ -183,29 +183,6 @@ namespace Arteranos.Services
     // -------------------------------------------------------------------
 }
 
-namespace Arteranos.Web
-{
-    // -------------------------------------------------------------------
-    #region Web helpers
-    public abstract class ConnectionManager : MonoBehaviour
-    {
-        protected abstract IEnumerator ConnectToServer_(MultiHash PeerID, Action<bool> callback);
-        protected abstract void DeliverDisconnectReason_(string reason);
-        protected abstract void ExpectConnectionResponse_();
-
-        public static ConnectionManager Instance { get; protected set; }
-
-        public static IEnumerator ConnectToServer(MultiHash PeerID, Action<bool> callback) 
-            => Instance.ConnectToServer_(PeerID, callback);
-        public static void DeliverDisconnectReason(string reason) 
-            => Instance.DeliverDisconnectReason_(reason);
-        public static void ExpectConnectionResponse()
-            => Instance.ExpectConnectionResponse_();
-    }
-    #endregion
-    // -------------------------------------------------------------------
-}
-
 namespace Arteranos.UI
 {
     // -------------------------------------------------------------------

@@ -189,7 +189,7 @@ namespace Arteranos.Core.Operations
             // TODO Use callback to be notified about the connection success/failure,
             // then maybe walk down on the list if the leading servers went dark.
             TaskScheduler.ScheduleCoroutine(
-                () => ConnectionManager.ConnectToServer(ServerPeerID, null));
+                () => G.ConnectionManager.ConnectToServer(ServerPeerID, null));
         }
     }
 }

@@ -277,7 +277,7 @@ namespace Arteranos.Services
                 await SmoothServerTransition();
 
             OpenPorts = true;
-            ConnectionManager.ExpectConnectionResponse();
+            G.ConnectionManager.ExpectConnectionResponse();
 
             // Custom server port -- Transport specific!
             transport.port = (ushort) SettingsManager.Server.ServerPort;

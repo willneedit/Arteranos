@@ -807,7 +807,7 @@ namespace Arteranos.Services
                     : "You've been kicked from this server.";
 
                 // The server will disconnect this user anyway.
-                ConnectionManager.DeliverDisconnectReason(reason);
+                G.ConnectionManager.DeliverDisconnectReason(reason);
 
                 return Task.CompletedTask;
             }

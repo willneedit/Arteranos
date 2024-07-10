@@ -553,7 +553,7 @@ namespace Arteranos.Services
 
             if (msg.status != HttpStatusCode.OK)
             {
-                ConnectionManager.DeliverDisconnectReason(msg.message);
+                G.ConnectionManager.DeliverDisconnectReason(msg.message);
 
                 // Just only some formality, the server will disconnect anyway.
                 ClientReject();

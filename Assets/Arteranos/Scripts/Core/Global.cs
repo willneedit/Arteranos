@@ -7,6 +7,7 @@
 
 using Arteranos.Avatar;
 using Arteranos.Services;
+using Arteranos.Web;
 using Arteranos.WorldEdit;
 using Arteranos.XR;
 
@@ -27,5 +28,7 @@ namespace Arteranos
         public static INetworkStatus NetworkStatus { get; set; }
 
         public static IAudioManager AudioManager { get; set; }
+
+        public static IConnectionManager ConnectionManager { get; set; }
     }
 }

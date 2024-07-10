@@ -20,12 +20,11 @@ using System.Threading;
 namespace Arteranos.Web
 {
 
-    public class ConnectionManagerImpl : ConnectionManager
+    public class ConnectionManager : MonoBehaviour, IConnectionManager
     {
-        private void Awake() => Instance = this;
-        private void OnDestroy() => Instance = null;
+        private void Awake() => G.ConnectionManager = this;
 
-        protected override IEnumerator ConnectToServer_(MultiHash PeerID, Action<bool> callback)
+        public IEnumerator ConnectToServer(MultiHash PeerID, Action<bool> callback)
         {
 
             bool? result = null;
@@ -90,7 +89,7 @@ namespace Arteranos.Web
                 ? new($"tcp4://[{addr}]:{si.ServerPort}")
                 : new($"tcp4://{addr}:{si.ServerPort}");
 
-            ExpectConnectionResponse_();
+            ExpectConnectionResponse();
             G.NetworkStatus.StartClient(connectionUri);
 
             // Save it for now even before the connection negotiation and authentication
@@ -116,7 +115,7 @@ namespace Arteranos.Web
             // fall back to the offline world.
         }
 
-        protected override void ExpectConnectionResponse_()
+        public void ExpectConnectionResponse()
         {
             G.NetworkStatus.OnClientConnectionResponse = ConnectionResponse;
         }
@@ -156,6 +155,6 @@ namespace Arteranos.Web
             dialog.Text = message;
         }
 
-        protected override void DeliverDisconnectReason_(string reason) => this.reason = reason;
+        public void DeliverDisconnectReason(string reason) => this.reason = reason;
     }
 }
