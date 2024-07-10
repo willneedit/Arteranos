@@ -111,7 +111,7 @@ namespace Arteranos.Services
             // Maybe more groups, like Ambient, BGM, and streaming music/video?
             // Distinguish with Name/Tags?
             foreach(AudioSource source in transform.GetComponents<AudioSource>())
-                source.outputAudioMixerGroup = AudioManager.MixerGroupEnv;
+                source.outputAudioMixerGroup = G.AudioManager.MixerGroupEnv;
 
             for(int i = 0, c = transform.childCount; i < c; ++i)
                 RouteAudio(transform.GetChild(i));

@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Audio;
 using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.Core.Cryptography;
@@ -22,7 +21,6 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using Ipfs.Http;
@@ -34,79 +32,6 @@ namespace Arteranos.Services
 {
     // -------------------------------------------------------------------
     #region Services helpers
-    public abstract class AudioManager : MonoBehaviour
-    {
-        protected abstract AudioMixerGroup MixerGroupEnv_ { get; }
-        protected abstract AudioMixerGroup MixerGroupVoice_ { get; }
-        protected abstract float VolumeEnv_ { get; set; }
-        protected abstract float VolumeMaster_ { get; set; }
-        protected abstract float VolumeVoice_ { get; set; }
-        protected abstract float MicGain_ { get; set; }
-        protected abstract int MicAGCLevel_ { get; set; }
-        protected abstract IVoiceInput MicInput_ { get; set; }
-        protected abstract int ChannelCount_ { get; }
-        protected abstract int SampleRate_ { get; }
-        protected abstract event Action<float[]> OnSampleReady_;
-        protected abstract event Action<int, byte[]> OnSegmentReady_;
-        protected abstract int? GetDeviceId_();
-        protected abstract IVoiceOutput GetVoiceOutput_(int SampleRate, int ChannelCount);
-        protected abstract void PushVolumeSettings_();
-        protected abstract void RenewMic_();
-
-        public static AudioManager Instance { get; set; }
-
-        public static AudioMixerGroup MixerGroupEnv { get => Instance.MixerGroupEnv_; }
-        public static AudioMixerGroup MixerGroupVoice { get => Instance.MixerGroupVoice_; }
-        public static float VolumeEnv
-        {
-            get => Instance.VolumeEnv_;
-            set => Instance.VolumeEnv_ = value;
-        }
-        public static float VolumeMaster
-        {
-            get => Instance.VolumeMaster_;
-            set => Instance.VolumeMaster_ = value;
-        }
-        public static float VolumeVoice
-        {
-            get => Instance.VolumeVoice_;
-            set => Instance.VolumeVoice_ = value;
-        }
-        public static float MicGain
-        {
-            get => Instance.MicGain_;
-            set => Instance.MicGain_ = value;
-        }
-        public static int MicAGCLevel
-        {
-            get => Instance.MicAGCLevel_;
-            set => Instance.MicAGCLevel_ = value;
-        }
-
-        public static int ChannelCount { get => Instance.ChannelCount_; }
-        public static int SampleRate { get => Instance.SampleRate_; }
-
-        public static event Action<float[]> OnSampleReady
-        {
-            add => Instance.OnSampleReady_ += value;
-            remove { if (Instance != null) Instance.OnSampleReady_ -= value; }
-        }
-
-        public static event Action<int, byte[]> OnSegmentReady
-        {
-            add => Instance.OnSegmentReady_ += value;
-            remove { if (Instance != null) Instance.OnSegmentReady_ -= value; }
-        }
-
-
-        public static int? GetDeviceId() => Instance.GetDeviceId_();
-        public static IVoiceOutput GetVoiceOutput(int SampleRate, int ChannelCount)
-            => Instance.GetVoiceOutput_(SampleRate, ChannelCount);
-
-        public static void PushVolumeSettings() => Instance.PushVolumeSettings_();
-        public static void RenewMic() => Instance.RenewMic_();
-
-    }
 
     public abstract class IPFSService : MonoBehaviour
     {

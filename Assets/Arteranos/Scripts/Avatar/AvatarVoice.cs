@@ -47,13 +47,13 @@ namespace Arteranos.Avatar
             base.OnStartClient();
 
             if(isLocalPlayer)
-                AudioManager.OnSegmentReady += ReceivedMicInput;
+                G.AudioManager.OnSegmentReady += ReceivedMicInput;
         }
 
         public override void OnStopClient()
         {
             if(isLocalPlayer)
-                AudioManager.OnSegmentReady -= ReceivedMicInput;
+                G.AudioManager.OnSegmentReady -= ReceivedMicInput;
 
             base.OnStopClient();
         }
@@ -69,8 +69,8 @@ namespace Arteranos.Avatar
                 receiverNetID = null, // Everyone available
                 data = new VoiceSegment()
                 {
-                    channelCount = AudioManager.ChannelCount,
-                    sampleRate = AudioManager.SampleRate,
+                    channelCount = G.AudioManager.ChannelCount,
+                    sampleRate = G.AudioManager.SampleRate,
                     index = index,
                     samples = samples
                 }
@@ -84,7 +84,7 @@ namespace Arteranos.Avatar
             if(AudioOutput == null)
             {
                 // FIXME what with channel count and sample rate mismatch?
-                AudioOutput = AudioManager.GetVoiceOutput(
+                AudioOutput = G.AudioManager.GetVoiceOutput(
                     voicePacket.data.sampleRate, voicePacket.data.channelCount);
 
                 IAvatarBrain _ = G.NetworkStatus.GetOnlineUser(voicePacket.senderNetID);

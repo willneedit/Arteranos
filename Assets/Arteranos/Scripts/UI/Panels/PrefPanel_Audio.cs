@@ -43,7 +43,7 @@ namespace Arteranos.UI
                 devices.Add(device);
 
             spn_InputDevice.Options = devices.ToArray();
-            spn_InputDevice.value = (AudioManager.GetDeviceId() ?? -1) + 1;
+            spn_InputDevice.value = (G.AudioManager.GetDeviceId() ?? -1) + 1;
 
             sld_MasterVolume.OnValueChanged += OnMasterVolumeChanged;
             sld_VoiceVolume.OnValueChanged += OnVoiceVolumeChanged;
@@ -52,7 +52,7 @@ namespace Arteranos.UI
             sld_MicInputGain.OnValueChanged += OnMicInputGainChanged;
             spn_AGC.OnChanged += OnAGCChanged;
 
-            AudioManager.OnSampleReady += TapMicrophoneInput;
+            G.AudioManager.OnSampleReady += TapMicrophoneInput;
         }
 
 
@@ -64,9 +64,9 @@ namespace Arteranos.UI
 
             // Reset the state as it's the initial state, not the blank slate.
 
-            sld_MasterVolume.value = AudioManager.VolumeMaster;
-            sld_VoiceVolume.value = AudioManager.VolumeVoice;
-            sld_EnvVolume.value = AudioManager.VolumeEnv;
+            sld_MasterVolume.value = G.AudioManager.VolumeMaster;
+            sld_VoiceVolume.value = G.AudioManager.VolumeVoice;
+            sld_EnvVolume.value = G.AudioManager.VolumeEnv;
 
             sld_MicInputGain.value = cs.AudioSettings.MicInputGain;
             spn_AGC.value = cs.AudioSettings.AGCLevel;
@@ -81,13 +81,13 @@ namespace Arteranos.UI
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty)
             {
-                AudioManager.PushVolumeSettings();
+                G.AudioManager.PushVolumeSettings();
 
                 cs.AudioSettings.MicInputGain = sld_MicInputGain.value;
                 cs.AudioSettings.AGCLevel = spn_AGC.value;
 
                 cs?.Save();
-                if(needsRenew) AudioManager.RenewMic();
+                if(needsRenew) G.AudioManager.RenewMic();
             }
 
             dirty = false;
@@ -96,7 +96,7 @@ namespace Arteranos.UI
 
         protected override void OnDestroy()
         {
-            AudioManager.OnSampleReady -= TapMicrophoneInput;
+            G.AudioManager.OnSampleReady -= TapMicrophoneInput;
 
             base.OnDestroy();
         }
@@ -118,19 +118,19 @@ namespace Arteranos.UI
 
         private void OnMasterVolumeChanged(float val)
         {
-            AudioManager.VolumeMaster = val;
+            G.AudioManager.VolumeMaster = val;
             dirty = true;
         }
 
         private void OnVoiceVolumeChanged(float val)
         {
-            AudioManager.VolumeVoice = val;
+            G.AudioManager.VolumeVoice = val;
             dirty = true;
         }
 
         private void OnEnvVolumeChanged(float val)
         {
-            AudioManager.VolumeEnv = val;
+            G.AudioManager.VolumeEnv = val;
             dirty = true;
         }
 
@@ -144,13 +144,13 @@ namespace Arteranos.UI
 
         private void OnMicInputGainChanged(float val)
         {
-            AudioManager.MicGain = Utils.LoudnessToFactor(val);
+            G.AudioManager.MicGain = Utils.LoudnessToFactor(val);
             dirty = true;
         }
 
         private void OnAGCChanged(int item, bool up)
         {
-            AudioManager.MicAGCLevel = spn_AGC.value;
+            G.AudioManager.MicAGCLevel = spn_AGC.value;
             dirty = true;
         }
 

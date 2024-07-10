@@ -25,5 +25,7 @@ namespace Arteranos
         public static IAvatarBrain Me {  get; set; }
 
         public static INetworkStatus NetworkStatus { get; set; }
+
+        public static IAudioManager AudioManager { get; set; }
     }
 }

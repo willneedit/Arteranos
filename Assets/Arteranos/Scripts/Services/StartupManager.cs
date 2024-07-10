@@ -32,7 +32,7 @@ namespace Arteranos.Services
         IEnumerator StartupCoroutine()
         {
             // Startup of dependent services...
-            AudioManager.Instance.enabled = true;
+            G.AudioManager.enabled = true;
 
             G.NetworkStatus.enabled = true;
 
