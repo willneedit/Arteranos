@@ -31,12 +31,12 @@ namespace Arteranos.Services
     {
 
         private INatDevice device = null;
-        protected override MultiHash RemotePeerId_ { get; set; } = null;
+        public override MultiHash RemotePeerId_ { get; set; } = null;
 
-        protected override event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
-        protected override Action<bool, string> OnClientConnectionResponse_ { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
+        public override event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
+        public override Action<bool, string> OnClientConnectionResponse_ { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
 
-        protected override bool OpenPorts_
+        public override bool OpenPorts_
         {
             get => m_OpenPorts;
             set
@@ -78,7 +78,7 @@ namespace Arteranos.Services
 
         // -------------------------------------------------------------------
         #region Running
-        protected override ConnectivityLevel GetConnectivityLevel_()
+        public override ConnectivityLevel GetConnectivityLevel_()
         {
             if(Application.internetReachability == NetworkReachability.NotReachable)
                 return ConnectivityLevel.Unconnected;
@@ -88,7 +88,7 @@ namespace Arteranos.Services
                 : ConnectivityLevel.Restricted;
         }
 
-        protected override OnlineLevel GetOnlineLevel_()
+        public override OnlineLevel GetOnlineLevel_()
         {
             if(!NetworkClient.active && !NetworkServer.active)
                 return OnlineLevel.Offline;
@@ -101,9 +101,9 @@ namespace Arteranos.Services
                 : OnlineLevel.Server;
         }
 
-        protected override bool IsClientConnecting_ => NetworkClient.isConnecting;
+        public override bool IsClientConnecting_ => NetworkClient.isConnecting;
 
-        protected override bool IsClientConnected_ => NetworkClient.isConnected;
+        public override bool IsClientConnected_ => NetworkClient.isConnected;
 
         void OnEnable()
         {
@@ -250,7 +250,7 @@ namespace Arteranos.Services
 
         private bool transitionDisconnect = false;
 
-        protected override void StartClient_(Uri connectionUri)
+        public override void StartClient_(Uri connectionUri)
         {
 
             Debug.Log($"Attempting to connect to {connectionUri}...");
@@ -258,7 +258,7 @@ namespace Arteranos.Services
             manager.StartClient(connectionUri);
         }
 
-        protected override async Task StopHost_(bool loadOfflineScene)
+        public override async Task StopHost_(bool loadOfflineScene)
         {
             manager.StopHost();
             OpenPorts = false;
@@ -272,7 +272,7 @@ namespace Arteranos.Services
             while (manager.isNetworkActive) await Task.Delay(8);
         }
 
-        protected override async Task StartHost_(bool resetConnection = false)
+        public override async Task StartHost_(bool resetConnection = false)
         {
             if (resetConnection)
                 await SmoothServerTransition();
@@ -288,7 +288,7 @@ namespace Arteranos.Services
             while (!manager.isNetworkActive) await Task.Delay(8);
         }
 
-        protected override async Task StartServer_()
+        public override async Task StartServer_()
         {
             await SmoothServerTransition();
 
@@ -321,7 +321,7 @@ namespace Arteranos.Services
         #endregion
         // -------------------------------------------------------------------
         #region User Data queries
-        protected override IAvatarBrain GetOnlineUser_(UserID userID)
+        public override IAvatarBrain GetOnlineUser_(UserID userID)
         {
             IEnumerable<IAvatarBrain> q =
                 from entry in GameObject.FindGameObjectsWithTag("Player")
@@ -331,7 +331,7 @@ namespace Arteranos.Services
             return q.Count() > 0 ? q.First() : null;
         }
 
-        protected override IAvatarBrain GetOnlineUser_(uint netId)
+        public override IAvatarBrain GetOnlineUser_(uint netId)
         {
             IEnumerable<IAvatarBrain> q =
                 from entry in GameObject.FindGameObjectsWithTag("Player")
@@ -341,7 +341,7 @@ namespace Arteranos.Services
             return q.Count() > 0 ? q.First() : null;
         }
 
-        protected override IEnumerable<IAvatarBrain> GetOnlineUsers_()
+        public override IEnumerable<IAvatarBrain> GetOnlineUsers_()
         {
             return from entry in GameObject.FindGameObjectsWithTag("Player")
                    select entry.GetComponent<IAvatarBrain>();

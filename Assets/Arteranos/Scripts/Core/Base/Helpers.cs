@@ -16,7 +16,6 @@ using Ipfs.CoreApi;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -34,48 +33,24 @@ using AsyncOperation = UnityEngine.AsyncOperation;
 namespace Arteranos.Services
 {
     // -------------------------------------------------------------------
-    #region Services constants
-    public enum ConnectivityLevel
-    {
-        [Description("Unconnected")]
-        Unconnected = 0,
-        [Description("Firewalled")]
-        Restricted,
-        [Description("Public")]
-        Unrestricted
-    }
-    public enum OnlineLevel
-    {
-        [Description("Offline")]
-        Offline = 0,
-        [Description("Client")]
-        Client,
-        [Description("Server")]
-        Server,
-        [Description("Host")]
-        Host
-    }
-
-    #endregion
-    // -------------------------------------------------------------------
     #region Services helpers
-    public abstract class NetworkStatus : MonoBehaviour
+    public abstract class NetworkStatus : MonoBehaviour, INetworkStatus
     {
-        protected abstract bool OpenPorts_ { get; set; }
-        protected abstract Action<bool, string> OnClientConnectionResponse_ { get; set; }
-        protected abstract MultiHash RemotePeerId_ { get; set; }
-        protected abstract event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
-        protected abstract ConnectivityLevel GetConnectivityLevel_();
-        protected abstract OnlineLevel GetOnlineLevel_();
-        protected abstract bool IsClientConnecting_ { get; }
-        protected abstract bool IsClientConnected_ { get; }
-        protected abstract IAvatarBrain GetOnlineUser_(UserID userID);
-        protected abstract IAvatarBrain GetOnlineUser_(uint netId);
-        protected abstract IEnumerable<IAvatarBrain> GetOnlineUsers_();
-        protected abstract void StartClient_(Uri connectionUri);
-        protected abstract Task StartHost_(bool resetConnection = false);
-        protected abstract Task StartServer_();
-        protected abstract Task StopHost_(bool loadOfflineScene);
+        public abstract bool OpenPorts_ { get; set; }
+        public abstract Action<bool, string> OnClientConnectionResponse_ { get; set; }
+        public abstract MultiHash RemotePeerId_ { get; set; }
+        public abstract event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
+        public abstract ConnectivityLevel GetConnectivityLevel_();
+        public abstract OnlineLevel GetOnlineLevel_();
+        public abstract bool IsClientConnecting_ { get; }
+        public abstract bool IsClientConnected_ { get; }
+        public abstract IAvatarBrain GetOnlineUser_(UserID userID);
+        public abstract IAvatarBrain GetOnlineUser_(uint netId);
+        public abstract IEnumerable<IAvatarBrain> GetOnlineUsers_();
+        public abstract void StartClient_(Uri connectionUri);
+        public abstract Task StartHost_(bool resetConnection = false);
+        public abstract Task StartServer_();
+        public abstract Task StopHost_(bool loadOfflineScene);
 
         public static NetworkStatus Instance { get; set; }
 
@@ -101,25 +76,25 @@ namespace Arteranos.Services
             get => Instance.RemotePeerId_;
             set => Instance.RemotePeerId_ = value;
         }
-        public static ConnectivityLevel GetConnectivityLevel() 
+        public static ConnectivityLevel GetConnectivityLevel()
             => Instance.GetConnectivityLevel_();
-        public static OnlineLevel GetOnlineLevel() 
+        public static OnlineLevel GetOnlineLevel()
             => Instance ? Instance.GetOnlineLevel_() : OnlineLevel.Offline;
         public static bool IsClientConnecting => Instance.IsClientConnecting_;
         public static bool IsClientConnected => Instance.IsClientConnected_;
-        public static void StartClient(Uri connectionUri) 
+        public static void StartClient(Uri connectionUri)
             => Instance.StartClient_(connectionUri);
-        public static Task StartHost(bool resetConnection = false) 
+        public static Task StartHost(bool resetConnection = false)
             => Instance.StartHost_(resetConnection);
-        public static Task StartServer() 
+        public static Task StartServer()
             => Instance.StartServer_();
-        public static Task StopHost(bool loadOfflineScene) 
+        public static Task StopHost(bool loadOfflineScene)
             => Instance.StopHost_(loadOfflineScene);
         public static IAvatarBrain GetOnlineUser(UserID userID)
             => Instance.GetOnlineUser_(userID);
-        public static IAvatarBrain GetOnlineUser(uint netId) 
+        public static IAvatarBrain GetOnlineUser(uint netId)
             => Instance.GetOnlineUser_(netId);
-        public static IEnumerable<IAvatarBrain> GetOnlineUsers() 
+        public static IEnumerable<IAvatarBrain> GetOnlineUsers()
             => Instance?.GetOnlineUsers_() ?? new IAvatarBrain[0];
     }
 

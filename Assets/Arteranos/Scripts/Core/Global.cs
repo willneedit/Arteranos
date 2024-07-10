@@ -23,5 +23,7 @@ namespace Arteranos
         public static IXRVisualConfigurator XRVisualConfigurator { get; set; }
 
         public static IAvatarBrain Me {  get; set; }
+
+        public static INetworkStatus NetworkStatus { get; set; }
     }
 }
