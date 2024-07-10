@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.Core.Cryptography;
 using Arteranos.UI;
@@ -16,7 +15,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -185,140 +183,8 @@ namespace Arteranos.Services
 
 namespace Arteranos.UI
 {
-    // -------------------------------------------------------------------
+
     #region UI factories
-
-    public class AgreementDialogUIFactory : UIBehaviour
-    {
-        private static bool CanSkipAgreement(ServerInfo si)
-        {
-            Client client = SettingsManager.Client;
-            byte[] serverTOSHash = si.PrivacyTOSNoticeHash;
-            if (serverTOSHash == null) return true;
-
-            if(client.ServerPasses.TryGetValue(si.SPKDBKey, out ServerPass sp))
-            {
-                // Server's [custom] agreement is unchanged.
-                if(sp.PrivacyTOSHash != null && serverTOSHash.SequenceEqual(sp.PrivacyTOSHash)) return true;
-            }
-
-            // Server uses an unknown TOS deviating from the standard TOS, needs to ask.
-            if (si.UsesCustomTOS) return false;
-
-            byte[] currentTOSHash = Hashes.SHA256(SettingsManager.DefaultTOStext);
-
-            // Only if the user's knowledge of the default TOS is up to date.
-            return client.KnowsDefaultTOS != null && currentTOSHash.SequenceEqual(client.KnowsDefaultTOS);
-
-        }
-
-
-        public static IAgreementDialogUI New(ServerInfo serverInfo, Action disagree, Action agree)
-        {
-            string text = serverInfo?.PrivacyTOSNotice;
-
-            // Can we skip it? Pleeeease..?
-            if (text == null || CanSkipAgreement(serverInfo))
-            {
-                Client.UpdateServerPass(serverInfo, true, null);
-                agree?.Invoke();
-                return null;
-            }
-
-            GameObject go = Instantiate(BP.I.UI.AgreementDialog);
-            IAgreementDialogUI AgreementDialogUI = go.GetComponent<IAgreementDialogUI>();
-            AgreementDialogUI.OnDisagree += disagree;
-            AgreementDialogUI.OnAgree += agree;
-            AgreementDialogUI.ServerInfo = serverInfo;
-            return AgreementDialogUI;
-        }
-    }
-
-    public class DialogUIFactory : UIBehaviour
-    {
-        public static IDialogUI New()
-        {
-            GameObject go = Instantiate(BP.I.UI.Dialog);
-            return go.GetComponent<IDialogUI>();
-        }
-
-    }
-
-    public class ProgressUIFactory : UIBehaviour
-    {
-        public static IProgressUI New()
-        {
-            GameObject go = Instantiate(BP.I.UI.Progress);
-            return go.GetComponent<IProgressUI>();
-        }
-    }
-
-    public class AvatarGalleryUIFactory : UIBehaviour
-    {
-        public static IAvatarGalleryUI New()
-        {
-            Transform t = G.XRControl.rigTransform;
-            Vector3 position = t.position;
-            Quaternion rotation= t.rotation;
-            position += rotation * Vector3.forward * 2f;
-
-            GameObject go = Instantiate(
-                BP.I.InApp.AvatarGalleryPedestal,
-                position,
-                rotation
-                );
-            return go.GetComponent<IAvatarGalleryUI>();
-        }
-    }
-
-    public class NameplateUIFactory : UIBehaviour
-    {
-        public static INameplateUI New(GameObject bearer)
-        {
-            GameObject go;
-            INameplateUI nameplate;
-
-            nameplate = bearer.GetComponentInChildren<INameplateUI>(true);
-            go = nameplate?.gameObject;
-
-            if(nameplate == null)
-            {
-                GameObject original = BP.I.InApp.Nameplate;
-                original.SetActive(false);
-
-                go = Instantiate(original, bearer.transform);
-
-                nameplate = go.GetComponent<INameplateUI>();
-            }
-
-            nameplate.Bearer = bearer.GetComponent<IAvatarBrain>();
-            go.SetActive(true);
-
-            return nameplate;
-        }
-    }
-
-    public class TextMessageUIFactory : UIBehaviour
-    {
-        public static ITextMessageUI New(IAvatarBrain receiver)
-        {
-            GameObject go = Instantiate(BP.I.UI.TextMessage);
-            ITextMessageUI textMessageUI = go.GetComponent<ITextMessageUI>();
-            textMessageUI.Receiver = receiver;
-            return textMessageUI;
-        }
-    }
-
-    public class KickBanUIFactory : UIBehaviour
-    {
-        public static IKickBanUI New(IAvatarBrain target)
-        {
-            GameObject go = Instantiate(BP.I.UI.KickBan);
-            IKickBanUI kickBanUI = go.GetComponentInChildren<IKickBanUI>();
-            kickBanUI.Target = target;
-            return kickBanUI;
-        }
-    }
 
     public abstract class SysMenuStatic : MonoBehaviour
     {

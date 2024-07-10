@@ -470,7 +470,7 @@ namespace Arteranos.Services
             else
             {
                 // Something is very, very wrong....!
-                IDialogUI dialog = DialogUIFactory.New();
+                IDialogUI dialog = Factory.NewDialog();
 
                 dialog.Text =
                     "!!! SERVER KEY CHANGED !!!\n\n" +

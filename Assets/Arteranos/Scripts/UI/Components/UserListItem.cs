@@ -193,14 +193,14 @@ namespace Arteranos.UI
             IAvatarBrain targetUser = G.NetworkStatus.GetOnlineUser(targetUserID);
             if (targetUser == null)
             {
-                IDialogUI dialog = DialogUIFactory.New();
+                IDialogUI dialog = Factory.NewDialog();
                 dialog.Text = "User is offline.";
                 dialog.Buttons = new string[] { "OK" };
                 return;
             }
 
             SysMenuStatic.CloseSysMenus();
-            TextMessageUIFactory.New(targetUser);
+            Factory.NewTextMessage(targetUser);
         }
     }
 }

@@ -59,7 +59,7 @@ namespace Arteranos.Avatar
                 if(lastInSight && stableDuration > m_PopupTime)
                 {
                     triggered = true;
-                    np = UI.NameplateUIFactory.New(Brain.gameObject);
+                    np = UI.Factory.NewNameplate(Brain.gameObject);
                 }
 
                 if(!lastInSight && stableDuration > m_PopoutTime)

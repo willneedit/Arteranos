@@ -469,7 +469,7 @@ namespace Arteranos.Services
         {
             yield return null;
 
-            IDialogUI dialog = DialogUIFactory.New();
+            IDialogUI dialog = Factory.NewDialog();
             dialog.Text = message;
             dialog.Buttons = new string[] { "OK" };
         }

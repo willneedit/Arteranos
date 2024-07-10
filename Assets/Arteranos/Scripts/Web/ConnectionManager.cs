@@ -39,7 +39,7 @@ namespace Arteranos.Web
 
             ServerInfo si = new(PeerID);
 
-            AgreementDialogUIFactory.New(si, () => result = false, () => result = true);
+            Factory.NewAgreement(si, () => result = false, () => result = true);
 
             yield return new WaitUntil(() => result != null);
 
@@ -150,7 +150,7 @@ namespace Arteranos.Web
 
             if(message == null) return;
             
-            IDialogUI dialog = DialogUIFactory.New();
+            IDialogUI dialog = Factory.NewDialog();
             dialog.Buttons = new[] { "Okay" };
             dialog.Text = message;
         }

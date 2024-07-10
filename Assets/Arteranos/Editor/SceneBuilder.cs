@@ -417,7 +417,7 @@ namespace Arteranos.Editor
                     if(!string.IsNullOrEmpty(testWorldZip))
                     {
 
-                        IProgressUI pui = ProgressUIFactory.New();
+                        IProgressUI pui = Factory.NewProgress();
 
                         pui.SetupAsyncOperations(() => AssetUploader.PrepareUploadToIPFS(testWorldZip, true)); // <-- Obvious, huh?
 
@@ -431,7 +431,7 @@ namespace Arteranos.Editor
 
                 static void NewMethod(Cid WorldCid)
                 {
-                    IProgressUI pui = ProgressUIFactory.New();
+                    IProgressUI pui = Factory.NewProgress();
 
                     pui.SetupAsyncOperations(() => WorldDownloader.PrepareGetWorldTemplate(WorldCid));
 

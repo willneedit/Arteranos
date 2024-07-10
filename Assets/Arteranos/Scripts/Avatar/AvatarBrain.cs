@@ -553,7 +553,7 @@ namespace Arteranos.Avatar
         {
             if(replyTo != null)
             {
-                TextMessageUIFactory.New(replyTo);
+                Factory.NewTextMessage(replyTo);
                 replyTo= null;
                 return;
             }
@@ -576,7 +576,7 @@ namespace Arteranos.Avatar
             string[] replyText = { "OK", "Reply" };
             string[] okText = { "OK" };
 
-            m_txtMessageBox = DialogUIFactory.New();
+            m_txtMessageBox = Factory.NewDialog();
 
             int rc = await m_txtMessageBox.PerformDialogAsync(
                 $"Message from {Nickname}:\n\n" +

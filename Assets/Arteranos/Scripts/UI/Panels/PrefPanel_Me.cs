@@ -71,7 +71,7 @@ namespace Arteranos.UI
         private void OnAvatarGalleryClicked()
         {
             SysMenuStatic.CloseSysMenus();
-            AvatarGalleryUIFactory.New();
+            Factory.NewAvatarGallery();
         }
 
         private void OnCreateAvatarClicked()

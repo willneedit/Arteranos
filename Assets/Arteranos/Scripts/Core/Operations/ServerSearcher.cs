@@ -152,7 +152,7 @@ namespace Arteranos.Core.Operations
 
         public static void InitiateServerTransition(Cid WorldCid, Action<Cid, MultiHash> OnSuccessCallback, Action OnFailureCallback)
         {
-            IProgressUI pui = ProgressUIFactory.New();
+            IProgressUI pui = Factory.NewProgress();
 
             pui.SetupAsyncOperations(() => PrepareSearchServers(WorldCid));
 

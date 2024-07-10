@@ -67,7 +67,7 @@ namespace Arteranos.UI
             CancellationTokenSource cts = new();
 
 
-            IProgressUI pui = ProgressUIFactory.New();
+            IProgressUI pui = Factory.NewProgress();
 
             pui.SetupAsyncOperations(() => AssetUploader.PrepareUploadToIPFS(obj, true, pin: true)); // World Zip file
 
