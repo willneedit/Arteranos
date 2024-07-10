@@ -41,7 +41,7 @@ namespace Arteranos.Core
         public static Cid DefaultFemaleAvatar { get; set; } = null;
 
         public static ServerJSON ActiveServerData =>
-            NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
+            G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
             ? CurrentServer
             : Server;
 
@@ -118,12 +118,12 @@ namespace Arteranos.Core
         /// <exception cref="NotImplementedException"></exception>
         public static MultiHash GetServerConnectionData()
         {
-            OnlineLevel ol = NetworkStatus.GetOnlineLevel();
+            OnlineLevel ol = G.NetworkStatus.GetOnlineLevel();
 
             return ol switch
             {
                 OnlineLevel.Offline => null,
-                OnlineLevel.Client => NetworkStatus.RemotePeerId,
+                OnlineLevel.Client => G.NetworkStatus.RemotePeerId,
                 OnlineLevel.Server => IPFSService.Self.Id,
                 OnlineLevel.Host => IPFSService.Self.Id,
                 _ => throw new NotImplementedException()

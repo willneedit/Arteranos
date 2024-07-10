@@ -24,7 +24,7 @@ namespace Arteranos.UI
             Dictionary<UserID, UserSocialEntryJSON> list = new();
 
             // Get the currently logged-in users with the default state....
-            foreach(IAvatarBrain user in NetworkStatus.GetOnlineUsers())
+            foreach(IAvatarBrain user in G.NetworkStatus.GetOnlineUsers())
             {
                 if(user.UserID == G.Me.UserID) continue;
 

@@ -100,7 +100,7 @@ namespace Arteranos.UI
         {
             // If we're in Host mode, you're the admin of your own server, so we're able to
             // change the world. And you still have the great responsibility...
-            btn_Visit.gameObject.SetActive(NetworkStatus.GetOnlineLevel() != OnlineLevel.Host);
+            btn_Visit.gameObject.SetActive(G.NetworkStatus.GetOnlineLevel() != OnlineLevel.Host);
             btn_ChangeWorld.gameObject.SetActive(
                 Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null)
                 && AllowedForThis);

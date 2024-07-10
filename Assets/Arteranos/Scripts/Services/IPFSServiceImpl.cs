@@ -529,8 +529,8 @@ namespace Arteranos.Services
         {
             while (true)
             {
-                if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Server ||
-                    NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
+                if (G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Server ||
+                    G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
                 {
                     yield return Asyncs.Async2Coroutine(FlipServerOnlineData_());
                 }
@@ -649,7 +649,7 @@ namespace Arteranos.Services
             if (last > DateTime.UtcNow - TimeSpan.FromSeconds(30)) return;
             last = DateTime.UtcNow;
 
-            List<byte[]> UserFingerprints = (from user in NetworkStatus.GetOnlineUsers()
+            List<byte[]> UserFingerprints = (from user in G.NetworkStatus.GetOnlineUsers()
                                 where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
                                 select CryptoHelpers.GetFingerprint(user.UserID)).ToList();
 
@@ -659,7 +659,7 @@ namespace Arteranos.Services
                 CurrentWorldName = SettingsManager.WorldName,
                 UserFingerprints = UserFingerprints,
                 // LastOnline = last, // Not serialized - set on receive
-                OnlineLevel = NetworkStatus.GetOnlineLevel()
+                OnlineLevel = G.NetworkStatus.GetOnlineLevel()
             };
 
             using MemoryStream ms = new();

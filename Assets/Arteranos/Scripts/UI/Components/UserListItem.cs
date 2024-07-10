@@ -73,7 +73,7 @@ namespace Arteranos.UI
 
             lbl_caption.text = targetUserID;
 
-            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = G.NetworkStatus.GetOnlineUser(targetUserID);
             Cid Icon;
 
             if(targetUser == null)
@@ -96,7 +96,7 @@ namespace Arteranos.UI
             // When it's hovered, watch for the status updates - both internal and external causes.
             if (go_Overlay.activeSelf)
             {
-                IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+                IAvatarBrain targetUser = G.NetworkStatus.GetOnlineUser(targetUserID);
 
                 IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> q = SettingsManager.Client.GetSocialList(targetUserID);
                 
@@ -123,7 +123,7 @@ namespace Arteranos.UI
 
         private void OnAddFriendButtonClicked()
         {
-            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = G.NetworkStatus.GetOnlineUser(targetUserID);
             if(targetUser != null)
             {
                 Me.OfferFriendship(targetUser, true);
@@ -140,7 +140,7 @@ namespace Arteranos.UI
 
         private void OnDelFriendButtonClicked()
         {
-            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = G.NetworkStatus.GetOnlineUser(targetUserID);
             if(targetUser != null)
             {
                 Me.OfferFriendship(targetUser, false);
@@ -157,7 +157,7 @@ namespace Arteranos.UI
 
         private void OnBlockButtonClicked()
         {
-            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = G.NetworkStatus.GetOnlineUser(targetUserID);
             if(targetUser != null)
             {
                 Me.BlockUser(targetUser, true);
@@ -174,7 +174,7 @@ namespace Arteranos.UI
 
         private void OnUnblockButtonClicked()
         {
-            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = G.NetworkStatus.GetOnlineUser(targetUserID);
             if(targetUser != null)
             {
                 Me.BlockUser(targetUser, false);
@@ -190,7 +190,7 @@ namespace Arteranos.UI
 
         private void OnSendTextButtonClicked()
         {
-            IAvatarBrain targetUser = NetworkStatus.GetOnlineUser(targetUserID);
+            IAvatarBrain targetUser = G.NetworkStatus.GetOnlineUser(targetUserID);
             if (targetUser == null)
             {
                 IDialogUI dialog = DialogUIFactory.New();

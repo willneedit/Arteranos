@@ -379,7 +379,7 @@ namespace Arteranos.Avatar
         [Command]
         private void CmdRouteCTCP(CTCPacketEnvelope envelope)
         {
-            AvatarBrain receiver = NetworkStatus.GetOnlineUser(envelope.receiver) as AvatarBrain;
+            AvatarBrain receiver = G.NetworkStatus.GetOnlineUser(envelope.receiver) as AvatarBrain;
             if (receiver == null)
             {
                 Debug.LogWarning($"Discarding CTCP for nonexistent/offline user {envelope.receiver}");
@@ -442,7 +442,7 @@ namespace Arteranos.Avatar
         private void ReactReceivedSSE(CTCPUserState received)
         {
             UserID sender = received.sender;
-            IAvatarBrain senderB = NetworkStatus.GetOnlineUser(sender);
+            IAvatarBrain senderB = G.NetworkStatus.GetOnlineUser(sender);
 
             LogDebug($"{(string) sender} updated social status to (his view) {received.state}");
 
@@ -566,7 +566,7 @@ namespace Arteranos.Avatar
 
             PostOffice.Save();
 
-            IAvatarBrain sender = NetworkStatus.GetOnlineUser(message.UserID);
+            IAvatarBrain sender = G.NetworkStatus.GetOnlineUser(message.UserID);
 
             ShowTextMessage(sender, message.Nickname, message.Text);
         }

@@ -30,10 +30,10 @@ namespace Arteranos.Web
 
             bool? result = null;
 
-            if (NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
+            if (G.NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline)
             {
                 // Anything but idle, cut off all connections before connecting to the desired server.
-                Task t0 = NetworkStatus.StopHost(false);
+                Task t0 = G.NetworkStatus.StopHost(false);
 
                 yield return new WaitUntil(() => t0.IsCompleted);
             }
@@ -91,19 +91,19 @@ namespace Arteranos.Web
                 : new($"tcp4://{addr}:{si.ServerPort}");
 
             ExpectConnectionResponse_();
-            NetworkStatus.StartClient(connectionUri);
+            G.NetworkStatus.StartClient(connectionUri);
 
             // Save it for now even before the connection negotiation and authentication
             // During the remainder of the ongoing frame, we have to have the PeerID available --
             // the complete login sequence can be commenced before WaitForEndOfFrame() let us continue.
-            NetworkStatus.RemotePeerId = si.PeerID;
+            G.NetworkStatus.RemotePeerId = si.PeerID;
 
             // https://www.youtube.com/watch?v=dQw4w9WgXcQ
-            while (NetworkStatus.IsClientConnecting) yield return new WaitForEndOfFrame();
+            while (G.NetworkStatus.IsClientConnecting) yield return new WaitForEndOfFrame();
 
             // Client failed to connect. Maybe an invalid IP, or a misconfigured firewall.
             // Fall back to the offline world.
-            if (!NetworkStatus.IsClientConnected)
+            if (!G.NetworkStatus.IsClientConnected)
             {
                 callback?.Invoke(false);
                 yield return TransitionProgressStatic.TransitionTo(null, null);
@@ -118,7 +118,7 @@ namespace Arteranos.Web
 
         protected override void ExpectConnectionResponse_()
         {
-            NetworkStatus.OnClientConnectionResponse = ConnectionResponse;
+            G.NetworkStatus.OnClientConnectionResponse = ConnectionResponse;
         }
 
         bool wasOnline = false;
@@ -126,12 +126,12 @@ namespace Arteranos.Web
 
         private void ConnectionResponse(bool success, string message)
         {
-            Debug.Log($"Onlinelevel={NetworkStatus.GetOnlineLevel()}, Success={success}, wasOnline={wasOnline}, reason={reason}");
+            Debug.Log($"Onlinelevel={G.NetworkStatus.GetOnlineLevel()}, Success={success}, wasOnline={wasOnline}, reason={reason}");
 
             if(!success)
             {
-                bool remoteDisconnected = (NetworkStatus.GetOnlineLevel() == OnlineLevel.Client 
-                    || NetworkStatus.GetOnlineLevel() == OnlineLevel.Host);
+                bool remoteDisconnected = (G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Client 
+                    || G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host);
 
                 if (reason != null)
                 {
@@ -147,7 +147,7 @@ namespace Arteranos.Web
                 }
             }
             wasOnline = success;
-            // NetworkStatus.OnClientConnectionResponse = null;
+            // G.NetworkStatus.OnClientConnectionResponse = null;
 
             if(message == null) return;
             

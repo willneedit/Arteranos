@@ -35,7 +35,7 @@ namespace Arteranos.Avatar
     {
         private IAvatarBrain Brain => gameObject.GetComponent<AvatarBrain>();
         private bool IsMuted => AppearanceStatus.IsSilent(Brain.AppearanceStatus);
-        // private bool IsMutedTo(uint netID) => IsMutedTo(NetworkStatus.GetOnlineUser(netID));
+        // private bool IsMutedTo(uint netID) => IsMutedTo(G.NetworkStatus.GetOnlineUser(netID));
         private bool IsMutedTo(IAvatarBrain other) => 
             (other != null) && AppearanceStatus.IsSilent(other.AppearanceStatus);
         private IVoiceOutput AudioOutput { get; set; } = null;
@@ -87,7 +87,7 @@ namespace Arteranos.Avatar
                 AudioOutput = AudioManager.GetVoiceOutput(
                     voicePacket.data.sampleRate, voicePacket.data.channelCount);
 
-                IAvatarBrain _ = NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
+                IAvatarBrain _ = G.NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
 
                 AudioOutput.transform.SetParent(transform, false);
             }
@@ -104,7 +104,7 @@ namespace Arteranos.Avatar
         [Command]
         private void CmdReceivedMicInput(VoicePacket voicePacket)
         {
-            IEnumerable<IAvatarBrain> q = from user in NetworkStatus.GetOnlineUsers()
+            IEnumerable<IAvatarBrain> q = from user in G.NetworkStatus.GetOnlineUsers()
                     where (user.NetID != voicePacket.senderNetID) 
                        && (voicePacket.receiverNetID == null 
                         || voicePacket.receiverNetID.Contains(user.NetID))
@@ -131,7 +131,7 @@ namespace Arteranos.Avatar
         [TargetRpc]
         private void TargetReceivedVoicePacket(VoicePacket voicePacket)
         {
-            IAvatarBrain emitter = NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
+            IAvatarBrain emitter = G.NetworkStatus.GetOnlineUser(voicePacket.senderNetID);
 
             if(emitter == null)
             {

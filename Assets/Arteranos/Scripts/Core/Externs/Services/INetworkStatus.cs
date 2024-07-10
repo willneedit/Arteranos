@@ -17,22 +17,22 @@ namespace Arteranos.Services
 {
     public interface INetworkStatus : IMonoBehaviour
     {
-        bool IsClientConnected_ { get; }
-        bool IsClientConnecting_ { get; }
-        Action<bool, string> OnClientConnectionResponse_ { get; set; }
-        bool OpenPorts_ { get; set; }
-        MultiHash RemotePeerId_ { get; set; }
+        bool IsClientConnected { get; }
+        bool IsClientConnecting { get; }
+        Action<bool, string> OnClientConnectionResponse { get; set; }
+        bool OpenPorts { get; set; }
+        MultiHash RemotePeerId { get; set; }
 
-        event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
+        event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 
-        ConnectivityLevel GetConnectivityLevel_();
-        OnlineLevel GetOnlineLevel_();
-        IEnumerable<IAvatarBrain> GetOnlineUsers_();
-        IAvatarBrain GetOnlineUser_(uint netId);
-        IAvatarBrain GetOnlineUser_(UserID userID);
-        void StartClient_(Uri connectionUri);
-        Task StartHost_(bool resetConnection = false);
-        Task StartServer_();
-        Task StopHost_(bool loadOfflineScene);
+        ConnectivityLevel GetConnectivityLevel();
+        OnlineLevel GetOnlineLevel();
+        IEnumerable<IAvatarBrain> GetOnlineUsers();
+        IAvatarBrain GetOnlineUser(uint netId);
+        IAvatarBrain GetOnlineUser(UserID userID);
+        void StartClient(Uri connectionUri);
+        Task StartHost(bool resetConnection = false);
+        Task StartServer();
+        Task StopHost(bool loadOfflineScene);
     }
 }

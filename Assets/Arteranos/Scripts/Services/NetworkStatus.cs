@@ -27,16 +27,16 @@ using Ipfs.Unity;
 
 namespace Arteranos.Services
 {
-    public partial class NetworkStatusImpl : NetworkStatus
+    public partial class NetworkStatus : MonoBehaviour, INetworkStatus
     {
 
         private INatDevice device = null;
-        public override MultiHash RemotePeerId_ { get; set; } = null;
+        public MultiHash RemotePeerId { get; set; } = null;
 
-        public override event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged_;
-        public override Action<bool, string> OnClientConnectionResponse_ { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
+        public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
+        public Action<bool, string> OnClientConnectionResponse { get => m_OnClientConnectionResponse; set => m_OnClientConnectionResponse = value; }
 
-        public override bool OpenPorts_
+        public bool OpenPorts
         {
             get => m_OpenPorts;
             set
@@ -67,18 +67,17 @@ namespace Arteranos.Services
             manager = FindObjectOfType<NetworkManager>(true);
             transport = FindObjectOfType<TelepathyTransport>(true);
 
-            Instance = this;
+            G.NetworkStatus = this;
         }
 
         private void OnDestroy()
         {
             ClosePortsAsync();
-            Instance = null;
         }
 
         // -------------------------------------------------------------------
         #region Running
-        public override ConnectivityLevel GetConnectivityLevel_()
+        public ConnectivityLevel GetConnectivityLevel()
         {
             if(Application.internetReachability == NetworkReachability.NotReachable)
                 return ConnectivityLevel.Unconnected;
@@ -88,7 +87,7 @@ namespace Arteranos.Services
                 : ConnectivityLevel.Restricted;
         }
 
-        public override OnlineLevel GetOnlineLevel_()
+        public OnlineLevel GetOnlineLevel()
         {
             if(!NetworkClient.active && !NetworkServer.active)
                 return OnlineLevel.Offline;
@@ -101,9 +100,9 @@ namespace Arteranos.Services
                 : OnlineLevel.Server;
         }
 
-        public override bool IsClientConnecting_ => NetworkClient.isConnecting;
+        public bool IsClientConnecting => NetworkClient.isConnecting;
 
-        public override bool IsClientConnected_ => NetworkClient.isConnected;
+        public bool IsClientConnected => NetworkClient.isConnected;
 
         void OnEnable()
         {
@@ -115,7 +114,7 @@ namespace Arteranos.Services
                 {
                     // No sense for router and IP detection if the computer's network cable is unplugged
                     // and in its airplane mode.
-                    if (GetConnectivityLevel_() == ConnectivityLevel.Unconnected)
+                    if (GetConnectivityLevel() == ConnectivityLevel.Unconnected)
                     {
                         yield return new WaitForSeconds(10);
                     }
@@ -154,11 +153,11 @@ namespace Arteranos.Services
 
         private void Update()
         {
-            ConnectivityLevel c1 = GetConnectivityLevel_();
-            OnlineLevel c2 = GetOnlineLevel_();
+            ConnectivityLevel c1 = GetConnectivityLevel();
+            OnlineLevel c2 = GetOnlineLevel();
 
             if(CurrentConnectivityLevel != c1 || CurrentOnlineLevel != c2)
-                OnNetworkStatusChanged_?.Invoke(c1, c2);
+                OnNetworkStatusChanged?.Invoke(c1, c2);
 
             if(CurrentOnlineLevel == OnlineLevel.Client && c2 == OnlineLevel.Offline)
                 OnRemoteDisconnected();
@@ -223,7 +222,7 @@ namespace Arteranos.Services
         public async void OpenPortsAsync()
         {
             // No point to open the ports if we're not supposed to.
-            if(!OpenPorts_) return;
+            if(!OpenPorts) return;
 
             Debug.Log("Opening ports in the router");
 
@@ -250,7 +249,7 @@ namespace Arteranos.Services
 
         private bool transitionDisconnect = false;
 
-        public override void StartClient_(Uri connectionUri)
+        public void StartClient(Uri connectionUri)
         {
 
             Debug.Log($"Attempting to connect to {connectionUri}...");
@@ -258,12 +257,12 @@ namespace Arteranos.Services
             manager.StartClient(connectionUri);
         }
 
-        public override async Task StopHost_(bool loadOfflineScene)
+        public async Task StopHost(bool loadOfflineScene)
         {
             manager.StopHost();
             OpenPorts = false;
 
-            RemotePeerId_ = null;
+            RemotePeerId = null;
 
             if (loadOfflineScene)
                 Core.TaskScheduler.ScheduleCoroutine(() => TransitionProgressStatic.TransitionTo(null, null));
@@ -272,7 +271,7 @@ namespace Arteranos.Services
             while (manager.isNetworkActive) await Task.Delay(8);
         }
 
-        public override async Task StartHost_(bool resetConnection = false)
+        public async Task StartHost(bool resetConnection = false)
         {
             if (resetConnection)
                 await SmoothServerTransition();
@@ -288,7 +287,7 @@ namespace Arteranos.Services
             while (!manager.isNetworkActive) await Task.Delay(8);
         }
 
-        public override async Task StartServer_()
+        public async Task StartServer()
         {
             await SmoothServerTransition();
 
@@ -307,7 +306,7 @@ namespace Arteranos.Services
             if (manager.isNetworkActive)
             {
                 transitionDisconnect = true;
-                await StopHost_(false);
+                await StopHost(false);
             }
         }
 
@@ -315,13 +314,13 @@ namespace Arteranos.Services
         {
             // Client to offline. It it's planned to switch servers,
             // skip the offline scene.
-            if(!transitionDisconnect) _ = StopHost_(true);
+            if(!transitionDisconnect) _ = StopHost(true);
             transitionDisconnect = false;
         }
         #endregion
         // -------------------------------------------------------------------
         #region User Data queries
-        public override IAvatarBrain GetOnlineUser_(UserID userID)
+        public IAvatarBrain GetOnlineUser(UserID userID)
         {
             IEnumerable<IAvatarBrain> q =
                 from entry in GameObject.FindGameObjectsWithTag("Player")
@@ -331,7 +330,7 @@ namespace Arteranos.Services
             return q.Count() > 0 ? q.First() : null;
         }
 
-        public override IAvatarBrain GetOnlineUser_(uint netId)
+        public IAvatarBrain GetOnlineUser(uint netId)
         {
             IEnumerable<IAvatarBrain> q =
                 from entry in GameObject.FindGameObjectsWithTag("Player")
@@ -341,7 +340,7 @@ namespace Arteranos.Services
             return q.Count() > 0 ? q.First() : null;
         }
 
-        public override IEnumerable<IAvatarBrain> GetOnlineUsers_()
+        public IEnumerable<IAvatarBrain> GetOnlineUsers()
         {
             return from entry in GameObject.FindGameObjectsWithTag("Player")
                    select entry.GetComponent<IAvatarBrain>();

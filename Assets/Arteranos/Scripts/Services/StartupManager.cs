@@ -11,7 +11,6 @@ using Arteranos.Core.Operations;
 using Arteranos.Web;
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -35,7 +34,7 @@ namespace Arteranos.Services
             // Startup of dependent services...
             AudioManager.Instance.enabled = true;
 
-            NetworkStatus.Instance.enabled = true;
+            G.NetworkStatus.enabled = true;
 
             G.XRControl.enabled = true;
 
@@ -62,7 +61,7 @@ namespace Arteranos.Services
             if (FileUtils.Unity_Server)
             {
                 // Manually start the server, including with the initialization.
-                Task t = NetworkStatus.StartServer();
+                Task t = G.NetworkStatus.StartServer();
                 while (!t.IsCompleted) yield return null;
                 yield return new WaitForSeconds(5);
                 Debug.Log($"Server is running, launch argument is: arteranos://{IPFSService.Self.Id}/");

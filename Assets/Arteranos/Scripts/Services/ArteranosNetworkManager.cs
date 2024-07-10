@@ -274,7 +274,7 @@ namespace Arteranos.Services
         {
             base.OnClientConnect();
 
-            NetworkStatus.OnClientConnectionResponse?.Invoke(true, null);
+            G.NetworkStatus.OnClientConnectionResponse?.Invoke(true, null);
         }
 
         /// <summary>
@@ -283,7 +283,7 @@ namespace Arteranos.Services
         /// </summary>
         public override void OnClientDisconnect()
         {
-            NetworkStatus.OnClientConnectionResponse?.Invoke(false, null);
+            G.NetworkStatus.OnClientConnectionResponse?.Invoke(false, null);
 
             SettingsManager.CurrentServer = null;
 
@@ -407,7 +407,7 @@ namespace Arteranos.Services
             if (!NetworkClient.active)
                 // Directly slice the packet into the server logic
                 ServerLocalCTSPacket(sender, packet);
-            else if (NetworkStatus.IsClientConnected)
+            else if (G.NetworkStatus.IsClientConnected)
             {
                 // Sign, encrypt and send it off to the connected server
                 Client.TransmitMessage(
@@ -485,7 +485,7 @@ namespace Arteranos.Services
             try
             {
                 Server.ReceiveMessage(envelope.CTSPayload, out byte[] data, out PublicKey signerPublicKey);
-                IAvatarBrain sender = NetworkStatus.GetOnlineUser(client.identity.netId);
+                IAvatarBrain sender = G.NetworkStatus.GetOnlineUser(client.identity.netId);
 
                 if (sender == null || sender.UserID != signerPublicKey)
                     throw new InvalidOperationException("Sender with invalid/forged packet signature");
@@ -571,7 +571,7 @@ namespace Arteranos.Services
 
             Debug.Log($"[Server] {(string)wca.invoker} wants to change the world to {wca.WorldInfo?.WorldCid}");
 
-            IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+            IAvatarBrain sender = G.NetworkStatus.GetOnlineUser(invoker);
 
             // If we're in the offline mode, we _are_ the only user, the one which are the server admin
             // If we're in the server or host mode, anyone could attempt it to invoke a change.
@@ -650,7 +650,7 @@ namespace Arteranos.Services
 
         private IEnumerator MakeClientWorldTransition(CTSPWorldChangeAnnouncement wca)
         {
-            if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
+            if (G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
             {
                 Debug.Log("[Client] Server wants to change the world, but we are in the host mode.");
                 yield break;
@@ -704,7 +704,7 @@ namespace Arteranos.Services
                     WorldName = null;
 
                     // We're in the client mode, see above.
-                    NetworkStatus.StopHost(false);
+                    G.NetworkStatus.StopHost(false);
                 }
             }
 
@@ -719,7 +719,7 @@ namespace Arteranos.Services
         {
             uss.invoker = invoker;
 
-            IAvatarBrain receiver = NetworkStatus.GetOnlineUser(uss.receiver);
+            IAvatarBrain receiver = G.NetworkStatus.GetOnlineUser(uss.receiver);
 
             // Fill in the server-only data for the user record
             if (receiver != null)
@@ -737,7 +737,7 @@ namespace Arteranos.Services
 
             if (NetworkServer.active)
             {
-                IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+                IAvatarBrain sender = G.NetworkStatus.GetOnlineUser(invoker);
 
                 action = UserCapabilities.CanAdminServerUsers;
 
@@ -825,7 +825,7 @@ namespace Arteranos.Services
         {
             IEnumerator EmitServerUserStateEntries(UserID invoker, IEnumerable<ServerUserState> q)
             {
-                IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+                IAvatarBrain sender = G.NetworkStatus.GetOnlineUser(invoker);
                 int i = 0;
 
                 // toList() to freeze the collection's state because of concurrency issues
@@ -838,7 +838,7 @@ namespace Arteranos.Services
                         yield return new WaitForEndOfFrame();
 
                         // ... Phew. Are you still there?
-                        sender = NetworkStatus.GetOnlineUser(invoker);
+                        sender = G.NetworkStatus.GetOnlineUser(invoker);
 
                         // User may have logged out, exit prematurely.
                         if (NetworkServer.active && sender == null) yield break;
@@ -858,7 +858,7 @@ namespace Arteranos.Services
 
             if (NetworkServer.active)
             {
-                IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+                IAvatarBrain sender = G.NetworkStatus.GetOnlineUser(invoker);
 
                 if (!Core.Utils.IsAbleTo(sender, UserCapabilities.CanAdminServerUsers, null))
                     return Task.CompletedTask;
@@ -886,7 +886,7 @@ namespace Arteranos.Services
         private void ServerUpdateServerConfiguration(UserID invoker, CTSServerConfig serverConfig) 
         {
             serverConfig.invoker = invoker;
-            IAvatarBrain sender = NetworkStatus.GetOnlineUser(invoker);
+            IAvatarBrain sender = G.NetworkStatus.GetOnlineUser(invoker);
 
             if (NetworkServer.active)
             {
@@ -931,7 +931,7 @@ namespace Arteranos.Services
         #region World Editing propagation (all)
         private void ServerCommitWorldObjectChange(UserID sender, CTSWorldObjectChange wc)
         {
-            IAvatarBrain senderB = NetworkStatus.GetOnlineUser(sender);
+            IAvatarBrain senderB = G.NetworkStatus.GetOnlineUser(sender);
 
             if (NetworkServer.active)
             {
@@ -952,7 +952,7 @@ namespace Arteranos.Services
         private void ClientGotWorldObjectChange(CTSWorldObjectChange wc)
         {
             // Already made in server side, no sense to do it again?
-            //if (NetworkStatus.GetOnlineLevel() == OnlineLevel.Host) return;
+            //if (G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host) return;
 
             // Make the changes real and notify the observers
             using MemoryStream ms = new(wc.changerequest);

@@ -31,7 +31,7 @@ namespace Arteranos.UI
             base.OnEnable();
 
             // Online users first.
-            foreach (IAvatarBrain user in NetworkStatus.GetOnlineUsers())
+            foreach (IAvatarBrain user in G.NetworkStatus.GetOnlineUsers())
                 PopulateOnlineSUBItem(user);
 
             // Prime myself for listening...

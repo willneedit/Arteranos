@@ -63,7 +63,7 @@ namespace Arteranos.UI
 
         private void Update()
         {
-            btn_CopyToClipboard.interactable = NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline;
+            btn_CopyToClipboard.interactable = G.NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline;
         }
 
         private void OnLicenseClicked(bool thirdparty)

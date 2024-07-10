@@ -62,7 +62,7 @@ namespace Arteranos.UI
                 () => G.Me.AppearanceStatus |= AppearanceStatus.Muting,
                 () => G.Me.AppearanceStatus &= ~AppearanceStatus.Muting,
                 OnSummonCameraClicked,
-                () => NetworkStatus.StopHost(true),
+                () => G.NetworkStatus.StopHost(true),
                 () => StartCoroutine(ToggleFlyout(EmojiFlyout)),
                 () => SysMenu.FindGadget<CameraDroneUI>(SysMenu.GADGET_CAMERA_DRONE).TakePhoto(),
                 OnDismissCameraClicked,
@@ -173,7 +173,7 @@ namespace Arteranos.UI
             bool muted = AppearanceStatus.IsSilent(G.Me?.AppearanceStatus ?? AppearanceStatus.OK);
 
             // Safety measure, to prevent accidental shut down a hosted session.
-            bool online = NetworkStatus.GetOnlineLevel() == OnlineLevel.Client;
+            bool online = G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Client;
 
             HUDButtons[btn_mute].Button.gameObject.SetActive(avatarOn && !muted);
             HUDButtons[btn_unmute].Button.gameObject.SetActive(avatarOn && muted);

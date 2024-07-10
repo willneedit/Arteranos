@@ -166,14 +166,14 @@ namespace Arteranos.Core.Operations
             if (!string.IsNullOrEmpty(WorldCid) && ServerPeerID == null)
             {
                 // It's time to part ways...
-                if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
-                    await NetworkStatus.StopHost(true);
+                if(G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
+                    await G.NetworkStatus.StopHost(true);
 
                 SettingsManager.EnterWorld(WorldCid);
 
                 // If we haven't a server (or, just left one), start up.
-                if(NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
-                    await NetworkStatus.StartHost();
+                if(G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline)
+                    await G.NetworkStatus.StartHost();
             }
 
             // No matching server, leave it be

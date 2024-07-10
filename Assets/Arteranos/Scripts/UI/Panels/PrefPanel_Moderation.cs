@@ -92,7 +92,7 @@ namespace Arteranos.UI
 
             SettingsManager.OnClientReceivedServerConfigAnswer += UpdateServerConfigDisplay;
 
-            bool networkConfig = NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline;
+            bool networkConfig = G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Offline;
 
             // Changing these settings remotely can pull the rug under your own feet.
             // Like remotely (mis)configuring a department's firewall on his workplace.
