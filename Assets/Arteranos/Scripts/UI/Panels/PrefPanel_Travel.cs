@@ -68,21 +68,21 @@ namespace Arteranos.UI
 
         private void OnWorldGalleryClicked()
         {
-            SysMenu.CloseSysMenus();
+            G.SysMenu.CloseSysMenus();
 
             WorldPanelUI.New();
         }
 
         private void OnServerGalleryClicked()
         {
-            SysMenu.CloseSysMenus();
+            G.SysMenu.CloseSysMenus();
 
             ServerListUI.New();
         }
 
         private void OnSetContentClicked()
         {
-            SysMenu.CloseSysMenus();
+            G.SysMenu.CloseSysMenus();
 
             ContentFilterUI cui = ContentFilterUI.New();
 

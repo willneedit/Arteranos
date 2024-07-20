@@ -155,13 +155,13 @@ Core.Utils.IsAbleTo(UserCapabilities.CanBanUser, Bearer)
 
         private void OnSendTextButtonClicked()
         {
-            SysMenu.CloseSysMenus();
+            G.SysMenu.CloseSysMenus();
             Factory.NewTextMessage(Bearer);
         }
 
         private void OnKickUserButtonClicked()
         {
-            SysMenu.CloseSysMenus();
+            G.SysMenu.CloseSysMenus();
             Factory.NewKickBan(Bearer);
         }
     }

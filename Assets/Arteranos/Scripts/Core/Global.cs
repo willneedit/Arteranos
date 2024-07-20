@@ -7,6 +7,7 @@
 
 using Arteranos.Avatar;
 using Arteranos.Services;
+using Arteranos.UI;
 using Arteranos.Web;
 using Arteranos.WorldEdit;
 using Arteranos.XR;
@@ -30,5 +31,7 @@ namespace Arteranos
         public static IAudioManager AudioManager { get; set; }
 
         public static IConnectionManager ConnectionManager { get; set; }
+
+        public static ISysMenu SysMenu { get; set; }
     }
 }

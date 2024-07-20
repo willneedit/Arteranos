@@ -62,7 +62,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            SysMenu.CloseSysMenus();
+            G.SysMenu.CloseSysMenus();
 
             lbl_LicenseText.text = MD2RichText(ServerInfo.PrivacyTOSNotice);
 

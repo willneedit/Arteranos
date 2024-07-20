@@ -7,7 +7,6 @@
 
 using Arteranos.Core;
 using Arteranos.Core.Cryptography;
-using Arteranos.UI;
 using Ipfs;
 using Ipfs.Cryptography.Proto;
 using Ipfs.CoreApi;
@@ -19,7 +18,6 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using Ipfs.Http;
 using Arteranos.WorldEdit;
@@ -120,7 +118,7 @@ namespace Arteranos.Services
 
             yield return new WaitUntil(() => Instance);
 
-            SysMenuStatic.EnableHUD(false);
+            G.SysMenu.EnableHUD(false);
         }
 
         // NOTE: Needs preloaded world! Just deploys the sceneloader which it uses
@@ -134,7 +132,7 @@ namespace Arteranos.Services
 
             G.XRVisualConfigurator.StartFading(0.0f);
 
-            SysMenuStatic.EnableHUD(true);
+            G.SysMenu.EnableHUD(true);
         }
 
         private static IEnumerator MoveToPreloadedWorld(Cid WorldCid, string WorldName)
@@ -175,48 +173,6 @@ namespace Arteranos.Services
 
             G.XRControl.MoveRig();
         }
-    }
-
-    #endregion
-    // -------------------------------------------------------------------
-}
-
-namespace Arteranos.UI
-{
-
-    #region UI factories
-
-    public abstract class SysMenuStatic : MonoBehaviour
-    {
-        public enum MenuKind
-        {
-            System,
-            WorldEdit
-        }
-
-        public static SysMenuStatic Instance = null;
-
-        public abstract bool HUDEnabled { get; set; }
-        public abstract void CloseSysMenus_();
-        public abstract void ShowUserHUD_(bool show = true);
-        public abstract void DismissGadget_(string name = null);
-
-        public static void EnableHUD(bool enable)
-        {
-            Instance.HUDEnabled = enable;
-            DismissGadget();
-            ShowUserHUD(false);
-
-            if (!enable)
-                CloseSysMenus();
-            else
-                ShowUserHUD();
-
-        }
-
-        public static void CloseSysMenus() => Instance.CloseSysMenus_();
-        public static void ShowUserHUD(bool show = true) => Instance.ShowUserHUD_(show);
-        public static void DismissGadget(string name = null) => Instance.DismissGadget_(name);
     }
 
     #endregion

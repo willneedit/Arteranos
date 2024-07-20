@@ -199,7 +199,7 @@ namespace Arteranos.UI
                 return;
             }
 
-            SysMenuStatic.CloseSysMenus();
+            G.SysMenu.CloseSysMenus();
             Factory.NewTextMessage(targetUser);
         }
     }

@@ -15,35 +15,34 @@ using Arteranos.Core;
 namespace Arteranos.UI
 {
 
-    public class SysMenu : SysMenuStatic
+    public class SysMenu : MonoBehaviour, ISysMenu
     {
         [SerializeField] private InputActionHandler SystemMenu;
 
         public const string GADGET_CAMERA_DRONE = "Camera Drone";
 
 
-        public override bool HUDEnabled { get; set; } = true;
+        public bool HUDEnabled { get; set; } = true;
 
         public void Awake()
         {
             SystemMenu.PerformCallback = (InputAction.CallbackContext obj) => OpenSysMenu(MenuKind.System);
-            Instance = this;
+            G.SysMenu = this;
         }
 
         public void OnEnable() => SystemMenu.BindAction();
 
         public void OnDisable() => SystemMenu.UnbindAction();
 
-
-        public static void OpenSysMenu(MenuKind kind)
+        public void OpenSysMenu(MenuKind kind)
         {
-            if(FindObjectOfType<SysMenuKind>() != null)
+            if(IsSysMenuOpen())
             {
                 CloseSysMenus();
                 return;
             }
 
-            if (!Instance.HUDEnabled) return;
+            if (!HUDEnabled) return;
 
             switch(kind)
             {
@@ -66,27 +65,32 @@ namespace Arteranos.UI
             }
         }
 
-        public override void CloseSysMenus_()
+        public bool IsSysMenuOpen()
+        {
+            return FindObjectOfType<SysMenuKind>() != null;
+        }
+
+        public void CloseSysMenus()
         {
             foreach(SysMenuKind menu in FindObjectsOfType<SysMenuKind>())
                 Destroy(menu.gameObject);
         }
 
-        public override void ShowUserHUD_(bool show = true)
+        public void ShowUserHUD(bool show = true)
         {
-            show = show && Instance.HUDEnabled;
+            show = show && HUDEnabled;
 
             UserHUDUI hud = FindObjectOfType<UserHUDUI>(true);
             if(hud != null) hud.gameObject.SetActive(show);
         }
 
-        public override void DismissGadget_(string name = null)
+        public void DismissGadget(string name = null)
         {
             foreach(GadgetKind gad in FindObjectsOfType<GadgetKind>())
                 if(name == null || name == gad.Name) Destroy(gad.gameObject);
         }
 
-        public static GameObject FindGadget(string name)
+        public GameObject FindGadget(string name)
         {
             foreach(GadgetKind gad in FindObjectsOfType<GadgetKind>())
                 if(name == gad.Name) return gad.gameObject;
@@ -94,7 +98,21 @@ namespace Arteranos.UI
             return null;
         }
 
-        public static T FindGadget<T>(string name) where T : Component
+        public T FindGadget<T>(string name) where T : Component
             => FindGadget(name)?.GetComponent<T>();
+
+        public void EnableHUD(bool enable)
+        {
+            HUDEnabled = enable;
+            DismissGadget();
+            ShowUserHUD(false);
+
+            if (!enable)
+                CloseSysMenus();
+            else
+                ShowUserHUD();
+
+        }
+
     }
 }

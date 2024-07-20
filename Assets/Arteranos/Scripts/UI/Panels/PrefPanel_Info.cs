@@ -68,7 +68,7 @@ namespace Arteranos.UI
 
         private void OnLicenseClicked(bool thirdparty)
         {
-            SysMenu.CloseSysMenus();
+            G.SysMenu.CloseSysMenus();
 
             LicenseTextUI.New(thirdparty);
         }

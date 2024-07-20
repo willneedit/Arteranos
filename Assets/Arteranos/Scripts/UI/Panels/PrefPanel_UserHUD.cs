@@ -117,14 +117,14 @@ namespace Arteranos.UI
         {
             base.OnEnable();
 
-            SysMenu.ShowUserHUD(true);
+            G.SysMenu.ShowUserHUD(true);
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
 
-            SysMenu.ShowUserHUD(false);
+            G.SysMenu.ShowUserHUD(false);
 
             // Might be to disabled before it's really started, so cs may be null yet.
             if(dirty) cs?.Save();

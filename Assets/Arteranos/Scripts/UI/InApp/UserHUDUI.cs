@@ -64,9 +64,9 @@ namespace Arteranos.UI
                 OnSummonCameraClicked,
                 () => G.NetworkStatus.StopHost(true),
                 () => StartCoroutine(ToggleFlyout(EmojiFlyout)),
-                () => SysMenu.FindGadget<CameraDroneUI>(SysMenu.GADGET_CAMERA_DRONE).TakePhoto(),
+                () => G.SysMenu.FindGadget<CameraDroneUI>(SysMenu.GADGET_CAMERA_DRONE).TakePhoto(),
                 OnDismissCameraClicked,
-                () => SysMenu.OpenSysMenu(SysMenuStatic.MenuKind.WorldEdit),
+                () => G.SysMenu.OpenSysMenu(MenuKind.WorldEdit),
             };
 
             CameraUITracker ct = GetComponent<CameraUITracker>();
@@ -95,7 +95,7 @@ namespace Arteranos.UI
             ToolTipText.text = " "; // Empty, but still taking some vertical space.
 
             SystemMenuButton.Button.onHover += makeHoverTip(SystemMenuButton.HoverTip);
-            SystemMenuButton.Button.onClick.AddListener(() => SysMenu.OpenSysMenu(SysMenuStatic.MenuKind.System));
+            SystemMenuButton.Button.onClick.AddListener(() => G.SysMenu.OpenSysMenu(MenuKind.System));
 
             for(int i = 0; i < HUDButtons.Length; i++)
             {
@@ -237,7 +237,7 @@ namespace Arteranos.UI
 
         private void OnSummonCameraClicked()
         {
-            SysMenuStatic.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
+            G.SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
 
             GameObject go = Instantiate(BP.I.InApp.CameraDrone);
 
@@ -251,7 +251,7 @@ namespace Arteranos.UI
 
         private void OnDismissCameraClicked()
         {
-            SysMenuStatic.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
+            G.SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
             cameraCalled = false;
         }
     }
