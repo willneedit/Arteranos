@@ -33,5 +33,7 @@ namespace Arteranos
         public static IConnectionManager ConnectionManager { get; set; }
 
         public static ISysMenu SysMenu { get; set; }
+
+        public static IIPFSService IPFSService { get; set; }
     }
 }

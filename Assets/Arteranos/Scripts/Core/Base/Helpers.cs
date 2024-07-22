@@ -29,7 +29,7 @@ namespace Arteranos.Services
     // -------------------------------------------------------------------
     #region Services helpers
 
-    public abstract class IPFSService : MonoBehaviour
+    public abstract class IPFSService : MonoBehaviour, IIPFSService
     {
         public abstract IpfsClientEx Ipfs_ { get; }
         public abstract Peer Self_ { get; }
@@ -44,51 +44,50 @@ namespace Arteranos.Services
         public abstract Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);
         public abstract Task<byte[]> ReadBinary_(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
         public abstract void DownloadServerOnlineData_(MultiHash SenderPeerID, Action callback = null);
-        public static IPFSService Instance { get; protected set; }
 
-        public static Peer Self 
-            => Instance.Self_;
+        public static Peer Self
+            => G.IPFSService.Self_;
         public static SignKey ServerKeyPair
-            => Instance.ServerKeyPair_;
+            => G.IPFSService.ServerKeyPair_;
         public static PublicKey ServerPublicKey
             => ServerKeyPair.PublicKey;
         public static Cid IdentifyCid
-            => Instance.IdentifyCid_;
+            => G.IPFSService.IdentifyCid_;
         public static Cid CurrentSDCid
-            => Instance.CurrentSDCid_;
+            => G.IPFSService.CurrentSDCid_;
         public static bool UsingPubsub
-            => Instance.UsingPubsub_;
+            => G.IPFSService.UsingPubsub_;
         public static async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
-            => await Instance.GetPeerIPAddress_(PeerID, token).ConfigureAwait(false);
+            => await G.IPFSService.GetPeerIPAddress_(PeerID, token).ConfigureAwait(false);
         public static async Task FlipServerDescription(bool reload)
-            => await Instance.FlipServerDescription_(reload).ConfigureAwait(false);
+            => await G.IPFSService.FlipServerDescription_(reload).ConfigureAwait(false);
         public static async Task PinCid(Cid cid, bool pinned, CancellationToken cancel = default)
-            => await Instance.PinCid_(cid, pinned, cancel).ConfigureAwait(false);
+            => await G.IPFSService.PinCid_(cid, pinned, cancel).ConfigureAwait(false);
         public static async Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
-            => await Instance.Ipfs_.Pin.ListAsync(cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs_.Pin.ListAsync(cancel).ConfigureAwait(false);
         public static async Task<Stream> ReadFile(string path, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs_.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
         public static async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
-            => await Instance.ReadBinary_(path, reportProgress, cancel).ConfigureAwait(false);
+            => await G.IPFSService.ReadBinary_(path, reportProgress, cancel).ConfigureAwait(false);
         public static void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null)
-            => Instance.DownloadServerOnlineData_(SenderPeerID, callback);
+            => G.IPFSService.DownloadServerOnlineData_(SenderPeerID, callback);
 
         public static async Task<Stream> Get(string path, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.GetAsync(path, cancel: cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs_.FileSystem.GetAsync(path, cancel: cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel).ConfigureAwait(false);
         public static async Task<string> ResolveAsync(string path, bool recursive = true, CancellationToken cancel = default)
-            => await Instance.Ipfs_.ResolveAsync(path, recursive, cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs_.ResolveAsync(path, recursive, cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.ListAsync(path, cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs_.FileSystem.ListAsync(path, cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
-            => await Instance.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel).ConfigureAwait(false);
         public static async Task RemoveGarbage(CancellationToken cancel = default)
-            => await Instance.Ipfs_.BlockRepository.RemoveGarbageAsync(cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs_.BlockRepository.RemoveGarbageAsync(cancel).ConfigureAwait(false);
 
         public static async Task<Cid> ResolveToCid(string path, CancellationToken cancel = default)
         {
-            string resolved = await Instance.Ipfs_.ResolveAsync(path, cancel: cancel).ConfigureAwait(false);
+            string resolved = await G.IPFSService.Ipfs_.ResolveAsync(path, cancel: cancel).ConfigureAwait(false);
             if (resolved == null || resolved.Length < 6 || resolved[0..6] != "/ipfs/") return null;
             return resolved[6..];
         }

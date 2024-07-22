@@ -119,7 +119,7 @@ namespace Arteranos.Services
         {
             base.OnApplicationQuit();
 
-            IPFSService.Instance.gameObject.SetActive(false);
+            G.IPFSService.gameObject.SetActive(false);
         }
 
         #endregion

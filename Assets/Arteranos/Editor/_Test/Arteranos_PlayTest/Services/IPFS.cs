@@ -54,7 +54,7 @@ namespace Arteranos.PlayTest.Services
             Assert.AreEqual(2, list.Count);
 
             FileSystemNode fsn = null;
-            yield return Asyncs.Async2Coroutine(IPFSService.Instance.Ipfs_.FileSystemEx.CreateDirectoryAsync(list), _fsn => fsn = _fsn);
+            yield return Asyncs.Async2Coroutine(G.IPFSService.Ipfs_.FileSystemEx.CreateDirectoryAsync(list), _fsn => fsn = _fsn);
 
             Assert.IsNotNull(fsn);
             Assert.AreEqual(2, fsn.Links.Count());

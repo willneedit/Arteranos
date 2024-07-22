@@ -44,10 +44,10 @@ namespace Arteranos.Services
 
             TransitionProgressStatic.Instance.OnProgressChanged(0.00f, "Starting up");
 
-            IPFSService.Instance.enabled = true;
+            G.IPFSService.enabled = true;
 
             // First, wait for IPFS to come up.
-            yield return new WaitUntil(() => IPFSService.Instance?.Ipfs_ != null);
+            yield return new WaitUntil(() => G.IPFSService.Ipfs_ != null);
 
             if (DesiredWorldCid != null)
                 ServerSearcher.InitiateServerTransition(DesiredWorldCid);

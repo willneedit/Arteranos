@@ -84,7 +84,7 @@ namespace Arteranos.Services
         #region Start & Stop
         private void Awake()
         {
-            Instance = this;
+            G.IPFSService = this;
         }
 
         private void Start()
@@ -436,11 +436,6 @@ namespace Arteranos.Services
             // await ipfs.ShutdownAsync();
 
             cts?.Dispose();
-        }
-
-        private void OnDestroy()
-        {
-            Instance = null;
         }
 
         private IEnumerator DiscoverPeersCoroutine()
