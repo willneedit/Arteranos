@@ -30,9 +30,9 @@ namespace Arteranos.Core.Operations
             string assetPath = $"{archiveCid}/{GetArchitectureDirName()}";
 
             // HACK: Kubo's ListFiles doesn't implicitly resolve.
-            assetPath = await IPFSService.ResolveToCid(assetPath, token);
+            assetPath = await G.IPFSService.ResolveToCid(assetPath, token);
 
-            IFileSystemNode fi = await IPFSService.ListFile(assetPath, token);
+            IFileSystemNode fi = await G.IPFSService.ListFile(assetPath, token);
             if (!fi.IsDirectory)
                 throw new InvalidDataException("Asset Archive is not a directory");
 
@@ -59,7 +59,7 @@ namespace Arteranos.Core.Operations
         {
             Dictionary<string, IFileSystemLink> dir = new();
 
-            IFileSystemNode fsn = await IPFSService.ListFile(worldCid, cancel);
+            IFileSystemNode fsn = await G.IPFSService.ListFile(worldCid, cancel);
             if (!fsn.IsDirectory)
                 throw new InvalidDataException($"{worldCid} is not a directory");
             foreach(IFileSystemLink file in fsn.Links)

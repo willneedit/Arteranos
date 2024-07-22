@@ -36,7 +36,7 @@ namespace Arteranos.Core.Operations
         {
             AssetDownloaderContext context = _context as AssetDownloaderContext;
 
-            IFileSystemNode fi = await IPFSService.ListFile(context.path, token);
+            IFileSystemNode fi = await G.IPFSService.ListFile(context.path, token);
 
             context.Size = fi.Size;
             totalBytesMag = Utils.Magnitude(context.Size);
@@ -55,7 +55,7 @@ namespace Arteranos.Core.Operations
             else
             {
                 // Extract directory
-                Stream tar = await IPFSService.Get(context.path, token);
+                Stream tar = await G.IPFSService.Get(context.path, token);
                 using TarArchive archive = TarArchive.CreateInputTarArchive(tar);
                 archive.ProgressMessageEvent += (a, e, m) =>
                 {

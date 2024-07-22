@@ -39,7 +39,7 @@ namespace Arteranos.Core.Operations
 
             try
             {
-                IFileSystemNode fsn = await IPFSService.AddDirectory(path, cancel: token);
+                IFileSystemNode fsn = await G.IPFSService.AddDirectory(path, cancel: token);
                 context.Cid = fsn.Id;
             }
             catch(Exception e)
@@ -131,7 +131,7 @@ namespace Arteranos.Core.Operations
                     }
                 });
 
-                IFileSystemNode fsn = await IPFSService.AddStream(stream, "", cancel: token);
+                IFileSystemNode fsn = await G.IPFSService.AddStream(stream, "", cancel: token);
 
                 context.Cid = fsn.Id;
             }

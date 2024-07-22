@@ -7,8 +7,11 @@
 
 using Arteranos.Core.Cryptography;
 using Ipfs;
+using Ipfs.CoreApi;
 using Ipfs.Http;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,10 +28,18 @@ namespace Arteranos.Services
         SignKey ServerKeyPair { get; }
         bool UsingPubsub { get; }
 
+        Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default);
+        Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default);
         void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null);
         Task FlipServerDescription(bool reload);
+        Task<Stream> Get(string path, CancellationToken cancel = default);
         Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default);
+        Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default);
+        Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default);
         Task PinCid(Cid cid, bool pinned, CancellationToken token = default);
         Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
+        Task<Stream> ReadFile(string path, CancellationToken cancel = default);
+        Task RemoveGarbage(CancellationToken cancel = default);
+        Task<Cid> ResolveToCid(string path, CancellationToken cancel = default);
     }
 }

@@ -42,13 +42,13 @@ namespace Arteranos.PlayTest.Services
             {
                 using MemoryStream stream = new(Encoding.UTF8.GetBytes("Hello World B"));
                 stream.Position = 0;
-                yield return Asyncs.Async2Coroutine(IPFSService.AddStream(stream, "Beta.txt"), _fsn => list.Add(_fsn.ToLink()));
+                yield return Asyncs.Async2Coroutine(G.IPFSService.AddStream(stream, "Beta.txt"), _fsn => list.Add(_fsn.ToLink()));
             }
 
             {
                 using MemoryStream stream = new(Encoding.UTF8.GetBytes("Hello World A"));
                 stream.Position = 0;
-                yield return Asyncs.Async2Coroutine(IPFSService.AddStream(stream, "Alpha.txt"), _fsn => list.Add(_fsn.ToLink()));
+                yield return Asyncs.Async2Coroutine(G.IPFSService.AddStream(stream, "Alpha.txt"), _fsn => list.Add(_fsn.ToLink()));
             }
 
             Assert.AreEqual(2, list.Count);

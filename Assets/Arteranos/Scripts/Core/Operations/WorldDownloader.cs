@@ -96,7 +96,7 @@ namespace Arteranos.Core.Operations
             Directory.CreateDirectory(Utils.WorldCacheRootDir);
             context.WorldAssetBundlePath = $"{Utils.WorldCacheRootDir}/{assetBundleCid}";
 
-            using Stream instr = await IPFSService.ReadFile(assetBundleCid, token);
+            using Stream instr = await G.IPFSService.ReadFile(assetBundleCid, token);
             using Stream outstr = File.Create(context.WorldAssetBundlePath);
 
             await Utils.CopyWithProgress(instr, outstr, _actual =>
@@ -130,7 +130,7 @@ namespace Arteranos.Core.Operations
 
         internal static async Task<WorldInfo> ExtractTemplateInfo(Cid templateCid, CancellationToken cancel)
         {
-            IFileSystemNode fsn = await IPFSService.ListFile(templateCid, cancel);
+            IFileSystemNode fsn = await G.IPFSService.ListFile(templateCid, cancel);
             IEnumerable<IFileSystemLink> links = fsn.Links;
 
             string screenshotName = null;
