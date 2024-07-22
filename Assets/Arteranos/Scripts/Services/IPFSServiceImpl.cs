@@ -39,14 +39,14 @@ using Debug = UnityEngine.Debug;
 
 namespace Arteranos.Services
 {
-    public class IPFSServiceImpl : IPFSService
+    public class IPFSServiceImpl : MonoBehaviour, IIPFSService
     {
-        public override IpfsClientEx Ipfs { get => ipfs; }
-        public override Peer Self { get => self; }
-        public override SignKey ServerKeyPair { get => serverKeyPair; }
-        public override Cid IdentifyCid { get; protected set; }
-        public override Cid CurrentSDCid { get; protected set; } = null;
-        public override bool UsingPubsub { get; protected set; } =
+        public IpfsClientEx Ipfs { get => ipfs; }
+        public Peer Self { get => self; }
+        public SignKey ServerKeyPair { get => serverKeyPair; }
+        public Cid IdentifyCid { get; protected set; }
+        public Cid CurrentSDCid { get; protected set; } = null;
+        public bool UsingPubsub { get; protected set; } =
 #if USE_PUBSUB
             true
 #else
@@ -490,7 +490,7 @@ namespace Arteranos.Services
         }
 
 
-        public override async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
+        public async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
         {
             IEnumerable<(IPAddress, ProtocolType, int)> ipAddresses = await ipfs.Routing.FindPeerAddressesAsync(PeerID, token).ConfigureAwait(false);
 
@@ -535,7 +535,7 @@ namespace Arteranos.Services
             // NOTREACHED
         }
 
-        public override async Task FlipServerDescription(bool reload)
+        public async Task FlipServerDescription(bool reload)
         {
             async Task<IFileSystemNode> CreateSDFile()
             {
@@ -762,7 +762,7 @@ namespace Arteranos.Services
 
         // Server Online Data are generated on demand from the server list and the world
         // panel generation.
-        public override void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null)
+        public void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null)
         {
             async Task DownloadTask(string sodPath)
             {
@@ -830,7 +830,7 @@ namespace Arteranos.Services
         #endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface
-        public override Task PinCid(Cid cid, bool pinned, CancellationToken token = default)
+        public Task PinCid(Cid cid, bool pinned, CancellationToken token = default)
         {
             if (pinned)
                 return ipfs.Pin.AddAsync(cid, cancel: token);
@@ -838,7 +838,7 @@ namespace Arteranos.Services
                 return ipfs.Pin.RemoveAsync(cid, cancel: token);
         }
 
-        public override async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
+        public async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
         {
             using MemoryStream ms = new();
             using Stream instr = await ipfs.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
@@ -860,6 +860,28 @@ namespace Arteranos.Services
             }
 
             return ms.ToArray();
+        }
+        public async Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
+            => await G.IPFSService.Ipfs.Pin.ListAsync(cancel).ConfigureAwait(false);
+        public async Task<Stream> ReadFile(string path, CancellationToken cancel = default)
+            => await G.IPFSService.Ipfs.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
+
+        public async Task<Stream> Get(string path, CancellationToken cancel = default)
+            => await G.IPFSService.Ipfs.FileSystem.GetAsync(path, cancel: cancel).ConfigureAwait(false);
+        public async Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
+            => await G.IPFSService.Ipfs.FileSystem.AddAsync(stream, name, options, cancel).ConfigureAwait(false);
+        public async Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
+            => await G.IPFSService.Ipfs.FileSystem.ListAsync(path, cancel).ConfigureAwait(false);
+        public async Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
+            => await G.IPFSService.Ipfs.FileSystem.AddDirectoryAsync(path, recursive, options, cancel).ConfigureAwait(false);
+        public async Task RemoveGarbage(CancellationToken cancel = default)
+            => await G.IPFSService.Ipfs.BlockRepository.RemoveGarbageAsync(cancel).ConfigureAwait(false);
+
+        public async Task<Cid> ResolveToCid(string path, CancellationToken cancel = default)
+        {
+            string resolved = await G.IPFSService.Ipfs.ResolveAsync(path, cancel: cancel).ConfigureAwait(false);
+            if (resolved == null || resolved.Length < 6 || resolved[0..6] != "/ipfs/") return null;
+            return resolved[6..];
         }
         #endregion
     }
