@@ -51,7 +51,7 @@ namespace Arteranos.Core
         {
             new WorldInfo()._DBDelete(cid);
             // Remove the pin, too, just in case.
-            _ = IPFSService.PinCid(cid, false);
+            _ = G.IPFSService.PinCid(cid, false);
         }
 
         public static IEnumerable<WorldInfo> DBList()

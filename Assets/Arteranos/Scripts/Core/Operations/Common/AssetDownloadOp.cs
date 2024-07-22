@@ -48,7 +48,7 @@ namespace Arteranos.Core.Operations
             if(!context.isTarred)
             {
                 // Read plain file
-                byte[] contents = await IPFSService.ReadBinary(context.path, cancel: token);
+                byte[] contents = await G.IPFSService.ReadBinary(context.path, cancel: token);
 
                 File.WriteAllBytes(context.TargetFile, contents);
             }

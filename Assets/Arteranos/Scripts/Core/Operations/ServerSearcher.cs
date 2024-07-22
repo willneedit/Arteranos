@@ -179,7 +179,7 @@ namespace Arteranos.Core.Operations
             // No matching server, leave it be
             if (ServerPeerID == null) return;
 
-            if(IPFSService.Self.Id == ServerPeerID)
+            if(G.IPFSService.Self.Id == ServerPeerID)
             {
                 Debug.Log("...It's us! :O");
                 return;

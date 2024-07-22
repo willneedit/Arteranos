@@ -177,7 +177,7 @@ namespace Arteranos.UI
             {
                 try
                 {
-                    await IPFSService.PinCid(toPin, state);
+                    await G.IPFSService.PinCid(toPin, state);
                 }
                 catch { }
             }
@@ -213,8 +213,8 @@ namespace Arteranos.UI
                 }
 
                 // Identification file and current server description
-                toPin.Add(IPFSService.IdentifyCid);
-                toPin.Add(IPFSService.CurrentSDCid);
+                toPin.Add(G.IPFSService.IdentifyCid);
+                toPin.Add(G.IPFSService.CurrentSDCid);
 
                 // Default avatars
                 toPin.Add(SettingsManager.DefaultMaleAvatar);

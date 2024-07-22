@@ -111,7 +111,7 @@ namespace Arteranos.Core.Operations
             // As an afterthought, pin the world in the local IPFS node.
             try
             {
-                await IPFSService.PinCid(worldCid, true);
+                await G.IPFSService.PinCid(worldCid, true);
             }
             catch { }
 
@@ -123,7 +123,7 @@ namespace Arteranos.Core.Operations
     {
         internal static async Task<IWorldDecoration> ExtractDecoration(Cid decoration, CancellationToken cancel)
         {
-            byte[] decorationData = await IPFSService.ReadBinary(decoration, cancel: cancel);
+            byte[] decorationData = await G.IPFSService.ReadBinary(decoration, cancel: cancel);
             using MemoryStream ms = new(decorationData);
             return G.WorldEditorData.DeserializeWD(ms);
         }
@@ -144,9 +144,9 @@ namespace Arteranos.Core.Operations
                     break;
                 }
 
-            byte[] screenshotBytes = await IPFSService.ReadBinary($"{templateCid}/{screenshotName}", cancel: cancel);
+            byte[] screenshotBytes = await G.IPFSService.ReadBinary($"{templateCid}/{screenshotName}", cancel: cancel);
 
-            byte[] mdbytes = await IPFSService.ReadBinary($"{templateCid}/Metadata.json", cancel: cancel);
+            byte[] mdbytes = await G.IPFSService.ReadBinary($"{templateCid}/Metadata.json", cancel: cancel);
 
             string json = Encoding.UTF8.GetString(mdbytes);
             WorldMetaData metaData = WorldMetaData.Deserialize(json);

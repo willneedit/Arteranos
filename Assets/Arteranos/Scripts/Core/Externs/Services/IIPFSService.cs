@@ -18,17 +18,17 @@ namespace Arteranos.Services
 {
     public interface IIPFSService : IMonoBehaviour
     {
-        Cid CurrentSDCid_ { get; }
-        Cid IdentifyCid_ { get; }
-        IpfsClientEx Ipfs_ { get; }
-        Peer Self_ { get; }
-        SignKey ServerKeyPair_ { get; }
-        bool UsingPubsub_ { get; }
+        Cid CurrentSDCid { get; }
+        Cid IdentifyCid { get; }
+        IpfsClientEx Ipfs { get; }
+        Peer Self { get; }
+        SignKey ServerKeyPair { get; }
+        bool UsingPubsub { get; }
 
-        void DownloadServerOnlineData_(MultiHash SenderPeerID, Action callback = null);
-        Task FlipServerDescription_(bool reload);
-        Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default);
-        Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);
-        Task<byte[]> ReadBinary_(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
+        void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null);
+        Task FlipServerDescription(bool reload);
+        Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default);
+        Task PinCid(Cid cid, bool pinned, CancellationToken token = default);
+        Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
     }
 }

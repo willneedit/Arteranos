@@ -67,7 +67,7 @@ namespace Arteranos.Web
             Task<IPAddress> taskIPAddr = Task.Run(async () =>
             {
                 using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
-                return await IPFSService.GetPeerIPAddress(si.PeerID, cts.Token);
+                return await G.IPFSService.GetPeerIPAddress(si.PeerID, cts.Token);
             });
 
             yield return new WaitUntil(() => taskIPAddr.IsCompleted);

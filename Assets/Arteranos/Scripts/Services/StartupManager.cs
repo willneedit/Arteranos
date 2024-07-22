@@ -47,7 +47,7 @@ namespace Arteranos.Services
             G.IPFSService.enabled = true;
 
             // First, wait for IPFS to come up.
-            yield return new WaitUntil(() => G.IPFSService.Ipfs_ != null);
+            yield return new WaitUntil(() => G.IPFSService.Ipfs != null);
 
             if (DesiredWorldCid != null)
                 ServerSearcher.InitiateServerTransition(DesiredWorldCid);
@@ -64,7 +64,7 @@ namespace Arteranos.Services
                 Task t = G.NetworkStatus.StartServer();
                 while (!t.IsCompleted) yield return null;
                 yield return new WaitForSeconds(5);
-                Debug.Log($"Server is running, launch argument is: arteranos://{IPFSService.Self.Id}/");
+                Debug.Log($"Server is running, launch argument is: arteranos://{G.IPFSService.Self.Id}/");
             }
 
             enabled = false;

@@ -66,7 +66,7 @@ namespace Arteranos.UI
                     using CancellationTokenSource cts = new(4000);
 
                     yield return Asyncs.Async2Coroutine(
-                        IPFSService.ReadBinary(m_Path, cancel: cts.Token),
+                        G.IPFSService.ReadBinary(m_Path, cancel: cts.Token),
                         _data => m_ImageData = _data);
                 }
 

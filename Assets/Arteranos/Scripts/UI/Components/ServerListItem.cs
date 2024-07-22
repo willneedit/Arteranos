@@ -117,10 +117,10 @@ namespace Arteranos.UI
             img_Icon.Path = si.ServerIcon;
 
             // With Pubsub, we get the data delivered. Without Pubsub, we need to ask for it.
-            if(IPFSService.UsingPubsub)
+            if(G.IPFSService.UsingPubsub)
                 ShowOnlineDetails();
             else
-                IPFSService.DownloadServerOnlineData(PeerID, ShowOnlineDetails);
+                G.IPFSService.DownloadServerOnlineData(PeerID, ShowOnlineDetails);
         }
 
         private void OnVisitClicked()

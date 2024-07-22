@@ -765,7 +765,7 @@ namespace Arteranos.Services
             // Admin list could have been changed
             // (Maybe a ban list, too, in future...)
             // so the server description has to be compiled and published.
-            _ = IPFSService.FlipServerDescription(true);
+            _ = G.IPFSService.FlipServerDescription(true);
 
             if (receiver != null)
             {
@@ -911,7 +911,7 @@ namespace Arteranos.Services
                 ss.ServerIcon = conf.ServerIcon;
 
                 ss.Save();
-                _ = IPFSService.FlipServerDescription(true);
+                _ = G.IPFSService.FlipServerDescription(true);
             }
             else
                 // Report the current server's settings

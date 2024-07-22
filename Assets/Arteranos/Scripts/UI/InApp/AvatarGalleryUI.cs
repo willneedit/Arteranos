@@ -121,7 +121,7 @@ namespace Arteranos.UI
             AvatarDescriptionJSON meAva = GetMeAvatar();
 
             Me.AvatarGallery.Insert(index, meAva);
-            IPFSService.PinCid(meAva.AvatarCidString, true);
+            G.IPFSService.PinCid(meAva.AvatarCidString, true);
             ShowAvatar();
 
             dirty = true;

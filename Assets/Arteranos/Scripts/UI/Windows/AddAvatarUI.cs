@@ -275,7 +275,7 @@ namespace Arteranos.UI
                 // Save this as the current avatar and keep it.
                 cs.AvatarCidString = AvatarCid;
                 cs.Save();
-                _ = IPFSService.PinCid(AvatarCid, true);
+                _ = G.IPFSService.PinCid(AvatarCid, true);
 
                 Destroy(gameObject);
             }
@@ -298,7 +298,7 @@ namespace Arteranos.UI
 
             if(!client.Me.AvatarGallery.Contains(newAva))
                 client.Me.AvatarGallery.Add(newAva);
-            IPFSService.PinCid(AvatarCid, true);
+            G.IPFSService.PinCid(AvatarCid, true);
 
             lbl_Notice.text = "Avatar stored in Gallery";
 

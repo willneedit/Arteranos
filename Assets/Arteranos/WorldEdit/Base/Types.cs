@@ -125,7 +125,7 @@ namespace Arteranos.WorldEdit
                 using CancellationTokenSource cts = new(60000);
                 byte[] data = null;
                 yield return Asyncs.Async2Coroutine(
-                    IPFSService.ReadBinary(GLTFObjectPath, cancel: cts.Token),
+                    G.IPFSService.ReadBinary(GLTFObjectPath, cancel: cts.Token),
                     _data => data = _data);
 
                 if (data == null)

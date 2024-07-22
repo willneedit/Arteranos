@@ -31,63 +31,43 @@ namespace Arteranos.Services
 
     public abstract class IPFSService : MonoBehaviour, IIPFSService
     {
-        public abstract IpfsClientEx Ipfs_ { get; }
-        public abstract Peer Self_ { get; }
-        public abstract SignKey ServerKeyPair_ { get; }
-        public abstract Cid IdentifyCid_ { get; protected set; }
-        public abstract Cid CurrentSDCid_ { get; protected set; }
-        public abstract bool UsingPubsub_ { get; protected set; }
+        public abstract IpfsClientEx Ipfs { get; }
+        public abstract Peer Self { get; }
+        public abstract SignKey ServerKeyPair { get; }
+        public abstract Cid IdentifyCid { get; protected set; }
+        public abstract Cid CurrentSDCid { get; protected set; }
+        public abstract bool UsingPubsub { get; protected set; }
 
 
-        public abstract Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default);
-        public abstract Task FlipServerDescription_(bool reload);
-        public abstract Task PinCid_(Cid cid, bool pinned, CancellationToken token = default);
-        public abstract Task<byte[]> ReadBinary_(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
-        public abstract void DownloadServerOnlineData_(MultiHash SenderPeerID, Action callback = null);
+        public abstract Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default);
+        public abstract Task FlipServerDescription(bool reload);
+        public abstract Task PinCid(Cid cid, bool pinned, CancellationToken token = default);
+        public abstract Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
+        public abstract void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null);
 
-        public static Peer Self
-            => G.IPFSService.Self_;
-        public static SignKey ServerKeyPair
-            => G.IPFSService.ServerKeyPair_;
         public static PublicKey ServerPublicKey
-            => ServerKeyPair.PublicKey;
-        public static Cid IdentifyCid
-            => G.IPFSService.IdentifyCid_;
-        public static Cid CurrentSDCid
-            => G.IPFSService.CurrentSDCid_;
-        public static bool UsingPubsub
-            => G.IPFSService.UsingPubsub_;
-        public static async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
-            => await G.IPFSService.GetPeerIPAddress_(PeerID, token).ConfigureAwait(false);
-        public static async Task FlipServerDescription(bool reload)
-            => await G.IPFSService.FlipServerDescription_(reload).ConfigureAwait(false);
-        public static async Task PinCid(Cid cid, bool pinned, CancellationToken cancel = default)
-            => await G.IPFSService.PinCid_(cid, pinned, cancel).ConfigureAwait(false);
+            => G.IPFSService.ServerKeyPair.PublicKey;
         public static async Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs_.Pin.ListAsync(cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs.Pin.ListAsync(cancel).ConfigureAwait(false);
         public static async Task<Stream> ReadFile(string path, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs_.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
-        public static async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
-            => await G.IPFSService.ReadBinary_(path, reportProgress, cancel).ConfigureAwait(false);
-        public static void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null)
-            => G.IPFSService.DownloadServerOnlineData_(SenderPeerID, callback);
+            => await G.IPFSService.Ipfs.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
 
         public static async Task<Stream> Get(string path, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs_.FileSystem.GetAsync(path, cancel: cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs.FileSystem.GetAsync(path, cancel: cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs_.FileSystem.AddAsync(stream, name, options, cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs.FileSystem.AddAsync(stream, name, options, cancel).ConfigureAwait(false);
         public static async Task<string> ResolveAsync(string path, bool recursive = true, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs_.ResolveAsync(path, recursive, cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs.ResolveAsync(path, recursive, cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs_.FileSystem.ListAsync(path, cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs.FileSystem.ListAsync(path, cancel).ConfigureAwait(false);
         public static async Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs_.FileSystem.AddDirectoryAsync(path, recursive, options, cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs.FileSystem.AddDirectoryAsync(path, recursive, options, cancel).ConfigureAwait(false);
         public static async Task RemoveGarbage(CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs_.BlockRepository.RemoveGarbageAsync(cancel).ConfigureAwait(false);
+            => await G.IPFSService.Ipfs.BlockRepository.RemoveGarbageAsync(cancel).ConfigureAwait(false);
 
         public static async Task<Cid> ResolveToCid(string path, CancellationToken cancel = default)
         {
-            string resolved = await G.IPFSService.Ipfs_.ResolveAsync(path, cancel: cancel).ConfigureAwait(false);
+            string resolved = await G.IPFSService.Ipfs.ResolveAsync(path, cancel: cancel).ConfigureAwait(false);
             if (resolved == null || resolved.Length < 6 || resolved[0..6] != "/ipfs/") return null;
             return resolved[6..];
         }

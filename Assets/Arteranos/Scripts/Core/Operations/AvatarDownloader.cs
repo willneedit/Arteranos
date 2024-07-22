@@ -431,7 +431,7 @@ namespace Arteranos.Core.Operations
                 // As an afterthought, pin the avatar in the local IPFS node.
                 try
                 {
-                    await IPFSService.PinCid(context.path, true);
+                    await G.IPFSService.PinCid(context.path, true);
                 }
                 catch { }
 

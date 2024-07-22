@@ -124,8 +124,8 @@ namespace Arteranos.Core
             {
                 OnlineLevel.Offline => null,
                 OnlineLevel.Client => G.NetworkStatus.RemotePeerId,
-                OnlineLevel.Server => IPFSService.Self.Id,
-                OnlineLevel.Host => IPFSService.Self.Id,
+                OnlineLevel.Server => G.IPFSService.Self.Id,
+                OnlineLevel.Host => G.IPFSService.Self.Id,
                 _ => throw new NotImplementedException()
             };
         }

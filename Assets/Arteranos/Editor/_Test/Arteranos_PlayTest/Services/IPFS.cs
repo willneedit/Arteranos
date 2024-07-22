@@ -54,7 +54,7 @@ namespace Arteranos.PlayTest.Services
             Assert.AreEqual(2, list.Count);
 
             FileSystemNode fsn = null;
-            yield return Asyncs.Async2Coroutine(G.IPFSService.Ipfs_.FileSystemEx.CreateDirectoryAsync(list), _fsn => fsn = _fsn);
+            yield return Asyncs.Async2Coroutine(G.IPFSService.Ipfs.FileSystemEx.CreateDirectoryAsync(list), _fsn => fsn = _fsn);
 
             Assert.IsNotNull(fsn);
             Assert.AreEqual(2, fsn.Links.Count());
@@ -67,13 +67,13 @@ namespace Arteranos.PlayTest.Services
 
             {
                 string result = null;
-                yield return Asyncs.Async2Coroutine(IPFSService.ReadBinary(fsn.Id + "/Alpha.txt"), _result => result = Encoding.UTF8.GetString(_result));
+                yield return Asyncs.Async2Coroutine(G.IPFSService.ReadBinary(fsn.Id + "/Alpha.txt"), _result => result = Encoding.UTF8.GetString(_result));
                 Assert.AreEqual("Hello World A", result);
             }
 
             {
                 string result = null;
-                yield return Asyncs.Async2Coroutine(IPFSService.ReadBinary(fsn.Id + "/Beta.txt"), _result => result = Encoding.UTF8.GetString(_result));
+                yield return Asyncs.Async2Coroutine(G.IPFSService.ReadBinary(fsn.Id + "/Beta.txt"), _result => result = Encoding.UTF8.GetString(_result));
                 Assert.AreEqual("Hello World B", result);
             }
         }

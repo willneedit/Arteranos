@@ -41,12 +41,12 @@ namespace Arteranos.Services
 {
     public class IPFSServiceImpl : IPFSService
     {
-        public override IpfsClientEx Ipfs_ { get => ipfs; }
-        public override Peer Self_ { get => self; }
-        public override SignKey ServerKeyPair_ { get => serverKeyPair; }
-        public override Cid IdentifyCid_ { get; protected set; }
-        public override Cid CurrentSDCid_ { get; protected set; } = null;
-        public override bool UsingPubsub_ { get; protected set; } =
+        public override IpfsClientEx Ipfs { get => ipfs; }
+        public override Peer Self { get => self; }
+        public override SignKey ServerKeyPair { get => serverKeyPair; }
+        public override Cid IdentifyCid { get; protected set; }
+        public override Cid CurrentSDCid { get; protected set; } = null;
+        public override bool UsingPubsub { get; protected set; } =
 #if USE_PUBSUB
             true
 #else
@@ -255,7 +255,7 @@ namespace Arteranos.Services
                 ProcessStartInfo psi = new()
                 {
                     FileName = IPFSExe,
-                    Arguments = UsingPubsub_
+                    Arguments = UsingPubsub
                     ? $"--repo-dir={repodir} daemon --enable-pubsub-experiment"
                     : $"--repo-dir={repodir} daemon",
                     UseShellExecute = false,
@@ -358,18 +358,18 @@ namespace Arteranos.Services
                 // Put up the identifier file
                 if (SettingsManager.Server.Public)
                 {
-                    IdentifyCid_ = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString())).Id;
+                    IdentifyCid = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString())).Id;
                 }
                 else
                 {
                     // rm -f the identifier file
                     AddFileOptions ao = new() { OnlyHash = true };
-                    IdentifyCid_ = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString(), ao)).Id;
+                    IdentifyCid = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString(), ao)).Id;
 
                     try
                     {
-                        await ipfsTmp.Pin.RemoveAsync(IdentifyCid_).ConfigureAwait(false);
-                        await ipfsTmp.Block.RemoveAsync(IdentifyCid_, true).ConfigureAwait(false);
+                        await ipfsTmp.Pin.RemoveAsync(IdentifyCid).ConfigureAwait(false);
+                        await ipfsTmp.Block.RemoveAsync(IdentifyCid, true).ConfigureAwait(false);
                     }
                     catch { }
                 }
@@ -392,7 +392,7 @@ namespace Arteranos.Services
                     sod_key_id = key.Id;
                 }
 
-                if(UsingPubsub_)
+                if(UsingPubsub)
                     _ = ipfsTmp.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
 
                 Debug.Log("---- IPFS Daemon init complete ----\n" +
@@ -403,7 +403,7 @@ namespace Arteranos.Services
                     $"Server Online Data publish key\n" +
                     $"   {sod_key_id}\n" +
                     $"Using Pubsub\n" +
-                    $"   {UsingPubsub_}");
+                    $"   {UsingPubsub}");
 
                 ipfs = ipfsTmp;
 
@@ -415,7 +415,7 @@ namespace Arteranos.Services
             }
 
             ipfs = null;
-            IdentifyCid_ = null;
+            IdentifyCid = null;
             last = DateTime.MinValue;
             DiscoveredPeers = new();
             cts = new();
@@ -426,7 +426,7 @@ namespace Arteranos.Services
 
         private async void OnDisable()
         {
-            await FlipServerDescription_(false);
+            await this.FlipServerDescription(false);
 
             Debug.Log("Shutting down the IPFS node.");
 
@@ -490,7 +490,7 @@ namespace Arteranos.Services
         }
 
 
-        public override async Task<IPAddress> GetPeerIPAddress_(MultiHash PeerID, CancellationToken token = default)
+        public override async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
         {
             IEnumerable<(IPAddress, ProtocolType, int)> ipAddresses = await ipfs.Routing.FindPeerAddressesAsync(PeerID, token).ConfigureAwait(false);
 
@@ -535,7 +535,7 @@ namespace Arteranos.Services
             // NOTREACHED
         }
 
-        public override async Task FlipServerDescription_(bool reload)
+        public override async Task FlipServerDescription(bool reload)
         {
             async Task<IFileSystemNode> CreateSDFile()
             {
@@ -607,7 +607,7 @@ namespace Arteranos.Services
             if (!reload) return;
 
             IFileSystemNode fsn = await CreateServerDescription().ConfigureAwait(false);
-            CurrentSDCid_ = fsn.Id;
+            CurrentSDCid = fsn.Id;
 
             if (SettingsManager.Server.Public)
             {
@@ -615,15 +615,15 @@ namespace Arteranos.Services
                 {
                     // Lasting for two days max, cache refresh needs one minute
                     await ipfs.NameEx.PublishAsync(
-                        CurrentSDCid_,
+                        CurrentSDCid,
                         lifetime: new TimeSpan(2, 0, 0, 0),
                         ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
                 }
 
-                if (UsingPubsub_)
+                if (UsingPubsub)
                 {
                     // Submit the announce in Pubsub as well, for all who's listening
-                    ServerDescriptionLink sdl = new() { ServerDescriptionCid = CurrentSDCid_ };
+                    ServerDescriptionLink sdl = new() { ServerDescriptionCid = CurrentSDCid };
                     using MemoryStream ms = new();
                     sdl.Serialize(ms);
                     ms.Position = 0;
@@ -631,10 +631,10 @@ namespace Arteranos.Services
                     await ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
                 }
 
-                Debug.Log($"Published server description CID: {CurrentSDCid_}");
+                Debug.Log($"Published server description CID: {CurrentSDCid}");
             }
             else
-                Debug.Log($"Server description CID would be: {CurrentSDCid_}");
+                Debug.Log($"Server description CID would be: {CurrentSDCid}");
 
         }
 
@@ -663,7 +663,7 @@ namespace Arteranos.Services
             ms.Position = 0;
 
             // No IPNS together with Pubsub, because latecomers get updated online data at max. one minute.
-            if (UsingPubsub_)
+            if (UsingPubsub)
             {
                 // Announce the server online data, too - fire and forget.
                 _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
@@ -762,7 +762,7 @@ namespace Arteranos.Services
 
         // Server Online Data are generated on demand from the server list and the world
         // panel generation.
-        public override void DownloadServerOnlineData_(MultiHash SenderPeerID, Action callback = null)
+        public override void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null)
         {
             async Task DownloadTask(string sodPath)
             {
@@ -830,7 +830,7 @@ namespace Arteranos.Services
         #endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface
-        public override Task PinCid_(Cid cid, bool pinned, CancellationToken token = default)
+        public override Task PinCid(Cid cid, bool pinned, CancellationToken token = default)
         {
             if (pinned)
                 return ipfs.Pin.AddAsync(cid, cancel: token);
@@ -838,7 +838,7 @@ namespace Arteranos.Services
                 return ipfs.Pin.RemoveAsync(cid, cancel: token);
         }
 
-        public override async Task<byte[]> ReadBinary_(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
+        public override async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
         {
             using MemoryStream ms = new();
             using Stream instr = await ipfs.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);

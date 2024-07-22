@@ -35,7 +35,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return TestFixtures.StartIPFSAndWait(service);
 
-            ipfs = service.Ipfs_;
+            ipfs = service.Ipfs;
         }
 
 

@@ -60,7 +60,7 @@ namespace Arteranos.PlayTest
             service.enabled = true;
             service.gameObject.SetActive(true);
 
-            yield return new WaitUntil(() => service.Ipfs_ != null);
+            yield return new WaitUntil(() => service.Ipfs != null);
         }
     }
 }
