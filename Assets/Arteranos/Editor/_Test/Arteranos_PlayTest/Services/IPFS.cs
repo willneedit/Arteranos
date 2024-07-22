@@ -15,7 +15,7 @@ namespace Arteranos.PlayTest.Services
 {
     public class IPFS
     {
-        IPFSServiceImpl service = null;
+        IPFSService service = null;
 
         [UnitySetUp]
         public IEnumerator Setup0()

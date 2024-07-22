@@ -25,7 +25,7 @@ namespace Arteranos.PlayTest.Web
         private string FileURLAsset => $"file:///{PlainFileAsset}";
         private string QuotedFileAsset => $"\"{PlainFileAsset}\"";
 
-        IPFSServiceImpl service = null;
+        IPFSService service = null;
         IpfsClientEx ipfs = null;
 
         [UnitySetUp]

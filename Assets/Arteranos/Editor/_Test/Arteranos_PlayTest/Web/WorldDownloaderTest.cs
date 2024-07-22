@@ -21,7 +21,7 @@ namespace Arteranos.PlayTest.Web
         private const string PlainFileAsset = "Assets/Arteranos/Editor/_Test/Sceelix_Abbey.zip";
         private string FileURLAsset => $"file:///{PlainFileAsset}";
 
-        IPFSServiceImpl service = null;
+        IPFSService service = null;
 
         Cid WorldCid = null;
 

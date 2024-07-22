@@ -20,7 +20,7 @@ namespace Arteranos.PlayTest.UI
     {
         private const string Asset_iws = "file:///Assets/Arteranos/Editor/_Test/6394c1e69ef842b3a5112221.glb";
 
-        IPFSServiceImpl service = null;
+        IPFSService service = null;
         AddAvatarUI aaui = null;
 
         [UnitySetUp]

@@ -33,13 +33,13 @@ using System.Net.Sockets;
 using TaskScheduler = Arteranos.Core.TaskScheduler;
 using ProtoBuf;
 using Ipfs.CoreApi;
-using Newtonsoft.Json.Linq;
+
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 
 namespace Arteranos.Services
 {
-    public class IPFSServiceImpl : MonoBehaviour, IIPFSService
+    public class IPFSService : MonoBehaviour, IIPFSService
     {
         public IpfsClientEx Ipfs { get => ipfs; }
         public Peer Self { get => self; }

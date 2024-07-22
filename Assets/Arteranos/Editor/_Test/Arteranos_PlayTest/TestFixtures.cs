@@ -35,9 +35,9 @@ namespace Arteranos.PlayTest
             }
         }
 
-        public static void IPFSServiceFixture(ref IPFSServiceImpl service)
+        public static void IPFSServiceFixture(ref IPFSService service)
         {
-            service = UnityEngine.Object.FindObjectOfType<IPFSServiceImpl>(true);
+            service = UnityEngine.Object.FindObjectOfType<IPFSService>(true);
             if(service == null)
             {
                 GameObject sce_bp = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Arteranos/Editor/_Test/_SceneEssentials Variant.prefab");
@@ -55,7 +55,7 @@ namespace Arteranos.PlayTest
             }
         }
 
-        public static IEnumerator StartIPFSAndWait(IPFSServiceImpl service)
+        public static IEnumerator StartIPFSAndWait(IPFSService service)
         {
             service.enabled = true;
             service.gameObject.SetActive(true);

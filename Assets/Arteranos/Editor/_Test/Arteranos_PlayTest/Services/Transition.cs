@@ -21,7 +21,7 @@ namespace Arteranos.PlayTest.Services
         Cid WorldCid = null;
 
 
-        IPFSServiceImpl service = null;
+        IPFSService service = null;
 
         [UnitySetUp]
         public IEnumerator Setup0()
