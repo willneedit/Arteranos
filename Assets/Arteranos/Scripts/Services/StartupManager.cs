@@ -38,11 +38,11 @@ namespace Arteranos.Services
 
             G.XRControl.enabled = true;
 
-            yield return TransitionProgressStatic.TransitionFrom();
+            yield return TransitionProgress.TransitionFrom();
 
-            yield return new WaitUntil(() => TransitionProgressStatic.Instance != null);
+            yield return new WaitUntil(() => G.TransitionProgress != null);
 
-            TransitionProgressStatic.Instance.OnProgressChanged(0.00f, "Starting up");
+            G.TransitionProgress.OnProgressChanged(0.00f, "Starting up");
 
             G.IPFSService.enabled = true;
 
@@ -54,7 +54,7 @@ namespace Arteranos.Services
             else if (TargetedPeerID != null)
                 yield return G.ConnectionManager.ConnectToServer(TargetedPeerID, null);
             else
-                yield return TransitionProgressStatic.TransitionTo(null, null);
+                yield return TransitionProgress.TransitionTo(null, null);
 
 
             // TODO Dedicated server: Startup world commandline argument processing

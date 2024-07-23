@@ -35,5 +35,7 @@ namespace Arteranos
         public static ISysMenu SysMenu { get; set; }
 
         public static IIPFSService IPFSService { get; set; }
+
+        public static ITransitionProgress TransitionProgress { get; set; }
     }
 }

@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Arteranos.Services
 {
-    public class TransitionProgress : TransitionProgressStatic
+    public class TransitionProgressRunner : MonoBehaviour, ITransitionProgress
     {
 
         public GameObject[] ProgressBarObjects = null;
@@ -25,7 +25,7 @@ namespace Arteranos.Services
 
         private void Awake()
         {
-            Instance = this;
+            G.TransitionProgress = this;
         }
 
         private void Start()
@@ -35,11 +35,11 @@ namespace Arteranos.Services
 
         private void OnDestroy()
         {
-            Instance = null;
+            G.TransitionProgress = null;
         }
 
         // async safe
-        public override void OnProgressChanged(float progress, string progressText)
+        public void OnProgressChanged(float progress, string progressText)
         {
             IEnumerator ProgessCoroutine(float progress, string progressText)
             {

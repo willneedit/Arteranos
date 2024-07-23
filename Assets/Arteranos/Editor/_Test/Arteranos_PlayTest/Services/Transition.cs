@@ -75,7 +75,7 @@ namespace Arteranos.PlayTest.Services
             for(int i = 0; i < 10; i++)
             {
                 float progress = (float)i / (float)10;
-                TransitionProgress.Instance.OnProgressChanged(progress, $"Progress {i}");
+                G.TransitionProgress.OnProgressChanged(progress, $"Progress {i}");
                 yield return new WaitForSeconds(2f);
             }
 
@@ -97,7 +97,7 @@ namespace Arteranos.PlayTest.Services
                 for (int i = 0; i < 10; i++)
                 {
                     float progress = (float)i / (float)10;
-                    TransitionProgress.Instance.OnProgressChanged(progress, $"Progress {i}");
+                    G.TransitionProgress.OnProgressChanged(progress, $"Progress {i}");
 
                     await Task.Delay(2000);
                 }
@@ -123,11 +123,11 @@ namespace Arteranos.PlayTest.Services
             (AsyncOperationExecutor<Context> ao, Context co) =
                 WorldDownloader.PrepareGetWorldTemplate(WorldCid);
 
-            ao.ProgressChanged += TransitionProgress.Instance.OnProgressChanged;
+            ao.ProgressChanged += G.TransitionProgress.OnProgressChanged;
 
             yield return ao.ExecuteCoroutine(co, (ex, co) =>
             {
-                TransitionProgress.Instance.OnProgressChanged(1.0f,
+                G.TransitionProgress.OnProgressChanged(1.0f,
                     co != null ? "Success" : "Failed");
             });
 

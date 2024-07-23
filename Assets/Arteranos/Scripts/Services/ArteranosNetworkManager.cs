@@ -607,7 +607,7 @@ namespace Arteranos.Services
                 }
             }
 
-            yield return TransitionProgressStatic.TransitionFrom();
+            yield return TransitionProgress.TransitionFrom();
 
             Cid WorldCid = null;
             string WorldName = null;
@@ -619,7 +619,7 @@ namespace Arteranos.Services
                 (AsyncOperationExecutor<Context> ao, Context co) =
                     WorldDownloader.PrepareGetWorldTemplate(WorldCid);
 
-                ao.ProgressChanged += TransitionProgressStatic.Instance.OnProgressChanged;
+                ao.ProgressChanged += G.TransitionProgress.OnProgressChanged;
 
                 yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
 
@@ -638,7 +638,7 @@ namespace Arteranos.Services
                 }
             }
 
-            yield return TransitionProgressStatic.TransitionTo(WorldCid, WorldName);
+            yield return TransitionProgress.TransitionTo(WorldCid, WorldName);
 
             // If we're in offline mode, we're done it.
             // If we're in server or host mode, we need to announce the world change,
@@ -657,7 +657,7 @@ namespace Arteranos.Services
             }
 
             // Only for the client mode, no offline or host mode
-            yield return TransitionProgressStatic.TransitionFrom();
+            yield return TransitionProgress.TransitionFrom();
 
             Cid WorldCid = null;
             string WorldName = null;
@@ -675,7 +675,7 @@ namespace Arteranos.Services
                     (AsyncOperationExecutor<Context> ao, Context co) =
                         WorldDownloader.PrepareGetWorldInfo(WorldCid);
 
-                    ao.ProgressChanged += TransitionProgressStatic.Instance.OnProgressChanged;
+                    ao.ProgressChanged += G.TransitionProgress.OnProgressChanged;
 
                     yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
 
@@ -687,7 +687,7 @@ namespace Arteranos.Services
                     (AsyncOperationExecutor<Context> ao, Context co) =
                         WorldDownloader.PrepareGetWorldTemplate(WorldCid);
 
-                    ao.ProgressChanged += TransitionProgressStatic.Instance.OnProgressChanged;
+                    ao.ProgressChanged += G.TransitionProgress.OnProgressChanged;
 
                     yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
 
@@ -708,7 +708,7 @@ namespace Arteranos.Services
                 }
             }
 
-            yield return TransitionProgressStatic.TransitionTo(WorldCid, WorldName);
+            yield return TransitionProgress.TransitionTo(WorldCid, WorldName);
         }
 
         #endregion

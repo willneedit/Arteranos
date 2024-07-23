@@ -265,7 +265,7 @@ namespace Arteranos.Services
             RemotePeerId = null;
 
             if (loadOfflineScene)
-                Core.TaskScheduler.ScheduleCoroutine(() => TransitionProgressStatic.TransitionTo(null, null));
+                Core.TaskScheduler.ScheduleCoroutine(() => TransitionProgress.TransitionTo(null, null));
 
             // And, wait for the network to really be shut down.
             while (manager.isNetworkActive) await Task.Delay(8);

@@ -60,9 +60,9 @@ namespace Arteranos.Web
             IPAddress addr = IPAddress.Any;
 
             // In any case, go into the transitional phase.
-            yield return TransitionProgressStatic.TransitionFrom();
+            yield return TransitionProgress.TransitionFrom();
 
-            TransitionProgressStatic.Instance.OnProgressChanged(0.10f, "Searching server");
+            G.TransitionProgress?.OnProgressChanged(0.10f, "Searching server");
 
             Task<IPAddress> taskIPAddr = Task.Run(async () =>
             {
@@ -75,14 +75,14 @@ namespace Arteranos.Web
             if(!taskIPAddr.IsCompletedSuccessfully)
             {
                 Debug.Log($"{si.PeerID} is unreachable.");
-                yield return TransitionProgressStatic.TransitionTo(null, null);
+                yield return TransitionProgress.TransitionTo(null, null);
                 callback?.Invoke(false);
                 yield break;
             }
 
             addr = taskIPAddr.Result;
 
-            TransitionProgressStatic.Instance.OnProgressChanged(0.50f, "Connecting...");
+            G.TransitionProgress?.OnProgressChanged(0.50f, "Connecting...");
 
             // FIXME Telepathy Transport specific.
             Uri connectionUri = addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
@@ -105,7 +105,7 @@ namespace Arteranos.Web
             if (!G.NetworkStatus.IsClientConnected)
             {
                 callback?.Invoke(false);
-                yield return TransitionProgressStatic.TransitionTo(null, null);
+                yield return TransitionProgress.TransitionTo(null, null);
                 yield break;
             }
 

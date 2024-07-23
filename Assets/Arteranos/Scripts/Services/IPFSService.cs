@@ -140,7 +140,7 @@ namespace Arteranos.Services
                     // Even worse...
                     if (IPFSExe == null)
                     {
-                        TransitionProgressStatic.Instance?.OnProgressChanged(0.00f, "No IPFS daemon -- aborting!");
+                        G.TransitionProgress?.OnProgressChanged(0.00f, "No IPFS daemon -- aborting!");
 
                         yield return new WaitForSeconds(10);
 
@@ -219,13 +219,13 @@ namespace Arteranos.Services
                 if(pk == null)
                 {
                     Debug.LogWarning("No IPFS repo, initializing...");
-                    TransitionProgressStatic.Instance.OnProgressChanged(0.15f, "Initializing IPFS repository");
+                    G.TransitionProgress?.OnProgressChanged(0.15f, "Initializing IPFS repository");
                     TryInitIPFS();
 
                     yield return new WaitForSeconds(2);
                 }
 
-                TransitionProgressStatic.Instance?.OnProgressChanged(0.20f, "Starting IPFS daemon");
+                G.TransitionProgress?.OnProgressChanged(0.20f, "Starting IPFS daemon");
 
                 TryStartIPFS();
 
@@ -244,7 +244,7 @@ namespace Arteranos.Services
                     }
                 }
 
-                TransitionProgressStatic.Instance.OnProgressChanged(0.00f, "Failed to start daemon");
+                G.TransitionProgress?.OnProgressChanged(0.00f, "Failed to start daemon");
                 yield return new WaitForSeconds(10);
                 SettingsManager.Quit();
             }
@@ -349,7 +349,7 @@ namespace Arteranos.Services
                     Debug.LogException(ex);
                 }
 
-                TransitionProgressStatic.Instance?.OnProgressChanged(0.30f, "Announcing its service");
+                G.TransitionProgress?.OnProgressChanged(0.30f, "Announcing its service");
 
                 StringBuilder sb = new();
                 sb.Append("Arteranos Server, built by willneedit\n");
@@ -411,7 +411,7 @@ namespace Arteranos.Services
                 serverKeyPair = SignKey.ImportPrivateKey(pk);
                 SettingsManager.Server.UpdateServerKey(serverKeyPair);
 
-                TransitionProgressStatic.Instance?.OnProgressChanged(0.40f, "Connected to IPFS");
+                G.TransitionProgress?.OnProgressChanged(0.40f, "Connected to IPFS");
             }
 
             ipfs = null;
@@ -466,7 +466,7 @@ namespace Arteranos.Services
         }
         private IEnumerator UploadDefaultAvatars()
         {
-            TransitionProgressStatic.Instance?.OnProgressChanged(0.50f, "Uploading default resources");
+            G.TransitionProgress?.OnProgressChanged(0.50f, "Uploading default resources");
 
             Cid cid = null;
             IEnumerator UploadAvatar(string resourceMA)

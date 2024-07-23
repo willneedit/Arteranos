@@ -16,15 +16,8 @@ using AsyncOperation = UnityEngine.AsyncOperation;
 
 namespace Arteranos.Services
 {
-    // -------------------------------------------------------------------
-    #region Services helpers
-
-    public abstract class TransitionProgressStatic : MonoBehaviour
+    public static class TransitionProgress
     {
-        public static TransitionProgressStatic Instance;
-
-        public abstract void OnProgressChanged(float progress, string progressText);
-
         public static IEnumerator TransitionFrom()
         {
             G.XRVisualConfigurator.StartFading(1.0f);
@@ -41,7 +34,7 @@ namespace Arteranos.Services
 
             G.XRVisualConfigurator.StartFading(0.0f);
 
-            yield return new WaitUntil(() => Instance);
+            yield return new WaitUntil(() => (G.TransitionProgress != null));
 
             G.SysMenu.EnableHUD(false);
         }
@@ -50,6 +43,25 @@ namespace Arteranos.Services
         // the current preloaded world asset bundle!
         public static IEnumerator TransitionTo(Cid WorldCid, string WorldName)
         {
+            static IEnumerator MoveToPreloadedWorld(Cid WorldCid, string WorldName)
+            {
+                if (WorldCid == null)
+                {
+                    AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
+                    while (!ao.isDone) yield return null;
+
+                    yield return new WaitForEndOfFrame();
+                    yield return new WaitForEndOfFrame();
+
+                    G.XRControl.MoveRig();
+                }
+                else
+                    yield return EnterDownloadedWorld();
+
+                SettingsManager.WorldCid = WorldCid;
+                SettingsManager.WorldName = WorldName;
+            }
+
             G.XRVisualConfigurator.StartFading(1.0f);
             yield return new WaitForSeconds(0.5f);
 
@@ -58,25 +70,6 @@ namespace Arteranos.Services
             G.XRVisualConfigurator.StartFading(0.0f);
 
             G.SysMenu.EnableHUD(true);
-        }
-
-        private static IEnumerator MoveToPreloadedWorld(Cid WorldCid, string WorldName)
-        {
-            if (WorldCid == null)
-            {
-                AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
-                while (!ao.isDone) yield return null;
-
-                yield return new WaitForEndOfFrame();
-                yield return new WaitForEndOfFrame();
-
-                G.XRControl.MoveRig();
-            }
-            else
-                yield return EnterDownloadedWorld();
-
-            SettingsManager.WorldCid = WorldCid;
-            SettingsManager.WorldName = WorldName;
         }
 
         public static IEnumerator EnterDownloadedWorld()
@@ -99,7 +92,4 @@ namespace Arteranos.Services
             G.XRControl.MoveRig();
         }
     }
-
-    #endregion
-    // -------------------------------------------------------------------
 }
