@@ -56,7 +56,6 @@ namespace Arteranos.WorldEdit
         private bool isLocked = false;
         private bool isGrabbable = false;
 
-        private IWorldEditorData EditorData = null;
         private Rigidbody body = null;
         private XRGrabInteractable mover = null;
 
@@ -75,7 +74,6 @@ namespace Arteranos.WorldEdit
             mover.lastSelectExited.AddListener(GotObjectRelease);
 
             Transform root = WorldChange.FindObjectByPath(null);
-            root.TryGetComponent(out EditorData);
 
             IsCollidable = false;
             IsLocked = false;
@@ -89,7 +87,7 @@ namespace Arteranos.WorldEdit
 
         private void GotObjectRelease(SelectExitEventArgs arg0)
         {
-            if(EditorData.IsInEditMode)
+            if(G.WorldEditorData.IsInEditMode)
             {
                 // We're in edit mode, we are actually changing the world.
                 TryGetWOC(out WOCTransform woct);
@@ -110,25 +108,25 @@ namespace Arteranos.WorldEdit
 
         private (Vector3 position, Vector3 eulerRotation) ConstrainMovement(Vector3 oldPosition, Vector3 oldEulerRotation)
         {
-            if(!EditorData.LockXAxis && !EditorData.LockYAxis && !EditorData.LockZAxis)
+            if(!G.WorldEditorData.LockXAxis && !G.WorldEditorData.LockYAxis && !G.WorldEditorData.LockZAxis)
                 return (transform.localPosition, transform.localEulerAngles);
 
             Vector3 position = transform.localPosition;
             Vector3 eulerRotation = transform.localEulerAngles;
 
-            if(EditorData.LockXAxis)
+            if(G.WorldEditorData.LockXAxis)
             {
                 position.x = oldPosition.x;
                 eulerRotation.x = oldEulerRotation.x;
             }
 
-            if(EditorData.LockYAxis)
+            if(G.WorldEditorData.LockYAxis)
             {
                 position.y = oldPosition.y;
                 eulerRotation.y = oldEulerRotation.y;
             }
 
-            if(EditorData.LockZAxis)
+            if(G.WorldEditorData.LockZAxis)
             {
                 position.z = oldPosition.z;
                 eulerRotation.z = oldEulerRotation.z;
@@ -178,7 +176,7 @@ namespace Arteranos.WorldEdit
 
         private void SetIsMovable()
         {
-            mover.enabled = EditorData.IsInEditMode 
+            mover.enabled = G.WorldEditorData.IsInEditMode 
                 ? !IsLocked
                 : IsGrabbable;
         }

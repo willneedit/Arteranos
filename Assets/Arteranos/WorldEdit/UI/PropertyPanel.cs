@@ -55,7 +55,6 @@ namespace Arteranos.WorldEdit
         public event Action OnReturnToList;
 
         private GameObject worldObject;
-        private IWorldEditorData EditorData = null;
 
         protected override void Awake()
         {
@@ -91,8 +90,7 @@ namespace Arteranos.WorldEdit
             Populate();
 
             Transform root = WorldChange.FindObjectByPath(null);
-            root.TryGetComponent(out EditorData);
-            EditorData.OnWorldChanged += GotWorldChanged;
+            G.WorldEditorData.OnWorldChanged += GotWorldChanged;
         }
 
         private void GotWorldChanged(IWorldChange change)
@@ -109,7 +107,7 @@ namespace Arteranos.WorldEdit
 
         protected override void OnDisable()
         {
-            EditorData.OnWorldChanged -= GotWorldChanged;
+            G.WorldEditorData.OnWorldChanged -= GotWorldChanged;
 
             base.OnDisable();
         }

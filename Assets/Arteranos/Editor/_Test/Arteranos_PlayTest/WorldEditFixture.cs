@@ -18,7 +18,6 @@ namespace Arteranos.PlayTest.WorldEdit
     public class WorldEditFixture
     {
         public GameObject pl = null;
-        public IWorldEditorData editorData = null;
 
         Camera ca = null;
         Light li = null;
@@ -28,8 +27,7 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             TestFixtures.SceneFixture(ref ca, ref li, ref pl);
 
-            if (!pl.TryGetComponent(out editorData))
-                Assert.Fail("No EditorData component");
+            Assert.IsNotNull(G.WorldEditorData);
 
             yield return new WaitForEndOfFrame();
         }

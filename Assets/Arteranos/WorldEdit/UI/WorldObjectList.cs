@@ -24,7 +24,6 @@ namespace Arteranos.WorldEdit
 
         private GameObject WORoot = null;
         private GameObject CurrentRoot = null;
-        private IWorldEditorData EditorData = null;
 
         protected override void Awake()
         {
@@ -37,9 +36,8 @@ namespace Arteranos.WorldEdit
             Chooser.OnAddingItem += RequestToAdd;
 
             WORoot = WorldChange.FindObjectByPath(null).gameObject;
-            WORoot.TryGetComponent(out EditorData);
 
-            EditorData.OnWorldChanged += GotWorldChanged;
+            G.WorldEditorData.OnWorldChanged += GotWorldChanged;
         }
 
         private void GotWorldChanged(IWorldChange change)
@@ -54,7 +52,7 @@ namespace Arteranos.WorldEdit
             Chooser.OnAddingItem -= RequestToAdd;
             Chooser.OnShowingPage -= PreparePage;
 
-            EditorData.OnWorldChanged -= GotWorldChanged;
+            G.WorldEditorData.OnWorldChanged -= GotWorldChanged;
 
             base.OnDestroy();
         }
