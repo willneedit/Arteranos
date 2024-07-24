@@ -55,9 +55,16 @@ namespace Arteranos.WorldEdit
         private List<UndoBuffer> undoStack = new();
         private int undoCount = 0;
 
+        private readonly Dictionary<IWorldObjectAsset, GameObject> AssetBlueprints = new();
+
         private void Awake()
         {
             G.WorldEditorData = this;
+        }
+
+        private void OnDestroy()
+        {
+            ClearBlueprints();
         }
 
         private IEnumerable<WorldObject> MakeSnapshot()
@@ -215,5 +222,19 @@ namespace Arteranos.WorldEdit
 
         public IWorldDecoration DeserializeWD(Stream stream)
             => Serializer.Deserialize<WorldDecoration>(stream);
+
+        public void ClearBlueprints()
+        {
+            foreach(var bp in AssetBlueprints)
+                Destroy(bp.Value);
+
+            AssetBlueprints.Clear();
+        }
+
+        public bool TryGetBlueprint(IWorldObjectAsset woa, out GameObject gameObject) 
+            => AssetBlueprints.TryGetValue(woa, out gameObject);
+
+        public void AddBlueprint(IWorldObjectAsset woa, GameObject gameObject) 
+            => AssetBlueprints.Add(woa, gameObject);
     }
 }

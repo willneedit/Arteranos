@@ -43,6 +43,9 @@ namespace Arteranos.WorldEdit
         public IEnumerator BuildWorld()
         {
             Transform t = WorldChange.FindObjectByPath(null);
+
+            G.WorldEditorData.ClearBlueprints();
+
             for (int i = 0; i < objects.Count; i++)
                 yield return objects[i].Instantiate(t);
         }
@@ -120,12 +123,13 @@ namespace Arteranos.WorldEdit
 
         public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
         {
-            IEnumerator LoadglTF(string GLTFObjectPath, GameObject LoadedObject)
+
+            static IEnumerator LoadglTF(WOglTF WOglTF, GameObject LoadedObject)
             {
                 using CancellationTokenSource cts = new(60000);
                 byte[] data = null;
                 yield return Asyncs.Async2Coroutine(
-                    G.IPFSService.ReadBinary(GLTFObjectPath, cancel: cts.Token),
+                    G.IPFSService.ReadBinary(WOglTF.glTFCid, cancel: cts.Token),
                     _data => data = _data);
 
                 if (data == null)
@@ -146,29 +150,58 @@ namespace Arteranos.WorldEdit
                     yield return Asyncs.Async2Coroutine(
                         gltf.InstantiateMainSceneAsync(instantiator));
                 }
+
+                LoadedObject.name = $"glTF {WOglTF.glTFCid}";
+            }
+
+            static IEnumerator LoadKit(WOKitItem kitItem, GameObject LoadedObject)
+            {
+                LoadedObject.name = $"kit {kitItem.kitCid}, Item {kitItem.kitName}";
+
+                throw new NotImplementedException();
             }
 
             GameObject gob;
-
-            // TODO: Implement kit item asset instantiation
-            if (asset is WOPrimitive WOPR)                          // Pun intended :)
+            if (asset == null)
             {
-                gob = GameObject.CreatePrimitive(WOPR.primitive);
+                gob = new GameObject("Empty world object");
                 gob.SetActive(false);
-            }
-            else if(asset is WOglTF WOglTF)
-            {
-                gob = new GameObject("Unleaded glTF world object"); // :)
-                gob.SetActive(false);
-                yield return LoadglTF(WOglTF.glTFCid, gob);
             }
             else
             {
-                gob = new GameObject("Empty or unsupported world object");
-                gob.SetActive(false);
-            }
+                // Look up, or create a blueprint if none exist
+                if (!G.WorldEditorData.TryGetBlueprint(asset, out GameObject gobbo))
+                {
+                    // TODO: Implement kit item asset instantiation
+                    switch (asset)
+                    {
+                        case WOPrimitive WOPR: // Pun intended :)
+                            gobbo = GameObject.CreatePrimitive(WOPR.primitive);
+                            gobbo.SetActive(false);
+                            break;
+                        case WOglTF WOglTF:
+                            gobbo = new GameObject("Unleaded glTF world object"); // :)
+                            gobbo.SetActive(false);
+                            yield return LoadglTF(WOglTF, gobbo);
+                            break;
+                        case WOKitItem WOKitItem:
+                            gobbo = new GameObject("Unleaded kit world object"); // :)
+                            gobbo.SetActive(false);
+                            yield return LoadKit(WOKitItem, gobbo);
+                            break;
+                        default:
+                            gobbo = new GameObject("Unsupported world object");
+                            gobbo.SetActive(false);
+                            break;
+                    }
 
-            // More complex constructs can be put as a child of an empty GameObject.
+                    gobbo.transform.position = new Vector3(0, -9000, 0);
+                    G.WorldEditorData.AddBlueprint(asset, gobbo);
+                }
+
+                // Got it now, clone it.
+                gob = UnityEngine.Object.Instantiate(gobbo, Vector3.zero, Quaternion.identity);
+            }
 
             gob.name = name;
 

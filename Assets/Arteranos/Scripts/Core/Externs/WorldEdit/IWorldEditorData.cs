@@ -8,6 +8,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using UnityEngine;
 
 namespace Arteranos.WorldEdit
 {
@@ -21,9 +22,11 @@ namespace Arteranos.WorldEdit
         event Action<bool> OnEditorModeChanged;
         event Action<IWorldChange> OnWorldChanged;
 
+        void AddBlueprint(IWorldObjectAsset woa, GameObject gameObject);
         void BuilderRequestedRedo();
         void BuilderRequestsUndo();
         IEnumerator BuildWorld(IWorldDecoration worldDecoration);
+        void ClearBlueprints();
         IWorldDecoration DeserializeWD(Stream stream);
         void DoApply(Stream stream);
         void DoApply(IWorldChange worldChange);
@@ -31,5 +34,6 @@ namespace Arteranos.WorldEdit
         void NotifyWorldChanged(IWorldChange worldChange);
         IEnumerator RecallUndoState(string hash);
         IWorldDecoration TakeSnapshot();
+        bool TryGetBlueprint(IWorldObjectAsset woa, out GameObject gameObject);
     }
 }

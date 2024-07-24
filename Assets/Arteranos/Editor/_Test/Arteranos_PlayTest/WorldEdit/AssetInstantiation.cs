@@ -71,7 +71,7 @@ namespace Arteranos.PlayTest.WorldEdit
             WOPrimitive prim2 = new() { primitive = PrimitiveType.Cube };
             WOPrimitive prim1_1 = new() { primitive = PrimitiveType.Sphere };
 
-            Dictionary<WorldObjectAsset, string> dict = new()
+            Dictionary<IWorldObjectAsset, string> dict = new()
             {
                 { gltf1, "gltf_1" },
                 { kitItem1, "kit_1" },
