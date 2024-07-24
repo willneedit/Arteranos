@@ -97,12 +97,12 @@ namespace Arteranos.WorldEdit
         {
             IEnumerator Cor()
             {
-                Chooser.btn_AddItem.interactable = false;
+                Chooser.Btn_AddItem.interactable = false;
 
                 (AsyncOperationExecutor<Context> ao, Context co) =
                     AssetUploader.PrepareUploadToIPFS(sourceURL, false); // Plain GLB file
 
-                ao.ProgressChanged += (ratio, msg) => Chooser.lbl_PageCount.text = $"{msg}";
+                ao.ProgressChanged += (ratio, msg) => Chooser.Lbl_PageCount = $"{msg}";
 
                 AggregateException ex = null;
                 yield return ao.ExecuteCoroutine(co, (_status, _) => ex = _status);
@@ -113,7 +113,7 @@ namespace Arteranos.WorldEdit
                     FriendlyName = AssetUploader.GetUploadedFilename(co),
                 });
 
-                Chooser.btn_AddItem.interactable = true;
+                Chooser.Btn_AddItem.interactable = true;
                 dirty = true;
 
                 Chooser.ShowPage(0);

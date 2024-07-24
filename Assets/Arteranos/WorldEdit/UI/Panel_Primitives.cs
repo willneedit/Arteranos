@@ -8,10 +8,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.EventSystems;
 using System;
 using Arteranos.UI;
-using UnityEngine.Events;
 
 namespace Arteranos.WorldEdit
 {

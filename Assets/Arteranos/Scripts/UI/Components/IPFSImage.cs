@@ -10,7 +10,6 @@ using System.Collections;
 using UnityEngine.UI;
 
 using Arteranos.Core;
-using Arteranos.Services;
 using UnityEngine;
 using Ipfs.Unity;
 using System.Threading;
@@ -18,11 +17,11 @@ using System.Threading;
 namespace Arteranos.UI
 {
     [AddComponentMenu("UI/IPFS Image", 13)]
-    public class IPFSImage : RawImage
+    public class IPFSImage : RawImage, IIPFSImage
     {
-        public string Path 
-        { 
-            get => m_Path; 
+        public string Path
+        {
+            get => m_Path;
             set
             {
                 m_Path = value;
@@ -30,13 +29,13 @@ namespace Arteranos.UI
             }
         }
 
-        public byte[] ImageData 
+        public byte[] ImageData
         {
             get => m_ImageData;
-            set 
+            set
             {
                 m_Path = null;
-                m_ImageData = value; 
+                m_ImageData = value;
                 RestartLoader();
             }
         }
@@ -50,7 +49,7 @@ namespace Arteranos.UI
             base.OnEnable();
 
 #if UNITY_EDITOR
-            if(Application.isPlaying)
+            if (Application.isPlaying)
 #endif
                 RestartLoader();
         }
@@ -61,7 +60,7 @@ namespace Arteranos.UI
             {
                 yield return null;
 
-                if(m_Path != null)
+                if (m_Path != null)
                 {
                     using CancellationTokenSource cts = new(4000);
 
@@ -76,7 +75,7 @@ namespace Arteranos.UI
                 if (m_ImageData != null)
                 {
                     yield return Asyncs.Async2Coroutine(
-                        AsyncImageLoader.LoadImageAsync(tex, m_ImageData), 
+                        AsyncImageLoader.LoadImageAsync(tex, m_ImageData),
                         _r => result = _r);
                 }
 

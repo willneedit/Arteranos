@@ -155,7 +155,7 @@ namespace Arteranos.WorldEdit
             woi.EmitToServer();
 
             // Finished with adding.
-            Chooser.btn_AddItem.interactable = true;
+            Chooser.Btn_AddItem.interactable = true;
         }
     }
 }

@@ -14,11 +14,14 @@ using System;
 
 namespace Arteranos.UI
 {
-    public class ObjectChooser : UIBehaviour
+    public class ObjectChooser : UIBehaviour, IObjectChooser
     {
         // [SerializeField] private GameObject grp_TileSample;
 
-        public TMP_Text lbl_PageCount;
+        [SerializeField] private TMP_Text lbl_PageCount;
+        [SerializeField] private TMP_InputField txt_AddItemURL;
+        [SerializeField] private Button btn_AddItem;
+
         public Button btn_First;
         public Button btn_FRev;
         public Button btn_Previous;
@@ -26,8 +29,6 @@ namespace Arteranos.UI
         public Button btn_FFwd;
         public Button btn_Last;
 
-        public TMP_InputField txt_AddItemURL;
-        public Button btn_AddItem;
         public int ItemsPerPage = 2;
 
         public GameObject TileBlueprint = null;
@@ -35,6 +36,9 @@ namespace Arteranos.UI
 
         public int CurrentPage { get; private set; } = 0;
         public int MaxPage { get; private set; } = 0;
+        public string Lbl_PageCount { get => lbl_PageCount.text; set => lbl_PageCount.text = value; }
+        public string Txt_AddItemURL { get => txt_AddItemURL.text; set => txt_AddItemURL.text = value; }
+        public Button Btn_AddItem { get => btn_AddItem; set => btn_AddItem = value; }
 
         // Page x is about to be shown. Recommend to call UpdateItemCount(), too.
         public event Action<int> OnShowingPage;
@@ -97,8 +101,8 @@ namespace Arteranos.UI
         {
             Transform panels = transform.GetChild(1);
 
-            return index < panels.childCount 
-                ? panels.GetChild(index).gameObject 
+            return index < panels.childCount
+                ? panels.GetChild(index).gameObject
                 : null;
         }
 
