@@ -30,6 +30,8 @@ namespace Arteranos.WorldEdit
         public Button btn_SaveAsZip;
         public Button btn_SaveInGallery;
 
+        public event Action OnReturnToList;
+
         private string templatePattern;
 
         protected override void Awake()
@@ -41,6 +43,16 @@ namespace Arteranos.WorldEdit
             btn_ReturnToList.onClick.AddListener(GotRTLClick);
             btn_SaveAsZip.onClick.AddListener(GotSaveAsZipClick);
             btn_SaveInGallery.onClick.AddListener(GotSaveInGalleryClick);
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
         }
 
         private void GotSaveInGalleryClick()
@@ -55,7 +67,7 @@ namespace Arteranos.WorldEdit
 
         private void GotRTLClick()
         {
-            throw new NotImplementedException();
+            OnReturnToList?.Invoke();
         }
     }
 }

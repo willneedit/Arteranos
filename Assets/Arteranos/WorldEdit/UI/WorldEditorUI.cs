@@ -21,10 +21,12 @@ namespace Arteranos.WorldEdit
         public WorldObjectList WorldObjectList;
         public PropertyPanel PropertyPanel;
         public GameObject NewObjectPicker;
+        public SaveWorldPanel SaveWorldPanel;
 
         public Button btn_AddNew;
         public Button btn_Undo;
         public Button btn_Redo;
+        public Button btn_Save;
 
         private NewObjectPanel[] NewObjectPanels = null;
 
@@ -39,9 +41,11 @@ namespace Arteranos.WorldEdit
             btn_AddNew.onClick.AddListener(SwitchToAdder);
             btn_Undo.onClick.AddListener(G.WorldEditorData.BuilderRequestsUndo);
             btn_Redo.onClick.AddListener(G.WorldEditorData.BuilderRequestedRedo);
+            btn_Save.onClick.AddListener(SwitchToSave);
 
             WorldObjectList.OnWantsToModify += ModifyObject;
             PropertyPanel.OnReturnToList += SwitchToList;
+            SaveWorldPanel.OnReturnToList += SwitchToList;
 
             //ChoiceBook choiceBook = NewObjectPicker.GetComponent<ChoiceBook>();
             //NewObjectPanels = choiceBook.PaneList.GetComponentsInChildren<NewObjectPanel>(true);
@@ -55,12 +59,14 @@ namespace Arteranos.WorldEdit
 
             WorldObjectList.OnWantsToModify -= ModifyObject;
             PropertyPanel.OnReturnToList -= SwitchToList;
+            SaveWorldPanel.OnReturnToList -= SwitchToList;
         }
 
         private void SwitchToAdder()
         {
             WorldObjectList.gameObject.SetActive(false);
             PropertyPanel.gameObject.SetActive(false);
+            SaveWorldPanel.gameObject.SetActive(false);
             NewObjectPicker.SetActive(true);
 
             ChoiceBook choiceBook = NewObjectPicker.GetComponent<ChoiceBook>();
@@ -83,6 +89,7 @@ namespace Arteranos.WorldEdit
         {
             WorldObjectList.gameObject.SetActive(true);
             PropertyPanel.gameObject.SetActive(false);
+            SaveWorldPanel.gameObject.SetActive(false);
             NewObjectPicker.SetActive(false);
         }
 
@@ -90,6 +97,15 @@ namespace Arteranos.WorldEdit
         {
             WorldObjectList.gameObject.SetActive(false);
             PropertyPanel.gameObject.SetActive(true);
+            SaveWorldPanel.gameObject.SetActive(false);
+            NewObjectPicker.SetActive(false);
+        }
+
+        private void SwitchToSave()
+        {
+            WorldObjectList.gameObject.SetActive(false);
+            PropertyPanel.gameObject.SetActive(false);
+            SaveWorldPanel.gameObject.SetActive(true);
             NewObjectPicker.SetActive(false);
         }
 

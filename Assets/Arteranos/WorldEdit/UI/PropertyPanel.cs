@@ -59,7 +59,7 @@ namespace Arteranos.WorldEdit
         {
             base.Awake();
 
-            btn_ReturnToList.onClick.AddListener(OnReturnToChooserClicked);
+            btn_ReturnToList.onClick.AddListener(GotReturnToChooserClick);
             chk_Local.onValueChanged.AddListener(_ => SetLocalMode(true));
             chk_Global.onValueChanged.AddListener(_ => SetLocalMode(false));
 
@@ -188,13 +188,13 @@ namespace Arteranos.WorldEdit
             Populate();
         }
 
-        private void OnReturnToChooserClicked()
+        private void GotReturnToChooserClick()
         {
             OnReturnToList?.Invoke();
         }
 
 #if UNITY_EDITOR
-        public void Test_OnReturnToChooserClicked() => OnReturnToChooserClicked();
+        public void Test_OnReturnToChooserClicked() => GotReturnToChooserClick();
         public void Test_SetLocalMode(bool local) => SetLocalMode(local);
 #endif
     }
