@@ -274,7 +274,7 @@ namespace Arteranos.Editor
         {
             GameObject env = GameObject.Find("Environment");
 
-            if (env) env = new GameObject("Environment");
+            if (!env) env = new GameObject("Environment");
 
             List<GameObject> looseObjects = sc.GetRootGameObjects().ToList().FindAll(x =>
                 x.name != "Environment"
@@ -314,8 +314,16 @@ namespace Arteranos.Editor
             GatherAsset(lsd, ROOT_PATH + "LightingScenarioData.asset");
             GatherPrefab(lld.gameObject, ROOT_PATH + "LevelLightmapData.prefab");
 
-            if(Lightmapping.lightingSettings != null)
-                GatherCopiedAsset(Lightmapping.lightingSettings, ROOT_PATH + "LightingSettings.lighting");
+            try
+            {
+                // Why throwing an exception if it's null ?!?!
+                if (Lightmapping.lightingSettings != null)
+                    GatherCopiedAsset(Lightmapping.lightingSettings, ROOT_PATH + "LightingSettings.lighting");
+            }
+            catch 
+            {
+                Debug.LogWarning("No lighting setting -- Create a new setting with Window->Rendering->Lighting");
+            }
         }
 
         public static void BuildSceneAsWorld()
