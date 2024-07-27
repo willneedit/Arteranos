@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 using System;
+using Arteranos.Core;
 
 namespace Arteranos.WorldEdit
 {
@@ -33,6 +34,7 @@ namespace Arteranos.WorldEdit
         public event Action OnReturnToList;
 
         private string templatePattern;
+        private UserID author;
 
         protected override void Awake()
         {
@@ -48,6 +50,27 @@ namespace Arteranos.WorldEdit
         protected override void OnEnable()
         {
             base.OnEnable();
+
+            Client cs = SettingsManager.Client;
+            author = new(cs.UserAgrPublicKey, cs.Me.Nickname);
+
+            lbl_Author.text = author;
+
+
+            if (SettingsManager.WorldCid == null)
+                lbl_Template.text = "None";
+            else
+                lbl_Template.text = string.Format(templatePattern, 
+                    SettingsManager.WorldCid,
+                    SettingsManager.WorldName);
+
+            ServerPermissions p = SettingsManager.ActiveServerData.Permissions;
+
+            PresetPermission(chk_Violence, p.Violence);
+            PresetPermission(chk_Nudity, p.Nudity);
+            PresetPermission(chk_Suggestive, p.Suggestive);
+            PresetPermission(chk_ExViolence, p.ExcessiveViolence);
+            PresetPermission(chk_ExNudity, p.ExplicitNudes);
         }
 
         protected override void OnDisable()
@@ -68,6 +91,25 @@ namespace Arteranos.WorldEdit
         private void GotRTLClick()
         {
             OnReturnToList?.Invoke();
+        }
+
+        private void PresetPermission(Toggle tg, bool? perm)
+        {
+            if (perm == null) // Saerver says, don't care
+            {
+                tg.interactable = true;
+                tg.isOn = false;
+            }
+            else if (perm == false) // Server forbids the content
+            {
+                tg.interactable = false;
+                tg.isOn = false;
+            }
+            else if (perm == true) // Server allows the content, maybe even likely in use
+            {
+                tg.interactable = true;
+                tg.isOn = true;
+            }
         }
     }
 }
