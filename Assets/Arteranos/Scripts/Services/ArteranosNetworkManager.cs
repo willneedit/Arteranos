@@ -288,7 +288,7 @@ namespace Arteranos.Services
             SettingsManager.CurrentServer = null;
 
             // Fall back to the client's only permissions, like flying
-            SettingsManager.Client.PingXRControllersChanged();
+            G.Client.PingXRControllersChanged();
         }
 
         /// <summary>
@@ -353,7 +353,7 @@ namespace Arteranos.Services
         {
             base.OnStopServer();
 
-            SettingsManager.WorldCid = null;
+            G.World.Cid = null;
 
             NetworkServer.UnregisterHandler<CTSPacketEnvelope>();
         }
@@ -379,7 +379,7 @@ namespace Arteranos.Services
             {
                 WorldInfo wi = null;
 
-                yield return WorldInfo.RetrieveCoroutine(SettingsManager.WorldCid, (_wi) => wi = _wi);
+                yield return WorldInfo.RetrieveCoroutine(G.World.Cid, (_wi) => wi = _wi);
 
                 EmitToClientCTSPacket(new CTSPWorldChangeAnnouncement()
                 {
@@ -388,7 +388,7 @@ namespace Arteranos.Services
             }
 
 
-            Debug.Log($"[Server] sending world CID '{SettingsManager.WorldCid}' to latecoming conn {conn.connectionId}");
+            Debug.Log($"[Server] sending world CID '{G.World.Cid}' to latecoming conn {conn.connectionId}");
 
             Core.TaskScheduler.ScheduleCoroutine(() => SendWCAJustForTheLaggard(conn, agreePublicKey));
         }
@@ -401,7 +401,7 @@ namespace Arteranos.Services
 
         public void EmitToServerCTSPacket(CTSPacket packet)
         {
-            Client client = SettingsManager.Client;
+            Client client = G.Client;
             UserID sender = new(client.UserSignPublicKey, client.Me.Nickname);
 
             if (!NetworkClient.active)
@@ -593,7 +593,7 @@ namespace Arteranos.Services
                 if(WorldInfo != null)
                 {
                     ServerPermissions permission = WorldInfo.win.ContentRating;
-                    bool AllowedForThis = permission != null && !permission.IsInViolation(SettingsManager.Server.Permissions);
+                    bool AllowedForThis = permission != null && !permission.IsInViolation(G.Server.Permissions);
 
                     if(!AllowedForThis)
                     {
@@ -757,9 +757,9 @@ namespace Arteranos.Services
             // and banning needs to be saved.
             if(action != UserCapabilities.CanKickUser)
             {
-                SettingsManager.ServerUsers.RemoveUsers(uss.State);
-                SettingsManager.ServerUsers.AddUser(uss.State);
-                SettingsManager.ServerUsers.Save();
+                G.ServerUsers.RemoveUsers(uss.State);
+                G.ServerUsers.AddUser(uss.State);
+                G.ServerUsers.Save();
             }
 
             // Admin list could have been changed
@@ -865,7 +865,7 @@ namespace Arteranos.Services
             }
 
             // State as in the 'where' clause in SQL.
-            IEnumerable<ServerUserState> q = SettingsManager.ServerUsers.FindUsers(userInfoQuery.State);
+            IEnumerable<ServerUserState> q = G.ServerUsers.FindUsers(userInfoQuery.State);
 
             StartCoroutine(EmitServerUserStateEntries(invoker, q));
             return Task.CompletedTask;
@@ -900,7 +900,7 @@ namespace Arteranos.Services
             {
                 // Save and propagate the changed settings
                 ServerJSON conf = serverConfig.config;
-                Server ss = SettingsManager.Server;
+                Server ss = G.Server;
 
                 ss.ServerPort = conf.ServerPort;
                 ss.UseUPnP = conf.UseUPnP;
@@ -915,7 +915,7 @@ namespace Arteranos.Services
             }
             else
                 // Report the current server's settings
-                serverConfig.config = new(SettingsManager.Server);
+                serverConfig.config = new(G.Server);
 
             // Regardless, send ack with the updated config
             EmitToClientCTSPacket(serverConfig, sender);

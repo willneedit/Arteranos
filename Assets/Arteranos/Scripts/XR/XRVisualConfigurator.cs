@@ -40,7 +40,7 @@ namespace Arteranos.XR
 
         private void OnDestroy()
         {
-            SettingsManager.Client.OnXRControllerChanged -= DownloadControlSettings;
+            G.Client.OnXRControllerChanged -= DownloadControlSettings;
             G.XRVisualConfigurator = null;
         }
 
@@ -50,8 +50,8 @@ namespace Arteranos.XR
             BlinderVolume = volumes[0];
             FaderVolume = volumes[1];
 
-            SettingsManager.Client.OnXRControllerChanged += DownloadControlSettings;
-            SettingsManager.Client.PingXRControllersChanged();
+            G.Client.OnXRControllerChanged += DownloadControlSettings;
+            G.Client.PingXRControllersChanged();
         }
 
         void Update()

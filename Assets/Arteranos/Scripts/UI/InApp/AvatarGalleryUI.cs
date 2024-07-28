@@ -33,14 +33,14 @@ namespace Arteranos.UI
 
         private void OnEnable()
         {
-            Me = SettingsManager.Client.Me;
+            Me = G.Client.Me;
             ShowAvatar();
         }
 
         private void OnDisable()
         {
             if(dirty)
-                SettingsManager.Client.Save();
+                G.Client.Save();
         }
 
         private void ShowAvatar()
@@ -108,7 +108,7 @@ namespace Arteranos.UI
             if(IsEmpty() || GetMeAvatar() == Me.AvatarGallery[index]) return;
 
             AvatarDescriptionJSON puppet = Me.AvatarGallery[index];
-            SettingsManager.Client.AvatarCidString = puppet.AvatarCidString;
+            G.Client.AvatarCidString = puppet.AvatarCidString;
 
             LightOn(btn_commit, false);
             dirty = true;

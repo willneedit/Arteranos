@@ -155,12 +155,12 @@ namespace Arteranos.Avatar
                 // the local avatar would be the remote avatar.
             }
 
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
 
             base.OnStartClient();
 
-            SettingsManager.Client.OnAvatarChanged += CommitAvatarChanged;
-            SettingsManager.Client.OnUserPrivacyChanged += UPChanged;
+            cs.OnAvatarChanged += CommitAvatarChanged;
+            cs.OnUserPrivacyChanged += UPChanged;
 
             if (isLocalPlayer)
             {
@@ -204,8 +204,8 @@ namespace Arteranos.Avatar
             // Maybe it isn't owned anymore, but it would be worse the other way round.
             if (isLocalPlayer) G.Me = null;
 
-            SettingsManager.Client.OnUserPrivacyChanged -= UPChanged;
-            SettingsManager.Client.OnAvatarChanged -= CommitAvatarChanged;
+            G.Client.OnUserPrivacyChanged -= UPChanged;
+            G.Client.OnAvatarChanged -= CommitAvatarChanged;
 
             base.OnStopClient();
         }
@@ -216,15 +216,15 @@ namespace Arteranos.Avatar
         /// </summary>
         private void DownloadClientSettings()
         {
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
 
             string avatarCidString = cs.AvatarCidString;
 
             // Schrödinger's cat and today's view of people's gender... all alike.
             // ¯\_(ツ)_/¯
             avatarCidString ??= (Random.Range(0, 100) < 50)
-                    ? SettingsManager.DefaultFemaleAvatar
-                    : SettingsManager.DefaultMaleAvatar;
+                    ? G.DefaultAvatar.Female
+                    : G.DefaultAvatar.Male;
 
             CommitAvatarChanged(avatarCidString, cs.AvatarHeight);
 
@@ -432,7 +432,7 @@ namespace Arteranos.Avatar
             if (!isLocalPlayer)
                 throw new InvalidOperationException("Not owner");
 
-            return SettingsManager.Client.Me.SocialList.TryGetValue(to, out UserSocialEntryJSON state)
+            return G.Client.Me.SocialList.TryGetValue(to, out UserSocialEntryJSON state)
                         ? state.State : SocialState.None;
         }
 
@@ -451,9 +451,9 @@ namespace Arteranos.Avatar
 
             // Save, for now.
             if (senderB != null)
-                SettingsManager.Client.SaveSocialStates(sender, state, senderB.UserIcon);
+                G.Client.SaveSocialStates(sender, state, senderB.UserIcon);
             else
-                SettingsManager.Client.SaveSocialStates(sender, state);
+                G.Client.SaveSocialStates(sender, state);
 
             // And take it the immediate effects, like blocking.
             UpdateSSEffects(senderB, state);
@@ -512,7 +512,7 @@ namespace Arteranos.Avatar
             // Maybe the intended receiver logged off while you tried to send a goodbye message.
             if (receiver == null) return;
 
-            SettingsManager.Client.SaveSocialStates(receiver.UserID, state, receiver.UserIcon);
+            G.Client.SaveSocialStates(receiver.UserID, state, receiver.UserIcon);
 
             SendCTCPacket(receiver, new CTCPUserState()
             {
@@ -545,7 +545,7 @@ namespace Arteranos.Avatar
             busy |= m_txtMessageBox != null;
 
             // "Dammit! Not right now!"
-            busy |= SettingsManager.Client.UserPrivacy.Visibility != Core.Visibility.Online;
+            busy |= G.Client.UserPrivacy.Visibility != Core.Visibility.Online;
             return busy;
         }
 
@@ -635,7 +635,7 @@ namespace Arteranos.Avatar
             return cap switch
             {
                 // User can enable flying if the current(!) server permits it
-                // Maybe add SettingsManager.Client.PingXRControllersChanged();
+                // Maybe add G.Client.PingXRControllersChanged();
                 // in the world transition, too.
                 UserCapabilities.CanEnableFly => isAnyAdmin || (SettingsManager.ActiveServerData?.Permissions.Flying ?? true),
 

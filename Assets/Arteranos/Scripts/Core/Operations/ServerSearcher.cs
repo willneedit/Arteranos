@@ -83,7 +83,7 @@ namespace Arteranos.Core.Operations
             int ScoreServer(ServerInfo x)
             {
                 int xScore = x.MatchScore;
-                if(x.UsesCustomTOS && !SettingsManager.Client.AllowCustomTOS)
+                if(x.UsesCustomTOS && !G.Client.AllowCustomTOS)
                     xScore = -20000;
                 else if (!x.IsOnline)
                     xScore = -20000;

@@ -198,15 +198,15 @@ namespace Arteranos.UI
                 }
 
                 // User and server icons
-                toPin.Add(SettingsManager.Client.Me.UserIconCid);
-                toPin.Add(SettingsManager.Server.ServerIcon);
+                toPin.Add(G.Client.Me.UserIconCid);
+                toPin.Add(G.Server.ServerIcon);
 
                 // Current avatar
-                toPin.Add(SettingsManager.Client.Me.CurrentAvatar.AvatarCidString);
+                toPin.Add(G.Client.Me.CurrentAvatar.AvatarCidString);
 
                 // Stored avatars
                 int storedAvatars = 0;
-                foreach(AvatarDescriptionJSON entry in SettingsManager.Client.Me.AvatarGallery)
+                foreach(AvatarDescriptionJSON entry in G.Client.Me.AvatarGallery)
                 {
                     storedAvatars++;
                     toPin.Add(entry.AvatarCidString);
@@ -217,15 +217,15 @@ namespace Arteranos.UI
                 toPin.Add(G.IPFSService.CurrentSDCid);
 
                 // Default avatars
-                toPin.Add(SettingsManager.DefaultMaleAvatar);
-                toPin.Add(SettingsManager.DefaultFemaleAvatar);
+                toPin.Add(G.DefaultAvatar.Male);
+                toPin.Add(G.DefaultAvatar.Female);
 
                 // World Editor Assets Collections: glTF models
-                foreach (WOCEntry item in SettingsManager.Client.WEAC.WorldObjectsGLTF)
+                foreach (WOCEntry item in G.Client.WEAC.WorldObjectsGLTF)
                     toPin.Add(item.IPFSPath);
 
                 // World Editor Assets Collections: Kits
-                foreach (WOCEntry item in SettingsManager.Client.WEAC.WorldObjectsKits)
+                foreach (WOCEntry item in G.Client.WEAC.WorldObjectsKits)
                     toPin.Add(item.IPFSPath);
 
                 // Eat up any empty entries

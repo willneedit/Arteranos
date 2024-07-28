@@ -267,7 +267,7 @@ namespace Arteranos.UI
 
             if(btn_LabelAddAvatar == tc_SetCurrent)
             {
-                Client cs = SettingsManager.Client;
+                Client cs = G.Client;
 
                 //if (cs.AvatarCidString != null)
                 //    IPFSService.PinCid(cs.AvatarCidString, false);
@@ -288,7 +288,7 @@ namespace Arteranos.UI
 
         private void OnAddToGalleryClicked()
         {
-            Client client = SettingsManager.Client;
+            Client client = G.Client;
 
             AvatarDescriptionJSON newAva = new()
             {

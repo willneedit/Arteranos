@@ -42,7 +42,7 @@ namespace Arteranos.Services
             set
             {
                 bool oldvalue = m_OpenPorts;
-                bool newvalue = value && (SettingsManager.Server?.UseUPnP ?? false);
+                bool newvalue = value && (G.Server?.UseUPnP ?? false);
                 if(oldvalue != newvalue)
                 {
                     m_OpenPorts = newvalue;
@@ -226,7 +226,7 @@ namespace Arteranos.Services
 
             Debug.Log("Opening ports in the router");
 
-            Server ss = SettingsManager.Server;
+            Server ss = G.Server;
 
             ServerPortPublic = await OpenPortAsync(ss.ServerPort);
         }
@@ -235,7 +235,7 @@ namespace Arteranos.Services
         {
             Debug.Log("Closing ports in the router, if there's need to do.");
 
-            Server ss = SettingsManager.Server;
+            Server ss = G.Server;
 
             if(ServerPortPublic)
                 ClosePortAsync(ss.ServerPort);
@@ -280,7 +280,7 @@ namespace Arteranos.Services
             G.ConnectionManager.ExpectConnectionResponse();
 
             // Custom server port -- Transport specific!
-            transport.port = (ushort) SettingsManager.Server.ServerPort;
+            transport.port = (ushort) G.Server.ServerPort;
             manager.StartHost();
 
             // And, wait for the network to really be started up.
@@ -294,7 +294,7 @@ namespace Arteranos.Services
             OpenPorts = true;
 
             // Custom server port -- Transport specific!
-            transport.port = (ushort)SettingsManager.Server.ServerPort;
+            transport.port = (ushort)G.Server.ServerPort;
             manager.StartServer();
 
             // And, wait for the network to really be started up.

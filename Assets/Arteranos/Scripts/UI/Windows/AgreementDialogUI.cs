@@ -82,7 +82,7 @@ namespace Arteranos.UI
 
         private void OnReaction(bool agree)
         {
-            Client client = SettingsManager.Client;
+            Client client = G.Client;
 
             if (agree)
             {

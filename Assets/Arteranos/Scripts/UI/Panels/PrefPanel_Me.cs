@@ -86,7 +86,7 @@ namespace Arteranos.UI
         {
             base.OnEnable();
 
-            cs = SettingsManager.Client;
+            cs = G.Client;
 
             UIDRepresentation fpmodeSet = cs.UserPrivacy.UIDRepresentation;
 

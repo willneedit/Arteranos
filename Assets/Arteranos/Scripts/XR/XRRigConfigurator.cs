@@ -52,18 +52,18 @@ namespace Arteranos.XR
 
         private void Start()
         {
-            SettingsManager.Client.OnXRControllerChanged += DownloadControlSettings;
-            SettingsManager.Client.PingXRControllersChanged();
+            G.Client.OnXRControllerChanged += DownloadControlSettings;
+            G.Client.PingXRControllersChanged();
         }
 
-        private void OnDestroy() => SettingsManager.Client.OnXRControllerChanged -= DownloadControlSettings;
+        private void OnDestroy() => G.Client.OnXRControllerChanged -= DownloadControlSettings;
 
 
         private void DownloadControlSettings(ControlSettingsJSON ccs, MovementSettingsJSON mcs, ServerPermissions sp)
         {
             if (ccs == null) return;
 
-            bool vrmode = SettingsManager.Client.VRMode;
+            bool vrmode = G.Client.VRMode;
 
             bool left_on = ccs.Controller_left && vrmode;
             bool right_on = ccs.Controller_right && vrmode;

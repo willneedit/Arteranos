@@ -17,11 +17,11 @@ namespace Arteranos.Avatar
         private SphereCollider Friend = null;
         private SphereCollider Stranger = null;
 
-        private readonly Client cs = SettingsManager.Client;
+        private readonly Client cs = G.Client;
 
         private void OnEnable() => cs.OnPrivacyBubbleChanged += OnPrivacyBubbleChanged;
 
-        private void OnDisable() => SettingsManager.Client.OnPrivacyBubbleChanged -= OnPrivacyBubbleChanged;
+        private void OnDisable() => G.Client.OnPrivacyBubbleChanged -= OnPrivacyBubbleChanged;
 
         private void OnPrivacyBubbleChanged(float friend, float stranger)
         {

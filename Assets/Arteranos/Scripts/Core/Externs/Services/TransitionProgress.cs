@@ -58,8 +58,8 @@ namespace Arteranos.Services
                 else
                     yield return EnterDownloadedWorld();
 
-                SettingsManager.WorldCid = WorldCid;
-                SettingsManager.WorldName = WorldName;
+                G.World.Cid = WorldCid;
+                G.World.Name = WorldName;
             }
 
             G.XRVisualConfigurator.StartFading(1.0f);

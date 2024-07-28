@@ -97,7 +97,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            cs = SettingsManager.Client;
+            cs = G.Client;
 
             sldn_AxisX.value = cs.UserHUD.AxisX;
             sldn_AxisY.value = cs.UserHUD.AxisY;

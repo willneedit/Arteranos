@@ -38,7 +38,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            cs = SettingsManager.Client;
+            cs = G.Client;
 
             chk_AllowCustomTOS.isOn = cs.AllowCustomTOS;
 
@@ -86,10 +86,10 @@ namespace Arteranos.UI
 
             ContentFilterUI cui = ContentFilterUI.New();
 
-            cui.spj = SettingsManager.Client.ContentFilterPreferences;
+            cui.spj = G.Client.ContentFilterPreferences;
 
             cui.OnFinishConfiguring +=
-                () => SettingsManager.Client?.Save();
+                () => G.Client?.Save();
         }
     }
 }

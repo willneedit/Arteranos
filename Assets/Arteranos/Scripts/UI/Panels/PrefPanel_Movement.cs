@@ -108,7 +108,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            cs = SettingsManager.Client;
+            cs = G.Client;
 
             MovementSettingsJSON movement = cs.Movement;
 

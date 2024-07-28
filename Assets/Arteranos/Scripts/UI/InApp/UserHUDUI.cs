@@ -135,11 +135,11 @@ namespace Arteranos.UI
         {
             if(!lateInitialized)
             {
-                if(SettingsManager.Client != null)
+                if(G.Client != null)
                 {
-                    SettingsManager.Client.OnUserHUDSettingsChanged += DownloadUserHUDSettings;
-                    SettingsManager.Client.OnVRModeChanged += (_) => SettingsManager.Client.PingUserHUDChanged();
-                    SettingsManager.Client.PingUserHUDChanged();
+                    G.Client.OnUserHUDSettingsChanged += DownloadUserHUDSettings;
+                    G.Client.OnVRModeChanged += (_) => G.Client.PingUserHUDChanged();
+                    G.Client.PingUserHUDChanged();
                     lateInitialized= true;
                 }
             }
@@ -184,7 +184,7 @@ namespace Arteranos.UI
             HUDButtons[btn_callcd].Button.gameObject.SetActive(!cameraCalled);
             HUDButtons[btn_takephoto].Button.gameObject.SetActive(cameraCalled);
             HUDButtons[btn_dismisscd].Button.gameObject.SetActive(cameraCalled);
-            HUDButtons[btn_editworld].Button.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanEditWorld, null));
+            HUDButtons[btn_editworld].Button.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanEditWorld, null) && G.World.Cid != null);
         }
 
         private void DownloadUserHUDSettings(UserHUDSettingsJSON obj)
@@ -198,7 +198,7 @@ namespace Arteranos.UI
                 obj.AxisY, 
                 1), PositionFactor);
 
-            float actualSize = Mathf.Pow(2, (float)(obj.Log2Size + (SettingsManager.Client.VRMode ? 1.0f : 0.0f)));
+            float actualSize = Mathf.Pow(2, (float)(obj.Log2Size + (G.Client.VRMode ? 1.0f : 0.0f)));
 
             rt.localScale = Vector3.Scale(new Vector3(
                 actualSize,

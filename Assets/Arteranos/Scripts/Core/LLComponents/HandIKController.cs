@@ -33,13 +33,13 @@ namespace Arteranos.Avatar
                 ? Quaternion.Euler(0, -90, -90)
                 : Quaternion.Euler(0, 90, 90);
 
-            SettingsManager.Client.OnVRModeChanged += OnXRChanged;
-            OnXRChanged(SettingsManager.Client.VRMode);
+            G.Client.OnVRModeChanged += OnXRChanged;
+            OnXRChanged(G.Client.VRMode);
         }
 
         private void OnDestroy()
         {
-            SettingsManager.Client.OnVRModeChanged -= OnXRChanged;
+            G.Client.OnVRModeChanged -= OnXRChanged;
         }
 
         private void OnXRChanged(bool useXR)
@@ -77,7 +77,7 @@ namespace Arteranos.Avatar
                 return;
             }
 
-            ControlSettingsJSON ccs = SettingsManager.Client.Controls;
+            ControlSettingsJSON ccs = G.Client.Controls;
 
             bool enabled = RightSide
                 ? ccs.Controller_right

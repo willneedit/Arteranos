@@ -419,10 +419,10 @@ namespace Arteranos.Core
         public string GetFingerprint(string fmt = null) => CryptoHelpers.ToString(fmt, UserSignPublicKey.Serialize());
 
         public static void TransmitMessage(byte[] data, PublicKey receiver, out CMSPacket messageData)
-            => SettingsManager.Client.CMH.TransmitMessage(data, receiver, out messageData);
+            => G.Client.CMH.TransmitMessage(data, receiver, out messageData);
 
         public static void ReceiveMessage(CMSPacket messageData, out byte[] data, out PublicKey signerPublicKey)
-            => SettingsManager.Client.CMH.ReceiveMessage(messageData, out data, out signerPublicKey);
+            => G.Client.CMH.ReceiveMessage(messageData, out data, out signerPublicKey);
 
         #endregion
         // ---------------------------------------------------------------
@@ -546,7 +546,7 @@ namespace Arteranos.Core
 
         public static void UpdateServerPass(ServerInfo serverInfo, bool TOS, byte[] serverKey)
         {
-            Client client = SettingsManager.Client;
+            Client client = G.Client;
 
             client.ServerPasses.TryGetValue(serverInfo.SPKDBKey, out ServerPass sp);
 

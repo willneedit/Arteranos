@@ -30,20 +30,14 @@ namespace Arteranos.Core
         public static ServerJSON CurrentServer { get; set; } = null;
 
         public static Transform Purgatory { get; private set; }
-        public static Client Client { get; internal set; }
-        public static Server Server { get; internal set; }
-        public static ServerUserBase ServerUsers { get; internal set; }
-        public static Cid WorldCid { get; set; }
-        public static string WorldName { get; set; }
+
         public static string DefaultTOStext { get; private set; } = null;
 
-        public static Cid DefaultMaleAvatar { get; set; } = null;
-        public static Cid DefaultFemaleAvatar { get; set; } = null;
 
         public static ServerJSON ActiveServerData =>
             G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
             ? CurrentServer
-            : Server;
+            : G.Server;
 
         protected virtual void Awake()
         {
@@ -54,8 +48,8 @@ namespace Arteranos.Core
             ParseSettingsAndCmdLine();
 
             DefaultTOStext = BP.I.PrivacyTOSNotice.text;
-            DefaultMaleAvatar = null;
-            DefaultFemaleAvatar = null;
+            G.DefaultAvatar.Male = null;
+            G.DefaultAvatar.Female = null;
         }
 
         protected abstract void OnDestroy();
@@ -78,9 +72,9 @@ namespace Arteranos.Core
                 return def;
             }
 
-            Client = Client.Load();
-            Server = Server.Load();
-            ServerUsers = ServerUserBase.Load();
+            G.Client = Client.Load();
+            G.Server = Server.Load();
+            G.ServerUsers = ServerUserBase.Load();
             Command = ScriptableObject.CreateInstance<CommandLine>();
 
             Command.GetCommandlineArgs();
@@ -100,7 +94,7 @@ namespace Arteranos.Core
                 }
             }
 
-            Client.VRMode = GetBoolArg("-vr", Client.VRMode);
+            G.Client.VRMode = GetBoolArg("-vr", G.Client.VRMode);
         }
 
         private void SetupPurgatory()

@@ -39,8 +39,8 @@ namespace Arteranos.Avatar
 
             if(isLocalPlayer)
             {
-                SettingsManager.Client.OnVRModeChanged += OnXRChanged;
-                OnXRChanged(SettingsManager.Client.VRMode);
+                G.Client.OnVRModeChanged += OnXRChanged;
+                OnXRChanged(G.Client.VRMode);
             }
 
         }
@@ -48,7 +48,7 @@ namespace Arteranos.Avatar
         public override void OnStopClient()
         {
             if(isLocalPlayer)
-                SettingsManager.Client.OnVRModeChanged -= OnXRChanged;
+                G.Client.OnVRModeChanged -= OnXRChanged;
 
             base.OnStopClient();
         }
@@ -91,7 +91,7 @@ namespace Arteranos.Avatar
         public void UpdateOwnPose()
         {
             // VR: Head tracking
-            if(SettingsManager.Client.VRMode)
+            if(G.Client.VRMode)
             {
                 if(!AvatarMeasures.CenterEye || !AvatarMeasures.Head) return;
 

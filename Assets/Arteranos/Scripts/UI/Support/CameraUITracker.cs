@@ -5,7 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Core;
+using Arteranos;
 using UnityEngine;
 
 public class CameraUITracker : MonoBehaviour
@@ -30,7 +30,7 @@ public class CameraUITracker : MonoBehaviour
         m_camera = Camera.main != null ? Camera.main.gameObject : null;
         if(m_camera == null) return;
 
-        float vrfactor = (SettingsManager.Client?.VRMode == true) ? 2.0f : 1.0f;
+        float vrfactor = (G.Client?.VRMode == true) ? 2.0f : 1.0f;
         Vector3 relOffset = m_camera.transform.rotation * (m_offset * vrfactor);
 
         if(initial)

@@ -58,7 +58,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            cs = SettingsManager.Client;
+            cs = G.Client;
 
             sldn_bubble_friends.value = cs.SizeBubbleFriends;
             sldn_bubble_strangers.value = cs.SizeBubbleStrangers;

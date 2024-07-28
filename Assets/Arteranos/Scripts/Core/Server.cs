@@ -142,9 +142,9 @@ namespace Arteranos.Core
         }
 
         public static void TransmitMessage(byte[] data, PublicKey receiver, out CMSPacket messageData)
-            => SettingsManager.Server.CMH.TransmitMessage(data, receiver, out messageData);
+            => G.Server.CMH.TransmitMessage(data, receiver, out messageData);
 
         public static void ReceiveMessage(CMSPacket messageData, out byte[] data, out PublicKey signerPublicKey)
-            => SettingsManager.Server.CMH.ReceiveMessage(messageData, out data, out signerPublicKey);
+            => G.Server.CMH.ReceiveMessage(messageData, out data, out signerPublicKey);
     }
 }

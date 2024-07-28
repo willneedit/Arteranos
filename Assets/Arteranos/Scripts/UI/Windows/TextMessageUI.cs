@@ -51,7 +51,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            cs = SettingsManager.Client;
+            cs = G.Client;
 
             if(cs.PresetStrings.Count == 0)
             {

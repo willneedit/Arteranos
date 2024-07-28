@@ -43,10 +43,10 @@ namespace Arteranos.Avatar
         
         private void Update()
         {
-            if(SettingsManager.Client != null)
+            if(G.Client != null)
             {
-                m_PopupTime = SettingsManager.Client.Controls.NameplateIn;
-                m_PopoutTime = SettingsManager.Client.Controls.NameplateOut;
+                m_PopupTime = G.Client.Controls.NameplateIn;
+                m_PopoutTime = G.Client.Controls.NameplateOut;
             }
 
             if(Brain.Body?.AvatarMeasures != null && fullHeight != Brain.Body.AvatarMeasures.FullHeight)

@@ -116,8 +116,8 @@ namespace Arteranos.UI
             {
                 worldlist.Clear();
 
-                if(SettingsManager.WorldCid != null)
-                    yield return AddManualWorldCoroutine(SettingsManager.WorldCid, false, true);
+                if(G.World.Cid != null)
+                    yield return AddManualWorldCoroutine(G.World.Cid, false, true);
 
                 yield return GatherServeredWorlds();
 

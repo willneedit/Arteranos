@@ -64,7 +64,7 @@ namespace Arteranos.UI
             btn_SendText.onClick.AddListener(OnSendTextButtonClicked);
 
             Me = G.Me;
-            cs = SettingsManager.Client;
+            cs = G.Client;
         }
 
         protected override void Start()
@@ -79,7 +79,7 @@ namespace Arteranos.UI
             if(targetUser == null)
             {
                 // Offline user, fetch icon from the social database
-                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> q = SettingsManager.Client.GetSocialList(targetUserID);
+                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> q = G.Client.GetSocialList(targetUserID);
                 Icon = q.Any() ? q.First().Value.Icon : null;
             }
             else
@@ -98,7 +98,7 @@ namespace Arteranos.UI
             {
                 IAvatarBrain targetUser = G.NetworkStatus.GetOnlineUser(targetUserID);
 
-                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> q = SettingsManager.Client.GetSocialList(targetUserID);
+                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> q = G.Client.GetSocialList(targetUserID);
                 
                 ulong currentState = q.Any() ? q.First().Value.State : SocialState.None;
 

@@ -35,7 +35,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            cs = SettingsManager.Client;
+            cs = G.Client;
 
             chk_DesiredVRMode.isOn = cs.DesiredVRMode;
 

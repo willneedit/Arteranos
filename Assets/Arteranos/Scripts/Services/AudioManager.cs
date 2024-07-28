@@ -88,7 +88,7 @@ namespace Arteranos.Services
 
         public int? GetDeviceId()
         {
-            string device = SettingsManager.Client.AudioSettings.InputDevice;
+            string device = G.Client.AudioSettings.InputDevice;
             int? deviceId = Array.IndexOf(Microphone.devices, device);
             deviceId = (deviceId < 0) ? null : deviceId;
             return deviceId;
@@ -103,7 +103,7 @@ namespace Arteranos.Services
 
         public void PullVolumeSettings()
         {
-            ClientAudioSettingsJSON audioSettings = SettingsManager.Client.AudioSettings;
+            ClientAudioSettingsJSON audioSettings = G.Client.AudioSettings;
             VolumeEnv = audioSettings.EnvVolume;
             VolumeMaster = audioSettings.MasterVolume;
             VolumeVoice = audioSettings.VoiceVolume;
@@ -114,7 +114,7 @@ namespace Arteranos.Services
 
         public void PushVolumeSettings()
         {
-            ClientAudioSettingsJSON audioSettings = SettingsManager.Client.AudioSettings;
+            ClientAudioSettingsJSON audioSettings = G.Client.AudioSettings;
             audioSettings.MasterVolume = VolumeMaster;
             audioSettings.VoiceVolume= VolumeVoice;
             audioSettings.EnvVolume = VolumeEnv;

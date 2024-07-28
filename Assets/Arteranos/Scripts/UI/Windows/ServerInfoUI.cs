@@ -61,7 +61,7 @@ namespace Arteranos.UI
             lbl_LastUpdated.text = si.LastUpdated.HumanReadable();
             lbl_LastOnline.text = si.SeenOnline ? si.LastOnline.HumanReadable() : "Never seen so far";
             lbl_MatchIndex.text = si.Permissions.HumanReadableMI(
-                SettingsManager.Client.ContentFilterPreferences
+                G.Client.ContentFilterPreferences
                 ).ToString();
             lbl_Description.text = si.Description.ToString();
 

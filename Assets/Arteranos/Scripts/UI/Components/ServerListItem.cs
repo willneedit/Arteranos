@@ -91,7 +91,7 @@ namespace Arteranos.UI
                 btn_Add.gameObject.SetActive(false);
                 btn_Delete.gameObject.SetActive(false);
 
-                btn_Background.image.color = (si.UsesCustomTOS && !SettingsManager.Client.AllowCustomTOS)
+                btn_Background.image.color = (si.UsesCustomTOS && !G.Client.AllowCustomTOS)
                     ? BgndWarning
                     : BgndRegular;
 
@@ -135,7 +135,7 @@ namespace Arteranos.UI
 
         private void OnAddClicked()
         {
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
 
             // Put it down into our bookmark list.
             if(!cs.ServerList.Contains(PeerID))
@@ -149,7 +149,7 @@ namespace Arteranos.UI
 
         private void OnDeleteClicked()
         {
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
 
             // Strike it from our list
             if(cs.ServerList.Contains(PeerID))

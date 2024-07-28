@@ -60,7 +60,7 @@ namespace Arteranos.UI
 
         private void HookVirtualKB(TMP_InputField field)
         {
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
 
             if(cs.Controls.VK_Usage == VKUsage.Never) return;
 
@@ -70,7 +70,7 @@ namespace Arteranos.UI
 
             // Desktop mode: straight up, in front of the camera.
             // VR mode: 45°, a little bit down below of the camera's forward vector.
-            bool vRMode = SettingsManager.Client.VRMode;
+            bool vRMode = G.Client.VRMode;
             Vector3 forward = Vector3.forward * (vRMode ? 0.25f : 0.99f) + (vRMode ? transform.rotation * Vector3.down * 0.25f: Vector3.zero);
             Vector3 scale = (vRMode ? 0.50f : 1.00f) * 0.005f * Vector3.one;
             Quaternion rotation = vRMode ? Quaternion.Euler(45,0,0) : Quaternion.identity;

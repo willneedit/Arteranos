@@ -49,8 +49,8 @@ namespace Arteranos.XR
         {
             while (true)
             {
-                bool desiredVRMode = SettingsManager.Client.DesiredVRMode && !quitting;
-                bool actualVRMode = SettingsManager.Client.VRMode;
+                bool desiredVRMode = G.Client.DesiredVRMode && !quitting;
+                bool actualVRMode = G.Client.VRMode;
 
 
                 if (desiredVRMode && !actualVRMode)
@@ -73,7 +73,7 @@ namespace Arteranos.XR
                         UpdateXROrigin(true);
                     }
                     else // Doesn't work now, switch off for now.
-                        SettingsManager.Client.DesiredVRMode = false;
+                        G.Client.DesiredVRMode = false;
                 }
                 if (!desiredVRMode && actualVRMode)
                 {
@@ -111,7 +111,7 @@ namespace Arteranos.XR
                 ReconfigureXRRig();
             };
 
-            SettingsManager.Client.VRMode = useVR;
+            G.Client.VRMode = useVR;
 
             CurrentVRRig = FindObjectOfType<XROrigin>();
 
@@ -135,7 +135,7 @@ namespace Arteranos.XR
         {
             quitting = true;
             StopAllCoroutines();
-            if (SettingsManager.Client.VRMode) StopXR();
+            if (G.Client.VRMode) StopXR();
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace Arteranos.XR
             KMTrackedPoseDriver kMTrackedPoseDriver =
                 xro.gameObject.GetComponentInChildren<KMTrackedPoseDriver>();
 
-            MovementSettingsJSON mcs = SettingsManager.Client.Movement;
+            MovementSettingsJSON mcs = G.Client.Movement;
 
             bool smooth = mcs.Turn == TurnType.Smooth;
             if (snapTurnProvider != null) snapTurnProvider.enabled = !value && !smooth;

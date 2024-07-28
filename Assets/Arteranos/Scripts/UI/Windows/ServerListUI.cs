@@ -48,7 +48,7 @@ namespace Arteranos.UI
             {
                 yield return null;
 
-                cs = SettingsManager.Client;
+                cs = G.Client;
 
                 // Put these servers in this list in front
                 foreach (string PeerIDString in cs.ServerList)

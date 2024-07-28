@@ -224,7 +224,7 @@ namespace Arteranos.Services
             };
 
             // Take the first step to authenticate.
-            Server ss = SettingsManager.Server;
+            Server ss = G.Server;
 
             AuthGreetingMessage authGreetingMessage = new()
             {
@@ -321,7 +321,7 @@ namespace Arteranos.Services
                     // Add the server settings and the signature of the client's public key.
                     // IMPORTANT: Need type ServerJSON, because inherited types make
                     // ProtoBuf choke on them.
-                    ServerSettings = new ServerJSON(SettingsManager.Server)
+                    ServerSettings = new ServerJSON(G.Server)
                 };
 
                 ServerUserState query = new()
@@ -331,7 +331,7 @@ namespace Arteranos.Services
                     deviceUID = request.deviceUID
                 };
 
-                IEnumerable<ServerUserState> q = SettingsManager.ServerUsers.FindUsersOR(query);
+                IEnumerable<ServerUserState> q = G.ServerUsers.FindUsersOR(query);
 
                 ulong aggregated = 0;
                 foreach (ServerUserState user in q) { aggregated |= user.userState; }
@@ -370,7 +370,7 @@ namespace Arteranos.Services
 
         private void EmitAuthResponse(ResponseQueueEntry e)
         {
-            Server ss = SettingsManager.Server;
+            Server ss = G.Server;
 
             using MemoryStream ms = new();
             Serializer.Serialize(ms, e.response);
@@ -436,7 +436,7 @@ namespace Arteranos.Services
             Debug.Log($"[Client] Server name   : {msg.ServerName}");
             Debug.Log($"[Client] Server version: {msg.ServerVersion.Full}");
 
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
 
             byte[] pubKeyData = msg.ServerSignPublicKey.Serialize();
 
@@ -499,7 +499,7 @@ namespace Arteranos.Services
                 return;
             }
 
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
             MultiHash RemotePeerId = SettingsManager.GetServerConnectionData();
 
             string key = $"{RemotePeerId}";
@@ -516,7 +516,7 @@ namespace Arteranos.Services
 
         private static void SubmitAuthRequest(AuthGreetingMessage msg)
         {
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
 
             AuthRequestPayload authRequestPayload = new()
             {
@@ -563,7 +563,7 @@ namespace Arteranos.Services
                 SettingsManager.CurrentServer = msg.ServerSettings;
 
                 // Update the sserver's restrictions, like flying.
-                SettingsManager.Client.PingXRControllersChanged();
+                G.Client.PingXRControllersChanged();
 
                 // Authentication has been accepted
                 ClientAccept();

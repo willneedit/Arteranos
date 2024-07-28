@@ -356,7 +356,7 @@ namespace Arteranos.Services
                 sb.Append(Core.Version.VERSION_MIN);
 
                 // Put up the identifier file
-                if (SettingsManager.Server.Public)
+                if (G.Server.Public)
                 {
                     IdentifyCid = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString())).Id;
                 }
@@ -409,7 +409,7 @@ namespace Arteranos.Services
 
                 // Reuse the IPFS peer key for the multiplayer server to ensure its association
                 serverKeyPair = SignKey.ImportPrivateKey(pk);
-                SettingsManager.Server.UpdateServerKey(serverKeyPair);
+                G.Server.UpdateServerKey(serverKeyPair);
 
                 G.TransitionProgress?.OnProgressChanged(0.40f, "Connected to IPFS");
             }
@@ -483,9 +483,9 @@ namespace Arteranos.Services
             if(EnableUploadDefaultAvatars)
             {
                 yield return UploadAvatar("resource:///Avatar/6394c1e69ef842b3a5112221.glb");
-                SettingsManager.DefaultMaleAvatar = cid;
+                G.DefaultAvatar.Male = cid;
                 yield return UploadAvatar("resource:///Avatar/63c26702e5b9a435587fba51.glb");
-                SettingsManager.DefaultFemaleAvatar = cid;
+                G.DefaultAvatar.Female = cid;
             }
         }
 
@@ -539,8 +539,8 @@ namespace Arteranos.Services
         {
             async Task<IFileSystemNode> CreateSDFile()
             {
-                Server server = SettingsManager.Server;
-                IEnumerable<string> q = from entry in SettingsManager.ServerUsers.Base
+                Server server = G.Server;
+                IEnumerable<string> q = from entry in G.ServerUsers.Base
                                         where UserState.IsSAdmin(entry.userState)
                                         select ((string)entry.userID);
 
@@ -609,7 +609,7 @@ namespace Arteranos.Services
             IFileSystemNode fsn = await CreateServerDescription().ConfigureAwait(false);
             CurrentSDCid = fsn.Id;
 
-            if (SettingsManager.Server.Public)
+            if (G.Server.Public)
             {
                 if(EnablePublishServerData)
                 {
@@ -650,8 +650,8 @@ namespace Arteranos.Services
 
             ServerOnlineData sod = new()
             {
-                CurrentWorldCid = SettingsManager.WorldCid,
-                CurrentWorldName = SettingsManager.WorldName,
+                CurrentWorldCid = G.World.Cid,
+                CurrentWorldName = G.World.Name,
                 UserFingerprints = UserFingerprints,
                 // LastOnline = last, // Not serialized - set on receive
                 OnlineLevel = G.NetworkStatus.GetOnlineLevel()

@@ -60,7 +60,7 @@ namespace Arteranos.UI
         {
             base.Start();
 
-            cs = SettingsManager.Client;
+            cs = G.Client;
 
             // Reset the state as it's the initial state, not the blank slate.
 

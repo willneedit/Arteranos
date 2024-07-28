@@ -27,7 +27,7 @@ namespace Arteranos.UI
         {
             base.OnEnable();
 
-            cs = SettingsManager.Client;
+            cs = G.Client;
 
             if(cs == null) return;
 

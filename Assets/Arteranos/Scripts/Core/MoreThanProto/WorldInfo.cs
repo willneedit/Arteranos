@@ -76,7 +76,7 @@ namespace Arteranos.Core
 
         public void Favourite()
         {
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
             if (!cs.FavouritedWorlds.Contains(WorldCid))
                 cs.FavouritedWorlds.Add(WorldCid);
 
@@ -85,7 +85,7 @@ namespace Arteranos.Core
 
         public void Unfavourite()
         {
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
             cs.FavouritedWorlds.Remove(WorldCid);
 
             cs.Save();
@@ -93,7 +93,7 @@ namespace Arteranos.Core
 
         public static List<Cid> ListFavourites()
         {
-            return SettingsManager.Client.FavouritedWorlds;
+            return G.Client.FavouritedWorlds;
         }
 
         public void BumpWI()

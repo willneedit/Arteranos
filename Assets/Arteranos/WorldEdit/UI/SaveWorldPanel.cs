@@ -51,18 +51,18 @@ namespace Arteranos.WorldEdit
         {
             base.OnEnable();
 
-            Client cs = SettingsManager.Client;
+            Client cs = G.Client;
             author = new(cs.UserAgrPublicKey, cs.Me.Nickname);
 
             lbl_Author.text = author;
 
 
-            if (SettingsManager.WorldCid == null)
+            if (G.World.Cid == null)
                 lbl_Template.text = "None";
             else
                 lbl_Template.text = string.Format(templatePattern, 
-                    SettingsManager.WorldCid,
-                    SettingsManager.WorldName);
+                    G.World.Cid,
+                    G.World.Name);
 
             ServerPermissions p = SettingsManager.ActiveServerData.Permissions;
 
@@ -95,7 +95,7 @@ namespace Arteranos.WorldEdit
 
         private void PresetPermission(Toggle tg, bool? perm)
         {
-            if (perm == null) // Saerver says, don't care
+            if (perm == null) // Server says, don't care
             {
                 tg.interactable = true;
                 tg.isOn = false;

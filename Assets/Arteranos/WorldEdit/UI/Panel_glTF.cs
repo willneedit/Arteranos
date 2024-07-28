@@ -51,7 +51,7 @@ namespace Arteranos.WorldEdit
         {
             base.OnEnable();
 
-            Client = SettingsManager.Client;
+            Client = G.Client;
             if (Client != null)
                 GLTFEntries = Client.WEAC.WorldObjectsGLTF;
             else

@@ -21,7 +21,7 @@ namespace Arteranos.UI
         {
             static bool CanSkipAgreement(ServerInfo si)
             {
-                Client client = SettingsManager.Client;
+                Client client = G.Client;
                 byte[] serverTOSHash = si.PrivacyTOSNoticeHash;
                 if (serverTOSHash == null) return true;
 

@@ -77,7 +77,7 @@ namespace Arteranos.Core
                 if (OnlineData?.UserFingerprints == null) return 0;
 
                 int friend = 0;
-                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> friends = SettingsManager.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.Value.State));
+                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> friends = G.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.Value.State));
 
                 foreach (KeyValuePair<UserID, UserSocialEntryJSON> entry in friends)
                 {
@@ -96,7 +96,7 @@ namespace Arteranos.Core
         {
             get
             {
-                (int ms, int _) = Permissions.MatchRatio(SettingsManager.Client.ContentFilterPreferences);
+                (int ms, int _) = Permissions.MatchRatio(G.Client.ContentFilterPreferences);
                 return ms + FriendCount * 3;
             }
         }
