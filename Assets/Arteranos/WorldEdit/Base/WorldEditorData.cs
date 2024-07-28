@@ -25,11 +25,14 @@ namespace Arteranos.WorldEdit
         }
 
         // Movement and rotation constraints
-        public bool LockXAxis { get; set; } = false;
-        public bool LockYAxis { get; set; } = false;
-        public bool LockZAxis { get; set; } = false;
+        public bool LockXAxis { get => lockXAxis; set => lockXAxis = value; }
+        public bool LockYAxis { get => lockYAxis; set => lockYAxis = value; }
+        public bool LockZAxis { get => lockZAxis; set => lockZAxis = value; }
 
-        private bool isInEditMode = false;
+        [SerializeField] private bool isInEditMode = false;
+        [SerializeField] private bool lockXAxis = false;
+        [SerializeField] private bool lockYAxis = false;
+        [SerializeField] private bool lockZAxis = false;
 
         // Are we in the edit mode at all?
         public bool IsInEditMode
@@ -54,7 +57,6 @@ namespace Arteranos.WorldEdit
 
         private List<UndoBuffer> undoStack = new();
         private int undoCount = 0;
-
         private readonly Dictionary<IWorldObjectAsset, GameObject> AssetBlueprints = new();
 
         private void Awake()

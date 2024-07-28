@@ -366,7 +366,16 @@ namespace Arteranos.WorldEdit
 
         public static Transform FindObjectByPath(List <Guid> path)
         {
-            Transform t = GameObject.FindGameObjectWithTag("WorldObjectsRoot").transform;
+            GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
+
+            // If the world object root doesn't exist yet, create one now.
+            if(gameObject == null)
+            {
+                gameObject = new("WorldObjectsRoot", new Type[] { typeof(WorldEditorData) });
+                gameObject.tag = gameObject.name;
+            }
+
+            Transform t = gameObject.transform;
 
             if (path == null) return t;
 

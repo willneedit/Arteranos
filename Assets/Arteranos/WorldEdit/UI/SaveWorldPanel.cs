@@ -66,6 +66,10 @@ namespace Arteranos.WorldEdit
 
             ServerPermissions p = SettingsManager.ActiveServerData.Permissions;
 
+            // Restrict the permission settings depending on the active server.
+            // Like, disallowing to build XXX content on a PG-13 server.
+            // If the world builder wants to, he'd have to switch servers.
+            // Or set up his own.
             PresetPermission(chk_Violence, p.Violence);
             PresetPermission(chk_Nudity, p.Nudity);
             PresetPermission(chk_Suggestive, p.Suggestive);
