@@ -33,14 +33,14 @@ namespace Arteranos.WorldEdit
         {
             base.Awake();
 
-            btn_ToParent.onClick.AddListener(OnToParentClicked);
-            btn_ToChild.onClick.AddListener(OnToChildClicked);
-            btn_Lock.onClick.AddListener(() => OnSetLockState(true));
-            btn_Unlock.onClick.AddListener(() => OnSetLockState(false));
-            btn_Delete.onClick.AddListener(OnDeleteClicked);
-            btn_Property.onClick.AddListener(OnPropertyPageClicked);
+            btn_ToParent.onClick.AddListener(GotToParentClicked);
+            btn_ToChild.onClick.AddListener(GotToChildClicked);
+            btn_Lock.onClick.AddListener(() => SetLockState(true));
+            btn_Unlock.onClick.AddListener(() => SetLockState(false));
+            btn_Delete.onClick.AddListener(GotDeleteClicked);
+            btn_Property.onClick.AddListener(GotPropertyPageClicked);
 
-            txt_Name.onValueChanged.AddListener(OnChangedName);
+            txt_Name.onValueChanged.AddListener(GotChangedName);
         }
 
         protected override void Start()
@@ -84,17 +84,17 @@ namespace Arteranos.WorldEdit
             btn_Delete.interactable = !IsLocked && !IsParentLink;
         }
 
-        private void OnToChildClicked()
+        private void GotToChildClicked()
         {
             Container.ChangeFolder(WorldObject);
         }
 
-        private void OnToParentClicked()
+        private void GotToParentClicked()
         {
             Container.ChangeFolder(WorldObject.transform.parent.gameObject);
         }
 
-        private void OnSetLockState(bool locked)
+        private void SetLockState(bool locked)
         {
             if (WorldObject.TryGetComponent(out WorldObjectComponent asset))
                 asset.IsLocked = locked;
@@ -102,7 +102,7 @@ namespace Arteranos.WorldEdit
             Populate();
         }
 
-        private void OnDeleteClicked()
+        private void GotDeleteClicked()
         {
             WorldObjectDeletion wod = new();
             wod.SetPathFromThere(WorldObject.transform);
@@ -111,20 +111,20 @@ namespace Arteranos.WorldEdit
             WorldObject = null;
         }
 
-        private void OnChangedName(string name) 
+        private void GotChangedName(string name) 
             => WorldObject.name = name;
 
-        private void OnPropertyPageClicked() 
+        private void GotPropertyPageClicked() 
             => Container.SwitchToPropertyPage(this);
 
 
 #if UNITY_EDITOR
         // Unit test backdoors
-        public void Test_OnToChildClicked() => OnToChildClicked();
-        public void Test_OnToParentClicked() => OnToParentClicked();
-        public void Test_OnSetLockState(bool locked) => OnSetLockState(locked);
-        public void Test_OnDeleteClicked() => OnDeleteClicked();
-        public void Test_OnPropertyPageClicked() => OnPropertyPageClicked();
+        public void Test_OnToChildClicked() => GotToChildClicked();
+        public void Test_OnToParentClicked() => GotToParentClicked();
+        public void Test_OnSetLockState(bool locked) => SetLockState(locked);
+        public void Test_OnDeleteClicked() => GotDeleteClicked();
+        public void Test_OnPropertyPageClicked() => GotPropertyPageClicked();
 #endif
     }
 }

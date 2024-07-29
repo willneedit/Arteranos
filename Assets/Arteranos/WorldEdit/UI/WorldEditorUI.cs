@@ -23,20 +23,28 @@ namespace Arteranos.WorldEdit
         public GameObject NewObjectPicker;
         public SaveWorldPanel SaveWorldPanel;
 
+        public Button btn_UILock;
+        public Button btn_UIUnlock;
         public Button btn_AddNew;
         public Button btn_Undo;
         public Button btn_Redo;
         public Button btn_Save;
 
         private NewObjectPanel[] NewObjectPanels = null;
+        private CameraUITracker Tracker = null;
 
         protected override void Start()
         {
             base.Start();
 
+            Tracker = GetComponentInParent<CameraUITracker>();
+
             WorldObjectList.gameObject.SetActive(true);
             PropertyPanel.gameObject.SetActive(false);
             NewObjectPicker.SetActive(false);
+
+            btn_UILock.onClick.AddListener(() => SetUILockState(true));
+            btn_UIUnlock.onClick.AddListener(() => SetUILockState(false));
 
             btn_AddNew.onClick.AddListener(SwitchToAdder);
             btn_Undo.onClick.AddListener(G.WorldEditorData.BuilderRequestsUndo);
@@ -46,6 +54,9 @@ namespace Arteranos.WorldEdit
             WorldObjectList.OnWantsToModify += ModifyObject;
             PropertyPanel.OnReturnToList += SwitchToList;
             SaveWorldPanel.OnReturnToList += SwitchToList;
+
+            SetUILockState(false);
+
 
             // Editing world without the template is just for testing in the Unity Editor.
             btn_Save.interactable = (G.World.Cid != null);
@@ -63,6 +74,14 @@ namespace Arteranos.WorldEdit
             WorldObjectList.OnWantsToModify -= ModifyObject;
             PropertyPanel.OnReturnToList -= SwitchToList;
             SaveWorldPanel.OnReturnToList -= SwitchToList;
+        }
+
+        private void SetUILockState(bool locking)
+        {
+            btn_UILock.gameObject.SetActive(!locking);
+            btn_UIUnlock.gameObject.SetActive(locking);
+
+            Tracker.enabled = !locking;
         }
 
         private void SwitchToAdder()
