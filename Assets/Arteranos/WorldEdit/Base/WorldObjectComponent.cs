@@ -77,7 +77,16 @@ namespace Arteranos.WorldEdit
 
             IsCollidable = false;
             IsLocked = false;
+
+            G.WorldEditorData.OnEditorModeChanged += GotEditorModeChanged;
         }
+
+        private void OnDestroy()
+        {
+            G.WorldEditorData.OnEditorModeChanged -= GotEditorModeChanged;
+        }
+
+        private void GotEditorModeChanged(bool editing) => SetIsMovable();
 
         private void Update()
         {

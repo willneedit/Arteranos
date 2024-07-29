@@ -38,6 +38,7 @@ namespace Arteranos.WorldEdit
             WORoot = WorldChange.FindObjectByPath(null).gameObject;
 
             G.WorldEditorData.OnWorldChanged += GotWorldChanged;
+            G.WorldEditorData.IsInEditMode = true;
         }
 
         private void GotWorldChanged(IWorldChange change)
@@ -52,6 +53,7 @@ namespace Arteranos.WorldEdit
             Chooser.OnAddingItem -= RequestToAdd;
             Chooser.OnShowingPage -= PreparePage;
 
+            G.WorldEditorData.IsInEditMode = false;
             G.WorldEditorData.OnWorldChanged -= GotWorldChanged;
 
             base.OnDestroy();
