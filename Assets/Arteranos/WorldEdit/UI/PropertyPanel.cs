@@ -39,6 +39,8 @@ namespace Arteranos.WorldEdit
         public Toggle chk_Global;
         public Slider sld_Hue;
 
+        public Toggle chk_Collidable;
+
         public GameObject WorldObject
         {
             get => worldObject;
@@ -78,7 +80,11 @@ namespace Arteranos.WorldEdit
             txt_Col_R.onValueChanged.AddListener(CommitChangedValues);
             txt_Col_G.onValueChanged.AddListener(CommitChangedValues);
             txt_Col_B.onValueChanged.AddListener(CommitChangedValues);
+
+            chk_Collidable.onValueChanged.AddListener(SetCollidable);
         }
+
+        private void SetCollidable(bool collidable) => Woc.IsCollidable = collidable;
 
         protected override void OnEnable()
         {
@@ -151,6 +157,8 @@ namespace Arteranos.WorldEdit
             img_Color_Swatch.color = col;
 
             lbl_Heading.text = WorldObject.name;
+
+            chk_Collidable.SetIsOnWithoutNotify(Woc.IsCollidable);
         }
 
         private void CommitChangedValues(string arg0)

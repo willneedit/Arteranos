@@ -62,9 +62,15 @@ namespace Arteranos.WorldEdit
         private void Awake()
         {
             body = gameObject.AddComponent<Rigidbody>();
+
+            // TODO: remove these modifications of physics-aware objects
+            // Prevent falling/floating/sliding of collidable objects
             body.useGravity = false;
-            body.drag = 0.5f;
-            body.angularDrag = 0.5f;
+            body.drag = 1000.0f;
+            body.angularDrag = 1000.0f;
+
+            // Prevent 'popping out' of intersecting collidable objects
+            body.constraints = RigidbodyConstraints.FreezeAll;
 
             mover = gameObject.AddComponent<XRGrabInteractable>();
             mover.throwOnDetach = false;
@@ -74,9 +80,6 @@ namespace Arteranos.WorldEdit
             mover.lastSelectExited.AddListener(GotObjectRelease);
 
             Transform root = WorldChange.FindObjectByPath(null);
-
-            IsCollidable = false;
-            IsLocked = false;
 
             G.WorldEditorData.OnEditorModeChanged += GotEditorModeChanged;
         }
@@ -216,6 +219,7 @@ namespace Arteranos.WorldEdit
                 components = woc.WOComponents,
                 name = transform.name,
                 id = Guid.NewGuid(), // Creating a copy of an existing one, so spawn a new guid
+                collidable = woc.IsCollidable
             };
 
             woi.SetPathFromThere(transform.parent);

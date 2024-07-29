@@ -81,7 +81,7 @@ namespace Arteranos.WorldEdit
             btn_UILock.gameObject.SetActive(!locking);
             btn_UIUnlock.gameObject.SetActive(locking);
 
-            Tracker.enabled = !locking;
+            if(Tracker) Tracker.enabled = !locking;
         }
 
         private void SwitchToAdder()

@@ -44,20 +44,21 @@ namespace Arteranos.PlayTest.WorldEdit
 
         // Must match the sample constructed with the following routine
         public static readonly string sampleWOB =
-            "CgaagCACCAMSCVRlc3QgQ3ViZTooioAgJAoKFQAAgD8dAACgQBIFJQAAgD8aD" +
-            "w0AAIA/FQAAgD8dAACAPzoakoAgFgoUDQAAgD8VAACAPx0AAIA/JQAAgD9CrQ" +
-            "EKBJqAIAASC1Rlc3QgU3BoZXJlOiOKgCAfCgUVAADAPxIFJQAAgD8aDw0AAIA" +
-            "/FQAAgD8dAACAPzoakoAgFgoUDQAAgD8VAACAPx0AAIA/JQAAgD9CVwoGmoAg" +
-            "AggBEgxUZXN0IENhcHN1bGU6I4qAIB8KBRUAAMA/EgUlAACAPxoPDQAAgD8VA" +
-            "ACAPx0AAIA/OhqSgCAWChQNAACAPxUAAIA/HQAAgD8lAACAP0JaCgaagCACCA" +
-            "MSD1Rlc3QgQ3ViZSBSaWdodDojioAgHwoFDQAAwD8SBSUAAIA/Gg8NAACAPxU" +
-            "AAIA/HQAAgD86GpKAIBYKFA0AAIA/FQAAgD8dAACAPyUAAIA/";
+            "CgaagCACCAMSCVRlc3QgQ3ViZSABOiiKgCAkCgoVAACAPx0AAKBAEgUlAACAP" +
+            "xoPDQAAgD8VAACAPx0AAIA/OhqSgCAWChQNAACAPxUAAIA/HQAAgD8lAACAP0" +
+            "KtAQoEmoAgABILVGVzdCBTcGhlcmU6I4qAIB8KBRUAAMA/EgUlAACAPxoPDQA" +
+            "AgD8VAACAPx0AAIA/OhqSgCAWChQNAACAPxUAAIA/HQAAgD8lAACAP0JXCgaa" +
+            "gCACCAESDFRlc3QgQ2Fwc3VsZTojioAgHwoFFQAAwD8SBSUAAIA/Gg8NAACAP" +
+            "xUAAIA/HQAAgD86GpKAIBYKFA0AAIA/FQAAgD8dAACAPyUAAIA/QloKBpqAIA" +
+            "IIAxIPVGVzdCBDdWJlIFJpZ2h0OiOKgCAfCgUNAADAPxIFJQAAgD8aDw0AAIA" +
+            "/FQAAgD8dAACAPzoakoAgFgoUDQAAgD8VAACAPx0AAIA/JQAAgD8=";
 
         public static WorldObject BuildSample()
         {
             WorldObject cube = new(PrimitiveType.Cube)
             {
-                name = "Test Cube"
+                name = "Test Cube",
+                collidable = true,
             };
             cube.GetWComponent<WOCTransform>().position = new Vector3(0, 1, 5);
 

@@ -43,6 +43,15 @@ namespace Arteranos.PlayTest.WorldEdit
             WorldObject wob = WorldObject.Deserialize(ms);
 
             yield return ShowObject(wob);
+
+            Transform tc = pl.transform.GetChild(0);
+
+            Assert.AreEqual("Test Cube", tc.name);
+
+            WorldObjectComponent woc = tc.GetComponent<WorldObjectComponent>();
+
+            Assert.IsNotNull(woc);
+            Assert.True(woc.IsCollidable);
         }
 
         [UnityTest]
