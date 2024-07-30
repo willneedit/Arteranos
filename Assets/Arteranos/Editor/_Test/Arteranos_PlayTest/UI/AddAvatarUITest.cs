@@ -8,7 +8,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Arteranos.Core;
 using Ipfs;
-using Arteranos.Web;
 using Arteranos.Core.Operations;
 using Arteranos.UI;
 using UnityEditor;

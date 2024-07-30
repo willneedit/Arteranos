@@ -19,7 +19,6 @@ using System.Collections;
 using System.Linq;
 using Arteranos.UI;
 using System.Collections.Concurrent;
-using Arteranos.Web;
 using Ipfs.Cryptography.Proto;
 using ProtoBuf;
 using System.IO;

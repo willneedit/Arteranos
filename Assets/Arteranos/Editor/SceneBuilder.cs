@@ -18,7 +18,6 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using Unity.EditorCoroutines.Editor;
 using Arteranos.UI;
-using Arteranos.Web;
 using System;
 using UnityEngine.Experimental.Rendering;
 using Object = UnityEngine.Object;

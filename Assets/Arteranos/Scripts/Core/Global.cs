@@ -9,7 +9,6 @@ using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.Services;
 using Arteranos.UI;
-using Arteranos.Web;
 using Arteranos.WorldEdit;
 using Arteranos.XR;
 using Ipfs;

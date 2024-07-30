@@ -9,17 +9,14 @@ using Arteranos.Core;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
-
-using Arteranos.Services;
 using System.Collections;
 using Arteranos.UI;
 using Ipfs;
 using System.Net;
 using System.Threading;
 
-namespace Arteranos.Web
+namespace Arteranos.Services
 {
-
     public class ConnectionManager : MonoBehaviour, IConnectionManager
     {
         private void Awake() => G.ConnectionManager = this;
@@ -72,7 +69,7 @@ namespace Arteranos.Web
 
             yield return new WaitUntil(() => taskIPAddr.IsCompleted);
 
-            if(!taskIPAddr.IsCompletedSuccessfully)
+            if (!taskIPAddr.IsCompletedSuccessfully)
             {
                 Debug.Log($"{si.PeerID} is unreachable.");
                 yield return TransitionProgress.TransitionTo(null, null);
@@ -127,10 +124,10 @@ namespace Arteranos.Web
         {
             Debug.Log($"Onlinelevel={G.NetworkStatus.GetOnlineLevel()}, Success={success}, wasOnline={wasOnline}, reason={reason}");
 
-            if(!success)
+            if (!success)
             {
-                bool remoteDisconnected = (G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Client 
-                    || G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host);
+                bool remoteDisconnected = G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Client
+                    || G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host;
 
                 if (reason != null)
                 {
@@ -148,8 +145,8 @@ namespace Arteranos.Web
             wasOnline = success;
             // G.NetworkStatus.OnClientConnectionResponse = null;
 
-            if(message == null) return;
-            
+            if (message == null) return;
+
             IDialogUI dialog = Factory.NewDialog();
             dialog.Buttons = new[] { "Okay" };
             dialog.Text = message;

@@ -14,16 +14,10 @@ using System.Threading.Tasks;
 using Arteranos.Core;
 using Mirror;
 
-using System.Net;
-using Arteranos.Web;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Text.RegularExpressions;
 using Arteranos.Avatar;
 using System.Linq;
 using Ipfs;
-using Ipfs.Unity;
 
 namespace Arteranos.Services
 {

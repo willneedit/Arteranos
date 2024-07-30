@@ -1,18 +1,11 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 using Mirror;
 
-using Arteranos.Services;
 using Arteranos.Core;
 using System;
-using Arteranos.Web;
 using Arteranos.UI;
-using Arteranos.XR;
 using Arteranos.Social;
-using System.Linq;
-using Ipfs;
 using Random = UnityEngine.Random;
 using Arteranos.Core.Cryptography;
 using Ipfs.Cryptography.Proto;

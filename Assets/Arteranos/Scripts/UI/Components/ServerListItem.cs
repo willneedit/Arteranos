@@ -7,13 +7,8 @@
 
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 using Arteranos.Core;
-using Arteranos.Web;
-using System.Collections;
-using System;
-using Arteranos.Services;
 
 namespace Arteranos.UI
 {

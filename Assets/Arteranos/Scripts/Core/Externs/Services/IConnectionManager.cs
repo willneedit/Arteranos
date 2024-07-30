@@ -10,7 +10,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-namespace Arteranos.Web
+namespace Arteranos.Services
 {
     public interface IConnectionManager : IMonoBehaviour
     {

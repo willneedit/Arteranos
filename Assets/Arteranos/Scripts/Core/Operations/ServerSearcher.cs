@@ -7,14 +7,11 @@
 
 using System;
 using System.Threading.Tasks;
-
-using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
 using Arteranos.UI;
 using Arteranos.Services;
 using Ipfs;
-using Arteranos.Web;
 
 namespace Arteranos.Core.Operations
 {
