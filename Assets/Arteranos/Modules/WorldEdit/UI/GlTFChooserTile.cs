@@ -87,7 +87,7 @@ namespace Arteranos.WorldEdit
                 while (true)
                 {
                     angle += Time.deltaTime * 45.0f;
-                    if (angle > 350.0f) angle -= 360.0f;
+                    if (angle > 360.0f) angle -= 360.0f;
                     if (LoadedObject)
                         LoadedObject.transform.localRotation = Quaternion.Euler(0.0f, angle, 0.0f);
 
