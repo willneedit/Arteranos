@@ -221,9 +221,8 @@ namespace Arteranos.Editor
         public static string[] GetSceneNames()
         {
             return new[] { 
-//                "Assets/Arteranos/Scenes/SampleScene.unity"
                 "Assets/Arteranos/Scenes/_Startup.unity",
-                "Assets/Arteranos/Scenes/OfflineScene.unity",
+                "Assets/Arteranos/Modules/OfflineScene/OfflineScene.unity",
                 "Assets/Arteranos/Scenes/Transition.unity"
             };
         }
