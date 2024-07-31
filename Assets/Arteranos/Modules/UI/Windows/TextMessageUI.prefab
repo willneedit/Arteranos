@@ -796,7 +796,7 @@ GameObject:
   - component: {fileID: 531649820525662566}
   - component: {fileID: 5233861304033580477}
   m_Layer: 5
-  m_Name: UI_TextMessage
+  m_Name: TextMessageUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

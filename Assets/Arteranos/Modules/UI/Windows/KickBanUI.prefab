@@ -975,7 +975,7 @@ GameObject:
   - component: {fileID: 7950683082265344095}
   - component: {fileID: 5146855065966379526}
   m_Layer: 5
-  m_Name: UI_KickBan
+  m_Name: KickBanUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

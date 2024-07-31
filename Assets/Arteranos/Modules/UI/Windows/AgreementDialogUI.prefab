@@ -866,7 +866,7 @@ GameObject:
   - component: {fileID: 8578468349755822397}
   - component: {fileID: 8713290218937289156}
   m_Layer: 5
-  m_Name: UI_AgreementDialog
+  m_Name: AgreementDialogUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

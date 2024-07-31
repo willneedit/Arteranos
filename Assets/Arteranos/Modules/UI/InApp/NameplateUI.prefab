@@ -940,7 +940,7 @@ GameObject:
   - component: {fileID: 1527640920646415747}
   - component: {fileID: 1527640920646415772}
   m_Layer: 5
-  m_Name: Nameplate
+  m_Name: NameplateUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1010,7 +1010,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &1527640920646415744
 MonoBehaviour:
   m_ObjectHideFlags: 0

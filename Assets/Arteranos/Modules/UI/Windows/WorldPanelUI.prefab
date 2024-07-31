@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: -3480630777290480473}
   - component: {fileID: 2672799225395380609}
   m_Layer: 5
-  m_Name: UI_WorldPanel
+  m_Name: WorldPanelUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

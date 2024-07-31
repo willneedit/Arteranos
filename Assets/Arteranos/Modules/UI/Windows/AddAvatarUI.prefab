@@ -547,7 +547,7 @@ GameObject:
   - component: {fileID: 2383748473476550683}
   - component: {fileID: 5234816913099980728}
   m_Layer: 5
-  m_Name: UI_AddAvatar
+  m_Name: AddAvatarUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
