@@ -15,12 +15,13 @@ using Ipfs;
 using GLTFast;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Arteranos.Avatar;
 using DitzelGames.FastIK;
 using Newtonsoft.Json;
 using Arteranos.Services;
+using Arteranos.Core;
+using Arteranos.Core.Operations;
 
-namespace Arteranos.Core.Operations
+namespace Arteranos.Avatar
 {
     internal class ObjectStats : IObjectStats
     {
@@ -110,15 +111,15 @@ namespace Arteranos.Core.Operations
 
             context.JointNames = new();
 
-            if(context.InstallFootIK)
+            if (context.InstallFootIK)
             {
                 Transform footHandle;
                 FootIKCollider footIK;
 
-                foreach(FootIKData foot in context.Feet)
+                foreach (FootIKData foot in context.Feet)
                 {
                     footHandle = RigIK(foot.FootTransform, avatarTransform, new Vector3(0, 0, 2));
-                    if(context.InstallFootIKCollider)
+                    if (context.InstallFootIKCollider)
                     {
                         footIK = footHandle.gameObject.AddComponent<FootIKCollider>();
                         footIK.Elevation = foot.Elevation;
@@ -128,7 +129,7 @@ namespace Arteranos.Core.Operations
                 }
             }
 
-            if(context.ReadFootJoints)
+            if (context.ReadFootJoints)
             {
                 foreach (FootIKData foot in context.Feet)
                     ReadJointNames(foot.FootTransform, context.JointNames);
@@ -139,7 +140,7 @@ namespace Arteranos.Core.Operations
                 Transform handHandle;
                 HandIKController handIK;
                 handHandle = RigIK(context.LeftHand, avatarTransform);
-                if(context.InstallHandIKController)
+                if (context.InstallHandIKController)
                 {
                     handIK = handHandle.gameObject.AddComponent<HandIKController>();
                     handIK.RightSide = false;
@@ -147,7 +148,7 @@ namespace Arteranos.Core.Operations
                 }
 
                 handHandle = RigIK(context.RightHand, avatarTransform);
-                if(context.InstallHandIKController)
+                if (context.InstallHandIKController)
                 {
                     handIK = handHandle.gameObject.AddComponent<HandIKController>();
                     handIK.RightSide = true;
@@ -155,7 +156,7 @@ namespace Arteranos.Core.Operations
                 }
             }
 
-            if(context.ReadHandJoints)
+            if (context.ReadHandJoints)
             {
                 ReadJointNames(context.LeftHand, context.JointNames);
                 ReadJointNames(context.RightHand, context.JointNames);
@@ -215,13 +216,13 @@ namespace Arteranos.Core.Operations
         {
             AvatarDownloaderContext context = _context as AvatarDownloaderContext;
 
-            if(context.InstallEyeAnimation)
+            if (context.InstallEyeAnimation)
             {
                 AvatarEyeAnimator a = context.Avatar.AddComponent<AvatarEyeAnimator>();
                 a.AvatarMeasures = context;
             }
 
-            if(context.InstallMouthAnimation)
+            if (context.InstallMouthAnimation)
             {
                 AvatarMouthAnimator a = context.Avatar.AddComponent<AvatarMouthAnimator>();
                 a.AvatarMeasures = context;
@@ -265,7 +266,7 @@ namespace Arteranos.Core.Operations
         public void FindBlendShapedMeshes(Transform t, string whichBlendShape, List<MeshBlendShapeIndex> collected)
         {
             SkinnedMeshRenderer[] meshes = t.gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
-            foreach(SkinnedMeshRenderer mesh in meshes)
+            foreach (SkinnedMeshRenderer mesh in meshes)
             {
                 int index = mesh.sharedMesh.GetBlendShapeIndex(whichBlendShape);
                 if (index >= 0)
@@ -316,7 +317,7 @@ namespace Arteranos.Core.Operations
             context.UnscaledHeight = FoldTransformHierarchy(avatarTransform, 0.0f,
                 (t, f) => t.position.y > f ? t.position.y : f);
 
-            if(context.DesiredHeight != 0 && context.UnscaledHeight > 0)
+            if (context.DesiredHeight != 0 && context.UnscaledHeight > 0)
             {
                 // Scale up (or down) the avatar to the desired height before
                 // to do the measuring.
@@ -389,14 +390,14 @@ namespace Arteranos.Core.Operations
             Match m = Regex.Match(t.name, pattern, RegexOptions.IgnoreCase);
             if (m.Success) collected.Add(t);
 
-            foreach(Transform transform in t)
+            foreach (Transform transform in t)
                 FindLimbsPattern(transform, pattern, collected);
         }
 
         public static T FoldTransformHierarchy<T>(Transform t, T start, Func<Transform, T, T> progress)
         {
             start = progress(t, start);
-            foreach(Transform tc in t)
+            foreach (Transform tc in t)
                 start = FoldTransformHierarchy(tc, start, progress);
 
             return start;
@@ -440,10 +441,15 @@ namespace Arteranos.Core.Operations
             return context;
         }
     }
-    
-    public static class AvatarDownloader
+
+    public class AvatarDownloader : MonoBehaviour, IAvatarDownloader
     {
-        public static (AsyncOperationExecutor<Context>, Context) PrepareDownloadAvatar(Cid cid, AvatarDownloaderOptions options = null, int timeout = 600)
+        private void Awake()
+        {
+            G.AvatarDownloader = this;
+        }
+
+        public (AsyncOperationExecutor<Context>, Context) PrepareDownloadAvatar(Cid cid, IAvatarDownloaderOptions options = null, int timeout = 600)
         {
             AvatarDownloaderContext context = new()
             {
@@ -551,16 +557,16 @@ namespace Arteranos.Core.Operations
             return null;
         }
 
-        public static string GetAvatarCacheFile(Cid cid)
+        public string GetAvatarCacheFile(Cid cid)
             => $"{FileUtils.temporaryCachePath}/AvatarCache/{Utils.GetURLHash(cid)}.glb";
 
-        public static GameObject GetLoadedAvatar(Context _context) 
+        public GameObject GetLoadedAvatar(Context _context)
             => (_context as AvatarDownloaderContext).Avatar;
 
-        public static IObjectStats GetAvatarRating(Context _context)
+        public IObjectStats GetAvatarRating(Context _context)
             => _context as IObjectStats;
 
-        public static IAvatarMeasures GetAvatarMeasures(Context _context) 
+        public IAvatarMeasures GetAvatarMeasures(Context _context)
             => _context as IAvatarMeasures;
     }
 }

@@ -9,9 +9,9 @@ using Arteranos.Core;
 using UnityEngine;
 using System.Collections;
 using Ipfs;
-using Arteranos.Core.Operations;
 using System.Threading.Tasks;
 using Arteranos.Services;
+using Arteranos.Avatar;
 
 namespace Arteranos.UI
 {
@@ -23,7 +23,7 @@ namespace Arteranos.UI
         [SerializeField] private Renderer btn_commit = null;
         [SerializeField] private Renderer btn_delete = null;
 
-        private readonly Vector3 puppetPosition = new Vector3(0, 0.2f, 0);
+        private readonly Vector3 puppetPosition = new(0, 0.2f, 0);
         private readonly Quaternion puppetRotation = Quaternion.Euler(0, 180, 0);
 
         private UserDataSettingsJSON Me;
@@ -52,7 +52,7 @@ namespace Arteranos.UI
                 currentAvatar = null;
 
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new()
+                    G.AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                     {
                         InstallAnimController = true,
                         //DesiredHeight = 1.75f,
@@ -61,7 +61,7 @@ namespace Arteranos.UI
 
                 yield return ao.ExecuteCoroutine(co);
 
-                currentAvatar = AvatarDownloader.GetLoadedAvatar(co);
+                currentAvatar = G.AvatarDownloader.GetLoadedAvatar(co);
                 currentAvatar.transform.SetParent(transform, false);
                 currentAvatar.transform.SetLocalPositionAndRotation(
                     puppetPosition,

@@ -15,7 +15,7 @@ using ICSharpCode.SharpZipLib.Tar;
 
 namespace Arteranos.Core.Operations
 {
-    internal class AssetDownloadOp : IAsyncOperation<Context>
+    public class AssetDownloadOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 8.0f;

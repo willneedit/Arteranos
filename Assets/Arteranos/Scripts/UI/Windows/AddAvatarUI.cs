@@ -6,6 +6,7 @@
  */
 
 
+using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.Core.Operations;
 using Arteranos.Services;
@@ -208,7 +209,7 @@ namespace Arteranos.UI
                     if(Avatar) Destroy(Avatar);
 
                     (AsyncOperationExecutor<Context> ao, Context co) =
-                        AvatarDownloader.PrepareDownloadAvatar(AssetCid, new()
+                        G.AvatarDownloader.PrepareDownloadAvatar(AssetCid, new AvatarDownloaderOptions()
                         {
                             InstallAnimController = true,
                         });
@@ -225,9 +226,9 @@ namespace Arteranos.UI
                         yield break;
                     }
 
-                    Avatar = AvatarDownloader.GetLoadedAvatar(co);
+                    Avatar = G.AvatarDownloader.GetLoadedAvatar(co);
 
-                    IObjectStats ar = AvatarDownloader.GetAvatarRating(co);
+                    IObjectStats ar = G.AvatarDownloader.GetAvatarRating(co);
 
                     lbl_DrawCalls.text = ar.Count.ToString();
                     lbl_Triangles.text = ar.Triangles.ToString();

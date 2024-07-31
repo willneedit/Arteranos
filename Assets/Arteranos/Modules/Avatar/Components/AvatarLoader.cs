@@ -10,7 +10,6 @@ using UnityEngine;
 using Arteranos.Core;
 using System.Collections;
 using Ipfs;
-using Arteranos.Core.Operations;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
@@ -82,7 +81,7 @@ namespace Arteranos.Avatar
                     yield return new WaitForSeconds((settleTime - DateTime.Now).Seconds);
 
                 (AsyncOperationExecutor<Context> ao, Context co) =
-                    AvatarDownloader.PrepareDownloadAvatar((Cid)avatarCid, new()
+                    G.AvatarDownloader.PrepareDownloadAvatar((Cid)avatarCid, new AvatarDownloaderOptions()
                     {
                         DesiredHeight = (float)height / 100.0f,
                         InstallAnimController = true,
@@ -102,7 +101,7 @@ namespace Arteranos.Avatar
                     Destroy(AvatarGameObject);
 
                 AvatarMeasures = co != null
-                    ? AvatarDownloader.GetAvatarMeasures(co)
+                    ? G.AvatarDownloader.GetAvatarMeasures(co)
                     : new InternalAvatarMeasures();
 
                 AvatarGameObject = AvatarMeasures.Avatar;

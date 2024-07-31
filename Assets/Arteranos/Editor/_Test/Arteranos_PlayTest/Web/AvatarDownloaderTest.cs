@@ -86,25 +86,25 @@ namespace Arteranos.PlayTest.Web
             Assert.IsNotNull(AvatarCid);
 
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AvatarDownloader.PrepareDownloadAvatar(AvatarCid);
+                G.AvatarDownloader.PrepareDownloadAvatar(AvatarCid);
 
             ao.ProgressChanged += (ratio, msg) => Debug.Log($"{ratio} - {msg}");
 
             yield return ao.ExecuteCoroutine(co);
 
-            Assert.IsNotNull(AvatarDownloader.GetLoadedAvatar(co));
+            Assert.IsNotNull(G.AvatarDownloader.GetLoadedAvatar(co));
 
-            avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = G.AvatarDownloader.GetLoadedAvatar(co);
             // avatar.SetActive(true);
             // avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
-            IObjectStats ar = AvatarDownloader.GetAvatarRating(co);
+            IObjectStats ar = G.AvatarDownloader.GetAvatarRating(co);
             Assert.AreEqual(1.0f, ar.Rating);
             Assert.IsTrue(ar.Vertices < 12000);
             Assert.IsTrue(ar.Triangles < 60000);
             Assert.IsTrue(ar.Vertices != 0);
 
-            IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
+            IAvatarMeasures am = G.AvatarDownloader.GetAvatarMeasures(co);
 
             Assert.IsNotNull(am);
 
@@ -150,14 +150,14 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator InstallAvatarEyeAnimator()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                G.AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
                     InstallEyeAnimation = true
                 });
 
             yield return ao.ExecuteCoroutine(co);
 
-            avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = G.AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
 
             Assert.IsNotNull(avatar.GetComponent<AvatarEyeAnimator>());
@@ -169,7 +169,7 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator InstallIK()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                G.AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
                     InstallFootIK = true,
                     InstallHandIK = true
@@ -177,10 +177,10 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = G.AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
 
-            IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
+            IAvatarMeasures am = G.AvatarDownloader.GetAvatarMeasures(co);
 
             // Read*Joints is false, no joints transmission
             Assert.AreEqual(0, am.JointNames.Count);
@@ -191,7 +191,7 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator ReadRemoteJointNames()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                G.AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
                     ReadFootJoints = true,
                     ReadHandJoints = true
@@ -199,10 +199,10 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = G.AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
 
-            IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
+            IAvatarMeasures am = G.AvatarDownloader.GetAvatarMeasures(co);
 
             Assert.AreEqual(12, am.JointNames.Count);
             // yield return UnityPAK();
@@ -212,7 +212,7 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator TestFootIK()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                G.AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
                     InstallFootIK = true,
                     InstallFootIKCollider = true,
@@ -221,7 +221,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = G.AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
             avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
@@ -240,18 +240,18 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator ScaleAvatar()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                G.AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
                     DesiredHeight = 0.50f
                 });
 
             yield return ao.ExecuteCoroutine(co);
 
-            avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = G.AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
             avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
-            IAvatarMeasures am = AvatarDownloader.GetAvatarMeasures(co);
+            IAvatarMeasures am = G.AvatarDownloader.GetAvatarMeasures(co);
 
             Assert.IsTrue(am.FullHeight > 0.499f);
             Assert.IsTrue(am.FullHeight < 0.501f);
@@ -273,14 +273,14 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator AnimateAvatar()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                G.AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
                     InstallAnimController = true
                 });
 
             yield return ao.ExecuteCoroutine(co);
 
-            avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = G.AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
             avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
@@ -323,7 +323,7 @@ namespace Arteranos.PlayTest.Web
         public IEnumerator AnimateIKAvatar()
         {
             (AsyncOperationExecutor<Context> ao, Context co) =
-                AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
+                G.AvatarDownloader.PrepareDownloadAvatar(AvatarCid, new AvatarDownloaderOptions()
                 {
                     InstallFootIK = true,
                     InstallFootIKCollider = true,
@@ -332,7 +332,7 @@ namespace Arteranos.PlayTest.Web
 
             yield return ao.ExecuteCoroutine(co);
 
-            avatar = AvatarDownloader.GetLoadedAvatar(co);
+            avatar = G.AvatarDownloader.GetLoadedAvatar(co);
             avatar.SetActive(true);
             avatar.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
 
