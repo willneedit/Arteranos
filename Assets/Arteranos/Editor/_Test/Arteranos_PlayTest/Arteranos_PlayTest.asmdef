@@ -4,9 +4,9 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
+        "Arteranos.Avatar",
         "Arteranos.Services",
         "Arteranos.Core",
-        "Arteranos.Web",
         "Arteranos.UI",
         "Arteranos.WorldEdit",
         "ipfs.Cryptography",
