@@ -15,7 +15,7 @@ using Arteranos.Core;
 namespace Arteranos.UI
 {
 
-    public class SysMenu : MonoBehaviour, ISysMenu
+    public class SysMenuUI : MonoBehaviour, ISysMenu
     {
         [SerializeField] private InputActionHandler SystemMenu;
 

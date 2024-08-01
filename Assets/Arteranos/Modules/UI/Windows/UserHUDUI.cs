@@ -64,7 +64,7 @@ namespace Arteranos.UI
                 OnSummonCameraClicked,
                 () => G.NetworkStatus.StopHost(true),
                 () => StartCoroutine(ToggleFlyout(EmojiFlyout)),
-                () => G.SysMenu.FindGadget<CameraDroneUI>(SysMenu.GADGET_CAMERA_DRONE).TakePhoto(),
+                () => G.SysMenu.FindGadget<CameraDroneUI>(SysMenuUI.GADGET_CAMERA_DRONE).TakePhoto(),
                 OnDismissCameraClicked,
                 () => G.SysMenu.OpenSysMenu(MenuKind.WorldEdit),
             };
@@ -244,7 +244,7 @@ namespace Arteranos.UI
 
         private void OnSummonCameraClicked()
         {
-            G.SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
+            G.SysMenu.DismissGadget(SysMenuUI.GADGET_CAMERA_DRONE);
 
             GameObject go = Instantiate(BP.I.InApp.CameraDrone);
 
@@ -258,7 +258,7 @@ namespace Arteranos.UI
 
         private void OnDismissCameraClicked()
         {
-            G.SysMenu.DismissGadget(SysMenu.GADGET_CAMERA_DRONE);
+            G.SysMenu.DismissGadget(SysMenuUI.GADGET_CAMERA_DRONE);
             cameraCalled = false;
         }
     }
