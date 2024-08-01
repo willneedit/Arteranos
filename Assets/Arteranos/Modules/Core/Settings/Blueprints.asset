@@ -21,6 +21,7 @@ MonoBehaviour:
     type: 2}
   RPMBoneTranslation: {fileID: 4900000, guid: 66a51722207631f4aac9c25a038fecf3, type: 3}
   PrivacyTOSNotice: {fileID: 4900000, guid: 08362dfbee11cd14ea1658be30f19536, type: 3}
+  DefaultWEMaterial: {fileID: 2100000, guid: 4006251228fedd944a2eaca76db7fccf, type: 2}
   UI:
     Dialog: {fileID: 1401308523161811021, guid: b08a789bff0e5e746b4efea304237fc2,
       type: 3}

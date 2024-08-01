@@ -33,6 +33,8 @@ namespace Arteranos.Core
 
         public TextAsset PrivacyTOSNotice;
 
+        public Material DefaultWEMaterial;
+
         [Serializable]
         public struct UI_
         {

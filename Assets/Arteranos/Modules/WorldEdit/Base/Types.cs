@@ -180,6 +180,8 @@ namespace Arteranos.WorldEdit
                     {
                         case WOPrimitive WOPR: // Pun intended :)
                             gobbo = GameObject.CreatePrimitive(WOPR.primitive);
+                            gobbo.TryGetComponent(out Renderer renderer);
+                            renderer.material = BP.I.DefaultWEMaterial;
                             gobbo.SetActive(false);
                             break;
                         case WOglTF WOglTF:
