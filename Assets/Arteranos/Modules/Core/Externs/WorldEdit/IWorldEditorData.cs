@@ -12,12 +12,20 @@ using UnityEngine;
 
 namespace Arteranos.WorldEdit
 {
+    public enum WorldEditMode
+    {
+        Translation = 0,
+        Rotation,
+        Scale
+    }
+
     public interface IWorldEditorData
     {
         bool IsInEditMode { get; set; }
         bool LockXAxis { get; set; }
         bool LockYAxis { get; set; }
         bool LockZAxis { get; set; }
+        bool UsingGlobal { get; set; }
 
         event Action<bool> OnEditorModeChanged;
         event Action<IWorldChange> OnWorldChanged;
