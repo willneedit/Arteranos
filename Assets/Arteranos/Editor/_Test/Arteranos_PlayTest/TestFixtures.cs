@@ -6,6 +6,7 @@ using Arteranos.Services;
 using System;
 using System.Threading.Tasks;
 using UnityEditor;
+using Arteranos.Core;
 
 namespace Arteranos.PlayTest
 {
@@ -52,6 +53,16 @@ namespace Arteranos.PlayTest
                 service.EnableUploadDefaultAvatars = false;
 
                 // Leave it disabled.
+            }
+        }
+
+        public static void WithBlueprintdFixture()
+        {
+            if(BP.I == null)
+            {
+                Blueprints blueprints = AssetDatabase.LoadAssetAtPath<Blueprints>("Assets/Arteranos/Modules/Core/Settings/Blueprints.asset");
+
+                BP.I = blueprints;
             }
         }
 

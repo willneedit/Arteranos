@@ -12,6 +12,7 @@ using UnityEngine.TestTools;
 
 using Arteranos.WorldEdit;
 using Object = UnityEngine.Object;
+using Arteranos.Core;
 
 namespace Arteranos.PlayTest.WorldEdit
 {
@@ -28,6 +29,10 @@ namespace Arteranos.PlayTest.WorldEdit
             TestFixtures.SceneFixture(ref ca, ref li, ref pl);
 
             Assert.IsNotNull(G.WorldEditorData);
+
+            TestFixtures.WithBlueprintdFixture();
+
+            Assert.IsNotNull(BP.I);
 
             yield return new WaitForEndOfFrame();
         }
