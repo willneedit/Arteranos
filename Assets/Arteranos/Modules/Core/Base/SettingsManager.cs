@@ -132,7 +132,9 @@ namespace Arteranos.Core
 
 
         public static void EmitToServerCTSPacket(CTSPacket packet)
-            => Instance?.EmitToServerCTSPacket_(packet);
+        {
+            if (Instance) Instance.EmitToServerCTSPacket_(packet);
+        }
 
         public static void EnterWorld(Cid WorldCid)
         {

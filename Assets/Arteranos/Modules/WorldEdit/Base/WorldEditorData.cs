@@ -34,6 +34,16 @@ namespace Arteranos.WorldEdit
         public event Action<IWorldChange> OnWorldChanged;
         public event Action<bool> OnEditorModeChanged;
 
+        public GameObject CurrentWorldObject
+        {
+            get => currentWorldObject;
+            set
+            {
+                currentWorldObject = value;
+                PlaceGizmo();
+            }
+        }
+
         // Movement and rotation constraints
         public bool LockXAxis { get => lockXAxis; set => lockXAxis = value; }
         public bool LockYAxis { get => lockYAxis; set => lockYAxis = value; }
@@ -48,6 +58,7 @@ namespace Arteranos.WorldEdit
                 bool old = isInEditMode;
                 isInEditMode = value;
                 if (old != value) NotifyEditorModeChanged();
+                PlaceGizmo();
             }
         }
 
@@ -58,19 +69,7 @@ namespace Arteranos.WorldEdit
             set => usingGlobal = value; 
         }
 
-        private List<UndoBuffer> undoStack = new();
-        private int undoCount = 0;
         private readonly Dictionary<IWorldObjectAsset, GameObject> AssetBlueprints = new();
-
-        private readonly List<float> TranslationValues = new() { 0.001f, 0.01f, 0.1f, 1f, 10f };
-        private readonly List<float> RotationValues = new() { 1f, 5f, 10f, 22.5f, 45f, 90f, 180f };
-        private readonly List<float> ScaleValues = new() { 0.001f, 0.01f, 0.1f, 1f, 10f };
-        private readonly List<WorldEditMode> EditModes = new()
-        {
-            WorldEditMode.Translation,
-            WorldEditMode.Rotation,
-            WorldEditMode.Scale,
-        };
 
         [SerializeField] private bool isInEditMode = false;
         [SerializeField] private bool usingGlobal = false;
@@ -78,11 +77,16 @@ namespace Arteranos.WorldEdit
         private bool lockXAxis = false;
         private bool lockYAxis = false;
         private bool lockZAxis = false;
+        private GameObject currentWorldObject;
+        private GameObject gizmoObject;
 
-
+        // ---------------------------------------------------------------
+        #region Start/Stop
         private void Awake()
         {
             G.WorldEditorData = this;
+
+            if (KMWorldEditorActions == null) return;
 
             // React only to the up flank
             KMWorldEditorModeSelect.PerformCallback = DoModeSelect;
@@ -100,6 +104,8 @@ namespace Arteranos.WorldEdit
 
         private void OnEnable()
         {
+            if (KMWorldEditorActions == null) return;
+
             KMWorldEditorModeSelect.BindAction();
             KMWorldEditorValueSelect.BindAction();
             KMWorldEditorActions.BindAction();
@@ -107,6 +113,8 @@ namespace Arteranos.WorldEdit
 
         private void OnDisable()
         {
+            if (KMWorldEditorActions == null) return;
+
             KMWorldEditorModeSelect.UnbindAction();
             KMWorldEditorValueSelect.UnbindAction();
             KMWorldEditorActions.UnbindAction();
@@ -122,8 +130,13 @@ namespace Arteranos.WorldEdit
 
         public void NotifyEditorModeChanged()
             => OnEditorModeChanged?.Invoke(IsInEditMode);
+        #endregion
         // ---------------------------------------------------------------
         #region Undo/Redo
+
+        private List<UndoBuffer> undoStack = new();
+        private int undoCount = 0;
+
         public IEnumerator RecallUndoState(string hash)
         {
             static IEnumerator Cor(List<byte[]> serialized)
@@ -256,10 +269,20 @@ namespace Arteranos.WorldEdit
         // ---------------------------------------------------------------
         #region Object Editor
 
-        private int TranslationValueIndex;
-        private int RotationValueIndex;
-        private int ScaleValueIndex;
-        private int EditModeIndex;
+        private readonly List<float> TranslationValues = new() { 0.001f, 0.01f, 0.1f, 1f, 10f };
+        private readonly List<float> RotationValues = new() { 1f, 5f, 10f, 22.5f, 45f, 90f, 180f };
+        private readonly List<float> ScaleValues = new() { 0.001f, 0.01f, 0.1f, 1f, 10f };
+        private readonly List<WorldEditMode> EditModes = new()
+        {
+            WorldEditMode.Translation,
+            WorldEditMode.Rotation,
+            WorldEditMode.Scale,
+        };
+
+        [SerializeField] private int TranslationValueIndex;
+        [SerializeField] private int RotationValueIndex;
+        [SerializeField] private int ScaleValueIndex;
+        [SerializeField] private int EditModeIndex;
 
         private Vector3 TransformAction = Vector3.zero;
 
@@ -299,24 +322,51 @@ namespace Arteranos.WorldEdit
         public void CycleMode(int direction) 
             => CycleValue(EditModes, direction, ref EditModeIndex);
 
+        float deltaTick = 0f;
+        const float deltaThreshold = 0.3f;
+
         private void HandleKMObjectEdit()
         {
             if (TransformAction == Vector3.zero) return;
 
-            Vector3 v = TransformAction * Time.deltaTime;
+            deltaTick += Time.deltaTime;
+
+            if (deltaTick < deltaThreshold) return;
+            deltaTick -= deltaThreshold;
+
+            if (!CurrentWorldObject) return;
+
+            Vector3 v = TransformAction * deltaThreshold;
+            CurrentWorldObject.TryGetComponent(out WorldObjectComponent woc);
+            woc.TryGetWOC(out WOCTransform woct);
+
+            // TODO global only, local not yet..
+            Vector3 p = woct.position;
+            Vector3 r = ((Quaternion) woct.rotation).eulerAngles;
+            Vector3 s = woct.scale;
 
             switch (EditModes[EditModeIndex])
             {
                 case WorldEditMode.Translation:
-                    v *= TranslationValues[TranslationValueIndex]; break;
-                case WorldEditMode.Rotation:
-                    v *= RotationValues[RotationValueIndex]; break;
+                    p += v * TranslationValues[TranslationValueIndex];
+                    break;
+                case WorldEditMode.Rotation:                    
+                    r += v * RotationValues[RotationValueIndex];
+                    break;
                 case WorldEditMode.Scale:
-                    v *= ScaleValues[ScaleValueIndex]; break;
+                    s += v * ScaleValues[ScaleValueIndex];
+                    break;
                 default: 
                     throw new NotImplementedException();
             }
-            throw new NotImplementedException();
+
+            woct.SetState(p, Quaternion.Euler(r), s);
+            CurrentWorldObject.MakePatch(false).EmitToServer();
+        }
+
+        private void PlaceGizmo()
+        {
+            // throw new NotImplementedException();
         }
 
 

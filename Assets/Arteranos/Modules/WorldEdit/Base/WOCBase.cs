@@ -54,6 +54,7 @@ namespace Arteranos.WorldEdit
 
         public void Update()
         {
+            // TODO Maybe only in edit mode?
             CheckState();
         }
 
@@ -123,6 +124,8 @@ namespace Arteranos.WorldEdit
                 this.position = Quaternion.Inverse(p_rotation) * position - p_position;
                 this.scale = scale;
             }
+
+            CheckState();
         }
 
         public override object Clone()
