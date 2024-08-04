@@ -33,8 +33,6 @@ namespace Arteranos.Core
 
         public TextAsset PrivacyTOSNotice;
 
-        public Material DefaultWEMaterial;
-
         [Serializable]
         public struct UI_
         {
@@ -78,6 +76,17 @@ namespace Arteranos.Core
         }
 
         public UIComponents_ UIComponents;
+
+        [Serializable]
+        public struct WorldEdit_
+        {
+            public GameObject TranslationGizmo;
+            public GameObject RotationGizmo;
+            public GameObject ScalingGizmo;
+            public Material DefaultWEMaterial;
+        }
+
+        public WorldEdit_ WorldEdit;
     }
 
     public static class BP

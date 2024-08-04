@@ -47,7 +47,6 @@ GameObject:
   - component: {fileID: 7188408584829907481}
   - component: {fileID: 4716932852414870009}
   - component: {fileID: 7557496742414671681}
-  - component: {fileID: 2061546927055650130}
   m_Layer: 0
   m_Name: Circle_Around_X
   m_TagString: Untagged
@@ -2107,20 +2106,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8259889859566724092}
   m_Mesh: {fileID: 0}
---- !u!64 &2061546927055650130
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8259889859566724092}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
 --- !u!1 &8711766750231268455
 GameObject:
   m_ObjectHideFlags: 0
@@ -2134,7 +2119,6 @@ GameObject:
   - component: {fileID: 3482936907317775569}
   - component: {fileID: 8755509848989608330}
   - component: {fileID: 3979568560505976375}
-  - component: {fileID: 2251005653193715235}
   m_Layer: 0
   m_Name: Circle_Around_Y
   m_TagString: Untagged
@@ -4194,20 +4178,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8711766750231268455}
   m_Mesh: {fileID: 0}
---- !u!64 &2251005653193715235
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8711766750231268455}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
 --- !u!1 &9185829806049962652
 GameObject:
   m_ObjectHideFlags: 0
@@ -4221,7 +4191,6 @@ GameObject:
   - component: {fileID: 3769520048294309049}
   - component: {fileID: 8442517940065980042}
   - component: {fileID: 4552775802437105728}
-  - component: {fileID: 5015177888080519440}
   m_Layer: 0
   m_Name: Circle_Around_Z
   m_TagString: Untagged
@@ -6280,18 +6249,4 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9185829806049962652}
-  m_Mesh: {fileID: 0}
---- !u!64 &5015177888080519440
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9185829806049962652}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
   m_Mesh: {fileID: 0}

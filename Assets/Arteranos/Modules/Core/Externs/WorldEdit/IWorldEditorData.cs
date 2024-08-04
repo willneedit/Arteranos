@@ -26,6 +26,7 @@ namespace Arteranos.WorldEdit
         bool LockYAxis { get; set; }
         bool LockZAxis { get; set; }
         bool UsingGlobal { get; set; }
+        GameObject CurrentWorldObject { get; set; }
 
         event Action<bool> OnEditorModeChanged;
         event Action<IWorldChange> OnWorldChanged;

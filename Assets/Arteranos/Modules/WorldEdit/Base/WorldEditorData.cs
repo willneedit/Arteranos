@@ -15,6 +15,7 @@ using System;
 
 using UnityEngine.InputSystem;
 using System.Threading;
+using Arteranos.Core;
 
 
 namespace Arteranos.WorldEdit
@@ -319,11 +320,14 @@ namespace Arteranos.WorldEdit
             }
         }
 
-        public void CycleMode(int direction) 
-            => CycleValue(EditModes, direction, ref EditModeIndex);
+        public void CycleMode(int direction)
+        {
+            CycleValue(EditModes, direction, ref EditModeIndex);
+            PlaceGizmo();
+        }
 
         float deltaTick = 0f;
-        const float deltaThreshold = 0.3f;
+        const float deltaThreshold = 0.1f;
 
         private void HandleKMObjectEdit()
         {
@@ -340,7 +344,8 @@ namespace Arteranos.WorldEdit
             CurrentWorldObject.TryGetComponent(out WorldObjectComponent woc);
             woc.TryGetWOC(out WOCTransform woct);
 
-            // TODO global only, local not yet..
+            // TODO local only, global not yet..
+            // FIXME Gimbal lock - maybe refactor to use Euler angles in serializing
             Vector3 p = woct.position;
             Vector3 r = ((Quaternion) woct.rotation).eulerAngles;
             Vector3 s = woct.scale;
@@ -348,10 +353,10 @@ namespace Arteranos.WorldEdit
             switch (EditModes[EditModeIndex])
             {
                 case WorldEditMode.Translation:
-                    p += v * TranslationValues[TranslationValueIndex];
+                    p += (Quaternion) woct.rotation * (v * TranslationValues[TranslationValueIndex]);
                     break;
                 case WorldEditMode.Rotation:                    
-                    r += v * RotationValues[RotationValueIndex];
+                    r += (v * RotationValues[RotationValueIndex]);
                     break;
                 case WorldEditMode.Scale:
                     s += v * ScaleValues[ScaleValueIndex];
@@ -366,7 +371,23 @@ namespace Arteranos.WorldEdit
 
         private void PlaceGizmo()
         {
-            // throw new NotImplementedException();
+            if (gizmoObject)
+            {
+                Destroy(gizmoObject);
+                gizmoObject = null;
+            }
+
+            if (!IsInEditMode || !currentWorldObject) return;
+
+            GameObject gobp = EditModes[EditModeIndex] switch
+            {
+                WorldEditMode.Translation => BP.I.WorldEdit.TranslationGizmo,
+                WorldEditMode.Rotation => BP.I.WorldEdit.RotationGizmo,
+                WorldEditMode.Scale => BP.I.WorldEdit.ScalingGizmo,
+                _ => throw new NotImplementedException()
+            };
+
+            gizmoObject = Instantiate(gobp, currentWorldObject.transform);
         }
 
 

@@ -77,6 +77,7 @@ namespace Arteranos.WorldEdit
             mover.smoothPosition = true;
             mover.smoothRotation = true;
 
+            mover.firstSelectEntered.AddListener(GotObjectGrabbed);
             mover.lastSelectExited.AddListener(GotObjectRelease);
 
             Transform root = WorldChange.FindObjectByPath(null);
@@ -117,6 +118,13 @@ namespace Arteranos.WorldEdit
                 wop.EmitToServer();
             }
         }
+
+        private void GotObjectGrabbed(SelectEnterEventArgs arg0)
+        {
+            G.WorldEditorData.CurrentWorldObject = gameObject;
+        }
+
+
 
         private (Vector3 position, Vector3 eulerRotation) ConstrainMovement(Vector3 oldPosition, Vector3 oldEulerRotation)
         {

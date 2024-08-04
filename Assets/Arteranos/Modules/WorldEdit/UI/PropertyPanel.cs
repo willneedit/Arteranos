@@ -43,19 +43,17 @@ namespace Arteranos.WorldEdit
 
         public GameObject WorldObject
         {
-            get => worldObject;
+            get => G.WorldEditorData.CurrentWorldObject;
             set
             {
-                worldObject = value;
-                Woc = worldObject.GetComponent<WorldObjectComponent>();
+                G.WorldEditorData.CurrentWorldObject = value;
+                Woc = G.WorldEditorData.CurrentWorldObject.GetComponent<WorldObjectComponent>();
             }
         }
 
         public WorldObjectComponent Woc { get; private set; }
 
         public event Action OnReturnToList;
-
-        private GameObject worldObject;
 
         protected override void Awake()
         {
@@ -185,7 +183,7 @@ namespace Arteranos.WorldEdit
 
             woct.SetState(p, r, s, chk_Global.isOn);
             wocc.SetState(col);
-            worldObject.MakePatch(true).EmitToServer();
+            WorldObject.MakePatch(true).EmitToServer();
         }
 
         private void SetLocalMode(bool local)

@@ -88,8 +88,7 @@ namespace Arteranos.Core
                 float t = time / duration;
 
                 t = 0.5f - (float) Mathf.Cos(t * Mathf.PI) * 0.5f;
-                transform.localPosition = Vector3.Lerp(startPosition, targetTransform.localPosition, t);
-                transform.localRotation = Quaternion.Lerp(startRotation, targetTransform.localRotation, t);
+                transform.SetLocalPositionAndRotation(Vector3.Lerp(startPosition, targetTransform.localPosition, t), Quaternion.Lerp(startRotation, targetTransform.localRotation, t));
                 transform.localScale = Vector3.Lerp(startScale, targetTransform.localScale, t);
                 time += Time.deltaTime;
                 await Task.Delay(8);
@@ -97,8 +96,7 @@ namespace Arteranos.Core
 
             if(!token.IsCancellationRequested)
             {
-                transform.localPosition = targetTransform.localPosition;
-                transform.localRotation = targetTransform.localRotation;
+                transform.SetLocalPositionAndRotation(targetTransform.localPosition, targetTransform.localRotation);
                 transform.localScale = targetTransform.localScale;
             }
         }
