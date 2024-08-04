@@ -270,9 +270,9 @@ namespace Arteranos.WorldEdit
         // ---------------------------------------------------------------
         #region Object Editor
 
-        private readonly List<float> TranslationValues = new() { 0.001f, 0.01f, 0.1f, 1f, 10f };
+        private readonly List<float> TranslationValues = new() { 0.01f, 0.1f, 1f, 10f };
         private readonly List<float> RotationValues = new() { 1f, 5f, 10f, 22.5f, 45f, 90f, 180f };
-        private readonly List<float> ScaleValues = new() { 0.001f, 0.01f, 0.1f, 1f, 10f };
+        private readonly List<float> ScaleValues = new() { 0.01f, 0.1f, 1f, 10f };
         private readonly List<WorldEditMode> EditModes = new()
         {
             WorldEditMode.Translation,
@@ -280,10 +280,10 @@ namespace Arteranos.WorldEdit
             WorldEditMode.Scale,
         };
 
-        [SerializeField] private int TranslationValueIndex;
-        [SerializeField] private int RotationValueIndex;
-        [SerializeField] private int ScaleValueIndex;
-        [SerializeField] private int EditModeIndex;
+        private int TranslationValueIndex;
+        private int RotationValueIndex;
+        private int ScaleValueIndex;
+        private int EditModeIndex;
 
         private Vector3 TransformAction = Vector3.zero;
 
@@ -326,21 +326,13 @@ namespace Arteranos.WorldEdit
             PlaceGizmo();
         }
 
-        float deltaTick = 0f;
-        const float deltaThreshold = 0.1f;
-
         private void HandleKMObjectEdit()
         {
             if (TransformAction == Vector3.zero) return;
 
-            deltaTick += Time.deltaTime;
-
-            if (deltaTick < deltaThreshold) return;
-            deltaTick -= deltaThreshold;
-
             if (!CurrentWorldObject) return;
 
-            Vector3 v = TransformAction * deltaThreshold;
+            Vector3 v = TransformAction * Time.deltaTime;
             CurrentWorldObject.TryGetComponent(out WorldObjectComponent woc);
             woc.TryGetWOC(out WOCTransform woct);
 
