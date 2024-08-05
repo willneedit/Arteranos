@@ -88,11 +88,12 @@ namespace Arteranos.WorldEdit
         {
             base.OnEnable();
 
-            SetLocalMode(true);
+            Transform root = WorldEditorData.FindObjectByPath(null);
+
+            SetLocalMode(!G.WorldEditorData.UsingGlobal);
 
             Populate();
 
-            Transform root = WorldEditorData.FindObjectByPath(null);
             G.WorldEditorData.OnWorldChanged += GotWorldChanged;
         }
 
@@ -123,8 +124,8 @@ namespace Arteranos.WorldEdit
         private void Populate()
         {
             Transform t = WorldObject.transform;
-            Vector3 p = chk_Local.isOn ? t.localPosition : t.position;
-            Quaternion q = chk_Local.isOn ? t.localRotation : t.rotation;
+            Vector3 p = G.WorldEditorData.UsingGlobal ? t.position : t.localPosition;
+            Quaternion q = G.WorldEditorData.UsingGlobal ? t.rotation : t.localRotation;
             Vector3 s = t.localScale;
 
             Vector3 r = q.eulerAngles;
@@ -161,9 +162,6 @@ namespace Arteranos.WorldEdit
 
         private void CommitChangedValues(string arg0)
         {
-            Woc.TryGetWOC(out WOCTransform woct);
-            Woc.TryGetWOC(out WOCColor wocc);
-
             Vector3 p = new(
                 txt_Pos_X.text.ParseInvariant(),
                 txt_Pos_Y.text.ParseInvariant(),
@@ -181,8 +179,12 @@ namespace Arteranos.WorldEdit
                 txt_Col_G.text.ParseInvariant(),
                 txt_Col_B.text.ParseInvariant());
 
-            woct.SetState(p, r, s, chk_Global.isOn);
-            wocc.SetState(col);
+            if(Woc.TryGetWOC(out WOCTransform woct))
+                woct.SetState(p, r, s, G.WorldEditorData.UsingGlobal);
+
+            if(Woc.TryGetWOC(out WOCColor wocc))
+                wocc.SetState(col);
+
             WorldObject.MakePatch(true).EmitToServer();
         }
 
@@ -190,6 +192,8 @@ namespace Arteranos.WorldEdit
         {
             chk_Local.SetIsOnWithoutNotify(local);
             chk_Global.SetIsOnWithoutNotify(!local);
+
+            G.WorldEditorData.UsingGlobal = !local;
 
             Populate();
         }

@@ -346,8 +346,8 @@ namespace Arteranos.WorldEdit
                 case WorldEditMode.Translation:
                     p += Quaternion.Euler(r) * (v * TranslationValues[TranslationValueIndex]);
                     break;
-                case WorldEditMode.Rotation:                    
-                    r += (v * RotationValues[RotationValueIndex]);
+                case WorldEditMode.Rotation:
+                    r = (Quaternion.Euler(r) * Quaternion.Euler(v * RotationValues[RotationValueIndex])).eulerAngles;
                     break;
                 case WorldEditMode.Scale:
                     s += v * ScaleValues[ScaleValueIndex];
