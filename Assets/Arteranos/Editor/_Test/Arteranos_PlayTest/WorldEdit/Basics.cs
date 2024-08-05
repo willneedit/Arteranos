@@ -44,7 +44,8 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             WorldObject wob = BuildSample();
 
-            wob.GetWComponent<WOCTransform>().rotation *= Quaternion.Euler(0, 45, 0);
+            WOCTransform wOCTransform = wob.GetWComponent<WOCTransform>();
+            wOCTransform.rotation += new Vector3(0, 45, 0);
 
             yield return ShowObject(wob);
         }
@@ -76,7 +77,7 @@ namespace Arteranos.PlayTest.WorldEdit
 
             WorldObject newroot = new();
             newroot.GetWComponent<WOCTransform>().position = new Vector3(-2, 0, 0);
-            newroot.GetWComponent<WOCTransform>().rotation = Quaternion.Euler(0, 0, -45);
+            newroot.GetWComponent<WOCTransform>().rotation = new Vector3(0, 0, -45);
             newroot.children.Add(wob);
 
             yield return ShowObject(newroot);

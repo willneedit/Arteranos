@@ -168,7 +168,7 @@ namespace Arteranos.WorldEdit
                 txt_Pos_X.text.ParseInvariant(),
                 txt_Pos_Y.text.ParseInvariant(),
                 txt_Pos_Z.text.ParseInvariant());
-            Quaternion r = Quaternion.Euler(
+            Vector3 r = new(
                 txt_Rot_X.text.ParseInvariant(),
                 txt_Rot_Y.text.ParseInvariant(),
                 txt_Rot_Z.text.ParseInvariant());

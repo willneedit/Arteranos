@@ -49,14 +49,14 @@ namespace Arteranos.PlayTest.WorldEdit
 
         // Must match the sample constructed with the following routine
         public static readonly string sampleWOB =
-            "CgaagCACCAMSCVRlc3QgQ3ViZSABOiiKgCAkCgoVAACAPx0AAKBAEgUlAACAP" +
-            "xoPDQAAgD8VAACAPx0AAIA/OhqSgCAWChQNAACAPxUAAIA/HQAAgD8lAACAP0" +
-            "KtAQoEmoAgABILVGVzdCBTcGhlcmU6I4qAIB8KBRUAAMA/EgUlAACAPxoPDQA" +
-            "AgD8VAACAPx0AAIA/OhqSgCAWChQNAACAPxUAAIA/HQAAgD8lAACAP0JXCgaa" +
-            "gCACCAESDFRlc3QgQ2Fwc3VsZTojioAgHwoFFQAAwD8SBSUAAIA/Gg8NAACAP" +
-            "xUAAIA/HQAAgD86GpKAIBYKFA0AAIA/FQAAgD8dAACAPyUAAIA/QloKBpqAIA" +
-            "IIAxIPVGVzdCBDdWJlIFJpZ2h0OiOKgCAfCgUNAADAPxIFJQAAgD8aDw0AAIA" +
-            "/FQAAgD8dAACAPzoakoAgFgoUDQAAgD8VAACAPx0AAIA/JQAAgD8=";
+            "CgaagCACCAMSCVRlc3QgQ3ViZSABOiOKgCAfCgoVAACAPx0AAKBAEgAaDw0AA" +
+            "IA/FQAAgD8dAACAPzoakoAgFgoUDQAAgD8VAACAPx0AAIA/JQAAgD9CowEKBJ" +
+            "qAIAASC1Rlc3QgU3BoZXJlOh6KgCAaCgUVAADAPxIAGg8NAACAPxUAAIA/HQA" +
+            "AgD86GpKAIBYKFA0AAIA/FQAAgD8dAACAPyUAAIA/QlIKBpqAIAIIARIMVGVz" +
+            "dCBDYXBzdWxlOh6KgCAaCgUVAADAPxIAGg8NAACAPxUAAIA/HQAAgD86GpKAI" +
+            "BYKFA0AAIA/FQAAgD8dAACAPyUAAIA/QlUKBpqAIAIIAxIPVGVzdCBDdWJlIF" +
+            "JpZ2h0Oh6KgCAaCgUNAADAPxIAGg8NAACAPxUAAIA/HQAAgD86GpKAIBYKFA0" +
+            "AAIA/FQAAgD8dAACAPyUAAIA/";
 
         public static WorldObject BuildSample()
         {

@@ -43,7 +43,7 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
             WOCTransform wot = new()
             {
                 position = new Vector3(0, 2, 0),
-                rotation = Quaternion.Euler(0, 0, 45),
+                rotation = new Vector3(0, 0, 45),
                 scale = Vector3.one
             };
 
@@ -82,7 +82,7 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
             WOCTransform wot = new()
             {
                 position = new Vector3(1, 1, 0),
-                rotation = Quaternion.Euler(0, 0, 45),
+                rotation = new Vector3(0, 0, 45),
                 scale = Vector3.one
             };
 
@@ -127,7 +127,7 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
             WOCTransform wot = new()
             {
                 position = new Vector3(1, 1, 0),
-                rotation = Quaternion.Euler(0, 0, 45),
+                rotation = new Vector3(0, 0, 45),
                 scale = Vector3.one
             };
 

@@ -337,15 +337,14 @@ namespace Arteranos.WorldEdit
             woc.TryGetWOC(out WOCTransform woct);
 
             // TODO local only, global not yet..
-            // FIXME Gimbal lock - maybe refactor to use Euler angles in serializing
             Vector3 p = woct.position;
-            Vector3 r = ((Quaternion) woct.rotation).eulerAngles;
+            Vector3 r = woct.rotation;
             Vector3 s = woct.scale;
 
             switch (EditModes[EditModeIndex])
             {
                 case WorldEditMode.Translation:
-                    p += (Quaternion) woct.rotation * (v * TranslationValues[TranslationValueIndex]);
+                    p += Quaternion.Euler(r) * (v * TranslationValues[TranslationValueIndex]);
                     break;
                 case WorldEditMode.Rotation:                    
                     r += (v * RotationValues[RotationValueIndex]);
@@ -357,7 +356,7 @@ namespace Arteranos.WorldEdit
                     throw new NotImplementedException();
             }
 
-            woct.SetState(p, Quaternion.Euler(r), s);
+            woct.SetState(p, r, s);
             CurrentWorldObject.MakePatch(false).EmitToServer();
         }
 

@@ -105,11 +105,11 @@ namespace Arteranos.WorldEdit
                 // We're in edit mode, we are actually changing the world.
                 TryGetWOC(out WOCTransform woct);
 
-                var (position, eulerRotation) = ConstrainMovement(woct.position, ((Quaternion)woct.rotation).eulerAngles);
+                var (position, eulerRotation) = ConstrainMovement(woct.position, woct.rotation);
 
                 woct.SetState(
                     position, 
-                    Quaternion.Euler(eulerRotation), 
+                    eulerRotation, 
                     transform.localScale);
 
                 WorldObjectPatch wop = new();

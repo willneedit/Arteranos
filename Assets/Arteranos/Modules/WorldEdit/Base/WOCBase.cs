@@ -67,7 +67,7 @@ namespace Arteranos.WorldEdit
         [ProtoMember(1)]
         public WOVector3 position;
         [ProtoMember(2)]
-        public WOQuaternion rotation;
+        public WOVector3 rotation; // Euler angles -- less data, needs Quaternion.eulerAngles and Quaternion.Euler()
         [ProtoMember(3)]
         public WOVector3 scale;
 
@@ -82,7 +82,7 @@ namespace Arteranos.WorldEdit
         public override void Init()
         {
             position = Vector3.zero; 
-            rotation = Quaternion.identity; 
+            rotation = Vector3.zero; 
             scale = Vector3.one;
         }
 
@@ -90,7 +90,7 @@ namespace Arteranos.WorldEdit
         {
             base.CommitState();
 
-            transform.SetLocalPositionAndRotation(position, rotation);
+            transform.SetLocalPositionAndRotation(position, Quaternion.Euler(rotation));
             transform.localScale = scale;
         }
 
@@ -99,13 +99,13 @@ namespace Arteranos.WorldEdit
             Dirty = false;
             if (transform.localPosition != position)
                 Dirty = true;
-            if(transform.localRotation != rotation)
+            if(transform.localRotation != Quaternion.Euler(rotation))
                 Dirty = true;
             if (transform.localScale != scale)
                 Dirty = true;
         }
 
-        public void SetState(Vector3 position, Quaternion rotation, Vector3 scale, bool global = false)
+        public void SetState(Vector3 position, Vector3 rotation, Vector3 scale, bool global = false)
         {
             if(!global)
             {
@@ -120,7 +120,7 @@ namespace Arteranos.WorldEdit
                 Quaternion p_rotation = parent != null ? parent.rotation : Quaternion.identity;
 
                 // Convert the _world space_ coords to _local_ coords, relative to parent
-                this.rotation = Quaternion.Inverse(p_rotation) * rotation;
+                this.rotation = (Quaternion.Inverse(p_rotation) * Quaternion.Euler(rotation)).eulerAngles;
                 this.position = Quaternion.Inverse(p_rotation) * position - p_position;
                 this.scale = scale;
             }

@@ -48,7 +48,7 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
             Assert.IsNotNull(t);
             Assert.IsNotNull(c);
 
-            t.rotation = Quaternion.Euler(0, 0, 45);
+            t.rotation = new Vector3(0, 0, 45);
             c.color = Color.red;
 
             yield return new WaitForSeconds(1);
@@ -84,7 +84,7 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
             WOCTransform t = new()
             {
                 position = new Vector3(0, 2, 0),
-                rotation = Quaternion.Euler(0, 0, 45),
+                rotation = new Vector3(0, 0, 45),
                 scale = Vector3.one
             };
 
@@ -131,14 +131,14 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
             WOCTransform nineoclock = new()
             {
                 position = new Vector3(0, 2, 0),
-                rotation = Quaternion.Euler(0, 0, 90),
+                rotation = new Vector3(0, 0, 90),
                 scale = Vector3.one
             };
 
             WOCTransform midday = new()
             {
                 position = new Vector3(0, 2, 0),
-                rotation = Quaternion.Euler(0, 0, 0),
+                rotation = new Vector3(0, 0, 0),
                 scale = Vector3.one
             };
 

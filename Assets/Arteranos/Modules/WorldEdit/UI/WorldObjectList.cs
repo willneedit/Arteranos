@@ -144,7 +144,7 @@ namespace Arteranos.WorldEdit
                 new WOCTransform()
                 {
                     position = Vector3.zero,
-                    rotation = Quaternion.identity,
+                    rotation = Vector3.zero,
                     scale = Vector3.one
                 },
 
