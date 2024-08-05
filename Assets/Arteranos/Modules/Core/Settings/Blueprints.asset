@@ -73,10 +73,10 @@ MonoBehaviour:
     WorldPanelItem: {fileID: 7778222521524494029, guid: 6e18a6fd290cb374a9ea29b871d4b71a,
       type: 3}
   WorldEdit:
-    TranslationGizmo: {fileID: 3857627357036114394, guid: db82a18fd9bb8e640bff393355c40a25,
+    TranslationGizmo: {fileID: 3514764267099751670, guid: db82a18fd9bb8e640bff393355c40a25,
       type: 3}
     RotationGizmo: {fileID: 7843359847165770081, guid: e8e027968a53f54458a8640684c6d25b,
       type: 3}
-    ScalingGizmo: {fileID: 3857627357036114394, guid: d59318eb8df3ee74f9f999f59bf90e93,
+    ScalingGizmo: {fileID: 3514764267099751670, guid: 3571a35d645f0b548aaec99b12e8196a,
       type: 3}
     DefaultWEMaterial: {fileID: 2100000, guid: 4006251228fedd944a2eaca76db7fccf, type: 2}
