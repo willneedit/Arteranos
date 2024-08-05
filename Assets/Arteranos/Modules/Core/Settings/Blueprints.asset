@@ -80,3 +80,5 @@ MonoBehaviour:
     ScalingGizmo: {fileID: 3514764267099751670, guid: 3571a35d645f0b548aaec99b12e8196a,
       type: 3}
     DefaultWEMaterial: {fileID: 2100000, guid: 4006251228fedd944a2eaca76db7fccf, type: 2}
+    WorldObjectRoot: {fileID: 3930812342674554157, guid: 78ac987e7f9917742b4ea4b722779d23,
+      type: 3}

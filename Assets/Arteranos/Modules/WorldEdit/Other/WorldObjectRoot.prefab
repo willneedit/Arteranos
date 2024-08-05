@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3930812342674554157
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3930812342674554156}
+  - component: {fileID: 3930812342674554159}
+  - component: {fileID: 3930812342674554158}
+  m_Layer: 0
+  m_Name: WorldObjectRoot
+  m_TagString: WorldObjectsRoot
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3930812342674554156
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3930812342674554157}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 4.223}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3930812342674554159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3930812342674554157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a6bec223e9b1cc4d8ddf3f3b4f6d7d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  KMWorldEditorActions:
+    m_ActionInput:
+      m_UseReference: 1
+      m_Action:
+        m_Name: Action Input
+        m_Type: 0
+        m_ExpectedControlType: 
+        m_Id: 6fe2dd3f-e097-4c56-9948-c819605d8a97
+        m_Processors: 
+        m_Interactions: 
+        m_SingletonActionBindings: []
+        m_Flags: 0
+      m_Reference: {fileID: -3750301936456351525, guid: 638fba651b9f90f4f8ad962121090576,
+        type: 3}
+  KMWorldEditorModeSelect:
+    m_ActionInput:
+      m_UseReference: 1
+      m_Action:
+        m_Name: Action Input
+        m_Type: 0
+        m_ExpectedControlType: 
+        m_Id: 4b737134-64f3-46d1-b6d7-68400500cadb
+        m_Processors: 
+        m_Interactions: 
+        m_SingletonActionBindings: []
+        m_Flags: 0
+      m_Reference: {fileID: 8891747388279936209, guid: 638fba651b9f90f4f8ad962121090576,
+        type: 3}
+  KMWorldEditorValueSelect:
+    m_ActionInput:
+      m_UseReference: 1
+      m_Action:
+        m_Name: Action Input
+        m_Type: 0
+        m_ExpectedControlType: 
+        m_Id: 68205b14-7fa4-4d34-888e-078bc0991630
+        m_Processors: 
+        m_Interactions: 
+        m_SingletonActionBindings: []
+        m_Flags: 0
+      m_Reference: {fileID: -6409165881168128917, guid: 638fba651b9f90f4f8ad962121090576,
+        type: 3}
+  isInEditMode: 0
+  usingGlobal: 0
+--- !u!114 &3930812342674554158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3930812342674554157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 017c5e3933235514c9520e1dace2a4b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ActionAssets:
+  - {fileID: -944628639613478452, guid: 638fba651b9f90f4f8ad962121090576, type: 3}

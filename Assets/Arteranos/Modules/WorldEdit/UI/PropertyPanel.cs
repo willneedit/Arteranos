@@ -92,7 +92,7 @@ namespace Arteranos.WorldEdit
 
             Populate();
 
-            Transform root = WorldChange.FindObjectByPath(null);
+            Transform root = WorldEditorData.FindObjectByPath(null);
             G.WorldEditorData.OnWorldChanged += GotWorldChanged;
         }
 

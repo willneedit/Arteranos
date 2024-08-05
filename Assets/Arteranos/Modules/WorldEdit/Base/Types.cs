@@ -42,7 +42,7 @@ namespace Arteranos.WorldEdit
         public WorldInfoNetwork Info { get => info; set => info = value; }
         public IEnumerator BuildWorld()
         {
-            Transform t = WorldChange.FindObjectByPath(null);
+            Transform t = WorldEditorData.FindObjectByPath(null);
 
             G.WorldEditorData.ClearBlueprints();
 
@@ -52,7 +52,7 @@ namespace Arteranos.WorldEdit
 
         public void TakeSnapshot()
         {
-            Transform t = WorldChange.FindObjectByPath(null);
+            Transform t = WorldEditorData.FindObjectByPath(null);
             for (int i = 0; i < t.childCount; i++)
                 objects.Add(t.GetChild(i).MakeWorldObject());
         }
@@ -370,47 +370,9 @@ namespace Arteranos.WorldEdit
         public static WorldChange Deserialize(Stream stream)
             => Serializer.Deserialize<WorldChange>(stream);
 
-        protected Transform FindObjectByPath() => FindObjectByPath(path);
+        protected Transform FindObjectByPath() => WorldEditorData.FindObjectByPath(path);
 
         public abstract IEnumerator Apply();
-
-        public static Transform FindObjectByPath(List <Guid> path)
-        {
-            GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
-
-            // If the world object root doesn't exist yet, create one now.
-            if(gameObject == null)
-            {
-                gameObject = new("WorldObjectsRoot", new Type[] { typeof(WorldEditorData) });
-                gameObject.tag = gameObject.name;
-            }
-
-            Transform t = gameObject.transform;
-
-            if (path == null) return t;
-
-            foreach (Guid id in path)
-            {
-                Transform found = null;
-                for (int i = 0; i < t.childCount; i++)
-                {
-                    if (!t.GetChild(i).TryGetComponent(out WorldObjectComponent woc)) continue;
-
-                    if (id == woc.Id)
-                    {
-                        found = t.GetChild(i);
-                        break;
-                    }
-                }
-
-                if (!found)
-                    throw new ArgumentException($"Unknown path element: {id}");
-
-                t = found;
-            }
-
-            return t;
-        }
 
         public void SetPathFromThere(Transform t)
         {

@@ -84,6 +84,7 @@ namespace Arteranos.Core
             public GameObject RotationGizmo;
             public GameObject ScalingGizmo;
             public Material DefaultWEMaterial;
+            public GameObject WorldObjectRoot;
         }
 
         public WorldEdit_ WorldEdit;

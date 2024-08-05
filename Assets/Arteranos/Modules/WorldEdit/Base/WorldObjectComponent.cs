@@ -72,6 +72,8 @@ namespace Arteranos.WorldEdit
             // Prevent 'popping out' of intersecting collidable objects
             body.constraints = RigidbodyConstraints.FreezeAll;
 
+            body.isKinematic = true;
+
             mover = gameObject.AddComponent<XRGrabInteractable>();
             mover.throwOnDetach = false;
             mover.smoothPosition = true;
@@ -79,8 +81,6 @@ namespace Arteranos.WorldEdit
 
             mover.firstSelectEntered.AddListener(GotObjectGrabbed);
             mover.lastSelectExited.AddListener(GotObjectRelease);
-
-            Transform root = WorldChange.FindObjectByPath(null);
 
             G.WorldEditorData.OnEditorModeChanged += GotEditorModeChanged;
         }

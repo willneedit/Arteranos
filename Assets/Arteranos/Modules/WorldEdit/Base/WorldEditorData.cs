@@ -142,7 +142,7 @@ namespace Arteranos.WorldEdit
         {
             static IEnumerator Cor(List<byte[]> serialized)
             {
-                Transform t = WorldChange.FindObjectByPath(null);
+                Transform t = FindObjectByPath(null);
 
                 // First, try to remember the previous gameobjects.
                 List<Transform> old = new();
@@ -387,7 +387,7 @@ namespace Arteranos.WorldEdit
         #region Internal
         private IEnumerable<WorldObject> MakeSnapshot()
         {
-            Transform t = WorldChange.FindObjectByPath(null);
+            Transform t = FindObjectByPath(null);
             for (int i = 0; i < t.childCount; i++)
             {
                 WorldObject wo = t.GetChild(i).MakeWorldObject();
@@ -435,6 +435,41 @@ namespace Arteranos.WorldEdit
                 hash = undoStack[^undoCount].hash,
             };
             request.EmitToServer();
+        }
+
+        public static Transform FindObjectByPath(List <Guid> path)
+        {
+            GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
+
+            // If the world object root doesn't exist yet, create one now.
+            if(!gameObject)
+                gameObject = Instantiate(BP.I.WorldEdit.WorldObjectRoot);
+
+            Transform t = gameObject.transform;
+
+            if (path == null) return t;
+
+            foreach (Guid id in path)
+            {
+                Transform found = null;
+                for (int i = 0; i < t.childCount; i++)
+                {
+                    if (!t.GetChild(i).TryGetComponent(out WorldObjectComponent woc)) continue;
+
+                    if (id == woc.Id)
+                    {
+                        found = t.GetChild(i);
+                        break;
+                    }
+                }
+
+                if (!found)
+                    throw new ArgumentException($"Unknown path element: {id}");
+
+                t = found;
+            }
+
+            return t;
         }
 
 
