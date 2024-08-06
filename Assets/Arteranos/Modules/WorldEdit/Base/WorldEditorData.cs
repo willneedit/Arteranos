@@ -336,18 +336,28 @@ namespace Arteranos.WorldEdit
             CurrentWorldObject.TryGetComponent(out WorldObjectComponent woc);
             woc.TryGetWOC(out WOCTransform woct);
 
-            // TODO local only, global not yet..
             Vector3 p = woct.position;
             Vector3 r = woct.rotation;
             Vector3 s = woct.scale;
 
+            Quaternion parentRotation = currentWorldObject.transform.parent.rotation;
+
             switch (EditModes[EditModeIndex])
             {
                 case WorldEditMode.Translation:
-                    p += Quaternion.Euler(r) * (v * TranslationValues[TranslationValueIndex]);
+                    if(usingGlobal)
+                        p += Quaternion.Inverse(parentRotation) * (v * TranslationValues[TranslationValueIndex]);
+                    else
+                        p += Quaternion.Euler(r) * (v * TranslationValues[TranslationValueIndex]);
                     break;
                 case WorldEditMode.Rotation:
-                    r = (Quaternion.Euler(r) * Quaternion.Euler(v * RotationValues[RotationValueIndex])).eulerAngles;
+                    if(usingGlobal)
+                    {
+                        Vector3 worldRotAngles = Quaternion.Inverse(parentRotation) * (v * RotationValues[RotationValueIndex]);
+                        r = (Quaternion.Euler(r) * Quaternion.Euler(worldRotAngles)).eulerAngles;
+                    }
+                    else
+                        r = (Quaternion.Euler(r) * Quaternion.Euler(v * RotationValues[RotationValueIndex])).eulerAngles;
                     break;
                 case WorldEditMode.Scale:
                     s += v * ScaleValues[ScaleValueIndex];

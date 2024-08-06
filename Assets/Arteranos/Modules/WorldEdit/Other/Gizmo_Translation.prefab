@@ -661,6 +661,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 27175570375176984}
+  - component: {fileID: 3284893518466085534}
   m_Layer: 0
   m_Name: Gizmo_Translation
   m_TagString: Untagged
@@ -684,6 +685,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3284893518466085534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3514764267099751670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12db7fd89f688f541ba9d92fb0ccdc19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5259452962085862371
 GameObject:
   m_ObjectHideFlags: 0
