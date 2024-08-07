@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace Arteranos.Core
 {
-    public partial class ServerPermissions : IEquatable<ServerPermissions>
+    public partial class ServerPermissions : IEquatable<ServerPermissions>, ICloneable
     {
         public (int, int) MatchRatio(ServerPermissions user)
         {
@@ -109,6 +109,8 @@ namespace Arteranos.Core
         {
             return HashCode.Combine(Flying, ExplicitNudes, Nudity, Suggestive, Violence, ExcessiveViolence);
         }
+
+        public object Clone() => MemberwiseClone();
 
         public static bool operator ==(ServerPermissions left, ServerPermissions right)
         {

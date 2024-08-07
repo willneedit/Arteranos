@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using System;
 using System.Collections;
 using System.IO;
@@ -27,6 +28,9 @@ namespace Arteranos.WorldEdit
         bool LockZAxis { get; set; }
         bool UsingGlobal { get; set; }
         GameObject CurrentWorldObject { get; set; }
+        string WorldName { get; set; }
+        string WorldDescription { get; set; }
+        ServerPermissions ContentWarning { get; set; }
 
         event Action<bool> OnEditorModeChanged;
         event Action<IWorldChange> OnWorldChanged;

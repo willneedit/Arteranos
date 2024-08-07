@@ -14,7 +14,6 @@ using System.IO;
 using System;
 
 using UnityEngine.InputSystem;
-using System.Threading;
 using Arteranos.Core;
 
 
@@ -46,9 +45,9 @@ namespace Arteranos.WorldEdit
         }
 
         // Movement and rotation constraints
-        public bool LockXAxis { get => lockXAxis; set => lockXAxis = value; }
-        public bool LockYAxis { get => lockYAxis; set => lockYAxis = value; }
-        public bool LockZAxis { get => lockZAxis; set => lockZAxis = value; }
+        public bool LockXAxis { get; set; } = false;
+        public bool LockYAxis { get; set; } = false;
+        public bool LockZAxis { get; set; } = false;
 
         // Are we in the edit mode at all?
         public bool IsInEditMode
@@ -70,14 +69,20 @@ namespace Arteranos.WorldEdit
             set => usingGlobal = value; 
         }
 
+        // The name
+        public string WorldName { get; set; }
+
+        // The description
+        public string WorldDescription { get; set; }
+
+        // Content warnings
+        public ServerPermissions ContentWarning { get; set; }
+
+
         private readonly Dictionary<IWorldObjectAsset, GameObject> AssetBlueprints = new();
 
-        [SerializeField] private bool isInEditMode = false;
-        [SerializeField] private bool usingGlobal = false;
-
-        private bool lockXAxis = false;
-        private bool lockYAxis = false;
-        private bool lockZAxis = false;
+        private bool isInEditMode = false;
+        private bool usingGlobal = false;
         private GameObject currentWorldObject;
         private GameObject gizmoObject;
 
@@ -88,6 +93,18 @@ namespace Arteranos.WorldEdit
             G.WorldEditorData = this;
 
             if (KMWorldEditorActions == null) return;
+
+            ContentWarning = new()
+            {
+                Violence = false,
+                Suggestive = false,
+                Nudity = false,
+                ExcessiveViolence = false,
+                ExplicitNudes = false,
+            };
+
+            WorldName = $"{(string) G.Client.MeUserID}'s unnamed world";
+            WorldDescription = "";
 
             // React only to the up flank
             KMWorldEditorModeSelect.PerformCallback = DoModeSelect;

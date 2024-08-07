@@ -370,6 +370,9 @@ namespace Arteranos.Core
         public PublicKey UserAgrPublicKey => CMH.AgreePublicKey;
 
         [JsonIgnore]
+        public UserID MeUserID => new(UserAgrPublicKey, Me.Nickname);
+
+        [JsonIgnore]
         public override bool VRMode
         {
             get => !FileUtils.Unity_Server && base.VRMode;

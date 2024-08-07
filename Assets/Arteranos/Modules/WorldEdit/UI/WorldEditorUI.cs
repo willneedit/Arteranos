@@ -57,10 +57,6 @@ namespace Arteranos.WorldEdit
 
             SetUILockState(false);
 
-
-            // Editing world without the template is just for testing in the Unity Editor.
-            btn_Save.interactable = (G.World.Cid != null);
-
             //ChoiceBook choiceBook = NewObjectPicker.GetComponent<ChoiceBook>();
             //NewObjectPanels = choiceBook.PaneList.GetComponentsInChildren<NewObjectPanel>(true);
             //foreach(NewObjectPanel panel in NewObjectPanels)
