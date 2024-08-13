@@ -3431,6 +3431,7 @@ GameObject:
   - component: {fileID: 3941414333272605691}
   - component: {fileID: 38206287695239355}
   - component: {fileID: 7924929403934278545}
+  - component: {fileID: 753016368431791609}
   m_Layer: 5
   m_Name: SaveWorldPanel
   m_TagString: Untagged
@@ -3557,6 +3558,26 @@ MonoBehaviour:
   chk_ExNudity: {fileID: 7735180792144338172}
   btn_SaveAsZip: {fileID: 3505457402781860726}
   btn_SaveInGallery: {fileID: 3165794820077462171}
+--- !u!114 &753016368431791609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9066760951915166495}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: 1
+  m_FlexibleHeight: 1
+  m_LayoutPriority: 1
 --- !u!1 &9132554104238060195
 GameObject:
   m_ObjectHideFlags: 0

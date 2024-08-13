@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5438729068876991865}
   - component: {fileID: 7535556176311076847}
   - component: {fileID: 8938431111270044517}
+  - component: {fileID: 1903549648326650338}
   m_Layer: 5
   m_Name: WorldObjectList
   m_TagString: Untagged
@@ -93,14 +94,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lbl_PageCount: {fileID: 4477890082455187970}
+  txt_AddItemURL: {fileID: 8919816566170465152}
+  btn_AddItem: {fileID: 8919816566327765020}
   btn_First: {fileID: 640946313860938724}
   btn_FRev: {fileID: 331201618093835669}
   btn_Previous: {fileID: 8822145761646105643}
   btn_Next: {fileID: 2187381738274907089}
   btn_FFwd: {fileID: 2974323995523302701}
   btn_Last: {fileID: 5190247290066118883}
-  txt_AddItemURL: {fileID: 8919816566170465152}
-  btn_AddItem: {fileID: 8919816566327765020}
   ItemsPerPage: 8
   TileBlueprint: {fileID: 1914553577795019703, guid: fb615be2f6ee6454fa6cae531f281fb4,
     type: 3}
@@ -116,6 +117,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 912e0e42fdc515244be8214771048e45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1903549648326650338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 524674961172982610}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: 1
+  m_FlexibleHeight: 1
+  m_LayoutPriority: 1
 --- !u!1 &3465194327485770275
 GameObject:
   m_ObjectHideFlags: 0

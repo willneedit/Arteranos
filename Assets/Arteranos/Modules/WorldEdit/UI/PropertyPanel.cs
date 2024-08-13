@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 using System;
+using System.Collections.Generic;
 
 namespace Arteranos.WorldEdit
 {
@@ -41,6 +42,10 @@ namespace Arteranos.WorldEdit
 
         public Toggle chk_Collidable;
 
+        public Transform grp_Component_List;
+
+        public GameObject bp_CollapsiblePane;
+
         public GameObject WorldObject
         {
             get => G.WorldEditorData.CurrentWorldObject;
@@ -51,9 +56,19 @@ namespace Arteranos.WorldEdit
             }
         }
 
-        public WorldObjectComponent Woc { get; private set; }
+        public WorldObjectComponent Woc
+        {
+            get => woc;
+            private set
+            {
+                woc = value;
+                RebuildInspectors();
+            }
+        }
 
         public event Action OnReturnToList;
+
+        private WorldObjectComponent woc;
 
         protected override void Awake()
         {
@@ -121,6 +136,45 @@ namespace Arteranos.WorldEdit
             base.OnDestroy();
         }
 
+        private readonly Dictionary<string, bool> paneOpen = new();
+
+        private void RebuildInspectors()
+        {
+            for(int i = 0; i < grp_Component_List.childCount; i++)
+            {
+                GameObject oldPaneGO = grp_Component_List.GetChild(i).gameObject;
+                oldPaneGO.TryGetComponent(out CollapsiblePane pane);
+
+                paneOpen[pane.Title] = pane.IsOpen;
+
+                Destroy(oldPaneGO);
+            }
+
+            for (int i = 0; i < woc.WOComponents.Count; i++)
+            {
+                WOCBase wocc = woc.WOComponents[i];
+                (string name, GameObject bp_contents) = wocc.GetUI();
+                if (bp_contents == null) continue;
+
+                GameObject paneGO = Instantiate(bp_CollapsiblePane, grp_Component_List);
+                paneGO.TryGetComponent(out CollapsiblePane cp);
+
+                cp.Title = name;
+                cp.IsOpen = paneOpen.ContainsKey(cp.Title) && paneOpen[cp.Title];
+
+                GameObject contentsGO = Instantiate(bp_contents, paneGO.transform);
+                contentsGO.TryGetComponent(out IInspector inspector);
+                if (inspector != null)
+                {
+                    inspector.Woc = wocc;
+                    inspector.PropertyPanel = this;
+                }
+                else
+                    Debug.LogWarning($"{name} doen't provide a valid inspector");
+            }
+        }
+
+
         private void Populate()
         {
             Transform t = WorldObject.transform;
@@ -158,6 +212,11 @@ namespace Arteranos.WorldEdit
             lbl_Heading.text = WorldObject.name;
 
             chk_Collidable.SetIsOnWithoutNotify(Woc.IsCollidable);
+        }
+
+        public void CommitModification(IInspector inspector)
+        {
+            WorldObject.MakePatch(false).EmitToServer();
         }
 
         private void CommitChangedValues(string arg0)

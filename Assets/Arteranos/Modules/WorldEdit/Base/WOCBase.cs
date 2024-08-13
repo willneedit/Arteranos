@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using ProtoBuf;
 using System;
 using UnityEngine;
@@ -59,6 +60,8 @@ namespace Arteranos.WorldEdit
         }
 
         public abstract object Clone();
+
+        public abstract (string name, GameObject gameObject) GetUI();
     }
 
     [ProtoContract]
@@ -132,6 +135,9 @@ namespace Arteranos.WorldEdit
         {
             return MemberwiseClone();
         }
+
+        public override (string name, GameObject gameObject) GetUI() 
+            => ("Transform", BP.I.WorldEdit.TransformInspector);
     }
 
     [ProtoContract]
@@ -171,11 +177,16 @@ namespace Arteranos.WorldEdit
         public void SetState(Color color)
         {
             this.color = color;
+
+            CheckState();
         }
 
         public override object Clone()
         {
             return MemberwiseClone();
         }
+
+        public override (string name, GameObject gameObject) GetUI()
+            => ("Color", BP.I.WorldEdit.ColorInspector);
     }
 }

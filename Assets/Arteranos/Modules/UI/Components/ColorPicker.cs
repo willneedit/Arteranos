@@ -37,11 +37,18 @@ namespace Arteranos
             get => color;
             set
             {
-                color = value;
-                img_New.color = color;
-                txt_Hex.SetTextWithoutNotify(string.Format("{0:X2}{1:X2}{2:X2}", (int)(color.r * 255), (int)(color.g * 255), (int)(color.b * 255)));
+                Color old = color;
+                if(value != old)
+                {
+                    color = value;
+                    img_New.color = color;
+                    txt_Hex.SetTextWithoutNotify(string.Format("{0:X2}{1:X2}{2:X2}", (int)(color.r * 255), (int)(color.g * 255), (int)(color.b * 255)));
+                    OnColorChanged?.Invoke(color);
+                }
             }
         }
+
+        public event Action<Color> OnColorChanged;
 
         private Color color = Color.white;
 

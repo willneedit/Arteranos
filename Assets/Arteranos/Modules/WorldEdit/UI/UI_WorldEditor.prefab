@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8802878131033308863}
   - component: {fileID: 1098347119006914656}
   - component: {fileID: 1867472004103769462}
+  - component: {fileID: 4863499645805643809}
   m_Layer: 5
   m_Name: UI_WorldEditor
   m_TagString: Untagged
@@ -141,6 +142,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 504c971a29732eb4eb888fcb0f455b49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4863499645805643809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4193041269047191700}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1001 &5107779748663101657
 PrefabInstance:
   m_ObjectHideFlags: 0

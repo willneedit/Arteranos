@@ -82,3 +82,7 @@ MonoBehaviour:
     DefaultWEMaterial: {fileID: 2100000, guid: 4006251228fedd944a2eaca76db7fccf, type: 2}
     WorldObjectRoot: {fileID: 3930812342674554157, guid: 78ac987e7f9917742b4ea4b722779d23,
       type: 3}
+    TransformInspector: {fileID: 7349416676873975400, guid: 46bfe1e3d1c151647a4426bcb65fef58,
+      type: 3}
+    ColorInspector: {fileID: 7327452052152048920, guid: 8e57a59cd593afa4996a324b4ab37983,
+      type: 3}

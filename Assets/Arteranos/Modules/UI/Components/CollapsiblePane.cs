@@ -21,6 +21,7 @@ namespace Arteranos
         public TextMeshProUGUI Lbl_title;
 
         public string Title { get => Lbl_title.text; set => Lbl_title.text = value; }
+        public GameObject EmbeddedWidget => transform.GetChild(1).gameObject;
         public bool IsOpen
         {
             get => isOpen;
@@ -28,7 +29,7 @@ namespace Arteranos
             {
                 bool old = isOpen;
                 isOpen = value;
-                if (old != isOpen) SetOpenState(true);
+                if (old != isOpen && isActiveAndEnabled) SetOpenState(true);
             }
         }
 
@@ -78,6 +79,9 @@ namespace Arteranos
 
                 float elapsed = 0f;
 
+                if (isOpen)
+                    CollapseTransform.gameObject.SetActive(true);
+
                 while(elapsed < duration)
                 {
                     elapsed += Time.deltaTime;
@@ -90,11 +94,14 @@ namespace Arteranos
                     LayoutRebuilder.MarkLayoutForRebuild(Canvas.transform as RectTransform);
                     yield return new WaitForEndOfFrame();
                 }
+
+                if (!isOpen)
+                    CollapseTransform.gameObject.SetActive(false);
             }
 
             StopAllCoroutines();
 
-            StartCoroutine(AnimateOpen(instantly ? 0.0001f : 0.5f));
+            StartCoroutine(AnimateOpen(instantly ? 0.0001f : 0.25f));
         }
     }
 }
