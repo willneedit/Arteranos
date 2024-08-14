@@ -38,7 +38,7 @@ namespace Arteranos.WorldEdit
 
         public void Populate()
         {
-            ColorPicker.Color = (Woc as WOCColor).color;
+            ColorPicker.SetColorWithoutNotify((Woc as WOCColor).color);
         }
 
         private void GotColorChanged(Color obj)
