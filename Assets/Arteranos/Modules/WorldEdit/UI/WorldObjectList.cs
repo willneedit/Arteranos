@@ -138,19 +138,21 @@ namespace Arteranos.WorldEdit
             // Path in its hierarchy....
             Transform current = CurrentRoot.transform;
             woi.SetPathFromThere(current);
-            woi.components = new()
-            {
-                // ...the default transform...
-                new WOCTransform()
-                {
-                    position = Vector3.zero,
-                    rotation = Vector3.zero,
-                    scale = Vector3.one
-                },
 
-                // ...and color.
-                new WOCColor() { color = Color.white }
-            };
+            // TODO Maybe to only modify the transform to place the object in front of the user.
+            //woi.components = new()
+            //{
+            //    // ...the default transform...
+            //    new WOCTransform()
+            //    {
+            //        position = Vector3.zero,
+            //        rotation = Vector3.zero,
+            //        scale = Vector3.one
+            //    },
+
+            //    // ...and color.
+            //    new WOCColor() { color = Color.white }
+            //};
 
             // Post the insertion request to the server, it should come back.
             // If you have the rights to do this.

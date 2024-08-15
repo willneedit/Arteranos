@@ -107,13 +107,7 @@ namespace Arteranos.WorldEdit
         {
             id = Guid.NewGuid();
 
-            components = new()
-            {
-                new WOCTransform(),
-                new WOCColor()
-            };
-
-            foreach(WOCBase w in components) w.Init();
+            components = new();
 
             children = new();
         }

@@ -131,7 +131,8 @@ namespace Arteranos.WorldEdit
             AddingNewObject(new()
             {
                 asset = newWOglTF,
-                name = GLTFEntries[index].FriendlyName
+                name = GLTFEntries[index].FriendlyName,
+                components = new() { new WOCTransform() }
             });
         }
     }

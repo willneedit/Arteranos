@@ -84,7 +84,12 @@ namespace Arteranos.WorldEdit
             AddingNewObject(new() 
             { 
                 asset = newWOP, 
-                name = primitives[index].name 
+                name = primitives[index].name,
+                components = new() 
+                { 
+                    new WOCTransform(),
+                    new WOCColor()
+                }
             });
         }
     }

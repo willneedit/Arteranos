@@ -24,7 +24,7 @@ namespace Arteranos.WorldEdit
     {
         public bool Dirty { get; protected set; } = false;
 
-        protected GameObject gameObject = null;
+        public GameObject GameObject { get; protected set; } = null;
 
         /// <summary>
         /// To make the changes to take effect.
@@ -48,7 +48,7 @@ namespace Arteranos.WorldEdit
 
         public virtual void Awake(GameObject gameObject)
         {
-            this.gameObject = gameObject;
+            this.GameObject = gameObject;
         }
 
         public virtual void OnDestroy() { }
