@@ -64,24 +64,44 @@ namespace Arteranos.PlayTest.WorldEdit
             {
                 name = "Test Cube",
                 collidable = true,
+                components = new()
+                {
+                    new WOCTransform(),
+                    new WOCColor()
+                }
             };
             cube.GetWComponent<WOCTransform>().position = new Vector3(0, 1, 5);
 
             WorldObject cube2 = new(PrimitiveType.Cube)
             {
-                name = "Test Cube Right"
+                name = "Test Cube Right",
+                components = new()
+                {
+                    new WOCTransform(),
+                    new WOCColor()
+                }
             };
             cube2.GetWComponent<WOCTransform>().position = new Vector3(1.5f, 0, 0);
 
             WorldObject sphere = new(PrimitiveType.Sphere)
             {
-                name = "Test Sphere"
+                name = "Test Sphere",
+                components = new()
+                {
+                    new WOCTransform(),
+                    new WOCColor()
+                }
             };
             sphere.GetWComponent<WOCTransform>().position = new Vector3(0, 1.5f, 0);
 
             WorldObject capsule = new(PrimitiveType.Capsule)
             {
-                name = "Test Capsule"
+                name = "Test Capsule",
+                components = new()
+                {
+                    new WOCTransform(),
+                    new WOCColor()
+                }
             };
             capsule.GetWComponent<WOCTransform>().position = new Vector3(0, 1.5f, 0);
 

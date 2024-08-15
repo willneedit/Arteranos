@@ -41,11 +41,6 @@ namespace Arteranos.WorldEdit
         /// </summary>
         public abstract void CheckState();
 
-        /// <summary>
-        /// Set as in default state
-        /// </summary>
-        public abstract void Init();
-
         public virtual void Awake(GameObject gameObject)
         {
             this.GameObject = gameObject;
@@ -68,11 +63,11 @@ namespace Arteranos.WorldEdit
     public class WOCTransform : WOCBase
     {
         [ProtoMember(1)]
-        public WOVector3 position;
+        public WOVector3 position = Vector3.zero;
         [ProtoMember(2)]
-        public WOVector3 rotation; // Euler angles -- less data, needs Quaternion.eulerAngles and Quaternion.Euler()
+        public WOVector3 rotation = Vector3.zero; // Euler angles -- less data, needs Quaternion.eulerAngles and Quaternion.Euler()
         [ProtoMember(3)]
-        public WOVector3 scale;
+        public WOVector3 scale = Vector3.one;
 
         private Transform transform = null;
 
@@ -80,13 +75,6 @@ namespace Arteranos.WorldEdit
         {
             base.Awake(gameObject);
             transform = gameObject.transform;
-        }
-
-        public override void Init()
-        {
-            position = Vector3.zero; 
-            rotation = Vector3.zero; 
-            scale = Vector3.one;
         }
 
         public override void CommitState()
@@ -144,7 +132,7 @@ namespace Arteranos.WorldEdit
     public class WOCColor : WOCBase
     {
         [ProtoMember(1)]
-        public WOColor color;
+        public WOColor color = Color.white;
 
         private Renderer renderer = null;
 
@@ -152,11 +140,6 @@ namespace Arteranos.WorldEdit
         {
             base.Awake(gameObject);
             gameObject.TryGetComponent(out renderer);
-        }
-
-        public override void Init()
-        {
-            color = Color.white;
         }
 
         public override void CommitState()
