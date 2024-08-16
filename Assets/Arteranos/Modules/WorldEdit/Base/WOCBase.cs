@@ -24,7 +24,7 @@ namespace Arteranos.WorldEdit
     {
         public bool Dirty { get; protected set; } = false;
 
-        public GameObject GameObject { get; protected set; } = null;
+        public virtual GameObject GameObject { get; set; } = null;
 
         /// <summary>
         /// To make the changes to take effect.
@@ -41,18 +41,15 @@ namespace Arteranos.WorldEdit
         /// </summary>
         public abstract void CheckState();
 
-        public virtual void Awake(GameObject gameObject)
-        {
-            this.GameObject = gameObject;
-        }
-
         public virtual void OnDestroy() { }
 
         public void Update()
         {
-            // TODO Maybe only in edit mode?
-            CheckState();
+            if(G.WorldEditorData.IsInEditMode)
+                CheckState();
         }
+
+        public abstract void ReplaceValues(WOCBase wOCBase);
 
         public abstract object Clone();
 
@@ -71,10 +68,14 @@ namespace Arteranos.WorldEdit
 
         private Transform transform = null;
 
-        public override void Awake(GameObject gameObject)
+        public override GameObject GameObject
         {
-            base.Awake(gameObject);
-            transform = gameObject.transform;
+            get => base.GameObject;
+            set
+            {
+                base.GameObject = value;
+                transform = GameObject.transform;
+            }
         }
 
         public override void CommitState()
@@ -126,6 +127,14 @@ namespace Arteranos.WorldEdit
 
         public override (string name, GameObject gameObject) GetUI() 
             => ("Transform", BP.I.WorldEdit.TransformInspector);
+
+        public override void ReplaceValues(WOCBase wOCBase)
+        {
+            WOCTransform t = wOCBase as WOCTransform;
+            position = t.position; 
+            rotation = t.rotation; 
+            scale = t.scale;
+        }
     }
 
     [ProtoContract]
@@ -136,10 +145,14 @@ namespace Arteranos.WorldEdit
 
         private Renderer renderer = null;
 
-        public override void Awake(GameObject gameObject)
+        public override GameObject GameObject
         {
-            base.Awake(gameObject);
-            gameObject.TryGetComponent(out renderer);
+            get => base.GameObject;
+            set
+            {
+                base.GameObject = value;
+                GameObject.TryGetComponent(out renderer);
+            }
         }
 
         public override void CommitState()
@@ -171,5 +184,12 @@ namespace Arteranos.WorldEdit
 
         public override (string name, GameObject gameObject) GetUI()
             => ("Color", BP.I.WorldEdit.ColorInspector);
+
+        public override void ReplaceValues(WOCBase wOCBase)
+        {
+            WOCColor c = wOCBase as WOCColor;
+
+            color = c.color;
+        }
     }
 }

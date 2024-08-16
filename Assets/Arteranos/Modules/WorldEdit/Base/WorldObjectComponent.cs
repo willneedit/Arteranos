@@ -175,15 +175,14 @@ namespace Arteranos.WorldEdit
                 WOCBase w = WOComponents[i];
                 if (wocb.GetType() == w.GetType())
                 {
-                    WOComponents[i] = wocb;
-                    wocb.Awake(gameObject);
-                    wocb.CommitState();
+                    w.ReplaceValues(wocb);
+                    w.CommitState();
                     return true;
                 }
             }
 
             WOComponents.Add(wocb);
-            wocb.Awake(gameObject);
+            wocb.GameObject = gameObject;
             wocb.CommitState();
             return false;
         }

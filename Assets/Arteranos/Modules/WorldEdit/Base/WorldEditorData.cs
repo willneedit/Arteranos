@@ -229,6 +229,9 @@ namespace Arteranos.WorldEdit
                 if (worldChange is not WorldRollbackRequest)
                     AddUndoEntry();
 
+                // TODO Need to add a notify when the world is about to change, e.g. remembering
+                // the object list's current root.
+
                 // Make the changes real.
                 // Rollback request will recall an arbitrary snapshot from the stack.
                 yield return worldChange.Apply();

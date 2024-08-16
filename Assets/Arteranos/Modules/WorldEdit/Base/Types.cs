@@ -215,7 +215,7 @@ namespace Arteranos.WorldEdit
 
             foreach (WOCBase w in woc.WOComponents)
             {
-                w.Awake(gob);
+                w.GameObject = gob;
                 w.CommitState();
             }
 

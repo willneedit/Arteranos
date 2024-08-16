@@ -17,6 +17,11 @@ namespace Arteranos.WorldEdit
                 transform.rotation = Quaternion.identity;
             else
                 transform.localRotation = Quaternion.identity;
+
+            transform.localScale = new(
+                1 / (transform.lossyScale.x + float.Epsilon),
+                1 / (transform.lossyScale.y + float.Epsilon),
+                1 / (transform.lossyScale.z + float.Epsilon));
         }
     }
 }
