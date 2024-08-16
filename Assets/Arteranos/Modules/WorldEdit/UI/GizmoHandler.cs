@@ -11,7 +11,7 @@ namespace Arteranos.WorldEdit
 {
     public class GizmoHandler : MonoBehaviour
     {
-        void Update()
+        private void Update()
         {
             if(G.WorldEditorData.UsingGlobal)
                 transform.rotation = Quaternion.identity;
@@ -19,9 +19,9 @@ namespace Arteranos.WorldEdit
                 transform.localRotation = Quaternion.identity;
 
             transform.localScale = new(
-                1 / (transform.lossyScale.x + float.Epsilon),
-                1 / (transform.lossyScale.y + float.Epsilon),
-                1 / (transform.lossyScale.z + float.Epsilon));
+                1 / (transform.parent.lossyScale.x + float.Epsilon),
+                1 / (transform.parent.lossyScale.y + float.Epsilon),
+                1 / (transform.parent.lossyScale.z + float.Epsilon));
         }
     }
 }
