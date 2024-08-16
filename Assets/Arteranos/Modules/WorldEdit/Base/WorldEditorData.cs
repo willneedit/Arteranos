@@ -352,8 +352,11 @@ namespace Arteranos.WorldEdit
 
             if (!CurrentWorldObject) return;
 
-            Vector3 v = TransformAction * Time.deltaTime;
             CurrentWorldObject.TryGetComponent(out WorldObjectComponent woc);
+            if (woc.IsLocked) return;
+
+            Vector3 v = TransformAction * Time.deltaTime;
+
             woc.TryGetWOC(out WOCTransform woct);
 
             Vector3 p = woct.position;
@@ -398,7 +401,10 @@ namespace Arteranos.WorldEdit
                 gizmoObject = null;
             }
 
-            if (!IsInEditMode || !currentWorldObject) return;
+            if (!IsInEditMode || !CurrentWorldObject) return;
+            CurrentWorldObject.TryGetComponent(out WorldObjectComponent woc);
+
+            if (woc.IsLocked) return;
 
             GameObject gobp = EditModes[EditModeIndex] switch
             {
@@ -408,7 +414,7 @@ namespace Arteranos.WorldEdit
                 _ => throw new NotImplementedException()
             };
 
-            gizmoObject = Instantiate(gobp, currentWorldObject.transform);
+            gizmoObject = Instantiate(gobp, CurrentWorldObject.transform);
         }
 
 

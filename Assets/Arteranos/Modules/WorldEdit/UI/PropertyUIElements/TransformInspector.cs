@@ -97,10 +97,13 @@ namespace Arteranos.WorldEdit
                     float.Parse(txt_Scale_Y.text),
                     float.Parse(txt_Scale_Z.text));
 
+                if (s.x <= 0 || s.y <= 0 || s.z <= 0)
+                    throw new ArgumentOutOfRangeException("Scale");
+
                 (Woc as WOCTransform).SetState(p, r, s, G.WorldEditorData.UsingGlobal);
                 PropertyPanel.CommitModification(this);
             }
-            catch (FormatException) { }
+            catch { }
         }
     }
 }

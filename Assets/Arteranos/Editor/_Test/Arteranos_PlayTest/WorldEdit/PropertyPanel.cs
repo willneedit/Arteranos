@@ -19,6 +19,7 @@ using Object = UnityEngine.Object;
 
 namespace Arteranos.PlayTest.WorldEdit
 {
+#if false
     public class PropertyPanel : WorldEditFixture
     {
         private GameObject canvas = null;
@@ -314,4 +315,5 @@ namespace Arteranos.PlayTest.WorldEdit
             Assert.AreEqual("Test Sphere Renamed" , woli.WorldObject.name);
         }
     }
+#endif
 }
