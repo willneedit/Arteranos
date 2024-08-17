@@ -1,0 +1,74 @@
+/*
+ * Copyright (c) 2024, willneedit
+ * 
+ * Licensed by the Mozilla Public License 2.0,
+ * residing in the LICENSE.md file in the project's root directory.
+ */
+
+using Arteranos.Core;
+using ProtoBuf;
+using UnityEngine;
+
+namespace Arteranos.WorldEdit
+{
+    [ProtoContract]
+    public class WOCPhysics : WOCBase
+    {
+        [ProtoMember(1)]
+        public bool Collidable = false;
+        [ProtoMember(2)]
+        public bool Grabbable = false;
+        [ProtoMember(3)]
+        public bool ObeysGravity = false;
+        [ProtoMember(4)]
+        public float ResetDuration = 0.0f;
+
+        private WorldObjectComponent woc = null;
+
+        public override GameObject GameObject
+        {
+            get => base.GameObject;
+            set
+            {
+                base.GameObject = value;
+                GameObject.TryGetComponent(out woc);
+            }
+        }
+
+        public override void CommitState()
+        {
+            base.CommitState();
+            // TODO Propagate to WOC
+
+            Dirty = false;
+        }
+
+        public override void CheckState()
+        {
+            // Leave untouched.
+        }
+
+        public void SetState()
+        {
+            Dirty = true;
+        }
+
+        public override object Clone()
+        {
+            return MemberwiseClone();
+        }
+
+        public override (string name, GameObject gameObject) GetUI()
+            => ("Physics", BP.I.WorldEdit.PhysicsInspector);
+
+        public override void ReplaceValues(WOCBase wOCBase)
+        {
+            WOCPhysics p = wOCBase as WOCPhysics;
+
+            Collidable = p.Collidable;
+            Grabbable = p.Grabbable;
+            ObeysGravity = p.ObeysGravity;
+            ResetDuration = p.ResetDuration;
+        }
+    }
+}

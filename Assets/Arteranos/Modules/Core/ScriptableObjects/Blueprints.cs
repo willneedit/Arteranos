@@ -88,6 +88,7 @@ namespace Arteranos.Core
 
             public GameObject TransformInspector;
             public GameObject ColorInspector;
+            public GameObject PhysicsInspector;
         }
 
         public WorldEdit_ WorldEdit;
