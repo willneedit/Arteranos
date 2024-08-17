@@ -80,6 +80,10 @@ namespace Arteranos.WorldEdit
         {
             WorldObjects.Clear();
 
+            // The current root has vanished. Maybe because of undo or concurrent editing.
+            if (!CurrentRoot) 
+                CurrentRoot = WORoot;
+
             WorldObjects.Add( CurrentRoot );
 
             for(int i = 0; i < CurrentRoot.transform.childCount; ++i)
@@ -139,20 +143,23 @@ namespace Arteranos.WorldEdit
             Transform current = CurrentRoot.transform;
             woi.SetPathFromThere(current);
 
-            // TODO Maybe to only modify the transform to place the object in front of the user.
-            //woi.components = new()
-            //{
-            //    // ...the default transform...
-            //    new WOCTransform()
-            //    {
-            //        position = Vector3.zero,
-            //        rotation = Vector3.zero,
-            //        scale = Vector3.one
-            //    },
+            Transform ct = Camera.main.transform;
 
-            //    // ...and color.
-            //    new WOCColor() { color = Color.white }
-            //};
+            // TODO Custom up vector?
+            Vector3 facingAngles = new(
+            0,
+            (ct.rotation.eulerAngles.y + 180.0f) % 360.0f,
+            0);
+
+            // Add default components....
+
+            // ...Transform as the first component, and place it in front of the user
+            woi.components.Insert(0, new WOCTransform()
+            {
+                position = ct.position + ct.rotation * Vector3.forward * 2.5f,
+                rotation = facingAngles,
+                scale = Vector3.one
+            });
 
             // Post the insertion request to the server, it should come back.
             // If you have the rights to do this.
