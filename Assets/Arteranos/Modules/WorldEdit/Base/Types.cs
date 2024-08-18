@@ -207,7 +207,6 @@ namespace Arteranos.WorldEdit
             WorldObjectComponent woc = gob.AddComponent<WorldObjectComponent>();  
             woc.Asset = asset;
             woc.Id = id;
-            woc.IsCollidable = collidable;
             woc.WOComponents = components;
 
             Transform t = gob.transform;
@@ -273,9 +272,6 @@ namespace Arteranos.WorldEdit
         [ProtoMember(3)]
         public Guid id = Guid.NewGuid();
 
-        [ProtoMember(4)]
-        public bool collidable;
-
         [ProtoMember(7)]
         public List<WOCBase> components;  // Additional properties (like teleport marker, ...)
 
@@ -288,7 +284,6 @@ namespace Arteranos.WorldEdit
                 asset = asset,
                 name = name,
                 id = id,
-                collidable = collidable,
                 components = components
             };
 
@@ -411,7 +406,6 @@ namespace Arteranos.WorldEdit
             wo.name = t.name;
             wo.components = woc.WOComponents;
             wo.id = woc.Id;
-            wo.collidable = woc.IsCollidable;
 
             if(includeChildren)
             {

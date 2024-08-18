@@ -21,9 +21,6 @@ namespace Arteranos.WorldEdit
 
         public Toggle chk_Local;
         public Toggle chk_Global;
-        public Slider sld_Hue;
-
-        public Toggle chk_Collidable;
 
         public Transform grp_Component_List;
 
@@ -60,11 +57,7 @@ namespace Arteranos.WorldEdit
             btn_ReturnToList.onClick.AddListener(GotReturnToChooserClick);
             chk_Local.onValueChanged.AddListener(_ => SetLocalMode(true));
             chk_Global.onValueChanged.AddListener(_ => SetLocalMode(false));
-
-            chk_Collidable.onValueChanged.AddListener(SetCollidable);
         }
-
-        private void SetCollidable(bool collidable) => Woc.IsCollidable = collidable;
 
         protected override void OnEnable()
         {
@@ -145,8 +138,6 @@ namespace Arteranos.WorldEdit
         private void Populate()
         {
             lbl_Heading.text = WorldObject.name;
-
-            chk_Collidable.SetIsOnWithoutNotify(Woc.IsCollidable);
 
             for (int i = 0; i < grp_Component_List.childCount; i++)
             {

@@ -51,7 +51,6 @@ namespace Arteranos.PlayTest.WorldEdit
             WorldObjectComponent woc = tc.GetComponent<WorldObjectComponent>();
 
             Assert.IsNotNull(woc);
-            Assert.True(woc.IsCollidable);
         }
 
         [UnityTest]

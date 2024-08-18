@@ -21,8 +21,15 @@ namespace Arteranos.WorldEdit
         public Toggle chk_ObeysGravity;
         public NumberedSlider sld_ResetDuration;
 
-        public WOCBase Woc { get; set; }
+        public WOCBase Woc 
+        { 
+            get => physics; 
+            set => physics = value as WOCPhysics; 
+        }
+
         public PropertyPanel PropertyPanel { get; set; }
+
+        private WOCPhysics physics;
 
         protected override void Awake()
         {
@@ -31,7 +38,31 @@ namespace Arteranos.WorldEdit
             Debug.Assert(Woc != null);
             Debug.Assert(PropertyPanel);
 
-            // ColorPicker.OnColorChanged += GotColorChanged;
+            chk_Collidable.onValueChanged.AddListener(on =>
+            {
+                physics.Collidable = on;
+
+                // If it's not collidable, it would fall right through the floor.
+                chk_ObeysGravity.interactable = on;
+                if (!on) chk_ObeysGravity.isOn = false;
+
+                physics.SetState();
+                PropertyPanel.CommitModification(this);
+            });
+
+            chk_Grabbable.onValueChanged.AddListener(on =>
+            {
+                physics.Grabbable = on;
+                physics.SetState();
+                PropertyPanel.CommitModification(this);
+            });
+
+            chk_ObeysGravity.onValueChanged.AddListener(on =>
+            {
+                physics.ObeysGravity = on;
+                physics.SetState();
+                PropertyPanel.CommitModification(this);
+            });
         }
 
         protected override void OnEnable()
@@ -43,14 +74,9 @@ namespace Arteranos.WorldEdit
 
         public void Populate()
         {
-            // ColorPicker.SetColorWithoutNotify((Woc as WOCColor).color);
+            chk_Collidable.isOn = physics.Collidable;
+            chk_Grabbable.isOn = physics.Grabbable;
+            chk_ObeysGravity.isOn = physics.ObeysGravity;
         }
-
-        //private void GotColorChanged(Color obj)
-        //{
-        //    (Woc as WOCColor).SetState(obj);
-
-        //    PropertyPanel.CommitModification(this);
-        //}
     }
 }

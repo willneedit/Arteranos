@@ -348,9 +348,9 @@ namespace Arteranos.WorldEdit
 
         private void HandleKMObjectEdit()
         {
-            if (TransformAction == Vector3.zero) return;
+            if (!CurrentWorldObject || !isInEditMode) return;
 
-            if (!CurrentWorldObject) return;
+            if (TransformAction == Vector3.zero) return;
 
             CurrentWorldObject.TryGetComponent(out WorldObjectComponent woc);
             if (woc.IsLocked) return;

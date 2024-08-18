@@ -19,6 +19,7 @@ namespace Arteranos.WorldEdit
     [ProtoContract]
     [ProtoInclude(65537, typeof(WOCTransform))]
     [ProtoInclude(65538, typeof(WOCColor))]
+    [ProtoInclude(65539, typeof(WOCPhysics))]
     public abstract class WOCBase : ICloneable
     {
         public bool Dirty { get; protected set; } = false;

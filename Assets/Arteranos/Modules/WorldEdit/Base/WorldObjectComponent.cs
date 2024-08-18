@@ -30,31 +30,31 @@ namespace Arteranos.WorldEdit
             set
             {
                 isLocked = value;
-                SetIsMovable();
+                UpdatePhysicsState();
             }
         }
-        public bool IsCollidable
-        {
-            get => isCollidable;
-            set
-            {
-                isCollidable = value;
-                gameObject.layer = (int) (value ? ColliderType.Solid : ColliderType.Ghostly);
-            }
-        }
-        public bool IsGrabbable
-        {
-            get => isGrabbable;
-            set
-            {
-                isGrabbable = value;
-                SetIsMovable();
-            }
-        }
+        //public bool IsCollidable
+        //{
+        //    get => isCollidable;
+        //    set
+        //    {
+        //        isCollidable = value;
+        //        gameObject.layer = (int) (value ? ColliderType.Solid : ColliderType.Ghostly);
+        //    }
+        //}
+        //public bool IsGrabbable
+        //{
+        //    get => isGrabbable;
+        //    set
+        //    {
+        //        isGrabbable = value;
+        //        SetIsMovable();
+        //    }
+        //}
 
-        private bool isCollidable = false;
+        //private bool isGrabbable = false;
+        //private bool isCollidable = false;
         private bool isLocked = false;
-        private bool isGrabbable = false;
 
         private Rigidbody body = null;
         private XRGrabInteractable mover = null;
@@ -65,14 +65,10 @@ namespace Arteranos.WorldEdit
 
             // TODO: remove these modifications of physics-aware objects
             // Prevent falling/floating/sliding of collidable objects
-            body.useGravity = false;
-            body.drag = 1000.0f;
-            body.angularDrag = 1000.0f;
+            //body.drag = 1000.0f;
+            //body.angularDrag = 1000.0f;
 
-            // Prevent 'popping out' of intersecting collidable objects
-            body.constraints = RigidbodyConstraints.FreezeAll;
-
-            body.isKinematic = true;
+            //body.isKinematic = true;
 
             mover = gameObject.AddComponent<XRGrabInteractable>();
             mover.throwOnDetach = false;
@@ -83,6 +79,8 @@ namespace Arteranos.WorldEdit
             mover.lastSelectExited.AddListener(GotObjectRelease);
 
             G.WorldEditorData.OnEditorModeChanged += GotEditorModeChanged;
+
+            UpdatePhysicsState();
         }
 
         private void OnDestroy()
@@ -90,7 +88,7 @@ namespace Arteranos.WorldEdit
             G.WorldEditorData.OnEditorModeChanged -= GotEditorModeChanged;
         }
 
-        private void GotEditorModeChanged(bool editing) => SetIsMovable();
+        private void GotEditorModeChanged(bool editing) => UpdatePhysicsState();
 
         private void Update()
         {
@@ -193,11 +191,28 @@ namespace Arteranos.WorldEdit
                 w.CommitState();
         }
 
-        private void SetIsMovable()
+        public void UpdatePhysicsState()
         {
+            // It's in a not (yet) instantiated object, take it as-is within CommitState()
+            if (!body || !mover) return;
+
+            TryGetWOC(out WOCPhysics p);
+
+            // Prevent physics shenanigans in the edit mode
+            body.constraints = G.WorldEditorData.IsInEditMode
+                ? RigidbodyConstraints.FreezeAll
+                : RigidbodyConstraints.None;
+
+            body.useGravity = !G.WorldEditorData.IsInEditMode
+                && (p?.ObeysGravity ?? false);
+
+            gameObject.layer = (int)(p?.Collidable ?? false 
+                ? ColliderType.Solid 
+                : ColliderType.Ghostly);
+
             mover.enabled = G.WorldEditorData.IsInEditMode 
                 ? !IsLocked
-                : IsGrabbable;
+                : p?.Grabbable ?? false;
         }
 
         public WorldObjectPatch MakePatch(bool complete = false)
@@ -226,7 +241,6 @@ namespace Arteranos.WorldEdit
                 components = woc.WOComponents,
                 name = transform.name,
                 id = Guid.NewGuid(), // Creating a copy of an existing one, so spawn a new guid
-                collidable = woc.IsCollidable
             };
 
             woi.SetPathFromThere(transform.parent);

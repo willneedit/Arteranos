@@ -38,7 +38,8 @@ namespace Arteranos.WorldEdit
         public override void CommitState()
         {
             base.CommitState();
-            // TODO Propagate to WOC
+
+            woc.UpdatePhysicsState();
 
             Dirty = false;
         }

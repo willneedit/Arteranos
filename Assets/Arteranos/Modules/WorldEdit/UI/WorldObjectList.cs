@@ -161,6 +161,9 @@ namespace Arteranos.WorldEdit
                 scale = Vector3.one
             });
 
+            // ...Physics component
+            woi.components.Insert(1, new WOCPhysics());
+
             // Post the insertion request to the server, it should come back.
             // If you have the rights to do this.
             woi.EmitToServer();
