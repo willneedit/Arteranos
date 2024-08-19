@@ -39,6 +39,7 @@ namespace Arteranos.UI
         public Button btn_CloseButton = null;
 
         public event Action<string, bool> OnFinishing;
+        public event Action<string> OnValueChanged;
 
         public string Text
         {
@@ -83,14 +84,18 @@ namespace Arteranos.UI
 
             LayoutKeyboard();
 
-            PreviewField.onValueChanged.AddListener(OnValueChanged);
+            PreviewField.onValueChanged.AddListener(GotValueChanged);
 
             btn_CloseButton.onClick.AddListener(OnCloseButtonClicked);
 
             Debug.Log($"Loaded keyboard layout: {layout}");
         }
 
-        private void OnValueChanged(string text) => lbl_RemainingChars.text = (PreviewField.characterLimit - text.Length).ToString();
+        private void GotValueChanged(string text)
+        {
+            lbl_RemainingChars.text = (PreviewField.characterLimit - text.Length).ToString();
+            OnValueChanged?.Invoke(text);
+        }
 
         protected override void OnEnable()
         {

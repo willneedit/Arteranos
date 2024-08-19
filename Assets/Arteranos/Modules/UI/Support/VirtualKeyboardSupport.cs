@@ -55,8 +55,11 @@ namespace Arteranos.UI
             }
         }
 
-        private Action<string, bool> MakeKbdCallback(TMP_InputField field) 
+        private Action<string, bool> MakeFinishCallback(TMP_InputField field) 
             => (string text, bool completed) => CommitEditing(field, text, completed);
+
+        private Action<string> MakeChangeCallback(TMP_InputField field)
+            => (string text) => PropagateTextChange(field, text);
 
         private void HookVirtualKB(TMP_InputField field)
         {
@@ -97,16 +100,23 @@ namespace Arteranos.UI
             AttachedKB.Text = field.text;
             AttachedKB.StringPosition = field.text.Length;
             AttachedKB.CharacterLimit = field.characterLimit;
-            AttachedKB.OnFinishing += MakeKbdCallback(field);
+            AttachedKB.OnFinishing += MakeFinishCallback(field);
+            AttachedKB.OnValueChanged += MakeChangeCallback(field);
             AttachedKB.gameObject.SetActive(true);
         }
 
         private void CommitEditing(TMP_InputField field, string text, bool completed)
         {
-            AttachedKB.OnFinishing -= MakeKbdCallback(field);
+            AttachedKB.OnFinishing -= MakeFinishCallback(field);
+            AttachedKB.OnValueChanged -= MakeChangeCallback(field);
             Destroy(AttachedKB.gameObject);
-            if(completed) field.text = text;
+            // if(completed) field.text = text;
         }
+        private void PropagateTextChange(TMP_InputField field, string text)
+        {
+            field.text = text;
+        }
+
     }
 }
 
