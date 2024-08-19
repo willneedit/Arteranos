@@ -15,13 +15,13 @@ namespace Arteranos.WorldEdit
     public class WOCPhysics : WOCBase
     {
         [ProtoMember(1)]
-        public bool Collidable = false;
+        public bool Collidable;
         [ProtoMember(2)]
-        public bool Grabbable = false;
+        public bool Grabbable;
         [ProtoMember(3)]
-        public bool ObeysGravity = false;
+        public bool ObeysGravity;
         [ProtoMember(4)]
-        public float ResetDuration = 0.0f;
+        public float ResetDuration;
 
         private WorldObjectComponent woc = null;
 

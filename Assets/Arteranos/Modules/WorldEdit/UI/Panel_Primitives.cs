@@ -87,7 +87,7 @@ namespace Arteranos.WorldEdit
                 name = primitives[index].name,
                 components = new() 
                 { 
-                    new WOCColor()
+                    new WOCColor() { color = Color.gray }
                 }
             });
         }

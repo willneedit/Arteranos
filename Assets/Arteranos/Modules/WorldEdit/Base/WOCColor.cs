@@ -15,7 +15,7 @@ namespace Arteranos.WorldEdit
     public class WOCColor : WOCBase
     {
         [ProtoMember(1)]
-        public WOColor color = Color.white;
+        public WOColor color;
 
         private Renderer renderer = null;
 

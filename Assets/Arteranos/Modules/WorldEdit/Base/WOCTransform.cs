@@ -15,11 +15,11 @@ namespace Arteranos.WorldEdit
     public class WOCTransform : WOCBase
     {
         [ProtoMember(1)]
-        public WOVector3 position = Vector3.zero;
+        public WOVector3 position;
         [ProtoMember(2)]
-        public WOVector3 rotation = Vector3.zero; // Euler angles -- less data, needs Quaternion.eulerAngles and Quaternion.Euler()
+        public WOVector3 rotation; // Euler angles -- less data, needs Quaternion.eulerAngles and Quaternion.Euler()
         [ProtoMember(3)]
-        public WOVector3 scale = Vector3.one;
+        public WOVector3 scale;
 
         private Transform transform = null;
 
