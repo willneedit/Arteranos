@@ -183,8 +183,8 @@ namespace Arteranos
             HSV.y = vector.x;
             HSV.z = vector.y;
 
-            txt_S.text = HSV.y.ToString("F4");
-            txt_V.text = HSV.z.ToString("F4");
+            txt_S.SetTextWithoutNotify(HSV.y.ToString("F4"));
+            txt_V.SetTextWithoutNotify(HSV.z.ToString("F4"));
 
             Color = HSVtoRGB(HSV);
             UpdateRGB();
@@ -193,7 +193,7 @@ namespace Arteranos
         private void GotHuePanelClick(Vector2 vector)
         {
             HSV.x = 1.0f - vector.y; // The start of the rainbow is on the top, not the bottom.
-            txt_H.text = HSV.x.ToString("F4");
+            txt_H.SetTextWithoutNotify(HSV.x.ToString("F4"));
             UpdateHuePanel();
 
             Color = HSVtoRGB(HSV);

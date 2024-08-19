@@ -1072,9 +1072,8 @@ MonoBehaviour:
   lbl_Heading: {fileID: 7919870569898683078}
   chk_Local: {fileID: 2025085450246785560}
   chk_Global: {fileID: 1245325846994067038}
-  sld_Hue: {fileID: 0}
   grp_Component_List: {fileID: 707729911707014700}
-  bp_CollapsiblePane: {fileID: 7607224959874254577, guid: 84f03ee63ae2ed34784ba5b095e3875f,
+  bp_CollapsiblePane: {fileID: 185341464900179991, guid: 2cd74bcfff6c8c34a8c3cf44a21058d9,
     type: 3}
 --- !u!114 &2307816376945340379
 MonoBehaviour:

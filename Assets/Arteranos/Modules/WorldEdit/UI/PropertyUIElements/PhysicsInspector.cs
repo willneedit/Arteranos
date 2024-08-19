@@ -42,9 +42,7 @@ namespace Arteranos.WorldEdit
             {
                 physics.Collidable = on;
 
-                // If it's not collidable, it would fall right through the floor.
-                chk_ObeysGravity.interactable = on;
-                if (!on) chk_ObeysGravity.isOn = false;
+                ValidateInput();
 
                 physics.SetState();
                 PropertyPanel.CommitModification(this);
@@ -65,6 +63,17 @@ namespace Arteranos.WorldEdit
             });
         }
 
+        private void ValidateInput()
+        {
+            // If it's not collidable, it would fall right through the floor.
+            chk_ObeysGravity.interactable = physics.Collidable;
+            if (!physics.Collidable)
+            {
+                chk_ObeysGravity.SetIsOnWithoutNotify(false);
+                physics.ObeysGravity = false;
+            }
+        }
+
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -77,6 +86,8 @@ namespace Arteranos.WorldEdit
             chk_Collidable.isOn = physics.Collidable;
             chk_Grabbable.isOn = physics.Grabbable;
             chk_ObeysGravity.isOn = physics.ObeysGravity;
+
+            ValidateInput();
         }
     }
 }
