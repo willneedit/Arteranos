@@ -19,20 +19,17 @@ namespace Arteranos.WorldEdit
         public Button btn_ReturnToList;
         public TextMeshProUGUI lbl_Heading;
 
-        public Toggle chk_Local;
-        public Toggle chk_Global;
-
         public Transform grp_Component_List;
 
         public GameObject bp_CollapsiblePane;
 
         public GameObject WorldObject
         {
-            get => G.WorldEditorData.CurrentWorldObject;
+            get => G.WorldEditorData.FocusedWorldObject;
             set
             {
-                G.WorldEditorData.CurrentWorldObject = value;
-                Woc = G.WorldEditorData.CurrentWorldObject.GetComponent<WorldObjectComponent>();
+                G.WorldEditorData.FocusedWorldObject = value;
+                Woc = G.WorldEditorData.FocusedWorldObject.GetComponent<WorldObjectComponent>();
             }
         }
 
@@ -55,8 +52,6 @@ namespace Arteranos.WorldEdit
             base.Awake();
 
             btn_ReturnToList.onClick.AddListener(GotReturnToChooserClick);
-            chk_Local.onValueChanged.AddListener(_ => SetLocalMode(true));
-            chk_Global.onValueChanged.AddListener(_ => SetLocalMode(false));
         }
 
         protected override void OnEnable()
@@ -64,8 +59,6 @@ namespace Arteranos.WorldEdit
             base.OnEnable();
 
             Transform root = WorldEditorData.FindObjectByPath(null);
-
-            SetLocalMode(!G.WorldEditorData.UsingGlobal);
 
             Populate();
 
@@ -154,16 +147,6 @@ namespace Arteranos.WorldEdit
                 WorldObject.MakePatch(false).EmitToServer();
         }
 
-        private void SetLocalMode(bool local)
-        {
-            chk_Local.SetIsOnWithoutNotify(local);
-            chk_Global.SetIsOnWithoutNotify(!local);
-
-            G.WorldEditorData.UsingGlobal = !local;
-
-            Populate();
-        }
-
         private void GotReturnToChooserClick()
         {
             OnReturnToList?.Invoke();
@@ -171,7 +154,6 @@ namespace Arteranos.WorldEdit
 
 #if UNITY_EDITOR
         public void Test_OnReturnToChooserClicked() => GotReturnToChooserClick();
-        public void Test_SetLocalMode(bool local) => SetLocalMode(local);
 #endif
     }
 }

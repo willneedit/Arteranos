@@ -27,7 +27,7 @@ namespace Arteranos.WorldEdit
         bool LockYAxis { get; set; }
         bool LockZAxis { get; set; }
         bool UsingGlobal { get; set; }
-        GameObject CurrentWorldObject { get; set; }
+        GameObject FocusedWorldObject { get; set; }
         string WorldName { get; set; }
         string WorldDescription { get; set; }
         ServerPermissions ContentWarning { get; set; }

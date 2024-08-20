@@ -34,7 +34,7 @@ namespace Arteranos.WorldEdit
         public event Action<IWorldChange> OnWorldChanged;
         public event Action<bool> OnEditorModeChanged;
 
-        public GameObject CurrentWorldObject
+        public GameObject FocusedWorldObject
         {
             get => currentWorldObject;
             set
@@ -348,11 +348,11 @@ namespace Arteranos.WorldEdit
 
         private void HandleKMObjectEdit()
         {
-            if (!CurrentWorldObject || !isInEditMode) return;
+            if (!FocusedWorldObject || !isInEditMode) return;
 
             if (TransformAction == Vector3.zero) return;
 
-            CurrentWorldObject.TryGetComponent(out WorldObjectComponent woc);
+            FocusedWorldObject.TryGetComponent(out WorldObjectComponent woc);
             if (woc.IsLocked) return;
 
             Vector3 v = TransformAction * Time.deltaTime;
@@ -390,7 +390,7 @@ namespace Arteranos.WorldEdit
             }
 
             woct.SetState(p, r, s);
-            CurrentWorldObject.MakePatch(false).EmitToServer();
+            FocusedWorldObject.MakePatch(false).EmitToServer();
         }
 
         private void PlaceGizmo()
@@ -401,8 +401,8 @@ namespace Arteranos.WorldEdit
                 gizmoObject = null;
             }
 
-            if (!IsInEditMode || !CurrentWorldObject) return;
-            CurrentWorldObject.TryGetComponent(out WorldObjectComponent woc);
+            if (!IsInEditMode || !FocusedWorldObject) return;
+            FocusedWorldObject.TryGetComponent(out WorldObjectComponent woc);
 
             if (woc.IsLocked) return;
 
@@ -414,7 +414,7 @@ namespace Arteranos.WorldEdit
                 _ => throw new NotImplementedException()
             };
 
-            gizmoObject = Instantiate(gobp, CurrentWorldObject.transform);
+            gizmoObject = Instantiate(gobp, FocusedWorldObject.transform);
         }
 
 

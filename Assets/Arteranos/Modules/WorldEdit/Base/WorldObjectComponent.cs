@@ -5,15 +5,11 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
+
 using System.Collections.Generic;
-using ProtoBuf;
 
-using Arteranos.Core;
 using UnityEngine;
-using System.IO;
 using System;
-
 using UnityEngine.XR.Interaction.Toolkit;
 
 namespace Arteranos.WorldEdit
@@ -33,27 +29,7 @@ namespace Arteranos.WorldEdit
                 UpdatePhysicsState();
             }
         }
-        //public bool IsCollidable
-        //{
-        //    get => isCollidable;
-        //    set
-        //    {
-        //        isCollidable = value;
-        //        gameObject.layer = (int) (value ? ColliderType.Solid : ColliderType.Ghostly);
-        //    }
-        //}
-        //public bool IsGrabbable
-        //{
-        //    get => isGrabbable;
-        //    set
-        //    {
-        //        isGrabbable = value;
-        //        SetIsMovable();
-        //    }
-        //}
 
-        //private bool isGrabbable = false;
-        //private bool isCollidable = false;
         private bool isLocked = false;
 
         private Rigidbody body = null;
@@ -68,15 +44,13 @@ namespace Arteranos.WorldEdit
             //body.drag = 1000.0f;
             //body.angularDrag = 1000.0f;
 
-            //body.isKinematic = true;
-
             mover = gameObject.AddComponent<XRGrabInteractable>();
             mover.throwOnDetach = false;
             mover.smoothPosition = true;
             mover.smoothRotation = true;
 
             mover.firstSelectEntered.AddListener(GotObjectGrabbed);
-            mover.lastSelectExited.AddListener(GotObjectRelease);
+            mover.lastSelectExited.AddListener(GotObjectReleased);
 
             G.WorldEditorData.OnEditorModeChanged += GotEditorModeChanged;
 
@@ -96,30 +70,31 @@ namespace Arteranos.WorldEdit
                 component.Update();
         }
 
-        private void GotObjectRelease(SelectExitEventArgs arg0)
+        private void GotObjectReleased(SelectExitEventArgs arg0)
         {
             if(G.WorldEditorData.IsInEditMode)
             {
                 // We're in edit mode, we are actually changing the world.
                 TryGetWOC(out WOCTransform woct);
 
-                var (position, eulerRotation) = ConstrainMovement(woct.position, woct.rotation);
+                (Vector3 position, Vector3 eulerRotation) = ConstrainMovement(woct.position, woct.rotation);
 
                 woct.SetState(
                     position, 
                     eulerRotation, 
-                    transform.localScale);
+                    woct.scale);
 
-                WorldObjectPatch wop = new();
+                WorldObjectPatch wop = new() { components = new() { woct } };
                 wop.SetPathFromThere(transform);
-                wop.components = new() { woct };
                 wop.EmitToServer();
             }
         }
 
         private void GotObjectGrabbed(SelectEnterEventArgs arg0)
         {
-            G.WorldEditorData.CurrentWorldObject = gameObject;
+            // Grabbing means it's the focused object.
+            if(G.WorldEditorData.IsInEditMode)
+                G.WorldEditorData.FocusedWorldObject = gameObject;
         }
 
 
@@ -196,21 +171,26 @@ namespace Arteranos.WorldEdit
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover) return;
 
+            //Concave colliders need to be kinematic. The basic colliders are all convex.
+            if (gameObject.TryGetComponent(out MeshCollider collider) && !collider.convex)
+                body.isKinematic = true;
+
             TryGetWOC(out WOCPhysics p);
 
             // Prevent physics shenanigans in the edit mode
-            body.constraints = G.WorldEditorData.IsInEditMode
+            bool isInEditMode = G.WorldEditorData.IsInEditMode;
+            body.constraints = isInEditMode
                 ? RigidbodyConstraints.FreezeAll
                 : RigidbodyConstraints.None;
 
-            body.useGravity = !G.WorldEditorData.IsInEditMode
+            body.useGravity = !isInEditMode
                 && (p?.ObeysGravity ?? false);
 
             gameObject.layer = (int)(p?.Collidable ?? false 
                 ? ColliderType.Solid 
                 : ColliderType.Ghostly);
 
-            mover.enabled = G.WorldEditorData.IsInEditMode 
+            mover.enabled = isInEditMode
                 ? !IsLocked
                 : p?.Grabbable ?? false;
         }

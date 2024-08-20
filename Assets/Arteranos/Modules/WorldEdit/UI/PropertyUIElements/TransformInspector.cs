@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Arteranos.WorldEdit
 {
@@ -27,6 +28,8 @@ namespace Arteranos.WorldEdit
         public TMP_InputField txt_Scale_X;
         public TMP_InputField txt_Scale_Y;
         public TMP_InputField txt_Scale_Z;
+
+        public Toggle chk_Global;
 
         public WOCBase Woc { get; set; }
         public PropertyPanel PropertyPanel { get; set; }
@@ -49,6 +52,8 @@ namespace Arteranos.WorldEdit
             txt_Scale_X.onValueChanged.AddListener(GotValuesChanged);
             txt_Scale_Y.onValueChanged.AddListener(GotValuesChanged);
             txt_Scale_Z.onValueChanged.AddListener(GotValuesChanged);
+
+            chk_Global.onValueChanged.AddListener(GotGlobalMode);
         }
 
         protected override void OnEnable()
@@ -78,6 +83,8 @@ namespace Arteranos.WorldEdit
             txt_Scale_X.SetTextWithoutNotify(s.x.ToString("F4"));
             txt_Scale_Y.SetTextWithoutNotify(s.y.ToString("F4"));
             txt_Scale_Z.SetTextWithoutNotify(s.z.ToString("F4"));
+
+            chk_Global.SetIsOnWithoutNotify(G.WorldEditorData.UsingGlobal);
         }
 
         private void GotValuesChanged(string arg0)
@@ -104,6 +111,13 @@ namespace Arteranos.WorldEdit
                 PropertyPanel.CommitModification(this);
             }
             catch { }
+        }
+
+        private void GotGlobalMode(bool arg0)
+        {
+            G.WorldEditorData.UsingGlobal = arg0;
+
+            Populate();
         }
     }
 }
