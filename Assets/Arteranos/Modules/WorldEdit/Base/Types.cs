@@ -15,7 +15,6 @@ using System.IO;
 using System;
 using System.Threading;
 using Ipfs.Unity;
-using Arteranos.Services;
 using GLTFast;
 
 namespace Arteranos.WorldEdit
@@ -23,7 +22,7 @@ namespace Arteranos.WorldEdit
     public enum ColliderType
     {
         Ghostly = 5,     // (Layer: UI) Collides nothing, passable
-        Intangible = 14, // (Layer: RigidBody): Collides likewise and solids, passable
+        Watery = 14,     // (Layer: RigidBody): Collides likewise and solids, passable
         Solid = 0,       // (Layer: Default): Collides likewise and intangibles, stops avatars
     }
 
@@ -142,10 +141,19 @@ namespace Arteranos.WorldEdit
 
                 if (success)
                 {
-                    GameObjectInstantiator instantiator = new(gltf, LoadedObject.transform);
+                    GameObjectBoundsInstantiator instantiator = new(gltf, LoadedObject.transform);
 
                     yield return Asyncs.Async2Coroutine(
                         gltf.InstantiateMainSceneAsync(instantiator));
+
+                    // Add a box collider with with the approximated bounds.
+                    Bounds? b = instantiator.CalculateBounds();
+                    if(b.HasValue)
+                    {
+                        BoxCollider bc = LoadedObject.AddComponent<BoxCollider>();
+                        bc.center = b.Value.center;
+                        bc.size = b.Value.size;
+                    }
                 }
 
                 LoadedObject.name = $"glTF {WOglTF.glTFCid}";
