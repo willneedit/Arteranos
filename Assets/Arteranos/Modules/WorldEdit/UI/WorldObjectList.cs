@@ -148,18 +148,36 @@ namespace Arteranos.WorldEdit
             // TODO Custom up vector?
             Vector3 facingAngles = new(
             0,
-            (ct.rotation.eulerAngles.y + 180.0f) % 360.0f,
+            ct.rotation.eulerAngles.y,
             0);
 
             // Add default components....
 
             // ...Transform as the first component, and place it in front of the user
-            woi.components.Insert(0, new WOCTransform()
+            WOCTransform newTransform;
+
+            if(CurrentRoot == WORoot)
             {
-                position = ct.position + ct.rotation * Vector3.forward * 2.5f,
-                rotation = facingAngles,
-                scale = Vector3.one
-            });
+                // Root resides at 0,0,0, global = local
+                newTransform = new WOCTransform()
+                {
+                    position = ct.position + ct.rotation * Vector3.forward * 2.5f,
+                    rotation = facingAngles,
+                    scale = Vector3.one
+                };
+            }
+            else
+            {
+                // leaf sprouting off right on its parent
+                newTransform = new WOCTransform()
+                {
+                    position = Vector3.zero,
+                    rotation = Vector3.zero,
+                    scale = Vector3.one
+                };
+            }
+
+            woi.components.Insert(0, newTransform);
 
             // ...Physics component
             woi.components.Insert(1, new WOCPhysics());
