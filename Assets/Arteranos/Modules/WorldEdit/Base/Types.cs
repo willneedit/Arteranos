@@ -48,6 +48,8 @@ namespace Arteranos.WorldEdit
 
         public void TakeSnapshot()
         {
+            objects = new();
+
             Transform t = WorldEditorData.FindObjectByPath(null);
             for (int i = 0; i < t.childCount; i++)
                 objects.Add(t.GetChild(i).MakeWorldObject());

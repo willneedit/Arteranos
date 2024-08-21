@@ -10,7 +10,6 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using Ipfs;
-using Arteranos.Services;
 using System.Collections.Generic;
 using System.Text;
 using Arteranos.WorldEdit;
@@ -42,6 +41,9 @@ namespace Arteranos.Core.Operations
                     win = wd.Info,
                     Updated = DateTime.MinValue
                 };
+
+                // Create a self-reference to the directory root
+                context.WorldInfo.win.WorldCid = context.WorldCid;
             }
 
             context.WorldInfo.DBUpdate();

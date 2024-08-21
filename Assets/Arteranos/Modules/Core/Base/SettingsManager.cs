@@ -45,6 +45,8 @@ namespace Arteranos.Core
 
             SetupPurgatory();
 
+            SetupWorldObjectRoot();
+
             ParseSettingsAndCmdLine();
 
             DefaultTOStext = BP.I.PrivacyTOSNotice.text;
@@ -102,6 +104,15 @@ namespace Arteranos.Core
             Purgatory = new GameObject("_Purgatory").transform;
             Purgatory.position = new Vector3(0, -9000, 0);
             DontDestroyOnLoad(Purgatory.gameObject);
+        }
+
+        private static void SetupWorldObjectRoot()
+        {
+            GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
+
+            // If the world object root doesn't exist yet, create one now.
+            if (!gameObject)
+                gameObject = Instantiate(BP.I.WorldEdit.WorldObjectRoot);
         }
 
         /// <summary>

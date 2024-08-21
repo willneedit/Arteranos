@@ -56,7 +56,7 @@ namespace Arteranos.UI
         }
 
         private Action<string, bool> MakeFinishCallback(TMP_InputField field) 
-            => (string text, bool completed) => CommitEditing(field, text, completed);
+            => (string text, bool completed) => CommitEditing(field);
 
         private Action<string> MakeChangeCallback(TMP_InputField field)
             => (string text) => PropagateTextChange(field, text);
@@ -105,18 +105,17 @@ namespace Arteranos.UI
             AttachedKB.gameObject.SetActive(true);
         }
 
-        private void CommitEditing(TMP_InputField field, string text, bool completed)
+        private void CommitEditing(TMP_InputField field)
         {
             AttachedKB.OnFinishing -= MakeFinishCallback(field);
             AttachedKB.OnValueChanged -= MakeChangeCallback(field);
             Destroy(AttachedKB.gameObject);
-            // if(completed) field.text = text;
         }
+
         private void PropagateTextChange(TMP_InputField field, string text)
         {
             field.text = text;
         }
-
     }
 }
 

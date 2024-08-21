@@ -862,27 +862,31 @@ namespace Arteranos.Services
             return ms.ToArray();
         }
         public async Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs.Pin.ListAsync(cancel).ConfigureAwait(false);
+            => await Ipfs.Pin.ListAsync(cancel).ConfigureAwait(false);
         public async Task<Stream> ReadFile(string path, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
+            => await Ipfs.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
 
         public async Task<Stream> Get(string path, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs.FileSystem.GetAsync(path, cancel: cancel).ConfigureAwait(false);
+            => await Ipfs.FileSystem.GetAsync(path, cancel: cancel).ConfigureAwait(false);
         public async Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs.FileSystem.AddAsync(stream, name, options, cancel).ConfigureAwait(false);
+            => await Ipfs.FileSystem.AddAsync(stream, name, options, cancel).ConfigureAwait(false);
         public async Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs.FileSystem.ListAsync(path, cancel).ConfigureAwait(false);
+            => await Ipfs.FileSystem.ListAsync(path, cancel).ConfigureAwait(false);
         public async Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs.FileSystem.AddDirectoryAsync(path, recursive, options, cancel).ConfigureAwait(false);
+            => await Ipfs.FileSystem.AddDirectoryAsync(path, recursive, options, cancel).ConfigureAwait(false);
         public async Task RemoveGarbage(CancellationToken cancel = default)
-            => await G.IPFSService.Ipfs.BlockRepository.RemoveGarbageAsync(cancel).ConfigureAwait(false);
+            => await Ipfs.BlockRepository.RemoveGarbageAsync(cancel).ConfigureAwait(false);
 
         public async Task<Cid> ResolveToCid(string path, CancellationToken cancel = default)
         {
-            string resolved = await G.IPFSService.Ipfs.ResolveAsync(path, cancel: cancel).ConfigureAwait(false);
+            string resolved = await Ipfs.ResolveAsync(path, cancel: cancel).ConfigureAwait(false);
             if (resolved == null || resolved.Length < 6 || resolved[0..6] != "/ipfs/") return null;
             return resolved[6..];
         }
+
+        public async Task<FileSystemNode> CreateDirectory(IEnumerable<IFileSystemLink> links, bool pin = true, CancellationToken cancel = default)
+            => await Ipfs.FileSystemEx.CreateDirectoryAsync(links, pin, cancel).ConfigureAwait(false);
+
         #endregion
     }
 }
