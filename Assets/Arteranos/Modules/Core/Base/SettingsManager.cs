@@ -45,13 +45,13 @@ namespace Arteranos.Core
 
             SetupPurgatory();
 
-            SetupWorldObjectRoot();
-
             ParseSettingsAndCmdLine();
 
             DefaultTOStext = BP.I.PrivacyTOSNotice.text;
             G.DefaultAvatar.Male = null;
             G.DefaultAvatar.Female = null;
+
+            SetupWorldObjectRoot();
         }
 
         protected abstract void OnDestroy();
