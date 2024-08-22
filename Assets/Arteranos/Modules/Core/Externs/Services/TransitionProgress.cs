@@ -13,6 +13,7 @@ using UnityEngine.SceneManagement;
 using Arteranos.WorldEdit;
 
 using AsyncOperation = UnityEngine.AsyncOperation;
+using Arteranos.Core.Operations;
 
 namespace Arteranos.Services
 {
@@ -62,6 +63,15 @@ namespace Arteranos.Services
                 G.World.Name = WorldName;
             }
 
+            WorldInfo worldInfo = WorldDownloader.GetWorldInfo(WorldDownloader.CurrentWorldContext);
+
+            if(WorldCid != null && WorldCid != worldInfo.WorldCid)
+            {
+                Debug.LogWarning("Attempt to move into the wrong world, falling back to offline");
+                WorldCid = null;
+                WorldName = null;
+            }
+
             G.XRVisualConfigurator.StartFading(1.0f);
             yield return new WaitForSeconds(0.5f);
 
@@ -74,8 +84,9 @@ namespace Arteranos.Services
 
         public static IEnumerator EnterDownloadedWorld()
         {
-            string worldABF = Core.Operations.WorldDownloader.CurrentWorldAssetBundlePath;
-            IWorldDecoration worldDecoration = Core.Operations.WorldDownloader.CurrentWorldDecoration;
+
+            string worldABF = WorldDownloader.GetWorldDataFile(WorldDownloader.CurrentWorldContext);
+            IWorldDecoration worldDecoration = WorldDownloader.GetWorldDecoration(WorldDownloader.CurrentWorldContext);
 
             Debug.Log($"Download complete, world={worldABF}");
 

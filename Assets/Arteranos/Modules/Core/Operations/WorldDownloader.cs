@@ -76,8 +76,7 @@ namespace Arteranos.Core.Operations
             WorldDownloadContext context = _context as WorldDownloadContext;
 
             // Invalidate the 'current' asset bundle path.
-            WorldDownloader.CurrentWorldAssetBundlePath = null;
-            WorldDownloader.CurrentWorldDecoration = null;
+            WorldDownloader.CurrentWorldContext = null;
 
             Cid worldCid = context.WorldCid;
             var (templateCid, decorationCid) = await OpUtils.GetWorldLinks(worldCid, token);
@@ -107,8 +106,7 @@ namespace Arteranos.Core.Operations
                 ProgressChanged((float)_actual / totalBytes);
             });
 
-            WorldDownloader.CurrentWorldDecoration = context.Decoration;
-            WorldDownloader.CurrentWorldAssetBundlePath = context.WorldAssetBundlePath;
+            WorldDownloader.CurrentWorldContext = context;
 
             // As an afterthought, pin the world in the local IPFS node.
             try
@@ -171,8 +169,9 @@ namespace Arteranos.Core.Operations
             return wi;
         }
 
-        public static string CurrentWorldAssetBundlePath { get; internal set; } = null;
-        public static IWorldDecoration CurrentWorldDecoration { get; internal set; } = null;
+        public static Context CurrentWorldContext { get; internal set; } = null;
+        //public static string CurrentWorldAssetBundlePath { get; internal set; } = null;
+        //public static IWorldDecoration CurrentWorldDecoration { get; internal set; } = null;
 
         public static (AsyncOperationExecutor<Context>, Context) PrepareGetWorldInfo(Cid WorldCid, int timeout = 600)
         {
@@ -201,7 +200,7 @@ namespace Arteranos.Core.Operations
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
             {
-                // TODO #115: Before: Check type: pure template or decorated world data (template + object list)
+                new DownloadWorldInfoOp(),
                 new DownloadTemplateOp(),
             })
             {
@@ -213,6 +212,9 @@ namespace Arteranos.Core.Operations
 
         public static WorldInfo GetWorldInfo(Context _context)
             => (_context as WorldDownloadContext).WorldInfo;
+
+        public static WorldInfo GetTemplateInfo(Context _context)
+            => (_context as WorldDownloadContext).TemplateInfo;
 
         public static string GetWorldDataFile(Context _context)
             => (_context as WorldDownloadContext).WorldAssetBundlePath;

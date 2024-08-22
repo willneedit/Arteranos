@@ -20,6 +20,7 @@ using System.Threading;
 using System.Collections;
 using Ipfs.Unity;
 using System.Diagnostics;
+using Arteranos.Core.Operations;
 
 namespace Arteranos.WorldEdit
 {
@@ -43,6 +44,7 @@ namespace Arteranos.WorldEdit
         public event Action OnReturnToList;
 
         private string templatePattern;
+        private string worldTemplateCid;
 
         protected override void Awake()
         {
@@ -101,14 +103,23 @@ namespace Arteranos.WorldEdit
             txt_WorldName.text = G.WorldEditorData.WorldName;
             txt_WorldDescription.text = G.WorldEditorData.WorldDescription;
 
-            // FIXME Needs to fall back to the template Cid, even if it's a
-            // derivation of an already hand-edited world
+            //WorldDownloader's info may be outdated if we fell back to offline.
             if (G.World.Cid == null)
+            {
+                worldTemplateCid = null;
                 lbl_Template.text = "None";
+            }
             else
+            {
+                WorldInfo info = WorldDownloader.GetTemplateInfo(WorldDownloader.CurrentWorldContext);
+                info ??= WorldDownloader.GetWorldInfo(WorldDownloader.CurrentWorldContext);
+
+                worldTemplateCid = info.WorldCid;
+
                 lbl_Template.text = string.Format(templatePattern,
-                    G.World.Cid,
-                    G.World.Name);
+                    info.WorldCid[^12..],
+                    info.WorldName);
+            }
 
             EnableSaveButtons();
 
@@ -118,8 +129,8 @@ namespace Arteranos.WorldEdit
         private void EnableSaveButtons()
         {
             // World needs templates....
-            btn_SaveAsZip.interactable = (G.World.Cid != null);
-            btn_SaveInGallery.interactable = (G.World.Cid != null);
+            btn_SaveAsZip.interactable = !string.IsNullOrEmpty(worldTemplateCid);
+            btn_SaveInGallery.interactable = !string.IsNullOrEmpty(worldTemplateCid);
         }
 
         private void RefreshContentWarning()
@@ -177,7 +188,7 @@ namespace Arteranos.WorldEdit
                 IFileSystemNode fsn = null;
 
                 yield return Asyncs.Async2Coroutine(
-                    AssembleWorldDirectory(G.World.Cid, world),
+                    AssembleWorldDirectory(worldTemplateCid, world),
                     result => fsn = result);
 
 
