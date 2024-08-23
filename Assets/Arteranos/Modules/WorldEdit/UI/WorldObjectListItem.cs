@@ -104,6 +104,9 @@ namespace Arteranos.WorldEdit
 
         private void GotDeleteClicked()
         {
+            // Save into paste buffer, too.
+            G.WorldEditorData.SaveToPasteBuffer(WorldObject);
+
             WorldObjectDeletion wod = new();
             wod.SetPathFromThere(WorldObject.transform);
 

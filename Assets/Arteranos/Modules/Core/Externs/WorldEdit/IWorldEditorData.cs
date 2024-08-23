@@ -31,6 +31,7 @@ namespace Arteranos.WorldEdit
         string WorldName { get; set; }
         string WorldDescription { get; set; }
         ServerPermissions ContentWarning { get; set; }
+        byte[] PasteBuffer { get; set; }
 
         event Action<bool> OnEditorModeChanged;
         event Action<IWorldChange> OnWorldChanged;
@@ -45,7 +46,9 @@ namespace Arteranos.WorldEdit
         void DoApply(IWorldChange worldChange);
         void NotifyEditorModeChanged();
         void NotifyWorldChanged(IWorldChange worldChange);
+        void RecallFromPasteBuffer(Transform root);
         IEnumerator RecallUndoState(string hash);
+        void SaveToPasteBuffer(GameObject go);
         IWorldDecoration TakeSnapshot();
         bool TryGetBlueprint(IWorldObjectAsset woa, out GameObject gameObject);
     }

@@ -28,6 +28,7 @@ namespace Arteranos.WorldEdit
         public Button btn_AddNew;
         public Button btn_Undo;
         public Button btn_Redo;
+        public Button btn_Paste;
         public Button btn_Save;
 
         private NewObjectPanel[] NewObjectPanels = null;
@@ -49,6 +50,7 @@ namespace Arteranos.WorldEdit
             btn_AddNew.onClick.AddListener(SwitchToAdder);
             btn_Undo.onClick.AddListener(G.WorldEditorData.BuilderRequestsUndo);
             btn_Redo.onClick.AddListener(G.WorldEditorData.BuilderRequestedRedo);
+            btn_Paste.onClick.AddListener(GotPasteClicked);
             btn_Save.onClick.AddListener(SwitchToSave);
 
             WorldObjectList.OnWantsToModify += ModifyObject;
@@ -56,11 +58,6 @@ namespace Arteranos.WorldEdit
             SaveWorldPanel.OnReturnToList += SwitchToList;
 
             SetUILockState(false);
-
-            //ChoiceBook choiceBook = NewObjectPicker.GetComponent<ChoiceBook>();
-            //NewObjectPanels = choiceBook.PaneList.GetComponentsInChildren<NewObjectPanel>(true);
-            //foreach(NewObjectPanel panel in NewObjectPanels)
-            //    panel.WorldEditorUI = this;
         }
 
         protected override void OnDestroy()
@@ -131,6 +128,10 @@ namespace Arteranos.WorldEdit
         {
             PropertyPanel.WorldObject = item.WorldObject;
             SwitchToProperty();
+        }
+        private void GotPasteClicked()
+        {
+            G.WorldEditorData.RecallFromPasteBuffer(WorldObjectList.CurrentRoot.transform);
         }
     }
 }

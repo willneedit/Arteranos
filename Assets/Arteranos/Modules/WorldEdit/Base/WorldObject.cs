@@ -31,9 +31,6 @@ namespace Arteranos.WorldEdit
         [ProtoMember(3)]
         public Guid id;
 
-        [ProtoMember(4)]
-        public bool collidable;
-
         [ProtoMember(7)]
         public List<WOCBase> components;  // Additional properties (like teleport marker, ...)
 

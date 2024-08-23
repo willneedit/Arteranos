@@ -78,6 +78,9 @@ namespace Arteranos.WorldEdit
         // Content warnings
         public ServerPermissions ContentWarning { get; set; }
 
+        // Paste Buffer
+        public byte[] PasteBuffer { get; set; }
+
 
         private readonly Dictionary<IWorldObjectAsset, GameObject> AssetBlueprints = new();
 
@@ -217,6 +220,44 @@ namespace Arteranos.WorldEdit
             undoCount--;
 
             EmitUndoRedo();
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Cut and Paste
+
+        public void SaveToPasteBuffer(GameObject go)
+        {
+            WorldObjectPaste paste = new();
+
+            // Serialize to prevent cross-referencing
+            paste.WorldObject = go.MakeWorldObject(true);
+            using MemoryStream ms = new();
+            paste.Serialize(ms);
+            PasteBuffer = ms.ToArray();            
+        }
+
+        public void RecallFromPasteBuffer(Transform root)
+        {
+            void RerollIDs(WorldObject wo)
+            {
+                wo.id = Guid.NewGuid();
+                if (wo.children != null)
+                    foreach (WorldObject child in wo.children)
+                        RerollIDs(child);
+            }
+
+            if (PasteBuffer == null) return;
+
+            WorldChange ch = WorldChange.Deserialize(new MemoryStream(PasteBuffer));
+
+            WorldObjectPaste paste = ch as WorldObjectPaste;
+
+            RerollIDs(paste.WorldObject);
+
+            paste.SetPathFromThere(root);
+
+            paste.EmitToServer();
         }
 
         #endregion

@@ -20,10 +20,11 @@ namespace Arteranos.WorldEdit
         public event Action OnWantsToAddItem;
         public event Action<WorldObjectListItem> OnWantsToModify;
 
+        public GameObject CurrentRoot { get; set; } = null;
+
         private ObjectChooser Chooser = null;
 
         private GameObject WORoot = null;
-        private GameObject CurrentRoot = null;
 
         protected override void Awake()
         {

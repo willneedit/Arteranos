@@ -111,8 +111,7 @@ namespace Arteranos.Core
             GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
 
             // If the world object root doesn't exist yet, create one now.
-            if (!gameObject)
-                gameObject = Instantiate(BP.I.WorldEdit.WorldObjectRoot);
+            if (!gameObject) Instantiate(BP.I.WorldEdit.WorldObjectRoot);
         }
 
         /// <summary>

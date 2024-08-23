@@ -92,6 +92,20 @@ namespace Arteranos.WorldEdit
     }
 
     [ProtoContract]
+    public class WorldObjectPaste : WorldChange
+    {
+        [ProtoMember(1)]
+        public WorldObject WorldObject;
+
+        public override IEnumerator Apply()
+        {
+            Transform t = FindObjectByPath();
+
+            yield return WorldObject.Instantiate(t);
+        }
+    }
+
+    [ProtoContract]
     public class WorldObjectPatch : WorldChange
     {
         [ProtoMember(2)]
@@ -148,6 +162,7 @@ namespace Arteranos.WorldEdit
     [ProtoInclude(65538, typeof(WorldObjectPatch))]
     [ProtoInclude(65539, typeof(WorldObjectDeletion))]
     [ProtoInclude(65540, typeof(WorldRollbackRequest))]
+    [ProtoInclude(65541, typeof(WorldObjectPaste))]
     public abstract class WorldChange : IWorldChange
     {
         [ProtoMember(1)]
@@ -207,11 +222,11 @@ namespace Arteranos.WorldEdit
             wo.components = woc.WOComponents;
             wo.id = woc.Id;
 
-            if(includeChildren)
+            if (includeChildren)
             {
                 for (int i = 0; i < t.childCount; ++i)
                 {
-                    WorldObject item = MakeWorldObject(t.GetChild(i));
+                    WorldObject item = MakeWorldObject(t.GetChild(i), includeChildren);
                     if (item != null) wo.children.Add(item);
                 }
             }

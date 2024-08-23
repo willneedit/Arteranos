@@ -63,7 +63,6 @@ namespace Arteranos.PlayTest.WorldEdit
             WorldObject cube = new(PrimitiveType.Cube)
             {
                 name = "Test Cube",
-                collidable = true,
                 components = new()
                 {
                     new WOCTransform(),
