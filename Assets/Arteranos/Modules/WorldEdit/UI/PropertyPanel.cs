@@ -93,13 +93,21 @@ namespace Arteranos.WorldEdit
 
         private void RebuildInspectors()
         {
-            for(int i = 0; i < grp_Component_List.childCount; i++)
+            // To prevent interference from to-be-destroyed gameobjects....
+            // 1. Use a loop down.
+            // 2. Explicitly set the objects inactive to prevent it being set active
+            // 3. Then, detach the object from its parent
+            // 4. Finally, set it to be destroyed.
+            // Reason? Until the next frame update, there'd be leftovers in the hierarchy.
+            for(int i = grp_Component_List.childCount - 1; i >= 0; i--)
             {
                 GameObject oldPaneGO = grp_Component_List.GetChild(i).gameObject;
                 oldPaneGO.TryGetComponent(out CollapsiblePane pane);
 
                 paneOpen[pane.Title] = pane.IsOpen;
 
+                oldPaneGO.SetActive(false);
+                oldPaneGO.transform.SetParent(null);
                 Destroy(oldPaneGO);
             }
 
