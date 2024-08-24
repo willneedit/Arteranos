@@ -193,6 +193,9 @@ namespace Arteranos.WorldEdit
             mover.enabled = isInEditMode
                 ? !IsLocked
                 : p?.Grabbable ?? false;
+
+            // #153: If we're in edit mode in desktop, lock rotation in grab
+            mover.trackRotation = !(G.WorldEditorData.IsInEditMode && !G.Client.VRMode);
         }
 
         public WorldObjectPatch MakePatch(bool complete = false)

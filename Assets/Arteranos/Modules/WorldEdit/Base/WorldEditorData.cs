@@ -228,10 +228,9 @@ namespace Arteranos.WorldEdit
 
         public void SaveToPasteBuffer(GameObject go)
         {
-            WorldObjectPaste paste = new();
+            WorldObjectPaste paste = new() { WorldObject = go.MakeWorldObject(true) };
 
             // Serialize to prevent cross-referencing
-            paste.WorldObject = go.MakeWorldObject(true);
             using MemoryStream ms = new();
             paste.Serialize(ms);
             PasteBuffer = ms.ToArray();            
@@ -239,7 +238,7 @@ namespace Arteranos.WorldEdit
 
         public void RecallFromPasteBuffer(Transform root)
         {
-            void RerollIDs(WorldObject wo)
+            static void RerollIDs(WorldObject wo)
             {
                 wo.id = Guid.NewGuid();
                 if (wo.children != null)
