@@ -21,6 +21,7 @@ using System.Collections;
 using Ipfs.Unity;
 using Arteranos.Core.Operations;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace Arteranos.WorldEdit
 {
@@ -197,7 +198,10 @@ namespace Arteranos.WorldEdit
         {
             IEnumerator Cor()
             {
-                WorldDecoration world = AssembleWorldDecoration();
+                using MemoryStream ms = new();
+                yield return TakePhoto(ms);
+
+                WorldDecoration world = AssembleWorldDecoration(ms.ToArray());
 
                 IFileSystemNode fsn = null;
 
@@ -227,7 +231,47 @@ namespace Arteranos.WorldEdit
             throw new NotImplementedException();
         }
 
-        private WorldDecoration AssembleWorldDecoration()
+        public IEnumerator TakePhoto(Stream stream)
+        {
+            ScreenshotCamera.TryGetComponent(out Camera cam);
+
+            RenderTexture rt = cam.targetTexture;
+
+            RenderTexture mRt = new(rt.width, rt.height, rt.depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)
+            {
+                antiAliasing = rt.antiAliasing
+            };
+
+            Texture2D tex = new(rt.width, rt.height, TextureFormat.ARGB32, false);
+            cam.targetTexture = mRt;
+            cam.Render();
+            RenderTexture.active = mRt;
+
+            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            tex.Apply();
+
+            cam.targetTexture = rt;
+            //DroneCamera.Render();
+            RenderTexture.active = rt;
+
+            byte[] imgBytes = tex.GetRawTextureData();
+            GraphicsFormat graphicsFormat = tex.graphicsFormat;
+            uint width = (uint)rt.width;
+            uint height = (uint)rt.height;
+
+            yield return Asyncs.Async2Coroutine(Task.Run(() => 
+            {
+                byte[] Bytes = ImageConversion.EncodeArrayToPNG(imgBytes, graphicsFormat, width, height);
+                stream.Write(Bytes, 0, Bytes.Length);
+                stream.Position = 0;
+            }));
+
+            Destroy(tex);
+
+            Destroy(mRt);
+        }
+
+        private WorldDecoration AssembleWorldDecoration(byte[] screenshotPNG)
         {
             WorldInfoNetwork wi = new()
             {
@@ -237,7 +281,7 @@ namespace Arteranos.WorldEdit
                 WorldName = G.WorldEditorData.WorldName,
                 WorldDescription = G.WorldEditorData.WorldDescription,
                 WorldCid = null, // Cannot create a self-reference, delay it to the WorldDownloader
-                ScreenshotPNG = null,
+                ScreenshotPNG = screenshotPNG,
                 Signature = null,
             };
 
