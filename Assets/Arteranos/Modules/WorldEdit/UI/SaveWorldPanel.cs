@@ -19,8 +19,8 @@ using ProtoBuf;
 using System.Threading;
 using System.Collections;
 using Ipfs.Unity;
-using System.Diagnostics;
 using Arteranos.Core.Operations;
+using UnityEngine;
 
 namespace Arteranos.WorldEdit
 {
@@ -41,10 +41,14 @@ namespace Arteranos.WorldEdit
         public Button btn_SaveAsZip;
         public Button btn_SaveInGallery;
 
+        public GameObject bp_ScreenshotCamera;
+
         public event Action OnReturnToList;
 
         private string templatePattern;
         private string worldTemplateCid;
+
+        private GameObject ScreenshotCamera;
 
         protected override void Awake()
         {
@@ -99,6 +103,8 @@ namespace Arteranos.WorldEdit
         {
             base.OnEnable();
 
+            if(!ScreenshotCamera) ScreenshotCamera = Instantiate(bp_ScreenshotCamera);
+
             lbl_Author.text = G.Client.MeUserID;
             txt_WorldName.text = G.WorldEditorData.WorldName;
             txt_WorldDescription.text = G.WorldEditorData.WorldDescription;
@@ -124,6 +130,14 @@ namespace Arteranos.WorldEdit
             EnableSaveButtons();
 
             RefreshContentWarning();
+        }
+
+        protected override void OnDisable()
+        {
+            if (ScreenshotCamera) Destroy(ScreenshotCamera);
+            ScreenshotCamera = null;
+
+            base.OnDisable();
         }
 
         private void EnableSaveButtons()
@@ -200,7 +214,7 @@ namespace Arteranos.WorldEdit
                     Updated = DateTime.UtcNow
                 };
                 wi.Favourite();
-                UnityEngine.Debug.Log($"Full world CID: {fsn.Id}");
+                Debug.Log($"Full world CID: {fsn.Id}");
 
                 EnableSaveButtons();
             }
