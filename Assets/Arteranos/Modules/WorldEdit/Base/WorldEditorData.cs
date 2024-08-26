@@ -15,6 +15,7 @@ using System;
 
 using UnityEngine.InputSystem;
 using Arteranos.Core;
+using Arteranos.Core.Operations;
 
 
 namespace Arteranos.WorldEdit
@@ -97,17 +98,29 @@ namespace Arteranos.WorldEdit
 
             if (KMWorldEditorActions == null) return;
 
-            ContentWarning = new()
-            {
-                Violence = false,
-                Suggestive = false,
-                Nudity = false,
-                ExcessiveViolence = false,
-                ExplicitNudes = false,
-            };
+            IWorldDecoration id = WorldDownloader.GetWorldDecoration(WorldDownloader.CurrentWorldContext);
+            WorldInfoNetwork info = id?.Info;
 
-            WorldName = $"{(string) G.Client.MeUserID}'s unnamed world";
-            WorldDescription = "";
+            if (info == null)
+            {
+                ContentWarning = new()
+                {
+                    Violence = false,
+                    Suggestive = false,
+                    Nudity = false,
+                    ExcessiveViolence = false,
+                    ExplicitNudes = false,
+                };
+
+                WorldName = $"{(string)G.Client.MeUserID}'s unnamed world";
+                WorldDescription = "";
+            }
+            else
+            {
+                ContentWarning = info.ContentRating.Clone() as ServerPermissions;
+                WorldName = info.WorldName;
+                WorldDescription = info.WorldDescription;
+            }
 
             // React only to the up flank
             KMWorldEditorModeSelect.PerformCallback = DoModeSelect;

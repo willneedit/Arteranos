@@ -211,15 +211,15 @@ namespace Arteranos.Core.Operations
         }
 
         public static WorldInfo GetWorldInfo(Context _context)
-            => (_context as WorldDownloadContext).WorldInfo;
+            => (_context as WorldDownloadContext)?.WorldInfo;
 
         public static WorldInfo GetTemplateInfo(Context _context)
-            => (_context as WorldDownloadContext).TemplateInfo;
+            => (_context as WorldDownloadContext)?.TemplateInfo;
 
         public static string GetWorldDataFile(Context _context)
-            => (_context as WorldDownloadContext).WorldAssetBundlePath;
+            => (_context as WorldDownloadContext)?.WorldAssetBundlePath;
 
         public static IWorldDecoration GetWorldDecoration(Context _context)
-            => (_context as WorldDownloadContext).Decoration;
+            => (_context as WorldDownloadContext)?.Decoration;
     }
 }

@@ -25,6 +25,7 @@ namespace Arteranos.Core
         // Convenience redirections.
         public string WorldCid => win.WorldCid;
         public string WorldName => win.WorldName;
+        public string WorldDescription => win.WorldDescription;
         public ServerPermissions ContentRating => win.ContentRating;
 
         public WorldInfo()
