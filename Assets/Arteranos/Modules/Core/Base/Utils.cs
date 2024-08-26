@@ -13,14 +13,14 @@ using System.Reflection;
 using System.Text;
 using Arteranos.Avatar;
 using Arteranos.Social;
-using Arteranos.XR;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections;
-using Arteranos.Services;
+using Object = UnityEngine.Object;
+using Ipfs.Unity;
 
 namespace Arteranos.Core
 {
@@ -311,6 +311,42 @@ namespace Arteranos.Core
 
             foreach(Transform transform in t)
                 CountGameObject(transform, counted);
+        }
+
+        /// <summary>
+        /// Take a screenshot on a camera with a Render Texture
+        /// </summary>
+        /// <param name="cam">Camera, positioned and with a valid Render Texture</param>
+        /// <param name="stream">Output stream to write the PNG to</param>
+        /// <returns>Coroutine IEnumerator</returns>
+        public static IEnumerator TakePhoto(Camera cam, Stream stream)
+        {
+            RenderTexture rt = cam.targetTexture;
+
+            RenderTexture mRt = new(rt.width, rt.height, rt.depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)
+            {
+                antiAliasing = rt.antiAliasing
+            };
+
+            Texture2D tex = new(rt.width, rt.height, TextureFormat.ARGB32, false);
+            cam.targetTexture = mRt;
+            cam.Render();
+            RenderTexture.active = mRt;
+
+            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            tex.Apply();
+
+            cam.targetTexture = rt;
+            RenderTexture.active = rt;
+
+            byte[] Bytes = tex.EncodeToPNG();
+            yield return Asyncs.Async2Coroutine(stream.WriteAsync(Bytes, 0, Bytes.Length));
+
+            Object.Destroy(tex);
+
+            Object.Destroy(mRt);
+
+            yield return null;
         }
     }
 }
