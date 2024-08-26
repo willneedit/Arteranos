@@ -18,7 +18,7 @@ namespace Arteranos.WorldEdit
 {
     public enum ColliderType
     {
-        Ghostly = 5,     // (Layer: UI) Collides nothing, passable
+        Intangible = 6,  // (Layer: Intangible) Collides nothing, passable
         Watery = 14,     // (Layer: RigidBody): Collides likewise and solids, passable
         Solid = 0,       // (Layer: Default): Collides likewise and intangibles, stops avatars
     }

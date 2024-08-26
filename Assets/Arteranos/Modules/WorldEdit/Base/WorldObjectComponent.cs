@@ -188,7 +188,7 @@ namespace Arteranos.WorldEdit
 
             gameObject.layer = (int)(p?.Collidable ?? false 
                 ? ColliderType.Solid 
-                : ColliderType.Ghostly);
+                : ColliderType.Intangible);
 
             mover.enabled = isInEditMode
                 ? !IsLocked
