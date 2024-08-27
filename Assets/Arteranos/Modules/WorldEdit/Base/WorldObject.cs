@@ -16,11 +16,12 @@ using System;
 using System.Threading;
 using Ipfs.Unity;
 using GLTFast;
+using Mono.Cecil.Cil;
 
 namespace Arteranos.WorldEdit
 {
     [ProtoContract]
-    public class WorldObject
+    public class WorldObject : IHasAssetReferences
     {
         [ProtoMember(1)]
         public WorldObjectAsset asset;      // see above
@@ -218,5 +219,33 @@ namespace Arteranos.WorldEdit
             return null;
         }
 
+        /// <summary>
+        /// Gets all assets we'd need this World Object to function.
+        /// </summary>
+        /// <returns>Asset references, from the asset itself and the object's components</returns>
+        public HashSet<AssetReference> GetAssetReferences()
+        {
+            HashSet<AssetReference> references = new();
+
+            if(asset != null)
+                references.UnionWith(asset.GetAssetReferences());
+
+            foreach(WOCBase w in components)
+                references.UnionWith(w.GetAssetReferences()); 
+
+            return references;
+        }
+
+        public HashSet<AssetReference> GetAssetReferences(bool recursive)
+        {
+            HashSet<AssetReference> references = GetAssetReferences();
+            if(recursive)
+            {
+                foreach (WorldObject child in children)
+                    references.UnionWith(child.GetAssetReferences(recursive));
+            }
+
+            return references;
+        }
     }
 }

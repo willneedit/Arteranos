@@ -7,6 +7,7 @@
 
 using ProtoBuf;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Arteranos.WorldEdit
@@ -20,7 +21,7 @@ namespace Arteranos.WorldEdit
     [ProtoInclude(65537, typeof(WOCTransform))]
     [ProtoInclude(65538, typeof(WOCColor))]
     [ProtoInclude(65539, typeof(WOCPhysics))]
-    public abstract class WOCBase : ICloneable
+    public abstract class WOCBase : ICloneable, IHasAssetReferences
     {
         public bool Dirty { get; protected set; } = false;
 
@@ -54,5 +55,7 @@ namespace Arteranos.WorldEdit
         public abstract object Clone();
 
         public abstract (string name, GameObject gameObject) GetUI();
+
+        public virtual HashSet<AssetReference> GetAssetReferences() => new();
     }
 }

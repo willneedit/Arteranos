@@ -21,7 +21,7 @@ using System.Collections;
 using Ipfs.Unity;
 using Arteranos.Core.Operations;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
+using Org.BouncyCastle.Utilities.Collections;
 
 namespace Arteranos.WorldEdit
 {
@@ -257,24 +257,64 @@ namespace Arteranos.WorldEdit
             return wd;
         }
 
+        private async Task<IFileSystemNode> AssembleReferencesDirectory(WorldDecoration decor, CancellationToken cancel = default)
+        {
+            // Gather all of the references
+            HashSet<AssetReference> references = new();
+
+            foreach(WorldObject objects in decor.objects)
+                references.UnionWith(objects.GetAssetReferences(true));
+
+            // Group the gathered references
+            Dictionary<string, List<string>> dict = new();
+            foreach(AssetReference reference in references)
+            {
+                if (!dict.ContainsKey(reference.type))
+                    dict[reference.type] = new();
+
+                dict[reference.type].Add(reference.cid);
+            }
+
+            // Build the entry list with the subdirectories
+            List<IFileSystemLink> dirEntries = new();
+            foreach(KeyValuePair<string, List<string>> entry in dict)
+            {
+                List<IFileSystemLink> subDirEntries = new();
+                foreach(string subEntry in entry.Value)
+                {
+                    IFileSystemNode subfsn = await G.IPFSService.ListFile(subEntry, cancel: cancel);
+                    subDirEntries.Add(subfsn.ToLink(subEntry));
+                }
+
+                IFileSystemNode subdirfsn = await G.IPFSService.CreateDirectory(subDirEntries, cancel: cancel);
+                dirEntries.Add(subdirfsn.ToLink(entry.Key));
+            }
+
+            IFileSystemNode dirfsn = await G.IPFSService.CreateDirectory(dirEntries, cancel: cancel);
+            return dirfsn;
+        }
+
         private async Task<IFileSystemNode> AssembleWorldDirectory(Cid template, WorldDecoration decor, CancellationToken cancel = default)
         {
-            List<IFileSystemLink> files = new();
+            List<IFileSystemLink> rootEntries = new();
 
+            // Add the decoration as a file
             using MemoryStream ms = new();
             Serializer.Serialize(ms, decor);
             ms.Position = 0;
             IFileSystemNode fsnDecor = await G.IPFSService.AddStream(ms, "Decoration", cancel: cancel).ConfigureAwait(false);
-            files.Add(fsnDecor.ToLink());
+            rootEntries.Add(fsnDecor.ToLink());
 
+            // Add the template as a hard link [to a directory]
             IFileSystemNode fsnTemplate = await G.IPFSService.ListFile(template, cancel: cancel).ConfigureAwait(false);
-            files.Add(fsnTemplate.ToLink("Template"));
+            rootEntries.Add(fsnTemplate.ToLink("Template"));
 
-            // TODO Link external resources, like glTF, kits, custom textures
-            // or skyboxes, too.
-            // Reason: Recursive pinning, and possibility of resource preloading
+            // Add the references as a directory tree with hard links [to files}
+            IFileSystemNode fsnReferences = await AssembleReferencesDirectory(decor, cancel);
+            rootEntries.Add(fsnReferences.ToLink("References"));
 
-            return await G.IPFSService.CreateDirectory(files, cancel: cancel).ConfigureAwait(false);
+            // Bundle them all together.
+            return await G.IPFSService.CreateDirectory(rootEntries, cancel: cancel).ConfigureAwait(false);
         }
 
         private void GotRTLClick()

@@ -12,11 +12,56 @@ using UnityEngine;
 
 namespace Arteranos.WorldEdit
 {
+    public readonly struct AssetReference : IEquatable<AssetReference>
+    {
+        public readonly string type;
+        public readonly string cid;
+
+        public AssetReference(string type, string cid)
+        {
+            this.type = type;
+            this.cid = cid;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is AssetReference reference && Equals(reference);
+        }
+
+        public bool Equals(AssetReference other)
+        {
+            return type == other.type &&
+                   cid == other.cid;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(type, cid);
+        }
+
+        public static bool operator ==(AssetReference left, AssetReference right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(AssetReference left, AssetReference right)
+        {
+            return !(left == right);
+        }
+    }
+
+    public interface IHasAssetReferences
+    {
+        HashSet<AssetReference> GetAssetReferences();
+    }
+
     [ProtoContract]
     public class WOglTF : WorldObjectAsset, IEquatable<WOglTF>
     {
         [ProtoMember(1)]
         public string glTFCid;  // 1. Single glTF file
+
+        public override HashSet<AssetReference> GetAssetReferences() => new() { new("glTF", glTFCid) };
 
         public override bool Equals(object obj)
         {
@@ -53,6 +98,8 @@ namespace Arteranos.WorldEdit
 
         [ProtoMember(2)]
         public string kitName;  // 2b. File, referring to an object im AssetBundle
+
+        public override HashSet<AssetReference> GetAssetReferences() => new() { new("Kit", kitCid) };
 
         public override bool Equals(object obj)
         {
@@ -99,6 +146,8 @@ namespace Arteranos.WorldEdit
                    primitive == other.primitive;
         }
 
+        public override HashSet<AssetReference> GetAssetReferences() => new();
+
         public override int GetHashCode()
         {
             return HashCode.Combine(primitive);
@@ -119,7 +168,8 @@ namespace Arteranos.WorldEdit
     [ProtoInclude(65537, typeof(WOglTF))]
     [ProtoInclude(65538, typeof(WOKitItem))]
     [ProtoInclude(65539, typeof(WOPrimitive))]
-    public class WorldObjectAsset : IWorldObjectAsset
+    public abstract class WorldObjectAsset : IWorldObjectAsset, IHasAssetReferences
     {
+        public abstract HashSet<AssetReference> GetAssetReferences();
     }
 }
