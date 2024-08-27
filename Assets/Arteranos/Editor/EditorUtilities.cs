@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Ipfs.Unity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace Arteranos
 {
@@ -89,6 +91,58 @@ namespace Arteranos
             name = null;
             gameObjects = null;
             return false;
+        }
+
+        public static void TakePhoto(Camera cam, Stream stream)
+        {
+            int width = 3840;
+            int height = 2160;
+            int depth = 32;
+
+            RenderTexture mRt = new(width, height, depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)
+            {
+                antiAliasing = 1
+            };
+
+            Texture2D tex = new(width, height, TextureFormat.ARGB32, false);
+            cam.targetTexture = mRt;
+            cam.Render();
+            RenderTexture.active = mRt;
+
+            tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            tex.Apply();
+
+            byte[] Bytes = tex.EncodeToPNG();
+            stream.Write(Bytes, 0, Bytes.Length);
+
+            RenderTexture.active = null;
+            cam.targetTexture = null;
+            Object.DestroyImmediate(tex);
+
+            Object.DestroyImmediate(mRt);
+        }
+
+        public static void TakeSceneViewPhoto(Stream stream)
+        {
+            ArrayList sv = SceneView.sceneViews;
+
+            if (sv == null || sv.Count == 0 || sv[0] is not SceneView)
+            {
+                Debug.LogError("There's no scene view.");
+                return;
+            }
+
+            SceneView scene = sv[0] as SceneView;
+
+            GameObject go = Object.Instantiate(scene.camera.gameObject);
+            go.TryGetComponent(out Camera cam);
+            cam.enabled = true;
+
+            cam.orthographic = false;
+
+            EditorUtilities.TakePhoto(cam, stream);
+
+            Object.DestroyImmediate(go);
         }
 
     }

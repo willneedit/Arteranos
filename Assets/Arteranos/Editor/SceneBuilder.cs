@@ -41,7 +41,7 @@ namespace Arteranos.Editor
 
 
 
-        [MenuItem("Arteranos/Build scene as world", false, 10)]
+        [MenuItem("Arteranos/Worlds/Build scene as world", false, 10)]
         public static void ShowScenebuilderGUI()
         {
             client = Client.Load();
@@ -387,7 +387,7 @@ namespace Arteranos.Editor
                 targetFile);
         }
 
-        [MenuItem("Arteranos/Test world...", false, 20)]
+        [MenuItem("Arteranos/Worlds/Test world...", false, 20)]
         public static void TestWorld()
         {
             if(EditorApplication.isPlaying)
