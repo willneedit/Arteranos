@@ -9,7 +9,6 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using Ipfs;
-using Arteranos.Services;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -27,7 +26,7 @@ namespace Arteranos.Core.Operations
         /// <exception cref="FileNotFoundException">archive has no matching assetBundle</exception>
         public static async Task<IFileSystemLink> ExtractAssetArchive(Cid archiveCid, CancellationToken token)
         {
-            string assetPath = $"{archiveCid}/{GetArchitectureDirName()}";
+            string assetPath = $"{archiveCid}/{Utils.GetArchitectureDirName()}";
 
             // HACK: Kubo's ListFiles doesn't implicitly resolve.
             assetPath = await G.IPFSService.ResolveToCid(assetPath, token);
@@ -41,18 +40,6 @@ namespace Arteranos.Core.Operations
                     return file;
 
             throw new FileNotFoundException("No usable Asset Bundle found");
-        }
-
-        public static string GetArchitectureDirName()
-        {
-            string archPath = "AssetBundles";
-            RuntimePlatform p = Application.platform;
-            if (p == RuntimePlatform.OSXEditor || p == RuntimePlatform.OSXPlayer)
-                archPath = "Mac";
-            if (p == RuntimePlatform.Android)
-                archPath = "Android";
-
-            return archPath;
         }
 
         public static async Task<(Cid template, Cid decoration)> GetWorldLinks(Cid worldCid, CancellationToken cancel = default)

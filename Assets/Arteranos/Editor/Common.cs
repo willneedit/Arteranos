@@ -5,6 +5,8 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
+using Arteranos.Core.Operations;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -219,7 +221,7 @@ namespace Arteranos.Editor
 
             AssetBundleBuild[] abb =
             {
-                new AssetBundleBuild()
+                new()
                 {
                     assetBundleName = tgtRootName,
                     assetNames = assetFiles
@@ -228,11 +230,8 @@ namespace Arteranos.Editor
 
             foreach (BuildTarget architecture in architectures)
             {
-                string assetBundlesSave = $"{tmpSaveLocation}/AssetBundles";
-                if (architecture == BuildTarget.Android)
-                    assetBundlesSave = $"{tmpSaveLocation}/Android";
-                else if (architecture == BuildTarget.StandaloneOSX)
-                    assetBundlesSave = $"{tmpSaveLocation}/Mac";
+                string assetBundlesSave = 
+                    $"{tmpSaveLocation}/{GetArchitectureDirName(architecture)}";
 
                 if (!Directory.Exists(assetBundlesSave))
                     Directory.CreateDirectory(assetBundlesSave);
@@ -249,6 +248,13 @@ namespace Arteranos.Editor
 
             Directory.Delete(tmpSaveLocation, true);
             return targetFileName;
+        }
+
+        public static string GetArchitectureDirName(BuildTarget p)
+        {
+            if (p == BuildTarget.Android) return Utils.GetArchitectureDirName(RuntimePlatform.Android);
+            if (p == BuildTarget.StandaloneOSX) return Utils.GetArchitectureDirName(RuntimePlatform.OSXPlayer);
+            return Utils.GetArchitectureDirName(RuntimePlatform.WindowsPlayer);
         }
 
         public static Dictionary<BuildTarget, bool> supported_cache = new();

@@ -5,11 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Ipfs.Unity;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -140,7 +136,7 @@ namespace Arteranos
 
             cam.orthographic = false;
 
-            EditorUtilities.TakePhoto(cam, stream);
+            TakePhoto(cam, stream);
 
             Object.DestroyImmediate(go);
         }

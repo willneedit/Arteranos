@@ -348,5 +348,21 @@ namespace Arteranos.Core
 
             yield return null;
         }
+
+        public static string GetArchitectureDirName()
+        {
+            RuntimePlatform p = Application.platform;
+            return GetArchitectureDirName(p);
+        }
+
+        public static string GetArchitectureDirName(RuntimePlatform p) => p switch
+        {
+            RuntimePlatform.OSXEditor or
+            RuntimePlatform.OSXPlayer or
+            RuntimePlatform.OSXServer => "Mac",
+            RuntimePlatform.Android => "Android",
+            _ => "AssetBundles",
+        };
+
     }
 }
