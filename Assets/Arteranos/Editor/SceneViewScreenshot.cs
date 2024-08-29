@@ -6,18 +6,10 @@
  */
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
-using Unity.EditorCoroutines.Editor;
 using UnityEditor;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using Object = UnityEngine.Object;
 
-namespace Arteranos
+namespace Arteranos.Editor
 {
     public static class SceneViewScreenshot
     {
@@ -29,7 +21,7 @@ namespace Arteranos
             string path = Path.Combine(picpath, name);
             using Stream fs = File.Create(path);
 
-            EditorUtilities.TakeSceneViewPhoto(fs);
+            EditorUtilities.TakeSceneViewPhotoStream(fs);
         }
     }
 }

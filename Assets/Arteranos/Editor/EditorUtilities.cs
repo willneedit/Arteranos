@@ -8,6 +8,7 @@
 using System.Collections;
 using System.IO;
 using System.Linq;
+using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -26,7 +27,7 @@ namespace Arteranos
             return true;
         }
 
-        [MenuItem("Assets/Create Asset Preview image", false, 20)]
+        [MenuItem("Assets/Create Asset Preview image", false, 22)]
         private static void CreateAssetPreviewMenu()
         {
             TryGetExportNameAndGameObjects(out string _, out GameObject[] objs);
@@ -39,35 +40,24 @@ namespace Arteranos
 
         private static void CreateAssetPreview(GameObject asset)
         {
-            Texture2D assetPreview = null;
-            for (int tmo = 0; tmo < 50; ++tmo)
+            IEnumerator Cor()
             {
-                if ((assetPreview = AssetPreview.GetAssetPreview(asset)) != null) break;
-                System.Threading.Thread.Sleep(6);
+                string name = AssetDatabase.GetAssetPath(asset);
+                name = $"{Path.GetDirectoryName(name)}/{asset.name}.png";
+
+                using (Stream stream = File.Create(name))
+                    yield return CreateAssetPreviewStream(asset, stream);
+
+                AssetDatabase.ImportAsset(name);
+
+                // THAT's how to modify the texture asset settings!
+                TextureImporter ti = AssetImporter.GetAtPath(name) as TextureImporter;
+                ti.alphaIsTransparency = true;
+                ti.SaveAndReimport();
             }
 
-            // No preview within five minutes, something has to be wrong.
-            if (assetPreview == null) return;
 
-            // Turn all background pixels to transparent.
-            Color blankPixel = assetPreview.GetPixel(0, 0);
-            for (int x = 0; x < assetPreview.width; ++x)
-                for (int y = 0; y < assetPreview.height; ++y)
-                    if (assetPreview.GetPixel(x, y) == blankPixel)
-                        assetPreview.SetPixel(x, y, Color.clear);
-
-            string name = AssetDatabase.GetAssetPath(asset);
-            name = $"{Path.GetDirectoryName(name)}/{asset.name}.png";
-
-            byte[] data = assetPreview.EncodeToPNG();
-            File.WriteAllBytes(name, data);
-
-            AssetDatabase.ImportAsset(name);
-
-            // THAT's how to modify the texture asset settings!
-            TextureImporter ti = AssetImporter.GetAtPath(name) as TextureImporter;
-            ti.alphaIsTransparency = true;
-            ti.SaveAndReimport();
+            EditorCoroutineUtility.StartCoroutineOwnerless(Cor());
         }
 
         // As seen in glTFast.Editor....
@@ -89,7 +79,7 @@ namespace Arteranos
             return false;
         }
 
-        public static void TakePhoto(Camera cam, Stream stream)
+        public static void TakePhotoStream(Camera cam, Stream stream)
         {
             int width = 3840;
             int height = 2160;
@@ -118,7 +108,7 @@ namespace Arteranos
             Object.DestroyImmediate(mRt);
         }
 
-        public static void TakeSceneViewPhoto(Stream stream)
+        public static void TakeSceneViewPhotoStream(Stream stream)
         {
             ArrayList sv = SceneView.sceneViews;
 
@@ -136,10 +126,35 @@ namespace Arteranos
 
             cam.orthographic = false;
 
-            TakePhoto(cam, stream);
+            TakePhotoStream(cam, stream);
 
             Object.DestroyImmediate(go);
         }
 
+        public static IEnumerator CreateAssetPreviewStream(GameObject asset, Stream stream)
+        {
+            Texture2D assetPreview = null;
+            for (int tmo = 0; tmo < 1; ++tmo)
+            {
+                if ((assetPreview = AssetPreview.GetAssetPreview(asset)) != null) break;
+                yield return new WaitForSeconds(1);
+            }
+
+            // No preview within five minutes, something has to be wrong.
+            if (assetPreview == null) yield break;
+
+            // Turn all background pixels to transparent.
+            Color blankPixel = assetPreview.GetPixel(0, 0);
+            for (int x = 0; x < assetPreview.width; ++x)
+                for (int y = 0; y < assetPreview.height; ++y)
+                    if (assetPreview.GetPixel(x, y) == blankPixel)
+                        assetPreview.SetPixel(x, y, Color.clear);
+
+
+            byte[] data = assetPreview.EncodeToPNG();
+            stream.Write(data, 0, data.Length);
+
+            yield break;
+        }
     }
 }
