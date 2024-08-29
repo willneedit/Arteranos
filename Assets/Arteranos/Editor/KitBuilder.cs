@@ -194,19 +194,14 @@ namespace Arteranos.Editor
 
         public static IEnumerator CommitBuild(GameObject[] objs, KitMetaData metaData)
         {
-
-            string tmpKitDirectory = $"_Kit{Path.GetRandomFileName()}.dir";
-            Directory.CreateDirectory(tmpKitDirectory);
+            using TempDir tmpKitDirectory = $"_Kit{Path.GetRandomFileName()}.dir";
 
             List<(KitEntryItem, GameObject)> objGuids = new();
 
             IEnumerator AssembleKitItemDirectories()
             {
-                string itemDirectory = $"{tmpKitDirectory}/KitItems";
-                Directory.CreateDirectory(itemDirectory);
-
-                string screenshotDirectory = $"{tmpKitDirectory}/KitScreenshots";
-                Directory.CreateDirectory(screenshotDirectory);
+                using TempDir itemDirectory = $"{tmpKitDirectory}/KitItems";
+                using TempDir screenshotDirectory = $"{tmpKitDirectory}/KitScreenshots";
 
                 foreach (GameObject obj in objs)
                 {
@@ -221,6 +216,9 @@ namespace Arteranos.Editor
                     Serializer.Serialize(stream, item);
                     objGuids.Add((item, obj));
                 }
+
+                itemDirectory.Detach();
+                screenshotDirectory.Detach();
             }
 
             IEnumerator AssembleMetaData()
@@ -248,9 +246,7 @@ namespace Arteranos.Editor
 
             IEnumerator AssembleKitAssetBundle()
             {
-                string gatheredAssetsDirectory = $"Assets/_Kit{Path.GetRandomFileName()}.dir";
-
-                Directory.CreateDirectory(gatheredAssetsDirectory);
+                using TempDir gatheredAssetsDirectory = $"Assets/_Kit{Path.GetRandomFileName()}.dir";
 
                 List<string> gatheredAssets = new();
 
@@ -269,8 +265,7 @@ namespace Arteranos.Editor
 
                 const BuildTarget architecture = BuildTarget.StandaloneWindows64;
 
-                string assetBundleDirectory = $"{tmpKitDirectory}/{Common.GetArchitectureDirName(architecture)}";
-                Directory.CreateDirectory(assetBundleDirectory);
+                using TempDir assetBundleDirectory = $"{tmpKitDirectory}/{Common.GetArchitectureDirName(architecture)}";
 
                 AssetBundleBuild[] abb =
                 {
@@ -286,6 +281,8 @@ namespace Arteranos.Editor
                     abb, 
                     BuildAssetBundleOptions.StrictMode, 
                     architecture);
+
+                assetBundleDirectory.Detach();
 
                 yield return null;
             }

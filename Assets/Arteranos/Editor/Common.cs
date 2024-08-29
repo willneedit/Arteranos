@@ -32,18 +32,18 @@ namespace Arteranos.Editor
         {
             get
             {
-                if(string.IsNullOrEmpty(_resourceDirectory))
+                if (string.IsNullOrEmpty(_resourceDirectory))
                 {
                     UnityEditor.PackageManager.PackageInfo p = UnityEditor.PackageManager.PackageInfo.FindForAssembly(Assembly.GetExecutingAssembly());
                     if (p != null)
                         _resourceDirectory = $"Packages/{p.name}/Resources";
                 }
 
-                if(String.IsNullOrEmpty(_resourceDirectory))
+                if (String.IsNullOrEmpty(_resourceDirectory))
                 {
                     // Find ourselves first, then go from there to the Resources folder.
                     string[] g = AssetDatabase.FindAssets("t:Script UrpInstaller");
-                    if(g.Length > 0)
+                    if (g.Length > 0)
                     {
                         _resourceDirectory = AssetDatabase.GUIDToAssetPath(g[0]);
                         _resourceDirectory = Path.GetDirectoryName(_resourceDirectory);
@@ -132,7 +132,7 @@ namespace Arteranos.Editor
             if (GUILayout.Button("...", GUILayout.Width(20)))
             {
                 string newPath = OpenFileDialog(path, folder, save, extension);
-                if(!string.IsNullOrEmpty(newPath))
+                if (!string.IsNullOrEmpty(newPath))
                     path = newPath;
             }
 
@@ -150,7 +150,7 @@ namespace Arteranos.Editor
                 : save
                     ? EditorUtility.SaveFilePanel("Select file to save to", path, "", extension)
                     : EditorUtility.OpenFilePanel("Select file to open", path, "");
-            if(newPath.StartsWith(Application.dataPath))
+            if (newPath.StartsWith(Application.dataPath))
                 newPath = "Assets" + newPath[Application.dataPath.Length..];
 
             return newPath;
@@ -213,10 +213,10 @@ namespace Arteranos.Editor
                 return null;
             }
 
-            if(!string.IsNullOrEmpty(screenshotFile))
+            if (!string.IsNullOrEmpty(screenshotFile))
                 File.Copy(screenshotFile, $"{tmpSaveLocation}/Screenshot{Path.GetExtension(screenshotFile)}", true);
 
-            if(!string.IsNullOrEmpty(metadataTxt))
+            if (!string.IsNullOrEmpty(metadataTxt))
                 File.WriteAllText($"{tmpSaveLocation}/Metadata.json", metadataTxt);
 
             AssetBundleBuild[] abb =
@@ -230,7 +230,7 @@ namespace Arteranos.Editor
 
             foreach (BuildTarget architecture in architectures)
             {
-                string assetBundlesSave = 
+                string assetBundlesSave =
                     $"{tmpSaveLocation}/{GetArchitectureDirName(architecture)}";
 
                 if (!Directory.Exists(assetBundlesSave))
@@ -266,7 +266,7 @@ namespace Arteranos.Editor
         /// <returns>true if build support is present</returns>
         public static bool IsBuildTargetSupported(BuildTarget target)
         {
-            if(!supported_cache.TryGetValue(target, out bool res))
+            if (!supported_cache.TryGetValue(target, out bool res))
             {
                 Type moduleManager = Type.GetType("UnityEditor.Modules.ModuleManager,UnityEditor.dll");
 
@@ -277,12 +277,12 @@ namespace Arteranos.Editor
                     "IsPlatformSupportLoaded",
                     BindingFlags.Static | BindingFlags.NonPublic);
 
-                string targetString = (string) getTargetStringFromBuildTarget.Invoke(null, new object[] { target });
-                res = (bool) isPlatformSupportLoaded.Invoke(null, new object[] { targetString });
+                string targetString = (string)getTargetStringFromBuildTarget.Invoke(null, new object[] { target });
+                res = (bool)isPlatformSupportLoaded.Invoke(null, new object[] { targetString });
 
                 supported_cache[target] = res;
 
-                if(!res)
+                if (!res)
                     Debug.LogWarning("Build Support '" + targetString + "' is not installed, building for this platform will be disabled.");
             }
 
@@ -290,5 +290,51 @@ namespace Arteranos.Editor
         }
 
         private static void CreateZip(string sourceDirectory, string outputFile) => ZipFile.CreateFromDirectory(sourceDirectory, outputFile);
+    }
+
+    /// <summary>
+    /// Creates a directory which will be deleted as soon as this object
+    /// falls out of scope.
+    /// </summary>
+    public class TempDir : IDisposable
+    {
+        string dir = null;
+
+        public TempDir(string directory)
+        {
+            this.dir = directory;
+            Directory.CreateDirectory(dir);
+        }
+
+        public static implicit operator string(TempDir s) => s.dir;
+
+        public override string ToString() => dir;
+
+        public static implicit operator TempDir(string s) => new(s);
+
+        /// <summary>
+        /// Removes the scope binding, making the directory permanent
+        /// </summary>
+        public void Detach() => dir = null;
+
+        public void Dispose()
+        {
+            if (dir == null) return;
+
+            if (!Directory.Exists(dir)) return;
+
+            Directory.Delete(dir, true);
+
+#if UNITY_EDITOR
+            string metaFile = $"{dir}.meta";
+            if (File.Exists(metaFile))
+            {
+                File.Delete(metaFile);
+                AssetDatabase.Refresh();
+            }
+#endif
+
+            dir = null;
+        }
     }
 }
