@@ -58,12 +58,18 @@ namespace Arteranos.Editor
         }
     }
 
+    [ProtoContract]
+    public struct KitEntryList
+    {
+        [ProtoMember(1)]
+        public List<KitEntryItem> Items;
+    }
+
     public class KitBuilderGUI : EditorWindow
     {
         public static KitMetaData metadata = null;
         public static Client client = null;
 
-        private static bool inProgress = false;
 
         private GameObject[] gameObjects = null;
         private bool objectListFoldout = false;
@@ -79,15 +85,9 @@ namespace Arteranos.Editor
             gui.Show();
         }
 
-        public static void FinishBuild()
-        {
-            inProgress = false;
-            GetWindow<KitBuilderGUI>().Repaint();
-        }
-
         public void OnGUI()
         {
-            if (inProgress)
+            if (KitBuilder.InProgress)
             {
 
                 GUIStyle style = new()
@@ -109,6 +109,14 @@ namespace Arteranos.Editor
                 return;
             }
 
+            GUIStyle errorStyle = new()
+            {
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+            };
+            errorStyle.normal.textColor = new Color(0.80f, 0.50f, 0.50f);
+
+
             EditorGUILayout.BeginVertical(new GUIStyle { padding = new RectOffset(10, 10, 10, 10) });
 
             EditorGUILayout.LabelField("Author Name", metadata.AuthorID);
@@ -123,10 +131,7 @@ namespace Arteranos.Editor
             {
                 int i = 1;
                 foreach(GameObject gameObject in gameObjects)
-                {
-                    EditorGUILayout.LabelField(i.ToString(), gameObject.name);
-                    i++;
-                }
+                    EditorGUILayout.LabelField($"{i++}.", gameObject.name);
             }
 
             targetFile = Common.FileSelectionField(
@@ -138,13 +143,24 @@ namespace Arteranos.Editor
 
             EditorGUILayout.Space(10);
 
-            if (GUILayout.Button("Build Kit Zip File", new GUIStyle(GUI.skin.button) { fontStyle = FontStyle.Bold }))
+            bool okay = true;
+            if (string.IsNullOrEmpty(targetFile))
             {
-                inProgress = true;
-                EditorCoroutineUtility.StartCoroutineOwnerless(
-                    KitBuilder.CommitBuild(gameObjects, metadata));
+                EditorGUILayout.LabelField("Need the Zip file name", errorStyle);
+                okay = false;
             }
 
+            if (gameObjects.Length == 0)
+            {
+                EditorGUILayout.LabelField("Needs at least one selected prefab", errorStyle);
+                okay = false;
+            }
+
+            if (okay && GUILayout.Button("Build Kit Zip File", new GUIStyle(GUI.skin.button) { fontStyle = FontStyle.Bold }))
+            {
+                EditorCoroutineUtility.StartCoroutineOwnerless(
+                    KitBuilder.CommitBuild(gameObjects, metadata, targetFile));
+            }
 
             EditorGUILayout.EndFoldoutHeaderGroup();
 
@@ -154,6 +170,8 @@ namespace Arteranos.Editor
 
     public static class KitBuilder
     {
+        public static bool InProgress { get; private set; } = false;
+
         [MenuItem("Assets/Create Kit from here...", true)]
         private static bool CreateKitFromHereValidation()
         {
@@ -192,7 +210,7 @@ namespace Arteranos.Editor
         }
 
 
-        public static IEnumerator CommitBuild(GameObject[] objs, KitMetaData metaData)
+        public static IEnumerator CommitBuild(GameObject[] objs, KitMetaData metaData, string targetFile)
         {
             using TempDir tmpKitDirectory = $"_Kit{Path.GetRandomFileName()}.dir";
 
@@ -200,8 +218,9 @@ namespace Arteranos.Editor
 
             IEnumerator AssembleKitItemDirectories()
             {
-                using TempDir itemDirectory = $"{tmpKitDirectory}/KitItems";
                 using TempDir screenshotDirectory = $"{tmpKitDirectory}/KitScreenshots";
+
+                string mapFile = $"{tmpKitDirectory}/map";
 
                 foreach (GameObject obj in objs)
                 {
@@ -212,12 +231,17 @@ namespace Arteranos.Editor
                     yield return EditorUtilities.CreateAssetPreviewStream(obj, ms);
                     ms.Flush();
 
-                    using Stream stream = File.Create($"{itemDirectory}/{item.GUID}.map");
-                    Serializer.Serialize(stream, item);
                     objGuids.Add((item, obj));
                 }
 
-                itemDirectory.Detach();
+                KitEntryList list = new()
+                {
+                    Items = (from entry in objGuids select entry.Item1).ToList()
+                };
+
+                using Stream stream = File.Create(mapFile);
+                Serializer.Serialize(stream, list);
+
                 screenshotDirectory.Detach();
             }
 
@@ -271,7 +295,7 @@ namespace Arteranos.Editor
                 {
                     new()
                     {
-                        assetBundleName = $"{Guid.NewGuid()}.kit",
+                        assetBundleName = "Kit",
                         assetNames = gatheredAssets.ToArray()
                     }
                 };
@@ -287,12 +311,25 @@ namespace Arteranos.Editor
                 yield return null;
             }
 
+            IEnumerator PackToZip()
+            {
+                Common.CreateZip(tmpKitDirectory, targetFile);
+
+                yield return null;
+            }
+
+            InProgress = true;
+
             yield return AssembleKitItemDirectories();
             yield return AssembleMetaData();
             yield return AssembleKitScreenshot();
             yield return AssembleKitAssetBundle();
 
-            KitBuilderGUI.FinishBuild();
+            yield return PackToZip();
+
+            InProgress = false;
+
+            EditorWindow.GetWindow<KitBuilderGUI>().Repaint();
             yield return null;
         }
     }

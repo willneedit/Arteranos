@@ -289,7 +289,7 @@ namespace Arteranos.Editor
             return res;
         }
 
-        private static void CreateZip(string sourceDirectory, string outputFile) => ZipFile.CreateFromDirectory(sourceDirectory, outputFile);
+        public static void CreateZip(string sourceDirectory, string outputFile) => ZipFile.CreateFromDirectory(sourceDirectory, outputFile);
     }
 
     /// <summary>
