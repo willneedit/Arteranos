@@ -259,7 +259,7 @@ namespace Arteranos.Core
 
             try
             {
-                sub = JsonConvert.DeserializeObject<ServerUserBase>(FileUtils.ReadTextConfig(PATH_SERVER_USERBASE));
+                sub = JsonConvert.DeserializeObject<ServerUserBase>(ConfigUtils.ReadTextConfig(PATH_SERVER_USERBASE));
             }
             catch(Exception)
             {
@@ -278,7 +278,7 @@ namespace Arteranos.Core
             try
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                FileUtils.WriteTextConfig(PATH_SERVER_USERBASE, json);
+                ConfigUtils.WriteTextConfig(PATH_SERVER_USERBASE, json);
             }
             catch(Exception e)
             {

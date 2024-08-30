@@ -375,7 +375,7 @@ namespace Arteranos.Core
         [JsonIgnore]
         public override bool VRMode
         {
-            get => !FileUtils.Unity_Server && base.VRMode;
+            get => !ConfigUtils.Unity_Server && base.VRMode;
             set {
                 bool old = VRMode;
                 base.VRMode = value;
@@ -505,7 +505,7 @@ namespace Arteranos.Core
             try
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                FileUtils.WriteTextConfig(PATH_CLIENT_SETTINGS, json);
+                ConfigUtils.WriteTextConfig(PATH_CLIENT_SETTINGS, json);
             }
             catch(Exception e)
             {
@@ -519,7 +519,7 @@ namespace Arteranos.Core
 
             try
             {
-                string json = FileUtils.ReadTextConfig(PATH_CLIENT_SETTINGS);
+                string json = ConfigUtils.ReadTextConfig(PATH_CLIENT_SETTINGS);
                 cs = JsonConvert.DeserializeObject<Client>(json);
             }
             catch(Exception e)

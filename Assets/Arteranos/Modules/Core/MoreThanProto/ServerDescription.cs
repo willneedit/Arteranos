@@ -18,8 +18,8 @@ namespace Arteranos.Core
     {
         public ServerDescription() 
         {
-            _KnownPeersRoot = $"{FileUtils.persistentDataPath}/KnownPeers";
-            _GetFileName = id => $"{FileUtils.persistentDataPath}/KnownPeers/{Utils.GetURLHash(id)}.description";
+            _KnownPeersRoot = $"{ConfigUtils.persistentDataPath}/KnownPeers";
+            _GetFileName = id => $"{ConfigUtils.persistentDataPath}/KnownPeers/{Utils.GetURLHash(id)}.description";
             _SearchPattern = "*.description";
             _Deserialize = Deserialize;
             _Serialize = Serialize;

@@ -57,7 +57,7 @@ namespace Arteranos.Core
         /// <summary>
         /// The world cache directory. Safe to delete, and deleting force reloads.
         /// </summary>
-        public static readonly string WorldCacheRootDir = $"{FileUtils.temporaryCachePath}/WorldCache";
+        public static readonly string WorldCacheRootDir = $"{ConfigUtils.temporaryCachePath}/WorldCache";
 
         /// <summary>
         /// Simulate a RC circuit (a capacitor and resistor) to measure the capacitor's charge,

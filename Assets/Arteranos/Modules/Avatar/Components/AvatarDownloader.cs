@@ -558,7 +558,7 @@ namespace Arteranos.Avatar
         }
 
         public string GetAvatarCacheFile(Cid cid)
-            => $"{FileUtils.temporaryCachePath}/AvatarCache/{Utils.GetURLHash(cid)}.glb";
+            => $"{ConfigUtils.temporaryCachePath}/AvatarCache/{Utils.GetURLHash(cid)}.glb";
 
         public GameObject GetLoadedAvatar(Context _context)
             => (_context as AvatarDownloaderContext).Avatar;

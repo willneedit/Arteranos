@@ -96,7 +96,7 @@ namespace Arteranos.Core
             {
                 ConfigLastChanged = DateTime.UtcNow;
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
-                FileUtils.WriteTextConfig(PATH_SERVER_SETTINGS, json);
+                ConfigUtils.WriteTextConfig(PATH_SERVER_SETTINGS, json);
             }
             catch (Exception e)
             {
@@ -110,17 +110,17 @@ namespace Arteranos.Core
 
             try
             {
-                string json = FileUtils.ReadTextConfig(PATH_SERVER_SETTINGS);
+                string json = ConfigUtils.ReadTextConfig(PATH_SERVER_SETTINGS);
                 ss = JsonConvert.DeserializeObject<Server>(json);
 
-                if (FileUtils.NeedsFallback(PATH_SERVER_SETTINGS))
+                if (ConfigUtils.NeedsFallback(PATH_SERVER_SETTINGS))
                 {
                     Debug.LogWarning("Modifying server settings: Ports, Name, Server Key");
                     ss.ServerPort -= 100;
                     ss.Name += " DS";
                 }
 
-                FileUtils.ReadConfig(PATH_SERVER_SETTINGS, File.GetLastWriteTime);
+                ConfigUtils.ReadConfig(PATH_SERVER_SETTINGS, File.GetLastWriteTime);
             }
             catch (Exception e)
             {

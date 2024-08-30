@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Arteranos.Core
 {
-    public static class FileUtils
+    public static class ConfigUtils
     {
         // Learned from work:
         // It's better to not to condition out the code, because it still always checks for errors

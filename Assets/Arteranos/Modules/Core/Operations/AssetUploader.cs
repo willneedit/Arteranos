@@ -223,7 +223,7 @@ namespace Arteranos.Core.Operations
 
     public static class AssetUploader
     {
-        public static (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS(string assetURL, bool asTarred, int timeout = 600, bool pin = false)
+        public static (AsyncOperationExecutor<Context>, Context) PrepareUploadToIPFS(string assetURL, bool asTarred, int timeout = 600, bool pin = true)
         {
             AssetUploaderContext context = new()
             {

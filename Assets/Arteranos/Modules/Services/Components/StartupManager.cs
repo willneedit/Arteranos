@@ -57,7 +57,7 @@ namespace Arteranos.Services
 
 
             // TODO Dedicated server: Startup world commandline argument processing
-            if (FileUtils.Unity_Server)
+            if (ConfigUtils.Unity_Server)
             {
                 // Manually start the server, including with the initialization.
                 Task t = G.NetworkStatus.StartServer();

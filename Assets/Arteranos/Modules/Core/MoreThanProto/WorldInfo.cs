@@ -35,8 +35,8 @@ namespace Arteranos.Core
 
         private void Init()
         {
-            _KnownPeersRoot = $"{FileUtils.persistentDataPath}/WorldInfos";
-            _GetFileName = cid => $"{FileUtils.persistentDataPath}/WorldInfos/{Utils.GetURLHash(cid)}.info";
+            _KnownPeersRoot = $"{ConfigUtils.persistentDataPath}/WorldInfos";
+            _GetFileName = cid => $"{ConfigUtils.persistentDataPath}/WorldInfos/{Utils.GetURLHash(cid)}.info";
             _SearchPattern = "*.info";
             _Deserialize = Deserialize;
             _Serialize = Serialize;
