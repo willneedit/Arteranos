@@ -42,5 +42,6 @@ namespace Arteranos.Services
         Task RemoveGarbage(CancellationToken cancel = default);
         Task<Cid> ResolveToCid(string path, CancellationToken cancel = default);
         Task<FileSystemNode> CreateDirectory(IEnumerable<IFileSystemLink> links, bool pin = true, CancellationToken cancel = default);
+        Task<MemoryStream> ReadIntoMS(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
     }
 }

@@ -17,6 +17,7 @@ using System.Threading;
 using Ipfs.Unity;
 using GLTFast;
 using Mono.Cecil.Cil;
+using System.Threading.Tasks;
 
 namespace Arteranos.WorldEdit
 {
@@ -76,6 +77,14 @@ namespace Arteranos.WorldEdit
 
         public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
         {
+            static async Task<AssetBundleCreateRequest> LoadAssetBundle(string path)
+            {
+                MemoryStream ms = await G.IPFSService.ReadIntoMS(
+                    $"{path}/{Utils.GetArchitectureDirName()}/kit");
+
+                return AssetBundle.LoadFromStreamAsync(ms);
+
+            }
 
             static IEnumerator LoadglTF(WOglTF WOglTF, GameObject LoadedObject)
             {
@@ -115,12 +124,29 @@ namespace Arteranos.WorldEdit
 
                 LoadedObject.name = $"glTF {WOglTF.glTFCid}";
             }
-
+            
             static IEnumerator LoadKit(WOKitItem kitItem, GameObject LoadedObject)
             {
                 LoadedObject.name = $"kit {kitItem.kitCid}, Item {kitItem.kitItemName}";
 
-                throw new NotImplementedException();
+                if(!G.WorldEditorData.TryGetKitAssetBundle(kitItem.kitCid, out AssetBundle ab))
+                {
+                    AssetBundleCreateRequest abc = null;
+
+                    yield return Asyncs.Async2Coroutine(
+                        LoadAssetBundle(kitItem.kitCid),
+                        _result => abc = _result);
+
+                    yield return new WaitUntil(() => abc.isDone);
+
+                    ab = abc.assetBundle;
+
+                    G.WorldEditorData.AddKitAssetBundle(kitItem.kitCid, ab);
+                }
+
+                GameObject ob = ab.LoadAsset<GameObject>($"Assets/KitRoot/{kitItem.kitItemName}.prefab");
+
+                UnityEngine.Object.Instantiate(ob, LoadedObject.transform);
             }
 
             GameObject gob;

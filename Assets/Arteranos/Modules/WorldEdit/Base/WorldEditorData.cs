@@ -85,6 +85,8 @@ namespace Arteranos.WorldEdit
 
         private readonly Dictionary<IWorldObjectAsset, GameObject> AssetBlueprints = new();
 
+        private readonly Dictionary<string, AssetBundle> KitAssetBundles = new();
+
         private bool isInEditMode = false;
         private bool usingGlobal = false;
         private GameObject currentWorldObject;
@@ -134,6 +136,8 @@ namespace Arteranos.WorldEdit
         private void OnDestroy()
         {
             ClearBlueprints();
+
+            ClearKitAssetBundles();
         }
 
         private void OnEnable()
@@ -470,6 +474,24 @@ namespace Arteranos.WorldEdit
             gizmoObject = Instantiate(gobp, FocusedWorldObject.transform);
         }
 
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Kit Asset Handling
+
+        public void ClearKitAssetBundles()
+        {
+            foreach (var ab in KitAssetBundles)
+                ab.Value.Unload(true);
+
+            KitAssetBundles.Clear();            
+        }
+
+        public bool TryGetKitAssetBundle(string path, out AssetBundle assetBundle)
+            => KitAssetBundles.TryGetValue(path, out assetBundle);
+
+        public void AddKitAssetBundle(string path, AssetBundle assetBundle)
+            => KitAssetBundles.Add(path, assetBundle);
 
         #endregion
         // ---------------------------------------------------------------

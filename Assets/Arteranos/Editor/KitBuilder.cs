@@ -239,7 +239,7 @@ namespace Arteranos.Editor
 
             IEnumerator AssembleKitAssetBundle()
             {
-                using TempDir gatheredAssetsDirectory = $"Assets/_Kit{Path.GetRandomFileName()}.dir";
+                using TempDir gatheredAssetsDirectory = "Assets/KitRoot";
 
                 List<string> gatheredAssets = new();
 

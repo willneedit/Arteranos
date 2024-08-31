@@ -838,9 +838,10 @@ namespace Arteranos.Services
                 return ipfs.Pin.RemoveAsync(cid, cancel: token);
         }
 
-        public async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
+        public async Task<MemoryStream> ReadIntoMS(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
         {
-            using MemoryStream ms = new();
+            MemoryStream ms = new();
+
             using Stream instr = await ipfs.FileSystem.ReadFileAsync(path, cancel).ConfigureAwait(false);
             byte[] buffer = new byte[128 * 1024];
 
@@ -859,8 +860,17 @@ namespace Arteranos.Services
                 ms.Write(buffer, 0, n);
             }
 
+            ms.Position = 0;
+            return ms;
+        }
+
+        public async Task<byte[]> ReadBinary(string path, Action<long> reportProgress = null, CancellationToken cancel = default)
+        {
+            using MemoryStream ms = await ReadIntoMS(path, reportProgress, cancel).ConfigureAwait(false);
+
             return ms.ToArray();
         }
+
         public async Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default)
             => await Ipfs.Pin.ListAsync(cancel).ConfigureAwait(false);
         public async Task<Stream> ReadFile(string path, CancellationToken cancel = default)

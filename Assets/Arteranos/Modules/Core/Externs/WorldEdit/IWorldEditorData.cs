@@ -37,10 +37,12 @@ namespace Arteranos.WorldEdit
         event Action<IWorldChange> OnWorldChanged;
 
         void AddBlueprint(IWorldObjectAsset woa, GameObject gameObject);
+        void AddKitAssetBundle(string path, AssetBundle assetBundle);
         void BuilderRequestedRedo();
         void BuilderRequestsUndo();
         IEnumerator BuildWorld(IWorldDecoration worldDecoration);
         void ClearBlueprints();
+        void ClearKitAssetBundles();
         IWorldDecoration DeserializeWD(Stream stream);
         void DoApply(Stream stream);
         void DoApply(IWorldChange worldChange);
@@ -51,5 +53,6 @@ namespace Arteranos.WorldEdit
         void SaveToPasteBuffer(GameObject go);
         IWorldDecoration TakeSnapshot();
         bool TryGetBlueprint(IWorldObjectAsset woa, out GameObject gameObject);
+        bool TryGetKitAssetBundle(string path, out AssetBundle assetBundle);
     }
 }
