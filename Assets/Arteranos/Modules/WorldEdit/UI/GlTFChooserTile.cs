@@ -64,7 +64,7 @@ namespace Arteranos.WorldEdit
                     if (b.Value.extents.z > largestAxis) largestAxis = b.Value.extents.z;
 
                     Transform t = LoadedObject.transform;
-                    grp_ObjectAnchor.transform.localScale *= 0.20f / largestAxis;
+                    grp_ObjectAnchor.transform.localScale *= 0.20f / (largestAxis + float.Epsilon);
                     t.SetParent(grp_ObjectAnchor.transform, false);
 
                     t.localPosition = -b.Value.center;

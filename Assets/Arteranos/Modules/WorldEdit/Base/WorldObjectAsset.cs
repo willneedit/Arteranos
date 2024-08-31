@@ -94,10 +94,10 @@ namespace Arteranos.WorldEdit
     public class WOKitItem : WorldObjectAsset, IEquatable<WOKitItem>
     {
         [ProtoMember(1)]
-        public string kitCid;   // 2a. Kit (collection of objects) file
+        public string kitCid;       // 2a. Kit (collection of objects) file
 
         [ProtoMember(2)]
-        public string kitName;  // 2b. File, referring to an object im AssetBundle
+        public Guid kitItemName;    // 2b. File, referring to an object im AssetBundle
 
         public override HashSet<AssetReference> GetAssetReferences() => new() { new("Kit", kitCid) };
 
@@ -110,12 +110,12 @@ namespace Arteranos.WorldEdit
         {
             return other is not null &&
                    kitCid == other.kitCid &&
-                   kitName == other.kitName;
+                   kitItemName == other.kitItemName;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(kitCid, kitName);
+            return HashCode.Combine(kitCid, kitItemName);
         }
 
         public static bool operator ==(WOKitItem left, WOKitItem right)

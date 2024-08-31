@@ -118,7 +118,7 @@ namespace Arteranos.WorldEdit
 
             static IEnumerator LoadKit(WOKitItem kitItem, GameObject LoadedObject)
             {
-                LoadedObject.name = $"kit {kitItem.kitCid}, Item {kitItem.kitName}";
+                LoadedObject.name = $"kit {kitItem.kitCid}, Item {kitItem.kitItemName}";
 
                 throw new NotImplementedException();
             }

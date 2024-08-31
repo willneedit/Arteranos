@@ -27,10 +27,13 @@ namespace Arteranos.PlayTest.WorldEdit
             WOglTF gltf2 = new() { glTFCid = "gltfcid2" };
             WOglTF gltf1_1 = new() { glTFCid = "gltfcid1" };
 
-            WOKitItem kitItem1 = new() { kitCid = "kit1", kitName = "kitObject1" };
-            WOKitItem kitItem2 = new() { kitCid = "kit1", kitName = "kitObject2" };
-            WOKitItem kitItem3 = new() { kitCid = "kit2", kitName = "kitObject1" };
-            WOKitItem kitItem1_1 = new() { kitCid = "kit1", kitName = "kitObject1" };
+            Guid k1 = Guid.NewGuid();
+            Guid k2 = Guid.NewGuid();
+
+            WOKitItem kitItem1 = new() { kitCid = "kit1", kitItemName = k1 };
+            WOKitItem kitItem2 = new() { kitCid = "kit1", kitItemName = k2 };
+            WOKitItem kitItem3 = new() { kitCid = "kit2", kitItemName = k1 };
+            WOKitItem kitItem1_1 = new() { kitCid = "kit1", kitItemName = k1 };
 
             WOPrimitive prim1 = new() { primitive = PrimitiveType.Sphere };
             WOPrimitive prim2 = new() { primitive = PrimitiveType.Cube };
@@ -62,10 +65,13 @@ namespace Arteranos.PlayTest.WorldEdit
             WOglTF gltf2 = new() { glTFCid = "gltfcid2" };
             WOglTF gltf1_1 = new() { glTFCid = "gltfcid1" };
 
-            WOKitItem kitItem1 = new() { kitCid = "kit1", kitName = "kitObject1" };
-            WOKitItem kitItem2 = new() { kitCid = "kit1", kitName = "kitObject2" };
-            WOKitItem kitItem3 = new() { kitCid = "kit2", kitName = "kitObject1" };
-            WOKitItem kitItem1_1 = new() { kitCid = "kit1", kitName = "kitObject1" };
+            Guid k1 = Guid.NewGuid();
+            Guid k2 = Guid.NewGuid();
+
+            WOKitItem kitItem1 = new() { kitCid = "kit1", kitItemName = k1 };
+            WOKitItem kitItem2 = new() { kitCid = "kit1", kitItemName = k2 };
+            WOKitItem kitItem3 = new() { kitCid = "kit2", kitItemName = k1 };
+            WOKitItem kitItem1_1 = new() { kitCid = "kit1", kitItemName = k1 };
 
             WOPrimitive prim1 = new() { primitive = PrimitiveType.Sphere };
             WOPrimitive prim2 = new() { primitive = PrimitiveType.Cube };

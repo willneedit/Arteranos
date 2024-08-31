@@ -1124,7 +1124,7 @@ PrefabInstance:
     - target: {fileID: 3995104435120682695, guid: eb0f181b1a1b18f488ef06bce2cd6653,
         type: 3}
       propertyPath: ChoiceEntries.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682695, guid: eb0f181b1a1b18f488ef06bce2cd6653,
         type: 3}
@@ -1140,6 +1140,12 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 3995104435120682695, guid: eb0f181b1a1b18f488ef06bce2cd6653,
         type: 3}
+      propertyPath: ChoiceEntries.Array.data[2].UI
+      value: 
+      objectReference: {fileID: 2675398542749706814, guid: 769b2eaf25f741447aadefb92d1f561f,
+        type: 3}
+    - target: {fileID: 3995104435120682695, guid: eb0f181b1a1b18f488ef06bce2cd6653,
+        type: 3}
       propertyPath: ChoiceEntries.Array.data[0].name
       value: Primitives
       objectReference: {fileID: 0}
@@ -1147,6 +1153,11 @@ PrefabInstance:
         type: 3}
       propertyPath: ChoiceEntries.Array.data[1].name
       value: glTF
+      objectReference: {fileID: 0}
+    - target: {fileID: 3995104435120682695, guid: eb0f181b1a1b18f488ef06bce2cd6653,
+        type: 3}
+      propertyPath: ChoiceEntries.Array.data[2].name
+      value: Kit
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682696, guid: eb0f181b1a1b18f488ef06bce2cd6653,
         type: 3}
