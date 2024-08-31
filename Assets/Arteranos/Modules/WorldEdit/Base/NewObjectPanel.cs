@@ -19,7 +19,7 @@ namespace Arteranos.WorldEdit
     {
         public event Action<WorldObjectInsertion> OnAddingNewObject;
 
-        protected void AddingNewObject(WorldObjectInsertion obj)
+        public void AddingNewObject(WorldObjectInsertion obj)
             => OnAddingNewObject?.Invoke(obj);
     }
 }

@@ -5,28 +5,20 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.XR;
-using Arteranos.Core;
 
+using Arteranos.Core;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using Unity.EditorCoroutines.Editor;
-using Arteranos.UI;
 using System;
-using UnityEngine.Experimental.Rendering;
-using Object = UnityEngine.Object;
-using System.Threading.Tasks;
-using Ipfs;
-using Arteranos.Core.Operations;
-using Arteranos.Services;
 using Newtonsoft.Json;
 using ProtoBuf;
+using Arteranos.WorldEdit;
 
 namespace Arteranos.Editor
 {
@@ -40,29 +32,6 @@ namespace Arteranos.Editor
         public string Serialize() => JsonConvert.SerializeObject(this, Formatting.Indented);
 
         public static KitMetaData Deserialize(string json) => JsonConvert.DeserializeObject<KitMetaData>(json);
-    }
-
-    [ProtoContract]
-    public struct KitEntryItem
-    {
-        [ProtoMember(1)]
-        public string Name;
-
-        [ProtoMember(2)]
-        public Guid GUID;
-
-        public KitEntryItem(string name, Guid guid)
-        {
-            Name = name;
-            GUID = guid;
-        }
-    }
-
-    [ProtoContract]
-    public struct KitEntryList
-    {
-        [ProtoMember(1)]
-        public List<KitEntryItem> Items;
     }
 
     public class KitBuilderGUI : EditorWindow

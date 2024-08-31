@@ -18,14 +18,17 @@ using UnityEngine.UI;
 
 namespace Arteranos.WorldEdit
 {
-    public class Panel_Kit : UIBehaviour
+    public class Panel_Kit : NewObjectPanel
     {
         public List<WOCEntry> KitEntries { get; private set; } = null;
 
         public ObjectChooser Chooser;
+        public GameObject bp_KitItemGO;
 
         private Client Client = null;
         private bool dirty = false;
+
+        private GameObject KitItemGO = null;
 
         protected override void Awake()
         {
@@ -127,15 +130,16 @@ namespace Arteranos.WorldEdit
                 kitItemName = default
             };
 
+            bp_KitItemGO.SetActive(false);
 
-            // TODO Switching to the kit item panel
+            if (!KitItemGO) KitItemGO = Instantiate(bp_KitItemGO, transform.parent);
 
-            //AddingNewObject(new()
-            //{
-            //    asset = newWOglTF,
-            //    name = KitEntries[index].FriendlyName,
-            //    components = new() { }
-            //});
+            KitItemGO.TryGetComponent(out Panel_KitItem kitItem);
+            kitItem.Item = newwOKitItem;
+            kitItem.ParentPanel = this;
+
+            KitItemGO.SetActive(true);
+            gameObject.SetActive(false);
         }
     }
 }
