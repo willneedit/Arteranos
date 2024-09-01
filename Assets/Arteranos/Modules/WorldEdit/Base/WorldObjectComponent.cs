@@ -171,9 +171,10 @@ namespace Arteranos.WorldEdit
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover) return;
 
-            //Concave colliders need to be kinematic. The basic colliders are all convex.
-            if (gameObject.TryGetComponent(out MeshCollider collider) && !collider.convex)
-                body.isKinematic = true;
+            // Fixup - set the mesh colliders to convex to prevent clash with kinematic
+            MeshCollider[] colliders = gameObject.GetComponentsInChildren<MeshCollider>();
+            foreach (MeshCollider collider in colliders)
+                collider.convex = true;
 
             TryGetWOC(out WOCPhysics p);
 
