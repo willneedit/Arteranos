@@ -11,6 +11,10 @@ using Ipfs;
 using UnityEditor;
 using Arteranos.Core.Operations;
 using Arteranos.XR;
+using Arteranos.Core.Managed;
+using AssetBundle = Arteranos.Core.Managed.AssetBundle;
+using System;
+using Ipfs.Unity;
 
 namespace Arteranos.PlayTest.Services
 {
@@ -52,21 +56,21 @@ namespace Arteranos.PlayTest.Services
 
 
         [UnityTest]
-        public IEnumerator InAndOut()
+        public IEnumerator T001_InAndOut()
         {
             yield return new WaitForSeconds(1);
 
             yield return TransitionProgress.TransitionFrom();
 
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(2);
 
             yield return TransitionProgress.TransitionTo(null, null);
 
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(2);
         }
 
         [UnityTest]
-        public IEnumerator ProgressMonitoring()
+        public IEnumerator T002_ProgressMonitoring()
         {
             yield return new WaitForSeconds(10);
 
@@ -76,16 +80,16 @@ namespace Arteranos.PlayTest.Services
             {
                 float progress = (float)i / (float)10;
                 G.TransitionProgress.OnProgressChanged(progress, $"Progress {i}");
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(1f);
             }
 
             yield return TransitionProgress.TransitionTo(null, null);
 
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(2);
         }
 
         [UnityTest]
-        public IEnumerator ProgressMonitoringFromAsync()
+        public IEnumerator T003_ProgressMonitoringFromAsync()
         {
             yield return new WaitForSeconds(10);
 
@@ -99,7 +103,7 @@ namespace Arteranos.PlayTest.Services
                     float progress = (float)i / (float)10;
                     G.TransitionProgress.OnProgressChanged(progress, $"Progress {i}");
 
-                    await Task.Delay(2000);
+                    await Task.Delay(1000);
                 }
             });
 
@@ -108,11 +112,87 @@ namespace Arteranos.PlayTest.Services
 
             yield return TransitionProgress.TransitionTo(null, null);
 
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(2);
         }
 
         [UnityTest]
-        public IEnumerator TransitionWorld()
+        public IEnumerator T004_ManagedAssetBundle()
+        {
+            void ReportProgress(long bytes)
+            {
+                Debug.Log(bytes);
+            }
+
+            yield return UploadTestWorld();
+
+            AssetBundle ab_ab = null;
+            yield return AssetBundle.LoadFromIPFS($"{WorldCid}/{Utils.GetArchitectureDirName()}/{Utils.GetArchitectureDirName()}", _result => ab_ab = _result);
+
+            Assert.IsNotNull(ab_ab);
+            Assert.IsNotNull((UnityEngine.AssetBundle)ab_ab);
+
+            AssetBundleManifest manifest = ((UnityEngine.AssetBundle) ab_ab).LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            foreach(string abname in manifest.GetAllAssetBundles())
+                Debug.Log(abname);
+
+            string actualABName = manifest.GetAllAssetBundles()[0];
+
+            AssetBundle actual_ab = null;
+            yield return AssetBundle.LoadFromIPFS(
+                $"{WorldCid}/{Utils.GetArchitectureDirName()}/{actualABName}",
+                _result => actual_ab = _result,
+                ReportProgress);
+
+            Assert.IsNotNull((UnityEngine.AssetBundle)actual_ab);
+
+            ab_ab.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(() =>
+            {
+                UnityEngine.AssetBundle raw_ab = ab_ab;
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator T005_ManagedAssetBundleAsync()
+        {
+            void ReportProgress(long bytes, long total)
+            {
+                Debug.Log($"{bytes} out of {total}");
+            }
+
+
+            yield return UploadTestWorld();
+
+            AssetBundle ab_ab = null;
+            yield return AssetBundle.LoadFromIPFS($"{WorldCid}/{Utils.GetArchitectureDirName()}/{Utils.GetArchitectureDirName()}", _result => ab_ab = _result);
+
+            Assert.IsNotNull(ab_ab);
+            Assert.IsNotNull((UnityEngine.AssetBundle)ab_ab);
+
+            AssetBundleManifest manifest = ((UnityEngine.AssetBundle)ab_ab).LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            foreach (string abname in manifest.GetAllAssetBundles())
+                Debug.Log(abname);
+
+            string actualABName = manifest.GetAllAssetBundles()[0];
+
+            AssetBundle actual_ab = null;
+
+            yield return Asyncs.Async2Coroutine(AssetBundle.LoadFromIPFSAsync(
+                $"{WorldCid}/{Utils.GetArchitectureDirName()}/{actualABName}", ReportProgress),
+                _result => actual_ab = _result
+                );
+
+            Assert.IsNotNull((UnityEngine.AssetBundle)actual_ab);
+
+        }
+
+
+
+        [UnityTest]
+        public IEnumerator T010_TransitionWorld()
         {
             yield return new WaitForSeconds(10);
 
@@ -140,7 +220,7 @@ namespace Arteranos.PlayTest.Services
 
             yield return TransitionProgress.TransitionTo(WorldCid, "Would be WorldInfo.Name");
 
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(1);
         }
     }
 }

@@ -1,16 +1,13 @@
 /*
- * Copyright (c) 2023, willneedit
+ * Copyright (c) 2024, willneedit
  * 
  * Licensed by the Mozilla Public License 2.0,
  * residing in the LICENSE.md file in the project's root directory.
- * 
- * Code idea seen in Ready Player Me SDK, modified and extended by willneedit
  */
 
 using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
