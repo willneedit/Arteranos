@@ -847,6 +847,7 @@ namespace Arteranos.Services
 
             // No cancel. We have to do it until the end, else the RPC client would choke.
             long totalBytes = 0;
+            long lastreported = 0;
             while (true)
             {
                 int n = instr.Read(buffer, 0, buffer.Length);
@@ -854,11 +855,19 @@ namespace Arteranos.Services
                 totalBytes += n;
                 try
                 {
-                    reportProgress?.Invoke(totalBytes);
+                    // Report rate throttling
+                    if(lastreported < totalBytes - buffer.Length)
+                    {
+                        reportProgress?.Invoke(totalBytes);
+                        lastreported = totalBytes;
+                    }
                 }
                 catch { } // Whatever may come, the show must go on.
                 ms.Write(buffer, 0, n);
             }
+
+            // One last report.
+            reportProgress?.Invoke(totalBytes);
 
             ms.Position = 0;
             return ms;
