@@ -15,6 +15,10 @@ using Arteranos.Core.Managed;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 using System;
 using Ipfs.Unity;
+using System.Threading;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 namespace Arteranos.PlayTest.Services
 {
@@ -118,9 +122,9 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator T004_ManagedAssetBundle()
         {
-            void ReportProgress(long bytes)
+            static void ReportProgress(long bytes, long total)
             {
-                Debug.Log(bytes);
+                Debug.Log($"{bytes} out of {total}");
             }
 
             yield return UploadTestWorld();
@@ -157,7 +161,7 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator T005_ManagedAssetBundleAsync()
         {
-            void ReportProgress(long bytes, long total)
+            static void ReportProgress(long bytes, long total)
             {
                 Debug.Log($"{bytes} out of {total}");
             }
@@ -189,7 +193,83 @@ namespace Arteranos.PlayTest.Services
 
         }
 
+        public async Task<AssetBundle> LoadAssetBundle(string path, Action<long, long> reportProgress = null, CancellationToken cancel = default)
+        {
+            AssetBundle resultAB = null;
+            SemaphoreSlim waiter = new(0, 1);
 
+            IEnumerator Cor()
+            {
+                AssetBundle manifestAB = null;
+                yield return AssetBundle.LoadFromIPFS($"{path}/{Utils.GetArchitectureDirName()}/{Utils.GetArchitectureDirName()}", _result => manifestAB = _result, cancel: cancel);
+
+                if(manifestAB != null)
+                {
+                    AssetBundleManifest manifest = ((UnityEngine.AssetBundle)manifestAB).LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                    string actualABName = manifest.GetAllAssetBundles()[0];
+
+                    yield return AssetBundle.LoadFromIPFS($"{path}/{Utils.GetArchitectureDirName()}/{actualABName}", _result => resultAB = _result, reportProgress, cancel);
+
+                    manifestAB.Dispose();
+                }
+
+                waiter.Release();
+            }
+
+            Core.TaskScheduler.ScheduleCoroutine(Cor);
+
+            await waiter.WaitAsync();
+
+            return resultAB;
+        }
+
+        [UnityTest]
+        public IEnumerator T006_LazyAsyncAssetBundle()
+        {
+            static void ReportProgress(long bytes, long total)
+            {
+                Debug.Log($"{bytes} out of {total}");
+            }
+
+            yield return UploadTestWorld();
+
+            Stopwatch sw = Stopwatch.StartNew();
+            AsyncLazy<AssetBundle> laab = new(() => LoadAssetBundle(WorldCid, ReportProgress));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 2);
+
+            sw.Restart();
+            yield return laab.WaitUntil();
+            Debug.Log($"{sw.ElapsedMilliseconds} ms");
+            Assert.IsTrue(sw.ElapsedMilliseconds > 100);
+
+            sw.Restart();
+            Assert.IsNotNull(laab);
+            Assert.IsNotNull((AssetBundle)laab);
+            Assert.IsTrue(sw.ElapsedMilliseconds < 2);
+
+            ((AssetBundle) laab).Dispose();
+            Assert.Throws<ObjectDisposedException>(() =>
+            {
+                AssetBundle ab = laab;
+                UnityEngine.AssetBundle native = ab;
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator T007_FailNonExistent()
+        {
+            static void ReportProgress(long bytes, long total)
+            {
+                Debug.Log($"{bytes} out of {total}");
+            }
+
+            Stopwatch sw = Stopwatch.StartNew();
+            AsyncLazy<AssetBundle> laab = new(() => LoadAssetBundle("foo", ReportProgress));
+            Assert.IsTrue(sw.ElapsedMilliseconds < 2);
+
+            yield return laab.WaitUntil();
+            Assert.IsNull((AssetBundle) laab);
+        }
 
         [UnityTest]
         public IEnumerator T010_TransitionWorld()

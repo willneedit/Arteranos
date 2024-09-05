@@ -25,23 +25,45 @@ namespace Arteranos.Core.Managed
     public class AssetBundle : IDisposable
     {
         private bool disposed = false;
-        private UnityEngine.AssetBundle assetBundle = null;
+        private UnityEngine.AssetBundle m_assetBundle = null;
 
-        public static implicit operator UnityEngine.AssetBundle(AssetBundle assetBundle)
+        private UnityEngine.AssetBundle InternalAssetBundle
         {
-            if (assetBundle.disposed)
-                throw new ObjectDisposedException(nameof(assetBundle));
+            get
+            {
+                if (disposed)
+                    throw new ObjectDisposedException("AssetBundle");
 
-            return assetBundle.assetBundle;
+                return m_assetBundle;
+            }
+
+            set => m_assetBundle = value;
         }
 
-        public static implicit operator AssetBundle(UnityEngine.AssetBundle assetBundle)
-            => new() { assetBundle = assetBundle };
+        public static implicit operator UnityEngine.AssetBundle(AssetBundle assetBundle) 
+            => assetBundle.InternalAssetBundle;
 
-        public static IEnumerator LoadFromIPFS(string path, Action<AssetBundle> result, Action<long> reportProgress = null, CancellationToken cancel = default)
+        public static implicit operator AssetBundle(UnityEngine.AssetBundle assetBundle)
+            => new() { InternalAssetBundle = assetBundle };
+
+        public static IEnumerator LoadFromIPFS(string path, Action<AssetBundle> result, Action<long, long> reportProgress = null, CancellationToken cancel = default)
         {
+            Cid cid = null;
+            yield return Asyncs.Async2Coroutine(G.IPFSService.ResolveToCid(path, cancel), _result => cid = _result, ex => { });
+            if (cid == null) yield break;
+
+            IFileSystemNode fsn = null;
+            yield return Asyncs.Async2Coroutine(G.IPFSService.ListFile(cid, cancel), _result => fsn = _result, ex => { });
+
+            // No 'stat' implementation, just add the block sizes
+            long totalBytes = 0;
+            foreach (IFileSystemLink link in fsn.Links)
+                totalBytes += link.Size;
+
+            Action<long> rp = reportProgress != null ? (b) => reportProgress(b, totalBytes) : null;
+
             MemoryStream ms = null;
-            yield return Asyncs.Async2Coroutine(G.IPFSService.ReadIntoMS(path, reportProgress, cancel), _result => ms = _result);
+            yield return Asyncs.Async2Coroutine(G.IPFSService.ReadIntoMS(path, rp, cancel), _result => ms = _result, ex => { });
 
             AssetBundleCreateRequest abc = UnityEngine.AssetBundle.LoadFromStreamAsync(ms);
 
@@ -87,15 +109,21 @@ namespace Arteranos.Core.Managed
         }
         ~AssetBundle() { Dispose(); }
 
-        public void Detach() => assetBundle = null;
+        public void Detach() => InternalAssetBundle = null;
 
         public void Dispose()
         {
+            IEnumerator Cor()
+            {
+                m_assetBundle.Unload(true);
+                m_assetBundle = null;
+                yield return null;
+            }
+
             if(disposed) return;
             disposed = true;
 
-            if(assetBundle != null) assetBundle.Unload(true);
-            assetBundle = null;
+            if (m_assetBundle != null) TaskScheduler.ScheduleCoroutine(() => Cor());
         }
     }
 }
