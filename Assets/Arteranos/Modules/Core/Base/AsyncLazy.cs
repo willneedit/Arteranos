@@ -47,7 +47,7 @@ namespace Arteranos.Core
         /// Allows use of 'yield return lazyvalue.WaitUntil();' in a Coroutine
         /// </summary>
         /// <returns>The Enumerator to wait the value to be created</returns>
-        public IEnumerator WaitUntil()
+        public IEnumerator WaitFor()
         {
             yield return new WaitUntil(() => GetAwaiter().IsCompleted);
         }

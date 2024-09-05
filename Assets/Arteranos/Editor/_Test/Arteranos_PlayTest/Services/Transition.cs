@@ -238,7 +238,7 @@ namespace Arteranos.PlayTest.Services
             Assert.IsTrue(sw.ElapsedMilliseconds < 2);
 
             sw.Restart();
-            yield return laab.WaitUntil();
+            yield return laab.WaitFor();
             Debug.Log($"{sw.ElapsedMilliseconds} ms");
             Assert.IsTrue(sw.ElapsedMilliseconds > 100);
 
@@ -267,7 +267,7 @@ namespace Arteranos.PlayTest.Services
             AsyncLazy<AssetBundle> laab = new(() => LoadAssetBundle("foo", ReportProgress));
             Assert.IsTrue(sw.ElapsedMilliseconds < 2);
 
-            yield return laab.WaitUntil();
+            yield return laab.WaitFor();
             Assert.IsNull((AssetBundle) laab);
         }
 

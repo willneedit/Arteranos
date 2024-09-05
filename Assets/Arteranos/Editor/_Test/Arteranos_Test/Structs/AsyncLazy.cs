@@ -21,7 +21,7 @@ namespace Arteranos.Test.Structs
         {
             AsyncLazy<string> data = new(CostlyStringFunction);
 
-            yield return data.WaitUntil();
+            yield return data.WaitFor();
             Assert.AreEqual("Test", (string) data);
         }
 
@@ -61,7 +61,7 @@ namespace Arteranos.Test.Structs
                 Assert.AreEqual("Test", (string)data);
             });
 
-            yield return data.WaitUntil();
+            yield return data.WaitFor();
 
             Assert.AreEqual("Test", (string)data);
         }
@@ -77,7 +77,7 @@ namespace Arteranos.Test.Structs
 
             // First access (and instantiation)
             sw.Restart();
-            yield return data.WaitUntil();
+            yield return data.WaitFor();
             Assert.AreEqual("Test", (string)data);
             Assert.IsTrue(sw.ElapsedMilliseconds > 4500);
 
