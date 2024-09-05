@@ -116,14 +116,7 @@ namespace Arteranos.Core.Managed
         private async Task<byte[]> GetActiveScreenshot()
         {           
             using CancellationTokenSource cts = new(4000);
-
-            if(await IsFullWorld())
-            {
-                IWorldDecoration worldDecoration = await GetWorldDecoration();
-                return worldDecoration.Info.ScreenshotPNG;
-            }
-
-            return await G.IPFSService.ReadBinary($"{await TemplateCid}/Screenshot.png", cancel: cts.Token);
+            return await G.IPFSService.ReadBinary($"{RootCid}/Screenshot.png", cancel: cts.Token);
         }
 
         private async Task<WorldInfoNetwork> GetTemplateInfo()
@@ -167,7 +160,7 @@ namespace Arteranos.Core.Managed
         }
 
         // TODO - Move into common space to make it accessible to kit loading
-        private async Task<AssetBundle> LoadAssetBundle(string path, Action<long, long> reportProgress = null, CancellationToken cancel = default)
+        private static async Task<AssetBundle> LoadAssetBundle(string path, Action<long, long> reportProgress = null, CancellationToken cancel = default)
         {
             AssetBundle resultAB = null;
             SemaphoreSlim waiter = new(0, 1);

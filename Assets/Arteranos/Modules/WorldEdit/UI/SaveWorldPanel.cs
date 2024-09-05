@@ -203,12 +203,12 @@ namespace Arteranos.WorldEdit
                 using MemoryStream ms = new();
                 yield return Utils.TakePhoto(cam, ms);
 
-                WorldDecoration world = AssembleWorldDecoration(ms.ToArray());
+                WorldDecoration world = AssembleWorldDecoration();
 
                 IFileSystemNode fsn = null;
 
                 yield return Asyncs.Async2Coroutine(
-                    AssembleWorldDirectory(worldTemplateCid, world),
+                    AssembleWorldDirectory(worldTemplateCid, world, ms.ToArray()),
                     result => fsn = result);
 
 
@@ -233,7 +233,7 @@ namespace Arteranos.WorldEdit
             throw new NotImplementedException();
         }
 
-        private WorldDecoration AssembleWorldDecoration(byte[] screenshotPNG)
+        private WorldDecoration AssembleWorldDecoration()
         {
             WorldInfoNetwork wi = new()
             {
@@ -243,7 +243,7 @@ namespace Arteranos.WorldEdit
                 WorldName = G.WorldEditorData.WorldName,
                 WorldDescription = G.WorldEditorData.WorldDescription,
                 WorldCid = null, // Cannot create a self-reference, delay it to the WorldDownloader
-                ScreenshotPNG = screenshotPNG,
+                ScreenshotPNG = null,
                 Signature = null,
             };
 
@@ -294,7 +294,11 @@ namespace Arteranos.WorldEdit
             return dirfsn;
         }
 
-        private async Task<IFileSystemNode> AssembleWorldDirectory(Cid template, WorldDecoration decor, CancellationToken cancel = default)
+        private async Task<IFileSystemNode> AssembleWorldDirectory(
+            Cid template, 
+            WorldDecoration decor, 
+            byte[] ScreenshotPNG,
+            CancellationToken cancel = default)
         {
             List<IFileSystemLink> rootEntries = new();
 
@@ -312,6 +316,10 @@ namespace Arteranos.WorldEdit
             // Add the references as a directory tree with hard links [to files}
             IFileSystemNode fsnReferences = await AssembleReferencesDirectory(decor, cancel);
             rootEntries.Add(fsnReferences.ToLink("References"));
+
+            using MemoryStream stream = new(ScreenshotPNG);
+            IFileSystemNode fsnSreenshot = await G.IPFSService.AddStream(stream, "Screenshot.png", cancel: cancel).ConfigureAwait(false);
+            rootEntries.Add(fsnSreenshot.ToLink());
 
             // Bundle them all together.
             return await G.IPFSService.CreateDirectory(rootEntries, cancel: cancel).ConfigureAwait(false);
