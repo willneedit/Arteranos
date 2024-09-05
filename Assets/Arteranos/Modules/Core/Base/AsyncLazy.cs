@@ -44,7 +44,7 @@ namespace Arteranos.Core
         public TaskAwaiter<T> GetAwaiter() => Value.GetAwaiter();
 
         /// <summary>
-        /// Allows use of 'yield return lazyvalue.WaitUntil();' in a Coroutine
+        /// Allows use of 'yield return lazyvalue.WaitFor();' in a Coroutine
         /// </summary>
         /// <returns>The Enumerator to wait the value to be created</returns>
         public IEnumerator WaitFor()
