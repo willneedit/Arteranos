@@ -7,7 +7,6 @@
 
 using Arteranos.WorldEdit;
 using Ipfs;
-using Ipfs.Unity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,6 +23,7 @@ namespace Arteranos.Core.Managed
     {
         void Favourite();
         void Unfavourite();
+        bool IsFavourited {  get; }
         void UpdateLastSeen();
         DateTime LastSeen { get; }
     }
@@ -34,8 +34,6 @@ namespace Arteranos.Core.Managed
 
         public string RootCid { get; private set; } = null;
 
-        public DateTime LastSeen => throw new NotImplementedException();
-
         private World() { }
 
         public World(string rootCid)
@@ -44,7 +42,6 @@ namespace Arteranos.Core.Managed
 
             TemplateCid = new(async () => (await GetWorldLinks()).Item1);
             DecorationCid = new(async () => (await GetWorldLinks()).Item2);
-            ActiveCid = new(async () => (await IsFullWorld()) ? await DecorationCid : await TemplateCid);
             WorldInfo = new(async () => await GetWorldInfo());
             TemplateInfo = new(async () => await GetTemplateInfo());
             ScreenshotPNG = new(async () => await GetActiveScreenshot());
@@ -62,11 +59,6 @@ namespace Arteranos.Core.Managed
         /// The decoration, null if there idn't one (aka blank world)
         /// </summary>
         public readonly AsyncLazy<string> DecorationCid;
-
-        /// <summary>
-        /// The Cid we refer to for the meta data and the screenshot
-        /// </summary>
-        public readonly AsyncLazy<string> ActiveCid;
 
         /// <summary>
         /// The active World Info, same as TemplateInfo if it's a blank world
@@ -122,10 +114,16 @@ namespace Arteranos.Core.Managed
         }
 
         private async Task<byte[]> GetActiveScreenshot()
-        {
-            string activecid = await ActiveCid;
+        {           
             using CancellationTokenSource cts = new(4000);
-            return await G.IPFSService.ReadBinary($"{activecid}/Screenshot.png", cancel: cts.Token);
+
+            if(await IsFullWorld())
+            {
+                IWorldDecoration worldDecoration = await GetWorldDecoration();
+                return worldDecoration.Info.ScreenshotPNG;
+            }
+
+            return await G.IPFSService.ReadBinary($"{await TemplateCid}/Screenshot.png", cancel: cts.Token);
         }
 
         private async Task<WorldInfoNetwork> GetTemplateInfo()
@@ -206,19 +204,37 @@ namespace Arteranos.Core.Managed
             return await LoadAssetBundle(await TemplateCid, (bytes, total) => OnReportingProgress?.Invoke(bytes, total), cts.Token);
         }
 
+        // ---------------------------------------------------------------
+
+        public DateTime LastSeen => DateTime.MinValue;
+
+        public bool IsFavourited => G.Client.FavouritedWorlds.Contains(RootCid);
+
         public void Favourite()
         {
-            throw new NotImplementedException();
+            Client cs = G.Client;
+            if (!cs.FavouritedWorlds.Contains(RootCid))
+                cs.FavouritedWorlds.Add(RootCid);
+
+            cs.Save();
         }
 
         public void Unfavourite()
         {
-            throw new NotImplementedException();
+            Client cs = G.Client;
+            cs.FavouritedWorlds.Remove(RootCid);
+
+            cs.Save();
         }
 
         public void UpdateLastSeen()
         {
-            throw new NotImplementedException();
+            // TODO Implement
+        }
+
+        public static List<Cid> ListFavourites()
+        {
+            return G.Client.FavouritedWorlds;
         }
     }
 }

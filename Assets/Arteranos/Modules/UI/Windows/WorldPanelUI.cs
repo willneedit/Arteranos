@@ -5,10 +5,8 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 using Arteranos.Core;
 using System.Collections.Generic;
@@ -18,6 +16,7 @@ using System.Collections;
 using Ipfs;
 using Arteranos.Core.Operations;
 using System.Collections.Concurrent;
+using Arteranos.Core.Managed;
 
 namespace Arteranos.UI
 {
@@ -89,13 +88,13 @@ namespace Arteranos.UI
         {
             if (!@object.TryGetComponent(out WorldPaneltem wli)) return;
 
-            wli.WorldCid = sortedWorldList[i];
-            if (worldlist.TryGetValue(wli.WorldCid, out Collection list))
+            Cid WorldCid = sortedWorldList[i];
+            wli.World = new World(WorldCid);
+            if (worldlist.TryGetValue(WorldCid, out Collection list))
             {
                 wli.ServersCount = list.serversCount;
                 wli.UsersCount = list.usersCount;
                 wli.FriendsMax = list.friendsMax;
-                wli.Favourited = list.favourited;
             }
         }
 
@@ -162,7 +161,7 @@ namespace Arteranos.UI
 
         private IEnumerator GatherFavouritedWorlds()
         {
-            List<Cid> pinned = WorldInfo.ListFavourites();
+            List<Cid> pinned = World.ListFavourites();
 
             foreach(Cid cid in pinned)
             {

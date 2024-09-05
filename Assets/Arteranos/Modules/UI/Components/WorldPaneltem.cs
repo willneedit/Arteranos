@@ -8,13 +8,11 @@
 using System;
 using System.Collections;
 using TMPro;
-using UnityEngine.UI;
 
 using Arteranos.Core;
 using Arteranos.Services;
-using Ipfs;
 using Arteranos.Core.Operations;
-using UnityEngine;
+using Arteranos.Core.Managed;
 
 namespace Arteranos.UI
 {
@@ -28,14 +26,12 @@ namespace Arteranos.UI
         public IPFSImage img_Screenshot = null;
         public TMP_Text lbl_Caption = null;
 
-        public Cid WorldCid { get; internal set; } = null;
+        public World World { get; internal set; } = null;
         public int ServersCount { get; internal set; } = 0;
         public int UsersCount { get; internal set; } = 0;
         public int FriendsMax { get; internal set; } = 0;
-        public bool Favourited { get; internal set; } = false;
 
         private bool AllowedForThis = true;
-        private WorldInfo WorldInfo = null;
         private string patternCaption = null;
 
         protected override void Awake()
@@ -66,38 +62,38 @@ namespace Arteranos.UI
 
         private void PopulateWorldData()
         {
-            IEnumerator VisCoroutine()
+            IEnumerator Cor()
             {
-                // If the database lookup failed, we have to look further...
-                if (WorldInfo == null)
-                    yield return WorldInfo.RetrieveCoroutine(WorldCid, (wi) => WorldInfo = wi);
+                yield return World.ScreenshotPNG.WaitFor();
+                yield return World.WorldInfo.WaitFor();
 
                 // Cid seems to be invalid, or expired, or unreachable.
-                if (WorldInfo == null)
+                if (World.WorldInfo == null)
                 {
                     lbl_Caption.text = "(unavailable)";
                     yield break;
                 }
 
-                ServerPermissions permission = WorldInfo.win.ContentRating;
+                WorldInfoNetwork worldInfo = World.WorldInfo;
+                ServerPermissions permission = worldInfo.ContentRating;
                 AllowedForThis = permission != null && !permission.IsInViolation(SettingsManager.ActiveServerData.Permissions);
 
                 VisualizeWorldData();
             }
 
-            if(WorldCid == null)
+            if(World == null)
             {
                 lbl_Caption.text = "(deleted)";
                 return;
             }
 
-            WorldInfo = WorldInfo.DBLookup(WorldCid);
-
-            StartCoroutine(VisCoroutine());
+            StartCoroutine(Cor());
         }
 
         private void VisualizeWorldData()
         {
+            WorldInfoNetwork WorldInfo = World.WorldInfo;
+
             // If we're in Host mode, you're the admin of your own server, so we're able to
             // change the world. And you still have the great responsibility...
             btn_Visit.gameObject.SetActive(G.NetworkStatus.GetOnlineLevel() != OnlineLevel.Host);
@@ -105,12 +101,12 @@ namespace Arteranos.UI
                 Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null)
                 && AllowedForThis);
 
-            btn_Add.gameObject.SetActive(!Favourited);
-            btn_Delete.gameObject.SetActive(Favourited);
+            btn_Add.gameObject.SetActive(!World.IsFavourited);
+            btn_Delete.gameObject.SetActive(World.IsFavourited);
 
-            string lvstr = (WorldInfo.Updated == DateTime.MinValue)
+            string lvstr = (World.LastSeen == DateTime.MinValue)
                 ? "Never"
-                : WorldInfo.Updated.ToShortDateString();
+                : World.LastSeen.ToShortDateString();
 
             lbl_Caption.text = string.Format(patternCaption,
                 WorldInfo.WorldName,
@@ -119,36 +115,33 @@ namespace Arteranos.UI
                 UsersCount,
                 FriendsMax);
 
-            if (WorldInfo.win.ScreenshotPNG != null)
-                img_Screenshot.ImageData = WorldInfo.win.ScreenshotPNG;
+            if (World.ScreenshotPNG != null)
+                img_Screenshot.ImageData = World.ScreenshotPNG;
         }
 
         private void OnVisitClicked(bool inPlace)
         {
-            if(!string.IsNullOrEmpty(WorldCid))
+            if(!string.IsNullOrEmpty(World.RootCid))
             {
                 if (inPlace)
-                    SettingsManager.EnterWorld(WorldCid);
+                    SettingsManager.EnterWorld(World.RootCid);
                 else
-                    ServerSearcher.InitiateServerTransition(WorldCid);
+                    ServerSearcher.InitiateServerTransition(World.RootCid);
 
-                WorldInfo.BumpWI();
+                World.UpdateLastSeen();
             }
         }
 
         private void OnAddClicked()
         {
-            WorldInfo.Favourite();
-            Favourited = true;
+            World.Favourite();
             PopulateWorldData();
         }
 
         private void OnDeleteClicked()
         {
-            WorldInfo.Unfavourite();
-            Favourited = false;
-            WorldInfo.DBDelete(WorldCid);
-            WorldCid = null;
+            World.Unfavourite();
+            World = null;
             PopulateWorldData();
         }
     }

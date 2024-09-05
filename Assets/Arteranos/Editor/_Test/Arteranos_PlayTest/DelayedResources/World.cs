@@ -70,19 +70,15 @@ namespace Arteranos.PlayTest.DelayedResources
             Stopwatch sw = Stopwatch.StartNew();
             yield return world.TemplateCid.WaitFor();
             yield return world.DecorationCid.WaitFor();
-            yield return world.ActiveCid.WaitFor();
             Debug.Log($"{sw.ElapsedMilliseconds} ms");
 
             sw.Restart();
             string tcid = world.TemplateCid;
             string dcid = world.DecorationCid;
-            string acid = world.ActiveCid;
             Debug.Log($"{sw.ElapsedMilliseconds} ms");
 
             Assert.IsNotNull(tcid);
             Assert.IsNull(dcid);
-
-            Assert.AreEqual(tcid, acid);
         }
 
         [UnityTest]
