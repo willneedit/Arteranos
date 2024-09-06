@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3569843273776312252}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Arrow_Y
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 8295126350309683457}
   - component: {fileID: 6425755979061937660}
   - component: {fileID: 8511768386882948761}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Cone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -512,7 +512,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6372238104844499419}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Arrow_X
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -545,7 +545,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2429485893024389721}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Arrow_Z
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -580,7 +580,7 @@ GameObject:
   - component: {fileID: 6566474078612833708}
   - component: {fileID: 4864393710827900356}
   - component: {fileID: 1576402421419703665}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -662,7 +662,7 @@ GameObject:
   m_Component:
   - component: {fileID: 27175570375176984}
   - component: {fileID: 3284893518466085534}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Gizmo_Translation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -708,7 +708,7 @@ GameObject:
   - component: {fileID: 1296317928884965274}
   - component: {fileID: 301676911306901738}
   - component: {fileID: 8073651319935810367}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -791,7 +791,7 @@ GameObject:
   - component: {fileID: 967458174601846276}
   - component: {fileID: 748711669366178633}
   - component: {fileID: 7162517786459839630}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -872,7 +872,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3375317203816972558}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -910,7 +910,7 @@ GameObject:
   - component: {fileID: 2240299732221702045}
   - component: {fileID: 7727534138696656590}
   - component: {fileID: 2116573131023984415}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Cone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1380,7 +1380,7 @@ GameObject:
   - component: {fileID: 6968173827053831183}
   - component: {fileID: 1541889438707888516}
   - component: {fileID: 8054107268690061386}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Cone
   m_TagString: Untagged
   m_Icon: {fileID: 0}

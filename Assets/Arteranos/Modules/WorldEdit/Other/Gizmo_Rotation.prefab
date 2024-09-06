@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3237734553264107482}
   - component: {fileID: 8609793777180438896}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Gizmo_Rotation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -60,7 +60,7 @@ GameObject:
   - component: {fileID: 7188408584829907481}
   - component: {fileID: 4716932852414870009}
   - component: {fileID: 7557496742414671681}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Circle_Around_X
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2132,7 +2132,7 @@ GameObject:
   - component: {fileID: 3482936907317775569}
   - component: {fileID: 8755509848989608330}
   - component: {fileID: 3979568560505976375}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Circle_Around_Y
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4204,7 +4204,7 @@ GameObject:
   - component: {fileID: 3769520048294309049}
   - component: {fileID: 8442517940065980042}
   - component: {fileID: 4552775802437105728}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Circle_Around_Z
   m_TagString: Untagged
   m_Icon: {fileID: 0}
