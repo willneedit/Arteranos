@@ -22,6 +22,7 @@ using Ipfs.Unity;
 using Arteranos.Core.Operations;
 using UnityEngine;
 using Org.BouncyCastle.Utilities.Collections;
+using Arteranos.Core.Managed;
 
 namespace Arteranos.WorldEdit
 {
@@ -104,33 +105,41 @@ namespace Arteranos.WorldEdit
         {
             base.OnEnable();
 
-            if(!ScreenshotCamera) ScreenshotCamera = Instantiate(bp_ScreenshotCamera);
-
-            lbl_Author.text = G.Client.MeUserID;
-            txt_WorldName.text = G.WorldEditorData.WorldName;
-            txt_WorldDescription.text = G.WorldEditorData.WorldDescription;
-
-            //WorldDownloader's info may be outdated if we fell back to offline.
-            if (G.World.Cid == null)
+            IEnumerator Cor()
             {
-                worldTemplateCid = null;
-                lbl_Template.text = "None";
+                if (!ScreenshotCamera) ScreenshotCamera = Instantiate(bp_ScreenshotCamera);
+
+                lbl_Author.text = G.Client.MeUserID;
+                txt_WorldName.text = G.WorldEditorData.WorldName;
+                txt_WorldDescription.text = G.WorldEditorData.WorldDescription;
+
+                //WorldDownloader's info may be outdated if we fell back to offline.
+                if (G.World.Cid == null)
+                {
+                    worldTemplateCid = null;
+                    lbl_Template.text = "None";
+                }
+                else
+                {
+                    World World = G.World.Cid;
+
+                    yield return World.TemplateInfo.WaitFor();
+
+                    WorldInfoNetwork info = World.TemplateInfo;
+
+                    worldTemplateCid = info.WorldCid;
+
+                    lbl_Template.text = string.Format(templatePattern,
+                        info.WorldCid[^12..],
+                        info.WorldName);
+                }
+
+                EnableSaveButtons();
+
+                RefreshContentWarning();
             }
-            else
-            {
-                WorldInfo info = WorldDownloader.GetTemplateInfo(WorldDownloader.CurrentWorldContext);
-                info ??= WorldDownloader.GetWorldInfo(WorldDownloader.CurrentWorldContext);
 
-                worldTemplateCid = info.WorldCid;
-
-                lbl_Template.text = string.Format(templatePattern,
-                    info.WorldCid[^12..],
-                    info.WorldName);
-            }
-
-            EnableSaveButtons();
-
-            RefreshContentWarning();
+            StartCoroutine(Cor());
         }
 
         protected override void OnDisable()
@@ -203,23 +212,19 @@ namespace Arteranos.WorldEdit
                 using MemoryStream ms = new();
                 yield return Utils.TakePhoto(cam, ms);
 
-                WorldDecoration world = AssembleWorldDecoration();
+                WorldDecoration decor = AssembleWorldDecoration();
 
                 IFileSystemNode fsn = null;
 
                 yield return Asyncs.Async2Coroutine(
-                    AssembleWorldDirectory(worldTemplateCid, world, ms.ToArray()),
+                    AssembleWorldDirectory(worldTemplateCid, decor, ms.ToArray()),
                     result => fsn = result);
 
 
                 // Pin and enter as a favourite
-                world.info.WorldCid = fsn.Id;
-                WorldInfo wi = new()
-                {
-                    win = world.info,
-                    Updated = DateTime.UtcNow
-                };
-                wi.Favourite();
+                World World = fsn.Id;
+                World.Favourite();
+
                 Debug.Log($"Full world CID: {fsn.Id}");
 
                 EnableSaveButtons();
