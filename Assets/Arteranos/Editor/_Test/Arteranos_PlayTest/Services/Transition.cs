@@ -68,7 +68,7 @@ namespace Arteranos.PlayTest.Services
 
             yield return new WaitForSeconds(2);
 
-            yield return TransitionProgress.TransitionTo(null, null);
+            yield return TransitionProgress.TransitionTo(null);
 
             yield return new WaitForSeconds(2);
         }
@@ -87,7 +87,7 @@ namespace Arteranos.PlayTest.Services
                 yield return new WaitForSeconds(1f);
             }
 
-            yield return TransitionProgress.TransitionTo(null, null);
+            yield return TransitionProgress.TransitionTo(null);
 
             yield return new WaitForSeconds(2);
         }
@@ -114,7 +114,7 @@ namespace Arteranos.PlayTest.Services
             // Wait for the task to be done.
             yield return new WaitUntil(() => t.IsCompleted);
 
-            yield return TransitionProgress.TransitionTo(null, null);
+            yield return TransitionProgress.TransitionTo(null);
 
             yield return new WaitForSeconds(2);
         }
@@ -298,7 +298,7 @@ namespace Arteranos.PlayTest.Services
 
             yield return new WaitForSeconds(2);
 
-            yield return TransitionProgress.TransitionTo(WorldCid, "Would be WorldInfo.Name");
+            yield return TransitionProgress.TransitionTo(WorldCid);
 
             yield return new WaitForSeconds(1);
         }

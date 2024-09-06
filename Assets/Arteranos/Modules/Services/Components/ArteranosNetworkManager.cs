@@ -570,7 +570,7 @@ namespace Arteranos.Services
             WorldInfoNetwork worldInfo = null;
             if (wca.WorldRootCid != null)
             {
-                world = wca.WorldRootCid;
+                world = (Cid) wca.WorldRootCid;
                 yield return world.WorldInfo.WaitFor();
                 worldInfo = world?.WorldInfo;
             }
@@ -614,11 +614,10 @@ namespace Arteranos.Services
             yield return TransitionProgress.TransitionFrom();
 
             Cid WorldCid = null;
-            string WorldName = null;
-            if (worldInfo != null)
+
+            if (world != null)
             {
                 WorldCid = worldInfo.WorldCid;
-                WorldName = worldInfo.WorldName;
 
                 (AsyncOperationExecutor<Context> ao, Context co) =
                     WorldDownloader.PrepareGetWorldTemplate(WorldCid);
@@ -637,12 +636,11 @@ namespace Arteranos.Services
 
                     // Invalidate the world info, because we are in a transitional stage.
                     wca.WorldRootCid = null;
-                    WorldCid = null;
-                    WorldName= null;
+                    world = null;
                 }
             }
 
-            yield return TransitionProgress.TransitionTo(WorldCid, WorldName);
+            yield return TransitionProgress.TransitionTo(world);
 
             // If we're in offline mode, we're done it.
             // If we're in server or host mode, we need to announce the world change,
@@ -664,13 +662,12 @@ namespace Arteranos.Services
             yield return TransitionProgress.TransitionFrom();
 
             Cid WorldCid = null;
-            string WorldName = null;
 
             World world = null;
             WorldInfoNetwork worldInfo = null;
             if (wca.WorldRootCid != null)
             {
-                world = wca.WorldRootCid;
+                world = (Cid) wca.WorldRootCid;
                 yield return world.WorldInfo.WaitFor();
                 worldInfo = world?.WorldInfo;
             }
@@ -679,7 +676,6 @@ namespace Arteranos.Services
             if (world != null)
             {
                 WorldCid = worldInfo.WorldCid;
-                WorldName = worldInfo.WorldName;
 
                 bool success = true;
 
@@ -697,19 +693,17 @@ namespace Arteranos.Services
 
                 if (!success)
                 {
-                    yield return ShowDialogCoroutine($"Error in loading world '{WorldName}' - disconnecting");
+                    yield return ShowDialogCoroutine($"Error in loading world '{WorldCid}' - disconnecting");
 
                     // Invalidate the world info, because we are in a transitional stage.
-                    worldInfo = null;
-                    WorldCid = null;
-                    WorldName = null;
+                    world = null;
 
                     // We're in the client mode, see above.
                     G.NetworkStatus.StopHost(false);
                 }
             }
 
-            yield return TransitionProgress.TransitionTo(WorldCid, WorldName);
+            yield return TransitionProgress.TransitionTo(world);
         }
 
         #endregion

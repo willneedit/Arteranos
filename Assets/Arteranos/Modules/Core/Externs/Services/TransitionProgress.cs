@@ -14,6 +14,7 @@ using Arteranos.WorldEdit;
 
 using AsyncOperation = UnityEngine.AsyncOperation;
 using Arteranos.Core.Operations;
+using Arteranos.Core.Managed;
 
 namespace Arteranos.Services
 {
@@ -42,11 +43,11 @@ namespace Arteranos.Services
 
         // NOTE: Needs preloaded world! Just deploys the sceneloader which it uses
         // the current preloaded world asset bundle!
-        public static IEnumerator TransitionTo(Cid WorldCid, string WorldName)
+        public static IEnumerator TransitionTo(World World)
         {
-            static IEnumerator MoveToPreloadedWorld(Cid WorldCid, string WorldName)
+            IEnumerator MoveToPreloadedWorld()
             {
-                if (WorldCid == null)
+                if (World == null)
                 {
                     AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
                     while (!ao.isDone) yield return null;
@@ -55,27 +56,24 @@ namespace Arteranos.Services
                     yield return new WaitForEndOfFrame();
 
                     G.XRControl.MoveRig();
+
+                    G.World.Name = "Somewhere";
                 }
                 else
+                {
                     yield return EnterDownloadedWorld();
+                    yield return World.WorldInfo.WaitFor();
 
-                G.World.Cid = WorldCid;
-                G.World.Name = WorldName;
-            }
+                    G.World.Name = ((WorldInfoNetwork)World.WorldInfo).WorldName;
+                }
 
-            WorldInfo worldInfo = WorldDownloader.GetWorldInfo(WorldDownloader.CurrentWorldContext);
-
-            if(WorldCid != null && WorldCid != worldInfo.WorldCid)
-            {
-                Debug.LogWarning("Attempt to move into the wrong world, falling back to offline");
-                WorldCid = null;
-                WorldName = null;
+                G.World.Cid = World?.RootCid;
             }
 
             G.XRVisualConfigurator.StartFading(1.0f);
             yield return new WaitForSeconds(0.5f);
 
-            yield return MoveToPreloadedWorld(WorldCid, WorldName);
+            yield return MoveToPreloadedWorld();
 
             G.XRVisualConfigurator.StartFading(0.0f);
 

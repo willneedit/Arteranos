@@ -72,7 +72,7 @@ namespace Arteranos.Services
             if (!taskIPAddr.IsCompletedSuccessfully)
             {
                 Debug.Log($"{si.PeerID} is unreachable.");
-                yield return TransitionProgress.TransitionTo(null, null);
+                yield return TransitionProgress.TransitionTo(null);
                 callback?.Invoke(false);
                 yield break;
             }
@@ -102,7 +102,7 @@ namespace Arteranos.Services
             if (!G.NetworkStatus.IsClientConnected)
             {
                 callback?.Invoke(false);
-                yield return TransitionProgress.TransitionTo(null, null);
+                yield return TransitionProgress.TransitionTo(null);
                 yield break;
             }
 

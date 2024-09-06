@@ -76,7 +76,7 @@ namespace Arteranos.Core
     public class CTSPWorldChangeAnnouncement : CTSPacket
     {
         [ProtoMember(1)]
-        public Cid WorldRootCid;
+        public string WorldRootCid;
     }
 
     // S: Dialog message

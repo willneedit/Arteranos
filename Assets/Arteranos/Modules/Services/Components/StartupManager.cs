@@ -53,7 +53,7 @@ namespace Arteranos.Services
             else if (TargetedPeerID != null)
                 yield return G.ConnectionManager.ConnectToServer(TargetedPeerID, null);
             else
-                yield return TransitionProgress.TransitionTo(null, null);
+                yield return TransitionProgress.TransitionTo(null);
 
 
             // TODO Dedicated server: Startup world commandline argument processing
