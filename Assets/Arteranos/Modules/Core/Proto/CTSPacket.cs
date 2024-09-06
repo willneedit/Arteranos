@@ -7,6 +7,7 @@
 
 using System.IO;
 using Arteranos.Core.Cryptography;
+using Ipfs;
 using Mirror;
 using ProtoBuf;
 
@@ -75,7 +76,7 @@ namespace Arteranos.Core
     public class CTSPWorldChangeAnnouncement : CTSPacket
     {
         [ProtoMember(1)]
-        public WorldInfo WorldInfo; // NOTE: No Screenshot for brevity, WorldCid points to original
+        public Cid WorldRootCid;
     }
 
     // S: Dialog message

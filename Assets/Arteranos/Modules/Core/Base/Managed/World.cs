@@ -32,11 +32,11 @@ namespace Arteranos.Core.Managed
     {
         public event Action<long, long> OnReportingProgress;
 
-        public string RootCid { get; private set; } = null;
+        public Cid RootCid { get; private set; } = null;
 
         private World() { }
 
-        public World(string rootCid)
+        public World(Cid rootCid)
         {
             RootCid = rootCid;
 
@@ -50,15 +50,17 @@ namespace Arteranos.Core.Managed
             DecorationDontent = new(async () => await GetWorldDecoration());
         }
 
+        public static implicit operator World(Cid rootCid) => new(rootCid);
+
         /// <summary>
         /// The underlying world template
         /// </summary>
-        public readonly AsyncLazy<string> TemplateCid;
+        public readonly AsyncLazy<Cid> TemplateCid;
 
         /// <summary>
         /// The decoration, null if there idn't one (aka blank world)
         /// </summary>
-        public readonly AsyncLazy<string> DecorationCid;
+        public readonly AsyncLazy<Cid> DecorationCid;
 
         /// <summary>
         /// The active World Info, same as TemplateInfo if it's a blank world
@@ -131,7 +133,7 @@ namespace Arteranos.Core.Managed
 
             WorldInfoNetwork win = new()
             {
-                WorldCid = TemplateCid,
+                WorldCid = (Cid) TemplateCid,
                 WorldName = metaData.WorldName,
                 WorldDescription = metaData.WorldDescription,
                 Author = metaData.AuthorID,
@@ -145,17 +147,19 @@ namespace Arteranos.Core.Managed
 
         private async Task<WorldInfoNetwork> GetWorldInfo()
         {
-            if (!(await IsFullWorld())) return await GetTemplateInfo();
+            WorldInfoNetwork win = await IsFullWorld() 
+                ? (await GetWorldDecoration()).Info 
+                : await GetTemplateInfo();
 
-            IWorldDecoration worldDecoration = await GetWorldDecoration();
-
-            return worldDecoration.Info;
+            // Add the self reference
+            win.WorldCid = RootCid;
+            return win;
         }
 
         private async Task<IWorldDecoration> GetWorldDecoration()
         {
             using CancellationTokenSource cts = new(4000);
-            using MemoryStream ms = await G.IPFSService.ReadIntoMS(DecorationCid, cancel: cts.Token);
+            using MemoryStream ms = await G.IPFSService.ReadIntoMS(await DecorationCid, cancel: cts.Token);
             return G.WorldEditorData.DeserializeWD(ms);
         }
 

@@ -148,11 +148,9 @@ namespace Arteranos.Core
 
         public static void EnterWorld(Cid WorldCid)
         {
-            WorldInfo wi = WorldInfo.DBLookup(WorldCid);
-
             EmitToServerCTSPacket(new CTSPWorldChangeAnnouncement()
             {
-                WorldInfo = wi?.Strip()
+                WorldRootCid = WorldCid,
             });
         }
 

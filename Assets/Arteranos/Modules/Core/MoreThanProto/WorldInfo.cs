@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 
 namespace Arteranos.Core
 {
+    [Obsolete("Use Core.Managed.World, or the root CID of the world")]
     public partial class WorldInfo : FlatFileDB<WorldInfo>
     {
         // Convenience redirections.

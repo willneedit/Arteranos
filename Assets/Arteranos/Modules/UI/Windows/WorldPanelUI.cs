@@ -89,7 +89,7 @@ namespace Arteranos.UI
             if (!@object.TryGetComponent(out WorldPaneltem wli)) return;
 
             Cid WorldCid = sortedWorldList[i];
-            wli.World = new World(WorldCid);
+            wli.World = WorldCid;
             if (worldlist.TryGetValue(WorldCid, out Collection list))
             {
                 wli.ServersCount = list.serversCount;

@@ -14,6 +14,7 @@ using Arteranos.Social;
 using System.Linq;
 using Ipfs;
 using System.IO;
+using Arteranos.Core.Managed;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -375,14 +376,12 @@ namespace Arteranos.Services
         {
             IEnumerator SendWCAJustForTheLaggard(NetworkConnectionToClient conn, PublicKey agreePublicKey)
             {
-                WorldInfo wi = null;
-
-                yield return WorldInfo.RetrieveCoroutine(G.World.Cid, (_wi) => wi = _wi);
-
                 EmitToClientCTSPacket(new CTSPWorldChangeAnnouncement()
                 {
-                    WorldInfo = wi?.Strip(),
+                    WorldRootCid = G.World.Cid,
                 }, conn, agreePublicKey);
+
+                yield return null;
             }
 
 
@@ -565,9 +564,16 @@ namespace Arteranos.Services
         {
             wca.invoker = invoker;
 
-            WorldInfo WorldInfo = wca.WorldInfo;
+            Debug.Log($"[Server] {(string)wca.invoker} wants to change the world to {wca.WorldRootCid}");
 
-            Debug.Log($"[Server] {(string)wca.invoker} wants to change the world to {wca.WorldInfo?.WorldCid}");
+            World world = null;
+            WorldInfoNetwork worldInfo = null;
+            if (wca.WorldRootCid != null)
+            {
+                world = wca.WorldRootCid;
+                yield return world.WorldInfo.WaitFor();
+                worldInfo = world?.WorldInfo;
+            }
 
             IAvatarBrain sender = G.NetworkStatus.GetOnlineUser(invoker);
 
@@ -588,9 +594,9 @@ namespace Arteranos.Services
 
                 // Can the user change a world like with p0rn or gore on this server which
                 // is like rated to G or PG-13? Even if it's the server admin?
-                if(WorldInfo != null)
+                if(worldInfo != null)
                 {
-                    ServerPermissions permission = WorldInfo.win.ContentRating;
+                    ServerPermissions permission = worldInfo.ContentRating;
                     bool AllowedForThis = permission != null && !permission.IsInViolation(G.Server.Permissions);
 
                     if(!AllowedForThis)
@@ -609,10 +615,10 @@ namespace Arteranos.Services
 
             Cid WorldCid = null;
             string WorldName = null;
-            if (wca.WorldInfo != null)
+            if (worldInfo != null)
             {
-                WorldCid = wca.WorldInfo.WorldCid;
-                WorldName = wca.WorldInfo.WorldName;
+                WorldCid = worldInfo.WorldCid;
+                WorldName = worldInfo.WorldName;
 
                 (AsyncOperationExecutor<Context> ao, Context co) =
                     WorldDownloader.PrepareGetWorldTemplate(WorldCid);
@@ -630,7 +636,7 @@ namespace Arteranos.Services
                     }, sender);
 
                     // Invalidate the world info, because we are in a transitional stage.
-                    wca.WorldInfo = null;
+                    wca.WorldRootCid = null;
                     WorldCid = null;
                     WorldName= null;
                 }
@@ -659,26 +665,23 @@ namespace Arteranos.Services
 
             Cid WorldCid = null;
             string WorldName = null;
-            if (wca.WorldInfo != null)
+
+            World world = null;
+            WorldInfoNetwork worldInfo = null;
+            if (wca.WorldRootCid != null)
             {
-                WorldCid = wca.WorldInfo.WorldCid;
-                WorldName = wca.WorldInfo.WorldName;
+                world = wca.WorldRootCid;
+                yield return world.WorldInfo.WaitFor();
+                worldInfo = world?.WorldInfo;
+            }
+
+
+            if (world != null)
+            {
+                WorldCid = worldInfo.WorldCid;
+                WorldName = worldInfo.WorldName;
 
                 bool success = true;
-
-                // We got a _stripped_ version, start to download the full version now
-                // if it's unavailable locally yet.
-                if(success && WorldInfo.DBLookup(WorldCid) == null)
-                {
-                    (AsyncOperationExecutor<Context> ao, Context co) =
-                        WorldDownloader.PrepareGetWorldInfo(WorldCid);
-
-                    ao.ProgressChanged += G.TransitionProgress.OnProgressChanged;
-
-                    yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
-
-                    success = co != null;
-                }
 
                 if (success)
                 {
@@ -697,7 +700,7 @@ namespace Arteranos.Services
                     yield return ShowDialogCoroutine($"Error in loading world '{WorldName}' - disconnecting");
 
                     // Invalidate the world info, because we are in a transitional stage.
-                    wca.WorldInfo = null;
+                    worldInfo = null;
                     WorldCid = null;
                     WorldName = null;
 

@@ -73,8 +73,8 @@ namespace Arteranos.PlayTest.DelayedResources
             Debug.Log($"{sw.ElapsedMilliseconds} ms");
 
             sw.Restart();
-            string tcid = world.TemplateCid;
-            string dcid = world.DecorationCid;
+            Cid tcid = world.TemplateCid;
+            Cid dcid = world.DecorationCid;
             Debug.Log($"{sw.ElapsedMilliseconds} ms");
 
             Assert.IsNotNull(tcid);
