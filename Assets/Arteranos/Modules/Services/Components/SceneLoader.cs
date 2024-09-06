@@ -116,11 +116,18 @@ namespace Arteranos.Services
             for(int i = 0, c = transform.childCount; i < c; ++i)
                 RouteAudio(transform.GetChild(i));
         }
+
         public IEnumerator LoadScene(string name)
         {
             yield return null;
 
             AssetBundle loadedAB = AssetBundle.LoadFromFile(name);
+
+            yield return LoadScene(loadedAB, false);
+        }
+
+        public IEnumerator LoadScene(AssetBundle loadedAB, bool doUnload = true)
+        {
             if(loadedAB == null)
             {
                 Debug.Log("Failed to load AssetBundle!");
@@ -198,7 +205,7 @@ namespace Arteranos.Services
 
             Debug.Log("Loader finished, cleaning up.");
 
-            loadedAB.Unload(false);
+            if(doUnload) loadedAB.Unload(false);
 
             // Give the chance to move the own avatar BEFORE to unload the old scene
             // to prevent to pull the rug away from under your feet.

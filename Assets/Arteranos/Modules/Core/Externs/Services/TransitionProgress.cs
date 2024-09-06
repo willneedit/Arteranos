@@ -5,16 +5,13 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Core;
-using Ipfs;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Arteranos.WorldEdit;
 
-using AsyncOperation = UnityEngine.AsyncOperation;
-using Arteranos.Core.Operations;
 using Arteranos.Core.Managed;
+using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 
 namespace Arteranos.Services
 {
@@ -41,8 +38,6 @@ namespace Arteranos.Services
             G.SysMenu.EnableHUD(false);
         }
 
-        // NOTE: Needs preloaded world! Just deploys the sceneloader which it uses
-        // the current preloaded world asset bundle!
         public static IEnumerator TransitionTo(World World)
         {
             IEnumerator MoveToPreloadedWorld()
@@ -61,10 +56,10 @@ namespace Arteranos.Services
                 }
                 else
                 {
-                    yield return EnterDownloadedWorld();
+                    yield return EnterDownloadedWorld(World);
                     yield return World.WorldInfo.WaitFor();
 
-                    G.World.Name = ((WorldInfoNetwork)World.WorldInfo).WorldName;
+                    G.World.Name = World.WorldInfo.Result.WorldName;
                 }
 
                 G.World.Cid = World?.RootCid;
@@ -80,15 +75,19 @@ namespace Arteranos.Services
             G.SysMenu.EnableHUD(true);
         }
 
-        public static IEnumerator EnterDownloadedWorld()
+        public static IEnumerator EnterDownloadedWorld(World world)
         {
+            // Last chance...
+            yield return world.TemplateContent.WaitFor();
+            yield return world.DecorationContent.WaitFor();
 
-            string worldABF = WorldDownloader.GetWorldDataFile(WorldDownloader.CurrentWorldContext);
-            IWorldDecoration worldDecoration = WorldDownloader.GetWorldDecoration(WorldDownloader.CurrentWorldContext);
+            AssetBundle ab = world.TemplateContent;
+            IWorldDecoration worldDecoration = world.DecorationContent.Result;
 
-            Debug.Log($"Download complete, world={worldABF}");
+            Debug.Log($"Download complete");
 
-            yield return G.SceneLoader.LoadScene(worldABF);
+            // TODO - remove as soon as the World object persists
+            yield return G.SceneLoader.LoadScene(ab.Detach());
 
             if (worldDecoration != null)
             {

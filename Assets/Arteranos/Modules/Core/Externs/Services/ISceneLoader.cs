@@ -6,11 +6,13 @@
  */
 
 using System.Collections;
+using UnityEngine;
 
 namespace Arteranos.Services
 {
     public interface ISceneLoader
     {
         IEnumerator LoadScene(string name);
+        IEnumerator LoadScene(AssetBundle loadedAB, bool doUnload = true);
     }
 }

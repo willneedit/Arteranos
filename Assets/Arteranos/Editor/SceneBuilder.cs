@@ -445,7 +445,7 @@ namespace Arteranos.Editor
                     pui.Completed += (_context) =>
                     {
                         Debug.Log("World data file loading and unpacking succeeded.");
-                        EditorCoroutineUtility.StartCoroutineOwnerless(TransitionProgress.EnterDownloadedWorld());
+                        EditorCoroutineUtility.StartCoroutineOwnerless(TransitionProgress.EnterDownloadedWorld(WorldCid));
                     };
 
                     pui.Faulted += (Exception ex, Context _context) => 

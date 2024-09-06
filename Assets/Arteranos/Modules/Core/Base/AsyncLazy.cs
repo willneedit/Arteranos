@@ -63,5 +63,21 @@ namespace Arteranos.Core
 
             return lazy.Value.Result;
         }
+
+        /// <summary>
+        /// For the two-stage value retrieval in Coroutine and implicit conversion fails
+        /// </summary>
+        /// <returns>The variable itself</returns>
+        /// <exception cref="InvalidOperationException">Access would block</exception>
+        public T Result
+        {
+            get
+            {
+                if (!Value.GetAwaiter().IsCompleted)
+                    throw new InvalidOperationException("Would block");
+
+                return Value.Result;
+            }
+        }
     }
 }

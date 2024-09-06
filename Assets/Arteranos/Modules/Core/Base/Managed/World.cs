@@ -47,7 +47,7 @@ namespace Arteranos.Core.Managed
             ScreenshotPNG = new(async () => await GetActiveScreenshot());
 
             TemplateContent = new(async () => await GetAssetBundle());
-            DecorationDontent = new(async () => await GetWorldDecoration());
+            DecorationContent = new(async () => await GetWorldDecoration());
         }
 
         public static implicit operator World(Cid rootCid) => new(rootCid);
@@ -84,7 +84,7 @@ namespace Arteranos.Core.Managed
         /// <summary>
         /// The world decoration's content
         /// </summary>
-        public readonly AsyncLazy<IWorldDecoration> DecorationDontent;
+        public readonly AsyncLazy<IWorldDecoration> DecorationContent;
 
         public async Task<bool> IsFullWorld() => await DecorationCid != null;
 
@@ -158,8 +158,12 @@ namespace Arteranos.Core.Managed
 
         private async Task<IWorldDecoration> GetWorldDecoration()
         {
+            Cid path = await DecorationCid;
+
+            if (path == null) return null;
+
             using CancellationTokenSource cts = new(4000);
-            using MemoryStream ms = await G.IPFSService.ReadIntoMS(await DecorationCid, cancel: cts.Token);
+            using MemoryStream ms = await G.IPFSService.ReadIntoMS(path, cancel: cts.Token);
             return G.WorldEditorData.DeserializeWD(ms);
         }
 

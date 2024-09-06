@@ -109,7 +109,12 @@ namespace Arteranos.Core.Managed
         }
         ~AssetBundle() { Dispose(); }
 
-        public void Detach() => InternalAssetBundle = null;
+        public UnityEngine.AssetBundle Detach()
+        {
+            UnityEngine.AssetBundle old = InternalAssetBundle;
+            InternalAssetBundle = null;
+            return old;
+        }
 
         public void Dispose()
         {
