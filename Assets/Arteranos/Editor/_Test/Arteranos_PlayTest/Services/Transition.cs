@@ -274,31 +274,38 @@ namespace Arteranos.PlayTest.Services
         [UnityTest]
         public IEnumerator T010_TransitionWorld()
         {
+            static void ReportProgress(long bytes, long totalBytes)
+            {
+                float ratio = bytes / (totalBytes + float.Epsilon);
+
+                string bytesMag = Core.Utils.Magnitude(bytes);
+                string totalBytesMag = Core.Utils.Magnitude(totalBytes);
+
+                string msg = totalBytes == 0
+                    ? "Downloading..."
+                    : $"Downloading {bytesMag} from {totalBytesMag}";
+
+                G.TransitionProgress.OnProgressChanged(ratio, msg);
+            }
+
             yield return new WaitForSeconds(10);
 
             yield return UploadTestWorld();
 
             yield return TransitionProgress.TransitionFrom();
 
-            (AsyncOperationExecutor<Context> ao, Context co) =
-                WorldDownloader.PrepareGetWorldTemplate(WorldCid);
+            World world = WorldCid;
 
-            ao.ProgressChanged += G.TransitionProgress.OnProgressChanged;
+            world.OnReportingProgress += ReportProgress;
 
-            yield return ao.ExecuteCoroutine(co, (ex, co) =>
-            {
-                G.TransitionProgress.OnProgressChanged(1.0f,
-                    co != null ? "Success" : "Failed");
-            });
+            yield return world.TemplateContent.WaitFor();
+            yield return world.DecorationContent.WaitFor();
 
-            string file = WorldDownloader.GetWorldDataFile(co);
-
-            Assert.IsNotNull(file);
-            Assert.IsTrue(File.Exists(file));
+            world.OnReportingProgress -= ReportProgress;
 
             yield return new WaitForSeconds(2);
 
-            yield return TransitionProgress.TransitionTo(WorldCid);
+            yield return TransitionProgress.TransitionTo(world);
 
             yield return new WaitForSeconds(1);
         }

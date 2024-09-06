@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Linq;
 using System.Threading;
+using Arteranos.Core.Managed;
 
 namespace Arteranos.UI
 {
@@ -191,7 +192,7 @@ namespace Arteranos.UI
                 // Favourited worlds
                 List<Cid> pinned = null;
                 int favouritedWorlds = 0;
-                foreach (Cid cid in WorldInfo.ListFavourites())
+                foreach (Cid cid in World.ListFavourites())
                 {
                     favouritedWorlds++;
                     toPin.Add(cid);

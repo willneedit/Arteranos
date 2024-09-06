@@ -12,6 +12,7 @@ using System.Threading;
 using Arteranos.UI;
 using Arteranos.Services;
 using Ipfs;
+using Arteranos.Core.Managed;
 
 namespace Arteranos.Core.Operations
 {
@@ -25,13 +26,15 @@ namespace Arteranos.Core.Operations
 
         public Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 ServerSearcherContext context = _context as ServerSearcherContext;
 
-                WorldInfo wi = WorldInfo.DBLookup(context.desiredWorldCid);
+                World world = context.desiredWorldCid;
 
-                context.desiredWorldPermissions = wi.ContentRating;
+                WorldInfoNetwork info = await world.WorldInfo;
+
+                context.desiredWorldPermissions = info?.ContentRating;
 
                 return context as Context;
             });

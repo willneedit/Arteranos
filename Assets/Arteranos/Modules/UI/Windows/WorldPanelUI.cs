@@ -234,9 +234,6 @@ namespace Arteranos.UI
             {
                 yield return null;
 
-                (var ao, var co) = WorldDownloader.PrepareGetWorldInfo(cid);
-                yield return ao.ExecuteCoroutine(co);
-
                 yield return AddManualWorldCoroutine(cid, true, null);
 
                 CreateSortedWorldList();
