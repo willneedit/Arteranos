@@ -42,6 +42,8 @@ namespace Arteranos.Services
         {
             IEnumerator MoveToPreloadedWorld()
             {
+                G.World.World = World;
+
                 if (World == null)
                 {
                     AsyncOperation ao = SceneManager.LoadSceneAsync("OfflineScene");
@@ -57,8 +59,6 @@ namespace Arteranos.Services
                     yield return EnterDownloadedWorld(World);
                     yield return World.WorldInfo.WaitFor();
                 }
-
-                G.World.World = World;
             }
 
             G.XRVisualConfigurator.StartFading(1.0f);

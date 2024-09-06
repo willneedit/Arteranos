@@ -114,14 +114,14 @@ namespace Arteranos.WorldEdit
                 txt_WorldDescription.text = G.WorldEditorData.WorldDescription;
 
                 //WorldDownloader's info may be outdated if we fell back to offline.
-                if (G.World.Cid == null)
+                if (G.World.World == null)
                 {
                     worldTemplateCid = null;
                     lbl_Template.text = "None";
                 }
                 else
                 {
-                    World World = G.World.Cid;
+                    World World = G.World.World;
 
                     yield return World.TemplateInfo.WaitFor();
 
