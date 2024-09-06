@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using Arteranos.UI;
-using Arteranos.Core.Operations;
 using Ipfs.Cryptography.Proto;
 using Arteranos.Core.Cryptography;
 using System.Collections;
@@ -560,6 +559,20 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region World Teansition (all)
 
+        private static void ReportProgress(long bytes, long totalBytes)
+        {
+            float ratio = bytes / (totalBytes + float.Epsilon);
+
+            string bytesMag = Core.Utils.Magnitude(bytes);
+            string totalBytesMag = Core.Utils.Magnitude(totalBytes);
+
+            string msg = totalBytes == 0
+                ? "Downloading..."
+                : $"Downloading {bytesMag} from {totalBytesMag}";
+
+            G.TransitionProgress.OnProgressChanged(ratio, msg);
+        }
+
         private IEnumerator MakeServerWorldTransition(UserID invoker, CTSPWorldChangeAnnouncement wca)
         {
             wca.invoker = invoker;
@@ -613,20 +626,16 @@ namespace Arteranos.Services
 
             yield return TransitionProgress.TransitionFrom();
 
-            Cid WorldCid = null;
-
             if (world != null)
             {
-                WorldCid = worldInfo.WorldCid;
+                world.OnReportingProgress += ReportProgress;
 
-                (AsyncOperationExecutor<Context> ao, Context co) =
-                    WorldDownloader.PrepareGetWorldTemplate(WorldCid);
+                yield return world.TemplateContent.WaitFor();
+                yield return world.DecorationContent.WaitFor();
 
-                ao.ProgressChanged += G.TransitionProgress.OnProgressChanged;
+                world.OnReportingProgress -= ReportProgress;
 
-                yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
-
-                if(co == null)
+                if ((UnityEngine.AssetBundle) world.TemplateContent.Result == null)
                 {
                     EmitToClientCTSPacket(new CTSMessage()
                     {
@@ -661,39 +670,22 @@ namespace Arteranos.Services
             // Only for the client mode, no offline or host mode
             yield return TransitionProgress.TransitionFrom();
 
-            Cid WorldCid = null;
-
-            World world = null;
-            WorldInfoNetwork worldInfo = null;
-            if (wca.WorldRootCid != null)
-            {
-                world = (Cid) wca.WorldRootCid;
-                yield return world.WorldInfo.WaitFor();
-                worldInfo = world?.WorldInfo;
-            }
-
+            World world = (wca.WorldRootCid != null)
+                ? (Cid)wca.WorldRootCid
+                : null;
 
             if (world != null)
             {
-                WorldCid = worldInfo.WorldCid;
+                world.OnReportingProgress += ReportProgress;
 
-                bool success = true;
+                yield return world.TemplateContent.WaitFor();
+                yield return world.DecorationContent.WaitFor();
 
-                if (success)
+                world.OnReportingProgress -= ReportProgress;
+
+                if ((UnityEngine.AssetBundle) world.TemplateContent.Result == null)
                 {
-                    (AsyncOperationExecutor<Context> ao, Context co) =
-                        WorldDownloader.PrepareGetWorldTemplate(WorldCid);
-
-                    ao.ProgressChanged += G.TransitionProgress.OnProgressChanged;
-
-                    yield return ao.ExecuteCoroutine(co, (_ex, _co) => co = _co);
-
-                    success = co != null;
-                }
-
-                if (!success)
-                {
-                    yield return ShowDialogCoroutine($"Error in loading world '{WorldCid}' - disconnecting");
+                    yield return ShowDialogCoroutine($"Error in loading world '{world.RootCid}' - disconnecting");
 
                     // Invalidate the world info, because we are in a transitional stage.
                     world = null;
