@@ -7,6 +7,7 @@
 
 using Arteranos.Avatar;
 using Arteranos.Core;
+using Arteranos.Core.Managed;
 using Arteranos.Services;
 using Arteranos.UI;
 using Arteranos.WorldEdit;
@@ -19,8 +20,9 @@ namespace Arteranos
     {
         public class World_
         {
-            public Cid Cid { get; set; }
-            public string Name { get; set; }
+            public World World { get; set; }
+            public Cid Cid => World?.RootCid;
+            public string Name => World?.WorldInfo.Result.WorldName ?? "Somewhere";
         }
 
         public class DefaultAvatar_

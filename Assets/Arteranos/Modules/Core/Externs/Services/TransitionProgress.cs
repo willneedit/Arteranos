@@ -51,18 +51,14 @@ namespace Arteranos.Services
                     yield return new WaitForEndOfFrame();
 
                     G.XRControl.MoveRig();
-
-                    G.World.Name = "Somewhere";
                 }
                 else
                 {
                     yield return EnterDownloadedWorld(World);
                     yield return World.WorldInfo.WaitFor();
-
-                    G.World.Name = World.WorldInfo.Result.WorldName;
                 }
 
-                G.World.Cid = World?.RootCid;
+                G.World.World = World;
             }
 
             G.XRVisualConfigurator.StartFading(1.0f);
@@ -81,18 +77,16 @@ namespace Arteranos.Services
             yield return world.TemplateContent.WaitFor();
             yield return world.DecorationContent.WaitFor();
 
-            AssetBundle ab = world.TemplateContent;
-            IWorldDecoration worldDecoration = world.DecorationContent.Result;
-
             Debug.Log($"Download complete");
 
-            // TODO - remove as soon as the World object persists
-            yield return G.SceneLoader.LoadScene(ab.Detach());
+            // Once the world is placed in global, the old value will be discarded,
+            // leading the AssetBundle will be unloaded.
+            yield return G.SceneLoader.LoadScene((AssetBundle)world.TemplateContent, false);
 
-            if (worldDecoration != null)
+            if (world.DecorationContent.Result != null)
             {
                 Debug.Log("World Decoration detected, building hand-edited world");
-                yield return G.WorldEditorData.BuildWorld(worldDecoration);
+                yield return G.WorldEditorData.BuildWorld(world.DecorationContent.Result);
             }
             else
                 Debug.Log("World is a bare template");

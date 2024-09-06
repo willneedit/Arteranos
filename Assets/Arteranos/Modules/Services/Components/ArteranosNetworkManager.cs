@@ -351,7 +351,7 @@ namespace Arteranos.Services
         {
             base.OnStopServer();
 
-            G.World.Cid = null;
+            G.World.World = null;
 
             NetworkServer.UnregisterHandler<CTSPacketEnvelope>();
         }
