@@ -74,7 +74,7 @@ namespace Arteranos.UI
                     yield break;
                 }
 
-                WorldInfoNetwork worldInfo = World.WorldInfo;
+                WorldInfo worldInfo = World.WorldInfo;
                 ServerPermissions permission = worldInfo.ContentRating;
                 AllowedForThis = permission != null && !permission.IsInViolation(SettingsManager.ActiveServerData.Permissions);
 
@@ -92,7 +92,7 @@ namespace Arteranos.UI
 
         private void VisualizeWorldData()
         {
-            WorldInfoNetwork WorldInfo = World.WorldInfo;
+            WorldInfo WorldInfo = World.WorldInfo;
 
             // If we're in Host mode, you're the admin of your own server, so we're able to
             // change the world. And you still have the great responsibility...

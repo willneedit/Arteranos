@@ -12,7 +12,7 @@ namespace Arteranos.WorldEdit
 {
     public interface IWorldDecoration
     {
-        WorldInfoNetwork Info { get; set; }
+        WorldInfo Info { get; set; }
 
         IEnumerator BuildWorld();
     }

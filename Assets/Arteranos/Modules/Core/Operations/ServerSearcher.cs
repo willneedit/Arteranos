@@ -32,7 +32,7 @@ namespace Arteranos.Core.Operations
 
                 World world = context.desiredWorldCid;
 
-                WorldInfoNetwork info = await world.WorldInfo;
+                WorldInfo info = await world.WorldInfo;
 
                 context.desiredWorldPermissions = info?.ContentRating;
 

@@ -101,7 +101,7 @@ namespace Arteranos.WorldEdit
             if (KMWorldEditorActions == null) return;
 
             IWorldDecoration id = G.World.World?.DecorationContent.Result;
-            WorldInfoNetwork info = id?.Info;
+            WorldInfo info = id?.Info;
 
             if (info == null)
             {

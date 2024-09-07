@@ -65,12 +65,12 @@ namespace Arteranos.Core.Managed
         /// <summary>
         /// The active World Info, same as TemplateInfo if it's a blank world
         /// </summary>
-        public readonly AsyncLazy<WorldInfoNetwork> WorldInfo;
+        public readonly AsyncLazy<WorldInfo> WorldInfo;
 
         /// <summary>
         /// The template's info.
         /// </summary>
-        public readonly AsyncLazy<WorldInfoNetwork> TemplateInfo;
+        public readonly AsyncLazy<WorldInfo> TemplateInfo;
         /// <summary>
         /// The screemshot PNG
         /// </summary>
@@ -121,7 +121,7 @@ namespace Arteranos.Core.Managed
             return await G.IPFSService.ReadBinary($"{RootCid}/Screenshot.png", cancel: cts.Token);
         }
 
-        private async Task<WorldInfoNetwork> GetTemplateInfo()
+        private async Task<WorldInfo> GetTemplateInfo()
         {
             string targeted = await TemplateCid;
 
@@ -131,7 +131,7 @@ namespace Arteranos.Core.Managed
 
             WorldMetaData metaData = WorldMetaData.Deserialize(json);
 
-            WorldInfoNetwork win = new()
+            WorldInfo win = new()
             {
                 WorldCid = (Cid) TemplateCid,
                 WorldName = metaData.WorldName,
@@ -145,9 +145,9 @@ namespace Arteranos.Core.Managed
             return win;
         }
 
-        private async Task<WorldInfoNetwork> GetWorldInfo()
+        private async Task<WorldInfo> GetWorldInfo()
         {
-            WorldInfoNetwork win = await IsFullWorld() 
+            WorldInfo win = await IsFullWorld() 
                 ? (await GetWorldDecoration()).Info 
                 : await GetTemplateInfo();
 

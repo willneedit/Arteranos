@@ -125,7 +125,7 @@ namespace Arteranos.WorldEdit
 
                     yield return World.TemplateInfo.WaitFor();
 
-                    WorldInfoNetwork info = World.TemplateInfo;
+                    WorldInfo info = World.TemplateInfo;
 
                     worldTemplateCid = info.WorldCid;
 
@@ -240,7 +240,7 @@ namespace Arteranos.WorldEdit
 
         private WorldDecoration AssembleWorldDecoration()
         {
-            WorldInfoNetwork wi = new()
+            WorldInfo wi = new()
             {
                 Author = G.Client.MeUserID,
                 ContentRating = G.WorldEditorData.ContentWarning,

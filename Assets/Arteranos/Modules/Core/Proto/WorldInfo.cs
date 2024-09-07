@@ -11,7 +11,7 @@ using System;
 namespace Arteranos.Core
 {
     [ProtoContract]
-    public class WorldInfoNetwork
+    public class WorldInfo
     {
         [ProtoMember(1)]
         public string WorldCid;

@@ -580,7 +580,7 @@ namespace Arteranos.Services
             Debug.Log($"[Server] {(string)wca.invoker} wants to change the world to {wca.WorldRootCid}");
 
             World world = null;
-            WorldInfoNetwork worldInfo = null;
+            WorldInfo worldInfo = null;
             if (wca.WorldRootCid != null)
             {
                 world = (Cid) wca.WorldRootCid;

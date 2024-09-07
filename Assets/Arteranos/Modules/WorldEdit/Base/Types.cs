@@ -30,12 +30,12 @@ namespace Arteranos.WorldEdit
     public class WorldDecoration : IWorldDecoration
     {
         [ProtoMember(1)]
-        public WorldInfoNetwork info;
+        public WorldInfo info;
 
         [ProtoMember(2)]
         public List<WorldObject> objects;
 
-        public WorldInfoNetwork Info { get => info; set => info = value; }
+        public WorldInfo Info { get => info; set => info = value; }
         public IEnumerator BuildWorld()
         {
             Transform t = WorldEditorData.FindObjectByPath(null);

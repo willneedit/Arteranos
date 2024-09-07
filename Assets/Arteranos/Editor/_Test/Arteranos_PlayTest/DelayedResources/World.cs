@@ -92,7 +92,7 @@ namespace Arteranos.PlayTest.DelayedResources
             Debug.Log($"{sw.ElapsedMilliseconds} ms");
 
             sw.Restart();
-            Assert.AreEqual("Sceelix Abbey", ((WorldInfoNetwork) world.WorldInfo).WorldName);
+            Assert.AreEqual("Sceelix Abbey", world.WorldInfo.Result.WorldName);
             Debug.Log($"{sw.ElapsedMilliseconds} ms");
         }
 
