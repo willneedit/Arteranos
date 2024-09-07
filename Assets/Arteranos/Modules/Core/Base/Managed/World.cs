@@ -139,7 +139,6 @@ namespace Arteranos.Core.Managed
                 Author = metaData.AuthorID,
                 ContentRating = metaData.ContentRating,
                 Signature = null,
-                ScreenshotPNG = null,
                 Created = metaData.Created,
             };
             return win;

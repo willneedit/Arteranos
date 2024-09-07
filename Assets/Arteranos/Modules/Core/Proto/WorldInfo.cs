@@ -34,8 +34,9 @@ namespace Arteranos.Core
         [ProtoMember(7)]
         public byte[] Signature;
 
-        [ProtoMember(8)]
-        public byte[] ScreenshotPNG;
+        //[ProtoMember(8)]
+        //[Obsolete("Retired, separate file")]
+        //public byte[] ScreenshotPNG;
 
         [ProtoMember(9)]
         public DateTime Created;

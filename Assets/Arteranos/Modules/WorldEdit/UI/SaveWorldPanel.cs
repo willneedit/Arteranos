@@ -248,7 +248,6 @@ namespace Arteranos.WorldEdit
                 WorldName = G.WorldEditorData.WorldName,
                 WorldDescription = G.WorldEditorData.WorldDescription,
                 WorldCid = null, // Cannot create a self-reference, delay it to the WorldDownloader
-                ScreenshotPNG = null,
                 Signature = null,
             };
 
