@@ -21,6 +21,8 @@ using System.Threading;
 using System.Collections;
 using Object = UnityEngine.Object;
 using Ipfs.Unity;
+using Arteranos.Core.Managed;
+using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 
 namespace Arteranos.Core
 {
@@ -363,6 +365,38 @@ namespace Arteranos.Core
             RuntimePlatform.Android => "Android",
             _ => "AssetBundles",
         };
+
+        // TODO - Move into common space to make it accessible to kit loading
+        public static async Task<AssetBundle> LoadAssetBundle(string path, Action<long, long> reportProgress = null, CancellationToken cancel = default)
+        {
+            AssetBundle resultAB = null;
+            SemaphoreSlim waiter = new(0, 1);
+
+            IEnumerator Cor()
+            {
+                AssetBundle manifestAB = null;
+                yield return AssetBundle.LoadFromIPFS($"{path}/{Utils.GetArchitectureDirName()}/{Utils.GetArchitectureDirName()}", _result => manifestAB = _result, cancel: cancel);
+
+                if (manifestAB != null)
+                {
+                    AssetBundleManifest manifest = ((UnityEngine.AssetBundle)manifestAB).LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                    string actualABName = manifest.GetAllAssetBundles()[0];
+
+                    yield return AssetBundle.LoadFromIPFS($"{path}/{Utils.GetArchitectureDirName()}/{actualABName}", _result => resultAB = _result, reportProgress, cancel);
+
+                    manifestAB.Dispose();
+                }
+
+                waiter.Release();
+            }
+
+            TaskScheduler.ScheduleCoroutine(Cor);
+
+            await waiter.WaitAsync();
+
+            return resultAB;
+        }
+
 
     }
 }

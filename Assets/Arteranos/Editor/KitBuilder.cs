@@ -22,17 +22,6 @@ using Arteranos.WorldEdit;
 
 namespace Arteranos.Editor
 {
-    public class KitMetaData
-    {
-        public string KitName = "Unnamed Kit";
-        public string KitDescription = string.Empty;
-        public UserID AuthorID = null;
-        public DateTime Created = DateTime.MinValue;
-
-        public string Serialize() => JsonConvert.SerializeObject(this, Formatting.Indented);
-
-        public static KitMetaData Deserialize(string json) => JsonConvert.DeserializeObject<KitMetaData>(json);
-    }
 
     public class KitBuilderGUI : EditorWindow
     {

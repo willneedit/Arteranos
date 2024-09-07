@@ -19,14 +19,6 @@ using UnityEngine;
 
 namespace Arteranos.Core.Managed
 {
-    public interface IFavouriteable
-    {
-        void Favourite();
-        void Unfavourite();
-        bool IsFavourited {  get; }
-        void UpdateLastSeen();
-        DateTime LastSeen { get; }
-    }
 
     public class World : IFavouriteable
     {
@@ -166,42 +158,11 @@ namespace Arteranos.Core.Managed
             return G.WorldEditorData.DeserializeWD(ms);
         }
 
-        // TODO - Move into common space to make it accessible to kit loading
-        private static async Task<AssetBundle> LoadAssetBundle(string path, Action<long, long> reportProgress = null, CancellationToken cancel = default)
-        {
-            AssetBundle resultAB = null;
-            SemaphoreSlim waiter = new(0, 1);
-
-            IEnumerator Cor()
-            {
-                AssetBundle manifestAB = null;
-                yield return AssetBundle.LoadFromIPFS($"{path}/{Utils.GetArchitectureDirName()}/{Utils.GetArchitectureDirName()}", _result => manifestAB = _result, cancel: cancel);
-
-                if (manifestAB != null)
-                {
-                    AssetBundleManifest manifest = ((UnityEngine.AssetBundle)manifestAB).LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-                    string actualABName = manifest.GetAllAssetBundles()[0];
-
-                    yield return AssetBundle.LoadFromIPFS($"{path}/{Utils.GetArchitectureDirName()}/{actualABName}", _result => resultAB = _result, reportProgress, cancel);
-
-                    manifestAB.Dispose();
-                }
-
-                waiter.Release();
-            }
-
-            TaskScheduler.ScheduleCoroutine(Cor);
-
-            await waiter.WaitAsync();
-
-            return resultAB;
-        }
-
         private async Task<AssetBundle> GetAssetBundle()
         {
             // TODO ten minutes timeout? Configurable?
             using CancellationTokenSource cts = new(600000);
-            return await LoadAssetBundle(await TemplateCid, (bytes, total) => OnReportingProgress?.Invoke(bytes, total), cts.Token);
+            return await Utils.LoadAssetBundle(await TemplateCid, (bytes, total) => OnReportingProgress?.Invoke(bytes, total), cts.Token);
         }
 
         // ---------------------------------------------------------------
