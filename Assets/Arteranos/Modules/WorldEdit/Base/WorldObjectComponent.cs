@@ -168,6 +168,13 @@ namespace Arteranos.WorldEdit
 
         public void UpdatePhysicsState()
         {
+            static void RecursiveSetLayer(int layer, Transform t)
+            {
+                t.gameObject.layer = layer;
+                for(int i = 0; i < t.childCount; i++)
+                    RecursiveSetLayer(layer, t.GetChild(i));
+            }
+
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover) return;
 
@@ -187,9 +194,9 @@ namespace Arteranos.WorldEdit
             body.useGravity = !isInEditMode
                 && (p?.ObeysGravity ?? false);
 
-            gameObject.layer = (int)(p?.Collidable ?? false 
-                ? ColliderType.Solid 
-                : ColliderType.Intangible);
+            RecursiveSetLayer((int)(p?.Collidable ?? false
+                ? ColliderType.Solid
+                : ColliderType.Intangible), transform);           
 
             mover.enabled = isInEditMode
                 ? !IsLocked
