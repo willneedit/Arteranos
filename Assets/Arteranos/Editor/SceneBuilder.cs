@@ -438,18 +438,7 @@ namespace Arteranos.Editor
 
                 static void NewMethod(Cid WorldCid)
                 {
-                    IProgressUI pui = Factory.NewProgress();
-
-                    pui.SetupAsyncOperations(() => WorldDownloader.PrepareGetWorldTemplate(WorldCid));
-
-                    pui.Completed += (_context) =>
-                    {
-                        Debug.Log("World data file loading and unpacking succeeded.");
                         EditorCoroutineUtility.StartCoroutineOwnerless(TransitionProgress.EnterDownloadedWorld(WorldCid));
-                    };
-
-                    pui.Faulted += (Exception ex, Context _context) => 
-                        Debug.LogError($"Error in loading world: {ex.Message}");
                 }
             }
         }

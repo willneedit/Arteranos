@@ -5,12 +5,8 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Ipfs;
 using ProtoBuf;
 using System;
-using System.Collections.Generic;
-using System.IO;
-
 
 namespace Arteranos.Core
 {
@@ -47,47 +43,5 @@ namespace Arteranos.Core
         [ProtoMember(10)]
         public UserID Author;
 
-    }
-
-    [ProtoContract]
-    public partial class WorldInfo
-    {
-
-        // The WorldInfoNetwork stays immutable, because its Cid needs to remain contant.
-        [ProtoMember(1)]
-        public WorldInfoNetwork win;
-
-        [ProtoMember(3)]
-        public DateTime Updated;
-
-
-        public void Serialize(Stream stream)
-            => Serializer.Serialize(stream, this);
-
-        public static WorldInfo Deserialize(Stream stream)
-            => Serializer.Deserialize<WorldInfo>(stream);
-
-        public WorldInfo Strip()
-        {
-            WorldInfo stripped = new()
-            { 
-                win = win,
-                Updated = Updated
-            };
-
-            stripped.win = new()
-            {
-                WorldCid = win.WorldCid,
-                WorldName = win.WorldName,
-                WorldDescription = win.WorldDescription,
-                Signature = win.Signature,
-                ScreenshotPNG = null, // Leave the screenshot for brevity
-                Created = win.Created,
-                Author = win.Author,
-                ContentRating = win.ContentRating,
-            };
-
-            return stripped;
-        }
     }
 }

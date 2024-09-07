@@ -21,19 +21,6 @@ namespace Arteranos.Core.Operations
         public long Size { get; set; } = -1;
     }
 
-    internal class WorldDownloadContext : Context
-    {
-        // Active data, with or without decoration
-        public Cid WorldCid;                    // Complete or Blank world
-        public WorldInfo WorldInfo;             // Complete or Blank world, with hand-editor's credentials
-
-        public Cid TemplateCid;                 // Blank world
-        public WorldInfo TemplateInfo;          // Blank World, with template builder's credentials
-
-        public string WorldAssetBundlePath;
-        public IWorldDecoration Decoration;      // !null: WorldDecoration
-    }
-
     internal class ServerSearcherContext : Context
     {
         public List<ServerInfo> serverInfos = null;
