@@ -13,20 +13,17 @@ using System.Collections;
 using Arteranos.Core;
 using Arteranos.Core.Operations;
 using System.Collections.Generic;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Linq;
 
 namespace Arteranos.WorldEdit
 {
     public class Panel_Kit : NewObjectPanel
     {
-        public List<WOCEntry> KitEntries { get; private set; } = null;
+        public List<Kit> KitEntries { get; private set; } = null;
 
         public ObjectChooser Chooser;
         public GameObject bp_KitItemGO;
-
-        private Client Client = null;
-        private bool dirty = false;
 
         private GameObject KitItemGO = null;
 
@@ -52,21 +49,13 @@ namespace Arteranos.WorldEdit
         {
             base.OnEnable();
 
-            Client = G.Client;
-            KitEntries = Client != null
-                ? Client.WEAC.WorldObjectsKits
-                : new();
+            KitEntries = (from kitCid in Kit.ListFavourites()
+                         select new Kit(kitCid)).ToList();
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-
-            if (Client != null && dirty)
-            {
-                Client.WEAC.WorldObjectsKits = KitEntries;
-                Client.Save();
-            }
         }
 
         protected override void Start()
@@ -83,15 +72,23 @@ namespace Arteranos.WorldEdit
 
         private void PopulateTile(int index, GameObject @object)
         {
-            WOCEntry entry = KitEntries[index];
-            IPFSImage image = @object.GetComponentInChildren<IPFSImage>();
-            TMP_Text text = @object.GetComponentInChildren<TMP_Text>();
-            Button button = @object.GetComponentInChildren<Button>();
+            IEnumerator Cor()
+            {
+                Kit entry = KitEntries[index];
+                IPFSImage image = @object.GetComponentInChildren<IPFSImage>();
+                TMP_Text text = @object.GetComponentInChildren<TMP_Text>();
+                Button button = @object.GetComponentInChildren<Button>();
 
-            image.Path = $"{entry.IPFSPath}/Screenshot.png";
-            text.text = entry.FriendlyName;
+                yield return entry.KitInfo.WaitFor();
+                yield return entry.ScreenshotPNG.WaitFor();
 
-            button.onClick.AddListener(() => OnTileClicked(index));
+                image.ImageData = entry.ScreenshotPNG;
+                text.text = entry.KitInfo.Result.KitName;
+
+                button.onClick.AddListener(() => OnTileClicked(index));
+            }
+
+            StartCoroutine(Cor());
         }
 
         private void RequestToAdd(string sourceURL)
@@ -108,14 +105,13 @@ namespace Arteranos.WorldEdit
                 AggregateException ex = null;
                 yield return ao.ExecuteCoroutine(co, (_status, _) => ex = _status);
 
-                KitEntries.Add(new()
-                {
-                    IPFSPath = AssetUploader.GetUploadedCid(co),
-                    FriendlyName = AssetUploader.GetUploadedFilename(co),
-                });
+                Kit newKit = new(AssetUploader.GetUploadedCid(co));
+                newKit.Favourite();
 
                 Chooser.Btn_AddItem.interactable = true;
-                dirty = true;
+
+                KitEntries = (from kitCid in Kit.ListFavourites()
+                              select new Kit(kitCid)).ToList();
 
                 Chooser.ShowPage(0);
             }
@@ -124,18 +120,12 @@ namespace Arteranos.WorldEdit
         }
         private void OnTileClicked(int index)
         {
-            WOKitItem newwOKitItem = new()
-            {
-                kitCid = KitEntries[index].IPFSPath,
-                kitItemName = default
-            };
-
             bp_KitItemGO.SetActive(false);
 
             if (!KitItemGO) KitItemGO = Instantiate(bp_KitItemGO, transform.parent);
 
             KitItemGO.TryGetComponent(out Panel_KitItem kitItem);
-            kitItem.Item = newwOKitItem;
+            kitItem.Item = KitEntries[index];
             kitItem.ParentPanel = this;
 
             KitItemGO.SetActive(true);

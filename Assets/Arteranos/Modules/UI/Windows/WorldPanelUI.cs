@@ -161,7 +161,7 @@ namespace Arteranos.UI
 
         private IEnumerator GatherFavouritedWorlds()
         {
-            List<Cid> pinned = World.ListFavourites();
+            IEnumerable<Cid> pinned = World.ListFavourites();
 
             foreach(Cid cid in pinned)
             {

@@ -19,11 +19,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
+using System.Linq;
 
 
 namespace Arteranos.WorldEdit
 {
-    public class Kit : IFavouriteable
+    public class Kit : IFavouriteable, IEquatable<Kit>
     {
         public Cid RootCid { get; private set; } = null;
 
@@ -40,6 +41,16 @@ namespace Arteranos.WorldEdit
         }
 
         public static implicit operator Kit(Cid rootCid) => new(rootCid);
+
+        public static bool operator ==(Kit left, Kit right)
+        {
+            return EqualityComparer<Kit>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(Kit left, Kit right)
+        {
+            return !(left == right);
+        }
 
         /// <summary>
         /// The kit content AssetBundle
@@ -72,7 +83,7 @@ namespace Arteranos.WorldEdit
         private async Task<Dictionary<Guid, string>> GetMap()
         {
             using CancellationTokenSource cts = new(4000);
-            using MemoryStream ms = await G.IPFSService.ReadIntoMS($"{RootCid}/Screenshot.png", cancel: cts.Token);
+            using MemoryStream ms = await G.IPFSService.ReadIntoMS($"{RootCid}/map", cancel: cts.Token);
             KitEntryList list = Serializer.Deserialize<KitEntryList>(ms);
 
             Dictionary<Guid, string> dict = new();
@@ -123,7 +134,11 @@ namespace Arteranos.WorldEdit
 
         public void Favourite()
         {
-            throw new NotImplementedException();
+            G.Client.WEAC.WorldObjectsKits.Add(new()
+            {
+                IPFSPath = RootCid,
+                FriendlyName = ""
+            });
         }
 
         public void Unfavourite()
@@ -136,6 +151,27 @@ namespace Arteranos.WorldEdit
             throw new NotImplementedException();
         }
 
+        public static IEnumerable<Cid> ListFavourites()
+        {
+            return from entry in G.Client.WEAC.WorldObjectsKits
+                   select (Cid) entry.IPFSPath;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Kit);
+        }
+
+        public bool Equals(Kit other)
+        {
+            return other is not null &&
+                   EqualityComparer<Cid>.Default.Equals(RootCid, other.RootCid);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(RootCid);
+        }
     }
 }
  

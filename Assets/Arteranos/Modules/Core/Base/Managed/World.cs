@@ -193,7 +193,7 @@ namespace Arteranos.Core.Managed
             // TODO Implement
         }
 
-        public static List<Cid> ListFavourites()
+        public static IEnumerable<Cid> ListFavourites()
         {
             return G.Client.FavouritedWorlds;
         }

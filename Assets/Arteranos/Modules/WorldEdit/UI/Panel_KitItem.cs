@@ -10,17 +10,18 @@ using TMPro;
 using Arteranos.UI;
 using System.Collections;
 using UnityEngine.UI;
-using Ipfs.Unity;
-using ProtoBuf;
-using System.IO;
+using System.Collections.Generic;
+using System;
+using System.Linq;
 
 namespace Arteranos.WorldEdit
 {
     public class Panel_KitItem : NewObjectPanel
     {
         public NewObjectPanel ParentPanel { get; set; } = null;
-        public WOKitItem Item { get; set; } = null;
-        public KitEntryList KitItemEntries { get; private set; } = default;
+        public Kit Item { get; set; } = null;
+        public Dictionary<Guid, string> KitItemEntries { get; private set; } = default;
+        public List<Guid> guids { get; private set; } = new();
 
         public ObjectChooser Chooser;
 
@@ -44,11 +45,11 @@ namespace Arteranos.WorldEdit
         {
             IEnumerator Cor()
             {
-                byte[] map = null;
-                yield return Asyncs.Async2Coroutine(
-                    G.IPFSService.ReadBinary($"{Item.kitCid}/map"), _result => map = _result);
+                yield return Item.ItemMap.WaitFor();
 
-                KitItemEntries = Serializer.Deserialize<KitEntryList>(new MemoryStream(map));
+                KitItemEntries = Item.ItemMap.Result;
+
+                guids = KitItemEntries.Keys.ToList();
 
                 Chooser.ShowPage(0);
             }
@@ -72,31 +73,46 @@ namespace Arteranos.WorldEdit
 
         private void PreparePage(int obj)
         {
-            Chooser.UpdateItemCount(KitItemEntries.Items.Count);
+            Chooser.UpdateItemCount(guids.Count);
         }
 
         private void PopulateTile(int index, GameObject @object)
         {
-            KitEntryItem entry = KitItemEntries.Items[index];
-            IPFSImage image = @object.GetComponentInChildren<IPFSImage>();
-            TMP_Text text = @object.GetComponentInChildren<TMP_Text>();
-            Button button = @object.GetComponentInChildren<Button>();
+            IEnumerator Cor()
+            {
+                Guid guid = guids[index];
 
-            image.Path = $"{Item.kitCid}/KitScreenshots/{entry.GUID}.png";
-            text.text = entry.Name;
+                IPFSImage image = @object.GetComponentInChildren<IPFSImage>();
+                TMP_Text text = @object.GetComponentInChildren<TMP_Text>();
+                Button button = @object.GetComponentInChildren<Button>();
 
-            button.onClick.AddListener(() => OnTileClicked(index));
+                Core.AsyncLazy<byte[]> ItemScreenshotPNG = Item.ItemScreenshotPNGs[guid];
+
+                yield return ItemScreenshotPNG.WaitFor();
+
+                image.ImageData = ItemScreenshotPNG.Result;
+                text.text = KitItemEntries[guid];
+
+                button.onClick.AddListener(() => OnTileClicked(index));
+            }
+
+            StartCoroutine(Cor());
         }
 
         private void OnTileClicked(int index)
         {
-            Item.kitItemName = KitItemEntries.Items[index].GUID;
+            Guid guid = guids[index];
+            WOKitItem asset = new()
+            {
+                kitCid = Item.RootCid,
+                kitItemName = guid
+            };
 
             // Defer to the kit selection panel, as this is registered by the choicebook
             ParentPanel.AddingNewObject(new()
             {
-                asset = Item,
-                name = KitItemEntries.Items[index].Name,
+                asset = asset,
+                name = KitItemEntries[guid],
                 components = new()
             });
 
