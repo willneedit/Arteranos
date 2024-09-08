@@ -8,7 +8,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Arteranos.WorldEdit;
 
 using Arteranos.Core.Managed;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
@@ -34,6 +33,10 @@ namespace Arteranos.Services
             G.XRVisualConfigurator.StartFading(0.0f);
 
             yield return new WaitUntil(() => (G.TransitionProgress != null));
+
+            // Explicitly dispose the old world before attempting to load the new one.
+            G.World.World?.Dispose();
+            G.World.World = null;
 
             G.SysMenu.EnableHUD(false);
         }

@@ -7,24 +7,21 @@
 
 using Arteranos.Core;
 using Arteranos.Core.Managed;
-using Arteranos.WorldEdit;
 using Ipfs;
 using ProtoBuf;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 using System.Linq;
 
 
 namespace Arteranos.WorldEdit
 {
-    public class Kit : IFavouriteable, IEquatable<Kit>
+    public class Kit : IFavouriteable, IEquatable<Kit>, IDisposable
     {
         public Cid RootCid { get; private set; } = null;
 
@@ -171,6 +168,22 @@ namespace Arteranos.WorldEdit
         public override int GetHashCode()
         {
             return HashCode.Combine(RootCid);
+        }
+        // ---------------------------------------------------------------
+
+        bool disposed = false;
+
+        ~Kit()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (disposed) return;
+            disposed = true;
+
+            if (KitContent.IsValueCreated) KitContent?.Result?.Dispose();
         }
     }
 }

@@ -20,7 +20,7 @@ using UnityEngine;
 namespace Arteranos.Core.Managed
 {
 
-    public class World : IFavouriteable
+    public class World : IFavouriteable, IDisposable
     {
         public event Action<long, long> OnReportingProgress;
 
@@ -196,6 +196,23 @@ namespace Arteranos.Core.Managed
         public static IEnumerable<Cid> ListFavourites()
         {
             return G.Client.FavouritedWorlds;
+        }
+
+        // ---------------------------------------------------------------
+
+        bool disposed = false;
+
+        ~World()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (disposed) return;
+            disposed = true;
+
+            if(TemplateContent.IsValueCreated) TemplateContent?.Result?.Dispose();
         }
     }
 }

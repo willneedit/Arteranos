@@ -9,10 +9,8 @@ using Ipfs;
 using Ipfs.Unity;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
 
@@ -87,7 +85,7 @@ namespace Arteranos.Core.Managed
         {
             IEnumerator Cor()
             {
-                Debug.Log($"Disposing {m_assetBundle.name}");
+                // Debug.Log($"Disposing {m_assetBundle.name}");
                 m_assetBundle.Unload(true);
                 m_assetBundle = null;
                 yield return null;

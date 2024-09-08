@@ -480,8 +480,15 @@ namespace Arteranos.WorldEdit
 
         private readonly Dictionary<string, Kit> KitAssetBundles = new();
 
-        public void ClearKitAssetBundles() 
-            => KitAssetBundles.Clear();
+        public void ClearKitAssetBundles()
+        {
+            // Explicitly dispose in case lingering kits collide with the same ones
+            // during reuse
+            foreach(Kit item in KitAssetBundles.Values)
+                item.Dispose();
+
+            KitAssetBundles.Clear();
+        }
 
         public AsyncLazy<AssetBundle> LoadKitAssetBundle(string path)
         {
