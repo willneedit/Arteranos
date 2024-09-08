@@ -16,8 +16,8 @@ using System;
 using System.Threading;
 using Ipfs.Unity;
 using GLTFast;
-using Mono.Cecil.Cil;
 using System.Threading.Tasks;
+using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 
 namespace Arteranos.WorldEdit
 {
@@ -77,15 +77,6 @@ namespace Arteranos.WorldEdit
 
         public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
         {
-            static async Task<AssetBundleCreateRequest> LoadAssetBundle(string path)
-            {
-                MemoryStream ms = await G.IPFSService.ReadIntoMS(
-                    $"{path}/{Utils.GetArchitectureDirName()}/kit");
-
-                return AssetBundle.LoadFromStreamAsync(ms);
-
-            }
-
             static IEnumerator LoadglTF(WOglTF WOglTF, GameObject LoadedObject)
             {
                 using CancellationTokenSource cts = new(60000);
@@ -129,22 +120,11 @@ namespace Arteranos.WorldEdit
             {
                 LoadedObject.name = $"kit {kitItem.kitCid}, Item {kitItem.kitItemName}";
 
-                if(!G.WorldEditorData.TryGetKitAssetBundle(kitItem.kitCid, out AssetBundle ab))
-                {
-                    AssetBundleCreateRequest abc = null;
+                AsyncLazy<AssetBundle> KitAB = G.WorldEditorData.LoadKitAssetBundle(kitItem.kitCid);
 
-                    yield return Asyncs.Async2Coroutine(
-                        LoadAssetBundle(kitItem.kitCid),
-                        _result => abc = _result);
+                yield return KitAB.WaitFor();
 
-                    yield return new WaitUntil(() => abc.isDone);
-
-                    ab = abc.assetBundle;
-
-                    G.WorldEditorData.AddKitAssetBundle(kitItem.kitCid, ab);
-                }
-
-                GameObject ob = ab.LoadAsset<GameObject>($"Assets/KitRoot/{kitItem.kitItemName}.prefab");
+                GameObject ob = ((UnityEngine.AssetBundle) KitAB.Result).LoadAsset<GameObject>($"Assets/KitRoot/{kitItem.kitItemName}.prefab");
 
                 UnityEngine.Object.Instantiate(ob, LoadedObject.transform);
             }

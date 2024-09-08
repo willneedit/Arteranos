@@ -158,41 +158,6 @@ namespace Arteranos.PlayTest.Services
             });
         }
 
-        [UnityTest]
-        public IEnumerator T005_ManagedAssetBundleAsync()
-        {
-            static void ReportProgress(long bytes, long total)
-            {
-                Debug.Log($"{bytes} out of {total}");
-            }
-
-
-            yield return UploadTestWorld();
-
-            AssetBundle ab_ab = null;
-            yield return AssetBundle.LoadFromIPFS($"{WorldCid}/{Utils.GetArchitectureDirName()}/{Utils.GetArchitectureDirName()}", _result => ab_ab = _result);
-
-            Assert.IsNotNull(ab_ab);
-            Assert.IsNotNull((UnityEngine.AssetBundle)ab_ab);
-
-            AssetBundleManifest manifest = ((UnityEngine.AssetBundle)ab_ab).LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-
-            foreach (string abname in manifest.GetAllAssetBundles())
-                Debug.Log(abname);
-
-            string actualABName = manifest.GetAllAssetBundles()[0];
-
-            AssetBundle actual_ab = null;
-
-            yield return Asyncs.Async2Coroutine(AssetBundle.LoadFromIPFSAsync(
-                $"{WorldCid}/{Utils.GetArchitectureDirName()}/{actualABName}", ReportProgress),
-                _result => actual_ab = _result
-                );
-
-            Assert.IsNotNull((UnityEngine.AssetBundle)actual_ab);
-
-        }
-
         public async Task<AssetBundle> LoadAssetBundle(string path, Action<long, long> reportProgress = null, CancellationToken cancel = default)
         {
             AssetBundle resultAB = null;

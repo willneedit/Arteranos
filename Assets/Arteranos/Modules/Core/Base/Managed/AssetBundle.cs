@@ -74,39 +74,6 @@ namespace Arteranos.Core.Managed
             result.Invoke(ab);
         }
 
-        public static async Task<AssetBundle> LoadFromIPFSAsync(string path, Action<long, long> reportProgress = null, CancellationToken cancel = default)
-        {
-            Cid cid = await G.IPFSService.ResolveToCid(path, cancel).ConfigureAwait(false);
-
-            IFileSystemNode fsn = await G.IPFSService.ListFile(cid, cancel).ConfigureAwait(false);
-
-            // No 'stat' implementation, just add the block sizes
-            long totalBytes = 0;
-            foreach (IFileSystemLink link in fsn.Links)
-                totalBytes += link.Size;
-
-            Action<long> rp = reportProgress != null ? (b) => reportProgress(b, totalBytes) : null;
-
-            using MemoryStream ms = await G.IPFSService.ReadIntoMS(cid, rp).ConfigureAwait(false);
-
-            AssetBundle ab = null;
-            IEnumerator Cor()
-            {
-                AssetBundleCreateRequest abc = UnityEngine.AssetBundle.LoadFromStreamAsync(ms);
-                yield return new WaitUntil(() => abc.isDone);
-
-                ab = abc.assetBundle;
-            }
-
-            // UnityEngine functions need to be called from the main thread - not from worker thread
-            TaskScheduler.ScheduleCoroutine(() => Cor());
-
-            while(ab == null)
-                await Task.Delay(100);
-
-            return ab;
-
-        }
         ~AssetBundle() { Dispose(); }
 
         public UnityEngine.AssetBundle Detach()
@@ -120,6 +87,7 @@ namespace Arteranos.Core.Managed
         {
             IEnumerator Cor()
             {
+                Debug.Log($"Disposing {m_assetBundle.name}");
                 m_assetBundle.Unload(true);
                 m_assetBundle = null;
                 yield return null;

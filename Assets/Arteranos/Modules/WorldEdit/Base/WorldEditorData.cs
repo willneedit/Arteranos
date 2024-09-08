@@ -15,7 +15,8 @@ using System;
 
 using UnityEngine.InputSystem;
 using Arteranos.Core;
-using Arteranos.Core.Operations;
+using Arteranos.Core.Managed;
+using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 
 
 namespace Arteranos.WorldEdit
@@ -84,8 +85,6 @@ namespace Arteranos.WorldEdit
 
 
         private readonly Dictionary<IWorldObjectAsset, GameObject> AssetBlueprints = new();
-
-        private readonly Dictionary<string, AssetBundle> KitAssetBundles = new();
 
         private bool isInEditMode = false;
         private bool usingGlobal = false;
@@ -479,19 +478,18 @@ namespace Arteranos.WorldEdit
         // ---------------------------------------------------------------
         #region Kit Asset Handling
 
-        public void ClearKitAssetBundles()
+        private readonly Dictionary<string, Kit> KitAssetBundles = new();
+
+        public void ClearKitAssetBundles() 
+            => KitAssetBundles.Clear();
+
+        public AsyncLazy<AssetBundle> LoadKitAssetBundle(string path)
         {
-            foreach (var ab in KitAssetBundles)
-                ab.Value.Unload(true);
+            if (!KitAssetBundles.ContainsKey(path))
+                KitAssetBundles[path] = new(path);
 
-            KitAssetBundles.Clear();            
+            return KitAssetBundles[path].KitContent;
         }
-
-        public bool TryGetKitAssetBundle(string path, out AssetBundle assetBundle)
-            => KitAssetBundles.TryGetValue(path, out assetBundle);
-
-        public void AddKitAssetBundle(string path, AssetBundle assetBundle)
-            => KitAssetBundles.Add(path, assetBundle);
 
         #endregion
         // ---------------------------------------------------------------

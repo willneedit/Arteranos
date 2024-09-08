@@ -56,6 +56,9 @@ namespace Arteranos.WorldEdit
         protected override void OnDisable()
         {
             base.OnDisable();
+
+            // In any case, disable the subpage, too.
+            if(KitItemGO) KitItemGO.SetActive(false);
         }
 
         protected override void Start()
@@ -128,8 +131,8 @@ namespace Arteranos.WorldEdit
             kitItem.Item = KitEntries[index];
             kitItem.ParentPanel = this;
 
-            KitItemGO.SetActive(true);
             gameObject.SetActive(false);
+            KitItemGO.SetActive(true);
         }
     }
 }

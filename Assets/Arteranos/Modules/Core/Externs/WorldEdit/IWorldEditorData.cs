@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
+using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 
 namespace Arteranos.WorldEdit
 {
@@ -37,7 +38,6 @@ namespace Arteranos.WorldEdit
         event Action<IWorldChange> OnWorldChanged;
 
         void AddBlueprint(IWorldObjectAsset woa, GameObject gameObject);
-        void AddKitAssetBundle(string path, AssetBundle assetBundle);
         void BuilderRequestedRedo();
         void BuilderRequestsUndo();
         IEnumerator BuildWorld(IWorldDecoration worldDecoration);
@@ -46,6 +46,7 @@ namespace Arteranos.WorldEdit
         IWorldDecoration DeserializeWD(Stream stream);
         void DoApply(Stream stream);
         void DoApply(IWorldChange worldChange);
+        AsyncLazy<AssetBundle> LoadKitAssetBundle(string path);
         void NotifyEditorModeChanged();
         void NotifyWorldChanged(IWorldChange worldChange);
         void RecallFromPasteBuffer(Transform root);
@@ -53,6 +54,5 @@ namespace Arteranos.WorldEdit
         void SaveToPasteBuffer(GameObject go);
         IWorldDecoration TakeSnapshot();
         bool TryGetBlueprint(IWorldObjectAsset woa, out GameObject gameObject);
-        bool TryGetKitAssetBundle(string path, out AssetBundle assetBundle);
     }
 }
