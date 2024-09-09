@@ -41,6 +41,7 @@ namespace Arteranos.WorldEdit
             btn_Property.onClick.AddListener(GotPropertyPageClicked);
 
             txt_Name.onValueChanged.AddListener(GotChangedName);
+            txt_Name.onSelect.AddListener(GotSelection);
         }
 
         protected override void Start()
@@ -82,6 +83,13 @@ namespace Arteranos.WorldEdit
             txt_Name.interactable = !IsLocked;
             txt_Name.text = WorldObject.name;
             btn_Delete.interactable = !IsLocked && !IsParentLink;
+        }
+
+        private void GotSelection(string arg0)
+        {
+            if (WorldObject.TryGetComponent(out WorldObjectComponent asset) && asset.IsLocked) return;
+
+            G.WorldEditorData.FocusedWorldObject = WorldObject;
         }
 
         private void GotToChildClicked()
