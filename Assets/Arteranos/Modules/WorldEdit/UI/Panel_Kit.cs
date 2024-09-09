@@ -34,6 +34,15 @@ namespace Arteranos.WorldEdit
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
             Chooser.OnAddingItem += RequestToAdd;
+
+            ChoiceBook cb = transform.parent.parent.gameObject.GetComponent<ChoiceBook>();
+            cb.OnChoicePageChanged += GotPageChanged;
+        }
+
+        private void GotPageChanged(int arg1, int arg2)
+        {
+            // In any case, disable the subpage, too.
+            if (!gameObject.activeSelf && KitItemGO) KitItemGO.SetActive(false);
         }
 
         protected override void OnDestroy()
@@ -56,9 +65,6 @@ namespace Arteranos.WorldEdit
         protected override void OnDisable()
         {
             base.OnDisable();
-
-            // In any case, disable the subpage, too.
-            if(KitItemGO) KitItemGO.SetActive(false);
         }
 
         protected override void Start()

@@ -53,7 +53,7 @@ namespace Arteranos.Core
         /// </summary>
         /// <param name="coroutine">The coroutine to be placed within the next couple of frames</param>
         public static void ScheduleCoroutine(Func<IEnumerator> coroutine)
-            => Instance.ScheduleCoroutine_(coroutine);
+            => Instance?.ScheduleCoroutine_(coroutine);
 
         private void Schedule_(Func<Task> task) => TaskQueued.Enqueue(task);
         private void ScheduleCallback_(Action callback) => CallbackQueued.Enqueue(callback);
