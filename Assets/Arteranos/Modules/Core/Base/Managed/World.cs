@@ -42,7 +42,7 @@ namespace Arteranos.Core.Managed
             DecorationContent = new(async () => await GetWorldDecoration());
         }
 
-        public static implicit operator World(Cid rootCid) => new(rootCid);
+        public static implicit operator World(Cid rootCid) => rootCid != null ? new(rootCid) : null;
 
         /// <summary>
         /// The underlying world template

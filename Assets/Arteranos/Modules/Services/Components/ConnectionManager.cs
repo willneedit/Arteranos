@@ -54,7 +54,7 @@ namespace Arteranos.Services
 
         private IEnumerator CommenceConnection(ServerInfo si, Action<bool> callback)
         {
-            IPAddress addr = IPAddress.Any;
+            IPAddress addr = null;
 
             // In any case, go into the transitional phase.
             yield return TransitionProgress.TransitionFrom();
@@ -69,7 +69,8 @@ namespace Arteranos.Services
 
             yield return new WaitUntil(() => taskIPAddr.IsCompleted);
 
-            if (!taskIPAddr.IsCompletedSuccessfully)
+            // Faulted, or no reachable IP address at all.
+            if (!taskIPAddr.IsCompletedSuccessfully || taskIPAddr.Result == null)
             {
                 Debug.Log($"{si.PeerID} is unreachable.");
                 yield return TransitionProgress.TransitionTo(null);
