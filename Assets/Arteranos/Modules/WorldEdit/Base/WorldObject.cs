@@ -130,6 +130,11 @@ namespace Arteranos.WorldEdit
                 // Really scrubbing the asset bundle's blueprints' components.
                 ScrubComponents(kit_blueprint);
 
+                // And, reset its root transform.
+                // Kit builders who REALLY use offsets have to use empties.
+                kit_blueprint.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+                // kit_blueprint.transform.localScale = Vector3.one;
+
                 UnityEngine.Object.Instantiate(kit_blueprint, LoadedObject.transform);
             }
 
