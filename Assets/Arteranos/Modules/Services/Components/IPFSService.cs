@@ -36,6 +36,7 @@ using Ipfs.CoreApi;
 
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
+using System.Net.Http;
 
 namespace Arteranos.Services
 {
@@ -118,6 +119,13 @@ namespace Arteranos.Services
                     Debug.LogWarning($"No usable API address, assuming default one. Or, initializing a new repo.");
                     ipfsTmp = new();
                 }
+
+                // Increase max concurrent connections to prevent choking
+                // Not implemented -- WHY?!
+                //ipfsTmp.HttpMessageHandler = new HttpClientHandler()
+                //{
+                //    MaxConnectionsPerServer = 20,
+                //};
 
                 // First, see if there is an already running and accessible IPFS daemon.
                 {

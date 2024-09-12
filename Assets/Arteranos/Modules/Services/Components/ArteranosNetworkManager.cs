@@ -927,21 +927,12 @@ namespace Arteranos.Services
                     return;
             }
 
-            // TBD: Do we have to?
-            //using MemoryStream ms = new(wc.changerequest);
-            //WorldChange worldChange = WorldChange.Deserialize(ms);
-
-            //StartCoroutine(worldChange.Apply());
-
             EmitToClientCTSPacket(wc, null);
         }
 
         private void ClientGotWorldObjectChange(CTSWorldObjectChange wc)
         {
-            // Already made in server side, no sense to do it again?
-            //if (G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host) return;
-
-            // Make the changes real and notify the observers
+            // FIXME Blank Template have no WorldEditorData
             using MemoryStream ms = new(wc.changerequest);
             G.WorldEditorData.DoApply(ms);
         }

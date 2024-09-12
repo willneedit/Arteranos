@@ -136,6 +136,8 @@ namespace Arteranos.WorldEdit
                 IPFSPath = RootCid,
                 FriendlyName = ""
             });
+
+            G.Client.Save();
         }
 
         public void Unfavourite()
