@@ -18,6 +18,7 @@ using Ipfs.Unity;
 using GLTFast;
 using System.Threading.Tasks;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
+using System.Reflection;
 
 namespace Arteranos.WorldEdit
 {
@@ -124,9 +125,12 @@ namespace Arteranos.WorldEdit
 
                 yield return KitAB.WaitFor();
 
-                GameObject ob = ((UnityEngine.AssetBundle) KitAB.Result).LoadAsset<GameObject>($"Assets/KitRoot/{kitItem.kitItemName}.prefab");
+                GameObject kit_blueprint = ((UnityEngine.AssetBundle) KitAB.Result).LoadAsset<GameObject>($"Assets/KitRoot/{kitItem.kitItemName}.prefab");
 
-                UnityEngine.Object.Instantiate(ob, LoadedObject.transform);
+                // Really scrubbing the asset bundle's blueprints' components.
+                ScrubComponents(kit_blueprint);
+
+                UnityEngine.Object.Instantiate(kit_blueprint, LoadedObject.transform);
             }
 
             GameObject gob;
@@ -140,7 +144,6 @@ namespace Arteranos.WorldEdit
                 // Look up, or create a blueprint if none exist
                 if (!G.WorldEditorData.TryGetBlueprint(asset, out GameObject gobbo))
                 {
-                    // TODO: Implement kit item asset instantiation
                     switch (asset)
                     {
                         case WOPrimitive WOPR: // Pun intended :)
@@ -198,6 +201,45 @@ namespace Arteranos.WorldEdit
             yield return null;
 
             callback?.Invoke(gob);
+        }
+
+        private static void ScrubComponents(GameObject kit_blueprint)
+        {
+            kit_blueprint.SetActive(false);
+            ScrubComponents(kit_blueprint.transform);
+            kit_blueprint.SetActive(true);
+        }
+
+        private static void ScrubComponents(Transform kit_blueprint)
+        {
+            bool IsValidComponent(Component component)
+            {
+                // Missing script or engine package - not OK.
+                if(component == null) return false;
+
+                // Not a script - OK.
+                if (component is not MonoBehaviour) return true;
+
+                string assname = component.GetType().Assembly.GetName().Name;
+                Debug.Log(assname);
+
+                // Userspace namespace - OK
+                if(assname == "Arteranos.User") return true;
+
+                // Everything else - not OK.
+                return false;
+            }
+
+            Component[] components = kit_blueprint.GetComponents<Component>();
+            foreach (Component component in components)
+            {
+                if (IsValidComponent(component)) continue;
+
+                UnityEngine.Object.DestroyImmediate(component, true);
+            }
+
+            for (int i = 0; i < kit_blueprint.transform.childCount; i++)
+                ScrubComponents(kit_blueprint.transform.GetChild(i));
         }
 
         public void Patch()
