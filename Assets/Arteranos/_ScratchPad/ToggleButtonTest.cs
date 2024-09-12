@@ -14,7 +14,11 @@ namespace Arteranos
     public class ToggleButtonTest : MonoBehaviour
     {
         private Renderer Renderer = null;
-        private void Awake() => Renderer = GetComponent<Renderer>();
+        private void Awake()
+        {
+            Renderer = GetComponent<Renderer>();
+            Debug.Log($"TggleButtonTest alive");
+        }
 
         public void TurnRed() => Renderer.material.color = Color.red;// renderer.material.SetColor("_Color", Color.red);
 

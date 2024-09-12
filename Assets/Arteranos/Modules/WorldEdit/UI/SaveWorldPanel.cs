@@ -19,9 +19,7 @@ using ProtoBuf;
 using System.Threading;
 using System.Collections;
 using Ipfs.Unity;
-using Arteranos.Core.Operations;
 using UnityEngine;
-using Org.BouncyCastle.Utilities.Collections;
 using Arteranos.Core.Managed;
 
 namespace Arteranos.WorldEdit

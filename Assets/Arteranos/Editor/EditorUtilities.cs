@@ -134,13 +134,13 @@ namespace Arteranos
         public static IEnumerator CreateAssetPreviewStream(GameObject asset, Stream stream)
         {
             Texture2D assetPreview = null;
-            for (int tmo = 0; tmo < 1; ++tmo)
+            for (int tmo = 0; tmo < 120; ++tmo)
             {
                 if ((assetPreview = AssetPreview.GetAssetPreview(asset)) != null) break;
-                yield return new WaitForSeconds(1);
+                yield return new WaitForSeconds(0.5f);
             }
 
-            // No preview within five minutes, something has to be wrong.
+            // No preview within one minute, something has to be wrong.
             if (assetPreview == null) yield break;
 
             // Turn all background pixels to transparent.
