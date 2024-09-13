@@ -106,7 +106,7 @@ namespace Arteranos.Core
             DontDestroyOnLoad(Purgatory.gameObject);
         }
 
-        private static void SetupWorldObjectRoot()
+        public static void SetupWorldObjectRoot()
         {
             GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
 

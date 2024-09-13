@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 
 using Arteranos.Core.Managed;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
+using Arteranos.Core;
 
 namespace Arteranos.Services
 {
@@ -85,6 +86,9 @@ namespace Arteranos.Services
             // Once the world is placed in global, the old value will be discarded,
             // leading the AssetBundle will be unloaded.
             yield return G.SceneLoader.LoadScene((AssetBundle)world.TemplateContent, false);
+
+            // In any case, set up a World Editor Data, for remote world editing on a bare template.
+            SettingsManager.SetupWorldObjectRoot();
 
             if (world.DecorationContent.Result != null)
             {
