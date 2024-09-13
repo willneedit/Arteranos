@@ -83,6 +83,9 @@ namespace Arteranos.Services
 
         // ---------------------------------------------------------------
         #region Start & Stop
+
+        private bool StartedIPFSDaemon = false;
+
         private void Awake()
         {
             G.IPFSService = this;
@@ -247,6 +250,7 @@ namespace Arteranos.Services
 
                     if (t.IsCompletedSuccessfully)
                     {
+                        StartedIPFSDaemon = true;
                         self = t.Result;
                         yield break;
                     }
@@ -434,14 +438,19 @@ namespace Arteranos.Services
 
         private async void OnDisable()
         {
-            await this.FlipServerDescription(false);
+            await FlipServerDescription(false);
 
-            Debug.Log("Shutting down the IPFS node.");
 
             cts?.Cancel();
 
-            // TODO Daemon Shutdown
-            // await ipfs.ShutdownAsync();
+            // If we're started the daemon on our own, shut it down, too.
+            if(StartedIPFSDaemon)
+            {
+                Debug.Log("Shutting down the IPFS node.");
+                await ipfs.ShutdownAsync();
+            }
+            else
+                Debug.Log("NOT Shutting down the IPFS node, because it's been already running.");
 
             cts?.Dispose();
         }
