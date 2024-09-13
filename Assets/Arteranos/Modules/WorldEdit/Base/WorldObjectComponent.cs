@@ -39,11 +39,6 @@ namespace Arteranos.WorldEdit
         {
             body = gameObject.AddComponent<Rigidbody>();
 
-            // TODO: remove these modifications of physics-aware objects
-            // Prevent falling/floating/sliding of collidable objects
-            //body.drag = 1000.0f;
-            //body.angularDrag = 1000.0f;
-
             mover = gameObject.AddComponent<XRGrabInteractable>();
             mover.throwOnDetach = false;
             mover.smoothPosition = true;
@@ -178,10 +173,13 @@ namespace Arteranos.WorldEdit
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover) return;
 
-            // Fixup - set the mesh colliders to convex to prevent clash with kinematic
+            // Fixup - Unity yells at you if it is a concave collider and it's physics-controlled.
+            bool needsKinematic = false;
             MeshCollider[] colliders = gameObject.GetComponentsInChildren<MeshCollider>();
             foreach (MeshCollider collider in colliders)
-                collider.convex = true;
+                needsKinematic |= !collider.convex;
+
+            body.isKinematic = needsKinematic;
 
             TryGetWOC(out WOCPhysics p);
 

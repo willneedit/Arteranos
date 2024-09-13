@@ -217,7 +217,7 @@ namespace Arteranos.WorldEdit
 
         private static void ScrubComponents(Transform kit_blueprint)
         {
-            bool IsValidComponent(Component component)
+            static bool IsValidComponent(Component component)
             {
                 // Missing script or engine package - not OK.
                 if(component == null) return false;
@@ -226,7 +226,6 @@ namespace Arteranos.WorldEdit
                 if (component is not MonoBehaviour) return true;
 
                 string assname = component.GetType().Assembly.GetName().Name;
-                Debug.Log(assname);
 
                 // Userspace namespace - OK
                 if(assname == "Arteranos.User") return true;
