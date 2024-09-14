@@ -26,6 +26,7 @@ namespace Arteranos.Core
     [ProtoInclude(65540, typeof(CTSMessage))]
     [ProtoInclude(65541, typeof(CTSServerConfig))]
     [ProtoInclude(65542, typeof(CTSWorldObjectChange))]
+    [ProtoInclude(65543, typeof(CTSObjectSpawn))]
     public class CTSPacket
     {
         [ProtoMember(1)]
@@ -103,5 +104,12 @@ namespace Arteranos.Core
     {
         [ProtoMember(1)]
         public byte[] changerequest; // Arteranos.WorldEdit.WorldChange, serialized
+    }
+
+    [ProtoContract]
+    public class CTSObjectSpawn : CTSPacket
+    {
+        [ProtoMember(1)]
+        public byte[] WOSerialized; // Arteranos.WorldEdit.WorldObject, serialized
     }
 }

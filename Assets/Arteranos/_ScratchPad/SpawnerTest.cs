@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using Mirror;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,13 +15,21 @@ namespace Arteranos
 {
     public class SpawnerTest : MonoBehaviour
     {
+        private void Start()
+        {
+            NetworkClient.RegisterPrefab(ToSpawn);
+        }
+
+        private void OnDestroy()
+        {
+            NetworkClient.UnregisterPrefab(ToSpawn);
+        }
+
         public GameObject ToSpawn;
 
         public void TriggerSpawn()
         {
-            GameObject spawned = Instantiate(ToSpawn, 
-                transform.position + transform.TransformDirection(Vector3.up), transform.rotation);
-            if(NetworkServer.active) NetworkServer.Spawn(spawned);
+            SettingsManager.EmitToServerCTSPacket(new CTSObjectSpawn());
         }
     }
 }

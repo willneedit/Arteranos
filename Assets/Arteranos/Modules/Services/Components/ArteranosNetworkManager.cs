@@ -65,6 +65,11 @@ namespace Arteranos.Services
         {
             base.Awake();
             Instance = this;
+
+            Guid guid = Guid.Parse("{F3A01BA2-8427-40C5-ADE3-E05D76C30E5E}");
+            RuntimeObjectAssetID = (uint)guid.GetHashCode(); // Seen in NetworkIdentity
+
+            NetworkClient.RegisterSpawnHandler(RuntimeObjectAssetID, ROSpawner, RODespawner);
         }
 
         public override void OnValidate()
@@ -94,6 +99,8 @@ namespace Arteranos.Services
         /// </summary>
         public override void OnDestroy()
         {
+            NetworkClient.UnregisterSpawnHandler(RuntimeObjectAssetID);
+
             base.OnDestroy();
         }
 
@@ -520,39 +527,32 @@ namespace Arteranos.Services
         // Entry point of the server side and offline mode
         public void ServerLocalCTSPacket(UserID sender, CTSPacket packet)
         {
-            if (packet is CTSPWorldChangeAnnouncement wca)
-                StartCoroutine(MakeServerWorldTransition(sender, wca));
-            else if (packet is CTSMessage message)
-                throw new InvalidOperationException($"Attempting to display a message on server: {message.message}");
-            else if (packet is CTSPUpdateUserState uss)
-                _ = ServerUpdateUserState(sender, uss);
-            else if (packet is STCUserInfo userInfoQuery)
-                _ = ServerQueryUserState(sender, userInfoQuery);
-            else if (packet is CTSServerConfig serverConfig)
-                ServerUpdateServerConfiguration(sender, serverConfig);
-            else if (packet is CTSWorldObjectChange wc)
-                ServerCommitWorldObjectChange(sender, wc);
-            else
-                throw new NotImplementedException();
+            switch (packet)
+            {
+                case CTSPWorldChangeAnnouncement wca: StartCoroutine(MakeServerWorldTransition(sender, wca)); break;
+                case CTSMessage message: throw new InvalidOperationException($"Attempting to display a message on server: {message.message}");
+                case CTSPUpdateUserState uss: _ = ServerUpdateUserState(sender, uss); break;
+                case STCUserInfo userInfoQuery: _ = ServerQueryUserState(sender, userInfoQuery); break;
+                case CTSServerConfig serverConfig: ServerUpdateServerConfiguration(sender, serverConfig); break;
+                case CTSWorldObjectChange wc: ServerCommitWorldObjectChange(sender, wc); break;
+                case CTSObjectSpawn wos: ServerGotObjectSpawn(sender, wos); break;
+                default: throw new NotImplementedException();
+            }
         }
 
         // Entry point of the client side and offline mode
         private void ClientLocalCTSPacket(CTSPacket packet)
         {
-            if (packet is CTSPWorldChangeAnnouncement wca)
-                StartCoroutine(MakeClientWorldTransition(wca));
-            else if (packet is CTSMessage message)
-                StartCoroutine(ShowDialogCoroutine(message.message));
-            else if (packet is CTSPUpdateUserState uss)
-                _ = ClientInformUpdatedUserState(uss);
-            else if (packet is STCUserInfo userInfo)
-                _ = ClientQueryUserState(userInfo);
-            else if (packet is CTSServerConfig serverConfig)
-                ClientGotServerConfiguration(serverConfig);
-            else if (packet is CTSWorldObjectChange wc)
-                ClientGotWorldObjectChange(wc);
-            else
-                throw new NotImplementedException();
+            switch (packet)
+            {
+                case CTSPWorldChangeAnnouncement wca: StartCoroutine(MakeClientWorldTransition(wca)); break;
+                case CTSMessage message: StartCoroutine(ShowDialogCoroutine(message.message)); break;
+                case CTSPUpdateUserState uss: _ = ClientInformUpdatedUserState(uss); break;
+                case STCUserInfo userInfo: _ = ClientQueryUserState(userInfo); break;
+                case CTSServerConfig serverConfig: ClientGotServerConfiguration(serverConfig); break;
+                case CTSWorldObjectChange wc: ClientGotWorldObjectChange(wc); break;
+                default: throw new NotImplementedException();
+            }
         }
 
         #endregion
@@ -936,6 +936,34 @@ namespace Arteranos.Services
             using MemoryStream ms = new(wc.changerequest);
             G.WorldEditorData.DoApply(ms);
         }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Runtime world object spawn
+
+        private uint RuntimeObjectAssetID = 0;
+
+        private void ServerGotObjectSpawn(UserID sender, CTSObjectSpawn wos)
+        {
+            GameObject go = new("Uninitialized spawned object (server)");
+            go.AddComponent<NetworkIdentity>();
+
+            if (NetworkServer.active)
+            {
+                NetworkServer.Spawn(go, RuntimeObjectAssetID);
+            }
+        }
+
+        private GameObject ROSpawner(SpawnMessage msg)
+        {
+            GameObject go = new("Uninitialized spawned object (client)");
+            go.AddComponent<NetworkIdentity>();
+
+            return go;
+        }
+
+        private void RODespawner(GameObject spawned) => Destroy(spawned);
+
 
         #endregion
     }
