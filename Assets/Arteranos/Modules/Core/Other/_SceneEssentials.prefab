@@ -532,8 +532,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnableUploadDefaultAvatars: 1
-  EnablePublishServerData: 1
-  EnableServerDiscovery: 1
+  EnablePublishServerData: 0
+  EnableServerDiscovery: 0
 --- !u!114 &7255308184707867998
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -949,9 +949,7 @@ namespace Arteranos.Services
             go.AddComponent<NetworkIdentity>();
 
             if (NetworkServer.active)
-            {
                 NetworkServer.Spawn(go, RuntimeObjectAssetID);
-            }
         }
 
         private GameObject ROSpawner(SpawnMessage msg)

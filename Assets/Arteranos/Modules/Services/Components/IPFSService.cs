@@ -5,11 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-// Use Pubsub. kubo's implementation is deemed to be experimental but
-// it persists in 0.28.0 and works fine and yields a better accuracy of
-// the server online data.
-#define USE_PUBSUB
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,6 +32,8 @@ using Ipfs.CoreApi;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 using System.Net.Http;
+using System.Net;
+using System.Net.NetworkInformation;
 
 namespace Arteranos.Services
 {
@@ -47,17 +44,8 @@ namespace Arteranos.Services
         public SignKey ServerKeyPair { get => serverKeyPair; }
         public Cid IdentifyCid { get; protected set; }
         public Cid CurrentSDCid { get; protected set; } = null;
-        public bool UsingPubsub { get; protected set; } =
-#if USE_PUBSUB
-            true
-#else
-            false
-#endif
-            ;
 
         public bool EnableUploadDefaultAvatars = true;
-        public bool EnablePublishServerData = true;
-        public bool EnableServerDiscovery = true;
 
         public static string CachedPTOSNotice { get; private set; } = null;
 
@@ -75,11 +63,7 @@ namespace Arteranos.Services
 
         private string versionString = null;
 
-        private Cid sod_key_id = null;
-
         private CancellationTokenSource cts = null;
-
-        private ConcurrentDictionary<MultiHash, Peer> DiscoveredPeers = null;
 
         // ---------------------------------------------------------------
         #region Start & Stop
@@ -101,77 +85,160 @@ namespace Arteranos.Services
 
             IEnumerator InitializeIPFSCoroutine()
             {
-                MultiAddress apiAddr = null;
-
-                try
+                IEnumerator EnsureIPFSStarted()
                 {
-                    apiAddr = IpfsClientEx.ReadDaemonAPIAddress(repodir);
-                    int port = -1;
-                    foreach(NetworkProtocol protocol in apiAddr.Protocols)
-                        if(protocol.Code == 6)
+                    IEnumerator FindIPFSExecutable()
+                    {
+                        bool IPFSAccessible()
                         {
-                            port = int.Parse(protocol.Value);
-                            break;
+                            ProcessStartInfo psi = new()
+                            {
+                                FileName = IPFSExe,
+                                Arguments = "help",
+                                UseShellExecute = false,
+                                RedirectStandardError = false,
+                                RedirectStandardInput = false,
+                                RedirectStandardOutput = false,
+                                CreateNoWindow = true,
+                            };
+
+                            try
+                            {
+                                Process process = Process.Start(psi);
+                                return true;
+                            }
+                            catch
+                            {
+                                Debug.LogWarning("No installed IPFS daemon available - needs to be acquired");
+                            }
+
+                            return false;
                         }
 
-                    Debug.Log($"Present configuration says API port {port}");
-                    ipfsTmp = new($"http://localhost:{port}");
-                }
-                catch
-                {
-                    Debug.LogWarning($"No usable API address, assuming default one. Or, initializing a new repo.");
-                    ipfsTmp = new();
-                }
+                        if (!IPFSAccessible())
+                        {
+                            IPFSExe = null;
+                            yield break;
+                        }
+                    }
 
-                // Increase max concurrent connections to prevent choking
-                // Not implemented -- WHY?!
-                //ipfsTmp.HttpMessageHandler = new HttpClientHandler()
-                //{
-                //    MaxConnectionsPerServer = 20,
-                //};
+                    IEnumerator StartupIPFSExeCoroutine()
+                    {
+                        PrivateKey pk = null;
 
-                // First, see if there is an already running and accessible IPFS daemon.
-                {
+                        try
+                        {
+                            pk = IpfsClientEx.ReadDaemonPrivateKey(repodir);
+                        }
+                        catch
+                        {
+                        }
+
+                        if (pk == null)
+                        {
+                            Debug.LogWarning("No IPFS repo, initializing...");
+                            G.TransitionProgress?.OnProgressChanged(0.15f, "Initializing IPFS repository");
+                            TryInitIPFS();
+
+                            yield return new WaitForSeconds(2);
+                        }
+
+                        G.TransitionProgress?.OnProgressChanged(0.20f, "Starting IPFS daemon");
+
+                        TryStartIPFS();
+
+                        for (int i = 0; i < 5; i++)
+                        {
+                            yield return new WaitForSeconds(1);
+
+                            Task<Peer> t = ipfsTmp.IdAsync();
+
+                            yield return new WaitUntil(() => t.IsCompleted);
+
+                            if (t.IsCompletedSuccessfully)
+                            {
+                                StartedIPFSDaemon = true;
+                                self = t.Result;
+                                yield break;
+                            }
+                        }
+
+                        G.TransitionProgress?.OnProgressChanged(0.00f, "Failed to start daemon");
+                        yield return new WaitForSeconds(10);
+                        SettingsManager.Quit();
+                    }
+
+                    MultiAddress apiAddr = null;
+
+                    try
+                    {
+                        apiAddr = IpfsClientEx.ReadDaemonAPIAddress(repodir);
+                        int port = -1;
+                        foreach (NetworkProtocol protocol in apiAddr.Protocols)
+                            if (protocol.Code == 6)
+                            {
+                                port = int.Parse(protocol.Value);
+                                break;
+                            }
+
+                        Debug.Log($"Present configuration says API port {port}");
+                        ipfsTmp = new($"http://localhost:{port}");
+                    }
+                    catch
+                    {
+                        Debug.LogWarning($"No usable API address, assuming default one. Or, initializing a new repo.");
+                        ipfsTmp = new();
+                    }
+
+                    // Increase max concurrent connections to prevent choking
+                    // Not implemented -- WHY?!
+                    //ipfsTmp.HttpMessageHandler = new HttpClientHandler()
+                    //{
+                    //    MaxConnectionsPerServer = 20,
+                    //};
+
+                    // First, see if there is an already running and accessible IPFS daemon.
                     self = null;
                     yield return Asyncs.Async2Coroutine(ipfsTmp.IdAsync(), _self => self = _self, _e =>
                     {
                         // No daemon, but that's okay. Yet.
                     });
-                }
 
-                // If not....
-                if (self == null)
-                {
-                    IPFSExe = "ipfs.exe";
-
-                    // In App: Next to the Arteranos (dedicated server) executable
-                    // In Editor: Project root, ignored in Git repo, generated along with the project build
-                    yield return FindIPFSExecutable();
-
-                    // Even worse...
-                    if (IPFSExe == null)
+                    // If not....
+                    if (self == null)
                     {
-                        G.TransitionProgress?.OnProgressChanged(0.00f, "No IPFS daemon -- aborting!");
+                        IPFSExe = "ipfs.exe";
 
-                        yield return new WaitForSeconds(10);
+                        // In App: Next to the Arteranos (dedicated server) executable
+                        // In Editor: Project root, ignored in Git repo, generated along with the project build
+                        yield return FindIPFSExecutable();
 
-                        Debug.LogError("Cannot find any ipfs executable!");
-                        SettingsManager.Quit();
-                        yield break;
+                        // Even worse...
+                        if (IPFSExe == null)
+                        {
+                            G.TransitionProgress?.OnProgressChanged(0.00f, "No IPFS daemon -- aborting!");
+
+                            yield return new WaitForSeconds(10);
+
+                            Debug.LogError("Cannot find any ipfs executable!");
+                            SettingsManager.Quit();
+                            yield break;
+                        }
+
+                        // If there isn't a repo, initialize it, and start the daenon afterwards.
+                        yield return StartupIPFSExeCoroutine();
                     }
 
-                    // If there isn't a repo, initialize it, and start the daenon afterwards.
-                    yield return StartupIPFSExeCoroutine();
                 }
+
+                // Find and start the IPFS Server. If it's not already running.
+                yield return EnsureIPFSStarted();
 
                 // Keep the IPFS synced - it needs the IPFS node alive.
                 yield return Asyncs.Async2Coroutine(InitializeIPFS());
 
                 // Default avatars
                 yield return UploadDefaultAvatars();
-
-                // Initiate the Arteranos peer discovery.
-                StartCoroutine(DiscoverPeersCoroutine());
 
                 // Start to emit the server description.
                 StartCoroutine(EmitServerDescriptionCoroutine());
@@ -180,96 +247,13 @@ namespace Arteranos.Services
                 StartCoroutine(EmitServerOnlineDataCoroutine());
             }
             
-            IEnumerator FindIPFSExecutable()
-            {
-                bool IPFSAccessible()
-                {
-                    ProcessStartInfo psi = new()
-                    {
-                        FileName = IPFSExe,
-                        Arguments = "help",
-                        UseShellExecute = false,
-                        RedirectStandardError = false,
-                        RedirectStandardInput = false,
-                        RedirectStandardOutput = false,
-                        CreateNoWindow = true,
-                    };
-
-                    try
-                    {
-                        Process process = Process.Start(psi);
-                        return true;
-                    }
-                    catch
-                    {
-                        Debug.LogWarning("No installed IPFS daemon available - needs to be acquired");
-                    }
-
-                    return false;
-                }
-
-                if (!IPFSAccessible())
-                {
-                    IPFSExe = null;
-                    yield break;
-                }
-            }
-
-            IEnumerator StartupIPFSExeCoroutine()
-            {
-                PrivateKey pk = null;
-
-                try
-                {
-                    pk = IpfsClientEx.ReadDaemonPrivateKey(repodir);
-                }
-                catch
-                {
-                }
-
-                if(pk == null)
-                {
-                    Debug.LogWarning("No IPFS repo, initializing...");
-                    G.TransitionProgress?.OnProgressChanged(0.15f, "Initializing IPFS repository");
-                    TryInitIPFS();
-
-                    yield return new WaitForSeconds(2);
-                }
-
-                G.TransitionProgress?.OnProgressChanged(0.20f, "Starting IPFS daemon");
-
-                TryStartIPFS();
-
-                for(int i = 0; i < 5; i++)
-                {
-                    yield return new WaitForSeconds(1);
-
-                    Task<Peer> t = ipfsTmp.IdAsync();
-
-                    yield return new WaitUntil(() => t.IsCompleted);
-
-                    if (t.IsCompletedSuccessfully)
-                    {
-                        StartedIPFSDaemon = true;
-                        self = t.Result;
-                        yield break;
-                    }
-                }
-
-                G.TransitionProgress?.OnProgressChanged(0.00f, "Failed to start daemon");
-                yield return new WaitForSeconds(10);
-                SettingsManager.Quit();
-            }
-
             bool TryStartIPFS()
             {
 
                 ProcessStartInfo psi = new()
                 {
                     FileName = IPFSExe,
-                    Arguments = UsingPubsub
-                    ? $"--repo-dir={repodir} daemon --enable-pubsub-experiment"
-                    : $"--repo-dir={repodir} daemon",
+                    Arguments = $"--repo-dir={repodir} daemon --enable-pubsub-experiment",
                     UseShellExecute = false,
                     RedirectStandardError = false,
                     RedirectStandardInput = false,
@@ -388,34 +372,13 @@ namespace Arteranos.Services
 
                 IEnumerable<IKey> keychain = await ipfsTmp.Key.ListAsync();
 
-                foreach (IKey key in keychain)
-                {
-                    if(key.Name == "key_sod")
-                    {
-                        Debug.Log($"Using existing key for Server Online Data publishing");
-                        sod_key_id = key.Id; break;
-                    }
-                }
-
-                if(sod_key_id == null) 
-                {
-                    Debug.Log($"Generating key for Server Online Data publishing");
-                    IKey key = await ipfsTmp.Key.CreateAsync("key_sod", "ed25519", 0);
-                    sod_key_id = key.Id;
-                }
-
-                if(UsingPubsub)
-                    _ = ipfsTmp.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
+                _ = ipfsTmp.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
 
                 Debug.Log("---- IPFS Daemon init complete ----\n" +
                     $"IPFS Node's ID\n" +
                     $"   {self.Id}\n" +
                     $"Discovery identifier file's CID\n" +
-                    $"   {IdentifyCid}\n" +
-                    $"Server Online Data publish key\n" +
-                    $"   {sod_key_id}\n" +
-                    $"Using Pubsub\n" +
-                    $"   {UsingPubsub}");
+                    $"   {IdentifyCid}\n");
 
                 ipfs = ipfsTmp;
 
@@ -429,8 +392,9 @@ namespace Arteranos.Services
             ipfs = null;
             IdentifyCid = null;
             last = DateTime.MinValue;
-            DiscoveredPeers = new();
             cts = new();
+
+            GetLocalIPAddresses();
 
             StartCoroutine(InitializeIPFSCoroutine());
 
@@ -455,32 +419,6 @@ namespace Arteranos.Services
             cts?.Dispose();
         }
 
-        private IEnumerator DiscoverPeersCoroutine()
-        {
-            async Task<List<Peer>> DoDiscovery()
-            {
-                IEnumerable<Peer> peers = await ipfs.Routing.FindProvidersAsync(IdentifyCid,
-                    1000, // FIXME Maybe configurable.
-                    _peer => OnDiscoveredPeer(_peer)).ConfigureAwait(false);
-
-                return peers.ToList();
-            }
-
-            // TransitionProgressStatic.Instance?.OnProgressChanged(0.70f, "Discovering other servers");
-
-            if(EnableServerDiscovery)
-            {
-                Debug.Log($"Starting node discovery");
-                while (true)
-                {
-                    List<Peer> peers = null;
-                    yield return Asyncs.Async2Coroutine(DoDiscovery(), _p => peers = _p);
-
-                    yield return new WaitForSeconds(heartbeatSeconds * 2);
-                }
-                // NOTREACHED
-            }
-        }
         private IEnumerator UploadDefaultAvatars()
         {
             G.TransitionProgress?.OnProgressChanged(0.50f, "Uploading default resources");
@@ -525,6 +463,24 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region Server information publishing
 
+        // TODO #163 
+        public List<IPAddress> GetLocalIPAddresses()
+        {
+            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (NetworkInterface adapter in adapters)
+            {
+                IPInterfaceProperties adapterProperties = adapter.GetIPProperties();
+                UnicastIPAddressInformationCollection uniCast = adapterProperties.UnicastAddresses;
+                if (uniCast.Count > 0) 
+                    foreach(UnicastIPAddressInformation uni in uniCast)
+                        Debug.Log($"Address: {uni.Address}, Prefix Origin: {uni.PrefixOrigin}, Suffix Origin: {uni.SuffixOrigin}");
+            }
+            IPHostEntry ipEntry = Dns.GetHostEntry(Dns.GetHostName());
+            List<IPAddress> addr = ipEntry.AddressList.ToList();
+
+            return addr;
+        }
+
         public IEnumerator EmitServerDescriptionCoroutine()
         {
             while (true)
@@ -543,9 +499,7 @@ namespace Arteranos.Services
             {
                 if (G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Server ||
                     G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
-                {
-                    yield return Asyncs.Async2Coroutine(FlipServerOnlineData_());
-                }
+                    FlipServerOnlineData_();
 
                 yield return new WaitForSeconds(heartbeatSeconds);
             }
@@ -573,8 +527,7 @@ namespace Arteranos.Services
                     PrivacyTOSNotice = CachedPTOSNotice,
                     AdminNames = q.ToArray(),
                     PeerID = self.Id.ToString(),
-                    LastModified = server.ConfigLastChanged,
-                    ServerOnlineDataLinkCid = sod_key_id
+                    LastModified = server.ConfigLastChanged
                 };
 
                 using MemoryStream ms = new();
@@ -628,34 +581,22 @@ namespace Arteranos.Services
 
             if (G.Server.Public)
             {
-                if(EnablePublishServerData)
-                {
-                    // Lasting for two days max, cache refresh needs one minute
-                    await ipfs.NameEx.PublishAsync(
-                        CurrentSDCid,
-                        lifetime: new TimeSpan(2, 0, 0, 0),
-                        ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
-                }
+                Stopwatch sw = Stopwatch.StartNew();
+                // Submit the announce in Pubsub as well, for all who's listening
+                ServerDescriptionLink sdl = new() { ServerDescriptionCid = CurrentSDCid };
+                using MemoryStream ms = new();
+                sdl.Serialize(ms);
+                ms.Position = 0;
 
-                if (UsingPubsub)
-                {
-                    // Submit the announce in Pubsub as well, for all who's listening
-                    ServerDescriptionLink sdl = new() { ServerDescriptionCid = CurrentSDCid };
-                    using MemoryStream ms = new();
-                    sdl.Serialize(ms);
-                    ms.Position = 0;
-
-                    await ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
-                }
-
-                Debug.Log($"Published server description CID: {CurrentSDCid}");
+                await ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
+                Debug.Log($"Publishing server description via PubSub(): {sw.Elapsed}");
             }
             else
                 Debug.Log($"Server description CID would be: {CurrentSDCid}");
 
         }
 
-        private async Task FlipServerOnlineData_()
+        private void FlipServerOnlineData_()
         {
             // Flood mitigation
             if (last > DateTime.UtcNow - TimeSpan.FromSeconds(30)) return;
@@ -670,8 +611,10 @@ namespace Arteranos.Services
                 CurrentWorldCid = G.World.Cid,
                 CurrentWorldName = G.World.Name,
                 UserFingerprints = UserFingerprints,
+                ServerDescriptionCid = CurrentSDCid,
                 // LastOnline = last, // Not serialized - set on receive
-                OnlineLevel = G.NetworkStatus.GetOnlineLevel()
+                OnlineLevel = G.NetworkStatus.GetOnlineLevel(),
+                IPAddresses = null
             };
 
             using MemoryStream ms = new();
@@ -679,26 +622,8 @@ namespace Arteranos.Services
             sod.Serialize(ms);
             ms.Position = 0;
 
-            // No IPNS together with Pubsub, because latecomers get updated online data at max. one minute.
-            if (UsingPubsub)
-            {
-                // Announce the server online data, too - fire and forget.
-                _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
-            }
-            else
-            {
-                IFileSystemNode fsn = await ipfs.FileSystem.AddAsync(ms, "ServerOnlineData").ConfigureAwait(false);
-
-                if(EnablePublishServerData)
-                {
-                    // Lasting for five minutes, ttl 60s, under the secondary key
-                    await ipfs.NameEx.PublishAsync(
-                        fsn.Id,
-                        key: "key_sod",
-                        lifetime: new TimeSpan(2, 0, 0, 0),
-                        ttl: new TimeSpan(0, 0, 1, 0)).ConfigureAwait(false);
-                }
-            }
+            // Announce the server online data, too - fire and forget.
+            _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
         }
 
         #endregion
@@ -727,6 +652,7 @@ namespace Arteranos.Services
                 else if (pm is ServerOnlineData sod) // As-is.
                 {
                     // Debug.Log($"New server online data from {SenderPeerID}");
+                    DownloadServerDescription(SenderPeerID, sod.ServerDescriptionCid);
                     sod.LastOnline = DateTime.UtcNow; // Not serialized
                     sod.DBInsert(SenderPeerID.ToString());
                 }
@@ -740,7 +666,7 @@ namespace Arteranos.Services
         }
 
         // Server description are generated by the Server Discovery
-        private void DownloadServerDescription(MultiHash SenderPeerID, string sddPath = null)
+        private void DownloadServerDescription(MultiHash SenderPeerID, string sddPath)
         {
 
             async Task DownloadSDAsync(MultiHash SenderPeerID, string sddPath)
@@ -773,77 +699,9 @@ namespace Arteranos.Services
             }
 
             // If we have the CID, okay. If not, use the IPNS resolver.
-            sddPath ??= "/ipns/" + SenderPeerID;
             TaskScheduler.Schedule(MakeDownloadTask(SenderPeerID, sddPath));
         }
 
-        // Server Online Data are generated on demand from the server list and the world
-        // panel generation.
-        public void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null)
-        {
-            async Task DownloadTask(string sodPath)
-            {
-                try
-                {
-                    using CancellationTokenSource cts = new(10000);
-
-                    using Stream s = await ipfs.FileSystem.ReadFileAsync(sodPath).ConfigureAwait(false);
-                    ServerOnlineData sod = Serializer.Deserialize<ServerOnlineData>(s);
-
-                    sod.LastOnline = DateTime.UtcNow; // Not serialized
-
-                    sod.DBInsert(SenderPeerID.ToString());
-                }
-                catch (Exception e)
-                {
-                    // Seems to be offline.
-                    Debug.LogWarning($"No SOD from {sodPath} ({SenderPeerID}): {e.Message}");
-                }
-
-                TaskScheduler.ScheduleCallback(callback);
-            }
-
-            Func<Task> MakeDownloadTask(string sodPath)
-            {
-                Task a() => DownloadTask(sodPath);
-                return a;
-            }
-
-            ServerDescription sd = ServerDescription.DBLookup(SenderPeerID.ToString());
-            if (sd == null) return;
-
-            string sodPath = "/ipns/" + sd.ServerOnlineDataLinkCid;
-
-            TaskScheduler.Schedule(MakeDownloadTask(sodPath));
-        }
-
-        private void OnDiscoveredPeer(Peer found)
-        {
-            MultiHash peerId = found.Id;
-            if (DiscoveredPeers.ContainsKey(peerId)) return;
-            DiscoveredPeers[peerId] = found;
-
-            if (peerId == self.Id)
-            {
-#if !UNITY_EDITOR
-                Debug.Log($"Discovered node {peerId} is self, skipping.");
-                return;
-#else
-                // Enable loopback for debugging
-                Debug.Log($"Discovered node {peerId} is self, adding for debugging purposes.");
-#endif
-            }
-
-            ServerDescription serverDescription = ServerDescription.DBLookup(peerId.ToString());
-            if(serverDescription == null)
-            {
-                Debug.Log($"Discovered node {peerId} is new, downloading data");
-                DownloadServerDescription(peerId);
-            }
-            else
-                Debug.Log($"Rediscovered node {peerId}.");
-
-        }
         #endregion
         // ---------------------------------------------------------------
         #region IPFS Lowlevel interface

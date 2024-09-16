@@ -5,9 +5,9 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using Arteranos.Services;
 using ProtoBuf;
 
@@ -22,8 +22,8 @@ namespace Arteranos.Core
         [ProtoMember(2)]
         public string CurrentWorldName;
 
-        //[ProtoMember(3)]
-        //public string ServerDescriptionCid; // Just in case if we don't have the SD at all.
+        [ProtoMember(3)]
+        public string ServerDescriptionCid; // Just in case if we don't have the SD at all.
 
         [ProtoMember(4)]
         public List<byte[]> UserFingerprints = new();
@@ -33,6 +33,9 @@ namespace Arteranos.Core
 
         //[ProtoMember(6)]
         //public string WorldCid;
+
+        [ProtoMember(7)]
+        public List<string> IPAddresses = new();
 
         public override void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);

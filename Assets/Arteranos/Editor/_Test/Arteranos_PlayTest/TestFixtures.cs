@@ -48,8 +48,6 @@ namespace Arteranos.PlayTest
                     Assert.Fail("No IPFS service implementation");
 
                 // Bare essentials, to not to interfere with the tests
-                service.EnablePublishServerData = false;
-                service.EnableServerDiscovery = false;
                 service.EnableUploadDefaultAvatars = false;
 
                 // Leave it disabled.

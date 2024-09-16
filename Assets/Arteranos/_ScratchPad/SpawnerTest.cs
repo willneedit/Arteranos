@@ -15,18 +15,6 @@ namespace Arteranos
 {
     public class SpawnerTest : MonoBehaviour
     {
-        private void Start()
-        {
-            NetworkClient.RegisterPrefab(ToSpawn);
-        }
-
-        private void OnDestroy()
-        {
-            NetworkClient.UnregisterPrefab(ToSpawn);
-        }
-
-        public GameObject ToSpawn;
-
         public void TriggerSpawn()
         {
             SettingsManager.EmitToServerCTSPacket(new CTSObjectSpawn());

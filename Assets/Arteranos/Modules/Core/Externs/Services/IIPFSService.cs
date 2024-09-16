@@ -26,11 +26,9 @@ namespace Arteranos.Services
         IpfsClientEx Ipfs { get; }
         Peer Self { get; }
         SignKey ServerKeyPair { get; }
-        bool UsingPubsub { get; }
 
         Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default);
         Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default);
-        void DownloadServerOnlineData(MultiHash SenderPeerID, Action callback = null);
         Task FlipServerDescription(bool reload);
         Task<Stream> Get(string path, CancellationToken cancel = default);
         Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default);

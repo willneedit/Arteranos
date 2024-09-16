@@ -60,9 +60,6 @@ namespace Arteranos.Core
         [ProtoMember(16)]
         public string ServerIcon; // string, because CIDs are not proto-serializable
 
-        [ProtoMember(17)]
-        public string ServerOnlineDataLinkCid; // /ipns/<SOD-Key>
-
         public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
 
