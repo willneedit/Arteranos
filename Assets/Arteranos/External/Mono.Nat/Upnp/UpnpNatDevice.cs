@@ -36,7 +36,7 @@ using Mono.Nat.Logging;
 
 namespace Mono.Nat.Upnp
 {
-    sealed class UpnpNatDevice : NatDevice, IEquatable<UpnpNatDevice>
+    public sealed class UpnpNatDevice : NatDevice, IEquatable<UpnpNatDevice>
     {
         static Logger Log { get; } = Logger.Create (nameof (UpnpNatDevice));
 
@@ -48,7 +48,7 @@ namespace Mono.Nat.Upnp
         /// <summary>
         /// The IP address of the LAN device (the current machine)
         /// </summary>
-        IPAddress LocalAddress { get; }
+        public IPAddress LocalAddress { get; }
 
         /// <summary>
         /// The service type we're using on the device

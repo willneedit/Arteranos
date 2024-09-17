@@ -64,30 +64,55 @@ namespace Mono.Nat.Upnp
         internal static UpnpSearcher Create ()
         {
             var clients = new Dictionary<UdpClient, List<IPAddress>> ();
-            var gateways = new List<IPAddress> { IPAddress.Parse ("239.255.255.250") };
+            var gatewaysV4 = new List<IPAddress> { IPAddress.Parse ("239.255.255.250") };
+            var gatewaysV6 = new List<IPAddress> { IPAddress.Parse("FF02::C") }; // site-local, out of FF02 (link-local), FF05 (site-local), FF08 (org-local) and FF0E (global)
 
-            try {
+            try
+            {
                 foreach (NetworkInterface n in NetworkInterface.GetAllNetworkInterfaces ()) {
                     foreach (UnicastIPAddressInformation address in n.GetIPProperties ().UnicastAddresses) {
                         if (address.Address.AddressFamily == AddressFamily.InterNetwork) {
                             try {
                                 var client = new UdpClient (new IPEndPoint (address.Address, 0));
-                                clients.Add (client, gateways);
+                                clients.Add (client, gatewaysV4);
 
                                 client = new UdpClient ();
                                 client.Client.SetSocketOption (SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
-                                client.Client.SetSocketOption (SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption (gateways[0], IPAddress.Any));
+                                client.Client.SetSocketOption (SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption (gatewaysV4[0], IPAddress.Any));
                                 client.Client.Bind (new IPEndPoint (address.Address, 1900));
-                                clients.Add (client, gateways);
+                                clients.Add (client, gatewaysV4);
                             } catch (Exception ex) {
                                 Log.Error (ex.Message);
+                                continue; // Move on to the next address.
+                            }
+                        }
+                        else if (address.Address.AddressFamily == AddressFamily.InterNetworkV6)
+                        {
+                            if (address.Address.IsIPv6LinkLocal) continue;
+
+                            try
+                            {
+                                var client = new UdpClient(new IPEndPoint(address.Address, 0));
+                                clients.Add(client, gatewaysV6);
+
+                                client = new UdpClient();
+                                client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
+
+                                // FIXME Needed?
+                                //client.Client.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, new MulticastOption(gatewaysV6[0], IPAddress.IPv6Any));
+                                //client.Client.Bind(new IPEndPoint(address.Address, 1900));
+                                //clients.Add(client, gatewaysV6);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex.Message);
                                 continue; // Move on to the next address.
                             }
                         }
                     }
                 }
             } catch (Exception) {
-                clients.Add (new UdpClient (0), gateways);
+                clients.Add (new UdpClient (0), gatewaysV4);
             }
 
             return new UpnpSearcher (new SocketGroup (clients, 1900));

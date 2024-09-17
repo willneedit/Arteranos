@@ -18,13 +18,14 @@ using System.Collections.Generic;
 using Arteranos.Avatar;
 using System.Linq;
 using Ipfs;
+using System.Net;
 
 namespace Arteranos.Services
 {
     public partial class NetworkStatus : MonoBehaviour, INetworkStatus
     {
 
-        private INatDevice device = null;
+        private readonly Dictionary<IPAddress, INatDevice> Devices = new();
         public MultiHash RemotePeerId { get; set; } = null;
 
         public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
@@ -164,38 +165,49 @@ namespace Arteranos.Services
         // -------------------------------------------------------------------
         #region Connectivity and UPnP
 
+        private bool reportRouter = false;
+
         private void DeviceFound(object sender, DeviceEventArgs e)
         {
-            // For some reason, my Fritz!Box reponds twice, for two WAN ports,
-            // all with the same external IP address?
-            if(device != null) return;
+            IPAddress localAddress = null;
 
-            device = e.Device;
+            if (e.Device is Mono.Nat.Upnp.UpnpNatDevice uPnPNatDevice)
+                localAddress = uPnPNatDevice.LocalAddress;
 
-            // ExternalAddress_ = await device.GetExternalIPAsync();
+            if(reportRouter)
+            {
+                Debug.Log($"Device found : {e.Device.NatProtocol}");
+                if (Devices.Count == 0)
+                    Debug.Log($"  Extern IP  : {e.Device.GetExternalIP()}");
+                Debug.Log($"  Type       : {e.Device.GetType().Name}");
 
-            Debug.Log($"Device found : {device.NatProtocol}");
-            Debug.Log($"  Type       : {device.GetType().Name}");
+                if (localAddress == null)
+                    Debug.Log($"  Local addr : {localAddress}");
+            }
 
-            OpenPortsAsync();
+            Devices.Add(localAddress, e.Device);
         }
 
         private async Task<bool> OpenPortAsync(int port)
         {
             // TCP, and internal and external ports as the same.
             Mapping mapping = new(Protocol.Tcp, port, port);
+            foreach(var device in Devices)
+            {
+                try
+                {
+                    await device.Value.CreatePortMapAsync(mapping);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"Failed to create a port mapping for {port}");
+                    Debug.LogException(ex);
+                    if (device.Value is Mono.Nat.Upnp.UpnpNatDevice usPnPNatDevice)
+                        Debug.Log($"Local address: {usPnPNatDevice.LocalAddress}");
+                }
+            }
 
-            try
-            {
-                await device.CreatePortMapAsync(mapping);
-                return true;
-            }
-            catch(Exception ex)
-            {
-                Debug.LogWarning($"Failed to create a port mapping for {port}");
-                Debug.LogException(ex);
-                return false;
-            }
+            return true;
         }
 
         private async void ClosePortAsync(int port)
@@ -203,13 +215,16 @@ namespace Arteranos.Services
             // TCP, and internal and external ports as the same.
             Mapping mapping = new(Protocol.Tcp, port, port);
 
-            try
+            foreach (var device in Devices)
             {
-                await device.DeletePortMapAsync(mapping);
-            }
-            catch
-            {
-                Debug.Log($"Failed to delete a port mapping for {port}... but it's okay.");
+                try
+                {
+                    await device.Value.DeletePortMapAsync(mapping);
+                }
+                catch
+                {
+                    Debug.Log($"Failed to delete a port mapping for {port}... but it's okay.");
+                }
             }
         }
 
@@ -231,8 +246,7 @@ namespace Arteranos.Services
 
             Server ss = G.Server;
 
-            if(ServerPortPublic)
-                ClosePortAsync(ss.ServerPort);
+            if (ServerPortPublic) ClosePortAsync(ss.ServerPort);
 
             ServerPortPublic = false;
         }

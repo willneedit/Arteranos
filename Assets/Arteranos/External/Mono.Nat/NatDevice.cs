@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 
 namespace Mono.Nat
 {
-    abstract class NatDevice : INatDevice
+    public abstract class NatDevice : INatDevice
     {
         public DateTime LastSeen { get; internal set; }
         public IPEndPoint DeviceEndpoint { get; }

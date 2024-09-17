@@ -473,7 +473,12 @@ namespace Arteranos.Services
                 UnicastIPAddressInformationCollection uniCast = adapterProperties.UnicastAddresses;
                 if (uniCast.Count > 0) 
                     foreach(UnicastIPAddressInformation uni in uniCast)
+                    {
+                        if (uni.Address.IsIPv6LinkLocal 
+                            || uni.PrefixOrigin == PrefixOrigin.WellKnown) continue;
+
                         Debug.Log($"Address: {uni.Address}, Prefix Origin: {uni.PrefixOrigin}, Suffix Origin: {uni.SuffixOrigin}");
+                    }
             }
             IPHostEntry ipEntry = Dns.GetHostEntry(Dns.GetHostName());
             List<IPAddress> addr = ipEntry.AddressList.ToList();
