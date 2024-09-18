@@ -394,8 +394,6 @@ namespace Arteranos.Services
             last = DateTime.MinValue;
             cts = new();
 
-            GetLocalIPAddresses();
-
             StartCoroutine(InitializeIPFSCoroutine());
 
         }
@@ -462,29 +460,6 @@ namespace Arteranos.Services
         #endregion
         // ---------------------------------------------------------------
         #region Server information publishing
-
-        // TODO #163 
-        public List<IPAddress> GetLocalIPAddresses()
-        {
-            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (NetworkInterface adapter in adapters)
-            {
-                IPInterfaceProperties adapterProperties = adapter.GetIPProperties();
-                UnicastIPAddressInformationCollection uniCast = adapterProperties.UnicastAddresses;
-                if (uniCast.Count > 0) 
-                    foreach(UnicastIPAddressInformation uni in uniCast)
-                    {
-                        if (uni.Address.IsIPv6LinkLocal 
-                            || uni.PrefixOrigin == PrefixOrigin.WellKnown) continue;
-
-                        Debug.Log($"Address: {uni.Address}, Prefix Origin: {uni.PrefixOrigin}, Suffix Origin: {uni.SuffixOrigin}");
-                    }
-            }
-            IPHostEntry ipEntry = Dns.GetHostEntry(Dns.GetHostName());
-            List<IPAddress> addr = ipEntry.AddressList.ToList();
-
-            return addr;
-        }
 
         public IEnumerator EmitServerDescriptionCoroutine()
         {
@@ -622,10 +597,12 @@ namespace Arteranos.Services
                 IPAddresses = null
             };
 
-            using MemoryStream ms = new();
+            List<IPAddress> IPAddresses = G.NetworkStatus.IPAddresses;
+            sod.IPAddresses = (from entry in IPAddresses
+                                select entry.ToString()).ToList();
 
+            using MemoryStream ms = new();
             sod.Serialize(ms);
-            ms.Position = 0;
 
             // Announce the server online data, too - fire and forget.
             _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());

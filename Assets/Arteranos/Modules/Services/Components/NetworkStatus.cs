@@ -19,6 +19,10 @@ using Arteranos.Avatar;
 using System.Linq;
 using Ipfs;
 using System.Net;
+using System.Threading;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Net.NetworkInformation;
 
 namespace Arteranos.Services
 {
@@ -26,6 +30,9 @@ namespace Arteranos.Services
     {
 
         private readonly Dictionary<IPAddress, INatDevice> Devices = new();
+
+        public AsyncLazy<List<IPAddress>> IPAddresses => m_IPAddresses;
+
         public MultiHash RemotePeerId { get; set; } = null;
 
         public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
@@ -105,6 +112,10 @@ namespace Arteranos.Services
 
             IEnumerator RefreshDiscovery()
             {
+                RefreshIPAddresses();
+
+                yield return IPAddresses.WaitFor();
+
                 while(true)
                 {
                     // No sense for router and IP detection if the computer's network cable is unplugged
@@ -165,7 +176,7 @@ namespace Arteranos.Services
         // -------------------------------------------------------------------
         #region Connectivity and UPnP
 
-        private bool reportRouter = false;
+        private readonly bool reportRouter = false;
 
         private void DeviceFound(object sender, DeviceEventArgs e)
         {
@@ -249,6 +260,110 @@ namespace Arteranos.Services
             if (ServerPortPublic) ClosePortAsync(ss.ServerPort);
 
             ServerPortPublic = false;
+        }
+
+        #endregion
+        // -------------------------------------------------------------------
+        #region IP Address determination
+
+        private AsyncLazy<List<IPAddress>> m_IPAddresses = null;
+
+        private void RefreshIPAddresses()
+        {
+            m_IPAddresses = new(async () => await GatherIPAddresses());
+        }
+
+        private async Task<List<IPAddress>> GatherIPAddresses()
+        {
+            List<IPAddress> ips = new()
+            {
+                await GetExternalIPAdress()
+            };
+
+            ips.AddRange(GetLocalIPAddresses());
+
+            foreach (IPAddress ip in ips)
+                Debug.Log($" Found IP address: {ip}");
+
+            return ips;
+        }
+
+        private static List<IPAddress> GetLocalIPAddresses()
+        {
+            List<IPAddress> addr = new();
+
+            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (NetworkInterface adapter in adapters)
+            {
+                IPInterfaceProperties adapterProperties = adapter.GetIPProperties();
+                UnicastIPAddressInformationCollection uniCast = adapterProperties.UnicastAddresses;
+                if (uniCast.Count > 0)
+                    foreach (UnicastIPAddressInformation uni in uniCast)
+                    {
+                        if (uni.Address.IsIPv6LinkLocal
+                            || uni.PrefixOrigin == PrefixOrigin.WellKnown) continue;
+
+                        addr.Add(uni.Address);
+                    }
+            }
+
+            return addr;
+        }
+
+        public static async Task<IPAddress> GetExternalIPAdress()
+        {
+            async Task<IPAddress> GetMyIPAsync(string service, CancellationToken cancel)
+            {
+                try
+                {
+                    using HttpClient webclient = new();
+
+                    HttpResponseMessage response = await webclient.GetAsync(service, cancel);
+                    string ipString = await response.Content.ReadAsStringAsync();
+
+                    // https://ihateregex.io/expr/ip
+                    Match m = Regex.Match(ipString, @"(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}");
+
+                    return m.Success ? IPAddress.Parse(m.Value) : null;
+                }
+                catch { }
+                return null;
+            }
+
+            CancellationTokenSource cts = null;
+            
+            // Services from https://stackoverflow.com/questions/3253701/get-public-external-ip-address
+            List<string> services = new()
+            {
+                "https://ipv4.icanhazip.com",
+                "https://api.ipify.org",
+                "https://ipinfo.io/ip",
+                "https://checkip.amazonaws.com",
+                "https://wtfismyip.com/text",
+                "http://icanhazip.com"
+            };
+
+            // Spread the load throughout on all of the services.
+            services.Shuffle();
+
+            cts = new CancellationTokenSource();
+
+            IPAddress result = null;
+
+            async Task GetOneMyIP(string service)
+            {
+                if (result != null || cts.Token.IsCancellationRequested) return;
+                result = await GetMyIPAsync(service, cts.Token);
+            }
+
+            TaskPool<string> pool = new(1);
+
+            foreach (string service in services)
+                pool.Schedule(service, GetOneMyIP);
+
+            await pool.Run(cts.Token);
+
+            return result;
         }
 
         #endregion

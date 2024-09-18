@@ -10,6 +10,7 @@ using Arteranos.Core;
 using Ipfs;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -22,6 +23,7 @@ namespace Arteranos.Services
         Action<bool, string> OnClientConnectionResponse { get; set; }
         bool OpenPorts { get; set; }
         MultiHash RemotePeerId { get; set; }
+        AsyncLazy<List<IPAddress>> IPAddresses { get; }
 
         event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
 
