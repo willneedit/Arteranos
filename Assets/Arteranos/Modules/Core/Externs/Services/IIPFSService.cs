@@ -31,7 +31,6 @@ namespace Arteranos.Services
         Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default);
         Task FlipServerDescription(bool reload);
         Task<Stream> Get(string path, CancellationToken cancel = default);
-        Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default);
         Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default);
         Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default);
         Task PinCid(Cid cid, bool pinned, CancellationToken token = default);

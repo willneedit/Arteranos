@@ -21,19 +21,14 @@ using System.Linq;
 using Ipfs.Cryptography.Proto;
 using Ipfs.Http;
 using System.Text;
-using System.Collections.Concurrent;
 using IPAddress = System.Net.IPAddress;
 using Arteranos.Core.Operations;
 using System.Net.Sockets;
 using TaskScheduler = Arteranos.Core.TaskScheduler;
-using ProtoBuf;
 using Ipfs.CoreApi;
 
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
-using System.Net.Http;
-using System.Net;
-using System.Net.NetworkInformation;
 
 namespace Arteranos.Services
 {
@@ -440,21 +435,6 @@ namespace Arteranos.Services
                 yield return UploadAvatar("resource:///Avatar/63c26702e5b9a435587fba51.glb");
                 G.DefaultAvatar.Female = cid;
             }
-        }
-
-
-        public async Task<IPAddress> GetPeerIPAddress(MultiHash PeerID, CancellationToken token = default)
-        {
-            IEnumerable<(IPAddress, ProtocolType, int)> ipAddresses = await ipfs.Routing.FindPeerAddressesAsync(PeerID, token).ConfigureAwait(false);
-
-            if (!ipAddresses.Any()) return null;
-
-            // Prefer IPv6 - less NAT or port forwarding issues
-            foreach (var ipAddress in ipAddresses)
-                if(ipAddress.Item1.AddressFamily == AddressFamily.InterNetworkV6)
-                    return ipAddress.Item1;
-
-            return ipAddresses.First().Item1;
         }
 
         #endregion

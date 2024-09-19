@@ -14,6 +14,7 @@ using Arteranos.UI;
 using Ipfs;
 using System.Net;
 using System.Threading;
+using System.Linq;
 
 namespace Arteranos.Services
 {
@@ -61,24 +62,14 @@ namespace Arteranos.Services
 
             G.TransitionProgress?.OnProgressChanged(0.10f, "Searching server");
 
-            Task<IPAddress> taskIPAddr = Task.Run(async () =>
+            if(!si.IPAddresses.Any())
             {
-                using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
-                return await G.IPFSService.GetPeerIPAddress(si.PeerID, cts.Token);
-            });
-
-            yield return new WaitUntil(() => taskIPAddr.IsCompleted);
-
-            // Faulted, or no reachable IP address at all.
-            if (!taskIPAddr.IsCompletedSuccessfully || taskIPAddr.Result == null)
-            {
-                Debug.Log($"{si.PeerID} is unreachable.");
+                ConnectionResponse(false, "Server reports no IP address");
                 yield return TransitionProgress.TransitionTo(null);
-                callback?.Invoke(false);
                 yield break;
             }
 
-            addr = taskIPAddr.Result;
+            addr = si.IPAddresses.First();
 
             G.TransitionProgress?.OnProgressChanged(0.50f, "Connecting...");
 

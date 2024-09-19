@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Ipfs;
 using Arteranos.Core.Cryptography;
+using System.Net;
 
 namespace Arteranos.Core
 {
@@ -64,6 +65,7 @@ namespace Arteranos.Core
         public string PrivacyTOSNotice => DescriptionStruct?.PrivacyTOSNotice;
         public Cid ServerIcon => DescriptionStruct?.ServerIcon;
         public string[] AdminNames => DescriptionStruct?.AdminNames ?? new string[0];
+        public IEnumerable<IPAddress> IPAddresses => from entry in OnlineData.IPAddresses select IPAddress.Parse(entry);
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
         public string SPKDBKey => DescriptionStruct.PeerID;
         public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new();
