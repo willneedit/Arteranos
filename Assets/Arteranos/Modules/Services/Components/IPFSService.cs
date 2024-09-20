@@ -232,6 +232,8 @@ namespace Arteranos.Services
                 // Keep the IPFS synced - it needs the IPFS node alive.
                 yield return Asyncs.Async2Coroutine(InitializeIPFS());
 
+                yield return new WaitForSeconds(5);
+
                 // Default avatars
                 yield return UploadDefaultAvatars();
 
@@ -240,6 +242,34 @@ namespace Arteranos.Services
 
                 // Start to emit the server online data.
                 StartCoroutine(EmitServerOnlineDataCoroutine());
+
+                // Start the Subscriber loop
+                StartCoroutine(SubscriberCoroutine());
+
+            }
+
+            IEnumerator SubscriberCoroutine()
+            {
+                Debug.Log("Subscribing Arteranos PubSub channel");
+
+                int pubsubSeconds = 300;
+
+                while(true)
+                {
+                    using CancellationTokenSource cts = new(pubsubSeconds * 1000 + 2000);
+
+                    // Truly async.
+                    _ = ipfs.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
+
+                    yield return new WaitForSeconds(pubsubSeconds);
+
+                    cts.Cancel();
+
+                    yield return new WaitForSeconds(1);
+
+                    Debug.Log("Refreshing PubSub Listener loop");
+               
+                }
             }
             
             bool TryStartIPFS()
@@ -364,10 +394,6 @@ namespace Arteranos.Services
                     }
                     catch { }
                 }
-
-                IEnumerable<IKey> keychain = await ipfsTmp.Key.ListAsync();
-
-                _ = ipfsTmp.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
 
                 Debug.Log("---- IPFS Daemon init complete ----\n" +
                     $"IPFS Node's ID\n" +
@@ -635,7 +661,7 @@ namespace Arteranos.Services
             {
                 try
                 {
-                    using CancellationTokenSource cts = new(30000);
+                    using CancellationTokenSource cts = new(1000);
 
                     // Server description is published under the peer ID. (= self)
                     // If it's cached, it's already in the local repo.
