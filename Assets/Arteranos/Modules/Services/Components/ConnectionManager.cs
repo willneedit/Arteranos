@@ -55,8 +55,6 @@ namespace Arteranos.Services
 
         private IEnumerator CommenceConnection(ServerInfo si, Action<bool> callback)
         {
-            IPAddress addr = null;
-
             // In any case, go into the transitional phase.
             yield return TransitionProgress.TransitionFrom();
 
@@ -69,35 +67,44 @@ namespace Arteranos.Services
                 yield break;
             }
 
-            addr = si.IPAddresses.First();
-
-            G.TransitionProgress?.OnProgressChanged(0.50f, "Connecting...");
-
-            // FIXME Telepathy Transport specific.
-            Uri connectionUri = addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
-                ? new($"tcp4://[{addr}]:{si.ServerPort}")
-                : new($"tcp4://{addr}:{si.ServerPort}");
-
-            ExpectConnectionResponse();
-            G.NetworkStatus.StartClient(connectionUri);
-
             // Save it for now even before the connection negotiation and authentication
             // During the remainder of the ongoing frame, we have to have the PeerID available --
             // the complete login sequence can be commenced before WaitForEndOfFrame() let us continue.
             G.NetworkStatus.RemotePeerId = si.PeerID;
 
-            // https://www.youtube.com/watch?v=dQw4w9WgXcQ
-            while (G.NetworkStatus.IsClientConnecting) yield return new WaitForEndOfFrame();
+            int i = 0;
+            foreach (IPAddress addr in si.IPAddresses)
+            {
+                G.TransitionProgress?.OnProgressChanged(0.50f, $"Connecting ({++i})...");
+
+                // TODO Needs cleanup!
+                G.NetworkStatus.OnClientConnectionResponse = null;
+
+                // FIXME Telepathy Transport specific.
+                Uri connectionUri = addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
+                    ? new($"tcp4://[{addr}]:{si.ServerPort}")
+                    : new($"tcp4://{addr}:{si.ServerPort}");
+
+                G.NetworkStatus.StartClient(connectionUri);
+
+                // https://www.youtube.com/watch?v=dQw4w9WgXcQ
+                while (G.NetworkStatus.IsClientConnecting) yield return new WaitForEndOfFrame();
+
+                if(G.NetworkStatus.IsClientConnected)
+                    break;
+            }
 
             // Client failed to connect. Maybe an invalid IP, or a misconfigured firewall.
             // Fall back to the offline world.
             if (!G.NetworkStatus.IsClientConnected)
             {
+                ConnectionResponse(false, "Cannot connect to server");
                 callback?.Invoke(false);
                 yield return TransitionProgress.TransitionTo(null);
                 yield break;
             }
 
+            ExpectConnectionResponse();
             callback?.Invoke(true);
             // Just-connected server will tell which world we're going to.
             // If the server is borked, the disconnecting server will cause the client to

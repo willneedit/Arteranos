@@ -84,13 +84,15 @@ namespace Arteranos.Services
 
         public OnlineLevel GetOnlineLevel()
         {
-            if(!NetworkClient.active && !NetworkServer.active)
+            bool clientConnected = NetworkClient.active && NetworkClient.isConnected;
+
+            if (!clientConnected && !NetworkServer.active)
                 return OnlineLevel.Offline;
 
-            if(NetworkClient.active && NetworkServer.active)
+            if(clientConnected && NetworkServer.active)
                 return OnlineLevel.Host;
 
-            return NetworkClient.active
+            return clientConnected
                 ? OnlineLevel.Client
                 : OnlineLevel.Server;
         }
