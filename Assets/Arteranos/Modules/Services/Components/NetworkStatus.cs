@@ -294,12 +294,14 @@ namespace Arteranos.Services
 
         public static async Task<IPAddress> GetExternalIPAdress()
         {
+            CancellationTokenSource cts = null;
+            IPAddress result = null;
+            using HttpClient webclient = new();
+
             async Task<IPAddress> GetMyIPAsync(string service, CancellationToken cancel)
             {
                 try
                 {
-                    using HttpClient webclient = new();
-
                     HttpResponseMessage response = await webclient.GetAsync(service, cancel);
                     string ipString = await response.Content.ReadAsStringAsync();
 
@@ -312,7 +314,6 @@ namespace Arteranos.Services
                 return null;
             }
 
-            CancellationTokenSource cts = null;
             
             // Services from https://stackoverflow.com/questions/3253701/get-public-external-ip-address
             List<string> services = new()
@@ -328,17 +329,17 @@ namespace Arteranos.Services
             // Spread the load throughout on all of the services.
             services.Shuffle();
 
-            cts = new CancellationTokenSource();
-
-            IPAddress result = null;
+            cts = new CancellationTokenSource(2000);
 
             async Task GetOneMyIP(string service)
             {
                 if (result != null || cts.Token.IsCancellationRequested) return;
                 result = await GetMyIPAsync(service, cts.Token);
+
+                if (result != null) cts.Cancel();
             }
 
-            TaskPool<string> pool = new(1);
+            TaskPool<string> pool = new(2);
 
             foreach (string service in services)
                 pool.Schedule(service, GetOneMyIP);

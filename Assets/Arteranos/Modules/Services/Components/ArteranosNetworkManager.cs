@@ -891,6 +891,7 @@ namespace Arteranos.Services
 
                 ss.ServerPort = conf.ServerPort;
                 ss.UseUPnP = conf.UseUPnP;
+                ss.ShutdownIPFS = conf.ShutdownIPFS;
                 ss.Name = conf.Name;
                 ss.Description = conf.Description;
                 ss.Permissions = conf.Permissions;

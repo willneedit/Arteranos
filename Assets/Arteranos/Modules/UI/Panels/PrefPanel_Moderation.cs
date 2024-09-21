@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using System.Linq;
-using System.Threading;
 using Arteranos.Core.Managed;
 
 namespace Arteranos.UI
@@ -30,11 +29,11 @@ namespace Arteranos.UI
         public TMP_InputField txt_ServerPort = null;
 
         public Toggle chk_UseUPnP = null;
+        public Toggle chk_ShutdownIPFS = null;
 
         public TMP_InputField txt_Description = null;
         public IconSelectorBar bar_IconSelector = null;
 
-        public Button btn_WorldGallery = null;
         public Button btn_ContentPermissions = null;
 
         public Toggle chk_Flying = null;
@@ -57,10 +56,10 @@ namespace Arteranos.UI
 
             txt_ServerPort.onValueChanged.AddListener(SetDirty);
             chk_UseUPnP.onValueChanged.AddListener(SetDirty);
+            chk_ShutdownIPFS.onValueChanged.AddListener(SetDirty);
 
             chk_Public.onValueChanged.AddListener(SetDirty);
 
-            btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
             btn_ContentPermissions.onClick.AddListener(OnContentPermissionsClicked);
 
             chk_Flying.onValueChanged.AddListener(SetDirty);
@@ -100,6 +99,7 @@ namespace Arteranos.UI
             // Believe me. Fastest car ride he pulled off....
             txt_ServerPort.interactable = networkConfig;
             chk_UseUPnP.interactable = networkConfig;
+            chk_ShutdownIPFS.interactable = networkConfig;
 
             // Send the query.
             SettingsManager.EmitToServerCTSPacket(new CTSServerConfig()
@@ -115,6 +115,7 @@ namespace Arteranos.UI
 
             txt_ServerPort.text = ss.ServerPort.ToString();
             chk_UseUPnP.isOn = ss.UseUPnP;
+            chk_ShutdownIPFS.isOn = ss.ShutdownIPFS;
 
             txt_ServerName.text = ss.Name;
             txt_Description.text = ss.Description;
@@ -143,6 +144,7 @@ namespace Arteranos.UI
                 Permissions = Permissions,
                 ServerPort = int.Parse(txt_ServerPort.text),
                 UseUPnP = chk_UseUPnP.isOn,
+                ShutdownIPFS = chk_ShutdownIPFS.isOn,
                 Name = txt_ServerName.text,
                 Description = txt_Description.text,
                 Public = chk_Public.isOn,
@@ -152,13 +154,6 @@ namespace Arteranos.UI
 
             // Send off the updated config to the server
             SettingsManager.EmitToServerCTSPacket(new CTSServerConfig() { config = ss });
-        }
-
-        private void OnWorldGalleryClicked()
-        {
-            G.SysMenu.CloseSysMenus();
-
-            WorldPanelUI.New();
         }
 
         private void OnContentPermissionsClicked()

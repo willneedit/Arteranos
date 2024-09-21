@@ -267,7 +267,7 @@ namespace Arteranos.Services
 
                     yield return new WaitForSeconds(1);
 
-                    Debug.Log("Refreshing PubSub Listener loop");
+                    // Debug.Log("Refreshing PubSub Listener loop");
                
                 }
             }
@@ -427,11 +427,13 @@ namespace Arteranos.Services
             cts?.Cancel();
 
             // If we're started the daemon on our own, shut it down, too.
-            if(StartedIPFSDaemon)
+            if(G.Server.ShutdownIPFS)
             {
                 Debug.Log("Shutting down the IPFS node.");
                 await ipfs.ShutdownAsync();
             }
+            else if(StartedIPFSDaemon)
+                Debug.Log("NOT Shutting down the IPFS node, because you want it to remain running.");
             else
                 Debug.Log("NOT Shutting down the IPFS node, because it's been already running.");
 

@@ -87,7 +87,8 @@ namespace Arteranos.UI
 
             StopAllCoroutines();
 
-            StartCoroutine(LoaderCoroutine());
+            if(isActiveAndEnabled)
+                StartCoroutine(LoaderCoroutine());
         }
     }
 }

@@ -34,6 +34,10 @@ namespace Arteranos.Core
         [ProtoMember(11)]
         public bool UseUPnP = true;
 
+        // Shutdown IPFS on quit
+        [ProtoMember(12)]
+        public bool ShutdownIPFS = true;
+
         // The server nickname.
         [ProtoMember(3)]
         public string Name = string.Empty;
@@ -72,6 +76,7 @@ namespace Arteranos.Core
             Name = other.Name;
             Description = other.Description;
             UseUPnP = other.UseUPnP;
+            ShutdownIPFS = other.ShutdownIPFS;
             Permissions = other.Permissions;
             Public = other.Public;
             ServerAgrPublicKey = other.ServerAgrPublicKey;
