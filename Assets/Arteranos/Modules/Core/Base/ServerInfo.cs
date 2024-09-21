@@ -59,7 +59,7 @@ namespace Arteranos.Core
 
         public bool IsValid => DescriptionStruct != null;
         public bool SeenOnline => OnlineData != null;
-        public bool IsOnline => OnlineData != null && OnlineData.LastOnline > (DateTime.UtcNow - TimeSpan.FromMinutes(5));
+        public bool IsOnline => OnlineData != null && OnlineData.LastOnline > (DateTime.UtcNow - TimeSpan.FromMinutes(5)) && OnlineData.OnlineLevel != Services.OnlineLevel.Offline;
         public string Name => DescriptionStruct?.Name;
         public string Description => DescriptionStruct?.Description ?? string.Empty;
         public string PrivacyTOSNotice => DescriptionStruct?.PrivacyTOSNotice;

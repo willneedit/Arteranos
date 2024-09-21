@@ -23,7 +23,6 @@ using Ipfs.Http;
 using System.Text;
 using IPAddress = System.Net.IPAddress;
 using Arteranos.Core.Operations;
-using System.Net.Sockets;
 using TaskScheduler = Arteranos.Core.TaskScheduler;
 using Ipfs.CoreApi;
 
@@ -483,11 +482,22 @@ namespace Arteranos.Services
 
         private IEnumerator EmitServerOnlineDataCoroutine()
         {
+            bool saidOnline = false;
+
             while (true)
             {
                 if (G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Server ||
                     G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
+                {
+                    saidOnline = true;
                     FlipServerOnlineData_();
+                }
+                else if(saidOnline)
+                {
+                    // First time after being online, wave the community goodbye.
+                    saidOnline = false;
+                    SendServerGoodbye_();
+                }
 
                 yield return new WaitForSeconds(heartbeatSeconds);
             }
@@ -594,6 +604,9 @@ namespace Arteranos.Services
                                 where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
                                 select CryptoHelpers.GetFingerprint(user.UserID)).ToList();
 
+            List<string> IPAddresses = (from entry in (List<IPAddress>)G.NetworkStatus.IPAddresses
+                               select entry.ToString()).ToList();
+
             ServerOnlineData sod = new()
             {
                 CurrentWorldCid = G.World.Cid,
@@ -602,17 +615,31 @@ namespace Arteranos.Services
                 ServerDescriptionCid = CurrentSDCid,
                 // LastOnline = last, // Not serialized - set on receive
                 OnlineLevel = G.NetworkStatus.GetOnlineLevel(),
-                IPAddresses = null
+                IPAddresses = IPAddresses
             };
-
-            List<IPAddress> IPAddresses = G.NetworkStatus.IPAddresses;
-            sod.IPAddresses = (from entry in IPAddresses
-                                select entry.ToString()).ToList();
 
             using MemoryStream ms = new();
             sod.Serialize(ms);
 
             // Announce the server online data, too - fire and forget.
+            _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
+        }
+
+        private void SendServerGoodbye_()
+        {
+            ServerOnlineData sod = new()
+            {
+                CurrentWorldCid = null,
+                CurrentWorldName = "Offline",
+                UserFingerprints = null,
+                ServerDescriptionCid = CurrentSDCid,
+                OnlineLevel = OnlineLevel.Offline,
+                IPAddresses = null
+            };
+            using MemoryStream ms = new();
+            sod.Serialize(ms);
+
+            // Just wave a goodbye.
             _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
         }
 

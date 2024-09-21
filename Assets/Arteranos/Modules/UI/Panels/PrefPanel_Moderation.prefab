@@ -3890,7 +3890,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5483533141505094443
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3930,7 +3930,6 @@ MonoBehaviour:
   chk_ShutdownIPFS: {fileID: 1322892543397636370}
   txt_Description: {fileID: 8505423802518198292}
   bar_IconSelector: {fileID: 63196198428329222}
-  btn_WorldGallery: {fileID: 0}
   btn_ContentPermissions: {fileID: 8268277737253132856}
   chk_Flying: {fileID: 2979457288832135865}
   chk_Public: {fileID: 3242759279332620819}
