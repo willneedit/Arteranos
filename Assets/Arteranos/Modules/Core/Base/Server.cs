@@ -31,11 +31,11 @@ namespace Arteranos.Core
         //public int MetadataPort = 9779;
 
         // Use UPnP port forwarding.
-        [ProtoMember(11)]
+        [ProtoMember(11, IsRequired = true)]
         public bool UseUPnP = true;
 
         // Shutdown IPFS on quit
-        [ProtoMember(12)]
+        [ProtoMember(12, IsRequired = true)]
         public bool ShutdownIPFS = true;
 
         // The server nickname.

@@ -45,6 +45,8 @@ namespace Arteranos.Services
 
         private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
 
+        private bool ForceIPFSShutdown = true;
+
         private const int heartbeatSeconds = 60;
         private const string AnnouncerTopic = "/X-Arteranos";
         private IpfsClientEx ipfs = null;
@@ -231,7 +233,7 @@ namespace Arteranos.Services
                 // Keep the IPFS synced - it needs the IPFS node alive.
                 yield return Asyncs.Async2Coroutine(InitializeIPFS());
 
-                yield return new WaitForSeconds(5);
+                yield return new WaitForSeconds(1);
 
                 // Default avatars
                 yield return UploadDefaultAvatars();
@@ -245,6 +247,8 @@ namespace Arteranos.Services
                 // Start the Subscriber loop
                 StartCoroutine(SubscriberCoroutine());
 
+                // Ready to proceed, past the point we can manually shut down the IPFS daemon
+                ForceIPFSShutdown = false;
             }
 
             IEnumerator SubscriberCoroutine()
@@ -426,7 +430,12 @@ namespace Arteranos.Services
             cts?.Cancel();
 
             // If we're started the daemon on our own, shut it down, too.
-            if(G.Server.ShutdownIPFS)
+            if(ForceIPFSShutdown)
+            {
+                Debug.Log("Shutting down the IPFS node, because the service didn't completely start.");
+                await ipfs.ShutdownAsync();
+            }
+            if (G.Server.ShutdownIPFS)
             {
                 Debug.Log("Shutting down the IPFS node.");
                 await ipfs.ShutdownAsync();
