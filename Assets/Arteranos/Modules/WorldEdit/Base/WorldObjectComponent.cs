@@ -181,6 +181,7 @@ namespace Arteranos.WorldEdit
 
             body.isKinematic = needsKinematic;
 
+            TryGetWOC(out WOCTransform t);
             TryGetWOC(out WOCPhysics p);
 
             // Prevent physics shenanigans in the edit mode
@@ -192,7 +193,7 @@ namespace Arteranos.WorldEdit
             body.useGravity = !isInEditMode
                 && (p?.ObeysGravity ?? false);
 
-            RecursiveSetLayer((int)(p?.Collidable ?? false
+            RecursiveSetLayer((int)(t?.isCollidable ?? false
                 ? ColliderType.Solid
                 : ColliderType.Intangible), transform);           
 

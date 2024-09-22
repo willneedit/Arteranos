@@ -20,8 +20,11 @@ namespace Arteranos.WorldEdit
         public WOVector3 rotation; // Euler angles -- less data, needs Quaternion.eulerAngles and Quaternion.Euler()
         [ProtoMember(3)]
         public WOVector3 scale;
+        [ProtoMember(4)]
+        public bool isCollidable;
 
         private Transform transform = null;
+        private WorldObjectComponent woc = null;
 
         public override GameObject GameObject
         {
@@ -30,6 +33,7 @@ namespace Arteranos.WorldEdit
             {
                 base.GameObject = value;
                 transform = GameObject.transform;
+                GameObject.TryGetComponent(out woc);
             }
         }
 
@@ -39,6 +43,10 @@ namespace Arteranos.WorldEdit
 
             transform.SetLocalPositionAndRotation(position, Quaternion.Euler(rotation));
             transform.localScale = scale;
+
+            woc.UpdatePhysicsState();
+
+            Dirty = false;
         }
 
         public override void CheckState()
@@ -75,6 +83,11 @@ namespace Arteranos.WorldEdit
             CheckState();
         }
 
+        public void SetState()
+        {
+            Dirty = true;
+        }
+
         public override object Clone()
         {
             return MemberwiseClone();
@@ -89,6 +102,7 @@ namespace Arteranos.WorldEdit
             position = t.position; 
             rotation = t.rotation; 
             scale = t.scale;
+            isCollidable = t.isCollidable;
         }
     }
 }

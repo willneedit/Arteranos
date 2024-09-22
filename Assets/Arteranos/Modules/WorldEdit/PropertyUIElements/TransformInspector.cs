@@ -31,6 +31,8 @@ namespace Arteranos.WorldEdit
 
         public Toggle chk_Global;
 
+        public Toggle chk_IsCollidable;
+
         public WOCBase Woc { get; set; }
         public PropertyPanel PropertyPanel { get; set; }
 
@@ -54,6 +56,16 @@ namespace Arteranos.WorldEdit
             txt_Scale_Z.onValueChanged.AddListener(GotValuesChanged);
 
             chk_Global.onValueChanged.AddListener(GotGlobalMode);
+
+            chk_IsCollidable.onValueChanged.AddListener(on =>
+            {
+                (Woc as WOCTransform).isCollidable = on;
+
+                (Woc as WOCTransform).SetState();
+                PropertyPanel.CommitModification(this);
+            });
+
+
         }
 
         protected override void OnEnable()
@@ -85,6 +97,8 @@ namespace Arteranos.WorldEdit
             txt_Scale_Z.SetTextWithoutNotify(s.z.ToString("F4"));
 
             chk_Global.SetIsOnWithoutNotify(G.WorldEditorData.UsingGlobal);
+
+            chk_IsCollidable.SetIsOnWithoutNotify((Woc as WOCTransform).isCollidable);
         }
 
         private void GotValuesChanged(string arg0)
