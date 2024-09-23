@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.WorldEdit.Components;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

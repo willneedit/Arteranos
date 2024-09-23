@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using Arteranos.UI;
+using Arteranos.WorldEdit.Components;
 
 namespace Arteranos.WorldEdit
 {

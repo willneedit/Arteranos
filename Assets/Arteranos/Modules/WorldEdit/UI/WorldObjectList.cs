@@ -12,6 +12,7 @@ using UnityEngine.EventSystems;
 
 using Arteranos.UI;
 using System;
+using Arteranos.WorldEdit.Components;
 
 namespace Arteranos.WorldEdit
 {

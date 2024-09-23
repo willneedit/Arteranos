@@ -16,6 +16,7 @@ using Arteranos.WorldEdit;
 using System.IO;
 using System;
 using Object = UnityEngine.Object;
+using Arteranos.WorldEdit.Components;
 
 namespace Arteranos.PlayTest.WorldEdit
 {

@@ -6,6 +6,7 @@
  */
 
 using Arteranos.UI;
+using Arteranos.WorldEdit.Components;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.XR.Interaction.Toolkit;
+using Arteranos.WorldEdit.Components;
 
 namespace Arteranos.WorldEdit
 {

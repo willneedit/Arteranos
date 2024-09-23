@@ -13,6 +13,7 @@ using UnityEngine.TestTools;
 using Arteranos.WorldEdit;
 using Object = UnityEngine.Object;
 using Arteranos.Core;
+using Arteranos.WorldEdit.Components;
 
 namespace Arteranos.PlayTest.WorldEdit
 {

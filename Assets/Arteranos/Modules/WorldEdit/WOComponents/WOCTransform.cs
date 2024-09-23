@@ -9,7 +9,7 @@ using Arteranos.Core;
 using ProtoBuf;
 using UnityEngine;
 
-namespace Arteranos.WorldEdit
+namespace Arteranos.WorldEdit.Components
 {
     [ProtoContract]
     public class WOCTransform : WOCBase
@@ -54,7 +54,7 @@ namespace Arteranos.WorldEdit
             Dirty = false;
             if (transform.localPosition != position)
                 Dirty = true;
-            if(transform.localRotation != Quaternion.Euler(rotation))
+            if (transform.localRotation != Quaternion.Euler(rotation))
                 Dirty = true;
             if (transform.localScale != scale)
                 Dirty = true;
@@ -62,7 +62,7 @@ namespace Arteranos.WorldEdit
 
         public void SetState(Vector3 position, Vector3 rotation, Vector3 scale, bool global = false)
         {
-            if(!global)
+            if (!global)
             {
                 this.position = position;
                 this.rotation = rotation;
@@ -93,14 +93,14 @@ namespace Arteranos.WorldEdit
             return MemberwiseClone();
         }
 
-        public override (string name, GameObject gameObject) GetUI() 
+        public override (string name, GameObject gameObject) GetUI()
             => ("Transform", BP.I.WorldEdit.TransformInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {
             WOCTransform t = wOCBase as WOCTransform;
-            position = t.position; 
-            rotation = t.rotation; 
+            position = t.position;
+            rotation = t.rotation;
             scale = t.scale;
             isCollidable = t.isCollidable;
         }

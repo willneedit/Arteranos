@@ -9,7 +9,7 @@ using Arteranos.Core;
 using ProtoBuf;
 using UnityEngine;
 
-namespace Arteranos.WorldEdit
+namespace Arteranos.WorldEdit.Components
 {
     [ProtoContract]
     public class WOCColor : WOCBase
@@ -33,14 +33,14 @@ namespace Arteranos.WorldEdit
         {
             base.CommitState();
 
-            if(renderer != null)
+            if (renderer != null)
                 renderer.material.color = color;
         }
 
         public override void CheckState()
         {
             Dirty = false;
-            if(renderer != null && renderer.material.color != color)
+            if (renderer != null && renderer.material.color != color)
                 Dirty = true;
         }
 

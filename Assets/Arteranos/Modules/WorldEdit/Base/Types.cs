@@ -13,6 +13,7 @@ using Arteranos.Core;
 using UnityEngine;
 using System.IO;
 using System;
+using Arteranos.WorldEdit.Components;
 
 namespace Arteranos.WorldEdit
 {

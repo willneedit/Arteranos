@@ -9,7 +9,7 @@ using Arteranos.Core;
 using ProtoBuf;
 using UnityEngine;
 
-namespace Arteranos.WorldEdit
+namespace Arteranos.WorldEdit.Components
 {
     [ProtoContract]
     public class WOCPhysics : WOCBase

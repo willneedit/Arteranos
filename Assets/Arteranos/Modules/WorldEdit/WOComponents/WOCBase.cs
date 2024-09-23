@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Arteranos.WorldEdit
+namespace Arteranos.WorldEdit.Components
 {
     /// <summary>
     /// World Object Component - lightweight component system, keeping in sync with
@@ -46,7 +46,7 @@ namespace Arteranos.WorldEdit
 
         public void Update()
         {
-            if(G.WorldEditorData.IsInEditMode)
+            if (G.WorldEditorData.IsInEditMode)
                 CheckState();
         }
 

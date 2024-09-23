@@ -19,6 +19,7 @@ using GLTFast;
 using System.Threading.Tasks;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 using System.Reflection;
+using Arteranos.WorldEdit.Components;
 
 namespace Arteranos.WorldEdit
 {

@@ -14,6 +14,7 @@ using UnityEngine.TestTools;
 using Arteranos.WorldEdit;
 using System;
 using System.Collections.Generic;
+using Arteranos.WorldEdit.Components;
 
 namespace Arteranos.PlayTest.WorldEdit.WorldChange
 {
