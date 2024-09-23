@@ -354,6 +354,8 @@ namespace Arteranos.Services
                     return;
                 }
 
+                ipfs = ipfsTmp;
+
                 // If it doesn't exist, write down the template in the config directory.
                 if (!ConfigUtils.ReadConfig(PATH_USER_PRIVACY_NOTICE, File.Exists))
                 {
@@ -403,8 +405,6 @@ namespace Arteranos.Services
                     $"   {self.Id}\n" +
                     $"Discovery identifier file's CID\n" +
                     $"   {IdentifyCid}\n");
-
-                ipfs = ipfsTmp;
 
                 // Reuse the IPFS peer key for the multiplayer server to ensure its association
                 serverKeyPair = SignKey.ImportPrivateKey(pk);

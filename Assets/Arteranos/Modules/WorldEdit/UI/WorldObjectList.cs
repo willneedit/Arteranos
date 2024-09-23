@@ -181,8 +181,8 @@ namespace Arteranos.WorldEdit
 
             woi.components.Insert(0, newTransform);
 
-            // ...Physics component
-            woi.components.Insert(1, new WOCPhysics());
+            //// ...Physics component
+            //woi.components.Insert(1, new WOCPhysics());
 
             // Post the insertion request to the server, it should come back.
             // If you have the rights to do this.
