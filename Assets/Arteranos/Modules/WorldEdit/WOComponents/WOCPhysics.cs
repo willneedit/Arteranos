@@ -44,11 +44,6 @@ namespace Arteranos.WorldEdit.Components
             Dirty = false;
         }
 
-        public override void CheckState()
-        {
-            // Leave untouched.
-        }
-
         public void SetState()
         {
             Dirty = true;

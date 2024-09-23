@@ -88,3 +88,5 @@ MonoBehaviour:
       type: 3}
     PhysicsInspector: {fileID: 7349416676873975400, guid: 903b47125d737be42873b40de0859c50,
       type: 3}
+    SpawnerInspector: {fileID: 7349416676873975400, guid: a557680c6596fc04e8c8e807d8fa0ffa,
+      type: 3}

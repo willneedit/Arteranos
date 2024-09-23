@@ -21,6 +21,7 @@ namespace Arteranos.WorldEdit.Components
     [ProtoInclude(65537, typeof(WOCTransform))]
     [ProtoInclude(65538, typeof(WOCColor))]
     [ProtoInclude(65539, typeof(WOCPhysics))]
+    [ProtoInclude(65540, typeof(WOCSpawner))]
     public abstract class WOCBase : ICloneable, IHasAssetReferences
     {
         public bool Dirty { get; protected set; } = false;
@@ -30,17 +31,13 @@ namespace Arteranos.WorldEdit.Components
         /// <summary>
         /// To make the changes to take effect.
         /// </summary>
-        public virtual void CommitState()
-        {
-            // TODO If dirty, propagate state
-            Dirty = false;
-        }
+        public virtual void CommitState() => Dirty = false;
 
         /// <summary>
         /// To read the state of the GameObject and convert the component's data into
         /// the serializable format.
         /// </summary>
-        public abstract void CheckState();
+        public virtual void CheckState() { }
 
         public virtual void OnDestroy() { }
 
