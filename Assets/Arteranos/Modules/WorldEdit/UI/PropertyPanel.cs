@@ -12,6 +12,7 @@ using UnityEngine.EventSystems;
 using System;
 using System.Collections.Generic;
 using Arteranos.WorldEdit.Components;
+using Arteranos.UI;
 
 namespace Arteranos.WorldEdit
 {
@@ -21,6 +22,10 @@ namespace Arteranos.WorldEdit
         public TextMeshProUGUI lbl_Heading;
 
         public Transform grp_Component_List;
+
+        public Transform grp_AddNewComponent;
+        public Spinner spn_NewComponent;
+        public Button btn_NewComponent;
 
         public GameObject bp_CollapsiblePane;
 
@@ -48,11 +53,22 @@ namespace Arteranos.WorldEdit
 
         private WorldObjectComponent woc;
 
+        private readonly Dictionary<string, WOCBase> OptionalComponents = new();
+
         protected override void Awake()
         {
             base.Awake();
 
             btn_ReturnToList.onClick.AddListener(GotReturnToChooserClick);
+            btn_NewComponent.onClick.AddListener(GotNewComponentClick);
+
+            WOCBase[] oclist =
+            {
+                new WOCSpawner()
+            };
+
+            foreach(var o in oclist)
+                OptionalComponents.Add(o.GetUI().name, o);
         }
 
         protected override void OnEnable()
@@ -94,6 +110,8 @@ namespace Arteranos.WorldEdit
 
         private void RebuildInspectors()
         {
+            grp_Component_List.gameObject.SetActive(false);
+
             // To prevent interference from to-be-destroyed gameobjects....
             // 1. Use a loop down.
             // 2. Explicitly set the objects inactive to prevent it being set active
@@ -134,6 +152,8 @@ namespace Arteranos.WorldEdit
                 else
                     Debug.LogWarning($"{name} doen't provide a valid inspector");
             }
+
+            grp_Component_List.gameObject.SetActive(true);
         }
 
 
@@ -148,6 +168,9 @@ namespace Arteranos.WorldEdit
                 pane.EmbeddedWidget.TryGetComponent(out IInspector inspector);
                 inspector?.Populate();
             }
+
+            // Offer adding optional components, if there are some of them.
+            RebuildMissingComponenntsList();
         }
 
         public void CommitModification(IInspector i)
@@ -159,6 +182,40 @@ namespace Arteranos.WorldEdit
         private void GotReturnToChooserClick()
         {
             OnReturnToList?.Invoke();
+        }
+
+        private void RebuildMissingComponenntsList()
+        {
+            List<string> missingCompons = new()
+            {
+                "Add new component..."
+            };
+
+            foreach(KeyValuePair<string, WOCBase> c in OptionalComponents)
+            {
+                if(!woc.TryGetWOC(out WOCBase _, c.Value.GetType()))
+                    missingCompons.Add(c.Key);
+            }
+
+            spn_NewComponent.Options = missingCompons.ToArray();
+            spn_NewComponent.value = 0;
+
+            // Remove the entire widget group if there are none of them.
+            grp_AddNewComponent.gameObject.SetActive(missingCompons.Count > 1);
+        }
+
+        private void GotNewComponentClick()
+        {
+            if (spn_NewComponent.value == 0) return;
+
+            string newComponentName = spn_NewComponent.Options[spn_NewComponent.value];
+            WOCBase newComponent = OptionalComponents[newComponentName];
+
+            woc.AddOrReplaceComponent(newComponent);
+
+            RebuildInspectors();
+
+            RebuildMissingComponenntsList();
         }
 
 #if UNITY_EDITOR

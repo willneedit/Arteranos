@@ -7,19 +7,25 @@
 
 using Arteranos.Core;
 using ProtoBuf;
+using System.IO;
 using UnityEngine;
 
 namespace Arteranos.WorldEdit.Components
 {
-    [ProtoContract]
-    public class WOCSpawner : WOCBase
+    public interface IClickable
     {
-        [ProtoMember(1)]
-        public int MaxItems;
+        void GotClicked();
+    }
+
+    [ProtoContract]
+    public class WOCSpawner : WOCBase, IClickable
+    {
+        [ProtoMember(1, IsRequired = true)]
+        public int MaxItems = 1;
         [ProtoMember(2)]
         public WOVector3 Force;
-        [ProtoMember(3)]
-        public float Lifetime;
+        [ProtoMember(3, IsRequired = true)]
+        public float Lifetime = 10.0f;
 
         public void SetState()
         {
@@ -41,6 +47,47 @@ namespace Arteranos.WorldEdit.Components
             MaxItems = s.MaxItems;
             Force = s.Force;
             Lifetime = s.Lifetime;
+        }
+
+        // ---------------------------------------------------------------
+
+        private Transform transform = null;
+        private WorldObjectComponent woc = null;
+        private byte[] serializedSpawnWO = null;
+
+        public override GameObject GameObject
+        {
+            get => base.GameObject;
+            set
+            {
+                base.GameObject = value;
+                transform = GameObject.transform;
+                GameObject.TryGetComponent(out woc);
+            }
+        }
+
+
+        public void GotClicked()
+        {
+            if (transform.childCount > 0)
+            {
+                WorldObject spawnWO = transform.GetChild(0).MakeWorldObject();
+                using MemoryStream ms = new();
+                spawnWO.Serialize(ms);
+                serializedSpawnWO = ms.ToArray();
+            }
+            else if (serializedSpawnWO == null) return;
+
+            // Both the server contains the spawner instances and hold the necessary data.
+            SettingsManager.EmitToServerCTSPacket(new CTSObjectSpawn()
+            {
+                WOSerialized = serializedSpawnWO,
+                MaxItems = MaxItems,
+                Lifetime = Lifetime,
+                Force = Force,
+                Position = transform.position, // _World_ coordinates.
+                Rotation = transform.rotation,
+            });
         }
     }
 }

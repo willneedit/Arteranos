@@ -128,9 +128,21 @@ namespace Arteranos.WorldEdit
         public bool TryGetWOC<T>(out T woComponent) where T : WOCBase
         {
             foreach (WOCBase w in WOComponents)
-                if(w is T woc)
+                if (w is T woc)
                 {
                     woComponent = woc;
+                    return true;
+                }
+            woComponent = null;
+            return false;
+        }
+
+        public bool TryGetWOC(out WOCBase woComponent, Type t)
+        {
+            foreach (WOCBase w in WOComponents)
+                if (w.GetType() == t)
+                {
+                    woComponent = w;
                     return true;
                 }
             woComponent = null;

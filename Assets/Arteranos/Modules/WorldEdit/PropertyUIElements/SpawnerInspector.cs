@@ -89,8 +89,8 @@ namespace Arteranos.WorldEdit
         {
             sld_MaxItems.value = spawner.MaxItems;
             txt_Force_X.text = spawner.Force.x.ToString("F1");
-            txt_Force_X.text = spawner.Force.y.ToString("F1");
-            txt_Force_X.text = spawner.Force.z.ToString("F1");
+            txt_Force_Y.text = spawner.Force.y.ToString("F1");
+            txt_Force_Z.text = spawner.Force.z.ToString("F1");
             sld_Lifetime.value = spawner.Lifetime;
         }
     }

@@ -14,6 +14,7 @@ using System.Linq;
 using Ipfs;
 using System.IO;
 using Arteranos.Core.Managed;
+using Arteranos.WorldEdit;
 
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -948,6 +949,8 @@ namespace Arteranos.Services
         {
             GameObject go = new("Uninitialized spawned object (server)");
             go.AddComponent<NetworkIdentity>();
+            SpawnInitData initData = go.AddComponent<SpawnInitData>();
+            initData.InitData = wos;
 
             if (NetworkServer.active)
                 NetworkServer.Spawn(go, RuntimeObjectAssetID);
@@ -957,6 +960,7 @@ namespace Arteranos.Services
         {
             GameObject go = new("Uninitialized spawned object (client)");
             go.AddComponent<NetworkIdentity>();
+            go.AddComponent<SpawnInitData>();
 
             return go;
         }

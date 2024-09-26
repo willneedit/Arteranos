@@ -43,6 +43,7 @@ namespace Arteranos.WorldEdit
         IEnumerator BuildWorld(IWorldDecoration worldDecoration);
         void ClearBlueprints();
         void ClearKitAssetBundles();
+        void CreateSpawnObject(CTSObjectSpawn spawn, Transform hookObject);
         IWorldDecoration DeserializeWD(Stream stream);
         void DoApply(Stream stream);
         void DoApply(IWorldChange worldChange);

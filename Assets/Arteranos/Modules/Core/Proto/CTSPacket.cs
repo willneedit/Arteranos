@@ -5,8 +5,11 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using Arteranos.Core.Cryptography;
+using Arteranos.WorldEdit;
 using Ipfs;
 using Mirror;
 using ProtoBuf;
@@ -110,6 +113,16 @@ namespace Arteranos.Core
     public class CTSObjectSpawn : CTSPacket
     {
         [ProtoMember(1)]
-        public byte[] WOSerialized; // Arteranos.WorldEdit.WorldObject, serialized
+        public int MaxItems;
+        [ProtoMember(2)]
+        public float Lifetime;
+        [ProtoMember(3)]
+        public byte[] WOSerialized;     // Arteranos.WorldEdit.WorldObject, serialized
+        [ProtoMember(4)]
+        public WOVector3 Force;
+        [ProtoMember(5)]
+        public WOVector3 Position;
+        [ProtoMember(6)]
+        public WOQuaternion Rotation;
     }
 }

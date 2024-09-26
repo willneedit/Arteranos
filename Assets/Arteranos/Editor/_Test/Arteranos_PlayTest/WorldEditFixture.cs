@@ -66,8 +66,8 @@ namespace Arteranos.PlayTest.WorldEdit
                 name = "Test Cube",
                 components = new()
                 {
-                    new WOCTransform(),
-                    new WOCColor()
+                    new WOCTransform() { scale = Vector3.one },
+                    new WOCColor() { color = Color.gray },
                 }
             };
             cube.GetWComponent<WOCTransform>().position = new Vector3(0, 1, 5);
@@ -77,8 +77,8 @@ namespace Arteranos.PlayTest.WorldEdit
                 name = "Test Cube Right",
                 components = new()
                 {
-                    new WOCTransform(),
-                    new WOCColor()
+                    new WOCTransform() { scale = Vector3.one },
+                    new WOCColor() { color = Color.gray },
                 }
             };
             cube2.GetWComponent<WOCTransform>().position = new Vector3(1.5f, 0, 0);
@@ -88,8 +88,8 @@ namespace Arteranos.PlayTest.WorldEdit
                 name = "Test Sphere",
                 components = new()
                 {
-                    new WOCTransform(),
-                    new WOCColor()
+                    new WOCTransform() { scale = Vector3.one },
+                    new WOCColor() { color = Color.gray } ,
                 }
             };
             sphere.GetWComponent<WOCTransform>().position = new Vector3(0, 1.5f, 0);
@@ -99,8 +99,8 @@ namespace Arteranos.PlayTest.WorldEdit
                 name = "Test Capsule",
                 components = new()
                 {
-                    new WOCTransform(),
-                    new WOCColor()
+                    new WOCTransform() { scale = Vector3.one },
+                    new WOCColor() { color = Color.gray } ,
                 }
             };
             capsule.GetWComponent<WOCTransform>().position = new Vector3(0, 1.5f, 0);

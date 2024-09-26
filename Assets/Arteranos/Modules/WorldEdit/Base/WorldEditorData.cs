@@ -345,6 +345,22 @@ namespace Arteranos.WorldEdit
 
         #endregion
         // ---------------------------------------------------------------
+        #region Runtime Object Spawn
+        public void CreateSpawnObject(CTSObjectSpawn spawn, Transform hookObject)
+        {
+            IEnumerator Cor()
+            {
+                WorldObject wo = WorldObject.Deserialize(new MemoryStream(spawn.WOSerialized));
+
+                GameObject spawnedWO = null;
+                yield return wo.Instantiate(hookObject, _res => spawnedWO = _res);
+                spawnedWO.transform.SetPositionAndRotation(spawn.Position, spawn.Rotation);
+            }
+
+            StartCoroutine(Cor());
+        }
+        #endregion
+        // ---------------------------------------------------------------
         #region Object Editor
 
         private readonly List<float> TranslationValues = new() { 0.01f, 0.1f, 1f, 10f };

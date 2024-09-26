@@ -76,7 +76,7 @@ namespace Arteranos.PlayTest.WorldEdit
         {
             WorldObject wob = BuildSample();
 
-            WorldObject newroot = new() { components = new() { new WOCTransform() } };
+            WorldObject newroot = new() { components = new() { new WOCTransform() { scale = Vector3.one } } };
             newroot.GetWComponent<WOCTransform>().position = new Vector3(-2, 0, 0);
             newroot.GetWComponent<WOCTransform>().rotation = new Vector3(0, 0, -45);
             newroot.children.Add(wob);
