@@ -947,26 +947,29 @@ namespace Arteranos.Services
 
         private void ServerGotObjectSpawn(UserID sender, CTSObjectSpawn wos)
         {
-            GameObject go = new("Uninitialized spawned object (server)");
-            go.AddComponent<NetworkIdentity>();
-            SpawnInitData initData = go.AddComponent<SpawnInitData>();
+            if (NetworkServer.active) return;
+
+            CreateRuntimeSpawn(true, out GameObject go, out SpawnInitData initData);
             initData.InitData = wos;
 
-            if (NetworkServer.active)
-                NetworkServer.Spawn(go, RuntimeObjectAssetID);
+            NetworkServer.Spawn(go, RuntimeObjectAssetID);
         }
 
         private GameObject ROSpawner(SpawnMessage msg)
         {
-            GameObject go = new("Uninitialized spawned object (client)");
-            go.AddComponent<NetworkIdentity>();
-            go.AddComponent<SpawnInitData>();
+            CreateRuntimeSpawn(false, out GameObject go, out _);
 
             return go;
         }
 
         private void RODespawner(GameObject spawned) => Destroy(spawned);
 
+        private static void CreateRuntimeSpawn(bool server, out GameObject go, out SpawnInitData initData)
+        {
+            go = new($"Uninitialized spawned object, server={server}");
+            go.AddComponent<NetworkIdentity>();
+            initData = go.AddComponent<SpawnInitData>();
+        }
 
         #endregion
     }

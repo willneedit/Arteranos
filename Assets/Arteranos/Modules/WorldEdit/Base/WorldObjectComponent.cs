@@ -35,6 +35,7 @@ namespace Arteranos.WorldEdit
 
         private Rigidbody body = null;
         private XRGrabInteractable mover = null;
+        private XRSimpleInteractable clicker = null;
 
         private void Awake()
         {
@@ -44,9 +45,15 @@ namespace Arteranos.WorldEdit
             mover.throwOnDetach = false;
             mover.smoothPosition = true;
             mover.smoothRotation = true;
+            mover.enabled = false;
+
+            clicker = gameObject.AddComponent<XRSimpleInteractable>();
+            clicker.enabled = false;
 
             mover.firstSelectEntered.AddListener(GotObjectGrabbed);
             mover.lastSelectExited.AddListener(GotObjectReleased);
+
+            clicker.activated.AddListener(GotObjectClicked);
 
             G.WorldEditorData.OnEditorModeChanged += GotEditorModeChanged;
 
@@ -93,7 +100,20 @@ namespace Arteranos.WorldEdit
                 G.WorldEditorData.FocusedWorldObject = gameObject;
         }
 
+        private void GotObjectClicked(ActivateEventArgs arg0)
+        {
+            if (G.WorldEditorData.IsInEditMode) return;
 
+            foreach (WOCBase component in WOComponents)
+                if (component is IClickable cl) cl.GotClicked();
+        }
+
+        private bool IsClickable()
+        {
+            foreach (WOCBase component in WOComponents)
+                if (component is IClickable) return true;
+            return false;
+        }
 
         private (Vector3 position, Vector3 eulerRotation) ConstrainMovement(Vector3 oldPosition, Vector3 oldEulerRotation)
         {
@@ -123,7 +143,6 @@ namespace Arteranos.WorldEdit
 
             return (position, eulerRotation);
         }
-
 
         public bool TryGetWOC<T>(out T woComponent) where T : WOCBase
         {
@@ -184,7 +203,11 @@ namespace Arteranos.WorldEdit
             }
 
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
-            if (!body || !mover) return;
+            if (!body || !mover || !clicker) return;
+
+            // Disable both of them to prevent the warning about conflicting interactables
+            mover.enabled = false;
+            clicker.enabled = false;
 
             // Fixup - Unity yells at you if it is a concave collider and it's physics-controlled.
             bool needsKinematic = false;
@@ -216,6 +239,8 @@ namespace Arteranos.WorldEdit
 
             // #153: If we're in edit mode in desktop, lock rotation in grab
             mover.trackRotation = !(G.WorldEditorData.IsInEditMode && !G.Client.VRMode);
+
+            clicker.enabled = !isInEditMode && IsClickable();
         }
 
         public WorldObjectPatch MakePatch(bool complete = false)
