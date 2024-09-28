@@ -69,8 +69,6 @@ namespace Arteranos.Services
 
             Guid guid = Guid.Parse("{F3A01BA2-8427-40C5-ADE3-E05D76C30E5E}");
             RuntimeObjectAssetID = (uint)guid.GetHashCode(); // Seen in NetworkIdentity
-
-            NetworkClient.RegisterSpawnHandler(RuntimeObjectAssetID, ROSpawner, RODespawner);
         }
 
         public override void OnValidate()
@@ -100,8 +98,6 @@ namespace Arteranos.Services
         /// </summary>
         public override void OnDestroy()
         {
-            NetworkClient.UnregisterSpawnHandler(RuntimeObjectAssetID);
-
             base.OnDestroy();
         }
 
@@ -345,6 +341,7 @@ namespace Arteranos.Services
             base.OnStartClient();
 
             NetworkClient.RegisterHandler<CTSPacketEnvelope>(OnClientGotCTSPacket);
+            NetworkClient.RegisterSpawnHandler(RuntimeObjectAssetID, ROSpawner, RODespawner);
         }
 
         /// <summary>
@@ -372,6 +369,7 @@ namespace Arteranos.Services
             base.OnStopClient();
 
             NetworkClient.UnregisterHandler<CTSPacketEnvelope>();
+            NetworkClient.UnregisterSpawnHandler(RuntimeObjectAssetID);
         }
 
         #endregion
@@ -947,12 +945,14 @@ namespace Arteranos.Services
 
         private void ServerGotObjectSpawn(UserID sender, CTSObjectSpawn wos)
         {
-            if (NetworkServer.active) return;
 
             CreateRuntimeSpawn(true, out GameObject go, out SpawnInitData initData);
             initData.InitData = wos;
 
-            NetworkServer.Spawn(go, RuntimeObjectAssetID);
+            initData.Init(wos);
+
+            if (NetworkServer.active)
+                NetworkServer.Spawn(go, RuntimeObjectAssetID);
         }
 
         private GameObject ROSpawner(SpawnMessage msg)

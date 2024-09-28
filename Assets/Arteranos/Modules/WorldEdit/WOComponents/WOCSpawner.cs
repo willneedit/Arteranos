@@ -12,10 +12,6 @@ using UnityEngine;
 
 namespace Arteranos.WorldEdit.Components
 {
-    public interface IClickable
-    {
-        void GotClicked();
-    }
 
     [ProtoContract]
     public class WOCSpawner : WOCBase, IClickable

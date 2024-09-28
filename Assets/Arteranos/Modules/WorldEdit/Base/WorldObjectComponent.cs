@@ -144,9 +144,9 @@ namespace Arteranos.WorldEdit
             return (position, eulerRotation);
         }
 
-        public bool TryGetWOC<T>(out T woComponent) where T : WOCBase
+        public bool TryGetWOC<T>(out T woComponent) where T : class
         {
-            foreach (WOCBase w in WOComponents)
+            foreach (object w in WOComponents)
                 if (w is T woc)
                 {
                     woComponent = woc;
@@ -202,9 +202,23 @@ namespace Arteranos.WorldEdit
                     RecursiveSetLayer(layer, t.GetChild(i));
             }
 
+            bool isInEditMode = G.WorldEditorData.IsInEditMode;
+
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover || !clicker) return;
 
+            // Meta objects are inactive out of the edit mode
+            if(TryGetWOC<IMetaObject>(out _))
+                gameObject.SetActive(isInEditMode);
+
+
+            // Same as with the *parent* being the spawner object.
+            if(transform.parent != null)
+            {
+                WorldObjectComponent parentWOC = transform.parent.GetComponent<WorldObjectComponent>();
+                if (parentWOC != null && parentWOC.TryGetWOC<WOCSpawner>(out _))
+                    gameObject.SetActive(isInEditMode);
+            }
             // Disable both of them to prevent the warning about conflicting interactables
             mover.enabled = false;
             clicker.enabled = false;
@@ -221,7 +235,6 @@ namespace Arteranos.WorldEdit
             TryGetWOC(out WOCPhysics p);
 
             // Prevent physics shenanigans in the edit mode
-            bool isInEditMode = G.WorldEditorData.IsInEditMode;
             body.constraints = isInEditMode
                 ? RigidbodyConstraints.FreezeAll
                 : RigidbodyConstraints.None;

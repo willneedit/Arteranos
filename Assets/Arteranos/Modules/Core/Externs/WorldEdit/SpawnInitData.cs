@@ -32,6 +32,11 @@ namespace Arteranos.WorldEdit
         {
             Debug.Log($"Got Init Data, server={isServer}");
 
+            Init(InitData);
+        }
+
+        public void Init(CTSObjectSpawn InitData)
+        {
             G.WorldEditorData.CreateSpawnObject(InitData, transform);
         }
     }
