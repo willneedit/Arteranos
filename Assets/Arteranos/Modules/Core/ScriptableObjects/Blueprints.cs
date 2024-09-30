@@ -33,6 +33,8 @@ namespace Arteranos.Core
 
         public TextAsset PrivacyTOSNotice;
 
+        public GameObject NetworkedWorldObject;
+
         [Serializable]
         public struct UI_
         {

@@ -67,8 +67,10 @@ namespace Arteranos.Services
             base.Awake();
             Instance = this;
 
-            Guid guid = Guid.Parse("{F3A01BA2-8427-40C5-ADE3-E05D76C30E5E}");
-            RuntimeObjectAssetID = (uint)guid.GetHashCode(); // Seen in NetworkIdentity
+            // No need, eegistered in the SceneEssentials prefab
+            //
+            //Guid guid = Guid.Parse("{F3A01BA2-8427-40C5-ADE3-E05D76C30E5E}");
+            //RuntimeObjectAssetID = (uint)guid.GetHashCode(); // Seen in NetworkIdentity
         }
 
         public override void OnValidate()
@@ -341,7 +343,7 @@ namespace Arteranos.Services
             base.OnStartClient();
 
             NetworkClient.RegisterHandler<CTSPacketEnvelope>(OnClientGotCTSPacket);
-            NetworkClient.RegisterSpawnHandler(RuntimeObjectAssetID, ROSpawner, RODespawner);
+            // NetworkClient.RegisterSpawnHandler(RuntimeObjectAssetID, ROSpawner, RODespawner);
         }
 
         /// <summary>
@@ -369,7 +371,7 @@ namespace Arteranos.Services
             base.OnStopClient();
 
             NetworkClient.UnregisterHandler<CTSPacketEnvelope>();
-            NetworkClient.UnregisterSpawnHandler(RuntimeObjectAssetID);
+            // NetworkClient.UnregisterSpawnHandler(RuntimeObjectAssetID);
         }
 
         #endregion
@@ -941,34 +943,17 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region Runtime world object spawn
 
-        private uint RuntimeObjectAssetID = 0;
-
         private void ServerGotObjectSpawn(UserID sender, CTSObjectSpawn wos)
         {
+            GameObject go = Instantiate(BP.I.NetworkedWorldObject);
+            SpawnInitData initData = go.GetComponent<SpawnInitData>();
 
-            CreateRuntimeSpawn(true, out GameObject go, out SpawnInitData initData);
+            go.name = $"Spawned object (server)";
+
             initData.InitData = wos;
+            initData.Init(wos, true);
 
-            initData.Init(wos);
-
-            if (NetworkServer.active)
-                NetworkServer.Spawn(go, RuntimeObjectAssetID);
-        }
-
-        private GameObject ROSpawner(SpawnMessage msg)
-        {
-            CreateRuntimeSpawn(false, out GameObject go, out _);
-
-            return go;
-        }
-
-        private void RODespawner(GameObject spawned) => Destroy(spawned);
-
-        private static void CreateRuntimeSpawn(bool server, out GameObject go, out SpawnInitData initData)
-        {
-            go = new($"Uninitialized spawned object, server={server}");
-            go.AddComponent<NetworkIdentity>();
-            initData = go.AddComponent<SpawnInitData>();
+            if (NetworkServer.active) NetworkServer.Spawn(go);
         }
 
         #endregion

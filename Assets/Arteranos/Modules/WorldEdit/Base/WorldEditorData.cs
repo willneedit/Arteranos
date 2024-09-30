@@ -346,7 +346,7 @@ namespace Arteranos.WorldEdit
         #endregion
         // ---------------------------------------------------------------
         #region Runtime Object Spawn
-        public void CreateSpawnObject(CTSObjectSpawn spawn, Transform hookObject)
+        public void CreateSpawnObject(CTSObjectSpawn spawn, Transform hookObject, bool server, Action<GameObject> callback)
         {
             IEnumerator Cor()
             {
@@ -354,7 +354,11 @@ namespace Arteranos.WorldEdit
 
                 GameObject spawnedWO = null;
                 yield return wo.Instantiate(hookObject, _res => spawnedWO = _res);
+                spawnedWO.TryGetComponent(out WorldObjectComponent component);
+                component.IsNetworkedObject = !server;
                 spawnedWO.transform.SetPositionAndRotation(spawn.Position, spawn.Rotation);
+
+                callback?.Invoke(spawnedWO);
             }
 
             StartCoroutine(Cor());

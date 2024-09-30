@@ -5,21 +5,10 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
-using System.Collections.Generic;
-using ProtoBuf;
-
 using Arteranos.Core;
 using UnityEngine;
-using System.IO;
-using System;
-using System.Threading;
-using Ipfs.Unity;
-using GLTFast;
-using System.Threading.Tasks;
-using AssetBundle = Arteranos.Core.Managed.AssetBundle;
-using System.Reflection;
 using Mirror;
+using System;
 
 namespace Arteranos.WorldEdit
 {
@@ -28,16 +17,21 @@ namespace Arteranos.WorldEdit
         [SyncVar(hook = nameof(GotInitData))]
         public CTSObjectSpawn InitData = null;
 
+        [Client]
         public void GotInitData(CTSObjectSpawn _1, CTSObjectSpawn _2)
         {
             Debug.Log($"Got Init Data, server={isServer}");
 
-            Init(InitData);
+            Init(InitData, false);
         }
 
-        public void Init(CTSObjectSpawn InitData)
+        public void Init(CTSObjectSpawn InitData, bool server)
         {
-            G.WorldEditorData.CreateSpawnObject(InitData, transform);
+            G.WorldEditorData.CreateSpawnObject(InitData, transform, server, go =>
+            {
+                if (TryGetComponent(out NetworkTransform nt))
+                    nt.target = go.transform;
+            });
         }
     }
 }

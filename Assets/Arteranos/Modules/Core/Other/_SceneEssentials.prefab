@@ -398,7 +398,8 @@ MonoBehaviour:
     type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
-  spawnPrefabs: []
+  spawnPrefabs:
+  - {fileID: 3405091302848977511, guid: 35adf32053f026f4e8fdda39b8ba49c1, type: 3}
   timeInterpolationGui: 0
 --- !u!114 &332929975885485241
 MonoBehaviour:
@@ -532,8 +533,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EnableUploadDefaultAvatars: 1
-  EnablePublishServerData: 0
-  EnableServerDiscovery: 0
 --- !u!114 &7255308184707867998
 MonoBehaviour:
   m_ObjectHideFlags: 0

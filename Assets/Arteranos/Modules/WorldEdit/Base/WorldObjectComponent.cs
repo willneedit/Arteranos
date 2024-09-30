@@ -21,6 +21,15 @@ namespace Arteranos.WorldEdit
         public WorldObjectAsset Asset { get; set; } = null;
         public Guid Id { get; set; } = new();
         public List<WOCBase> WOComponents { get; set; } = null;
+        public bool IsNetworkedObject
+        {
+            get => isNetworkedObject;
+            set
+            {
+                isNetworkedObject = value;
+                UpdatePhysicsState();
+            }
+        }
         public bool IsLocked
         {
             get => isLocked;
@@ -31,6 +40,8 @@ namespace Arteranos.WorldEdit
             }
         }
 
+
+        private bool isNetworkedObject = false;
         private bool isLocked = false;
 
         private Rigidbody body = null;
@@ -203,6 +214,7 @@ namespace Arteranos.WorldEdit
             }
 
             bool isInEditMode = G.WorldEditorData.IsInEditMode;
+            bool needsKinematic = IsNetworkedObject;
 
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover || !clicker) return;
@@ -224,7 +236,6 @@ namespace Arteranos.WorldEdit
             clicker.enabled = false;
 
             // Fixup - Unity yells at you if it is a concave collider and it's physics-controlled.
-            bool needsKinematic = false;
             MeshCollider[] colliders = gameObject.GetComponentsInChildren<MeshCollider>();
             foreach (MeshCollider collider in colliders)
                 needsKinematic |= !collider.convex;
@@ -246,12 +257,12 @@ namespace Arteranos.WorldEdit
                 ? ColliderType.Solid
                 : ColliderType.Intangible), transform);           
 
+            // #153: If we're in edit mode in desktop, lock rotation in grab
+            mover.trackRotation = !(G.WorldEditorData.IsInEditMode && !G.Client.VRMode);
+
             mover.enabled = isInEditMode
                 ? !IsLocked
                 : p?.Grabbable ?? false;
-
-            // #153: If we're in edit mode in desktop, lock rotation in grab
-            mover.trackRotation = !(G.WorldEditorData.IsInEditMode && !G.Client.VRMode);
 
             clicker.enabled = !isInEditMode && IsClickable();
         }
