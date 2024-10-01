@@ -356,7 +356,6 @@ namespace Arteranos.WorldEdit
                 yield return wo.Instantiate(hookObject, _res => spawnedWO = _res);
                 spawnedWO.TryGetComponent(out WorldObjectComponent component);
                 component.IsNetworkedObject = !server;
-                spawnedWO.transform.SetPositionAndRotation(spawn.Position, spawn.Rotation);
 
                 callback?.Invoke(spawnedWO);
             }

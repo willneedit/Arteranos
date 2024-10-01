@@ -20,17 +20,29 @@ namespace Arteranos.WorldEdit
         [Client]
         public void GotInitData(CTSObjectSpawn _1, CTSObjectSpawn _2)
         {
-            Debug.Log($"Got Init Data, server={isServer}");
-
             Init(InitData, false);
         }
 
         public void Init(CTSObjectSpawn InitData, bool server)
         {
+            // Latecomer in a world with already existing spawned objects.
+            SettingsManager.SetupWorldObjectRoot();
+
+            // Set DDOL both for the framing object for the latecomer - the world is yet to load...
+            DontDestroyOnLoad(gameObject);
+
             G.WorldEditorData.CreateSpawnObject(InitData, transform, server, go =>
             {
                 if (TryGetComponent(out NetworkTransform nt))
+                {
+                    // Transfer the position and rotation data and its guidance to the World Editor Object
+                    Vector3 oldPosition = transform.position;
+                    Quaternion oldRotation = transform.rotation;
+                    transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
                     nt.target = go.transform;
+                    go.transform.SetPositionAndRotation(oldPosition, oldRotation);
+                    //nt.Reset();
+                }
             });
         }
     }

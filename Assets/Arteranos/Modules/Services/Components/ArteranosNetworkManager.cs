@@ -949,6 +949,7 @@ namespace Arteranos.Services
             SpawnInitData initData = go.GetComponent<SpawnInitData>();
 
             go.name = $"Spawned object (server)";
+            go.transform.SetPositionAndRotation(wos.Position, wos.Rotation);
 
             initData.InitData = wos;
             initData.Init(wos, true);
