@@ -945,6 +945,25 @@ namespace Arteranos.Services
 
         private void ServerGotObjectSpawn(UserID sender, CTSObjectSpawn wos)
         {
+            Transform spawnerT = G.WorldEditorData.FindObjectByPath_S(wos.spawnerPath);
+            if(!spawnerT)
+            {
+                Debug.LogError($"Discarding spawner message from an unknown spawner");
+                return;
+            }
+
+            // If we have no server data storage, create one now. 
+            if(!spawnerT.TryGetComponent(out WorldObjectData worldObjectData))
+                 worldObjectData = spawnerT.gameObject.AddComponent<WorldObjectData>();
+
+            // Check against the max number
+            if (worldObjectData.SpawnedItems >= wos.MaxItems) return;
+
+            // All systems go, load the GameObject with the necessary data.
+
+            // Expiring spawned objects decrease the number in the WOComponent's OnDestroy()
+            worldObjectData.SpawnedItems++;
+
             GameObject go = Instantiate(BP.I.NetworkedWorldObject);
             SpawnInitData initData = go.GetComponent<SpawnInitData>();
 

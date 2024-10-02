@@ -179,16 +179,7 @@ namespace Arteranos.WorldEdit
 
         public abstract IEnumerator Apply();
 
-        public void SetPathFromThere(Transform t)
-        {
-            path = new();
-            while (t.TryGetComponent(out WorldObjectComponent woc))
-            {
-                path.Add(woc.Id);
-                t = t.parent;
-            }
-            path.Reverse();
-        }
+        public void SetPathFromThere(Transform t) => path = WorldEditorData.GetPathFromObject(t);
 
         public void EmitToServer()
         {

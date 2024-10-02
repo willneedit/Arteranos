@@ -28,7 +28,7 @@ namespace Arteranos.WorldEdit
             // Latecomer in a world with already existing spawned objects.
             SettingsManager.SetupWorldObjectRoot();
 
-            // Set DDOL both for the framing object for the latecomer - the world is yet to load...
+            // Set DDOL both for the shell object for the latecomer - the world is yet to load...
             DontDestroyOnLoad(gameObject);
 
             G.WorldEditorData.CreateSpawnObject(InitData, transform, server, go =>

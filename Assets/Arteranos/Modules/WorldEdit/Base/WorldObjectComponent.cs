@@ -21,12 +21,15 @@ namespace Arteranos.WorldEdit
         public WorldObjectAsset Asset { get; set; } = null;
         public Guid Id { get; set; } = new();
         public List<WOCBase> WOComponents { get; set; } = null;
-        public bool IsNetworkedObject
+        public DateTime ExpirationTime { get; set; } = DateTime.MaxValue;
+        public List<Guid> DataObjectPath { get; set; } = null;
+        public bool IsNetworkedObject { get; set; } = false;
+        public bool IsNetworkedClientObject
         {
-            get => isNetworkedObject;
+            get => isNetworkedClientObject;
             set
             {
-                isNetworkedObject = value;
+                isNetworkedClientObject = value;
                 UpdatePhysicsState();
             }
         }
@@ -41,7 +44,7 @@ namespace Arteranos.WorldEdit
         }
 
 
-        private bool isNetworkedObject = false;
+        private bool isNetworkedClientObject = false;
         private bool isLocked = false;
 
         private Rigidbody body = null;
@@ -74,12 +77,31 @@ namespace Arteranos.WorldEdit
         private void OnDestroy()
         {
             G.WorldEditorData.OnEditorModeChanged -= GotEditorModeChanged;
+
+            // If it's a spawned object, sign ourselves off. No matter if clients miscounted,
+            // the server has the authority.
+            if (IsNetworkedObject && DataObjectPath != null)
+            {
+                Transform doT = WorldEditorData.FindObjectByPath(DataObjectPath);
+                if (doT != null && doT.TryGetComponent(out WorldObjectData worldObjectData))
+                    worldObjectData.SpawnedItems--;
+            }
         }
 
         private void GotEditorModeChanged(bool editing) => UpdatePhysicsState();
 
         private void Update()
         {
+            if (ExpirationTime < DateTime.UtcNow)
+            {
+                // It it's networked, target the shell instead of the object itself.
+                Transform toGoT = IsNetworkedObject ? transform.parent : transform;
+
+                // And if it's networked, let the server do it, not the client itself.
+                if (!isNetworkedClientObject)
+                    Destroy(toGoT.gameObject);
+            }
+                
             foreach (WOCBase component in WOComponents)
                 component.Update();
         }
@@ -214,7 +236,7 @@ namespace Arteranos.WorldEdit
             }
 
             bool isInEditMode = G.WorldEditorData.IsInEditMode;
-            bool needsKinematic = IsNetworkedObject;
+            bool needsKinematic = IsNetworkedClientObject;
 
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover || !clicker) return;

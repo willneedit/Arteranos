@@ -8,6 +8,7 @@
 using Arteranos.Core;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
@@ -55,5 +56,7 @@ namespace Arteranos.WorldEdit
         void SaveToPasteBuffer(GameObject go);
         IWorldDecoration TakeSnapshot();
         bool TryGetBlueprint(IWorldObjectAsset woa, out GameObject gameObject);
+        public Transform FindObjectByPath_S(List<Guid> path);
+        public List<Guid> GetPathFromObject_S(Transform t);
     }
 }

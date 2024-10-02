@@ -346,16 +346,19 @@ namespace Arteranos.WorldEdit
         #endregion
         // ---------------------------------------------------------------
         #region Runtime Object Spawn
-        public void CreateSpawnObject(CTSObjectSpawn spawn, Transform hookObject, bool server, Action<GameObject> callback)
+        public void CreateSpawnObject(CTSObjectSpawn spawn, Transform shellObject, bool server, Action<GameObject> callback)
         {
             IEnumerator Cor()
             {
                 WorldObject wo = WorldObject.Deserialize(new MemoryStream(spawn.WOSerialized));
 
                 GameObject spawnedWO = null;
-                yield return wo.Instantiate(hookObject, _res => spawnedWO = _res);
-                spawnedWO.TryGetComponent(out WorldObjectComponent component);
-                component.IsNetworkedObject = !server;
+                yield return wo.Instantiate(shellObject, _res => spawnedWO = _res);
+                spawnedWO.TryGetComponent(out WorldObjectComponent woc);
+                woc.IsNetworkedObject = true;
+                woc.IsNetworkedClientObject = !server;
+                woc.ExpirationTime = DateTime.UtcNow + TimeSpan.FromSeconds(spawn.Lifetime);
+                woc.DataObjectPath = spawn.spawnerPath;
 
                 callback?.Invoke(spawnedWO);
             }
@@ -572,6 +575,24 @@ namespace Arteranos.WorldEdit
             };
             request.EmitToServer();
         }
+
+        public List<Guid> GetPathFromObject_S(Transform t)
+            => GetPathFromObject(t);
+
+        public static List<Guid> GetPathFromObject(Transform t)
+        {
+            List<Guid> path = new();
+            while (t.TryGetComponent(out WorldObjectComponent woc))
+            {
+                path.Add(woc.Id);
+                t = t.parent;
+            }
+            path.Reverse();
+            return path;
+        }
+
+        public Transform FindObjectByPath_S(List<Guid> path)
+            => FindObjectByPath(path);
 
         public static Transform FindObjectByPath(List <Guid> path)
         {

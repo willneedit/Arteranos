@@ -62,7 +62,6 @@ namespace Arteranos.WorldEdit.Components
             }
         }
 
-
         public void GotClicked()
         {
             if (transform.childCount > 0)
@@ -83,6 +82,7 @@ namespace Arteranos.WorldEdit.Components
                 Force = Force,
                 Position = transform.position, // _World_ coordinates.
                 Rotation = transform.rotation,
+                spawnerPath = WorldEditorData.GetPathFromObject(transform),
             });
         }
     }

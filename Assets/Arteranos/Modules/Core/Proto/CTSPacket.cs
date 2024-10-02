@@ -124,5 +124,7 @@ namespace Arteranos.Core
         public WOVector3 Position;
         [ProtoMember(6)]
         public WOQuaternion Rotation;
+        [ProtoMember(7)]
+        public List<Guid> spawnerPath;
     }
 }
