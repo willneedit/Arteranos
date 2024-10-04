@@ -23,7 +23,7 @@ namespace Arteranos.WorldEdit
         public List<WOCBase> WOComponents { get; set; } = null;
         public DateTime ExpirationTime { get; set; } = DateTime.MaxValue;
         public List<Guid> DataObjectPath { get; set; } = null;
-        public bool IsNetworkedObject { get; set; } = false;
+        public bool HasNetworkShell { get; set; } = false;
         public bool IsNetworkedClientObject
         {
             get => isNetworkedClientObject;
@@ -100,7 +100,7 @@ namespace Arteranos.WorldEdit
 
             // If it's a spawned object, sign ourselves off. No matter if clients miscounted,
             // the server has the authority.
-            if (IsNetworkedObject && DataObjectPath != null)
+            if (HasNetworkShell && DataObjectPath != null)
             {
                 try
                 {
@@ -120,7 +120,7 @@ namespace Arteranos.WorldEdit
             if (ExpirationTime < DateTime.UtcNow)
             {
                 // It it's networked, target the shell instead of the object itself.
-                Transform toGoT = IsNetworkedObject ? transform.parent : transform;
+                Transform toGoT = HasNetworkShell ? transform.parent : transform;
 
                 // And if it's networked, let the server do it, not the client itself.
                 // togoT can be null if the object is currently held - they will be
@@ -258,7 +258,7 @@ namespace Arteranos.WorldEdit
             }
 
             bool isInEditMode = G.WorldEditorData.IsInEditMode;
-            bool needsKinematic = IsNetworkedClientObject;
+            bool needsKinematic = isNetworkedClientObject;
 
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover || !clicker) return;

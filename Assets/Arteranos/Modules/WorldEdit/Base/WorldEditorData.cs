@@ -355,7 +355,7 @@ namespace Arteranos.WorldEdit
                 GameObject spawnedWO = null;
                 yield return wo.Instantiate(shellObject, _res => spawnedWO = _res);
                 spawnedWO.TryGetComponent(out WorldObjectComponent woc);
-                woc.IsNetworkedObject = true;
+                woc.HasNetworkShell = true;
                 woc.IsNetworkedClientObject = !server;
                 woc.ExpirationTime = DateTime.UtcNow + TimeSpan.FromSeconds(spawn.Lifetime);
                 woc.DataObjectPath = spawn.spawnerPath;
