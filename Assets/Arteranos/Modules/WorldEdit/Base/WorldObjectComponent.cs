@@ -43,6 +43,26 @@ namespace Arteranos.WorldEdit
             }
         }
 
+        public IClickable IsClickable
+        {
+            get
+            {
+                foreach (WOCBase component in WOComponents)
+                    if (component is IClickable cl) return cl;
+                return null;
+            }
+        }
+
+        public IRigidBody IsGrabbable
+        {
+            get
+            {
+                foreach (WOCBase component in WOComponents)
+                    if (component is IRigidBody gr) return gr;
+                return null;
+            }
+        }
+
 
         private bool isNetworkedClientObject = false;
         private bool isLocked = false;
@@ -82,9 +102,14 @@ namespace Arteranos.WorldEdit
             // the server has the authority.
             if (IsNetworkedObject && DataObjectPath != null)
             {
-                Transform doT = WorldEditorData.FindObjectByPath(DataObjectPath);
-                if (doT != null && doT.TryGetComponent(out WorldObjectData worldObjectData))
-                    worldObjectData.SpawnedItems--;
+                try
+                {
+                    // throws if the data storage is already been destroyed, but that would be okay
+                    Transform doT = WorldEditorData.FindObjectByPath(DataObjectPath);
+                    if (doT != null && doT.TryGetComponent(out WorldObjectData worldObjectData))
+                        worldObjectData.SpawnedItems--;
+                }
+                catch { }
             }
         }
 
@@ -106,9 +131,20 @@ namespace Arteranos.WorldEdit
                 component.Update();
         }
 
+        private void GotObjectGrabbed(SelectEnterEventArgs arg0)
+        {
+            // Grabbing means it's the focused object.
+            if (!G.WorldEditorData.IsInEditMode)
+                IsGrabbable?.GotGrabbed();
+            else
+                G.WorldEditorData.FocusedWorldObject = gameObject;
+        }
+
         private void GotObjectReleased(SelectExitEventArgs arg0)
         {
-            if(G.WorldEditorData.IsInEditMode)
+            if (!G.WorldEditorData.IsInEditMode)
+                IsGrabbable?.GotReleased();
+            else
             {
                 // We're in edit mode, we are actually changing the world.
                 TryGetWOC(out WOCTransform woct);
@@ -116,8 +152,8 @@ namespace Arteranos.WorldEdit
                 (Vector3 position, Vector3 eulerRotation) = ConstrainMovement(woct.position, woct.rotation);
 
                 woct.SetState(
-                    position, 
-                    eulerRotation, 
+                    position,
+                    eulerRotation,
                     woct.scale);
 
                 WorldObjectPatch wop = new() { components = new() { woct } };
@@ -126,26 +162,10 @@ namespace Arteranos.WorldEdit
             }
         }
 
-        private void GotObjectGrabbed(SelectEnterEventArgs arg0)
-        {
-            // Grabbing means it's the focused object.
-            if(G.WorldEditorData.IsInEditMode)
-                G.WorldEditorData.FocusedWorldObject = gameObject;
-        }
-
         private void GotObjectClicked(ActivateEventArgs arg0)
         {
-            if (G.WorldEditorData.IsInEditMode) return;
-
-            foreach (WOCBase component in WOComponents)
-                if (component is IClickable cl) cl.GotClicked();
-        }
-
-        private bool IsClickable()
-        {
-            foreach (WOCBase component in WOComponents)
-                if (component is IClickable) return true;
-            return false;
+            if (!G.WorldEditorData.IsInEditMode) 
+                IsClickable?.GotClicked();
         }
 
         private (Vector3 position, Vector3 eulerRotation) ConstrainMovement(Vector3 oldPosition, Vector3 oldEulerRotation)
@@ -284,9 +304,9 @@ namespace Arteranos.WorldEdit
 
             mover.enabled = isInEditMode
                 ? !IsLocked
-                : p?.Grabbable ?? false;
+                : IsGrabbable?.IsMovable ?? false;
 
-            clicker.enabled = !isInEditMode && IsClickable();
+            clicker.enabled = !isInEditMode && (IsClickable != null);
         }
 
         public WorldObjectPatch MakePatch(bool complete = false)

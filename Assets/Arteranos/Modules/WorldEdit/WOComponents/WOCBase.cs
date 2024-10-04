@@ -22,6 +22,7 @@ namespace Arteranos.WorldEdit.Components
     [ProtoInclude(65538, typeof(WOCColor))]
     [ProtoInclude(65539, typeof(WOCPhysics))]
     [ProtoInclude(65540, typeof(WOCSpawner))]
+    [ProtoInclude(65541, typeof(WOCRigidBody))]
     public abstract class WOCBase : ICloneable, IHasAssetReferences
     {
         public bool Dirty { get; protected set; } = false;

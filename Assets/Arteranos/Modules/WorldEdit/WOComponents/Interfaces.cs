@@ -10,7 +10,20 @@ namespace Arteranos.WorldEdit.Components
     // Object is supposed to be clickable
     public interface IClickable
     {
+        // Object has been activated (a.k.a left-clicked, or with the trigger button)
         void GotClicked();
+    }
+
+    public interface IRigidBody
+    {
+        // Object has been grabbed (a.k.a right-clicked, or with the grab button)
+        void GotGrabbed();
+
+        // Object has been just released
+        void GotReleased();
+
+        // Object is movable by users at all
+        bool IsMovable { get; }
     }
 
     // Object is a 'meta' object. Visible im editor, but inactive out of the edit mode

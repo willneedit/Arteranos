@@ -64,7 +64,8 @@ namespace Arteranos.WorldEdit
 
             WOCBase[] oclist =
             {
-                new WOCSpawner()
+                new WOCSpawner(),
+                new WOCRigidBody()
             };
 
             foreach(var o in oclist)
@@ -186,6 +187,8 @@ namespace Arteranos.WorldEdit
 
         private void RebuildMissingComponenntsList()
         {
+            bool hasInteractable = (woc.IsClickable != null) || (woc.IsGrabbable != null);
+
             List<string> missingCompons = new()
             {
                 "Add new component..."
@@ -193,6 +196,12 @@ namespace Arteranos.WorldEdit
 
             foreach(KeyValuePair<string, WOCBase> c in OptionalComponents)
             {
+                bool isClickable = c.Value is IClickable;
+                bool isGrabbable = c.Value is IRigidBody;
+
+                // Only one potential interactable.
+                if (hasInteractable && (isClickable || isGrabbable)) continue;
+
                 if(!woc.TryGetWOC(out WOCBase _, c.Value.GetType()))
                     missingCompons.Add(c.Key);
             }

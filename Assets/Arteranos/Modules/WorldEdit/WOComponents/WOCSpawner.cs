@@ -48,7 +48,6 @@ namespace Arteranos.WorldEdit.Components
         // ---------------------------------------------------------------
 
         private Transform transform = null;
-        private WorldObjectComponent woc = null;
         private byte[] serializedSpawnWO = null;
 
         public override GameObject GameObject
@@ -58,7 +57,6 @@ namespace Arteranos.WorldEdit.Components
             {
                 base.GameObject = value;
                 transform = GameObject.transform;
-                GameObject.TryGetComponent(out woc);
             }
         }
 
