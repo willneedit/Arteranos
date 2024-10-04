@@ -92,3 +92,5 @@ MonoBehaviour:
       type: 3}
     SpawnerInspector: {fileID: 7349416676873975400, guid: a557680c6596fc04e8c8e807d8fa0ffa,
       type: 3}
+    RigidBodyInspector: {fileID: 7349416676873975400, guid: 824bb6c36c87b514cb927d5e19b9b049,
+      type: 3}

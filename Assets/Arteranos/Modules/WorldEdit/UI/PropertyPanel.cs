@@ -171,7 +171,7 @@ namespace Arteranos.WorldEdit
             }
 
             // Offer adding optional components, if there are some of them.
-            RebuildMissingComponenntsList();
+            RebuildMissingComponentsList();
         }
 
         public void CommitModification(IInspector i)
@@ -185,7 +185,7 @@ namespace Arteranos.WorldEdit
             OnReturnToList?.Invoke();
         }
 
-        private void RebuildMissingComponenntsList()
+        private void RebuildMissingComponentsList()
         {
             bool hasInteractable = (woc.IsClickable != null) || (woc.IsGrabbable != null);
 
@@ -224,7 +224,9 @@ namespace Arteranos.WorldEdit
 
             RebuildInspectors();
 
-            RebuildMissingComponenntsList();
+            RebuildMissingComponentsList();
+
+            Populate();
         }
 
 #if UNITY_EDITOR

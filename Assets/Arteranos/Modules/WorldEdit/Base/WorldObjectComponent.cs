@@ -123,7 +123,9 @@ namespace Arteranos.WorldEdit
                 Transform toGoT = IsNetworkedObject ? transform.parent : transform;
 
                 // And if it's networked, let the server do it, not the client itself.
-                if (!isNetworkedClientObject)
+                // togoT can be null if the object is currently held - they will be
+                // expired as soon as the user releases it.
+                if (!isNetworkedClientObject && toGoT)
                     Destroy(toGoT.gameObject);
             }
                 
@@ -285,7 +287,7 @@ namespace Arteranos.WorldEdit
             body.isKinematic = needsKinematic;
 
             TryGetWOC(out WOCTransform t);
-            TryGetWOC(out WOCPhysics p);
+            TryGetWOC(out WOCRigidBody rb);
 
             // Prevent physics shenanigans in the edit mode
             body.constraints = isInEditMode
@@ -293,7 +295,10 @@ namespace Arteranos.WorldEdit
                 : RigidbodyConstraints.None;
 
             body.useGravity = !isInEditMode
-                && (p?.ObeysGravity ?? false);
+                && (rb?.ObeysGravity ?? false);
+            body.mass = rb?.Mass ?? 0;
+            body.drag = rb?.Drag ?? 0;
+            body.angularDrag = rb?.AngularDrag ?? 0;
 
             RecursiveSetLayer((int)(t?.isCollidable ?? false
                 ? ColliderType.Solid

@@ -37,7 +37,7 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Rigid Body", null);
+            => ("Rigid Body", BP.I.WorldEdit.RigidBodyInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {
