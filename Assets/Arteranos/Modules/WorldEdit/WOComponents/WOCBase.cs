@@ -42,7 +42,7 @@ namespace Arteranos.WorldEdit.Components
 
         public virtual void OnDestroy() { }
 
-        public void Update()
+        public virtual void Update()
         {
             if (G.WorldEditorData.IsInEditMode)
                 CheckState();

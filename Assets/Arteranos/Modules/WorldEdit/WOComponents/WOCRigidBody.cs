@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Avatar;
 using Arteranos.Core;
 using ProtoBuf;
 using System.IO;
@@ -68,14 +69,50 @@ namespace Arteranos.WorldEdit.Components
 
         public bool IsMovable => Grabbable;
 
+        private bool clientGrabbed = false;
+
+        public override void Update()
+        {
+            base.Update();
+
+            // As soon as the local playwr grabbed the object, start sending
+            // the coordinates to the server for propagation
+            if (clientGrabbed)
+            {
+                if (G.Me != null) G.Me.GotObjectHeld(GameObject, GameObject.transform.position, GameObject.transform.rotation);
+                else ServerGotObjectHeld(GameObject.transform.position, GameObject.transform.rotation);
+            }
+        }
+
         public void GotGrabbed()
         {
+            clientGrabbed = true;
 
+            if (G.Me != null) G.Me.GotObjectGrabbed(GameObject);
+            else ServerGotGrabbed();
         }
 
         public void GotReleased()
         {
+            clientGrabbed = false;
 
+            if (G.Me != null) G.Me.GotObjectReleased(GameObject);
+            else ServerGotReleased();
+        }
+
+        public void ServerGotGrabbed()
+        {
+        }
+
+        public void ServerGotReleased()
+        {
+        }
+
+        public void ServerGotObjectHeld(Vector3 position, Quaternion rotation)
+        {
+            // Transfer the data to the server object, the NetworkTransform takes care of
+            // the synchronization.
+            GameObject.transform.SetPositionAndRotation(position, rotation);
         }
     }
 }

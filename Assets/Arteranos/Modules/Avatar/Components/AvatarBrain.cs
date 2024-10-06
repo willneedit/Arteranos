@@ -675,5 +675,24 @@ namespace Arteranos.Avatar
         }
 
         #endregion
+        // ---------------------------------------------------------------
+        #region Interacting World Objects
+        public void GotObjectClicked(GameObject clicked) => CmdGotObjectClicked(clicked);
+        public void GotObjectGrabbed(GameObject grabbed) => CmdGotObjectGrabbed(grabbed);
+        public void GotObjectReleased(GameObject released) => CmdGotObjectReleased(released);
+        public void GotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation) => CmdGotObjectHeld(holding, position, rotation);
+
+        [Command]
+        private void CmdGotObjectClicked(GameObject clicked) => G.WorldEditorData.GotWorldObjectClicked(clicked);
+
+        [Command]
+        private void CmdGotObjectGrabbed(GameObject grabbed) => G.WorldEditorData.GotWorldObjectGrabbed(grabbed);
+
+        [Command]
+        private void CmdGotObjectReleased(GameObject released) => G.WorldEditorData.GotWorldObjectReleased(released);
+
+        [Command]
+        private void CmdGotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation) => G.WorldEditorData.GotWorldObjectHeld(holding, position, rotation);
+        #endregion
     }
 }

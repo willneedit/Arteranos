@@ -523,6 +523,60 @@ namespace Arteranos.WorldEdit
 
         #endregion
         // ---------------------------------------------------------------
+        #region Interactables dispatching
+
+        private bool AffectedComponent<T>(GameObject go, out T wocc)  where T : class
+        {
+            wocc = null;
+            return go.TryGetComponent(out WorldObjectComponent woc) && woc.TryGetWOC(out wocc);
+        }
+
+        public bool GotWorldObjectClicked(GameObject go)
+        {
+            if(AffectedComponent(go, out IClickable cl))
+            {
+                cl.ServerGotClicked();
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool GotWorldObjectGrabbed(GameObject go)
+        {
+            if(AffectedComponent(go,out IRigidBody body))
+            {
+                body.ServerGotGrabbed();
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool GotWorldObjectReleased(GameObject go)
+        {
+            if (AffectedComponent(go, out IRigidBody body))
+            {
+                body.ServerGotReleased();
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool GotWorldObjectHeld(GameObject go, Vector3 position, Quaternion rotation)
+        {
+            if (AffectedComponent(go, out IRigidBody body))
+            {
+                body.ServerGotObjectHeld(position, rotation);
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
         #region Internal
         private IEnumerable<WorldObject> MakeSnapshot()
         {
@@ -628,9 +682,6 @@ namespace Arteranos.WorldEdit
 
             return t;
         }
-
-
         #endregion
-
     }
 }

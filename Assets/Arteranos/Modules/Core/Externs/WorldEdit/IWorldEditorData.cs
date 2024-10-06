@@ -58,5 +58,9 @@ namespace Arteranos.WorldEdit
         bool TryGetBlueprint(IWorldObjectAsset woa, out GameObject gameObject);
         public Transform FindObjectByPath_S(List<Guid> path);
         public List<Guid> GetPathFromObject_S(Transform t);
+        public bool GotWorldObjectClicked(GameObject go);
+        public bool GotWorldObjectGrabbed(GameObject go);
+        public bool GotWorldObjectReleased(GameObject go);
+        public bool GotWorldObjectHeld(GameObject go, Vector3 position, Quaternion rotation);
     }
 }

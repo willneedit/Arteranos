@@ -83,5 +83,10 @@ namespace Arteranos.WorldEdit.Components
                 spawnerPath = WorldEditorData.GetPathFromObject(transform),
             });
         }
+
+        public void ServerGotClicked()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

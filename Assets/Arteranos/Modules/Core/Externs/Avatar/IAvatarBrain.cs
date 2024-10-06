@@ -42,5 +42,9 @@ namespace Arteranos.Avatar
         void SetAppearanceStatusBit(int ASBit, bool set);
         void UpdateSSEffects(IAvatarBrain receiver, ulong state);
         void SendSocialState(IAvatarBrain receiver, ulong state);
+        void GotObjectClicked(GameObject clicked);
+        void GotObjectGrabbed(GameObject grabbed);
+        void GotObjectReleased(GameObject released);
+        void GotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation);
     }
 }
