@@ -48,6 +48,8 @@ namespace Arteranos.WorldEdit.Components
                 CheckState();
         }
 
+        public virtual void LateUpdate() { }
+
         public abstract void ReplaceValues(WOCBase wOCBase);
 
         public abstract object Clone();

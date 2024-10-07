@@ -355,7 +355,7 @@ namespace Arteranos.WorldEdit
                 GameObject spawnedWO = null;
                 yield return wo.Instantiate(shellObject, _res => spawnedWO = _res);
                 spawnedWO.TryGetComponent(out WorldObjectComponent woc);
-                woc.HasNetworkShell = true;
+                woc.HasNetworkShell = shellObject;
                 woc.IsNetworkedClientObject = !server;
                 woc.ExpirationTime = DateTime.UtcNow + TimeSpan.FromSeconds(spawn.Lifetime);
                 woc.DataObjectPath = spawn.spawnerPath;
@@ -525,9 +525,16 @@ namespace Arteranos.WorldEdit
         // ---------------------------------------------------------------
         #region Interactables dispatching
 
-        private bool AffectedComponent<T>(GameObject go, out T wocc)  where T : class
+        private bool AffectedComponent<T>(GameObject goOrShell, out T wocc)  where T : class
         {
             wocc = null;
+
+            if(!goOrShell) return false;
+
+            GameObject go = goOrShell.TryGetComponent(out SpawnInitData spawnInitData)
+                ? spawnInitData.CoreGO
+                : goOrShell;
+
             return go.TryGetComponent(out WorldObjectComponent woc) && woc.TryGetWOC(out wocc);
         }
 

@@ -53,21 +53,37 @@ namespace Arteranos.WorldEdit.Components
 
         // ---------------------------------------------------------------
 
-        //private Transform transform = null;
-        //private WorldObjectComponent woc = null;
+        private Transform transform = null;
+        private WorldObjectComponent woc = null;
 
-        //public override GameObject GameObject
-        //{
-        //    get => base.GameObject;
-        //    set
-        //    {
-        //        base.GameObject = value;
-        //        transform = GameObject.transform;
-        //        GameObject.TryGetComponent(out woc);
-        //    }
-        //}
+        private Rigidbody body = null;
+        private bool wasKinematic = false;
+        
+        private GameObject goOrShell => woc?.HasNetworkShell
+                    ? woc.HasNetworkShell.gameObject
+                    : GameObject;
+
+        public override GameObject GameObject
+        {
+            get => base.GameObject;
+            set
+            {
+                base.GameObject = value;
+                transform = GameObject.transform;
+                GameObject.TryGetComponent(out woc);
+            }
+        }
 
         public bool IsMovable => Grabbable;
+
+        private Rigidbody Body
+        {
+            get
+            {
+                if (!body) GameObject.TryGetComponent(out body);
+                return body;
+            }
+        }
 
         private bool clientGrabbed = false;
 
@@ -79,7 +95,9 @@ namespace Arteranos.WorldEdit.Components
             // the coordinates to the server for propagation
             if (clientGrabbed)
             {
-                if (G.Me != null) G.Me.GotObjectHeld(GameObject, GameObject.transform.position, GameObject.transform.rotation);
+                // TODO NetworkTransform interferes. Maybe temporarily disable whild grabbing?
+                Debug.Log($"Sending grabbed object position: {GameObject.transform.position}");
+                if (G.Me != null) G.Me.GotObjectHeld(goOrShell, GameObject.transform.position, GameObject.transform.rotation);
                 else ServerGotObjectHeld(GameObject.transform.position, GameObject.transform.rotation);
             }
         }
@@ -88,7 +106,7 @@ namespace Arteranos.WorldEdit.Components
         {
             clientGrabbed = true;
 
-            if (G.Me != null) G.Me.GotObjectGrabbed(GameObject);
+            if (G.Me != null) G.Me.GotObjectGrabbed(goOrShell);
             else ServerGotGrabbed();
         }
 
@@ -96,7 +114,7 @@ namespace Arteranos.WorldEdit.Components
         {
             clientGrabbed = false;
 
-            if (G.Me != null) G.Me.GotObjectReleased(GameObject);
+            if (G.Me != null) G.Me.GotObjectReleased(goOrShell);
             else ServerGotReleased();
         }
 
@@ -112,6 +130,7 @@ namespace Arteranos.WorldEdit.Components
         {
             // Transfer the data to the server object, the NetworkTransform takes care of
             // the synchronization.
+            Debug.Log($"Received grabbed Object position: {position}");
             GameObject.transform.SetPositionAndRotation(position, rotation);
         }
     }

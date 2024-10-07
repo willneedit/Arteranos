@@ -23,7 +23,7 @@ namespace Arteranos.WorldEdit
         public List<WOCBase> WOComponents { get; set; } = null;
         public DateTime ExpirationTime { get; set; } = DateTime.MaxValue;
         public List<Guid> DataObjectPath { get; set; } = null;
-        public bool HasNetworkShell { get; set; } = false;
+        public Transform HasNetworkShell { get; set; } = null;
         public bool IsNetworkedClientObject
         {
             get => isNetworkedClientObject;
@@ -120,17 +120,21 @@ namespace Arteranos.WorldEdit
             if (ExpirationTime < DateTime.UtcNow)
             {
                 // It it's networked, target the shell instead of the object itself.
-                Transform toGoT = HasNetworkShell ? transform.parent : transform;
+                Transform toGoT = HasNetworkShell ? HasNetworkShell : transform;
 
                 // And if it's networked, let the server do it, not the client itself.
-                // togoT can be null if the object is currently held - they will be
-                // expired as soon as the user releases it.
-                if (!isNetworkedClientObject && toGoT)
+                if (!isNetworkedClientObject)
                     Destroy(toGoT.gameObject);
             }
                 
             foreach (WOCBase component in WOComponents)
                 component.Update();
+        }
+
+        private void LateUpdate()
+        {
+            foreach (WOCBase component in WOComponents)
+                component.LateUpdate();
         }
 
         private void GotObjectGrabbed(SelectEnterEventArgs arg0)

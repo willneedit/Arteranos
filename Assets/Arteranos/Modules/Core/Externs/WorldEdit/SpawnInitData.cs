@@ -17,6 +17,8 @@ namespace Arteranos.WorldEdit
         [SyncVar(hook = nameof(GotInitData))]
         public CTSObjectSpawn InitData = null;
 
+        public GameObject CoreGO {  get; private set; }
+
         [Client]
         public void GotInitData(CTSObjectSpawn _1, CTSObjectSpawn _2)
         {
@@ -33,6 +35,8 @@ namespace Arteranos.WorldEdit
 
             G.WorldEditorData.CreateSpawnObject(InitData, transform, server, go =>
             {
+                CoreGO = go;
+
                 if (TryGetComponent(out NetworkTransform nt))
                 {
                     // Transfer the position and rotation data and its guidance to the World Editor Object
@@ -41,9 +45,15 @@ namespace Arteranos.WorldEdit
                     transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
                     nt.target = go.transform;
                     go.transform.SetPositionAndRotation(oldPosition, oldRotation);
-                    //nt.Reset();
                 }
             });
+        }
+
+        // Even if the shell object is destroyed (maybe, scene changes, or by expiring)
+        // do destroy the enclosing object, even if it's detached by grab.
+        private void OnDestroy()
+        {
+            Destroy(CoreGO);
         }
     }
 }
