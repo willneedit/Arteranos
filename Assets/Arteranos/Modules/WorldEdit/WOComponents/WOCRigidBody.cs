@@ -53,13 +53,9 @@ namespace Arteranos.WorldEdit.Components
 
         // ---------------------------------------------------------------
 
-        private Transform transform = null;
         private WorldObjectComponent woc = null;
-
-        private Rigidbody body = null;
-        private bool wasKinematic = false;
         
-        private GameObject goOrShell => woc?.HasNetworkShell
+        private GameObject GoOrShell => woc?.HasNetworkShell
                     ? woc.HasNetworkShell.gameObject
                     : GameObject;
 
@@ -69,44 +65,61 @@ namespace Arteranos.WorldEdit.Components
             set
             {
                 base.GameObject = value;
-                transform = GameObject.transform;
                 GameObject.TryGetComponent(out woc);
+            }
+        }
+
+        public Rigidbody Rigidbody 
+        { 
+            get 
+            {
+                if (!rigidbody) GameObject.TryGetComponent(out rigidbody);
+                return rigidbody;
+            } 
+        }
+
+        public bool IsKinematic
+        {
+            get
+            {
+                if (!isKinematic.HasValue) isKinematic = Rigidbody.isKinematic;
+                return isKinematic.Value;
             }
         }
 
         public bool IsMovable => Grabbable;
 
-        private Rigidbody Body
-        {
-            get
-            {
-                if (!body) GameObject.TryGetComponent(out body);
-                return body;
-            }
-        }
-
         private bool clientGrabbed = false;
+        private Rigidbody rigidbody = null;
+        private bool? isKinematic = null;
+
+        // Grab & Release: When a non-Host user grabs the object, we have to disable the
+        // NetworkTransform to effectively reverse the data flow from the grabbing user's
+        // client to the server, which it will propagate to the other users
 
         public override void Update()
         {
             base.Update();
 
-            // As soon as the local playwr grabbed the object, start sending
-            // the coordinates to the server for propagation
+            // HACK: Value may not set before the first update phase
+            bool k = IsKinematic;
+
             if (clientGrabbed)
             {
-                // TODO NetworkTransform interferes. Maybe temporarily disable whild grabbing?
-                Debug.Log($"Sending grabbed object position: {GameObject.transform.position}");
-                if (G.Me != null) G.Me.GotObjectHeld(goOrShell, GameObject.transform.position, GameObject.transform.rotation);
+                if (G.Me != null) G.Me.GotObjectHeld(GoOrShell, GameObject.transform.position, GameObject.transform.rotation);
                 else ServerGotObjectHeld(GameObject.transform.position, GameObject.transform.rotation);
             }
         }
 
+        // On client, suspend the Network Transform to stop receiving data.
         public void GotGrabbed()
         {
             clientGrabbed = true;
 
-            if (G.Me != null) G.Me.GotObjectGrabbed(goOrShell);
+            if (woc.HasNetworkShell.TryGetComponent(out ISpawnInitData spawnInitData))
+                spawnInitData.SuspendNetworkTransform();
+
+            if (G.Me != null) G.Me.GotObjectGrabbed(GoOrShell);
             else ServerGotGrabbed();
         }
 
@@ -114,24 +127,36 @@ namespace Arteranos.WorldEdit.Components
         {
             clientGrabbed = false;
 
-            if (G.Me != null) G.Me.GotObjectReleased(goOrShell);
+            if (woc.HasNetworkShell.TryGetComponent(out ISpawnInitData spawnInitData))
+                spawnInitData.ResumeNetworkTransform();
+
+            if (G.Me != null) G.Me.GotObjectReleased(GoOrShell);
             else ServerGotReleased();
         }
 
+        // On server, suspend the physics engine for the object to control the movement
         public void ServerGotGrabbed()
         {
+            // Either it's already true if we're the host's local user by the XRGrabInteractable,
+            // or the Physics interferes with the client's provided tracking. So, set it.
+            Rigidbody.isKinematic = true;
         }
 
         public void ServerGotReleased()
         {
+            // XRGrabInteractable would reset the state, but we have to do it manually on
+            // the server, especially with the remote controlled object.
+            Rigidbody.isKinematic = IsKinematic;
         }
 
         public void ServerGotObjectHeld(Vector3 position, Quaternion rotation)
         {
-            // Transfer the data to the server object, the NetworkTransform takes care of
-            // the synchronization.
-            Debug.Log($"Received grabbed Object position: {position}");
-            GameObject.transform.SetPositionAndRotation(position, rotation);
+            if (woc.HasNetworkShell.TryGetComponent(out ISpawnInitData spawnInitData))
+                spawnInitData.PropagateTransform(position, rotation);
+            else
+                // Transfer the data to the server object, the NetworkTransform takes care of
+                // the synchronization.
+                GameObject.transform.SetPositionAndRotation(position, rotation);
         }
     }
 }

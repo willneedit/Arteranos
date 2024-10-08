@@ -8,16 +8,28 @@
 using Arteranos.Core;
 using UnityEngine;
 using Mirror;
-using System;
 
 namespace Arteranos.WorldEdit
 {
-    public class SpawnInitData : NetworkBehaviour
+    public interface ISpawnInitData
+    {
+        GameObject CoreGO { get; }
+        bool IsOnServer { get; }
+
+        void PropagateTransform(Vector3 position, Quaternion rotation);
+        void ResumeNetworkTransform();
+        void SuspendNetworkTransform();
+    }
+
+    public class SpawnInitData : NetworkBehaviour, ISpawnInitData
     {
         [SyncVar(hook = nameof(GotInitData))]
         public CTSObjectSpawn InitData = null;
 
-        public GameObject CoreGO {  get; private set; }
+        public GameObject CoreGO { get; private set; }
+        public bool IsOnServer { get; private set; }
+
+        private NetworkTransformBase NetworkTransform = null;
 
         [Client]
         public void GotInitData(CTSObjectSpawn _1, CTSObjectSpawn _2)
@@ -27,6 +39,8 @@ namespace Arteranos.WorldEdit
 
         public void Init(CTSObjectSpawn InitData, bool server)
         {
+            IsOnServer = server;
+
             // Latecomer in a world with already existing spawned objects.
             SettingsManager.SetupWorldObjectRoot();
 
@@ -37,13 +51,13 @@ namespace Arteranos.WorldEdit
             {
                 CoreGO = go;
 
-                if (TryGetComponent(out NetworkTransform nt))
+                if (TryGetComponent(out NetworkTransform))
                 {
                     // Transfer the position and rotation data and its guidance to the World Editor Object
                     Vector3 oldPosition = transform.position;
                     Quaternion oldRotation = transform.rotation;
                     transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-                    nt.target = go.transform;
+                    NetworkTransform.target = go.transform;
                     go.transform.SetPositionAndRotation(oldPosition, oldRotation);
                 }
             });
@@ -54,6 +68,26 @@ namespace Arteranos.WorldEdit
         private void OnDestroy()
         {
             Destroy(CoreGO);
+        }
+
+        // Server and Host have to remain on. Everyone still have to get the data, and
+        // Host doesn't bounce the data back to its client part.
+        public void SuspendNetworkTransform()
+        {
+            if(NetworkTransform && !IsOnServer)
+                NetworkTransform.enabled = false;
+        }
+
+        public void ResumeNetworkTransform()
+        {
+            if (NetworkTransform && !IsOnServer)
+                NetworkTransform.enabled = true;
+        }
+
+        public void PropagateTransform(Vector3 position, Quaternion rotation)
+        {
+            CoreGO.transform.SetPositionAndRotation(position, rotation);
+            NetworkTransform.Reset();
         }
     }
 }

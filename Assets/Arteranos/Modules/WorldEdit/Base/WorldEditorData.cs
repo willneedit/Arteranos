@@ -531,7 +531,7 @@ namespace Arteranos.WorldEdit
 
             if(!goOrShell) return false;
 
-            GameObject go = goOrShell.TryGetComponent(out SpawnInitData spawnInitData)
+            GameObject go = goOrShell.TryGetComponent(out ISpawnInitData spawnInitData)
                 ? spawnInitData.CoreGO
                 : goOrShell;
 
