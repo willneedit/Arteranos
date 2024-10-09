@@ -965,13 +965,12 @@ namespace Arteranos.Services
             worldObjectData.SpawnedItems++;
 
             GameObject go = Instantiate(BP.I.NetworkedWorldObject);
-            SpawnInitData initData = go.GetComponent<SpawnInitData>();
+            ISpawnInitData initData = go.GetComponent<ISpawnInitData>();
 
             go.name = $"Spawned object (server)";
             go.transform.SetPositionAndRotation(wos.Position, wos.Rotation);
 
-            initData.InitData = wos;
-            initData.Init(wos, true);
+            initData.ServerInit(wos);
 
             if (NetworkServer.active) NetworkServer.Spawn(go);
         }

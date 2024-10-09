@@ -14,31 +14,41 @@ namespace Arteranos.WorldEdit
     public interface ISpawnInitData
     {
         GameObject CoreGO { get; }
-        bool IsOnServer { get; }
+        bool? IsOnServer { get; }
 
         void PropagateTransform(Vector3 position, Quaternion rotation);
         void ResumeNetworkTransform();
+        void ServerInit(CTSObjectSpawn newValue);
         void SuspendNetworkTransform();
     }
 
     public class SpawnInitData : NetworkBehaviour, ISpawnInitData
     {
         [SyncVar(hook = nameof(GotInitData))]
-        public CTSObjectSpawn InitData = null;
+        private CTSObjectSpawn InitData = null;
 
         public GameObject CoreGO { get; private set; }
-        public bool IsOnServer { get; private set; }
+        public bool? IsOnServer { get; private set; } = null;
 
         private NetworkTransformBase NetworkTransform = null;
 
         [Client]
-        public void GotInitData(CTSObjectSpawn _1, CTSObjectSpawn _2)
+        public void GotInitData(CTSObjectSpawn _1, CTSObjectSpawn newValue)
         {
-            Init(InitData, false);
+            Init(newValue, false);
         }
 
-        public void Init(CTSObjectSpawn InitData, bool server)
+        public void ServerInit(CTSObjectSpawn newValue)
         {
+            Init(newValue, true);
+            InitData = newValue;
+        }
+
+        private void Init(CTSObjectSpawn newValue, bool server)
+        {
+            Debug.Assert(newValue != null);
+
+            if (IsOnServer != null) return;
             IsOnServer = server;
 
             // Latecomer in a world with already existing spawned objects.
@@ -47,7 +57,7 @@ namespace Arteranos.WorldEdit
             // Set DDOL both for the shell object for the latecomer - the world is yet to load...
             DontDestroyOnLoad(gameObject);
 
-            G.WorldEditorData.CreateSpawnObject(InitData, transform, server, go =>
+            G.WorldEditorData.CreateSpawnObject(newValue, transform, server, go =>
             {
                 CoreGO = go;
 
@@ -74,13 +84,13 @@ namespace Arteranos.WorldEdit
         // Host doesn't bounce the data back to its client part.
         public void SuspendNetworkTransform()
         {
-            if(NetworkTransform && !IsOnServer)
+            if(NetworkTransform && !IsOnServer.Value)
                 NetworkTransform.enabled = false;
         }
 
         public void ResumeNetworkTransform()
         {
-            if (NetworkTransform && !IsOnServer)
+            if (NetworkTransform && !IsOnServer.Value)
                 NetworkTransform.enabled = true;
         }
 
