@@ -23,7 +23,7 @@ using Arteranos.WorldEdit;
 
 namespace Arteranos.Services
 {
-    public class ArteranosNetworkManager : NetworkManager
+    public class ArteranosNetworkManager : NetworkManager, IArteranosNetworkManager
     {
         internal struct AuthSequence
         {
@@ -66,6 +66,7 @@ namespace Arteranos.Services
         {
             base.Awake();
             Instance = this;
+            G.ArteranosNetworkManager = this;
 
             // No need, eegistered in the SceneEssentials prefab
             //
@@ -536,7 +537,6 @@ namespace Arteranos.Services
                 case STCUserInfo userInfoQuery: _ = ServerQueryUserState(sender, userInfoQuery); break;
                 case CTSServerConfig serverConfig: ServerUpdateServerConfiguration(sender, serverConfig); break;
                 case CTSWorldObjectChange wc: ServerCommitWorldObjectChange(sender, wc); break;
-                case CTSObjectSpawn wos: ServerGotObjectSpawn(sender, wos); break;
                 default: throw new NotImplementedException();
             }
         }
@@ -943,27 +943,8 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region Runtime world object spawn
 
-        private void ServerGotObjectSpawn(UserID sender, CTSObjectSpawn wos)
+        public void SpawnObject(CTSObjectSpawn wos)
         {
-            Transform spawnerT = G.WorldEditorData.FindObjectByPath_S(wos.spawnerPath);
-            if(!spawnerT)
-            {
-                Debug.LogError($"Discarding spawner message from an unknown spawner");
-                return;
-            }
-
-            // If we have no server data storage, create one now. 
-            if(!spawnerT.TryGetComponent(out WorldObjectData worldObjectData))
-                 worldObjectData = spawnerT.gameObject.AddComponent<WorldObjectData>();
-
-            // Check against the max number
-            if (worldObjectData.SpawnedItems >= wos.MaxItems) return;
-
-            // All systems go, load the GameObject with the necessary data.
-
-            // Expiring spawned objects decrease the number in the WOComponent's OnDestroy()
-            worldObjectData.SpawnedItems++;
-
             GameObject go = Instantiate(BP.I.NetworkedWorldObject);
             ISpawnInitData initData = go.GetComponent<ISpawnInitData>();
 

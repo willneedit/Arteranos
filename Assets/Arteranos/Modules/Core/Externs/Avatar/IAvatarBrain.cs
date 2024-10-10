@@ -9,6 +9,7 @@ using Arteranos.Core;
 using Arteranos.Social;
 using Ipfs.Cryptography.Proto;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Arteranos.Avatar
@@ -46,5 +47,9 @@ namespace Arteranos.Avatar
         void GotObjectGrabbed(GameObject grabbed);
         void GotObjectReleased(GameObject released);
         void GotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation);
+        void GotObjectClicked(List<Guid> clicked);
+        void GotObjectGrabbed(List<Guid> grabbed);
+        void GotObjectReleased(List<Guid> released);
+        void GotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation);
     }
 }

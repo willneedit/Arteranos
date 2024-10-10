@@ -112,8 +112,6 @@ namespace Arteranos.Core
     [ProtoContract]
     public class CTSObjectSpawn : CTSPacket
     {
-        [ProtoMember(1)]
-        public int MaxItems;
         [ProtoMember(2)]
         public float Lifetime;
         [ProtoMember(3)]

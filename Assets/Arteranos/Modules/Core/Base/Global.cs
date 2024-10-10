@@ -44,6 +44,7 @@ namespace Arteranos
         public static IIPFSService IPFSService { get; set; }
         public static ITransitionProgress TransitionProgress { get; set; }
         public static IAvatarDownloader AvatarDownloader { get; set; }
+        public static IArteranosNetworkManager ArteranosNetworkManager { get; set; }
         // ---------------------------------------------------------------
         public static World_ World { get; } = new();
         // ---------------------------------------------------------------

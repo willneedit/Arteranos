@@ -48,7 +48,6 @@ namespace Arteranos.WorldEdit.Components
         // ---------------------------------------------------------------
 
         private Transform transform = null;
-        private byte[] serializedSpawnWO = null;
 
         public override GameObject GameObject
         {
@@ -62,31 +61,45 @@ namespace Arteranos.WorldEdit.Components
 
         public void GotClicked()
         {
+            if (G.Me != null) G.Me.GotObjectClicked(WorldEditorData.GetPathFromObject(transform));
+            else ServerGotClicked();
+        }
+
+        public void ServerGotClicked()
+        {
+            byte[] serializedSpawnWO = null;
+
             if (transform.childCount > 0)
             {
-                WorldObject spawnWO = transform.GetChild(0).MakeWorldObject();
+                int pick = Random.Range(0, transform.childCount);
+                WorldObject spawnWO = transform.GetChild(pick).MakeWorldObject();
                 using MemoryStream ms = new();
                 spawnWO.Serialize(ms);
                 serializedSpawnWO = ms.ToArray();
             }
             else if (serializedSpawnWO == null) return;
 
-            // Both the server contains the spawner instances and hold the necessary data.
-            SettingsManager.EmitToServerCTSPacket(new CTSObjectSpawn()
+            // If we have no server data storage, create one now. 
+            if (!transform.TryGetComponent(out WorldObjectData worldObjectData))
+                worldObjectData = transform.gameObject.AddComponent<WorldObjectData>();
+
+            // Check against the max number
+            if (worldObjectData.SpawnedItems >= MaxItems) return;
+
+            // All systems go, load the GameObject with the necessary data.
+
+            // Expiring spawned objects decrease the number in the WOComponent's OnDestroy()
+            worldObjectData.SpawnedItems++;
+
+            G.ArteranosNetworkManager.SpawnObject(new CTSObjectSpawn()
             {
                 WOSerialized = serializedSpawnWO,
-                MaxItems = MaxItems,
                 Lifetime = Lifetime,
                 Force = Force,
                 Position = transform.position, // _World_ coordinates.
                 Rotation = transform.rotation,
                 spawnerPath = WorldEditorData.GetPathFromObject(transform),
             });
-        }
-
-        public void ServerGotClicked()
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

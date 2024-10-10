@@ -549,6 +549,9 @@ namespace Arteranos.WorldEdit
             return false;
         }
 
+        public bool GotWorldObjectClicked(List<Guid> go)
+            => GotWorldObjectClicked(FindObjectByPath(go).gameObject);
+
         public bool GotWorldObjectGrabbed(GameObject go)
         {
             if(AffectedComponent(go,out IRigidBody body))
@@ -559,6 +562,9 @@ namespace Arteranos.WorldEdit
 
             return false;
         }
+
+        public bool GotWorldObjectGrabbed(List<Guid> go)
+            => GotWorldObjectGrabbed(FindObjectByPath(go).gameObject);
 
         public bool GotWorldObjectReleased(GameObject go)
         {
@@ -571,6 +577,9 @@ namespace Arteranos.WorldEdit
             return false;
         }
 
+        public bool GotWorldObjectReleased(List<Guid> go)
+            => GotWorldObjectReleased(FindObjectByPath(go).gameObject);
+
         public bool GotWorldObjectHeld(GameObject go, Vector3 position, Quaternion rotation)
         {
             if (AffectedComponent(go, out IRigidBody body))
@@ -581,6 +590,9 @@ namespace Arteranos.WorldEdit
 
             return false;
         }
+
+        public bool GotWorldObjectHeld(List<Guid> go, Vector3 position, Quaternion rotation)
+            => GotWorldObjectHeld(FindObjectByPath(go).gameObject, position, rotation);
 
         #endregion
         // ---------------------------------------------------------------
