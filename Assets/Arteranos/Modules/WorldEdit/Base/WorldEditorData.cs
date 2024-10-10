@@ -350,7 +350,9 @@ namespace Arteranos.WorldEdit
         {
             IEnumerator Cor()
             {
-                WorldObject wo = WorldObject.Deserialize(new MemoryStream(spawn.WOSerialized));
+                Transform spawnerT = FindObjectByPath(spawn.SpawnerPath);
+
+                WorldObject wo = spawnerT.GetChild(spawn.Pick).MakeWorldObject();
 
                 GameObject spawnedWO = null;
                 yield return wo.Instantiate(shellObject, _res => spawnedWO = _res);
@@ -358,7 +360,7 @@ namespace Arteranos.WorldEdit
                 woc.HasNetworkShell = shellObject;
                 woc.IsNetworkedClientObject = !server;
                 woc.ExpirationTime = DateTime.UtcNow + TimeSpan.FromSeconds(spawn.Lifetime);
-                woc.DataObjectPath = spawn.spawnerPath;
+                woc.DataObject = spawnerT;
 
                 callback?.Invoke(spawnedWO);
             }

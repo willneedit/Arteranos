@@ -67,18 +67,6 @@ namespace Arteranos.WorldEdit.Components
 
         public void ServerGotClicked()
         {
-            byte[] serializedSpawnWO = null;
-
-            if (transform.childCount > 0)
-            {
-                int pick = Random.Range(0, transform.childCount);
-                WorldObject spawnWO = transform.GetChild(pick).MakeWorldObject();
-                using MemoryStream ms = new();
-                spawnWO.Serialize(ms);
-                serializedSpawnWO = ms.ToArray();
-            }
-            else if (serializedSpawnWO == null) return;
-
             // If we have no server data storage, create one now. 
             if (!transform.TryGetComponent(out WorldObjectData worldObjectData))
                 worldObjectData = transform.gameObject.AddComponent<WorldObjectData>();
@@ -93,12 +81,12 @@ namespace Arteranos.WorldEdit.Components
 
             G.ArteranosNetworkManager.SpawnObject(new CTSObjectSpawn()
             {
-                WOSerialized = serializedSpawnWO,
+                Pick = Random.Range(0, transform.childCount),
                 Lifetime = Lifetime,
                 Force = Force,
                 Position = transform.position, // _World_ coordinates.
                 Rotation = transform.rotation,
-                spawnerPath = WorldEditorData.GetPathFromObject(transform),
+                SpawnerPath = WorldEditorData.GetPathFromObject(transform),
             });
         }
     }

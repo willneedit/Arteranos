@@ -22,7 +22,7 @@ namespace Arteranos.WorldEdit
         public Guid Id { get; set; } = new();
         public List<WOCBase> WOComponents { get; set; } = null;
         public DateTime ExpirationTime { get; set; } = DateTime.MaxValue;
-        public List<Guid> DataObjectPath { get; set; } = null;
+        public Transform DataObject { get; set; } = null;
         public Transform HasNetworkShell { get; set; } = null;
         public bool IsNetworkedClientObject
         {
@@ -100,17 +100,8 @@ namespace Arteranos.WorldEdit
 
             // If it's a spawned object, sign ourselves off. No matter if clients miscounted,
             // the server has the authority.
-            if (HasNetworkShell && DataObjectPath != null)
-            {
-                try
-                {
-                    // throws if the data storage is already been destroyed, but that would be okay
-                    Transform doT = WorldEditorData.FindObjectByPath(DataObjectPath);
-                    if (doT != null && doT.TryGetComponent(out WorldObjectData worldObjectData))
-                        worldObjectData.SpawnedItems--;
-                }
-                catch { }
-            }
+            if (DataObject && DataObject.TryGetComponent(out WorldObjectData worldObjectData))
+                worldObjectData.SpawnedItems--;
         }
 
         private void GotEditorModeChanged(bool editing) => UpdatePhysicsState();

@@ -13,6 +13,7 @@ using Arteranos.WorldEdit;
 using Ipfs;
 using Mirror;
 using ProtoBuf;
+using UnityEngine;
 
 namespace Arteranos.Core
 {
@@ -29,7 +30,7 @@ namespace Arteranos.Core
     [ProtoInclude(65540, typeof(CTSMessage))]
     [ProtoInclude(65541, typeof(CTSServerConfig))]
     [ProtoInclude(65542, typeof(CTSWorldObjectChange))]
-    [ProtoInclude(65543, typeof(CTSObjectSpawn))]
+
     public class CTSPacket
     {
         [ProtoMember(1)]
@@ -109,20 +110,15 @@ namespace Arteranos.Core
         public byte[] changerequest; // Arteranos.WorldEdit.WorldChange, serialized
     }
 
-    [ProtoContract]
-    public class CTSObjectSpawn : CTSPacket
+    public class CTSObjectSpawn
     {
-        [ProtoMember(2)]
+        // Object to spawn is the <spawnerPath>'s <Pick>th child.
+        public List<Guid> SpawnerPath;
+        public int Pick;
+
         public float Lifetime;
-        [ProtoMember(3)]
-        public byte[] WOSerialized;     // Arteranos.WorldEdit.WorldObject, serialized
-        [ProtoMember(4)]
-        public WOVector3 Force;
-        [ProtoMember(5)]
-        public WOVector3 Position;
-        [ProtoMember(6)]
-        public WOQuaternion Rotation;
-        [ProtoMember(7)]
-        public List<Guid> spawnerPath;
+        public Vector3 Force;
+        public Vector3 Position;
+        public Quaternion Rotation;
     }
 }

@@ -14,7 +14,7 @@ namespace Arteranos
     {
         public void TriggerSpawn()
         {
-            SettingsManager.EmitToServerCTSPacket(new CTSObjectSpawn());
+
         }
     }
 }
