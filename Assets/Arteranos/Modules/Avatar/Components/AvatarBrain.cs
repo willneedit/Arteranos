@@ -10,6 +10,7 @@ using Random = UnityEngine.Random;
 using Arteranos.Core.Cryptography;
 using Ipfs.Cryptography.Proto;
 using System.Collections.Generic;
+using Arteranos.Services;
 
 namespace Arteranos.Avatar
 {
@@ -678,38 +679,61 @@ namespace Arteranos.Avatar
         #endregion
         // ---------------------------------------------------------------
         #region Interacting World Objects
-        public void GotObjectClicked(GameObject clicked) => CmdGotObjectClicked(clicked);
-        public void GotObjectClicked(List<Guid> clicked) => CmdGotObjectClicked(clicked);
-        public void GotObjectGrabbed(GameObject grabbed) => CmdGotObjectGrabbed(grabbed);
-        public void GotObjectGrabbed(List<Guid> grabbed) => CmdGotObjectGrabbed(grabbed);
-        public void GotObjectReleased(GameObject released) => CmdGotObjectReleased(released);
-        public void GotObjectReleased(List<Guid> released) => CmdGotObjectReleased(released);
-        public void GotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation) => CmdGotObjectHeld(holding, position, rotation);
-        public void GotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation) => CmdGotObjectHeld(holding, position, rotation);
+        public void GotObjectClicked(GameObject clicked) 
+            => CmdGotObjectClicked(GetEnclosingObject(clicked));
+        public void GotObjectClicked(List<Guid> clicked) 
+            => CmdGotObjectClicked(clicked);
+        public void GotObjectGrabbed(GameObject grabbed) 
+            => CmdGotObjectGrabbed(GetEnclosingObject(grabbed));
+        public void GotObjectGrabbed(List<Guid> grabbed) 
+            => CmdGotObjectGrabbed(grabbed);
+        public void GotObjectReleased(GameObject released) 
+            => CmdGotObjectReleased(GetEnclosingObject(released));
+        public void GotObjectReleased(List<Guid> released) 
+            => CmdGotObjectReleased(released);
+        public void GotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation) 
+            => CmdGotObjectHeld(GetEnclosingObject(holding), position, rotation);
+        public void GotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation) 
+            => CmdGotObjectHeld(holding, position, rotation);
 
         [Command]
-        private void CmdGotObjectClicked(GameObject clicked) => G.WorldEditorData.GotWorldObjectClicked(clicked);
+        private void CmdGotObjectClicked(GameObject clicked)
+            => G.WorldEditorData.GotWorldObjectClicked(GetEnclosedObject(clicked));
 
         [Command]
-        private void CmdGotObjectClicked(List<Guid> clicked) => G.WorldEditorData.GotWorldObjectClicked(clicked);
+        private void CmdGotObjectClicked(List<Guid> clicked) 
+            => G.WorldEditorData.GotWorldObjectClicked(clicked);
 
         [Command]
-        private void CmdGotObjectGrabbed(GameObject grabbed) => G.WorldEditorData.GotWorldObjectGrabbed(grabbed);
+        private void CmdGotObjectGrabbed(GameObject grabbed) 
+            => G.WorldEditorData.GotWorldObjectGrabbed(GetEnclosedObject(grabbed));
 
         [Command]
-        private void CmdGotObjectGrabbed(List<Guid> grabbed) => G.WorldEditorData.GotWorldObjectGrabbed(grabbed);
+        private void CmdGotObjectGrabbed(List<Guid> grabbed) 
+            => G.WorldEditorData.GotWorldObjectGrabbed(grabbed);
 
         [Command]
-        private void CmdGotObjectReleased(GameObject released) => G.WorldEditorData.GotWorldObjectReleased(released);
+        private void CmdGotObjectReleased(GameObject released) 
+            => G.WorldEditorData.GotWorldObjectReleased(GetEnclosedObject(released));
 
         [Command]
-        private void CmdGotObjectReleased(List<Guid> released) => G.WorldEditorData.GotWorldObjectReleased(released);
+        private void CmdGotObjectReleased(List<Guid> released) 
+            => G.WorldEditorData.GotWorldObjectReleased(released);
 
         [Command]
-        private void CmdGotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation) => G.WorldEditorData.GotWorldObjectHeld(holding, position, rotation);
+        private void CmdGotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation) 
+            => G.WorldEditorData.GotWorldObjectHeld(GetEnclosedObject(holding), position, rotation);
 
         [Command]
-        private void CmdGotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation) => G.WorldEditorData.GotWorldObjectHeld(holding, position, rotation);
+        private void CmdGotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation) 
+            => G.WorldEditorData.GotWorldObjectHeld(holding, position, rotation);
+
+        private GameObject GetEnclosedObject(GameObject networkGO) 
+            => networkGO && networkGO.TryGetComponent(out IEnclosingObject o) ? o.EnclosedObject : networkGO;
+
+        private GameObject GetEnclosingObject(GameObject coreGO) 
+            => coreGO.TryGetComponent(out IEnclosedObject o) ? o.EnclosingObject : coreGO;
+
         #endregion
     }
 }

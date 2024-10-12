@@ -8,48 +8,67 @@
 using Arteranos.Core;
 using UnityEngine;
 using Mirror;
+using Arteranos.Services;
 
 namespace Arteranos.WorldEdit
 {
+
     public interface ISpawnInitData
     {
-        GameObject CoreGO { get; }
-        bool? IsOnServer { get; }
-
         void PropagateTransform(Vector3 position, Quaternion rotation);
         void ResumeNetworkTransform();
         void ServerInit(CTSObjectSpawn newValue);
         void SuspendNetworkTransform();
     }
 
-    public class SpawnInitData : NetworkBehaviour, ISpawnInitData
+    public class SpawnInitData : NetworkBehaviour, ISpawnInitData, IEnclosingObject
     {
-        [SyncVar(hook = nameof(GotInitData))]
+        [SyncVar]
         private CTSObjectSpawn InitData = null;
 
-        public GameObject CoreGO { get; private set; }
         public bool? IsOnServer { get; private set; } = null;
 
-        private NetworkTransformBase NetworkTransform = null;
+        public GameObject EnclosedObject => CoreGO;
 
-        [Client]
-        public void GotInitData(CTSObjectSpawn _1, CTSObjectSpawn newValue)
-        {
-            Init(newValue, false);
-        }
+        private NetworkTransformBase NetworkTransform = null;
+        private GameObject CoreGO = null;
 
         public void ServerInit(CTSObjectSpawn newValue)
         {
-            Init(newValue, true);
             InitData = newValue;
+
+            if (!NetworkServer.active) Init(newValue);
         }
 
-        private void Init(CTSObjectSpawn newValue, bool server)
+        public override void OnStartServer()
         {
+            base.OnStartServer();
+            // Debug.Log($"OnStartServer, s={isServer}, netId={netId}");
+
+            IsOnServer = isServer;
+            Init(InitData);
+        }
+
+        public override void OnStartClient()
+        {
+            base.OnStartClient();
+            // Debug.Log($"OnStartClient, s={isServer}, netId={netId}");
+
+            // Don't do that twice on host mode.
+            if(!isServer)
+            {
+                IsOnServer = isServer;
+                Init(InitData);
+            }
+        }
+
+        private void Init(CTSObjectSpawn newValue)
+        {
+            // TODO Perhaps a network ID confusion because of a botched initialization.
+            // The connection to the core GO is mistakenly to the *last* one
             Debug.Assert(newValue != null);
 
-            if (IsOnServer != null) return;
-            IsOnServer = server;
+            gameObject.name = $"Spawned Object s={IsOnServer}, nid={netId}";
 
             // Latecomer in a world with already existing spawned objects.
             SettingsManager.SetupWorldObjectRoot();
@@ -57,9 +76,11 @@ namespace Arteranos.WorldEdit
             // Set DDOL both for the shell object for the latecomer - the world is yet to load...
             DontDestroyOnLoad(gameObject);
 
-            G.WorldEditorData.CreateSpawnObject(newValue, transform, server, go =>
+            G.WorldEditorData.CreateSpawnObject(newValue, transform, go =>
             {
                 CoreGO = go;
+
+                Debug.Assert(go.TryGetComponent(out IEnclosedObject o) && o.EnclosingObject == gameObject);
 
                 if (TryGetComponent(out NetworkTransform))
                 {
@@ -80,18 +101,20 @@ namespace Arteranos.WorldEdit
             Destroy(CoreGO);
         }
 
+        // TODO Doesn't work. Inequal enabled state causes misattributing network transform data.
+
         // Server and Host have to remain on. Everyone still have to get the data, and
         // Host doesn't bounce the data back to its client part.
         public void SuspendNetworkTransform()
         {
-            if(NetworkTransform && !IsOnServer.Value)
-                NetworkTransform.enabled = false;
+            //if(NetworkTransform && IsOnServer == false)
+            //    NetworkTransform.enabled = false;
         }
 
         public void ResumeNetworkTransform()
         {
-            if (NetworkTransform && !IsOnServer.Value)
-                NetworkTransform.enabled = true;
+            //if (NetworkTransform && IsOnServer == false)
+            //    NetworkTransform.enabled = true;
         }
 
         public void PropagateTransform(Vector3 position, Quaternion rotation)

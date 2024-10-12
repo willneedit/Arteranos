@@ -948,7 +948,7 @@ namespace Arteranos.Services
             GameObject go = Instantiate(BP.I.NetworkedWorldObject);
             ISpawnInitData initData = go.GetComponent<ISpawnInitData>();
 
-            go.name = $"Spawned object (server)";
+            go.name = "Spawned object (server)";
             go.transform.SetPositionAndRotation(wos.Position, wos.Rotation);
 
             initData.ServerInit(wos);

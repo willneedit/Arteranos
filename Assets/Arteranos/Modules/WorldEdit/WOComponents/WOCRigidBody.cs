@@ -55,10 +55,6 @@ namespace Arteranos.WorldEdit.Components
 
         private WorldObjectComponent woc = null;
         
-        private GameObject GoOrShell => woc?.HasNetworkShell
-                    ? woc.HasNetworkShell.gameObject
-                    : GameObject;
-
         public override GameObject GameObject
         {
             get => base.GameObject;
@@ -106,7 +102,7 @@ namespace Arteranos.WorldEdit.Components
 
             if (clientGrabbed)
             {
-                if (G.Me != null) G.Me.GotObjectHeld(GoOrShell, GameObject.transform.position, GameObject.transform.rotation);
+                if (G.Me != null) G.Me.GotObjectHeld(GameObject, GameObject.transform.position, GameObject.transform.rotation);
                 else ServerGotObjectHeld(GameObject.transform.position, GameObject.transform.rotation);
             }
         }
@@ -116,10 +112,10 @@ namespace Arteranos.WorldEdit.Components
         {
             clientGrabbed = true;
 
-            if (woc.HasNetworkShell.TryGetComponent(out ISpawnInitData spawnInitData))
+            if (woc.EnclosingObject.TryGetComponent(out ISpawnInitData spawnInitData))
                 spawnInitData.SuspendNetworkTransform();
 
-            if (G.Me != null) G.Me.GotObjectGrabbed(GoOrShell);
+            if (G.Me != null) G.Me.GotObjectGrabbed(GameObject);
             else ServerGotGrabbed();
         }
 
@@ -127,10 +123,10 @@ namespace Arteranos.WorldEdit.Components
         {
             clientGrabbed = false;
 
-            if (woc.HasNetworkShell.TryGetComponent(out ISpawnInitData spawnInitData))
+            if (woc.EnclosingObject.TryGetComponent(out ISpawnInitData spawnInitData))
                 spawnInitData.ResumeNetworkTransform();
 
-            if (G.Me != null) G.Me.GotObjectReleased(GoOrShell);
+            if (G.Me != null) G.Me.GotObjectReleased(GameObject);
             else ServerGotReleased();
         }
 
@@ -151,7 +147,7 @@ namespace Arteranos.WorldEdit.Components
 
         public void ServerGotObjectHeld(Vector3 position, Quaternion rotation)
         {
-            if (woc.HasNetworkShell.TryGetComponent(out ISpawnInitData spawnInitData))
+            if (woc.EnclosingObject.TryGetComponent(out ISpawnInitData spawnInitData))
                 spawnInitData.PropagateTransform(position, rotation);
             else
                 // Transfer the data to the server object, the NetworkTransform takes care of

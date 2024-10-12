@@ -18,6 +18,7 @@ using Arteranos.Core;
 using Arteranos.Core.Managed;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 using Arteranos.WorldEdit.Components;
+using Arteranos.Services;
 
 
 namespace Arteranos.WorldEdit
@@ -346,21 +347,28 @@ namespace Arteranos.WorldEdit
         #endregion
         // ---------------------------------------------------------------
         #region Runtime Object Spawn
-        public void CreateSpawnObject(CTSObjectSpawn spawn, Transform shellObject, bool server, Action<GameObject> callback)
+        public void CreateSpawnObject(CTSObjectSpawn spawn, Transform shellObject, Action<GameObject> callback)
         {
             IEnumerator Cor()
             {
                 Transform spawnerT = FindObjectByPath(spawn.SpawnerPath);
 
-                WorldObject wo = spawnerT.GetChild(spawn.Pick).MakeWorldObject();
+                WorldObject blueprint = spawnerT.GetChild(spawn.Pick).MakeWorldObject();
+
+                // One way to do deep copying, especially complex structures? Serializing!
+                using MemoryStream ms = new();
+                blueprint.Serialize(ms);
+                ms.Position = 0;
+                WorldObject wo = WorldObject.Deserialize(ms);
 
                 GameObject spawnedWO = null;
                 yield return wo.Instantiate(shellObject, _res => spawnedWO = _res);
                 spawnedWO.TryGetComponent(out WorldObjectComponent woc);
-                woc.HasNetworkShell = shellObject;
-                woc.IsNetworkedClientObject = !server;
+                woc.EnclosingObject = shellObject.gameObject;
                 woc.ExpirationTime = DateTime.UtcNow + TimeSpan.FromSeconds(spawn.Lifetime);
                 woc.DataObject = spawnerT;
+
+                spawnedWO.name = $"{spawnedWO.name} (with {woc.EnclosingObject.name})";
 
                 callback?.Invoke(spawnedWO);
             }
@@ -527,15 +535,11 @@ namespace Arteranos.WorldEdit
         // ---------------------------------------------------------------
         #region Interactables dispatching
 
-        private bool AffectedComponent<T>(GameObject goOrShell, out T wocc)  where T : class
+        private bool AffectedComponent<T>(GameObject go, out T wocc)  where T : class
         {
             wocc = null;
 
-            if(!goOrShell) return false;
-
-            GameObject go = goOrShell.TryGetComponent(out ISpawnInitData spawnInitData)
-                ? spawnInitData.CoreGO
-                : goOrShell;
+            if(!go) return false;
 
             return go.TryGetComponent(out WorldObjectComponent woc) && woc.TryGetWOC(out wocc);
         }

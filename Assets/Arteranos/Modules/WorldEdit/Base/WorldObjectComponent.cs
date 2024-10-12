@@ -12,27 +12,32 @@ using UnityEngine;
 using System;
 using UnityEngine.XR.Interaction.Toolkit;
 using Arteranos.WorldEdit.Components;
+using Arteranos.Services;
 
 namespace Arteranos.WorldEdit
 {
     // Just for keeping the data for converting the gameobject to a serializable world object.
-    public class WorldObjectComponent : MonoBehaviour
+    public class WorldObjectComponent : MonoBehaviour, IEnclosedObject
     {
         public WorldObjectAsset Asset { get; set; } = null;
         public Guid Id { get; set; } = new();
         public List<WOCBase> WOComponents { get; set; } = null;
         public DateTime ExpirationTime { get; set; } = DateTime.MaxValue;
         public Transform DataObject { get; set; } = null;
-        public Transform HasNetworkShell { get; set; } = null;
-        public bool IsNetworkedClientObject
+        public GameObject EnclosingObject
         {
-            get => isNetworkedClientObject;
+            get => enclosingObject;
             set
             {
-                isNetworkedClientObject = value;
+                enclosingObject = value;
                 UpdatePhysicsState();
             }
         }
+        public bool? IsOnServer 
+            => EnclosingObject && EnclosingObject.TryGetComponent(out IEnclosingObject o) 
+            ? o.IsOnServer 
+            : null;
+
         public bool IsLocked
         {
             get => isLocked;
@@ -64,12 +69,12 @@ namespace Arteranos.WorldEdit
         }
 
 
-        private bool isNetworkedClientObject = false;
         private bool isLocked = false;
 
         private Rigidbody body = null;
         private XRGrabInteractable mover = null;
         private XRSimpleInteractable clicker = null;
+        private GameObject enclosingObject = null;
 
         private void Awake()
         {
@@ -111,11 +116,11 @@ namespace Arteranos.WorldEdit
             if (ExpirationTime < DateTime.UtcNow)
             {
                 // It it's networked, target the shell instead of the object itself.
-                Transform toGoT = HasNetworkShell ? HasNetworkShell : transform;
+                GameObject toGo = EnclosingObject ? EnclosingObject : gameObject;
 
-                // And if it's networked, let the server do it, not the client itself.
-                if (!isNetworkedClientObject)
-                    Destroy(toGoT.gameObject);
+                // Do it on the server or on offline, not on a client
+                if (IsOnServer != false)
+                    Destroy(toGo);
             }
                 
             foreach (WOCBase component in WOComponents)
@@ -253,7 +258,7 @@ namespace Arteranos.WorldEdit
             }
 
             bool isInEditMode = G.WorldEditorData.IsInEditMode;
-            bool needsKinematic = isNetworkedClientObject;
+            bool needsKinematic = IsOnServer == false;
 
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover || !clicker) return;

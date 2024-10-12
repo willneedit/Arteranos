@@ -7,7 +7,6 @@
 
 using Arteranos.Core;
 using ProtoBuf;
-using System.IO;
 using UnityEngine;
 
 namespace Arteranos.WorldEdit.Components
