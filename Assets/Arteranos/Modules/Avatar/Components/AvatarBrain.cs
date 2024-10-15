@@ -695,6 +695,8 @@ namespace Arteranos.Avatar
             => CmdGotObjectHeld(GetEnclosingObject(holding), position, rotation);
         public void GotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation) 
             => CmdGotObjectHeld(holding, position, rotation);
+        public void ManageAuthorityOf(GameObject GO, bool auth)
+            => CmdManageAuthorityOf(GetEnclosingObject(GO), auth);
 
         [Command]
         private void CmdGotObjectClicked(GameObject clicked)
@@ -727,6 +729,29 @@ namespace Arteranos.Avatar
         [Command]
         private void CmdGotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation) 
             => G.WorldEditorData.GotWorldObjectHeld(holding, position, rotation);
+
+        [Command]
+        private void CmdManageAuthorityOf(GameObject networkGO, bool auth)
+        {
+            // Object lost -- maybe destroyed.
+            if (!networkGO) return;
+
+            if(!networkGO.TryGetComponent(out NetworkIdentity networkIdentity))
+            {
+                Debug.LogError($"{networkGO.name} has no NetworkIdentity");
+            }
+
+            if (auth)
+            {
+                networkIdentity.RemoveClientAuthority();
+                networkIdentity.AssignClientAuthority(connectionToClient);
+            }
+            else
+            {
+                networkIdentity.RemoveClientAuthority();
+                networkIdentity.AssignClientAuthority(NetworkServer.localConnection);
+            }
+        }
 
         private GameObject GetEnclosedObject(GameObject networkGO) 
             => networkGO && networkGO.TryGetComponent(out IEnclosingObject o) ? o.EnclosedObject : networkGO;

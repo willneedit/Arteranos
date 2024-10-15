@@ -15,10 +15,7 @@ namespace Arteranos.WorldEdit
 
     public interface ISpawnInitData
     {
-        void PropagateTransform(Vector3 position, Quaternion rotation);
-        void ResumeNetworkTransform();
         void ServerInit(CTSObjectSpawn newValue);
-        void SuspendNetworkTransform();
     }
 
     public class SpawnInitData : NetworkBehaviour, ISpawnInitData, IEnclosingObject
@@ -62,6 +59,36 @@ namespace Arteranos.WorldEdit
             }
         }
 
+        private Rigidbody Rigidbody = null;
+        private bool? wasKinematic = null;
+        private bool gotAuthorityLost = false;
+
+        public override void OnStartAuthority()
+        {
+            base.OnStartAuthority();
+
+            if (!isServer) return;
+
+            if (Rigidbody)
+                Rigidbody.isKinematic = wasKinematic.Value;
+
+            if(NetworkTransform)
+                NetworkTransform.Reset();
+        }
+
+        public override void OnStopAuthority()
+        {
+            base.OnStopAuthority();
+
+            if (!isServer) return;
+
+            if (Rigidbody)
+                Rigidbody.isKinematic = true;
+
+            if (NetworkTransform)
+                NetworkTransform.Reset();
+        }
+
         private void Init(CTSObjectSpawn newValue)
         {
             // TODO Perhaps a network ID confusion because of a botched initialization.
@@ -91,6 +118,12 @@ namespace Arteranos.WorldEdit
                     NetworkTransform.target = go.transform;
                     go.transform.SetPositionAndRotation(oldPosition, oldRotation);
                 }
+
+                if(go.TryGetComponent(out Rigidbody))
+                {
+                    // Set the default kinematic state.
+                    wasKinematic = Rigidbody.isKinematic;
+                }
             });
         }
 
@@ -99,28 +132,6 @@ namespace Arteranos.WorldEdit
         private void OnDestroy()
         {
             Destroy(CoreGO);
-        }
-
-        // TODO Doesn't work. Inequal enabled state causes misattributing network transform data.
-
-        // Server and Host have to remain on. Everyone still have to get the data, and
-        // Host doesn't bounce the data back to its client part.
-        public void SuspendNetworkTransform()
-        {
-            //if(NetworkTransform && IsOnServer == false)
-            //    NetworkTransform.enabled = false;
-        }
-
-        public void ResumeNetworkTransform()
-        {
-            //if (NetworkTransform && IsOnServer == false)
-            //    NetworkTransform.enabled = true;
-        }
-
-        public void PropagateTransform(Vector3 position, Quaternion rotation)
-        {
-            CoreGO.transform.SetPositionAndRotation(position, rotation);
-            NetworkTransform.Reset();
         }
     }
 }

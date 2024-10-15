@@ -51,5 +51,6 @@ namespace Arteranos.Avatar
         void GotObjectGrabbed(List<Guid> grabbed);
         void GotObjectReleased(List<Guid> released);
         void GotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation);
+        void ManageAuthorityOf(GameObject GO, bool auth);
     }
 }

@@ -53,106 +53,34 @@ namespace Arteranos.WorldEdit.Components
 
         // ---------------------------------------------------------------
 
-        private WorldObjectComponent woc = null;
-        
-        public override GameObject GameObject
-        {
-            get => base.GameObject;
-            set
-            {
-                base.GameObject = value;
-                GameObject.TryGetComponent(out woc);
-            }
-        }
-
-        public Rigidbody Rigidbody 
-        { 
-            get 
-            {
-                if (!rigidbody) GameObject.TryGetComponent(out rigidbody);
-                return rigidbody;
-            } 
-        }
-
-        public bool IsKinematic
-        {
-            get
-            {
-                if (!isKinematic.HasValue) isKinematic = Rigidbody.isKinematic;
-                return isKinematic.Value;
-            }
-        }
-
         public bool IsMovable => Grabbable;
-
-        private bool clientGrabbed = false;
-        private Rigidbody rigidbody = null;
-        private bool? isKinematic = null;
-
-        // Grab & Release: When a non-Host user grabs the object, we have to disable the
-        // NetworkTransform to effectively reverse the data flow from the grabbing user's
-        // client to the server, which it will propagate to the other users
-
-        public override void Update()
-        {
-            base.Update();
-
-            // HACK: Value may not set before the first update phase
-            bool k = IsKinematic;
-
-            if (clientGrabbed)
-            {
-                if (G.Me != null) G.Me.GotObjectHeld(GameObject, GameObject.transform.position, GameObject.transform.rotation);
-                else ServerGotObjectHeld(GameObject.transform.position, GameObject.transform.rotation);
-            }
-        }
 
         // On client, suspend the Network Transform to stop receiving data.
         public void GotGrabbed()
         {
-            clientGrabbed = true;
-
-            if (woc.EnclosingObject.TryGetComponent(out ISpawnInitData spawnInitData))
-                spawnInitData.SuspendNetworkTransform();
-
-            if (G.Me != null) G.Me.GotObjectGrabbed(GameObject);
+            if (G.Me != null)
+            {
+                G.Me.GotObjectGrabbed(GameObject);
+                G.Me.ManageAuthorityOf(GameObject, true);
+            }
             else ServerGotGrabbed();
         }
 
         public void GotReleased()
         {
-            clientGrabbed = false;
-
-            if (woc.EnclosingObject.TryGetComponent(out ISpawnInitData spawnInitData))
-                spawnInitData.ResumeNetworkTransform();
-
-            if (G.Me != null) G.Me.GotObjectReleased(GameObject);
+            if (G.Me != null)
+            {
+                G.Me.GotObjectReleased(GameObject);
+                G.Me.ManageAuthorityOf(GameObject, false);
+            }
             else ServerGotReleased();
         }
 
         // On server, suspend the physics engine for the object to control the movement
-        public void ServerGotGrabbed()
-        {
-            // Either it's already true if we're the host's local user by the XRGrabInteractable,
-            // or the Physics interferes with the client's provided tracking. So, set it.
-            Rigidbody.isKinematic = true;
-        }
+        public void ServerGotGrabbed() { }
 
-        public void ServerGotReleased()
-        {
-            // XRGrabInteractable would reset the state, but we have to do it manually on
-            // the server, especially with the remote controlled object.
-            Rigidbody.isKinematic = IsKinematic;
-        }
+        public void ServerGotReleased() { }
 
-        public void ServerGotObjectHeld(Vector3 position, Quaternion rotation)
-        {
-            if (woc.EnclosingObject.TryGetComponent(out ISpawnInitData spawnInitData))
-                spawnInitData.PropagateTransform(position, rotation);
-            else
-                // Transfer the data to the server object, the NetworkTransform takes care of
-                // the synchronization.
-                GameObject.transform.SetPositionAndRotation(position, rotation);
-        }
+        public void ServerGotObjectHeld(Vector3 position, Quaternion rotation) { }
     }
 }

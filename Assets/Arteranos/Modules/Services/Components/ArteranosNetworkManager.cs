@@ -953,7 +953,7 @@ namespace Arteranos.Services
 
             initData.ServerInit(wos);
 
-            if (NetworkServer.active) NetworkServer.Spawn(go);
+            if (NetworkServer.active) NetworkServer.Spawn(go, NetworkServer.localConnection);
         }
 
         #endregion
