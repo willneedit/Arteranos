@@ -753,7 +753,7 @@ namespace Arteranos.Services
             // Admin list could have been changed
             // (Maybe a ban list, too, in future...)
             // so the server description has to be compiled and published.
-            _ = G.IPFSService.FlipServerDescription(true);
+            _ = G.IPFSService.FlipServerDescription();
 
             if (receiver != null)
             {
@@ -893,6 +893,8 @@ namespace Arteranos.Services
                 ss.ServerPort = conf.ServerPort;
                 ss.UseUPnP = conf.UseUPnP;
                 ss.ShutdownIPFS = conf.ShutdownIPFS;
+                ss.AnnounceRefreshTime = conf.AnnounceRefreshTime;
+                ss.ListenRefreshTime = conf.ListenRefreshTime;
                 ss.Name = conf.Name;
                 ss.Description = conf.Description;
                 ss.Permissions = conf.Permissions;
@@ -900,7 +902,7 @@ namespace Arteranos.Services
                 ss.ServerIcon = conf.ServerIcon;
 
                 ss.Save();
-                _ = G.IPFSService.FlipServerDescription(true);
+                _ = G.IPFSService.FlipServerDescription();
             }
             else
                 // Report the current server's settings

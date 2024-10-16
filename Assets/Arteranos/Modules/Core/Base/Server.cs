@@ -38,6 +38,14 @@ namespace Arteranos.Core
         [ProtoMember(12, IsRequired = true)]
         public bool ShutdownIPFS = true;
 
+        // Interval to announce server online data
+        [ProtoMember(13)]
+        public int AnnounceRefreshTime = 60;
+
+        // Time to refresh listening to the channel
+        [ProtoMember(14)]
+        public int ListenRefreshTime = 300;
+
         // The server nickname.
         [ProtoMember(3)]
         public string Name = string.Empty;
@@ -77,6 +85,8 @@ namespace Arteranos.Core
             Description = other.Description;
             UseUPnP = other.UseUPnP;
             ShutdownIPFS = other.ShutdownIPFS;
+            AnnounceRefreshTime = other.AnnounceRefreshTime;
+            ListenRefreshTime = other.ListenRefreshTime;
             Permissions = other.Permissions;
             Public = other.Public;
             ServerAgrPublicKey = other.ServerAgrPublicKey;

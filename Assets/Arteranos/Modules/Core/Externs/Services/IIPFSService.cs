@@ -29,7 +29,7 @@ namespace Arteranos.Services
 
         Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default);
         Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default);
-        Task FlipServerDescription(bool reload);
+        Task FlipServerDescription();
         Task<Stream> Get(string path, CancellationToken cancel = default);
         Task<IFileSystemNode> ListFile(string path, CancellationToken cancel = default);
         Task<IEnumerable<Cid>> ListPinned(CancellationToken cancel = default);

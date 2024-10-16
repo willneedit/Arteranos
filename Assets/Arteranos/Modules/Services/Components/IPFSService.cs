@@ -47,7 +47,6 @@ namespace Arteranos.Services
 
         private bool ForceIPFSShutdown = true;
 
-        private const int heartbeatSeconds = 60;
         private const string AnnouncerTopic = "/X-Arteranos";
         private IpfsClientEx ipfs = null;
         private Peer self = null;
@@ -75,8 +74,12 @@ namespace Arteranos.Services
         {
             IpfsClientEx ipfsTmp = null;
 
-            // Shared directory between Desktop and Dedicated Server - one node, one daemon.
-            string repodir = $"{Application.persistentDataPath}/.ipfs";
+            // Running the same IPFS daemon for both the dedicated server and
+            // the desktop app will lead to confustion because of using the
+            // same peer ID.
+            //
+            // So, to each its own.
+            string repodir = $"{ConfigUtils.persistentDataPath}/.ipfs";
 
 
             IEnumerator InitializeIPFSCoroutine()
@@ -255,16 +258,14 @@ namespace Arteranos.Services
             {
                 Debug.Log("Subscribing Arteranos PubSub channel");
 
-                int pubsubSeconds = 300;
-
                 while(true)
                 {
-                    using CancellationTokenSource cts = new(pubsubSeconds * 1000 + 2000);
+                    using CancellationTokenSource cts = new(G.Server.ListenRefreshTime * 1000 + 2000);
 
                     // Truly async.
                     _ = ipfs.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
 
-                    yield return new WaitForSeconds(pubsubSeconds);
+                    yield return new WaitForSeconds(G.Server.ListenRefreshTime);
 
                     cts.Cancel();
 
@@ -424,7 +425,7 @@ namespace Arteranos.Services
 
         private async void OnDisable()
         {
-            await FlipServerDescription(false);
+            await FlipServerDescription();
 
 
             cts?.Cancel();
@@ -481,7 +482,7 @@ namespace Arteranos.Services
         {
             while (true)
             {
-                yield return Asyncs.Async2Coroutine(FlipServerDescription(true));
+                yield return Asyncs.Async2Coroutine(FlipServerDescription());
 
                 // One day
                 yield return new WaitForSeconds(24 * 60 * 60);
@@ -508,12 +509,12 @@ namespace Arteranos.Services
                     SendServerGoodbye_();
                 }
 
-                yield return new WaitForSeconds(heartbeatSeconds);
+                yield return new WaitForSeconds(G.Server.AnnounceRefreshTime);
             }
             // NOTREACHED
         }
 
-        public async Task FlipServerDescription(bool reload)
+        public async Task FlipServerDescription()
         {
             async Task<IFileSystemNode> CreateSDFile()
             {
@@ -581,8 +582,6 @@ namespace Arteranos.Services
                 return await ipfs.FileSystemEx.CreateDirectoryAsync(list).ConfigureAwait(false);
             }
 
-            if (!reload) return;
-
             IFileSystemNode fsn = await CreateServerDescription().ConfigureAwait(false);
             CurrentSDCid = fsn.Id;
 
@@ -605,8 +604,11 @@ namespace Arteranos.Services
 
         private void FlipServerOnlineData_()
         {
+            // If we're explicitely set the shorter time, we lower the flood throttling, too.
+            int floodmark = G.Server.AnnounceRefreshTime < 30 ? G.Server.AnnounceRefreshTime : 30;
+
             // Flood mitigation
-            if (last > DateTime.UtcNow - TimeSpan.FromSeconds(30)) return;
+            if (last > DateTime.UtcNow - TimeSpan.FromSeconds(floodmark)) return;
             last = DateTime.UtcNow;
 
             List<byte[]> UserFingerprints = (from user in G.NetworkStatus.GetOnlineUsers()
@@ -714,7 +716,7 @@ namespace Arteranos.Services
                 }
                 catch
                 {
-                    Debug.Log($"Timeout while downloading server online data from {SenderPeerID} - likely offline.");
+                    Debug.Log($"Timeout while downloading server description from {SenderPeerID}");
                 }
             }
 

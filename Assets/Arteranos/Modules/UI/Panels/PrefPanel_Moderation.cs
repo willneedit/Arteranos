@@ -31,6 +31,9 @@ namespace Arteranos.UI
         public Toggle chk_UseUPnP = null;
         public Toggle chk_ShutdownIPFS = null;
 
+        public NumberedSlider sld_AnnounceRefresh = null;
+        public NumberedSlider sld_ListenRefreshTime = null;
+
         public TMP_InputField txt_Description = null;
         public IconSelectorBar bar_IconSelector = null;
 
@@ -57,6 +60,9 @@ namespace Arteranos.UI
             txt_ServerPort.onValueChanged.AddListener(SetDirty);
             chk_UseUPnP.onValueChanged.AddListener(SetDirty);
             chk_ShutdownIPFS.onValueChanged.AddListener(SetDirty);
+
+            sld_AnnounceRefresh.OnValueChanged += SetDirty;
+            sld_ListenRefreshTime.OnValueChanged += SetDirty;
 
             chk_Public.onValueChanged.AddListener(SetDirty);
 
@@ -85,6 +91,7 @@ namespace Arteranos.UI
 
         private void SetDirty(bool _) => dirty = true;
         private void SetDirty(string _) => dirty = true;
+        private void SetDirty(float _) => dirty = true;
 
         protected override void OnEnable()
         {
@@ -116,6 +123,8 @@ namespace Arteranos.UI
             txt_ServerPort.text = ss.ServerPort.ToString();
             chk_UseUPnP.isOn = ss.UseUPnP;
             chk_ShutdownIPFS.isOn = ss.ShutdownIPFS;
+            sld_AnnounceRefresh.value = ss.AnnounceRefreshTime;
+            sld_ListenRefreshTime.value = ss.ListenRefreshTime;
 
             txt_ServerName.text = ss.Name;
             txt_Description.text = ss.Description;
@@ -144,6 +153,8 @@ namespace Arteranos.UI
                 Permissions = Permissions,
                 ServerPort = int.Parse(txt_ServerPort.text),
                 UseUPnP = chk_UseUPnP.isOn,
+                AnnounceRefreshTime = (int) sld_AnnounceRefresh.value,
+                ListenRefreshTime = (int) sld_ListenRefreshTime.value,
                 ShutdownIPFS = chk_ShutdownIPFS.isOn,
                 Name = txt_ServerName.text,
                 Description = txt_Description.text,
