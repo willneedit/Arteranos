@@ -16,6 +16,8 @@ namespace Arteranos.Services
     {
         GameObject EnclosedObject { get; }
         bool? IsOnServer { get; }
+
+        void ChangeAuthority(GameObject targetGO, bool auth);
     }
 
     public interface IEnclosedObject

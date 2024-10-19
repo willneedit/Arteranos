@@ -434,6 +434,10 @@ namespace Arteranos.Avatar
             if (!isLocalPlayer)
                 throw new InvalidOperationException("Not owner");
 
+            // Maybe not yet fully initialized.
+            if (to == null)
+                return SocialState.None;
+
             return G.Client.Me.SocialList.TryGetValue(to, out UserSocialEntryJSON state)
                         ? state.State : SocialState.None;
         }
@@ -512,7 +516,7 @@ namespace Arteranos.Avatar
                 throw new InvalidOperationException("Not owner");
 
             // Maybe the intended receiver logged off while you tried to send a goodbye message.
-            if (receiver == null) return;
+            if (receiver?.UserID == null) return;
 
             G.Client.SaveSocialStates(receiver.UserID, state, receiver.UserIcon);
 
@@ -743,21 +747,8 @@ namespace Arteranos.Avatar
             // Object lost -- maybe destroyed.
             if (!networkGO) return;
 
-            if(!networkGO.TryGetComponent(out NetworkIdentity networkIdentity))
-            {
-                Debug.LogError($"{networkGO.name} has no NetworkIdentity");
-            }
-
-            if (auth)
-            {
-                networkIdentity.RemoveClientAuthority();
-                networkIdentity.AssignClientAuthority(connectionToClient);
-            }
-            else
-            {
-                networkIdentity.RemoveClientAuthority();
-                networkIdentity.AssignClientAuthority(NetworkServer.localConnection);
-            }
+            networkGO.TryGetComponent(out IEnclosingObject o);
+            o.ChangeAuthority(gameObject, auth);
         }
 
         private GameObject GetEnclosedObject(GameObject networkGO) 

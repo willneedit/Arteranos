@@ -25,10 +25,9 @@ namespace Arteranos.WorldEdit
 
         public bool? IsOnServer { get; private set; } = null;
 
-        public GameObject EnclosedObject => CoreGO;
+        public GameObject EnclosedObject { get; set; } = null;
 
         private NetworkTransformBase NetworkTransform = null;
-        private GameObject CoreGO = null;
 
         public void ServerInit(CTSObjectSpawn newValue)
         {
@@ -61,33 +60,6 @@ namespace Arteranos.WorldEdit
 
         private Rigidbody Rigidbody = null;
         private bool? wasKinematic = null;
-        private bool gotAuthorityLost = false;
-
-        public override void OnStartAuthority()
-        {
-            base.OnStartAuthority();
-
-            if (!isServer) return;
-
-            if (Rigidbody)
-                Rigidbody.isKinematic = wasKinematic.Value;
-
-            if(NetworkTransform)
-                NetworkTransform.Reset();
-        }
-
-        public override void OnStopAuthority()
-        {
-            base.OnStopAuthority();
-
-            if (!isServer) return;
-
-            if (Rigidbody)
-                Rigidbody.isKinematic = true;
-
-            if (NetworkTransform)
-                NetworkTransform.Reset();
-        }
 
         private void Init(CTSObjectSpawn newValue)
         {
@@ -105,7 +77,7 @@ namespace Arteranos.WorldEdit
 
             G.WorldEditorData.CreateSpawnObject(newValue, transform, go =>
             {
-                CoreGO = go;
+                this.EnclosedObject = go;
 
                 Debug.Assert(go.TryGetComponent(out IEnclosedObject o) && o.EnclosingObject == gameObject);
 
@@ -117,6 +89,10 @@ namespace Arteranos.WorldEdit
                     transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
                     NetworkTransform.target = go.transform;
                     go.transform.SetPositionAndRotation(oldPosition, oldRotation);
+
+                    // Default is orphaned object, server takes the role of a foster parent
+                    // and the clients have to stay silent, fornow.
+                    if (isServer) NetworkTransform.syncDirection = SyncDirection.ServerToClient;
                 }
 
                 if(go.TryGetComponent(out Rigidbody))
@@ -131,7 +107,37 @@ namespace Arteranos.WorldEdit
         // do destroy the enclosing object, even if it's detached by grab.
         private void OnDestroy()
         {
-            Destroy(CoreGO);
+            Destroy(EnclosedObject);
+        }
+
+        // ---------------------------------------------------------------
+
+        [Server]
+        public void ChangeAuthority(GameObject targetGO, bool auth)
+        {
+            // Debug.Log($"[{gameObject.name}] Authority change: o={targetGO.name}, auth={auth}");
+
+            if (!targetGO.TryGetComponent(out NetworkIdentity targetIdentity))
+            {
+                Debug.LogError($"{targetGO.name} has no NetworkIdentity");
+                return;
+            }
+
+            NetworkTransform.syncDirection = auth
+                ? SyncDirection.ClientToServer  // true: let the client guide the flow
+                : SyncDirection.ServerToClient; // false: Server takes the helm
+
+            if (Rigidbody)
+                Rigidbody.isKinematic = auth
+                    ? true                      // true: Server has to keep its hands off
+                    : wasKinematic.Value;       // false: revert to the default
+
+            if (auth)
+                netIdentity.AssignClientAuthority(targetIdentity.connectionToClient);
+            else
+                netIdentity.RemoveClientAuthority();
+
+            NetworkTransform.Reset();
         }
     }
 }
