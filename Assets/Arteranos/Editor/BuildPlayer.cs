@@ -96,6 +96,18 @@ namespace Arteranos.Editor
             AssetDatabase.Refresh();
         }
 
+        public static void BumpForceReloadFile()
+        {
+            File.WriteAllText("Assets/Generated/dummy.cs", @"
+#pragma warning disable IDE1006
+public static class _dummy
+{
+    public static string creationTime = """ + DateTime.UtcNow.ToString() + @""";
+}"
+            );
+            AssetDatabase.Refresh();
+        }
+
         [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon", false, 90)]
         public static void RetrieveIPFSDaemon()
             => RetrieveIPFSDaemon(false);
@@ -115,6 +127,8 @@ namespace Arteranos.Editor
             Debug.Log($"Version detected: Full={v.Full}, M.M.P={v.MMP}");
 
             UpdateLicenseFiles();
+
+            BumpForceReloadFile();
         }
 
         [MenuItem("Arteranos/Build/Build Windows64", false, 110)]
