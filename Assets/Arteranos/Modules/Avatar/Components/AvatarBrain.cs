@@ -316,10 +316,18 @@ namespace Arteranos.Avatar
         private void CmdPropagateUserPrivacy(UserPrivacy userPrivacy) => m_UserPrivacy = userPrivacy;
 
         [Command]
-        private void CmdPropagateAvatarURL(string URL) => m_AvatarCidString = URL;
+        private void CmdPropagateAvatarURL(string URL)
+        {
+            m_AvatarCidString = URL;
+            if(!isClient) Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
+        }
 
         [Command]
-        private void CmdPropagateAvatarHeight(float height) => m_AvatarHeight = height;
+        private void CmdPropagateAvatarHeight(float height)
+        {
+            m_AvatarHeight = height;
+            if (!isClient) Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
+        }
 
         [Command]
         private void CmdPropagateUserIcon(string icon) => m_UserIcon = icon;

@@ -730,6 +730,9 @@ namespace Arteranos.Services
                 return a;
             }
 
+            // Empty message, maybe just going online.
+            if (string.IsNullOrEmpty(sddPath)) return;
+
             // Already known and saved, don't bother.
             if (KnownServerDescriptions.ContainsKey(SenderPeerID)
                 && KnownServerDescriptions[SenderPeerID] == sddPath)
