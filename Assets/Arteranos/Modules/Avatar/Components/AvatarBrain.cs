@@ -48,7 +48,15 @@ namespace Arteranos.Avatar
         public string UserIcon { get => m_UserIcon; private set => CmdPropagateUserIcon(value); }
 
         // Okay to use the setter. The SyncVar would yell at you if you fiddle with the privilege client-side
-        public UserID UserID { get => m_userID; set => m_userID = value; }
+        public UserID UserID
+        {
+            get => m_userID;
+            set
+            {
+                m_userID = value;
+                if (!isClient) OnUserIDChanged(null, m_userID);
+            }
+        }
 
         public PublicKey AgreePublicKey { get => m_AgreePublicKey; set => m_AgreePublicKey = value; }
 
@@ -291,22 +299,14 @@ namespace Arteranos.Avatar
         public void OnNetAppearanceStatusChanged(int _1, int _2) 
             => UpdateNetAppearanceStatus();
 
-        private void OnAvatarCidStringChanged(string _1, string _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
+        private void OnAvatarCidStringChanged(string _1, string _2) 
+            => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
 
-        private void OnAvatarHeightChanged(float _1, float _2) => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
+        private void OnAvatarHeightChanged(float _1, float _2) 
+            => Body?.ReloadAvatar(m_AvatarCidString, m_AvatarHeight);
 
-        private void OnUserIDChanged(UserID _1, UserID userID)
-        {
-            if(isServer)
-            {
-                int connId = GetComponent<NetworkIdentity>().connectionToClient.connectionId;
-                name = $"Avatar [{userID.Nickname}][connId={connId}, netId={netId}]";
-            }
-            else
-            {
-                name = $"Avatar [{userID.Nickname}][netId={netId}]";
-            }
-        }
+        private void OnUserIDChanged(UserID _1, UserID userID) 
+            => name = $"Avatar [{userID.Nickname}][netId={netId}]";
 
         // Maybe I have to include a second component for the client-guided variables?
         [Command]
@@ -607,15 +607,15 @@ namespace Arteranos.Avatar
         // ---------------------------------------------------------------
         #region Emotes performance
 
-        private IEnumerator CleanupEmojiPS(ParticleSystem ps)
-        {
-            yield return new WaitForSeconds(5);
-
-            Destroy(ps.gameObject);
-        }
-
         private void LoopPerformEmoji(string emojiName)
         {
+            IEnumerator CleanupEmojiPS(ParticleSystem ps)
+            {
+                yield return new WaitForSeconds(5);
+
+                Destroy(ps.gameObject);
+            }
+
             ParticleSystem ps = EmojiSettings.Load().GetEmotePS(emojiName);
 
             if(ps == null) return;

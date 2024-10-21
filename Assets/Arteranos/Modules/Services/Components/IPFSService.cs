@@ -425,7 +425,7 @@ namespace Arteranos.Services
 
         private async void OnDisable()
         {
-            await FlipServerDescription();
+            // await FlipServerDescription();
 
 
             cts?.Cancel();
@@ -436,7 +436,7 @@ namespace Arteranos.Services
                 Debug.Log("Shutting down the IPFS node, because the service didn't completely start.");
                 await ipfs.ShutdownAsync();
             }
-            if (G.Server.ShutdownIPFS)
+            else if (G.Server.ShutdownIPFS)
             {
                 Debug.Log("Shutting down the IPFS node.");
                 await ipfs.ShutdownAsync();
