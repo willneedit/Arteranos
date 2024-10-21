@@ -98,11 +98,16 @@ namespace Arteranos.Editor
 
         public static void BumpForceReloadFile()
         {
+            // Put a timestamp in the RFC3339 datetime format.
+            // Contents doesn't matter, only when it's CHANGING after a platform switch!
+
             File.WriteAllText("Assets/Generated/dummy.cs", @"
+// Automatically generated file -- EDITS WILL BE OVERWRITTEN
+
 #pragma warning disable IDE1006
 public static class _dummy
 {
-    public static string creationTime = """ + DateTime.UtcNow.ToString() + @""";
+    public static string creationTime = """ + DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK") + @""";
 }"
             );
             AssetDatabase.Refresh();
@@ -118,7 +123,7 @@ public static class _dummy
         }
 
 
-        [MenuItem("Arteranos/Build/Update Project Version", false, 101)]
+        [MenuItem("Arteranos/Build/Update version and platform", false, 101)]
         public static void SetVersion()
         {
             GetProjectGitVersion();
@@ -185,7 +190,7 @@ public static class _dummy
             // Earlier sessions may have it.
             if (File.Exists(IPFSExe))
             {
-                if (!silent) Debug.Log($"ipfs.exe is already there, maybe you want to manually delete it?");
+                if (!silent) Debug.Log($"ipfs.exe is already there in the project codebase, maybe you want to manually delete it?");
                 IPFSExe = desired;
                 yield break;
             }
