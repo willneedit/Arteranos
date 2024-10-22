@@ -60,6 +60,9 @@ namespace Arteranos.Core
         [ProtoMember(16)]
         public string ServerIcon; // string, because CIDs are not proto-serializable
 
+        [ProtoMember(17)]
+        public DateTime LastSeen; // Local only: Time last seen online
+
         public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
 

@@ -609,7 +609,7 @@ namespace Arteranos.Avatar
 
         private void LoopPerformEmoji(string emojiName)
         {
-            IEnumerator CleanupEmojiPS(ParticleSystem ps)
+            static IEnumerator CleanupEmojiPS(ParticleSystem ps)
             {
                 yield return new WaitForSeconds(5);
 

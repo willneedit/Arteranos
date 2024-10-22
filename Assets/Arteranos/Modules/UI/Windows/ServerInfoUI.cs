@@ -56,10 +56,11 @@ namespace Arteranos.UI
 
         private void Populate()
         {
+            string peerID = si.PeerID.ToString();
             lbl_Name.text = si.Name;
-            lbl_Address.text = ""; // Maybe an abbreviated PeerID?
+            lbl_Address.text = $"{peerID[..12]}...{peerID[^12..]}";
             lbl_LastUpdated.text = si.LastUpdated.HumanReadable();
-            lbl_LastOnline.text = si.SeenOnline ? si.LastOnline.HumanReadable() : "Never seen so far";
+            lbl_LastOnline.text =  si.LastOnline != System.DateTime.MinValue ? si.LastOnline.HumanReadable() : "Never seen so far";
             lbl_MatchIndex.text = si.Permissions.HumanReadableMI(
                 G.Client.ContentFilterPreferences
                 ).ToString();

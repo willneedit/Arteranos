@@ -70,7 +70,17 @@ namespace Arteranos.Core
         public string SPKDBKey => DescriptionStruct.PeerID;
         public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new();
         public DateTime LastUpdated => DescriptionStruct?.LastModified ?? DateTime.MinValue;
-        public DateTime LastOnline => OnlineData?.LastOnline ?? DateTime.MinValue;
+        public DateTime LastOnline
+        {
+            get
+            {
+                DateTime online = OnlineData?.LastOnline ?? DateTime.MinValue;
+                DateTime data = DescriptionStruct?.LastSeen ?? DateTime.MinValue;
+
+                return online > data ? online : data;
+            }
+        }
+
         public int UserCount => OnlineData?.UserFingerprints?.Count ?? 0;
         public int FriendCount
         {
