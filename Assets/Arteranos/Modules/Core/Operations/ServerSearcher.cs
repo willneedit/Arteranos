@@ -59,7 +59,7 @@ namespace Arteranos.Core.Operations
                 context.serverInfos = new();
                 context.resultPeerID = null;
 
-                foreach (ServerInfo entry in ServerInfo.Dump(DateTime.MinValue))
+                foreach (ServerInfo entry in ServerInfo.Dump())
                     context.serverInfos.Add(entry);
 
                 return context;

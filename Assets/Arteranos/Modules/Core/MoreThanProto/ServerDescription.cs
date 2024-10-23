@@ -34,8 +34,13 @@ namespace Arteranos.Core
         public static void DBDelete(string id) 
             => new ServerDescription()._DBDelete(id);
 
-        public static IEnumerable<ServerDescription> DBList() 
-            => new ServerDescription()._DBList();
+        public static IEnumerable<ServerDescription> DBList()
+        {
+            // Filter out outdated entries
+            // TODO actively deleting outdated entries, as soon as it's confirmed working
+            foreach (ServerDescription entry in new ServerDescription()._DBList())
+                if (entry) yield return entry;
+        }
 
         public void Serialize(SignKey serverPrivateKey, Stream stream)
         {
@@ -68,6 +73,21 @@ namespace Arteranos.Core
             }
 
             return d;
+        }
+
+        public static implicit operator bool(ServerDescription sd)
+        {
+            if (sd == null) return false;
+
+            // Seen longer than 30 days ago
+            if (sd.LastSeen < DateTime.UtcNow - TimeSpan.FromDays(30)) return false;
+
+            // Outdated version
+            Version serverVersion = Core.Version.Parse(sd.Version);
+            if (serverVersion < Core.Version.MinVersion) return false;
+
+            // Everything is OK.
+            return true;
         }
 
     }

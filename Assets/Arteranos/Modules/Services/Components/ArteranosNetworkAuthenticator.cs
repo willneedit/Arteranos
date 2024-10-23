@@ -292,10 +292,9 @@ namespace Arteranos.Services
                 };
             }
 
-            Version minVersion = Version.Parse(Version.VERSION_MIN);
             Version clientVersion = Version.Parse(encryptedMsg.ClientVersion.MMPB);
 
-            if (clientVersion < minVersion)
+            if (clientVersion < Version.MinVersion)
             {
                 // Insufficient version
                 response = new()

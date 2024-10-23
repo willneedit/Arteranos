@@ -54,7 +54,7 @@ namespace Arteranos.UI
                 foreach (string PeerIDString in cs.ServerList)
                     ServerList[PeerIDString] = ServerListItem.New(lvc_ServerList.transform, PeerIDString);
 
-                foreach (ServerInfo si in ServerInfo.Dump(DateTime.MinValue))
+                foreach (ServerInfo si in ServerInfo.Dump())
                 {
                     string PeerIDString = si.PeerID.ToString();
                     if (!ServerList.ContainsKey(PeerIDString))

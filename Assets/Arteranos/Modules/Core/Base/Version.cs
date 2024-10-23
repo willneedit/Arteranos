@@ -15,6 +15,8 @@ namespace Arteranos.Core
     {
         public const string VERSION_MIN = "2.1.0";
 
+        public static readonly Version MinVersion = Parse(VERSION_MIN);
+
         public string MMP = "0.0.0";    // Major, minor, patch
         public string MMPB = "0.0.0.0"; // Major, minor, patch, build
         public string B = "0";          // build

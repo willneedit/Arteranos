@@ -134,7 +134,7 @@ namespace Arteranos.UI
 
         private IEnumerator GatherServeredWorlds()
         {
-            foreach(ServerInfo si in ServerInfo.Dump(DateTime.MinValue))
+            foreach(ServerInfo si in ServerInfo.Dump())
             {
                 if(si.CurrentWorldCid == null) continue;
 

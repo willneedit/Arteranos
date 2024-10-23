@@ -42,12 +42,10 @@ namespace Arteranos.Core
             ServerOnlineData.DBDelete(PeerID.ToString());
             ServerDescription.DBDelete(PeerID.ToString());
         }
-        public static IEnumerable<ServerInfo> Dump(DateTime cutoff)
+        public static IEnumerable<ServerInfo> Dump()
         {
             foreach(ServerDescription sd in ServerDescription.DBList())
             {
-                if (sd.LastModified < cutoff) continue;
-
                 yield return new ServerInfo()
                 {
                     OnlineData = ServerOnlineData.DBLookup(sd.PeerID),
@@ -57,7 +55,7 @@ namespace Arteranos.Core
             }
         }
 
-        public bool IsValid => DescriptionStruct != null;
+        public bool IsValid => DescriptionStruct;
         public bool SeenOnline => OnlineData != null;
         public bool IsOnline => OnlineData != null && OnlineData.LastOnline > (DateTime.UtcNow - TimeSpan.FromMinutes(5)) && OnlineData.OnlineLevel != Services.OnlineLevel.Offline;
         public string Name => DescriptionStruct?.Name;

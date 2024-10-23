@@ -11,6 +11,7 @@ using System.IO;
 
 namespace Arteranos.Core
 {
+    #pragma warning disable IDE1006 // Benennungsstile
     public class FlatFileDB<T> where T : class
     {
         protected static string _KnownPeersRoot = null;
