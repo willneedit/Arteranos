@@ -292,7 +292,10 @@ namespace Arteranos.Services
                 };
             }
 
-            if (!encryptedMsg.ClientVersion.IsGE(Version.VERSION_MIN))
+            Version minVersion = Version.Parse(Version.VERSION_MIN);
+            Version clientVersion = Version.Parse(encryptedMsg.ClientVersion.MMPB);
+
+            if (clientVersion < minVersion)
             {
                 // Insufficient version
                 response = new()
