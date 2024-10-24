@@ -36,10 +36,22 @@ namespace Arteranos.Core
 
         public static IEnumerable<ServerDescription> DBList()
         {
-            // Filter out outdated entries
-            // TODO actively deleting outdated entries, as soon as it's confirmed working
+            // Filter out outdated entries, too.
+            List<string> toDelete = new();
             foreach (ServerDescription entry in new ServerDescription()._DBList())
+            {
                 if (entry) yield return entry;
+                else
+                {
+                    UnityEngine.Debug.Log($"Discarding outdated peer {entry.PeerID}");
+                    toDelete.Add(entry.PeerID);
+                }
+            }
+
+            // And, really delete obsolete entries.
+            ServerDescription _DB = new();
+            foreach(string id in toDelete)
+                _DB._DBDelete(id);
         }
 
         public void Serialize(SignKey serverPrivateKey, Stream stream)

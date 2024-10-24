@@ -46,7 +46,10 @@ namespace Arteranos.Core
         /// Place a callback action from an async task.
         /// </summary>
         /// <param name="callback">The callback to be placed within the next couple of frames</param>
-        public static void ScheduleCallback(Action callback) => Instance.ScheduleCallback_(callback);
+        public static void ScheduleCallback(Action callback)
+        {
+            if (Instance) Instance.ScheduleCallback_(callback);
+        }
 
         /// <summary>
         /// Place a coroutine from an async task.
