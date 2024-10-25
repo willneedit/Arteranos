@@ -75,7 +75,7 @@ namespace Arteranos.Editor
             string WiXFileText =
 @"<?xml version='1.0' encoding='utf-8' ?>
 
-<?define version = """+ version.MMPB + @""" ?>
+<?define version = """+ version.MMP + @""" ?>
 <?define fullversion = """+ version.Full + @""" ?>
 
 <Include xmlns='http://schemas.microsoft.com/wix/2006/wi'>
@@ -108,8 +108,8 @@ namespace Arteranos.Editor
 public static class _dummy
 {
     public static string creationTime = """ + DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fffK") + @""";
-}"
-            );
+}
+");
             AssetDatabase.Refresh();
         }
 
@@ -128,12 +128,12 @@ public static class _dummy
         {
             GetProjectGitVersion();
 
-            Core.Version v = Core.Version.Load();
-            Debug.Log($"Version detected: Full={v.Full}, M.M.P={v.MMP}");
-
             UpdateLicenseFiles();
 
             BumpForceReloadFile();
+
+            Core.Version v = Core.Version.Load();
+            Debug.Log($"Version detected: Full={v.Full}, M.M.P={v.MMP}");
         }
 
         [MenuItem("Arteranos/Build/Build Windows64", false, 110)]
@@ -185,12 +185,15 @@ public static class _dummy
             string desired = $"{targetDir}/kubo/ipfs.exe";
             long totalBytes = 0;
 
-            Debug.Log(Directory.GetCurrentDirectory());
-
             // Earlier sessions may have it.
             if (File.Exists(IPFSExe))
             {
-                if (!silent) Debug.Log($"ipfs.exe is already there in the project codebase, maybe you want to manually delete it?");
+                if (!silent)
+                {
+                    Debug.Log($"ipfs.exe is already there in the project codebase, maybe you want to manually delete it?");
+                    Debug.Log(Directory.GetCurrentDirectory());
+                }
+
                 IPFSExe = desired;
                 yield break;
             }
@@ -341,37 +344,53 @@ public static class _dummy
 
             try
             {
-                if (Directory.Exists("build")) Directory.Delete("build", true);
+                // Debug convenience when false - for just building the installer package,
+                // without building the actual executables
+                if(true)
+                {
+                    if (Directory.Exists("build")) Directory.Delete("build", true);
 
-                GetProjectGitVersion();
+                    GetProjectGitVersion();
 
-                Progress.Report(progressId, 0.40f, "Build Win64 Dedicated Server");
+                    Progress.Report(progressId, 0.40f, "Build Win64 Dedicated Server");
 
-                yield return BuildWin64DSCoroutine();
+                    yield return BuildWin64DSCoroutine();
 
-                Progress.Report(progressId, 0.60f, "Build Win64 Desktop");
+                    Progress.Report(progressId, 0.60f, "Build Win64 Desktop");
 
-                yield return BuildWin64Coroutine();
+                    yield return BuildWin64Coroutine();
 
-                Directory.Move("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", "build/Arteranos_BurstDebugInformation");
-                Directory.Move("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", "build/Arteranos-Server_BurstDebugInformation");
+                    Directory.Move("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", "build/Arteranos_BurstDebugInformation");
+                    Directory.Move("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", "build/Arteranos-Server_BurstDebugInformation");
+
+                    File.Copy("ipfs.exe", "build/ipfs.exe");
+
+                }
 
                 File.Move("build/Win64/Arteranos.exe", "build/Arteranos.exe");
                 File.Move("build/Win64-Server/Arteranos-Server.exe", "build/Arteranos-Server.exe");
-                File.Copy("ipfs.exe", "build/ipfs.exe");
-
+ 
                 Progress.Report(progressId, 0.80f, "Build setup wizard");
 
+                if (File.Exists("build/ArteranosSetup.msi")) File.Delete("build/ArteranosSetup.msi");
+                if (File.Exists("build/ArteranosSetup.exe")) File.Delete("build/ArteranosSetup.exe");
+                if (File.Exists("build/ArteranosSetup.7z")) File.Delete("build/ArteranosSetup.7z");
                 yield return BuildSetup();
 
                 File.Move("build/Arteranos.exe", "build/Win64/Arteranos.exe");
                 File.Move("build/Arteranos-Server.exe", "build/Win64-Server/Arteranos-Server.exe");
 
+                if (!File.Exists("build/ArteranosSetup.msi"))
+                {
+                    Debug.LogError("Installation wizard build failed - see logs");
+                    yield break;
+                }
+
                 yield return BuildSetupExe();
 
                 if(!File.Exists("build/ArteranosSetup.exe"))
                 {
-                    Debug.LogError("Installation wizard build failed - see logs");
+                    Debug.LogError("Installation executable build failed - see logs");
                     yield break;
                 }
 
