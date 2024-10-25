@@ -5,9 +5,9 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using Arteranos.Services;
 using ProtoBuf;
 
@@ -36,6 +36,9 @@ namespace Arteranos.Core
 
         [ProtoMember(7)]
         public List<string> IPAddresses = new();
+
+        [ProtoMember(8)]
+        public DateTime Timestamp; // Sender's idea of time. And to see that the packets are different ones, not just dupes.
 
         public override void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);

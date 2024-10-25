@@ -631,7 +631,8 @@ namespace Arteranos.Services
                 ServerDescriptionCid = CurrentSDCid,
                 // LastOnline = last, // Not serialized - set on receive
                 OnlineLevel = G.NetworkStatus.GetOnlineLevel(),
-                IPAddresses = IPAddresses
+                IPAddresses = IPAddresses,
+                Timestamp = DateTime.UtcNow,
             };
 
             using MemoryStream ms = new();
@@ -650,7 +651,8 @@ namespace Arteranos.Services
                 UserFingerprints = null,
                 ServerDescriptionCid = CurrentSDCid,
                 OnlineLevel = OnlineLevel.Offline,
-                IPAddresses = null
+                IPAddresses = null,
+                Timestamp = DateTime.UtcNow,
             };
             using MemoryStream ms = new();
             sod.Serialize(ms);
