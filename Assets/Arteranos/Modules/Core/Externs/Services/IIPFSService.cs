@@ -12,7 +12,6 @@ using Ipfs.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -22,7 +21,9 @@ namespace Arteranos.Services
     public interface IIPFSService : IMonoBehaviour
     {
         Cid CurrentSDCid { get; }
+#if USE_IDENTIFY_CID
         Cid IdentifyCid { get; }
+#endif
         IpfsClientEx Ipfs { get; }
         Peer Self { get; }
         SignKey ServerKeyPair { get; }

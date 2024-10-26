@@ -30,6 +30,7 @@ using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 using System.Collections.Concurrent;
 
+
 namespace Arteranos.Services
 {
     public class IPFSService : MonoBehaviour, IIPFSService
@@ -37,7 +38,9 @@ namespace Arteranos.Services
         public IpfsClientEx Ipfs { get => ipfs; }
         public Peer Self { get => self; }
         public SignKey ServerKeyPair { get => serverKeyPair; }
+#if USE_IDENTIFY_CID
         public Cid IdentifyCid { get; protected set; }
+#endif
         public Cid CurrentSDCid { get; protected set; } = null;
 
         public bool EnableUploadDefaultAvatars = true;
@@ -383,6 +386,7 @@ namespace Arteranos.Services
                 sb.Append("Arteranos Server, built by willneedit\n");
                 sb.Append(Core.Version.VERSION_MIN);
 
+#if USE_IDENTIFY_CID
                 // Put up the identifier file
                 if (G.Server.Public)
                 {
@@ -401,12 +405,15 @@ namespace Arteranos.Services
                     }
                     catch { }
                 }
-
+#endif
                 Debug.Log("---- IPFS Backend init complete ----\n" +
                     $"IPFS Node's ID\n" +
-                    $"   {self.Id}\n" +
-                    $"Discovery identifier file's CID\n" +
-                    $"   {IdentifyCid}\n");
+                    $"   {self.Id}\n"
+#if USE_IDENTIFY_CID
+                    + $"Discovery identifier file's CID\n" +
+                    $"   {IdentifyCid}\n"
+#endif
+                    );
 
                 // Reuse the IPFS peer key for the multiplayer server to ensure its association
                 serverKeyPair = SignKey.ImportPrivateKey(pk);
@@ -416,7 +423,9 @@ namespace Arteranos.Services
             }
 
             ipfs = null;
+#if USE_IDENTIFY_CID
             IdentifyCid = null;
+#endif
             last = DateTime.MinValue;
             cts = new();
 
@@ -475,7 +484,7 @@ namespace Arteranos.Services
             }
         }
 
-        #endregion
+#endregion
         // ---------------------------------------------------------------
         #region Server information publishing
 
