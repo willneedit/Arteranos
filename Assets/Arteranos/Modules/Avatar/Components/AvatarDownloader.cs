@@ -404,7 +404,7 @@ namespace Arteranos.Avatar
         }
     }
 
-    internal class SetupAvatarObjOp : IAsyncOperation<Context>
+    internal class LoadAvatarObjOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 0.5f;
@@ -415,9 +415,12 @@ namespace Arteranos.Avatar
         {
             AvatarDownloaderContext context = _context as AvatarDownloaderContext;
 
-            Debug.Log($"AvatarDownloader ({context.path}): Entering setup avatar");
+            Debug.Log($"AvatarDownloader ({context.path}): Entering load avatar");
 
-            byte[] data = await File.ReadAllBytesAsync(context.TargetFile);
+            using MemoryStream ms = await G.IPFSService.ReadIntoMS(context.path, cancel: token);
+            byte[] data = ms.ToArray();
+
+            Debug.Log($"AvatarDownloader ({context.path}): Load avatar from IPFS finished");
 
             GltfImport gltf = new(deferAgent: new UninterruptedDeferAgent());
 
@@ -434,13 +437,13 @@ namespace Arteranos.Avatar
                 // As an afterthought, pin the avatar in the local IPFS node.
                 try
                 {
-                    await G.IPFSService.PinCid(context.path, true);
+                    _ = G.IPFSService.PinCid(context.path, true);
                 }
                 catch { }
 
             }
 
-            Debug.Log($"AvatarDownloader ({context.path}): Exiting setup avatar");
+            Debug.Log($"AvatarDownloader ({context.path}): Exiting load avatar");
 
             return context;
         }
@@ -474,8 +477,7 @@ namespace Arteranos.Avatar
 
             AsyncOperationExecutor<Context> executor = new(new IAsyncOperation<Context>[]
             {
-                new AssetDownloadOp(),
-                new SetupAvatarObjOp(),
+                new LoadAvatarObjOp(),
                 new MeasureSkeletonOp(),
                 new FindBlendShapesOp(),
                 new InstallAnimationOp(),
