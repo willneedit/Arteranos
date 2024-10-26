@@ -415,6 +415,8 @@ namespace Arteranos.Avatar
         {
             AvatarDownloaderContext context = _context as AvatarDownloaderContext;
 
+            Debug.Log($"AvatarDownloader ({context.path}): Entering setup avatar");
+
             byte[] data = await File.ReadAllBytesAsync(context.TargetFile);
 
             GltfImport gltf = new(deferAgent: new UninterruptedDeferAgent());
@@ -437,6 +439,8 @@ namespace Arteranos.Avatar
                 catch { }
 
             }
+
+            Debug.Log($"AvatarDownloader ({context.path}): Exiting setup avatar");
 
             return context;
         }

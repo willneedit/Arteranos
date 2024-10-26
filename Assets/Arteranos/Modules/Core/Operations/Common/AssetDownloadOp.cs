@@ -12,6 +12,7 @@ using System.Threading;
 using Ipfs;
 using Arteranos.Services;
 using ICSharpCode.SharpZipLib.Tar;
+using UnityEngine;
 
 namespace Arteranos.Core.Operations
 {
@@ -36,7 +37,11 @@ namespace Arteranos.Core.Operations
         {
             AssetDownloaderContext context = _context as AssetDownloaderContext;
 
+            Debug.Log($"AssetDownloader ({context.path}): Entering IPFS File load");
+
             IFileSystemNode fi = await G.IPFSService.ListFile(context.path, token);
+
+            Debug.Log($"AssetDownloader ({context.path}): Got file stat");
 
             context.Size = fi.Size;
             totalBytesMag = Utils.Magnitude(context.Size);
@@ -64,6 +69,8 @@ namespace Arteranos.Core.Operations
                 };
                 archive.ExtractContents(context.TargetFile);
             }
+
+            Debug.Log($"AssetDownloader ({context.path}): Exiting IPFS File load");
 
             return context;
         }
