@@ -75,7 +75,7 @@ namespace Arteranos.Services
         {
             IpfsClientEx ipfsTmp = null;
 
-            // Running the same IPFS daemon for both the dedicated server and
+            // Running the same IPFS backend for both the dedicated server and
             // the desktop app will lead to confustion because of using the
             // same peer ID.
             //
@@ -109,7 +109,7 @@ namespace Arteranos.Services
                             }
                             catch
                             {
-                                Debug.LogWarning("No installed IPFS daemon available - needs to be acquired");
+                                Debug.LogWarning("No installed IPFS backend available - needs to be acquired");
                             }
 
                             return false;
@@ -143,7 +143,7 @@ namespace Arteranos.Services
                             yield return new WaitForSeconds(2);
                         }
 
-                        G.TransitionProgress?.OnProgressChanged(0.20f, "Starting IPFS daemon");
+                        G.TransitionProgress?.OnProgressChanged(0.20f, "Starting IPFS backend");
 
                         TryStartIPFS();
 
@@ -163,7 +163,7 @@ namespace Arteranos.Services
                             }
                         }
 
-                        G.TransitionProgress?.OnProgressChanged(0.00f, "Failed to start daemon");
+                        G.TransitionProgress?.OnProgressChanged(0.00f, "Failed to start backend");
                         yield return new WaitForSeconds(10);
                         SettingsManager.Quit();
                     }
@@ -197,11 +197,11 @@ namespace Arteranos.Services
                     //    MaxConnectionsPerServer = 20,
                     //};
 
-                    // First, see if there is an already running and accessible IPFS daemon.
+                    // First, see if there is an already running and accessible IPFS backend.
                     self = null;
                     yield return Asyncs.Async2Coroutine(ipfsTmp.IdAsync(), _self => self = _self, _e =>
                     {
-                        // No daemon, but that's okay. Yet.
+                        // No backend, but that's okay. Yet.
                     });
 
                     // If not....
@@ -216,7 +216,7 @@ namespace Arteranos.Services
                         // Even worse...
                         if (IPFSExe == null)
                         {
-                            G.TransitionProgress?.OnProgressChanged(0.00f, "No IPFS daemon -- aborting!");
+                            G.TransitionProgress?.OnProgressChanged(0.00f, "No IPFS backend -- aborting!");
 
                             yield return new WaitForSeconds(10);
 
@@ -251,7 +251,7 @@ namespace Arteranos.Services
                 // Start the Subscriber loop
                 StartCoroutine(SubscriberCoroutine());
 
-                // Ready to proceed, past the point we can manually shut down the IPFS daemon
+                // Ready to proceed, past the point we can manually shut down the IPFS backend
                 ForceIPFSShutdown = false;
             }
 
@@ -335,7 +335,7 @@ namespace Arteranos.Services
             async Task InitializeIPFS()
             {
                 ipfs = null;
-                if (self == null) throw new InvalidOperationException("Dead daemon");
+                if (self == null) throw new InvalidOperationException("Dead backend");
 
                 PrivateKey pk = IpfsClientEx.ReadDaemonPrivateKey(repodir);
 
@@ -345,13 +345,13 @@ namespace Arteranos.Services
                 }
                 catch (InvalidDataException)
                 {
-                    Debug.LogError("Daemon doesn't match with its supposed private key");
+                    Debug.LogError("Backend doesn't match with its supposed private key");
                     SettingsManager.Quit();
                     return;
                 }
                 catch
                 {
-                    Debug.LogError("Daemon communication");
+                    Debug.LogError("Backend communication");
                     SettingsManager.Quit();
                     return;
                 }
@@ -402,7 +402,7 @@ namespace Arteranos.Services
                     catch { }
                 }
 
-                Debug.Log("---- IPFS Daemon init complete ----\n" +
+                Debug.Log("---- IPFS Backend init complete ----\n" +
                     $"IPFS Node's ID\n" +
                     $"   {self.Id}\n" +
                     $"Discovery identifier file's CID\n" +
@@ -431,7 +431,7 @@ namespace Arteranos.Services
 
             cts?.Cancel();
 
-            // If we're started the daemon on our own, shut it down, too.
+            // If we're started the backend on our own, shut it down, too.
             if(ForceIPFSShutdown)
             {
                 Debug.Log("Shutting down the IPFS node, because the service didn't completely start.");
