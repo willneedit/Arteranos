@@ -262,14 +262,24 @@ namespace Arteranos.Services
             {
                 Debug.Log("Subscribing Arteranos PubSub channel");
 
-                while(true)
+                while (true)
                 {
                     using CancellationTokenSource cts = new(G.Server.ListenRefreshTime * 1000 + 2000);
 
                     // Truly async.
-                    _ = ipfs.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
+                    Task t = ipfs.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
 
-                    yield return new WaitForSeconds(G.Server.ListenRefreshTime);
+                    if(G.Server.ListenRefreshTime >= 5)
+                    {
+                        yield return new WaitForSeconds(5);
+
+                        if (!t.IsCompleted)
+                            Debug.LogWarning("Subscription task seems to be stuck, retrying...");
+                        else
+                            yield return new WaitForSeconds(G.Server.ListenRefreshTime - 5);
+                    }
+                    else
+                        yield return new WaitForSeconds(G.Server.ListenRefreshTime);
 
                     cts.Cancel();
 
