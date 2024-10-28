@@ -6,10 +6,8 @@
  */
 
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
-
 using System.Threading;
 using Ipfs;
 using GLTFast;
@@ -17,9 +15,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DitzelGames.FastIK;
 using Newtonsoft.Json;
-using Arteranos.Services;
 using Arteranos.Core;
-using Arteranos.Core.Operations;
 
 namespace Arteranos.Avatar
 {
@@ -417,8 +413,7 @@ namespace Arteranos.Avatar
 
             Debug.Log($"AvatarDownloader ({context.path}): Entering load avatar");
 
-            using MemoryStream ms = await G.IPFSService.ReadIntoMS(context.path, cancel: token);
-            byte[] data = ms.ToArray();
+            byte[] data = await G.IPFSService.ReadBinary(context.path, cancel: token);
 
             Debug.Log($"AvatarDownloader ({context.path}): Load avatar from IPFS finished");
 

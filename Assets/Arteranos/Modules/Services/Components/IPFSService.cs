@@ -264,29 +264,19 @@ namespace Arteranos.Services
 
                 while (true)
                 {
-                    using CancellationTokenSource cts = new(G.Server.ListenRefreshTime * 1000 + 2000);
+                    using CancellationTokenSource cts_sub = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
 
                     // Truly async.
-                    Task t = ipfs.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts.Token);
+                    Task t = ipfs.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts_sub.Token);
 
-                    if(G.Server.ListenRefreshTime >= 5)
-                    {
-                        yield return new WaitForSeconds(5);
+                    yield return new WaitForSeconds(5);
 
-                        if (!t.IsCompleted)
-                            Debug.LogWarning("Subscription task seems to be stuck, retrying...");
-                        else
-                            yield return new WaitForSeconds(G.Server.ListenRefreshTime - 5);
-                    }
-                    else
-                        yield return new WaitForSeconds(G.Server.ListenRefreshTime);
+                    if (t.IsCompleted)
+                        yield return new WaitUntil(() => false); // NOTREACHED, until Service is destroyed
 
-                    cts.Cancel();
-
+                    Debug.LogWarning("Subscription task seems to be stuck, retrying...");
+                    cts_sub.Cancel();
                     yield return new WaitForSeconds(1);
-
-                    // Debug.Log("Refreshing PubSub Listener loop");
-               
                 }
             }
             
@@ -639,8 +629,16 @@ namespace Arteranos.Services
                                 where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
                                 select CryptoHelpers.GetFingerprint(user.UserID)).ToList();
 
-            List<string> IPAddresses = (from entry in (List<IPAddress>)G.NetworkStatus.IPAddresses
-                               select entry.ToString()).ToList();
+            List<IPAddress> addrs = G.NetworkStatus?.IPAddresses;
+
+            if(addrs == null)
+            {
+                Debug.LogWarning("No IP addresses yet, skipping Server Online data for this turn");
+                return;
+            }
+
+            List<string> IPAddresses = (from entry in addrs
+                                        select entry.ToString()).ToList();
 
             ServerOnlineData sod = new()
             {
@@ -861,6 +859,8 @@ namespace Arteranos.Services
                 catch { } // Whatever may come, the show must go on.
                 ms.Write(buffer, 0, n);
             }
+
+            instr.Close();
 
             // One last report.
             reportProgress?.Invoke(totalBytes);
