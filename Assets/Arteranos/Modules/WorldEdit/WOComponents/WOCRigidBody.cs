@@ -70,16 +70,17 @@ namespace Arteranos.WorldEdit.Components
         {
             if (G.Me != null)
             {
-                G.Me.GotObjectReleased(GameObject);
+                // TODO Pusk back after ArteranosGrabInteractable.Detach for the final results
+                G.Me.GotObjectReleased(GameObject, Vector3.zero, Vector3.zero);
                 G.Me.ManageAuthorityOf(GameObject, false);
             }
-            else ServerGotReleased();
+            else ServerGotReleased(Vector3.zero, Vector3.zero);
         }
 
         // On server, suspend the physics engine for the object to control the movement
         public void ServerGotGrabbed() { }
 
-        public void ServerGotReleased() { }
+        public void ServerGotReleased(Vector3 detachVelocity, Vector3 detachAngularVelocity) { }
 
         public void ServerGotObjectHeld(Vector3 position, Quaternion rotation) { }
     }

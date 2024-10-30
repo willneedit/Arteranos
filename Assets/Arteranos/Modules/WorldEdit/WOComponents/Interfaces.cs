@@ -31,7 +31,7 @@ namespace Arteranos.WorldEdit.Components
 
         void ServerGotGrabbed();
 
-        void ServerGotReleased();
+        void ServerGotReleased(Vector3 detachVelocity, Vector3 detachAngularVelocity);
 
         void ServerGotObjectHeld(Vector3 position, Quaternion rotation);
     }

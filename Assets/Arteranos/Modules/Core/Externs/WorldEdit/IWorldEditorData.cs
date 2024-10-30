@@ -60,11 +60,11 @@ namespace Arteranos.WorldEdit
         public List<Guid> GetPathFromObject_S(Transform t);
         bool GotWorldObjectClicked(GameObject go);
         bool GotWorldObjectGrabbed(GameObject go);
-        bool GotWorldObjectReleased(GameObject go);
+        bool GotWorldObjectReleased(GameObject go, Vector3 detachVelocity, Vector3 detachAngularVelocity);
         bool GotWorldObjectHeld(GameObject go, Vector3 position, Quaternion rotation);
         bool GotWorldObjectClicked(List<Guid> go);
         bool GotWorldObjectGrabbed(List<Guid> go);
-        bool GotWorldObjectReleased(List<Guid> go);
+        bool GotWorldObjectReleased(List<Guid> go, Vector3 detachVelocity, Vector3 detachAngularVelocity);
         bool GotWorldObjectHeld(List<Guid> go, Vector3 position, Quaternion rotation);
     }
 }

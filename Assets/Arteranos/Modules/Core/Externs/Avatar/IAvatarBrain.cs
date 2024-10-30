@@ -45,11 +45,11 @@ namespace Arteranos.Avatar
         void SendSocialState(IAvatarBrain receiver, ulong state);
         void GotObjectClicked(GameObject clicked);
         void GotObjectGrabbed(GameObject grabbed);
-        void GotObjectReleased(GameObject released);
+        void GotObjectReleased(GameObject released, Vector3 detachVelocity, Vector3 detachAngularVelocity);
         void GotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation);
         void GotObjectClicked(List<Guid> clicked);
         void GotObjectGrabbed(List<Guid> grabbed);
-        void GotObjectReleased(List<Guid> released);
+        void GotObjectReleased(List<Guid> released, Vector3 detachVelocity, Vector3 detachAngularVelocity);
         void GotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation);
         void ManageAuthorityOf(GameObject GO, bool auth);
     }

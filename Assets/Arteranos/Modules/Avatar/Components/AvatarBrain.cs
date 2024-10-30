@@ -706,10 +706,10 @@ namespace Arteranos.Avatar
             => CmdGotObjectGrabbed(GetEnclosingObject(grabbed));
         public void GotObjectGrabbed(List<Guid> grabbed) 
             => CmdGotObjectGrabbed(grabbed);
-        public void GotObjectReleased(GameObject released) 
-            => CmdGotObjectReleased(GetEnclosingObject(released));
-        public void GotObjectReleased(List<Guid> released) 
-            => CmdGotObjectReleased(released);
+        public void GotObjectReleased(GameObject released, Vector3 detachVelocity, Vector3 detachAngularVelocity)
+            => CmdGotObjectReleased(GetEnclosingObject(released), detachVelocity, detachAngularVelocity);
+        public void GotObjectReleased(List<Guid> released, Vector3 detachVelocity, Vector3 detachAngularVelocity)
+            => CmdGotObjectReleased(released, detachVelocity, detachAngularVelocity);
         public void GotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation) 
             => CmdGotObjectHeld(GetEnclosingObject(holding), position, rotation);
         public void GotObjectHeld(List<Guid> holding, Vector3 position, Quaternion rotation) 
@@ -734,12 +734,12 @@ namespace Arteranos.Avatar
             => G.WorldEditorData.GotWorldObjectGrabbed(grabbed);
 
         [Command]
-        private void CmdGotObjectReleased(GameObject released) 
-            => G.WorldEditorData.GotWorldObjectReleased(GetEnclosedObject(released));
+        private void CmdGotObjectReleased(GameObject released, Vector3 detachVelocity, Vector3 detachAngularVelocity)
+            => G.WorldEditorData.GotWorldObjectReleased(GetEnclosedObject(released), detachVelocity, detachAngularVelocity);
 
         [Command]
-        private void CmdGotObjectReleased(List<Guid> released) 
-            => G.WorldEditorData.GotWorldObjectReleased(released);
+        private void CmdGotObjectReleased(List<Guid> released, Vector3 detachVelocity, Vector3 detachAngularVelocity)
+            => G.WorldEditorData.GotWorldObjectReleased(released, detachVelocity, detachAngularVelocity);
 
         [Command]
         private void CmdGotObjectHeld(GameObject holding, Vector3 position, Quaternion rotation) 

@@ -572,19 +572,19 @@ namespace Arteranos.WorldEdit
         public bool GotWorldObjectGrabbed(List<Guid> go)
             => GotWorldObjectGrabbed(FindObjectByPath(go).gameObject);
 
-        public bool GotWorldObjectReleased(GameObject go)
+        public bool GotWorldObjectReleased(GameObject go, Vector3 detachVelocity, Vector3 detachAngularVelocity)
         {
             if (AffectedComponent(go, out IRigidBody body))
             {
-                body.ServerGotReleased();
+                body.ServerGotReleased(detachAngularVelocity, detachAngularVelocity);
                 return true;
             }
 
             return false;
         }
 
-        public bool GotWorldObjectReleased(List<Guid> go)
-            => GotWorldObjectReleased(FindObjectByPath(go).gameObject);
+        public bool GotWorldObjectReleased(List<Guid> go, Vector3 detachVelocity, Vector3 detachAngularVelocity)
+            => GotWorldObjectReleased(FindObjectByPath(go).gameObject, detachAngularVelocity, detachAngularVelocity);
 
         public bool GotWorldObjectHeld(GameObject go, Vector3 position, Quaternion rotation)
         {
