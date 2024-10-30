@@ -13,6 +13,7 @@ using System;
 using UnityEngine.XR.Interaction.Toolkit;
 using Arteranos.WorldEdit.Components;
 using Arteranos.Services;
+using Arteranos.XR;
 
 namespace Arteranos.WorldEdit
 {
@@ -80,8 +81,8 @@ namespace Arteranos.WorldEdit
         {
             body = gameObject.AddComponent<Rigidbody>();
 
-            mover = gameObject.AddComponent<XRGrabInteractable>();
-            mover.throwOnDetach = false;
+            mover = gameObject.AddComponent<ArteranosGrabInteractable>();
+            mover.throwOnDetach = true;
             mover.smoothPosition = true;
             mover.smoothRotation = true;
             mover.enabled = false;
