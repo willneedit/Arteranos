@@ -576,7 +576,7 @@ namespace Arteranos.WorldEdit
         {
             if (AffectedComponent(go, out IRigidBody body))
             {
-                body.ServerGotReleased(detachAngularVelocity, detachAngularVelocity);
+                body.ServerGotReleased(detachVelocity, detachAngularVelocity);
                 return true;
             }
 
@@ -584,7 +584,7 @@ namespace Arteranos.WorldEdit
         }
 
         public bool GotWorldObjectReleased(List<Guid> go, Vector3 detachVelocity, Vector3 detachAngularVelocity)
-            => GotWorldObjectReleased(FindObjectByPath(go).gameObject, detachAngularVelocity, detachAngularVelocity);
+            => GotWorldObjectReleased(FindObjectByPath(go).gameObject, detachVelocity, detachAngularVelocity);
 
         public bool GotWorldObjectHeld(GameObject go, Vector3 position, Quaternion rotation)
         {

@@ -73,7 +73,7 @@ namespace Arteranos.WorldEdit
         private bool isLocked = false;
 
         private Rigidbody body = null;
-        private XRGrabInteractable mover = null;
+        private ArteranosGrabInteractable mover = null;
         private XRSimpleInteractable clicker = null;
         private GameObject enclosingObject = null;
 
@@ -92,6 +92,7 @@ namespace Arteranos.WorldEdit
 
             mover.firstSelectEntered.AddListener(GotObjectGrabbed);
             mover.lastSelectExited.AddListener(GotObjectReleased);
+            mover.OnDetach += GotObjectDetach;
 
             clicker.activated.AddListener(GotObjectClicked);
 
@@ -145,9 +146,7 @@ namespace Arteranos.WorldEdit
 
         private void GotObjectReleased(SelectExitEventArgs arg0)
         {
-            if (!G.WorldEditorData.IsInEditMode)
-                IsGrabbable?.GotReleased();
-            else
+            if (G.WorldEditorData.IsInEditMode)
             {
                 // We're in edit mode, we are actually changing the world.
                 TryGetWOC(out WOCTransform woct);
@@ -163,6 +162,14 @@ namespace Arteranos.WorldEdit
                 wop.SetPathFromThere(transform);
                 wop.EmitToServer();
             }
+        }
+
+        // Needed release even after LateUpdate, so it's pushed back with GrabInteractable's
+        // Detach()
+        private void GotObjectDetach(Vector3 velocity, Vector3 angularVelocity)
+        {
+            if (!G.WorldEditorData.IsInEditMode)
+                IsGrabbable?.GotReleased(velocity, angularVelocity);
         }
 
         private void GotObjectClicked(ActivateEventArgs arg0)

@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -23,6 +24,8 @@ namespace Arteranos.XR
         public Vector3 m_DetachVelocity { get; private set; }
         public Vector3 m_DetachAngularVelocity { get; private set; }
 
+        public event Action<Vector3, Vector3> OnDetach;
+
         protected override void Drop()
         {
             base.Drop();
@@ -31,26 +34,32 @@ namespace Arteranos.XR
         protected override void Detach()
         {
             if (m_Rigidbody == null && !TryGetComponent(out m_Rigidbody))
-                throw new System.InvalidOperationException("No RigidBody");
+                throw new InvalidOperationException("No RigidBody");
 
             if(!m_Rigidbody.isKinematic)
+            {
                 base.Detach();
+
+                m_DetachVelocity = m_Rigidbody.velocity;
+                m_DetachAngularVelocity = m_Rigidbody.angularVelocity;
+            }
             else
             {
                 // Either client or misconfigured. Temporarily turn off isKinematic
                 // to convince XRGrabInteractable to spill its ~~privates~~ guts.
-
                 m_Rigidbody.isKinematic = false;
                 base.Detach();
 
                 m_DetachVelocity = m_Rigidbody.velocity;
                 m_DetachAngularVelocity = m_Rigidbody.angularVelocity;
 
-                Debug.Log($"Detach velocities: {m_DetachVelocity}, {m_DetachAngularVelocity}");
-
+                // Swtting isKinematic to true back on zeros the velocities.
                 m_Rigidbody.isKinematic = true;
             }
 
+            // Debug.Log($"Detach velocities: {m_DetachVelocity}, {m_DetachAngularVelocity}");
+
+            OnDetach?.Invoke(m_DetachVelocity, m_DetachAngularVelocity);
         }
     }
 }

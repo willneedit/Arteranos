@@ -54,6 +54,7 @@ namespace Arteranos.WorldEdit.Components
         // ---------------------------------------------------------------
 
         public bool IsMovable => Grabbable;
+        public Rigidbody Rigidbody = null;
 
         // On client, suspend the Network Transform to stop receiving data.
         public void GotGrabbed()
@@ -66,21 +67,31 @@ namespace Arteranos.WorldEdit.Components
             else ServerGotGrabbed();
         }
 
-        public void GotReleased()
+        public void GotReleased(Vector3 velocity, Vector3 angularVelocity)
         {
+            // Debug.Log($"[Client] Detach velocities: {velocity}, {angularVelocity}");
+
             if (G.Me != null)
             {
                 // TODO Pusk back after ArteranosGrabInteractable.Detach for the final results
-                G.Me.GotObjectReleased(GameObject, Vector3.zero, Vector3.zero);
+                G.Me.GotObjectReleased(GameObject, velocity, angularVelocity);
                 G.Me.ManageAuthorityOf(GameObject, false);
             }
-            else ServerGotReleased(Vector3.zero, Vector3.zero);
+            else ServerGotReleased(velocity, angularVelocity);
         }
 
-        // On server, suspend the physics engine for the object to control the movement
         public void ServerGotGrabbed() { }
 
-        public void ServerGotReleased(Vector3 detachVelocity, Vector3 detachAngularVelocity) { }
+        // On server, receive the 'last seen' velocities and import to the physics engine
+        public void ServerGotReleased(Vector3 detachVelocity, Vector3 detachAngularVelocity) 
+        {
+            if (!Rigidbody && !GameObject.TryGetComponent(out Rigidbody)) return;
+
+            // Debug.Log($"[Server] Detach velocities: {detachVelocity}, {detachAngularVelocity}");
+
+            Rigidbody.velocity = detachVelocity;
+            Rigidbody.angularVelocity = detachAngularVelocity;
+        }
 
         public void ServerGotObjectHeld(Vector3 position, Quaternion rotation) { }
     }

@@ -24,7 +24,7 @@ namespace Arteranos.WorldEdit.Components
         void GotGrabbed();
 
         // Object has been just released
-        void GotReleased();
+        void GotReleased(Vector3 velocity, Vector3 angularVelocity);
 
         // Object is movable by users at all
         bool IsMovable { get; }
