@@ -77,6 +77,12 @@ namespace Arteranos.WorldEdit
 
             G.WorldEditorData.CreateSpawnObject(newValue, transform, go =>
             {
+                if (!go)
+                {
+                    Debug.LogError("CreateSpawnObject didn't return an object!");
+                    return;
+                }
+
                 this.EnclosedObject = go;
 
                 Debug.Assert(go.TryGetComponent(out IEnclosedObject o) && o.EnclosingObject == gameObject);
@@ -129,8 +135,7 @@ namespace Arteranos.WorldEdit
 
             if (Rigidbody)
                 Rigidbody.isKinematic = auth
-                    ? true                      // true: Server has to keep its hands off
-                    : wasKinematic.Value;       // false: revert to the default
+                    || wasKinematic.Value;       // false: revert to the default
 
             if (auth)
                 netIdentity.AssignClientAuthority(targetIdentity.connectionToClient);

@@ -7,6 +7,7 @@
 
 using Arteranos.Core;
 using ProtoBuf;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Arteranos.WorldEdit.Components
@@ -78,9 +79,15 @@ namespace Arteranos.WorldEdit.Components
             // Expiring spawned objects decrease the number in the WOComponent's OnDestroy()
             worldObjectData.SpawnedItems++;
 
+            // Filter out the alien gameobjects in the hierarchy and maek down the possible picks
+            List<int> picks = new();
+            for(int i = 0; i < transform.childCount; i++)
+                if(transform.GetChild(i).TryGetComponent(out WorldObjectComponent _)) picks.Add(i);
+            if (picks.Count == 0) return;
+
             G.ArteranosNetworkManager.SpawnObject(new CTSObjectSpawn()
             {
-                Pick = Random.Range(0, transform.childCount),
+                Pick = picks[Random.Range(0, picks.Count - 1)],
                 Lifetime = Lifetime,
                 Force = Force,
                 Position = transform.position, // _World_ coordinates.

@@ -106,12 +106,20 @@ namespace Arteranos.Core
             DontDestroyOnLoad(Purgatory.gameObject);
         }
 
-        public static void SetupWorldObjectRoot()
+        public static GameObject SetupWorldObjectRoot(bool onlyExisting = false)
         {
-            GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
-
             // If the world object root doesn't exist yet, create one now.
-            if (!gameObject) Instantiate(BP.I.WorldEdit.WorldObjectRoot);
+            GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
+            if (!gameObject && !onlyExisting)
+            {
+                Debug.Log("Setting up World Object Root");
+                gameObject = Instantiate(BP.I.WorldEdit.WorldObjectRoot);
+
+                //// Needed to persist even the scene rebuild, only on entering transition
+                //DontDestroyOnLoad(gameObject);
+            }
+
+            return gameObject;
         }
 
         /// <summary>

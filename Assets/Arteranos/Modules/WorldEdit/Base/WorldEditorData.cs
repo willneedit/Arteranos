@@ -8,17 +8,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using ProtoBuf;
-
 using UnityEngine;
 using System.IO;
 using System;
-
 using UnityEngine.InputSystem;
 using Arteranos.Core;
-using Arteranos.Core.Managed;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 using Arteranos.WorldEdit.Components;
-using Arteranos.Services;
 
 
 namespace Arteranos.WorldEdit
@@ -347,13 +343,34 @@ namespace Arteranos.WorldEdit
         #endregion
         // ---------------------------------------------------------------
         #region Runtime Object Spawn
+
         public void CreateSpawnObject(CTSObjectSpawn spawn, Transform shellObject, Action<GameObject> callback)
         {
             IEnumerator Cor()
             {
-                Transform spawnerT = FindObjectByPath(spawn.SpawnerPath);
+                // Latecomer just entering world which is in process of creation.
+                Transform spawnerT = null;
+                yield return new WaitUntil(() =>
+                {
+                    try
+                    {
+                        spawnerT = FindObjectByPath(spawn.SpawnerPath);
+                    }
+                    catch { }
 
-                WorldObject blueprint = spawnerT.GetChild(spawn.Pick).MakeWorldObject();
+                    return spawnerT != null;
+                });
+
+                // More complex objects take more time to be constructed.
+                WorldObject blueprint = null;
+                yield return new WaitUntil(() =>
+                {
+                    // The spawner may have not yet completed, wait a turn.
+                    if (spawnerT.childCount <= spawn.Pick) return false;
+
+                    blueprint = spawnerT.GetChild(spawn.Pick).MakeWorldObject();
+                    return blueprint != null;
+                });
 
                 // One way to do deep copying, especially complex structures? Serializing!
                 using MemoryStream ms = new();
@@ -675,13 +692,7 @@ namespace Arteranos.WorldEdit
 
         public static Transform FindObjectByPath(List <Guid> path)
         {
-            GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
-
-            // If the world object root doesn't exist yet, create one now.
-            if(!gameObject)
-                gameObject = Instantiate(BP.I.WorldEdit.WorldObjectRoot);
-
-            Transform t = gameObject.transform;
+            Transform t = SettingsManager.SetupWorldObjectRoot().transform;
 
             if (path == null) return t;
 
