@@ -9,6 +9,7 @@ using Arteranos.Core;
 using UnityEngine;
 using Mirror;
 using Arteranos.Services;
+using System;
 
 namespace Arteranos.WorldEdit
 {
@@ -75,38 +76,55 @@ namespace Arteranos.WorldEdit
             // Set DDOL both for the shell object for the latecomer - the world is yet to load...
             DontDestroyOnLoad(gameObject);
 
-            G.WorldEditorData.CreateSpawnObject(newValue, transform, go =>
+            // returning false means the world is not finished yet, put it on the backburner,
+            // if it's the case.
+            if (!G.WorldEditorData.CreateSpawnObject(newValue, transform, go =>
             {
-                if (!go)
-                {
-                    Debug.LogError("CreateSpawnObject didn't return an object!");
-                    return;
-                }
+                ConnectSpawnObject(go);
+            }))
+                TransitionProgress.OnWorldFinished += MakeGotWorldFinished(this, newValue);
+        }
 
-                this.EnclosedObject = go;
+        private static Action MakeGotWorldFinished(SpawnInitData @this, CTSObjectSpawn newValue)
+            => () => { if (@this) @this.GotWorldFinished(newValue); };
 
-                Debug.Assert(go.TryGetComponent(out IEnclosedObject o) && o.EnclosingObject == gameObject);
+        private void GotWorldFinished(CTSObjectSpawn newValue)
+        {
+            TransitionProgress.OnWorldFinished -= MakeGotWorldFinished(this, newValue);
 
-                if (TryGetComponent(out NetworkTransform))
-                {
-                    // Transfer the position and rotation data and its guidance to the World Editor Object
-                    Vector3 oldPosition = transform.position;
-                    Quaternion oldRotation = transform.rotation;
-                    transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-                    NetworkTransform.target = go.transform;
-                    go.transform.SetPositionAndRotation(oldPosition, oldRotation);
-
-                    // Default is orphaned object, server takes the role of a foster parent
-                    // and the clients have to stay silent, fornow.
-                    if (isServer) NetworkTransform.syncDirection = SyncDirection.ServerToClient;
-                }
-
-                if(go.TryGetComponent(out Rigidbody))
-                {
-                    // Set the default kinematic state.
-                    wasKinematic = Rigidbody.isKinematic;
-                }
+            G.WorldEditorData?.CreateSpawnObject(newValue, transform, go =>
+            {
+                ConnectSpawnObject(go);
             });
+        }
+
+        private void ConnectSpawnObject(GameObject go)
+        {
+            if (!go) return;
+
+            EnclosedObject = go;
+
+            Debug.Assert(go.TryGetComponent(out IEnclosedObject o) && o.EnclosingObject == gameObject);
+
+            if (TryGetComponent(out NetworkTransform))
+            {
+                // Transfer the position and rotation data and its guidance to the World Editor Object
+                Vector3 oldPosition = transform.position;
+                Quaternion oldRotation = transform.rotation;
+                transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+                NetworkTransform.target = go.transform;
+                go.transform.SetPositionAndRotation(oldPosition, oldRotation);
+
+                // Default is orphaned object, server takes the role of a foster parent
+                // and the clients have to stay silent, fornow.
+                if (isServer) NetworkTransform.syncDirection = SyncDirection.ServerToClient;
+            }
+
+            if (go.TryGetComponent(out Rigidbody))
+            {
+                // Set the default kinematic state.
+                wasKinematic = Rigidbody.isKinematic;
+            }
         }
 
         // Even if the shell object is destroyed (maybe, scene changes, or by expiring)

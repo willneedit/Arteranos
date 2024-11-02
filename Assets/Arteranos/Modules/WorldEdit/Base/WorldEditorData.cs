@@ -344,23 +344,12 @@ namespace Arteranos.WorldEdit
         // ---------------------------------------------------------------
         #region Runtime Object Spawn
 
-        public void CreateSpawnObject(CTSObjectSpawn spawn, Transform shellObject, Action<GameObject> callback)
+        public bool CreateSpawnObject(CTSObjectSpawn spawn, Transform shellObject, Action<GameObject> callback)
         {
+            Transform spawnerT = null;
+
             IEnumerator Cor()
             {
-                // Latecomer just entering world which is in process of creation.
-                Transform spawnerT = null;
-                yield return new WaitUntil(() =>
-                {
-                    try
-                    {
-                        spawnerT = FindObjectByPath(spawn.SpawnerPath);
-                    }
-                    catch { }
-
-                    return spawnerT != null;
-                });
-
                 // More complex objects take more time to be constructed.
                 WorldObject blueprint = null;
                 yield return new WaitUntil(() =>
@@ -390,7 +379,22 @@ namespace Arteranos.WorldEdit
                 callback?.Invoke(spawnedWO);
             }
 
+            try
+            {
+                spawnerT = FindObjectByPath(spawn.SpawnerPath);
+            }
+            catch 
+            {
+                spawnerT = null;
+            }
+
+            // Spawned objects are primed by the multiplayer network stack, but the world
+            // isn't loaded yet?
+            if (!spawnerT) return false;
+
+            // Ready to go.
             StartCoroutine(Cor());
+            return true;
         }
         #endregion
         // ---------------------------------------------------------------

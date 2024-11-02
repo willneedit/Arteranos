@@ -12,11 +12,14 @@ using UnityEngine.SceneManagement;
 using Arteranos.Core.Managed;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 using Arteranos.Core;
+using System;
 
 namespace Arteranos.Services
 {
     public static class TransitionProgress
     {
+        public static event Action OnWorldFinished = null;
+
         public static IEnumerator TransitionFrom()
         {
             G.XRVisualConfigurator.StartFading(1.0f);
@@ -90,13 +93,14 @@ namespace Arteranos.Services
             // In any case, set up a World Editor Data, for remote world editing on a bare template.
             SettingsManager.SetupWorldObjectRoot();
 
+            // If we found decorations, act on them.
             if (world.DecorationContent.Result != null)
-            {
-                Debug.Log("World Decoration detected, building hand-edited world");
                 yield return G.WorldEditorData.BuildWorld(world.DecorationContent.Result);
-            }
-            else
-                Debug.Log("World is a bare template");
+
+            // Tell everyone that the world is done, even with the world editor objects, like...
+            // - populating the spawned objects which needs blueprints for the spawnees
+            // - start up live content
+            OnWorldFinished?.Invoke();
 
             G.XRControl.MoveRig();
         }
