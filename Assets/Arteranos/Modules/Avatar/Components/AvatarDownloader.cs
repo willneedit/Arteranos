@@ -411,11 +411,11 @@ namespace Arteranos.Avatar
         {
             AvatarDownloaderContext context = _context as AvatarDownloaderContext;
 
-            Debug.Log($"AvatarDownloader ({context.path}): Entering load avatar");
+            // Debug.Log($"AvatarDownloader ({context.path}): Entering load avatar");
 
             byte[] data = await G.IPFSService.ReadBinary(context.path, cancel: token);
 
-            Debug.Log($"AvatarDownloader ({context.path}): Load avatar from IPFS finished");
+            // Debug.Log($"AvatarDownloader ({context.path}): Load avatar from IPFS finished");
 
             GltfImport gltf = new(deferAgent: new UninterruptedDeferAgent());
 
@@ -438,7 +438,7 @@ namespace Arteranos.Avatar
 
             }
 
-            Debug.Log($"AvatarDownloader ({context.path}): Exiting load avatar");
+            // Debug.Log($"AvatarDownloader ({context.path}): Exiting load avatar");
 
             return context;
         }

@@ -225,8 +225,12 @@ namespace Arteranos.WorldEdit
 
                 Debug.Log($"Full world CID: {fsn.Id}");
 
+                // And, re-enable the button.
                 EnableSaveButtons();
             }
+
+            // Disable the button for the duration of the saving process
+            btn_SaveInGallery.interactable = false;
 
             StartCoroutine(Cor());
         }

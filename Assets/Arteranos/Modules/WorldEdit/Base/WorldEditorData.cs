@@ -382,19 +382,16 @@ namespace Arteranos.WorldEdit
             try
             {
                 spawnerT = FindObjectByPath(spawn.SpawnerPath);
+                StartCoroutine(Cor());
+                return true;
             }
             catch 
             {
-                spawnerT = null;
+                // Multiplayer network primed the spawned object, but the world is not
+                // yet created. Report back to schedule delays.
+                return false;
             }
-
-            // Spawned objects are primed by the multiplayer network stack, but the world
-            // isn't loaded yet?
-            if (!spawnerT) return false;
-
-            // Ready to go.
-            StartCoroutine(Cor());
-            return true;
+            // NOTREACHED
         }
         #endregion
         // ---------------------------------------------------------------

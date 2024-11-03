@@ -132,6 +132,7 @@ namespace Arteranos.Core.Operations
                 });
 
                 IFileSystemNode fsn = await G.IPFSService.AddStream(stream, "", cancel: token);
+                stream.Close();
 
                 context.Cid = fsn.Id;
             }

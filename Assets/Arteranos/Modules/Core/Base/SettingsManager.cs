@@ -112,7 +112,7 @@ namespace Arteranos.Core
             GameObject gameObject = GameObject.FindGameObjectWithTag("WorldObjectsRoot");
             if (!gameObject && !onlyExisting)
             {
-                Debug.Log("Setting up World Object Root");
+                // Debug.Log("Setting up World Object Root");
                 gameObject = Instantiate(BP.I.WorldEdit.WorldObjectRoot);
 
                 //// Needed to persist even the scene rebuild, only on entering transition
