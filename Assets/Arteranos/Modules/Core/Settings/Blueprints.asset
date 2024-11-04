@@ -96,3 +96,5 @@ MonoBehaviour:
       type: 3}
     TeleportMarkerInspector: {fileID: 7349416676873975400, guid: 4f46bfaf16e9e784388682e309b4a642,
       type: 3}
+    TeleportButtonInspector: {fileID: 7349416676873975400, guid: 9ef39edf10608fd4b9351e43b6eab564,
+      type: 3}

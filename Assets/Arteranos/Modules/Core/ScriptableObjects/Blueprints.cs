@@ -94,6 +94,7 @@ namespace Arteranos.Core
             public GameObject SpawnerInspector;
             public GameObject RigidBodyInspector;
             public GameObject TeleportMarkerInspector;
+            public GameObject TeleportButtonInspector;
         }
 
         public WorldEdit_ WorldEdit;
