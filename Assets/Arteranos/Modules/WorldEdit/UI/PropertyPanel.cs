@@ -64,6 +64,7 @@ namespace Arteranos.WorldEdit
 
             WOCBase[] oclist =
             {
+                new WOCTeleportMarker(),
                 new WOCSpawner(),
                 new WOCRigidBody()
             };

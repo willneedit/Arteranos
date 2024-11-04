@@ -94,3 +94,5 @@ MonoBehaviour:
       type: 3}
     RigidBodyInspector: {fileID: 7349416676873975400, guid: 824bb6c36c87b514cb927d5e19b9b049,
       type: 3}
+    TeleportMarkerInspector: {fileID: 7349416676873975400, guid: 4f46bfaf16e9e784388682e309b4a642,
+      type: 3}
