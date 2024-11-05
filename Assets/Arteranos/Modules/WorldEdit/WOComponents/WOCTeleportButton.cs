@@ -52,15 +52,41 @@ namespace Arteranos.WorldEdit.Components
                 return;
             }    
 
-            Debug.Log($"[Client] Want to teleport to {location}");
-            if (G.Me != null) G.Me.GotObjectClicked(WorldEditorData.GetPathFromObject(GameObject.transform));
-            else ServerGotClicked();
+            GameObject tgt = FindTeleportTarget(location);
+
+            if(!tgt)
+            {
+                Debug.Log($"{location} not found.");
+                return;
+            }
+
+            // Initiate teleport, according the user's settings.
+            G.XRControl.Teleport(tgt.transform.position, tgt.transform.rotation);
+
+            //if (G.Me != null) G.Me.GotObjectClicked(WorldEditorData.GetPathFromObject(GameObject.transform));
+            //else ServerGotClicked();
         }
 
         // No server action (for now), because positioning is up to the authorized clients.
-        public void ServerGotClicked()
-        {
+        public void ServerGotClicked() =>
+            throw new System.NotImplementedException();
 
+        private static GameObject FindTeleportTarget(string location, Transform node)
+        {
+            if (node.TryGetComponent(out WorldObjectComponent woc) 
+                && woc.TryGetWOC(out WOCTeleportMarker tm) 
+                && tm.location == location) return node.gameObject;
+
+            for (int i = 0; i < node.childCount; ++i)
+            {
+                GameObject res = FindTeleportTarget(location, node.GetChild(i));
+                if (res) return res;
+            }
+
+            return null;
         }
+
+        public static GameObject FindTeleportTarget(string location)
+            => FindTeleportTarget(location, WorldEditorData.FindObjectByPath(null));
     }
 }

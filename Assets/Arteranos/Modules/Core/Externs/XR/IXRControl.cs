@@ -27,5 +27,6 @@ namespace Arteranos.XR
         public void ReconfigureXRRig();
         void FreezeControls(bool value);
         void MoveRig();
+        void Teleport(Vector3 position, Quaternion rotation);
     }
 }

@@ -227,5 +227,18 @@ namespace Arteranos.XR
             StartCoroutine(MoveRigCoroutine());
         }
 
+        public void Teleport(Vector3 position, Quaternion rotation) 
+        {
+            XROrigin xro = CurrentVRRig;
+            if (!xro || !xro.gameObject.TryGetComponent(out TeleportationProvider tp)) return;
+
+            tp.QueueTeleportRequest(new()
+            {
+                destinationPosition = position,
+                destinationRotation = rotation,
+                matchOrientation = MatchOrientation.TargetUpAndForward,
+                requestTime = Time.time
+            });
+        }
     }
 }

@@ -265,6 +265,7 @@ namespace Arteranos.WorldEdit
 
         private async Task<IFileSystemNode> AssembleReferencesDirectory(WorldDecoration decor, CancellationToken cancel = default)
         {
+            Debug.Log($"Starting gathering asset references");
             // Gather all of the references
             HashSet<AssetReference> references = new();
 
@@ -281,21 +282,28 @@ namespace Arteranos.WorldEdit
                 dict[reference.type].Add(reference.cid);
             }
 
+            Debug.Log($"Found {dict.Count} reference types");
+
             // Build the entry list with the subdirectories
             List<IFileSystemLink> dirEntries = new();
             foreach(KeyValuePair<string, List<string>> entry in dict)
             {
+                Debug.Log($"Creating {entry.Key} entry for {entry.Value.Count} entries");
+
                 List<IFileSystemLink> subDirEntries = new();
                 foreach(string subEntry in entry.Value)
                 {
+                    Debug.Log($"  Looking for entry {subEntry}");
                     IFileSystemNode subfsn = await G.IPFSService.ListFile(subEntry, cancel: cancel);
                     subDirEntries.Add(subfsn.ToLink(subEntry));
                 }
 
                 IFileSystemNode subdirfsn = await G.IPFSService.CreateDirectory(subDirEntries, cancel: cancel);
                 dirEntries.Add(subdirfsn.ToLink(entry.Key));
+                Debug.Log($"Created {entry.Key} entry for {entry.Value.Count} entries");
             }
 
+            Debug.Log($"Finished creating reference directory");
             IFileSystemNode dirfsn = await G.IPFSService.CreateDirectory(dirEntries, cancel: cancel);
             return dirfsn;
         }
