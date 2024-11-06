@@ -19,8 +19,16 @@ namespace UnityEngine.XR.Interaction.Toolkit
         public TeleportType TeleportType = TeleportType.Instant;
         public float TravelDuration = 0.0f;
 
-        private IEnumerator MoveToDestination(Vector3 src, Vector3 dest)
+        private IEnumerator ZipLineToDestination(Vector3 src, Quaternion srcRotation, Vector3 dest, Vector3 destUp, Vector3 destForward)
         {
+            Vector3 srcForward = srcRotation * Vector3.forward;
+
+            // destUp zero: No rotstion change
+            // destForward zero : Rotate around forward (from src), to match Up again.
+            Quaternion destRotation = destUp != Vector3.zero
+                ? Quaternion.LookRotation(destForward != Vector3.zero ? destForward : srcForward, destUp)
+                : srcRotation;
+
             float progress = 0.0f;
 
             // Suspend the gravity for the teleport travel duration
@@ -33,9 +41,14 @@ namespace UnityEngine.XR.Interaction.Toolkit
 
                 progress += Time.deltaTime;
 
-                float t = progress / TravelDuration;
+                float t = Mathf.Clamp01(progress / TravelDuration);
                 Vector3 actual = Vector3.Lerp(src, dest, t);
+                Quaternion actualRotation = Quaternion.Slerp(srcRotation, destRotation, t);
 
+                Vector3 actualUp = destUp != Vector3.zero ? actualRotation * Vector3.up : Vector3.zero;
+                Vector3 actualForward = destForward != Vector3.zero ? actualRotation * Vector3.forward : Vector3.zero;
+
+                ReorientView(actualUp, actualForward);
                 system.xrOrigin.MoveCameraToWorldLocation(actual);
                 Physics.SyncTransforms();
 
@@ -46,11 +59,12 @@ namespace UnityEngine.XR.Interaction.Toolkit
             EndLocomotion();
         }
 
-        private IEnumerator BlinkToDestination(Vector3 dest)
+        private IEnumerator BlinkToDestination(Vector3 dest, Vector3 up, Vector3 forward)
         {
             G.XRVisualConfigurator.StartFading(1.0f, 0.25f);
             yield return new WaitForSeconds(0.25f);
 
+            ReorientView(up, forward);
             system.xrOrigin.MoveCameraToWorldLocation(dest);
             Physics.SyncTransforms();
 
@@ -77,18 +91,23 @@ namespace UnityEngine.XR.Interaction.Toolkit
                 return;
 
             XROrigin xrOrigin = system.xrOrigin;
+
+            Vector3 targetUp = Vector3.zero;
+            Vector3 targetForward = Vector3.zero;
+
             if (xrOrigin != null)
             {
                 switch (currentRequest.matchOrientation)
                 {
                     case MatchOrientation.WorldSpaceUp:
-                        xrOrigin.MatchOriginUp(Vector3.up);
+                        targetUp = Vector3.up;
                         break;
                     case MatchOrientation.TargetUp:
-                        xrOrigin.MatchOriginUp(currentRequest.destinationRotation * Vector3.up);
+                        targetUp = currentRequest.destinationRotation * Vector3.up;
                         break;
                     case MatchOrientation.TargetUpAndForward:
-                        xrOrigin.MatchOriginUpCameraForward(currentRequest.destinationRotation * Vector3.up, currentRequest.destinationRotation * Vector3.forward);
+                        targetUp = currentRequest.destinationRotation * Vector3.up;
+                        targetForward = currentRequest.destinationRotation * Vector3.forward;
                         break;
                     case MatchOrientation.None:
                         // Change nothing. Maintain current origin rotation.
@@ -104,23 +123,35 @@ namespace UnityEngine.XR.Interaction.Toolkit
 
                 if(TeleportType == TeleportType.Instant)
                 {
+                    ReorientView(targetUp, targetForward);
                     xrOrigin.MoveCameraToWorldLocation(cameraDestination);
                     Physics.SyncTransforms();
                     EndLocomotion();
                 }
                 else if(TeleportType == TeleportType.Blink)
                 {
-                    StartCoroutine(BlinkToDestination(cameraDestination));
+                    StartCoroutine(BlinkToDestination(cameraDestination, targetUp, targetForward));
                 }
                 else if(TeleportType == TeleportType.Zipline)
                 {
-                    StartCoroutine(MoveToDestination(
+                    StartCoroutine(ZipLineToDestination(
                         xrOrigin.Origin.transform.position + heightAdjustment,
-                        cameraDestination));
+                        xrOrigin.Origin.transform.rotation,
+                        cameraDestination, targetUp, targetForward));
                 }
             }
 
             validRequest = false;
+        }
+
+        private void ReorientView(Vector3 up, Vector3 forward)
+        {
+            if(up == Vector3.zero) return;
+
+            if (forward == Vector3.zero)
+                system.xrOrigin.MatchOriginUp(up);
+            else
+                system.xrOrigin.MatchOriginUpCameraForward(up, forward);
         }
     }
 }
