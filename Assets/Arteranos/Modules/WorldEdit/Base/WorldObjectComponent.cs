@@ -252,6 +252,8 @@ namespace Arteranos.WorldEdit
             return false;
         }
 
+        public void RemoveComponent(int index) => WOComponents.RemoveAt(index);
+
         public void CommitStates()
         {
             foreach(WOCBase w in WOComponents)

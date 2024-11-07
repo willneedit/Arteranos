@@ -114,6 +114,9 @@ namespace Arteranos.WorldEdit
 
         private void RebuildInspectors()
         {
+            Action MakeGotRemoveComponentClicked(int index)
+                => () => GotRemoveComponentClicked(index);
+
             grp_Component_List.gameObject.SetActive(false);
 
             // To prevent interference from to-be-destroyed gameobjects....
@@ -145,6 +148,8 @@ namespace Arteranos.WorldEdit
 
                 cp.Title = name;
                 cp.IsOpen = paneOpen.ContainsKey(cp.Title) && paneOpen[cp.Title];
+                cp.IsDeleteable = wocc.IsRemovable;
+                cp.OnDeleteClicked += MakeGotRemoveComponentClicked(i);
 
                 GameObject contentsGO = Instantiate(bp_contents, paneGO.transform);
                 contentsGO.TryGetComponent(out IInspector inspector);
@@ -160,6 +165,18 @@ namespace Arteranos.WorldEdit
             grp_Component_List.gameObject.SetActive(true);
         }
 
+        private void GotRemoveComponentClicked(int index)
+        {
+            WOCBase wocc = woc.WOComponents[index];
+            Debug.Log($"Attempting to remove component {index}: {wocc}");
+            woc.RemoveComponent(index);
+
+            RebuildInspectors();
+
+            RebuildMissingComponentsList();
+
+            Populate();
+        }
 
         private void Populate()
         {

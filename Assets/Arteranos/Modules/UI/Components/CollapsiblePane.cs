@@ -18,6 +18,7 @@ namespace Arteranos
     public class CollapsiblePane : UIBehaviour
     {
         public Button Btn_expand;
+        public Button Btn_delete;
         public TextMeshProUGUI Lbl_title;
 
         public string Title { get => Lbl_title.text; set => Lbl_title.text = value; }
@@ -32,6 +33,14 @@ namespace Arteranos
                 if (old != isOpen && isActiveAndEnabled) SetOpenState(true);
             }
         }
+
+        public bool IsDeleteable
+        {
+            get => Btn_delete.gameObject.activeSelf;
+            set => Btn_delete.gameObject.SetActive(value);
+        }
+
+        public event Action OnDeleteClicked;
 
         [SerializeField] private bool isOpen;
 
@@ -53,6 +62,8 @@ namespace Arteranos
                 isOpen = !isOpen;
                 SetOpenState(false);
             });
+
+            Btn_delete.onClick.AddListener(() => OnDeleteClicked?.Invoke());
         }
 
         protected override void OnEnable()

@@ -32,6 +32,8 @@ namespace Arteranos.WorldEdit.Components
 
         public virtual GameObject GameObject { get; set; } = null;
 
+        public virtual bool IsRemovable => true;
+
         /// <summary>
         /// To make the changes to take effect.
         /// </summary>

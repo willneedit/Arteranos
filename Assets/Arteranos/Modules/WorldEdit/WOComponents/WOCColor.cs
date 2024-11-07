@@ -29,6 +29,8 @@ namespace Arteranos.WorldEdit.Components
             }
         }
 
+        public override bool IsRemovable => false;
+
         public override void CommitState()
         {
             base.CommitState();
