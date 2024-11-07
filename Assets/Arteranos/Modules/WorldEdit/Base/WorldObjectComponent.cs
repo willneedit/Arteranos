@@ -14,6 +14,8 @@ using UnityEngine.XR.Interaction.Toolkit;
 using Arteranos.WorldEdit.Components;
 using Arteranos.Services;
 using Arteranos.XR;
+using Arteranos.User;
+using UnityEditor.SceneManagement;
 
 namespace Arteranos.WorldEdit
 {
@@ -296,6 +298,7 @@ namespace Arteranos.WorldEdit
 
             TryGetWOC(out WOCTransform t);
             TryGetWOC(out WOCRigidBody rb);
+            TryGetWOC(out WOCTeleportSurface ts);
 
             // Prevent physics shenanigans in the edit mode
             body.constraints = isInEditMode
@@ -311,6 +314,15 @@ namespace Arteranos.WorldEdit
             RecursiveSetLayer((int)(t?.isCollidable ?? false
                 ? ColliderType.Solid
                 : ColliderType.Intangible), transform);           
+
+            if(ts != null)
+            {
+                if(!TryGetComponent(out User.TeleportationArea area))
+                    area = gameObject.AddComponent<User.TeleportationArea>();
+
+                // To prevent accidental teleports because of missed objects on grabbing
+                area.enabled = !isInEditMode;
+            }
 
             // #153: If we're in edit mode in desktop, lock rotation in grab
             mover.trackRotation = !(G.WorldEditorData.IsInEditMode && !G.Client.VRMode);

@@ -10,13 +10,15 @@ namespace Arteranos.User
     {
         protected override bool GenerateTeleportRequest(IXRInteractor interactor, RaycastHit raycastHit, ref TeleportRequest teleportRequest)
         {
-            if(raycastHit.collider == null)
+            if(!enabled || raycastHit.collider == null)
                 return false;
 
             teleportRequest.destinationPosition = raycastHit.point;
             teleportRequest.destinationRotation = transform.rotation;
             return true;
         }
+
+        /// <inheritdoc />
         protected override void OnSelectEntered(SelectEnterEventArgs args)
         {
             if(teleportationProvider == null)

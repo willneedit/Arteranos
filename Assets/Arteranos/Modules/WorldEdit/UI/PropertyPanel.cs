@@ -66,6 +66,7 @@ namespace Arteranos.WorldEdit
             {
                 new WOCTeleportMarker(),
                 new WOCTeleportButton(),
+                new WOCTeleportSurface(),
                 new WOCSpawner(),
                 new WOCRigidBody()
             };

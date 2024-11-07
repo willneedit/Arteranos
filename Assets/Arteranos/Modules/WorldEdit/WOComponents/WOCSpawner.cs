@@ -87,7 +87,7 @@ namespace Arteranos.WorldEdit.Components
 
             G.ArteranosNetworkManager.SpawnObject(new CTSObjectSpawn()
             {
-                Pick = picks[Random.Range(0, picks.Count - 1)],
+                Pick = picks[Random.Range(0, picks.Count)],
                 Lifetime = Lifetime,
                 Force = Force,
                 Position = transform.position, // _World_ coordinates.
