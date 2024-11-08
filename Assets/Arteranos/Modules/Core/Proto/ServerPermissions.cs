@@ -49,11 +49,11 @@ namespace Arteranos.Core
 
         // Other Nudity (eg. non-sexual or artistic)
         [ProtoMember(2)]
-        public bool? Nudity = true;
+        public bool? Nudity = null;
 
         // Sexually suggestive (does not include nudity)
         [ProtoMember(3)]
-        public bool? Suggestive = true;
+        public bool? Suggestive = null;
 
         // Violence (Cartoon / "Clean" violence)
         [ProtoMember(4)]
@@ -61,7 +61,7 @@ namespace Arteranos.Core
 
         // Explicit Sexual Images
         [ProtoMember(5)]
-        public bool? ExplicitNudes = null;
+        public bool? ExplicitNudes = false;
 
         // NEW
         //

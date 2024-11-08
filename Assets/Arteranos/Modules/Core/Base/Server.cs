@@ -48,11 +48,11 @@ namespace Arteranos.Core
 
         // The server nickname.
         [ProtoMember(3)]
-        public string Name = string.Empty;
+        public string Name = $"Unconfigured server {UnityEngine.Random.Range(1000, 1000000000)}";
 
         // The short server description.
         [ProtoMember(4)]
-        public string Description = string.Empty;
+        public string Description = "This server is not customized.";
 
         // The server icon. PNG file bytes, at least 128x128, at most 512x512
         [ProtoMember(5)]

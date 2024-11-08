@@ -157,7 +157,7 @@ namespace Arteranos.Core
     {
         public VKUsage VK_Usage { get; set; } = VKUsage.VROnly;
 
-        public VKLayout VK_Layout { get; set; } = VKLayout.de_DE_full;
+        public VKLayout VK_Layout { get; set; } = VKLayout.en_US_full;
 
         public float NameplateIn { get; set; } = 0.5f;
 
@@ -208,7 +208,7 @@ namespace Arteranos.Core
         public byte[] UserSignKeyPair = null;
 
         // The display name of the user. Generate if null
-        public string Nickname { get; set; } = "Anonymous";
+        public string Nickname { get; set; } = $"Anonymous {UnityEngine.Random.Range(1000, 1000000000)}";
 
         // The user's 2D Icon.
         public Cid UserIconCid { get; set; } = null;
@@ -280,7 +280,7 @@ namespace Arteranos.Core
         public virtual float SizeBubbleStrangers { get; set; } = 1.0f;
 
         // Privacy settings
-        public virtual UserPrivacy UserPrivacy { get; set; } = new();
+        public virtual UserPrivacy UserPrivacy { get; set; } = new() { UIDRepresentation = UIDRepresentation.Dice_5 };
 
         // The audio settings
         public virtual ClientAudioSettingsJSON AudioSettings { get; set; } = new();
