@@ -48,7 +48,7 @@ namespace Arteranos.Core
 
         // The server nickname.
         [ProtoMember(3)]
-        public string Name = $"Unconfigured server {UnityEngine.Random.Range(1000, 1000000000)}";
+        public string Name = SessionConstants.Instance.DefaultServerName;
 
         // The short server description.
         [ProtoMember(4)]

@@ -14,8 +14,6 @@ using UnityEngine.XR.Interaction.Toolkit;
 using Arteranos.WorldEdit.Components;
 using Arteranos.Services;
 using Arteranos.XR;
-using Arteranos.User;
-using UnityEditor.SceneManagement;
 
 namespace Arteranos.WorldEdit
 {

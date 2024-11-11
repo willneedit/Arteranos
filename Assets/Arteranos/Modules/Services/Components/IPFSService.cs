@@ -768,10 +768,10 @@ namespace Arteranos.Services
                         Debug.Log($"Rejecting server description ({sddPath}) from {SenderPeerID}");
 
                 }
-                catch // (Exception ex)
+                catch (Exception ex)
                 {
-                    //Debug.LogException(ex);
-                    Debug.LogWarning($"Failed downloading server description ({sddPath}) from {SenderPeerID}");
+                    // Debug.LogException(ex);
+                    Debug.LogWarning($"Failed downloading server description ({sddPath}) from {SenderPeerID}: {ex.Message}");
 
                     // Remove the marking, the attempt or result is invalid.
                     KnownServerDescriptions.TryRemove(SenderPeerID, out _);

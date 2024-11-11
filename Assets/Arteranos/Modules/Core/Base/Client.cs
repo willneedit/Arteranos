@@ -208,7 +208,7 @@ namespace Arteranos.Core
         public byte[] UserSignKeyPair = null;
 
         // The display name of the user. Generate if null
-        public string Nickname { get; set; } = $"Anonymous {UnityEngine.Random.Range(1000, 1000000000)}";
+        public string Nickname { get; set; } = SessionConstants.Instance.DefaultUserName;
 
         // The user's 2D Icon.
         public Cid UserIconCid { get; set; } = null;
