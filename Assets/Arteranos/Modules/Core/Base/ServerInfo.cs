@@ -66,7 +66,7 @@ namespace Arteranos.Core
         public IEnumerable<IPAddress> IPAddresses => from entry in OnlineData.IPAddresses select IPAddress.Parse(entry);
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
         public string SPKDBKey => DescriptionStruct.PeerID;
-        public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new();
+        public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new(true);
         public DateTime LastUpdated => DescriptionStruct?.LastModified ?? DateTime.MinValue;
         public DateTime LastOnline
         {

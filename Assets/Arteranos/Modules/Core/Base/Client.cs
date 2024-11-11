@@ -286,7 +286,7 @@ namespace Arteranos.Core
         public virtual ClientAudioSettingsJSON AudioSettings { get; set; } = new();
 
         // The content filter preferences for sorting the servers
-        public virtual ServerPermissions ContentFilterPreferences { get; set; } = new();
+        public virtual ServerPermissions ContentFilterPreferences { get; set; } = new(true);
 
         // The controls settings
         public virtual ControlSettingsJSON Controls { get; set; } = new();

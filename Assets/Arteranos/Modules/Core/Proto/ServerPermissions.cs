@@ -42,31 +42,42 @@ namespace Arteranos.Core
         //
         // Impersonation - FALSE - Self-explanatory
 
-
-
         [ProtoMember(1)]
-        public bool? Flying = false;
+        public bool? Flying;
 
         // Other Nudity (eg. non-sexual or artistic)
         [ProtoMember(2)]
-        public bool? Nudity = null;
+        public bool? Nudity;
 
         // Sexually suggestive (does not include nudity)
         [ProtoMember(3)]
-        public bool? Suggestive = null;
+        public bool? Suggestive;
 
         // Violence (Cartoon / "Clean" violence)
         [ProtoMember(4)]
-        public bool? Violence = null;
+        public bool? Violence;
 
         // Explicit Sexual Images
         [ProtoMember(5)]
-        public bool? ExplicitNudes = false;
+        public bool? ExplicitNudes;
 
         // NEW
         //
         // Excessive Violence / Blood (Gore, self-harm, torture)
         [ProtoMember(6)]
-        public bool? ExcessiveViolence = false;
+        public bool? ExcessiveViolence;
+
+        public ServerPermissions() { }
+
+        public ServerPermissions(bool _)
+        {
+            Flying = false;
+
+            Nudity = null;
+            Suggestive = null;
+            Violence = null;
+            ExplicitNudes = null;
+            ExcessiveViolence = false;
+        }
     }
 }
