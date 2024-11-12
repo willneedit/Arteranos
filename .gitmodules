@@ -10,3 +10,6 @@
 [submodule "Packages/Arteranos-IPFS-interface"]
 	path = Packages/Arteranos-IPFS-interface
 	url = https://github.com/willneedit/Arteranos-IPFS-interface.git
+[submodule "Packages/LiteNetLibTransportNG"]
+	path = Packages/LiteNetLibTransportNG
+	url = https://github.com/willneedit/LiteNetLibTransportNG.git

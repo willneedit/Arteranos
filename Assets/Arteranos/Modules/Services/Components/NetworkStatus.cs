@@ -61,11 +61,11 @@ namespace Arteranos.Services
         private bool m_OpenPorts = false;
 
         private NetworkManager manager = null;
-        private TelepathyTransport transport = null;
+        private Transport transport = null;
         private void Awake()
         {
             manager = FindObjectOfType<NetworkManager>(true);
-            transport = FindObjectOfType<TelepathyTransport>(true);
+            transport = FindObjectOfType<Transport>(true);
 
             G.NetworkStatus = this;
         }
@@ -189,8 +189,8 @@ namespace Arteranos.Services
 
         private async Task<bool> OpenPortAsync(int port)
         {
-            // TCP, and internal and external ports as the same.
-            Mapping mapping = new(Protocol.Tcp, port, port);
+            // UDP, and internal and external ports as the same.
+            Mapping mapping = new(Protocol.Udp, port, port);
 
             try
             {
@@ -199,16 +199,15 @@ namespace Arteranos.Services
             }
             catch(Exception ex)
             {
-                Debug.LogWarning($"Failed to create a port mapping for {port}");
-                Debug.LogException(ex);
+                Debug.Log($"Failed to create a port mapping for {port}: {ex.Message}");
                 return false;
             }
         }
 
         private async void ClosePortAsync(int port)
         {
-            // TCP, and internal and external ports as the same.
-            Mapping mapping = new(Protocol.Tcp, port, port);
+            // UDP, and internal and external ports as the same.
+            Mapping mapping = new(Protocol.Udp, port, port);
 
             try
             {
@@ -216,7 +215,7 @@ namespace Arteranos.Services
             }
             catch
             {
-                Debug.Log($"Failed to delete a port mapping for {port}... but it's okay.");
+                Debug.Log($"Failed to delete a port mapping for {port}... but that's okay.");
             }
         }
 
@@ -385,12 +384,21 @@ namespace Arteranos.Services
             OpenPorts = true;
             G.ConnectionManager.ExpectConnectionResponse();
 
-            // Custom server port -- Transport specific!
-            transport.port = (ushort) G.Server.ServerPort;
+            SetPort();
             manager.StartHost();
 
             // And, wait for the network to really be started up.
             while (!manager.isNetworkActive) await Task.Delay(8);
+        }
+
+        private void SetPort()
+        {
+            // Set the port number on supported transports, as long as they'd
+            // require it.
+            if (transport is TelepathyTransport tt)
+                tt.port = (ushort)G.Server.ServerPort;
+            else if (transport is LiteNetLibTransport lnlt)
+                lnlt.port = (ushort)G.Server.ServerPort;
         }
 
         public async Task StartServer()
@@ -399,8 +407,7 @@ namespace Arteranos.Services
 
             OpenPorts = true;
 
-            // Custom server port -- Transport specific!
-            transport.port = (ushort)G.Server.ServerPort;
+            SetPort();
             manager.StartServer();
 
             // And, wait for the network to really be started up.

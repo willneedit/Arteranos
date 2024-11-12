@@ -13,8 +13,8 @@ using System.Collections;
 using Arteranos.UI;
 using Ipfs;
 using System.Net;
-using System.Threading;
 using System.Linq;
+using Mirror;
 
 namespace Arteranos.Services
 {
@@ -55,6 +55,18 @@ namespace Arteranos.Services
 
         private IEnumerator CommenceConnection(ServerInfo si, Action<bool> callback)
         {
+            Transport transport = Transport.active;
+
+            string GetTransportScheme()
+            {
+                return transport switch
+                {
+                    TelepathyTransport => "tcp4",
+                    LiteNetLibTransport => "litenet",
+                    _ => throw new InvalidOperationException("Unrecognized transport layer")
+                };
+            }
+
             // In any case, go into the transitional phase.
             yield return TransitionProgress.TransitionFrom();
 
@@ -66,6 +78,11 @@ namespace Arteranos.Services
                 yield return TransitionProgress.TransitionTo(null);
                 yield break;
             }
+
+            // Get the scheme as we use it for outgoing connections as
+            // same as we use it ourselves as a server.
+            // Maybe to use the scheme same as with the port in the ServerDescription...?
+            string scheme = GetTransportScheme();
 
             // Save it for now even before the connection negotiation and authentication
             // During the remainder of the ongoing frame, we have to have the PeerID available --
@@ -80,10 +97,9 @@ namespace Arteranos.Services
                 // TODO Needs cleanup!
                 G.NetworkStatus.OnClientConnectionResponse = null;
 
-                // FIXME Telepathy Transport specific.
                 Uri connectionUri = addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
-                    ? new($"tcp4://[{addr}]:{si.ServerPort}")
-                    : new($"tcp4://{addr}:{si.ServerPort}");
+                    ? new($"{scheme}://[{addr}]:{si.ServerPort}")
+                    : new($"{scheme}://{addr}:{si.ServerPort}");
 
                 G.NetworkStatus.StartClient(connectionUri);
 

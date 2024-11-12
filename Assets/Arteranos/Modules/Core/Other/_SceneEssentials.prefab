@@ -336,7 +336,7 @@ GameObject:
   - component: {fileID: 3840780144436917895}
   - component: {fileID: 7940587785708425646}
   - component: {fileID: 332929975885485241}
-  - component: {fileID: -746876566335505752}
+  - component: {fileID: 4354697011605772162}
   - component: {fileID: 1851660504593070244}
   - component: {fileID: 3772151105963276859}
   - component: {fileID: 2249293273173543674}
@@ -390,7 +390,7 @@ MonoBehaviour:
   sendRate: 30
   offlineScene: 
   onlineScene: 
-  transport: {fileID: -746876566335505752}
+  transport: {fileID: 4354697011605772162}
   networkAddress: localhost
   maxConnections: 100
   authenticator: {fileID: 332929975885485241}
@@ -419,7 +419,7 @@ MonoBehaviour:
   OnClientAuthenticated:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &-746876566335505752
+--- !u!114 &4354697011605772162
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -428,21 +428,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 3840780144436917897}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7424c1070fad4ba2a7a96b02fbeb4bb, type: 3}
+  m_Script: {fileID: 11500000, guid: 163e217a2d66dbe48a85491f3c458407, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  port: 9777
-  NoDelay: 1
-  SendTimeout: 5000
-  ReceiveTimeout: 30000
-  serverMaxMessageSize: 16384
-  serverMaxReceivesPerTick: 10000
-  serverSendQueueLimitPerConnection: 10000
-  serverReceiveQueueLimitPerConnection: 10000
-  clientMaxMessageSize: 16384
-  clientMaxReceivesPerTick: 1000
-  clientSendQueueLimit: 10000
-  clientReceiveQueueLimit: 10000
+  port: 8888
+  updateTime: 15
+  disconnectTimeout: 5000
+  ipv6Enabled: 1
+  natPunchEnabled: 1
+  maxConnectAttempts: 10
+  serverMaxMessagesPerTick: 10000
+  clientMaxMessagesPerTick: 1000
+  channels: 0204
+  connectKey: MIRROR_LITENETLIB
 --- !u!114 &1851660504593070244
 MonoBehaviour:
   m_ObjectHideFlags: 0
