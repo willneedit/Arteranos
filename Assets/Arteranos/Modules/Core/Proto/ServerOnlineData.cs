@@ -40,6 +40,9 @@ namespace Arteranos.Core
         [ProtoMember(8)]
         public DateTime Timestamp; // Sender's idea of time. And to see that the packets are different ones, not just dupes.
 
+        [ProtoMember(9)]
+        public bool Firewalled;
+
         public override void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
     }

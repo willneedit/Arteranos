@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using Ipfs;
 using System;
 using System.Collections;
@@ -17,5 +18,6 @@ namespace Arteranos.Services
         IEnumerator ConnectToServer(MultiHash PeerID, Action<bool> callback);
         void DeliverDisconnectReason(string reason);
         void ExpectConnectionResponse();
+        void Peer_InitateNatPunch(NatPunchRequestData nprd);
     }
 }

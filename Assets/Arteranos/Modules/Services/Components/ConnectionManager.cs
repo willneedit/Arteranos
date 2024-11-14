@@ -15,6 +15,8 @@ using Ipfs;
 using System.Net;
 using System.Linq;
 using Mirror;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Arteranos.Services
 {
@@ -57,6 +59,16 @@ namespace Arteranos.Services
         {
             Transport transport = Transport.active;
 
+            if (transport is INatPunchAddon ina)
+            {
+                ina.ClientNeedsNatPunch = si.IsFirewalled;
+                Debug.Log($"Emabling NAT punching addon: {ina.ClientNeedsNatPunch}");
+
+                ina.OnInitiatingNatPunch = t => Ina_OnInitiatingNatPunch(si.PeerID, ina);
+            }
+            else
+                Debug.Log("NAT punching is not supported with this transport");
+
             string GetTransportScheme()
             {
                 return transport switch
@@ -94,7 +106,6 @@ namespace Arteranos.Services
             {
                 G.TransitionProgress?.OnProgressChanged(0.50f, $"Connecting ({++i})...");
 
-                // TODO Needs cleanup!
                 G.NetworkStatus.OnClientConnectionResponse = null;
 
                 Uri connectionUri = addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
@@ -125,6 +136,58 @@ namespace Arteranos.Services
             // Just-connected server will tell which world we're going to.
             // If the server is borked, the disconnecting server will cause the client to
             // fall back to the offline world.
+        }
+
+        private void Ina_OnInitiatingNatPunch(MultiHash peerID, INatPunchAddon ina)
+        {
+            Guid tokenGuid = Guid.NewGuid();
+
+            IEnumerable<ServerInfo> possibleRelays = from entry in ServerInfo.Dump()
+                                                     where entry.IsOnline && !entry.IsFirewalled
+                                                     select entry;
+
+            List<ServerInfo> relayList = possibleRelays.ToList();
+
+            if(relayList.Count == 0)
+            {
+                Debug.LogWarning("No viable relays.");
+                return;
+            }
+
+            ServerInfo relaySI = relayList[UnityEngine.Random.Range(0, relayList.Count)];
+
+            IPEndPoint relay = new(relaySI.IPAddresses.ToList().First(), relaySI.ServerPort);
+
+            string token = tokenGuid.ToString();
+
+            NatPunchRequestData nprd = new()
+            {
+                toPeerID = peerID.ToString(),
+                relayIP = relay.Address.ToString(),
+                relayPort = relay.Port,
+                token = token,
+            };
+
+            using MemoryStream ms = new();
+            nprd.Serialize(ms);
+
+            // ... initiate the Nat punch process, both for us,
+            // and asking the server to do that, too.
+            ina.InitiateNatPunch(relay, nprd.token);
+            Debug.Log($"Sending peer the Nat punch request for relay={nprd.relayIP}:{nprd.relayPort}, token={nprd.token}");
+            G.IPFSService.PostMessageTo(peerID, ms.ToArray());
+        }
+
+        public void Peer_InitateNatPunch(NatPunchRequestData nprd)
+        {
+            // Other peer wants us to initiate Nat punch
+            if (Transport.active is INatPunchAddon ina)
+            {
+                IPEndPoint relay = new(IPAddress.Parse(nprd.relayIP), nprd.relayPort);
+                ina.InitiateNatPunch(relay, nprd.token);
+            }
+            else
+                Debug.LogWarning("... but this peer's transport doesn't support Nat punching.");
         }
 
         public void ExpectConnectionResponse()

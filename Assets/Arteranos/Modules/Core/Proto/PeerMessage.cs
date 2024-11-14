@@ -10,9 +10,15 @@ using ProtoBuf;
 
 namespace Arteranos.Core
 {
+    public interface IDirectedPeerMessage
+    {
+        string ToPeerID { get; }
+    }
+
     [ProtoContract]
     [ProtoInclude(65538, typeof(ServerOnlineData))]
     [ProtoInclude(65539, typeof(ServerDescriptionLink))]
+    [ProtoInclude(65540, typeof(NatPunchRequestData))]
     public class PeerMessage
     {
         public virtual void Serialize(Stream stream)

@@ -650,6 +650,7 @@ namespace Arteranos.Services
                 OnlineLevel = G.NetworkStatus.GetOnlineLevel(),
                 IPAddresses = IPAddresses,
                 Timestamp = DateTime.UtcNow,
+                Firewalled = G.NetworkStatus.GetConnectivityLevel() != ConnectivityLevel.Unrestricted
             };
 
             using MemoryStream ms = new();
@@ -682,6 +683,11 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region Peer communication and data exchange
 
+        public void PostMessageTo(MultiHash peerID, byte[] message)
+        {
+            _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, message);
+        }
+
         private void ParseArteranosMessage(IPublishedMessage message)
         {
             MultiHash SenderPeerID = message.Sender.Id;
@@ -696,6 +702,17 @@ namespace Arteranos.Services
                 using MemoryStream ms = new(message.DataBytes);
                 PeerMessage pm = PeerMessage.Deserialize(ms);
 
+                if(pm is IDirectedPeerMessage dm)
+                {
+                    if (dm.ToPeerID != self.Id.ToString())
+                    {
+                        Debug.Log("Discarding a message directed to another peer");
+                        return;
+                    }
+                    else
+                        Debug.Log($"Directed message accepoted: {dm.ToPeerID}");
+                }
+
                 // Maybe obsolete.
                 if (pm is ServerDescriptionLink sdl) // Too big for pubsub, this is only a link
                 {
@@ -708,6 +725,10 @@ namespace Arteranos.Services
                     DownloadServerDescription(SenderPeerID, sod.ServerDescriptionCid);
                     sod.LastOnline = DateTime.UtcNow; // Not serialized
                     sod.DBInsert(SenderPeerID.ToString());
+                }
+                else if (pm is NatPunchRequestData nprd)
+                {
+                    InitiateNatPunch(nprd);
                 }
                 else
                     Debug.LogWarning($"Discarding unknown message from {SenderPeerID}");
@@ -819,6 +840,12 @@ namespace Arteranos.Services
             }
 
             TaskScheduler.Schedule(MakeDownloadTask(SenderPeerID, sddPath));
+        }
+
+        private void InitiateNatPunch(NatPunchRequestData nprd)
+        {
+            Debug.Log($"Contacting peer wants us to initiate Nat punch, relay={nprd.relayIP}:{nprd.relayPort}, token={nprd.token}");
+            G.ConnectionManager.Peer_InitateNatPunch(nprd);
         }
 
         #endregion
