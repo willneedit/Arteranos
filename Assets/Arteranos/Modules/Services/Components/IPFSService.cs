@@ -164,6 +164,11 @@ namespace Arteranos.Services
                                 self = t.Result;
                                 yield break;
                             }
+
+                            if(t.IsFaulted)
+                            {
+                                Debug.LogException(t.Exception);
+                            }
                         }
 
                         G.TransitionProgress?.OnProgressChanged(0.00f, "Failed to start backend");
