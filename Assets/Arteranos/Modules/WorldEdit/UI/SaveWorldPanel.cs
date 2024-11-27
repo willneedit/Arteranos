@@ -215,7 +215,7 @@ namespace Arteranos.WorldEdit
                 IFileSystemNode fsn = null;
 
                 yield return Asyncs.Async2Coroutine(
-                    AssembleWorldDirectory(worldTemplateCid, decor, ms.ToArray()),
+                    () => AssembleWorldDirectory(worldTemplateCid, decor, ms.ToArray()),
                     result => fsn = result);
 
 

@@ -81,7 +81,7 @@ namespace Arteranos.UI
             bool result = false;
 
             yield return Asyncs.Async2Coroutine(
-                AsyncImageLoader.LoadImageAsync(tex, IconData),
+                () => AsyncImageLoader.LoadImageAsync(tex, IconData),
                 _r => result = _r);
 
             if (tex == null || !result) yield break;

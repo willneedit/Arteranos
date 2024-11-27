@@ -13,6 +13,7 @@ using Arteranos.Core;
 using UnityEngine;
 using Ipfs.Unity;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Arteranos.UI
 {
@@ -65,7 +66,7 @@ namespace Arteranos.UI
                     using CancellationTokenSource cts = new(4000);
 
                     yield return Asyncs.Async2Coroutine(
-                        G.IPFSService.ReadBinary(m_Path, cancel: cts.Token),
+                        () => G.IPFSService.ReadBinary(m_Path, cancel: cts.Token),
                         _data => m_ImageData = _data);
                 }
 
@@ -74,9 +75,10 @@ namespace Arteranos.UI
 
                 if (m_ImageData != null)
                 {
-                    yield return Asyncs.Async2Coroutine(
-                        AsyncImageLoader.LoadImageAsync(tex, m_ImageData),
-                        _r => result = _r);
+                    // No Async2Coroutine. AsyncImageLoader's initializer needs the main task.
+                    Task<bool> resultTask = AsyncImageLoader.LoadImageAsync(tex, m_ImageData);
+                    yield return new WaitUntil(() => resultTask.IsCompleted);
+                    result = resultTask.Result;
                 }
 
                 if (result)

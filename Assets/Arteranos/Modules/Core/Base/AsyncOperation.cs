@@ -104,7 +104,10 @@ namespace Arteranos.Core
         /// <returns>The Enumerator to work with the Coroutine framework</returns>
         public IEnumerator ExecuteCoroutine(T context, Action<AggregateException, T> callback = null)
         {
-            Task<T> ao = ExecuteAsync(context);
+            Task<T> ao = Task.Run(async () =>
+            {
+                return await ExecuteAsync(context);
+            });
 
             yield return new WaitUntil(() => ao.IsCompleted);
 

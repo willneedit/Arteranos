@@ -81,7 +81,7 @@ namespace Arteranos.UI
             {
                 using MemoryStream ms = new(obj);
                 ms.Position = 0;
-                yield return Asyncs.Async2Coroutine(G.IPFSService.AddStream(ms), _fsn => ServerIcon = _fsn.Id);
+                yield return Asyncs.Async2Coroutine(() => G.IPFSService.AddStream(ms), _fsn => ServerIcon = _fsn.Id);
 
                 dirty = true;
             }
@@ -242,7 +242,7 @@ namespace Arteranos.UI
 
                 Debug.Log($"Total needs pinning: {toPin.Count}, out of {favouritedWorlds} worlds and {storedAvatars} stored avatars");
 
-                yield return Asyncs.Async2Coroutine(G.IPFSService.ListPinned(), _pinned => pinned = _pinned.ToList());
+                yield return Asyncs.Async2Coroutine(() => G.IPFSService.ListPinned(), _pinned => pinned = _pinned.ToList());
 
                 Debug.Log($"Actual pinned (including indirect): {pinned.Count}");
 
@@ -250,12 +250,12 @@ namespace Arteranos.UI
                 foreach (Cid entry in pinned)
                 {
                     if(!toPin.Contains(entry))
-                        yield return Asyncs.Async2Coroutine(SetPin(entry, false));
+                        yield return Asyncs.Async2Coroutine(() => SetPin(entry, false));
                 }
 
                 Debug.Log("Now, garbage collection.");
                 // And, scrub...
-                yield return Asyncs.Async2Coroutine(G.IPFSService.RemoveGarbage());
+                yield return Asyncs.Async2Coroutine(() => G.IPFSService.RemoveGarbage());
 
                 btn_ClearCaches.interactable = true;
             }

@@ -69,12 +69,12 @@ namespace Arteranos.Services
 
         private bool StartedIPFSDaemon = false;
 
-        private void Awake()
+        public void Awake()
         {
             G.IPFSService = this;
         }
 
-        private void Start()
+        public void Start()
         {
             IpfsClientEx ipfsTmp = null;
 
@@ -154,7 +154,9 @@ namespace Arteranos.Services
                         {
                             yield return new WaitForSeconds(1);
 
-                            Task<Peer> t = ipfsTmp.IdAsync();
+                            Task<Peer> t = Task.Run(async () => {
+                                return await ipfsTmp.IdAsync();
+                            });
 
                             yield return new WaitUntil(() => t.IsCompleted);
 
@@ -207,7 +209,7 @@ namespace Arteranos.Services
 
                     // First, see if there is an already running and accessible IPFS backend.
                     self = null;
-                    yield return Asyncs.Async2Coroutine(ipfsTmp.IdAsync(), _self => self = _self, _e =>
+                    yield return Asyncs.Async2Coroutine(() => ipfsTmp.IdAsync(), _self => self = _self, _e =>
                     {
                         // No backend, but that's okay. Yet.
                     });
@@ -239,11 +241,21 @@ namespace Arteranos.Services
 
                 }
 
+                try
+                {
+                    versionString = Core.Version.Load().MMP;
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError("Internal error: Missing version information - use Arteranos->Build->Update version");
+                    Debug.LogException(ex);
+                }
+
                 // Find and start the IPFS Server. If it's not already running.
                 yield return EnsureIPFSStarted();
 
                 // Keep the IPFS synced - it needs the IPFS node alive.
-                yield return Asyncs.Async2Coroutine(InitializeIPFS());
+                yield return Asyncs.Async2Coroutine(InitializeIPFS);
 
                 yield return new WaitForSeconds(1);
 
@@ -375,16 +387,6 @@ namespace Arteranos.Services
 
                 CachedPTOSNotice = ConfigUtils.ReadTextConfig(PATH_USER_PRIVACY_NOTICE);
 
-                try
-                {
-                    versionString = Core.Version.Load().MMP;
-                }
-                catch(Exception ex)
-                {
-                    Debug.LogError("Internal error: Missing version information - use Arteranos->Build->Update version");
-                    Debug.LogException(ex);
-                }
-
                 G.TransitionProgress?.OnProgressChanged(0.30f, "Announcing its service");
 
                 StringBuilder sb = new();
@@ -438,30 +440,33 @@ namespace Arteranos.Services
 
         }
 
-        private async void OnDisable()
+        public async void OnDisable()
         {
             // await FlipServerDescription();
 
-
-            cts?.Cancel();
-
-            // If we're started the backend on our own, shut it down, too.
-            if(ForceIPFSShutdown)
+            // FIXME Cannot send the shutdown request to the daemon because the HTTP Daemon is about to be killed, too.
+            await Task.Run(async () =>
             {
-                Debug.Log("Shutting down the IPFS node, because the service didn't completely start.");
-                await ipfs.ShutdownAsync();
-            }
-            else if (G.Server.ShutdownIPFS)
-            {
-                Debug.Log("Shutting down the IPFS node.");
-                await ipfs.ShutdownAsync();
-            }
-            else if(StartedIPFSDaemon)
-                Debug.Log("NOT Shutting down the IPFS node, because you want it to remain running.");
-            else
-                Debug.Log("NOT Shutting down the IPFS node, because it's been already running.");
+                cts?.Cancel();
 
-            cts?.Dispose();
+                // If we're started the backend on our own, shut it down, too.
+                if (ForceIPFSShutdown)
+                {
+                    Debug.Log("Shutting down the IPFS node, because the service didn't completely start.");
+                    await ipfs.ShutdownAsync();
+                }
+                else if (G.Server.ShutdownIPFS)
+                {
+                    Debug.Log("Shutting down the IPFS node.");
+                    await ipfs.ShutdownAsync();
+                }
+                else if (StartedIPFSDaemon)
+                    Debug.Log("NOT Shutting down the IPFS node, because you want it to remain running.");
+                else
+                    Debug.Log("NOT Shutting down the IPFS node, because it's been already running.");
+
+                cts?.Dispose();
+            });
         }
 
         private IEnumerator UploadDefaultAvatars()
@@ -497,7 +502,7 @@ namespace Arteranos.Services
         {
             while (true)
             {
-                yield return Asyncs.Async2Coroutine(FlipServerDescription());
+                yield return Asyncs.Async2Coroutine(FlipServerDescription);
 
                 // One day
                 yield return new WaitForSeconds(24 * 60 * 60);

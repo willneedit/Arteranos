@@ -47,11 +47,11 @@ namespace Arteranos.Core.Managed
         public static IEnumerator LoadFromIPFS(string path, Action<AssetBundle> result, Action<long, long> reportProgress = null, CancellationToken cancel = default)
         {
             Cid cid = null;
-            yield return Asyncs.Async2Coroutine(G.IPFSService.ResolveToCid(path, cancel), _result => cid = _result, ex => { });
+            yield return Asyncs.Async2Coroutine(() => G.IPFSService.ResolveToCid(path, cancel), _result => cid = _result, ex => { });
             if (cid == null) yield break;
 
             IFileSystemNode fsn = null;
-            yield return Asyncs.Async2Coroutine(G.IPFSService.ListFile(cid, cancel), _result => fsn = _result, ex => { });
+            yield return Asyncs.Async2Coroutine(() => G.IPFSService.ListFile(cid, cancel), _result => fsn = _result, ex => { });
 
             // No 'stat' implementation, just add the block sizes
             long totalBytes = 0;
@@ -61,7 +61,7 @@ namespace Arteranos.Core.Managed
             Action<long> rp = reportProgress != null ? (b) => reportProgress(b, totalBytes) : null;
 
             MemoryStream ms = null;
-            yield return Asyncs.Async2Coroutine(G.IPFSService.ReadIntoMS(path, rp, cancel), _result => ms = _result, ex => { });
+            yield return Asyncs.Async2Coroutine(() => G.IPFSService.ReadIntoMS(path, rp, cancel), _result => ms = _result, ex => { });
 
             AssetBundleCreateRequest abc = UnityEngine.AssetBundle.LoadFromStreamAsync(ms);
 

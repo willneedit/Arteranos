@@ -16,6 +16,7 @@ using Ipfs.CoreApi;
 using System.Net.Http;
 using UnityEngine;
 using System.IO.Compression;
+using System.Collections;
 
 namespace Arteranos.Core.Operations
 {
@@ -166,6 +167,23 @@ namespace Arteranos.Core.Operations
 
         public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
         {
+
+            byte[] LBA(string assetURL)
+            {
+                IEnumerator LBACoroutine(string assetURL, Action<byte[]> callback)
+                {
+                    TextAsset ta = Resources.Load<TextAsset>(assetURL);
+                    yield return null;
+                    callback(ta.bytes);
+                }
+
+                byte[] ta = null;
+                TaskScheduler.ScheduleCoroutine(() => LBACoroutine(assetURL, _ta => ta = _ta));
+
+                while(ta == null) Thread.Yield();
+                return ta;
+            }
+
             Stream inStream = null;
 
             AssetUploaderContext context = _context as AssetUploaderContext;
@@ -197,8 +215,8 @@ namespace Arteranos.Core.Operations
             {
                 assetURL = assetURL[12..];
 
-                TextAsset ta = Resources.Load<TextAsset>(assetURL);
-                inStream = new MemoryStream(ta.bytes);
+                byte[] ta = LBA(assetURL);
+                inStream = new MemoryStream(ta);
             }
             else
             {

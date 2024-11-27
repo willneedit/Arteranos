@@ -13,6 +13,7 @@ using Ipfs.Unity;
 using Arteranos.Services;
 using System.Threading;
 using GLTFast;
+using System.Threading.Tasks;
 
 namespace Arteranos.WorldEdit
 {
@@ -31,7 +32,7 @@ namespace Arteranos.WorldEdit
                 using CancellationTokenSource cts = new(10000);
                 byte[] data = null;
                 yield return Asyncs.Async2Coroutine(
-                    G.IPFSService.ReadBinary(GLTFObjectPath, cancel: cts.Token),
+                    () => G.IPFSService.ReadBinary(GLTFObjectPath, cancel: cts.Token),
                     _data => data = _data);
 
                 if (data == null)
@@ -39,11 +40,9 @@ namespace Arteranos.WorldEdit
 
                 GltfImport gltf = new(deferAgent: new UninterruptedDeferAgent());
 
-                bool success = false;
-
-                yield return Asyncs.Async2Coroutine(
-                    gltf.LoadGltfBinary(data, cancellationToken: cts.Token),
-                    _success => success = _success);
+                Task<bool> taskSuccess = gltf.LoadGltfBinary(data, cancellationToken: cts.Token);
+                yield return new WaitUntil(() => taskSuccess.IsCompleted);
+                bool success = taskSuccess.Result;
 
                 if(success)
                 {
@@ -52,8 +51,8 @@ namespace Arteranos.WorldEdit
 
                     GameObjectBoundsInstantiator instantiator = new(gltf, LoadedObject.transform);
 
-                    yield return Asyncs.Async2Coroutine(
-                        gltf.InstantiateMainSceneAsync(instantiator));
+                    Task task = gltf.InstantiateMainSceneAsync(instantiator);
+                    yield return new WaitUntil(() => task.IsCompleted);
 
                     Bounds? b = instantiator.CalculateBounds();
                     // Debug.Log($"Bounds: Center={b.Value.center}, Extent={b.Value.extents}, Max={b.Value.max}");

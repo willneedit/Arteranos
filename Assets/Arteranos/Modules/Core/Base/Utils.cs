@@ -342,7 +342,7 @@ namespace Arteranos.Core
             RenderTexture.active = rt;
 
             byte[] Bytes = tex.EncodeToPNG();
-            yield return Asyncs.Async2Coroutine(stream.WriteAsync(Bytes, 0, Bytes.Length));
+            yield return Asyncs.Async2Coroutine(() => stream.WriteAsync(Bytes, 0, Bytes.Length));
 
             Object.Destroy(tex);
 

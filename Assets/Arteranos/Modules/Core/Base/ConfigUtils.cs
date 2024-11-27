@@ -82,7 +82,7 @@ namespace Arteranos.Core
                 Debug.LogWarning($"{fullPath} doesn't exist - falling back to regular file.");
             }
 
-            fullPath = $"{Application.persistentDataPath}/{path}";
+            fullPath = $"{_persistentDataPath}/{path}";
             return reader(fullPath);
         }
 

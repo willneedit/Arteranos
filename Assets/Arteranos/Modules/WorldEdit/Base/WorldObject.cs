@@ -84,7 +84,7 @@ namespace Arteranos.WorldEdit
                 using CancellationTokenSource cts = new(60000);
                 byte[] data = null;
                 yield return Asyncs.Async2Coroutine(
-                    G.IPFSService.ReadBinary(WOglTF.glTFCid, cancel: cts.Token),
+                    () => G.IPFSService.ReadBinary(WOglTF.glTFCid, cancel: cts.Token),
                     _data => data = _data);
 
                 if (data == null)
@@ -95,7 +95,7 @@ namespace Arteranos.WorldEdit
                 bool success = false;
 
                 yield return Asyncs.Async2Coroutine(
-                    gltf.LoadGltfBinary(data, cancellationToken: cts.Token),
+                    () => gltf.LoadGltfBinary(data, cancellationToken: cts.Token),
                     _success => success = _success);
 
                 if (success)
@@ -103,7 +103,7 @@ namespace Arteranos.WorldEdit
                     GameObjectBoundsInstantiator instantiator = new(gltf, LoadedObject.transform);
 
                     yield return Asyncs.Async2Coroutine(
-                        gltf.InstantiateMainSceneAsync(instantiator));
+                        () => gltf.InstantiateMainSceneAsync(instantiator));
 
                     // Add a box collider with with the approximated bounds.
                     Bounds? b = instantiator.CalculateBounds();

@@ -210,11 +210,11 @@ namespace Arteranos.PlayTest.Web
                 // Alternatively, using file[0].Id works as well.
 
                 Cid resolved = null;
-                yield return Asyncs.Async2Coroutine(G.IPFSService.ResolveToCid($"{AssetCid}/{files[0].Name}"), _r => resolved = _r);
+                yield return Asyncs.Async2Coroutine(() => G.IPFSService.ResolveToCid($"{AssetCid}/{files[0].Name}"), _r => resolved = _r);
                 Assert.IsNotNull(resolved);
 
                 IFileSystemNode fsn_AB = null;
-                yield return Asyncs.Async2Coroutine(ipfs.FileSystem.ListAsync(resolved), _r => fsn_AB = _r);
+                yield return Asyncs.Async2Coroutine(() => ipfs.FileSystem.ListAsync(resolved), _r => fsn_AB = _r);
                 IFileSystemLink[] files_AB = fsn_AB.Links.ToArray();
                 Assert.IsTrue(fsn_AB.IsDirectory);
                 Assert.AreEqual(4, files_AB.Length);

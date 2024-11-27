@@ -60,7 +60,7 @@ namespace Arteranos.UI
             {
                 using MemoryStream ms = new(obj);
                 ms.Position = 0;
-                yield return Asyncs.Async2Coroutine(G.IPFSService.AddStream(ms), _fsn => cs.Me.UserIconCid = _fsn.Id);
+                yield return Asyncs.Async2Coroutine(() => G.IPFSService.AddStream(ms), _fsn => cs.Me.UserIconCid = _fsn.Id);
 
                 dirty = true;
             }
