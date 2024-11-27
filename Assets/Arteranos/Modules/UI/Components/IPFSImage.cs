@@ -73,7 +73,7 @@ namespace Arteranos.UI
                 bool result = false;
                 Texture2D tex = new(2, 2);
 
-                if (m_ImageData != null)
+                if (m_ImageData != null && m_ImageData.Length > 0)
                 {
                     // No Async2Coroutine. AsyncImageLoader's initializer needs the main task.
                     Task<bool> resultTask = AsyncImageLoader.LoadImageAsync(tex, m_ImageData);

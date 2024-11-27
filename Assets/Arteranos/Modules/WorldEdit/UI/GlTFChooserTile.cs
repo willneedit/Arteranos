@@ -9,11 +9,8 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Ipfs.Unity;
-using Arteranos.Services;
+using Arteranos.Core.Managed;
 using System.Threading;
-using GLTFast;
-using System.Threading.Tasks;
 
 namespace Arteranos.WorldEdit
 {
@@ -30,46 +27,27 @@ namespace Arteranos.WorldEdit
             IEnumerator Cor()
             {
                 using CancellationTokenSource cts = new(10000);
-                byte[] data = null;
-                yield return Asyncs.Async2Coroutine(
-                    () => G.IPFSService.ReadBinary(GLTFObjectPath, cancel: cts.Token),
-                    _data => data = _data);
+                IPFSGLTFObject obj = new(GLTFObjectPath, cts.Token);
+                obj.InitActive = false;
 
-                if (data == null)
-                    yield break;
+                yield return obj.GameObject.WaitFor();
+                LoadedObject = obj.GameObject;
+                Bounds? b = obj.Bounds;
 
-                GltfImport gltf = new(deferAgent: new UninterruptedDeferAgent());
+                // Debug.Log($"Bounds: Center={b.Value.center}, Extent={b.Value.extents}, Max={b.Value.max}");
 
-                Task<bool> taskSuccess = gltf.LoadGltfBinary(data, cancellationToken: cts.Token);
-                yield return new WaitUntil(() => taskSuccess.IsCompleted);
-                bool success = taskSuccess.Result;
+                // Center is locked to the preview anchors, now only extents matter.
+                float largestAxis = b.Value.extents.x;
+                if (b.Value.extents.y > largestAxis) largestAxis = b.Value.extents.y;
+                if (b.Value.extents.z > largestAxis) largestAxis = b.Value.extents.z;
 
-                if(success)
-                {
-                    LoadedObject = new();
-                    LoadedObject.SetActive(false);
+                Transform t = LoadedObject.transform;
+                grp_ObjectAnchor.transform.localScale *= 0.20f / (largestAxis + float.Epsilon);
+                t.SetParent(grp_ObjectAnchor.transform, false);
 
-                    GameObjectBoundsInstantiator instantiator = new(gltf, LoadedObject.transform);
+                t.localPosition = -b.Value.center;
 
-                    Task task = gltf.InstantiateMainSceneAsync(instantiator);
-                    yield return new WaitUntil(() => task.IsCompleted);
-
-                    Bounds? b = instantiator.CalculateBounds();
-                    // Debug.Log($"Bounds: Center={b.Value.center}, Extent={b.Value.extents}, Max={b.Value.max}");
-
-                    // Center is locked to the preview anchors, now only extents matter.
-                    float largestAxis = b.Value.extents.x;
-                    if (b.Value.extents.y > largestAxis) largestAxis = b.Value.extents.y;
-                    if (b.Value.extents.z > largestAxis) largestAxis = b.Value.extents.z;
-
-                    Transform t = LoadedObject.transform;
-                    grp_ObjectAnchor.transform.localScale *= 0.20f / (largestAxis + float.Epsilon);
-                    t.SetParent(grp_ObjectAnchor.transform, false);
-
-                    t.localPosition = -b.Value.center;
-
-                    LoadedObject.SetActive(true);
-                }
+                LoadedObject.SetActive(true);
             }
 
             base.Start();

@@ -111,8 +111,9 @@ namespace Arteranos.Core
                 {
                     Stopwatch sw = Stopwatch.StartNew();
                     callback?.Invoke();
-                    if (sw.ElapsedMilliseconds > 2)
-                        Debug.LogWarning($"Callback took more than 2 ms from the main thread!");
+                    // Coroutines can be put 'on hold' with 'yield return'
+                    //if (sw.ElapsedMilliseconds > 2)
+                    //    Debug.LogWarning($"Callback took more than 2 ms from the main thread!");
                 }
                 catch (Exception ex)
                 {
