@@ -96,6 +96,48 @@ namespace Arteranos.Core
             return context;
         }
 
+        public IEnumerator ExecuteAllCoroutines(T context, Action<AggregateException, T> callback = null)
+        {
+            tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(Timeout));
+            weightSoFar = 0f;
+
+            foreach (IAsyncOperation<T> operation in asyncOperations)
+            {
+                operation.ProgressChanged += OnProgressChanged;
+                operation.Timeout = Timeout;
+                currentOperation = operation;
+
+                try
+                {
+                    // Even if particular operations would be technically synced, we have to
+                    // look for that occasion.
+                    if (tokenSource.IsCancellationRequested)
+                        throw new OperationCanceledException();
+
+                    OnProgressChanged(0f);
+                    Task<T> t = operation.ExecuteAsync(context, tokenSource.Token);
+                    yield return new WaitUntil(() => t.IsCompleted);
+                    if(t.IsFaulted)
+                    {
+                        callback?.Invoke(t.Exception, default);
+                        yield break;
+                    }
+                    context = t.Result;
+                    OnProgressChanged(1f);
+
+                    weightSoFar += operation.Weight;
+                }
+                finally
+                {
+                    if (tokenSource.IsCancellationRequested) tokenSource.Dispose();
+                }
+
+                operation.ProgressChanged -= OnProgressChanged;
+            }
+
+            Completed?.Invoke(context);
+            callback?.Invoke(default, context);
+        }
         /// <summary>
         /// Execute complex operations inside an encapsulating coroutine.
         /// </summary>
