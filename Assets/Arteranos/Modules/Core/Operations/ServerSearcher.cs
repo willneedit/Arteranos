@@ -13,6 +13,7 @@ using Arteranos.UI;
 using Arteranos.Services;
 using Ipfs;
 using Arteranos.Core.Managed;
+using System.Collections;
 
 namespace Arteranos.Core.Operations
 {
@@ -144,8 +145,17 @@ namespace Arteranos.Core.Operations
 
         public static void InitiateServerTransition(Cid WorldCid)
         {
-            static void GotResult(Cid WorldCid, MultiHash ServerPeerID) 
-                => _ = OnGotSearchResult(WorldCid, ServerPeerID);
+            static IEnumerator Cor(Cid WorldCid, MultiHash ServerPeerID)
+            {
+                _ = OnGotSearchResult(WorldCid, ServerPeerID);
+
+                yield return null;
+            }
+
+            static void GotResult(Cid WorldCid, MultiHash ServerPeerID)
+            {
+                TaskScheduler.ScheduleCoroutine(() => Cor(WorldCid, ServerPeerID));
+            }
 
             InitiateServerTransition(WorldCid, GotResult, null);
         }
