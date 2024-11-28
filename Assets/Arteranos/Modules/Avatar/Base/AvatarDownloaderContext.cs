@@ -7,7 +7,6 @@
 
 using UnityEngine;
 using System.Collections.Generic;
-using GLTFast;
 using Arteranos.Core;
 using Arteranos.Core.Operations;
 
@@ -52,7 +51,5 @@ namespace Arteranos.Avatar
         public int Triangles { get; set; }
         public int Materials { get; set; }
         public float Rating { get; set; }
-
-        public GltfImport GltfImport { get; set; }
     }
 }

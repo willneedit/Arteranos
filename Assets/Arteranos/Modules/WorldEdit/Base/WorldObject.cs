@@ -14,12 +14,9 @@ using UnityEngine;
 using System.IO;
 using System;
 using System.Threading;
-using Ipfs.Unity;
-using GLTFast;
-using System.Threading.Tasks;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
-using System.Reflection;
 using Arteranos.WorldEdit.Components;
+using Arteranos.Core.Managed;
 
 namespace Arteranos.WorldEdit
 {
@@ -82,37 +79,21 @@ namespace Arteranos.WorldEdit
             static IEnumerator LoadglTF(WOglTF WOglTF, GameObject LoadedObject)
             {
                 using CancellationTokenSource cts = new(60000);
-                byte[] data = null;
-                yield return Asyncs.Async2Coroutine(
-                    () => G.IPFSService.ReadBinary(WOglTF.glTFCid, cancel: cts.Token),
-                    _data => data = _data);
-
-                if (data == null)
-                    yield break;
-
-                GltfImport gltf = new(deferAgent: new UninterruptedDeferAgent());
-
-                bool success = false;
-
-                yield return Asyncs.Async2Coroutine(
-                    () => gltf.LoadGltfBinary(data, cancellationToken: cts.Token),
-                    _success => success = _success);
-
-                if (success)
+                using IPFSGLTFObject obj = new(WOglTF.glTFCid, cts.Token)
                 {
-                    GameObjectBoundsInstantiator instantiator = new(gltf, LoadedObject.transform);
+                    RootObject = LoadedObject,
+                    InitActive = false
+                };
 
-                    yield return Asyncs.Async2Coroutine(
-                        () => gltf.InstantiateMainSceneAsync(instantiator));
+                yield return obj.GameObject.WaitFor();
 
-                    // Add a box collider with with the approximated bounds.
-                    Bounds? b = instantiator.CalculateBounds();
-                    if(b.HasValue)
-                    {
-                        BoxCollider bc = LoadedObject.AddComponent<BoxCollider>();
-                        bc.center = b.Value.center;
-                        bc.size = b.Value.size;
-                    }
+                // Add a box collider with with the approximated bounds.
+                Bounds? b = obj.Bounds;
+                if(b.HasValue)
+                {
+                    BoxCollider bc = LoadedObject.AddComponent<BoxCollider>();
+                    bc.center = b.Value.center;
+                    bc.size = b.Value.size;
                 }
 
                 LoadedObject.name = $"glTF {WOglTF.glTFCid}";

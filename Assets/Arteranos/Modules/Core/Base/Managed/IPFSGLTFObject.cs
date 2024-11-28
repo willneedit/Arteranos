@@ -19,6 +19,7 @@ namespace Arteranos.Core.Managed
     {
         public string Path { get; set; } = null;
         public bool InitActive { get; set; } = true;
+        public GameObject RootObject { get; set; } = null;
 
         public AsyncLazy<GameObject> GameObject { get; private set; } = null;
         public Bounds? Bounds { get; private set; } = null;
@@ -57,7 +58,7 @@ namespace Arteranos.Core.Managed
 
                     if (!success) yield break;
 
-                    goTmp = new();
+                    goTmp = RootObject ? RootObject : new();
                     goTmp.SetActive(false);
 
                     GameObjectBoundsInstantiator instantiator = new(gltf, goTmp.transform);
