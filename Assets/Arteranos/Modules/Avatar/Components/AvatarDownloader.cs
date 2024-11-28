@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 using UnityEngine;
 using System.Threading;
 using Ipfs;
-using GLTFast;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DitzelGames.FastIK;
 using Newtonsoft.Json;
 using Arteranos.Core;
+using Arteranos.Core.Managed;
 
 namespace Arteranos.Avatar
 {
@@ -411,24 +411,15 @@ namespace Arteranos.Avatar
         {
             AvatarDownloaderContext context = _context as AvatarDownloaderContext;
 
-            // Debug.Log($"AvatarDownloader ({context.path}): Entering load avatar");
-
-            byte[] data = await G.IPFSService.ReadBinary(context.path, cancel: token);
-
-            // Debug.Log($"AvatarDownloader ({context.path}): Load avatar from IPFS finished");
-
-            GltfImport gltf = new(deferAgent: new UninterruptedDeferAgent());
-
-            var success = await gltf.LoadGltfBinary(data, cancellationToken: token);
-
-            if (success)
+            IPFSGLTFObject obj = new(context.path, token)
             {
-                context.Avatar = new GameObject();
-                context.Avatar.SetActive(false);
-                GameObjectInstantiator customInstantiator = new(gltf, context.Avatar.transform);
+                InitActive = false
+            };
 
-                await gltf.InstantiateMainSceneAsync(customInstantiator);
+            context.Avatar = await obj.GameObject;
 
+            if (context.Avatar)
+            {
                 // As an afterthought, pin the avatar in the local IPFS node.
                 try
                 {
