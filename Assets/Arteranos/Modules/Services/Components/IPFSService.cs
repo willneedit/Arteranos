@@ -647,8 +647,8 @@ namespace Arteranos.Services
                 return;
             }
 
-            List<string> IPAddresses = (from entry in addrs
-                                        select entry.ToString()).ToList();
+            List<string> IPAddresses = new();
+            foreach (IPAddress entry in addrs) if(entry != null) IPAddresses.Add(entry.ToString());
 
             ServerOnlineData sod = new()
             {

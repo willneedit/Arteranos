@@ -64,7 +64,7 @@ namespace Arteranos.Services
                 ina.ClientNeedsNatPunch = si.IsFirewalled;
                 Debug.Log($"Emabling NAT punching addon: {ina.ClientNeedsNatPunch}");
 
-                ina.OnInitiatingNatPunch = t => Ina_OnInitiatingNatPunch(si.PeerID, ina);
+                ina.OnInitiatingNatPunch = t => Ina_OnInitiatingNatPunch(t, si.PeerID, ina);
             }
             else
                 Debug.Log("NAT punching is not supported with this transport");
@@ -138,8 +138,15 @@ namespace Arteranos.Services
             // fall back to the offline world.
         }
 
-        private void Ina_OnInitiatingNatPunch(MultiHash peerID, INatPunchAddon ina)
+        private void Ina_OnInitiatingNatPunch(IPEndPoint target, MultiHash peerID, INatPunchAddon ina)
         {
+            // First IPv4: External IP, beyond NAT
+            // First IPv6: Well....
+            IEnumerable<IPAddress> possible =
+                from ipadddr in (List<IPAddress>)G.NetworkStatus.IPAddresses
+                where ipadddr.AddressFamily == target.AddressFamily
+                select ipadddr;
+
             Guid tokenGuid = Guid.NewGuid();
 
             IEnumerable<ServerInfo> possibleRelays = from entry in ServerInfo.Dump()
@@ -148,32 +155,43 @@ namespace Arteranos.Services
 
             List<ServerInfo> relayList = possibleRelays.ToList();
 
-            if(relayList.Count == 0)
+            string token = tokenGuid.ToString();
+            IPEndPoint relayEP = new(IPAddress.None, 0);
+            IPEndPoint clientEP = new(IPAddress.None, 0);
+
+            if (relayList.Count != 0)
             {
-                Debug.LogWarning("No viable relays.");
+                // Pick one... 
+                ServerInfo relaySI = relayList[UnityEngine.Random.Range(0, relayList.Count)];
+                relayEP = new(relaySI.IPAddresses.ToList().First(), relaySI.ServerPort);
+                // ... and try relayed NAT punching
+                ina.InitiateNatPunch(relayEP, token);
+            }
+            else if(!possible.Any())
+            {
+                Debug.LogWarning("Target is unreachable (IPv6 vs. IPv4)");
                 return;
+            }      
+            else
+            {
+                clientEP = new(possible.First(), ina.LocalPort);
+                Debug.Log($"No viable relays, trying relayless with {clientEP}...");
             }
 
-            ServerInfo relaySI = relayList[UnityEngine.Random.Range(0, relayList.Count)];
-
-            IPEndPoint relay = new(relaySI.IPAddresses.ToList().First(), relaySI.ServerPort);
-
-            string token = tokenGuid.ToString();
-
+            // Notify server via IPFS, too, to make it work in tandem
             NatPunchRequestData nprd = new()
             {
-                toPeerID = peerID.ToString(),
-                relayIP = relay.Address.ToString(),
-                relayPort = relay.Port,
+                serverPeerID = peerID.ToString(),
+                relayIP = relayEP.Address.ToString(),
+                relayPort = relayEP.Port,
+                clientIP = clientEP.Address.ToString(),
+                clientPort = clientEP.Port,
                 token = token,
             };
 
             using MemoryStream ms = new();
             nprd.Serialize(ms);
 
-            // ... initiate the Nat punch process, both for us,
-            // and asking the server to do that, too.
-            ina.InitiateNatPunch(relay, nprd.token);
             Debug.Log($"Sending peer the Nat punch request for relay={nprd.relayIP}:{nprd.relayPort}, token={nprd.token}");
             G.IPFSService.PostMessageTo(peerID, ms.ToArray());
         }
@@ -184,7 +202,19 @@ namespace Arteranos.Services
             if (Transport.active is INatPunchAddon ina)
             {
                 IPEndPoint relay = new(IPAddress.Parse(nprd.relayIP), nprd.relayPort);
-                ina.InitiateNatPunch(relay, nprd.token);
+                IPEndPoint client = new(IPAddress.Parse(nprd.clientIP), nprd.clientPort);
+
+                if(!relay.Address.Equals(IPAddress.None))
+                {
+                    Debug.Log($"Relayed NAT punching process via {relay}");
+                    ina.InitiateNatPunch(relay, nprd.token);
+                }
+                else
+                {
+                    Debug.Log($"Relayless NAT punching process towards {client}");
+                    ina.ConnectBackTo(client);
+                }
+
             }
             else
                 Debug.LogWarning("... but this peer's transport doesn't support Nat punching.");

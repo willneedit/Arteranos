@@ -22,7 +22,7 @@ namespace Arteranos.Core
     public class NatPunchRequestData : PeerMessage, IDirectedPeerMessage
     {
         [ProtoMember(1)]
-        public string relayIP;  // The relay to contact to
+        public string relayIP;  // The relay to contact to, if it's using relayed
 
         [ProtoMember(2)]
         public int relayPort;
@@ -31,9 +31,15 @@ namespace Arteranos.Core
         public string token;    // The token, provided by the peer which wants to contact us
 
         [ProtoMember(4)]
-        public string toPeerID;
+        public string serverPeerID;
 
-        public string ToPeerID { get => toPeerID; set => toPeerID = value; }
+        [ProtoMember(5)]
+        public string clientIP; // The client who wants to connect to the firewalled server, if it's relayless
+
+        [ProtoMember(6)]
+        public int clientPort;
+
+        public string ToPeerID { get => serverPeerID; set => serverPeerID = value; }
 
         public override void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);

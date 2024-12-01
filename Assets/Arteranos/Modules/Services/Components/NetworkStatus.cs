@@ -256,10 +256,16 @@ namespace Arteranos.Services
 
         private async Task<List<IPAddress>> GatherIPAddresses()
         {
-            List<IPAddress> ips = new()
+            List<IPAddress> ips = new();
+
+            IPAddress externalIPAddress = null;
+            for(int i = 0; i < 10; i++)
             {
-                await GetExternalIPAdress()
-            };
+                externalIPAddress = await GetExternalIPAdress();
+                if (externalIPAddress != null) break;
+            }
+
+            if(externalIPAddress != null) ips.Add(externalIPAddress);
 
             ips.AddRange(GetLocalIPAddresses());
 
