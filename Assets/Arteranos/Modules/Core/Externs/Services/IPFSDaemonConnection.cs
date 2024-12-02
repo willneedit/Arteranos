@@ -21,7 +21,7 @@ namespace Arteranos.Services
     public static class IPFSDaemonConnection
     {
         // API ports to avoid
-        public static readonly HashSet<int> bannedAPIPorts = new() { 5001 };
+        public static readonly HashSet<int> bannedAPIPorts = new() { 5001, 8080 };
 
         public enum Status
         {
@@ -50,8 +50,8 @@ namespace Arteranos.Services
 
             if (includeDefaultOptions)
             {
-                if(CheckRepository(false) != Status.OK)
-                    throw new InvalidOperationException("Cannot use the default arguments aren't evaluated");
+                // Just set up the suitable RepoDir, don't care if it actually exists or not.
+                CheckRepository(false);
 
                 sb.Add($"--repo-dir={RepoDir}");
             }
@@ -207,12 +207,14 @@ namespace Arteranos.Services
             {
                 try
                 {
-                    Peer peer = await ipfs.IdAsync();
-                    Self = peer;
+                    _ = await ipfs.Config.GetAsync();
                     status = Status.OK;
                     break;
                 }
-                catch {  }
+                catch // (Exception es) 
+                {
+                    // Debug.LogException(es);
+                }
 
                 await Task.Delay(1000);
             }
@@ -227,13 +229,68 @@ namespace Arteranos.Services
 
                 ServerKeyPair = SignKey.ImportPrivateKey(pk);
                 Ipfs = ipfs;
+
+                Self = await ipfs.IdAsync();
             }
-            catch
+            catch // (Exception ex)
             {
+                // Debug.LogError(ex);
                 return Status.PortSquatter;
             }
 
             return Status.OK;
+        }
+
+        public static async Task<Status> EvadePortSquatters(int attempts)
+        {
+            Status result;
+
+            for (int i = 0; i < attempts; i++)
+            {
+                result = await CheckAPIConnection(5, true);
+
+                if (result != Status.PortSquatter) return result;
+
+                Debug.Log($"API port squatting detected");
+
+                StopDaemon();
+                APIPort = null;
+
+                await Task.Delay(5000);
+
+                int newPort;
+                Random rnd = new();
+                
+                do
+                {
+                    newPort = rnd.Next(5001, 49999);
+                } while(bannedAPIPorts.Contains(newPort));
+
+                string reconfigureCmd = $"config Addresses.API /ip4/127.0.0.1/tcp/{newPort}";
+
+                ProcessStartInfo psi = BuildDaemonCommand(reconfigureCmd);
+                result = RunDaemonCommand(psi, true);
+
+                // Additionally, remove the Web Gateway port.
+                psi = BuildDaemonCommand("config --json Addresses.Gateway []");
+                RunDaemonCommand(psi, true);
+
+                if(result != Status.OK)
+                {
+                    Debug.LogError("Reconfiguring daemon failed");
+                    return result;
+                }
+
+                Debug.Log($"Restarting daemon with new port {newPort}...");
+                bannedAPIPorts.Add(newPort);
+
+                StartDaemon(false);
+
+                await Task.Delay(5000);
+            }
+
+            // Too many retries
+            return Status.CommandFailed;
         }
     }
 }

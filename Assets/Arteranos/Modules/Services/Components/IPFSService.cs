@@ -65,8 +65,6 @@ namespace Arteranos.Services
         // ---------------------------------------------------------------
         #region Start & Stop
 
-        private bool StartedIPFSDaemon = false;
-
         public void Awake()
         {
             G.IPFSService = this;
@@ -74,37 +72,27 @@ namespace Arteranos.Services
 
         public void Start()
         {
-            IpfsClientEx ipfsTmp = null;
-
-            // Running the same IPFS backend for both the dedicated server and
-            // the desktop app will lead to confustion because of using the
-            // same peer ID.
-            //
-            // So, to each its own.
-            string repodir = $"{ConfigUtils.persistentDataPath}/.ipfs";
-
-
             IEnumerator InitializeIPFSCoroutine()
             {
                 IEnumerator EnsureIPFSStarted()
                 {
                     IEnumerator StartupIPFSExeCoroutine()
                     {
-                        if(IPFSDaemonConnection.IPFSAccessible() != IPFSDaemonConnection.Status.OK)
-                        {
-                            G.TransitionProgress?.OnProgressChanged(0.00f, "NO IPFS EXECUTABLE AVAILABLE");
-                            Debug.LogError(@"
-**************************************************************************
-* !!! No IPFS Executable available                                   !!! *
-* Possible causes are....                                                *
-*  * Corrupted install                                                   *
-*  * Attempt to start Arteranos outside of its installation              *
-**************************************************************************
-");
-                            yield return new WaitForSeconds(10);
-                            SettingsManager.Quit();
-                            yield break;
-                        }
+//                        if (IPFSDaemonConnection.IPFSAccessible() != IPFSDaemonConnection.Status.OK)
+//                        {
+//                            G.TransitionProgress?.OnProgressChanged(0.00f, "NO IPFS EXECUTABLE AVAILABLE");
+//                            Debug.LogError(@"
+//**************************************************************************
+//* !!! No IPFS Executable available                                   !!! *
+//* Possible causes are....                                                *
+//*  * Corrupted install                                                   *
+//*  * Attempt to start Arteranos outside of its installation              *
+//**************************************************************************
+//");
+//                            yield return new WaitForSeconds(10);
+//                            SettingsManager.Quit();
+//                            yield break;
+//                        }
 
                         IPFSDaemonConnection.Status res = IPFSDaemonConnection.CheckRepository(false);
 
@@ -148,15 +136,6 @@ namespace Arteranos.Services
                             SettingsManager.Quit();
                             yield break;
                         }
-
-                        yield return Asyncs.Async2Coroutine(() => IPFSDaemonConnection.CheckAPIConnection(5, false), _res => res = _res);
-
-                        if (res == IPFSDaemonConnection.Status.OK)
-                            yield break;
-
-                        G.TransitionProgress?.OnProgressChanged(0.00f, "Failed to start backend");
-                        yield return new WaitForSeconds(10);
-                        SettingsManager.Quit();
                     }
 
                     IPFSDaemonConnection.Status res = IPFSDaemonConnection.Status.CommandFailed;
@@ -175,8 +154,6 @@ namespace Arteranos.Services
                     {
                         yield return StartupIPFSExeCoroutine();
                     }
-
-                    ipfsTmp = new($"http://localhost:{port}");
                 }
 
                 try
@@ -188,6 +165,8 @@ namespace Arteranos.Services
                     Debug.LogError("Internal error: Missing version information - use Arteranos->Build->Update version");
                     Debug.LogException(ex);
                 }
+
+                IPFSDaemonConnection.IPFSAccessible();
 
                 // Find and start the IPFS Server. If it's not already running.
                 yield return EnsureIPFSStarted();
@@ -239,19 +218,25 @@ namespace Arteranos.Services
             {
                 ipfs = null;
 
-                IPFSDaemonConnection.Status status = await IPFSDaemonConnection.CheckAPIConnection(1, true);
+                IPFSDaemonConnection.Status status = await IPFSDaemonConnection.EvadePortSquatters(20);
 
-                if(status == IPFSDaemonConnection.Status.PortSquatter)
+                if(status != IPFSDaemonConnection.Status.OK)
                 {
-                    Debug.LogError("Backend doesn't match with its supposed private key");
+                    G.TransitionProgress?.OnProgressChanged(0.00f, "CANNOT USE IPFS INTERFACE");
+                    Debug.LogError(@"
+**************************************************************************
+* !!! Cannot use IPFS Interface                                      !!! *
+* Possible causes are....                                                *
+*  * Corrupted install                                                   *
+*  * System with MANY running services (port exhaustion)                 *
+**************************************************************************
+");
                     SettingsManager.Quit();
-                    return;
+                    throw new ApplicationException();
                 }
 
                 self = IPFSDaemonConnection.Self;
-                ipfsTmp = IPFSDaemonConnection.Ipfs;
-
-                ipfs = ipfsTmp;
+                ipfs = IPFSDaemonConnection.Ipfs;
 
                 // If it doesn't exist, write down the template in the config directory.
                 if (!ConfigUtils.ReadConfig(PATH_USER_PRIVACY_NOTICE, File.Exists))
@@ -315,33 +300,27 @@ namespace Arteranos.Services
 
         }
 
-        public async void OnDisable()
+        public void OnDisable()
         {
             // await FlipServerDescription();
 
-            // FIXME Cannot send the shutdown request to the daemon because the HTTP Daemon is about to be killed, too.
-            await Task.Run(async () =>
+            cts?.Cancel();
+
+            // If we're started the backend on our own, shut it down, too.
+            if (ForceIPFSShutdown)
             {
-                cts?.Cancel();
+                Debug.Log("Shutting down the IPFS node, because the service didn't completely start.");
+                if (ipfs != null) IPFSDaemonConnection.StopDaemon();
+            }
+            else if (G.Server.ShutdownIPFS)
+            {
+                Debug.Log("Shutting down the IPFS node.");
+                if (ipfs != null) IPFSDaemonConnection.StopDaemon();
+            }
+            else
+                Debug.Log("NOT Shutting down the IPFS node, because you want it to remain running.");
 
-                // If we're started the backend on our own, shut it down, too.
-                if (ForceIPFSShutdown)
-                {
-                    Debug.Log("Shutting down the IPFS node, because the service didn't completely start.");
-                    if(ipfs != null) await ipfs.ShutdownAsync();
-                }
-                else if (G.Server.ShutdownIPFS)
-                {
-                    Debug.Log("Shutting down the IPFS node.");
-                    if (ipfs != null) await ipfs.ShutdownAsync();
-                }
-                else if (StartedIPFSDaemon)
-                    Debug.Log("NOT Shutting down the IPFS node, because you want it to remain running.");
-                else
-                    Debug.Log("NOT Shutting down the IPFS node, because it's been already running.");
-
-                cts?.Dispose();
-            });
+            cts?.Dispose();
         }
 
         private IEnumerator UploadDefaultAvatars()
