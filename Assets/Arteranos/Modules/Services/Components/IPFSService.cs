@@ -606,13 +606,13 @@ namespace Arteranos.Services
                 try
                 {
                     // Mark it now because download in progress.
-                    SDEntry value = new()
+                    SDEntry newValue = new()
                     {
                         path = sddPath,
                         lastSeen = now
                     };
 
-                    KnownServerDescriptions.AddOrUpdate(SenderPeerID, value, (sender, value) => value);
+                    KnownServerDescriptions.AddOrUpdate(SenderPeerID, newValue, (sender, value) => newValue);
 
                     using CancellationTokenSource cts = new(20000);
 
@@ -674,13 +674,13 @@ namespace Arteranos.Services
                             sd.DBUpdate();
                         }
 
-                        SDEntry value = new()
+                        SDEntry newValue = new()
                         {
                             path = sddPath,
                             lastSeen = now
                         };
 
-                        KnownServerDescriptions.AddOrUpdate(SenderPeerID, value, (sender, value) => value);
+                        KnownServerDescriptions.AddOrUpdate(SenderPeerID, newValue, (sender, value) => newValue);
                     }
 
                     return;

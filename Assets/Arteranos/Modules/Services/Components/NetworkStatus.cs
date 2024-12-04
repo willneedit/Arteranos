@@ -460,10 +460,19 @@ namespace Arteranos.Services
         {
             // Set the port number on supported transports, as long as they'd
             // require it.
+            int serverPort = G.Server.ServerPort;
+            if (GetAvailablePort(serverPort, serverPort + 1, null, false) == 0)
+            {
+                Debug.LogWarning("Squatter on server detected");
+                serverPort = GetAvailablePort(8000, 49152);
+                Debug.LogWarning($"Port temporarily changed to {serverPort}");
+                G.Server.ServerPort = serverPort;
+            }
+
             if (transport is TelepathyTransport tt)
-                tt.port = (ushort)G.Server.ServerPort;
+                tt.port = (ushort)serverPort;
             else if (transport is LiteNetLibTransport lnlt)
-                lnlt.port = (ushort)G.Server.ServerPort;
+                lnlt.port = (ushort)serverPort;
         }
 
         public async Task StartServer()
