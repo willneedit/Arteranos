@@ -393,7 +393,7 @@ namespace Arteranos.Services
             // Spread the load throughout on all of the services.
             services.Shuffle();
 
-            cts = new CancellationTokenSource(2000);
+            cts = new CancellationTokenSource(10000);
 
             async Task GetOneMyIP(string service)
             {
@@ -403,7 +403,7 @@ namespace Arteranos.Services
                 if (result != null) cts.Cancel();
             }
 
-            TaskPool<string> pool = new(2);
+            TaskPool<string> pool = new(6);
 
             foreach (string service in services)
                 pool.Schedule(service, GetOneMyIP);
