@@ -21,7 +21,12 @@ namespace Arteranos.Services
     public static class IPFSDaemonConnection
     {
         // API ports to avoid
-        public static readonly HashSet<int> bannedAPIPorts = new() { 5001, 8080 };
+        public static readonly HashSet<int> bannedAPIPorts = new() 
+        { 
+            5001, // Default API
+            4001, // Default IPFS
+            8080, // Default Web Gateway 
+        };
 
         public enum Status
         {
@@ -241,56 +246,56 @@ namespace Arteranos.Services
             return Status.OK;
         }
 
-        public static async Task<Status> EvadePortSquatters(int attempts)
+        public static async Task<Status> EvadePortSquatters()
         {
             Status result;
 
-            for (int i = 0; i < attempts; i++)
-            {
-                result = await CheckAPIConnection(5, true);
+            // Early exit if everything is not a port squatter
+            result = await CheckAPIConnection(5, true);
+            if (result != Status.PortSquatter) return result;
 
-                if (result != Status.PortSquatter) return result;
+            Debug.Log($"API port squatting detected");
 
-                Debug.Log($"API port squatting detected");
+            int apiPort = NetworkStatus.GetAvailablePort(5001, 49162, bannedAPIPorts, true);
+            bannedAPIPorts.Add(apiPort);
+            int ipfsPort = NetworkStatus.GetAvailablePort(4001, 49152, bannedAPIPorts, true);
+            bannedAPIPorts.Add(ipfsPort);
 
-                StopDaemon();
-                APIPort = null;
+            // Port exhaustion.
+            if (apiPort == 0 || ipfsPort == 0) return Status.PortSquatter;
 
-                await Task.Delay(5000);
+            // Stop daemon and invalidate current port number
+            StopDaemon();
+            APIPort = null;
+            await Task.Delay(5000);
 
-                int newPort;
-                Random rnd = new();
-                
-                do
-                {
-                    newPort = rnd.Next(5001, 49999);
-                } while(bannedAPIPorts.Contains(newPort));
+            Debug.Log($"New port allocations: API={apiPort}, IPFS={ipfsPort}");
 
-                string reconfigureCmd = $"config Addresses.API /ip4/127.0.0.1/tcp/{newPort}";
+            // Reconfigure API port
+            ProcessStartInfo psi = BuildDaemonCommand($"config Addresses.API /ip4/127.0.0.1/tcp/{apiPort}");
+            _ = RunDaemonCommand(psi, true);
 
-                ProcessStartInfo psi = BuildDaemonCommand(reconfigureCmd);
-                result = RunDaemonCommand(psi, true);
+            // Reconfigure IPFS port
+            psi = BuildDaemonCommand($"config --json Addresses.Swarm " +
+                $"\"[ " +
+                $"  \\\"/ip4/0.0.0.0/tcp/{ipfsPort}\\\", " +
+                $"  \\\"/ip6/::/tcp/{ipfsPort}\\\", " +
+                $"  \\\"/ip4/0.0.0.0/udp/{ipfsPort}/quic-v1\\\", " +
+                $"  \\\"/ip4/0.0.0.0/udp/{ipfsPort}/quic-v1/webtransport\\\", " +
+                $"  \\\"/ip6/::/udp/{ipfsPort}/quic-v1\\\", " +
+                $"  \\\"/ip6/::/udp/{ipfsPort}/quic-v1/webtransport\\\" " +
+                $"]\"");
+            _ = RunDaemonCommand(psi, true);
 
-                // Additionally, remove the Web Gateway port.
-                psi = BuildDaemonCommand("config --json Addresses.Gateway []");
-                RunDaemonCommand(psi, true);
 
-                if(result != Status.OK)
-                {
-                    Debug.LogError("Reconfiguring daemon failed");
-                    return result;
-                }
+            // Additionally, remove the Web Gateway port.
+            psi = BuildDaemonCommand("config --json Addresses.Gateway []");
+            _ = RunDaemonCommand(psi, true);
 
-                Debug.Log($"Restarting daemon with new port {newPort}...");
-                bannedAPIPorts.Add(newPort);
-
-                StartDaemon(false);
-
-                await Task.Delay(5000);
-            }
-
-            // Too many retries
-            return Status.CommandFailed;
+            // Start the daemon anew, and see if we're okay.
+            StartDaemon(false);
+            await Task.Delay(5000);
+            return await CheckAPIConnection(5, true);
         }
     }
 }

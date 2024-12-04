@@ -23,6 +23,7 @@ using System.Threading;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 namespace Arteranos.Services
 {
@@ -62,7 +63,7 @@ namespace Arteranos.Services
 
         private NetworkManager manager = null;
         private Transport transport = null;
-        private void Awake()
+        public void Awake()
         {
             manager = FindObjectOfType<NetworkManager>(true);
             transport = FindObjectOfType<Transport>(true);
@@ -101,7 +102,7 @@ namespace Arteranos.Services
 
         public bool IsClientConnected => NetworkClient.isConnected;
 
-        void OnEnable()
+        public void OnEnable()
         {
             Debug.Log("Setting up NAT gateway configuration");
 
@@ -139,7 +140,7 @@ namespace Arteranos.Services
             StartCoroutine(RefreshDiscovery());
         }
 
-        private void OnDisable()
+        public void OnDisable()
         {
             Debug.Log("Shutting down NAT gateway configuration");
 
@@ -152,7 +153,7 @@ namespace Arteranos.Services
             NatUtility.StopDiscovery();
         }
 
-        private void Update()
+        public void Update()
         {
             ConnectivityLevel c1 = GetConnectivityLevel();
             OnlineLevel c2 = GetOnlineLevel();
@@ -243,6 +244,64 @@ namespace Arteranos.Services
             ServerPortPublic = false;
         }
 
+        #endregion
+        // -------------------------------------------------------------------
+        #region Port allocation
+
+        private static readonly HashSet<int> bannedPorts = new()
+        {
+            5001, // Default API
+            4001, // Default IPFS
+            8080, // Default Web Gateway 
+        };
+
+        public static int GetAvailablePort(int startPort, int endPort = 49152, HashSet<int> excluded = null, bool random = true)
+        {
+            static void AddCollection<T>(HashSet<T> set, IEnumerable<T> collection)
+            {
+                foreach(T t in collection) set.Add(t);
+            }
+
+            var portArray = new HashSet<int>();
+
+            var properties = IPGlobalProperties.GetIPGlobalProperties();
+
+            // Ignore preallocated ports
+            AddCollection(portArray, excluded ?? bannedPorts);
+
+            // Ignore active connections
+            var connections = properties.GetActiveTcpConnections();
+            AddCollection(portArray, from n in connections select n.LocalEndPoint.Port);
+
+            // Ignore active tcp listners
+            var endPoints = properties.GetActiveTcpListeners();
+            AddCollection(portArray, from n in endPoints select n.Port);
+
+            // Ignore active UDP listeners
+            endPoints = properties.GetActiveUdpListeners();
+            AddCollection(portArray, from n in endPoints select n.Port);
+
+            if (!random) // Sequential
+            {
+                for (int i = startPort; i < endPort; i++)
+                    if (!portArray.Contains(i))
+                        return i;
+                return 0;
+            }
+            else // Just pick one
+            {
+                if (portArray.Count > endPort - startPort - 20) return 0;
+
+                System.Random rnd = new();
+                while(true)
+                {
+                    int i = rnd.Next(startPort, endPort);
+                    if (!portArray.Contains(i)) return i;
+                }
+            }
+
+            // NOTREACHED
+        }
         #endregion
         // -------------------------------------------------------------------
         #region IP Address determination

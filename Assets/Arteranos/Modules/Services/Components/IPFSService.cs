@@ -78,22 +78,6 @@ namespace Arteranos.Services
                 {
                     IEnumerator StartupIPFSExeCoroutine()
                     {
-//                        if (IPFSDaemonConnection.IPFSAccessible() != IPFSDaemonConnection.Status.OK)
-//                        {
-//                            G.TransitionProgress?.OnProgressChanged(0.00f, "NO IPFS EXECUTABLE AVAILABLE");
-//                            Debug.LogError(@"
-//**************************************************************************
-//* !!! No IPFS Executable available                                   !!! *
-//* Possible causes are....                                                *
-//*  * Corrupted install                                                   *
-//*  * Attempt to start Arteranos outside of its installation              *
-//**************************************************************************
-//");
-//                            yield return new WaitForSeconds(10);
-//                            SettingsManager.Quit();
-//                            yield break;
-//                        }
-
                         IPFSDaemonConnection.Status res = IPFSDaemonConnection.CheckRepository(false);
 
                         if(res != IPFSDaemonConnection.Status.OK)
@@ -218,7 +202,7 @@ namespace Arteranos.Services
             {
                 ipfs = null;
 
-                IPFSDaemonConnection.Status status = await IPFSDaemonConnection.EvadePortSquatters(20);
+                IPFSDaemonConnection.Status status = await IPFSDaemonConnection.EvadePortSquatters();
 
                 if(status != IPFSDaemonConnection.Status.OK)
                 {
