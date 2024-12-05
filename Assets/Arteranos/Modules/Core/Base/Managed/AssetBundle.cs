@@ -20,23 +20,19 @@ namespace Arteranos.Core.Managed
     /// Managed version of AssetBundle, to let it only live as long as the
     /// reference is held.
     /// </summary>
-    public class AssetBundle : IDisposable
+    public class AssetBundle : ManagedHandle<UnityEngine.AssetBundle>
     {
-        private bool disposed = false;
-        private UnityEngine.AssetBundle m_assetBundle = null;
-
         private UnityEngine.AssetBundle InternalAssetBundle
         {
-            get
-            {
-                if (disposed)
-                    throw new ObjectDisposedException("AssetBundle");
-
-                return m_assetBundle;
-            }
-
-            set => m_assetBundle = value;
+            get => resource;
+            set => Attach(value);
         }
+
+        public AssetBundle() : base(
+            () => null, 
+            r => { Disposer(r); }
+            )
+        { }
 
         public static implicit operator UnityEngine.AssetBundle(AssetBundle assetBundle) 
             => assetBundle.InternalAssetBundle;
@@ -72,29 +68,15 @@ namespace Arteranos.Core.Managed
             result.Invoke(ab);
         }
 
-        ~AssetBundle() { Dispose(); }
-
-        public UnityEngine.AssetBundle Detach()
+        private static void Disposer(UnityEngine.AssetBundle b)
         {
-            UnityEngine.AssetBundle old = InternalAssetBundle;
-            InternalAssetBundle = null;
-            return old;
-        }
-
-        public void Dispose()
-        {
-            IEnumerator Cor()
+            static IEnumerator Cor(UnityEngine.AssetBundle b)
             {
-                // Debug.Log($"Disposing {m_assetBundle.name}");
-                m_assetBundle.Unload(true);
-                m_assetBundle = null;
+                if(b) b.Unload(true);
                 yield return null;
             }
 
-            if(disposed) return;
-            disposed = true;
-
-            if (m_assetBundle != null) TaskScheduler.ScheduleCoroutine(() => Cor());
+            TaskScheduler.ScheduleCoroutine(() => Cor(b));
         }
     }
 }

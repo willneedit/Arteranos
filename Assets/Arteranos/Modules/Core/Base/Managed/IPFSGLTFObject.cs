@@ -15,7 +15,7 @@ using UnityEngine;
 
 namespace Arteranos.Core.Managed
 {
-    public class IPFSGLTFObject : IDisposable
+    public class IPFSGLTFObject : ManagedHandle<CancellationTokenSource>
     {
         public string Path { get; set; } = null;
         public bool InitActive { get; set; } = true;
@@ -24,22 +24,20 @@ namespace Arteranos.Core.Managed
         public AsyncLazy<GameObject> GameObject { get; private set; } = null;
         public Bounds? Bounds { get; private set; } = null;
 
-        private readonly CancellationTokenSource own_cts = null;
-
-        public IPFSGLTFObject(string path = null, CancellationToken? cancel = null)
+        public IPFSGLTFObject(string path = null, CancellationToken? cancel = null) : base(
+            () => null,
+            r => Disposer(r)
+            )
         {
             Path = path;
 
             // If we get a (timeout) token, link it with the source for disposing
-            own_cts = cancel != null 
+            Attach(cancel != null 
                 ? CancellationTokenSource.CreateLinkedTokenSource(cancel.Value) 
-                : new CancellationTokenSource();
+                : new CancellationTokenSource());
 
-            GameObject = new(() => Loader(own_cts.Token));
+            GameObject = new(() => Loader(resource.Token));
         }
-
-        ~IPFSGLTFObject() => Dispose(false);
-
 
         private async Task<GameObject> Loader(CancellationToken cancel)
         {
@@ -95,25 +93,11 @@ namespace Arteranos.Core.Managed
         }
 
         // ---------------------------------------------------------------
-        public void Dispose()
+        private static void Disposer(CancellationTokenSource tokenSource)
         {
-            GC.SuppressFinalize(this);
-            Dispose(true);
+            if (tokenSource == null) return;
+            tokenSource.Cancel();
+            tokenSource.Dispose();
         }
-
-        private void Dispose(bool _ /* disposing */)
-        {
-            lock (this)
-            {
-                // if (disposing) /* cleanup managed resources */
-                // cleanup unmanaged resources
-                if (own_cts != null)
-                {
-                    own_cts.Cancel();
-                    own_cts.Dispose();
-                }
-            }
-        }
-
     }
 }
