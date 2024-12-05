@@ -61,11 +61,13 @@ namespace Arteranos.Core.Managed
                 _disposed = true;
                 // if (disposing) /* cleanup managed resources */
                 // cleanup unmanaged resources
+                DisposeOuter();
                 destructor?.Invoke(resource);
                 destructor = null;
             }
         }
 
+        protected virtual void DisposeOuter() { }
         public void ThrowIfDisposed()
         {
             if (_disposed) throw new ObjectDisposedException(GetType().FullName);

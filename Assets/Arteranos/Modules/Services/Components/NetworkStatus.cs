@@ -23,7 +23,7 @@ using System.Threading;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Net.NetworkInformation;
-using System.Net.Sockets;
+using Arteranos.Core.Managed;
 
 namespace Arteranos.Services
 {
@@ -31,7 +31,7 @@ namespace Arteranos.Services
     {
         public AsyncLazy<List<IPAddress>> IPAddresses => m_IPAddresses;
 
-        private INatDevice device = null;
+        private NATDevice device = null;
         public MultiHash RemotePeerId { get; set; } = null;
 
         public event Action<ConnectivityLevel, OnlineLevel> OnNetworkStatusChanged;
@@ -148,7 +148,8 @@ namespace Arteranos.Services
 
             StopAllCoroutines();
 
-            ClosePortsAsync();
+            device.Dispose();
+            device = null;
 
             NatUtility.StopDiscovery();
         }
@@ -178,14 +179,12 @@ namespace Arteranos.Services
             // all with the same external IP address?
             if(device != null) return;
 
-            device = e.Device;
+            device = new(e.Device);
 
             // ExternalAddress_ = await device.GetExternalIPAsync();
 
             Debug.Log($"Device found : {device.NatProtocol}");
             Debug.Log($"  Type       : {device.GetType().Name}");
-
-            OpenPortsAsync();
         }
 
         private async Task<bool> OpenPortAsync(int port)
@@ -234,7 +233,7 @@ namespace Arteranos.Services
 
         public void ClosePortsAsync()
         {
-            Debug.Log("Closing ports in the router, if there's need to do.");
+            Debug.Log("Closing ports in the router.");
 
             Server ss = G.Server;
 
@@ -536,5 +535,61 @@ namespace Arteranos.Services
 
         #endregion
         // -------------------------------------------------------------------
+    }
+
+    // Extension of INatDevice to treat port mappings as a managed resource
+    internal class NATDevice : ManagedHandle<INatDevice>, INatDevice
+    {
+        public NATDevice(INatDevice newDevice) : base(
+            () => newDevice,
+            r => { }
+            )
+        { }
+
+        private readonly List<Mapping> mappings = new();
+        public IPEndPoint DeviceEndpoint => resource.DeviceEndpoint;
+        public DateTime LastSeen => resource.LastSeen;
+        public NatProtocol NatProtocol => resource.NatProtocol;
+        public async Task<Mapping> CreatePortMapAsync(Mapping mapping)
+        {
+            Mapping map = await resource.CreatePortMapAsync(mapping);
+            mappings.Add(map);
+            return map;
+        }
+
+        public async Task<Mapping> DeletePortMapAsync(Mapping mapping)
+        {
+            Mapping map = await resource.DeletePortMapAsync(mapping);
+            for (int i = mappings.Count - 1; i >= 0; i--)
+                if (mappings[i].Equals(map)) mappings.RemoveAt(i);
+
+            return map;
+        }
+
+        public Task<Mapping[]> GetAllMappingsAsync() => resource.GetAllMappingsAsync();
+        public Task<IPAddress> GetExternalIPAsync() => resource.GetExternalIPAsync();
+        public Task<Mapping> GetSpecificMappingAsync(Protocol protocol, int publicPort) => resource.GetSpecificMappingAsync(protocol, publicPort);
+
+        private static void DeleteAllPortMappings(INatDevice device, List<Mapping> mappings)
+        {
+            foreach (var mapping in mappings)
+            {
+                try
+                {
+                    Debug.Log($"Disposing {mapping.PrivatePort}/{mapping.Protocol} --> {mapping.PublicPort}");
+                    device.DeletePortMap(mapping);
+                }
+                catch { }
+            }
+        }
+
+        public void DeleteAllPortMappings() => DeleteAllPortMappings(resource, mappings);
+        // -------------------------------------------------------------------
+        protected override void DisposeOuter()
+        {
+            DeleteAllPortMappings();
+
+            base.DisposeOuter();
+        }
     }
 }
