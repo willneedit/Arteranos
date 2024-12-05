@@ -460,9 +460,11 @@ namespace Arteranos.Services
             // Set the port number on supported transports, as long as they'd
             // require it.
             int serverPort = G.Server.ServerPort;
-            if (GetAvailablePort(serverPort, serverPort + 1, null, false) == 0)
+            if (serverPort <= 0
+                || serverPort >= 49152
+                || GetAvailablePort(serverPort, serverPort + 1, null, false) == 0)
             {
-                Debug.LogWarning("Squatter on server detected");
+                Debug.LogWarning("Preferred port unavailable");
                 serverPort = GetAvailablePort(8000, 49152);
                 Debug.LogWarning($"Port temporarily changed to {serverPort}");
                 G.Server.ServerPort = serverPort;
