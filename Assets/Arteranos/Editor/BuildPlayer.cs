@@ -178,7 +178,7 @@ public static class _dummy
         {
             string IPFSExe = "ipfs.exe";
 
-            string source = "https://github.com/ipfs/kubo/releases/download/v0.28.0/kubo_v0.28.0_windows-amd64.zip";
+            string source = "https://github.com/ipfs/kubo/releases/download/v0.32.0/kubo_v0.32.0_windows-amd64.zip";
             // TODO sha512
             string target = $"{Application.temporaryCachePath}/downloaded-kubo-ipfs.zip";
             string targetDir = $"{target}.dir";
@@ -236,7 +236,10 @@ public static class _dummy
 
             yield return new WaitUntil(() => taskDownload.IsCompleted);
 
-            if (File.Exists(desired)) File.Copy(desired, IPFSExe);
+            if (File.Exists(desired))
+                File.Copy(desired, IPFSExe);
+            else
+                Debug.LogError($"{desired} not found.");
 
             Debug.Log("Done.");
         }
