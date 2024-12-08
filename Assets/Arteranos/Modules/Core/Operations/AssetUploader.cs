@@ -11,12 +11,13 @@ using System.Threading.Tasks;
 
 using System.Threading;
 using Ipfs;
-using Arteranos.Services;
-using Ipfs.CoreApi;
 using System.Net.Http;
 using UnityEngine;
 using System.IO.Compression;
 using System.Collections;
+using ICSharpCode.SharpZipLib.Tar;
+using System.Text;
+using System.Collections.Generic;
 
 namespace Arteranos.Core.Operations
 {
@@ -52,11 +53,12 @@ namespace Arteranos.Core.Operations
                 if (Directory.Exists(path)) Directory.Delete(path, true);
             }
 
+            Debug.Log($"Resulting CID: {context.Cid}");
             return context;
         }
     }
 
-    internal class UnzipFileOp : IAsyncOperation<Context>
+    internal class UnZipFileOp : IAsyncOperation<Context>
     {
         public int Timeout { get; set; }
         public float Weight { get; set; } = 2.0f;
@@ -84,6 +86,68 @@ namespace Arteranos.Core.Operations
                     if (File.Exists(context.TempFile)) File.Delete(context.TempFile);
                 }
             });
+        }
+    }
+
+    internal class UnTarFileOp : IAsyncOperation<Context>
+    {
+        public int Timeout { get; set; }
+        public float Weight { get; set; } = 2.0f;
+        public string Caption { get; set; } = "Uncompressing file";
+        public Action<float> ProgressChanged { get; set; }
+
+        public async Task<Context> ExecuteAsync(Context _context, CancellationToken token)
+        {
+            AssetUploaderContext context = _context as AssetUploaderContext;
+
+            try
+            {
+                string path = $"{context.TempFile}.dir";
+
+                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+                using Stream fs = File.OpenRead(context.TempFile);
+
+                string common = null;
+
+                using (TarInputStream tar = new(fs, Encoding.UTF8))
+                {
+                    tar.IsStreamOwner = false;
+                    for (TarEntry entry = tar.GetNextEntry(); entry != null; entry = tar.GetNextEntry())
+                    {
+                        if (entry.IsDirectory) continue;
+
+                        common ??= entry.Name;
+
+                        int i = common.CommonStart(entry.Name);
+                        common = entry.Name[0..i];
+                    }
+                }
+
+                fs.Seek(0, SeekOrigin.Begin);
+                int cutoff = common.Length;
+
+                using (TarInputStream tar = new(fs, Encoding.UTF8))
+                {
+                    for (TarEntry entry = tar.GetNextEntry(); entry != null; entry = tar.GetNextEntry())
+                    {
+                        if (entry.IsDirectory) continue;
+
+                        string filePath = $"{path}/{entry.Name[cutoff..]}";
+                        string dirName = Path.GetDirectoryName(filePath);
+                        if (!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
+
+                        using Stream stream = File.Create(filePath);
+                        await tar.CopyEntryContentsAsync(stream, token);
+                    }
+                }
+
+                return context;
+            }
+            finally
+            {
+                if (File.Exists(context.TempFile)) File.Delete(context.TempFile);
+            }
         }
     }
 
@@ -256,12 +320,16 @@ namespace Arteranos.Core.Operations
 
             if (asTarred)
             {
-                executor = new(new IAsyncOperation<Context>[]
-                {
-                    new DownloadFromWeb(),
-                    new UnzipFileOp(),
-                    new UploadDirectoryToIPFS()
-                })
+                bool tarFormat = assetURL.EndsWith(".tar");
+
+                List<IAsyncOperation<Context>> asyncOperations = new() { new DownloadFromWeb() };
+
+                if (tarFormat) asyncOperations.Add(new UnZipFileOp());
+                else asyncOperations.Add(new UnTarFileOp());
+
+                asyncOperations.Add(new UploadDirectoryToIPFS());
+
+                executor = new(asyncOperations.ToArray())
                 {
                     Timeout = timeout
                 };

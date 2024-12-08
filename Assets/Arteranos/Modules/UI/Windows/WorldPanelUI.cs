@@ -241,7 +241,7 @@ namespace Arteranos.UI
                 ShowPage(0);
             }
 
-            StartCoroutine(ParseWorldCoroutine());
+            TaskScheduler.ScheduleCoroutine(ParseWorldCoroutine);
         }
     }
 }
