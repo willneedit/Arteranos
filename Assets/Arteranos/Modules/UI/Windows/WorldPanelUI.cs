@@ -32,7 +32,8 @@ namespace Arteranos.UI
 
     public class WorldPanelUI : UIBehaviour
     {
-        [SerializeField] private ObjectChooser Chooser;
+        public ObjectChooser Chooser;
+        public FileBrowser FileBrowser;
 
         private readonly ConcurrentDictionary<Cid, Collection> worldlist = new();
         private readonly List<Cid> sortedWorldList = new();
@@ -53,7 +54,31 @@ namespace Arteranos.UI
 
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
-            Chooser.OnAddingItem += RequestToAdd;
+            Chooser.OnAddingItem += _ => SwitchPane(true);
+
+            FileBrowser.OnSelection += GotFileBrowserSelection;
+
+            SwitchPane(false);
+        }
+
+        private void SwitchPane(bool filePane)
+        {
+            Chooser.gameObject.SetActive(!filePane);
+            FileBrowser.gameObject.SetActive(filePane);
+        }
+
+        private void GotFileBrowserSelection(string obj)
+        {
+            SwitchPane(false);
+
+            if (obj == null)
+            {
+                Chooser.FinishAdding();
+                return;
+            }
+
+            Debug.Log($"Chosen to add: {obj}");
+            RequestToAdd(obj);
         }
 
         private void PreparePage(int obj)
@@ -238,6 +263,7 @@ namespace Arteranos.UI
 
                 CreateSortedWorldList();
 
+                Chooser.FinishAdding();
                 ShowPage(0);
             }
 

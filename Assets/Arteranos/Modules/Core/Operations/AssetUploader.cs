@@ -320,11 +320,11 @@ namespace Arteranos.Core.Operations
 
             if (asTarred)
             {
-                bool tarFormat = assetURL.EndsWith(".tar");
+                bool tarFormat = assetURL.EndsWith(".tar") || assetURL.EndsWith(".tar\"");
 
                 List<IAsyncOperation<Context>> asyncOperations = new() { new DownloadFromWeb() };
 
-                if (tarFormat) asyncOperations.Add(new UnZipFileOp());
+                if (!tarFormat) asyncOperations.Add(new UnZipFileOp());
                 else asyncOperations.Add(new UnTarFileOp());
 
                 asyncOperations.Add(new UploadDirectoryToIPFS());
