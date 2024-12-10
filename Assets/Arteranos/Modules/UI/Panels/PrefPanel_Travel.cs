@@ -77,7 +77,7 @@ namespace Arteranos.UI
         {
             G.SysMenu.CloseSysMenus();
 
-            ServerListUI.New();
+            ActionRegistry.Call("serverList");
         }
 
         private void OnSetContentClicked()

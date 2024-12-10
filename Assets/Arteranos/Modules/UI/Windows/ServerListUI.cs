@@ -6,18 +6,16 @@
  */
 
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Collections;
-using System;
 
 namespace Arteranos.UI
 {
-    public class ServerListUI : UIBehaviour
+    public class ServerListUI : ActionPage
     {
 
         public RectTransform lvc_ServerList;
@@ -26,12 +24,6 @@ namespace Arteranos.UI
         private Client cs = null;
 
         private readonly Dictionary<string, ServerListItem> ServerList = new();
-
-        public static ServerListUI New()
-        {
-            GameObject go = Instantiate(BP.I.UI.ServerList);
-            return go.GetComponent<ServerListUI>();
-        }
 
         protected override void Awake()
         {

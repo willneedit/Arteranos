@@ -143,9 +143,9 @@ namespace Arteranos.UI
             if(item.IsDirectory)
                 CurrentDirectory = item.FullPath; // Including the UI refresh
             else
-                Back(item.FullPath);
+                BackOut(item.FullPath);
         }
 
-        public void GotCancel() => Back(null);
+        public void GotCancel() => BackOut(null);
     }
 }

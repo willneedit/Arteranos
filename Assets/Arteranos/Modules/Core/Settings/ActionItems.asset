@@ -18,3 +18,6 @@ MonoBehaviour:
   - Id: worldPanel
     ActionGameObject: {fileID: 3973834586187625388, guid: 30fa112d6d177534daae0ebc0159a434,
       type: 3}
+  - Id: serverList
+    ActionGameObject: {fileID: 1943824474716096331, guid: de980c2889ea78249a5ed23529eca106,
+      type: 3}

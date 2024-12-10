@@ -15,8 +15,8 @@ namespace Arteranos.Core
 {
     public interface IActionPage : IMonoBehaviour
     {
-        void Back(object result);
-        void Call(object data);
+        void BackOut(object result);
+        void Called(object data);
         bool CanBeCalled(object data);
         void OnEnterLeaveAction(bool onEnter);
     }
@@ -25,9 +25,9 @@ namespace Arteranos.Core
     { 
         public virtual bool CanBeCalled(object data) { return true; }
 
-        public virtual void Call(object data) { }
+        public virtual void Called(object data) { }
 
-        public virtual void Back(object result) { ActionRegistry.Back(result); }
+        public virtual void BackOut(object result) { ActionRegistry.Back(result); }
 
         public virtual void OnEnterLeaveAction(bool onEnter)
         { 
@@ -114,7 +114,7 @@ namespace Arteranos.Core
 
             _actionStack.Push(newItem);
 
-            newItem.caller.Call(data);
+            newItem.caller.Called(data);
 
             return newItem.caller.gameObject;
         }

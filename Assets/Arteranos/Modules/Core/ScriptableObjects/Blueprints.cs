@@ -49,7 +49,6 @@ namespace Arteranos.Core
             public GameObject ContentFilter;
             public GameObject LicenseText;
             public GameObject ServerInfo;
-            public GameObject ServerList;
             public GameObject ServerUserList;
             public GameObject UserHUD;
         };
