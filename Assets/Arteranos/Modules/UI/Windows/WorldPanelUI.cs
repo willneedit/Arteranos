@@ -30,7 +30,7 @@ namespace Arteranos.UI
         public bool current;
     }
 
-    public class WorldPanelUI : UIBehaviour
+    public class WorldPanelUI : ActionPage
     {
         public ObjectChooser Chooser;
         public FileBrowser FileBrowser;
@@ -38,13 +38,6 @@ namespace Arteranos.UI
         private readonly ConcurrentDictionary<Cid, Collection> worldlist = new();
         private readonly List<Cid> sortedWorldList = new();
         private Mutex DictMutex = null;
-
-
-        public static WorldPanelUI New()
-        {
-            GameObject go = Instantiate(BP.I.UI.WorldPanel);
-            return go.GetComponent<WorldPanelUI>();
-        }
 
         protected override void Awake()
         {
@@ -54,22 +47,17 @@ namespace Arteranos.UI
 
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
-            Chooser.OnAddingItem += _ => SwitchPane(true);
-
-            FileBrowser.OnSelection += GotFileBrowserSelection;
-
-            SwitchPane(false);
+            Chooser.OnAddingItem += _ => ActionRegistry.Call("embedded.fileBrowser", null, FileBrowser, GotFileBrowserSelection);
         }
 
-        private void SwitchPane(bool filePane)
+        public override void OnEnterLeaveAction(bool onEnter)
         {
-            Chooser.gameObject.SetActive(!filePane);
-            FileBrowser.gameObject.SetActive(filePane);
+            Chooser.gameObject.SetActive(onEnter);
         }
 
-        private void GotFileBrowserSelection(string obj)
+        private void GotFileBrowserSelection(object result)
         {
-            SwitchPane(false);
+            string obj = result as string;
 
             if (obj == null)
             {

@@ -70,7 +70,7 @@ namespace Arteranos.UI
         {
             G.SysMenu.CloseSysMenus();
 
-            WorldPanelUI.New();
+            ActionRegistry.Call("worldPanel");
         }
 
         private void OnServerGalleryClicked()

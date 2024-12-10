@@ -7,7 +7,6 @@
 
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 using System;
 using System.IO;
@@ -15,11 +14,9 @@ using UnityEngine.UI;
 
 namespace Arteranos.UI
 {
-    public class FileBrowser : UIBehaviour
+    public class FileBrowser : Core.ActionPage
     {
         public Button btn_Cancel = null;
-
-        public event Action<string> OnSelection;
 
         public string CurrentDirectory
         {
@@ -53,7 +50,6 @@ namespace Arteranos.UI
         {
             Chooser.OnPopulateTile -= PopulateTile;
             Chooser.OnShowingPage -= PreparePage;
-
 
             base.OnDestroy();
         }
@@ -147,9 +143,9 @@ namespace Arteranos.UI
             if(item.IsDirectory)
                 CurrentDirectory = item.FullPath; // Including the UI refresh
             else
-                OnSelection?.Invoke(item.FullPath);
+                Back(item.FullPath);
         }
 
-        public void GotCancel() => OnSelection?.Invoke(null);
+        public void GotCancel() => Back(null);
     }
 }

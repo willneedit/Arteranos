@@ -52,7 +52,6 @@ namespace Arteranos.Core
             public GameObject ServerList;
             public GameObject ServerUserList;
             public GameObject UserHUD;
-            public GameObject WorldPanel;
         };
         public UI_ UI;
 

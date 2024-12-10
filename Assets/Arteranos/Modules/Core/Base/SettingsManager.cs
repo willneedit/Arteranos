@@ -19,6 +19,7 @@ namespace Arteranos.Core
         public static SettingsManager Instance;
 
         public Blueprints Blueprints;
+        public ActionItems ActionItems;
 
         private CommandLine Command;
 
@@ -42,6 +43,7 @@ namespace Arteranos.Core
         protected virtual void Awake()
         {
             BP.I = Blueprints;
+            ActionRegistry.Register(ActionItems);
 
             SetupPurgatory();
 
