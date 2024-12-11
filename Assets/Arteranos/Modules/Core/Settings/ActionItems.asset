@@ -30,3 +30,6 @@ MonoBehaviour:
   - Id: fileBrowser
     ActionGameObject: {fileID: 4193041269047191700, guid: 42873459c13e7eb4f9619b75288f031a,
       type: 3}
+  - Id: avatarGallery
+    ActionGameObject: {fileID: 3879904410954356699, guid: 029ea5ee39836354f97cb7c946878aee,
+      type: 3}

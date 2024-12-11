@@ -71,21 +71,6 @@ namespace Arteranos.UI
             return go.GetComponent<IProgressUI>();
         }
 
-        public static IAvatarGalleryUI NewAvatarGallery()
-        {
-            Transform t = G.XRControl.rigTransform;
-            Vector3 position = t.position;
-            Quaternion rotation= t.rotation;
-            position += rotation * Vector3.forward * 2f;
-
-            GameObject go = Object.Instantiate(
-                BP.I.InApp.AvatarGalleryPedestal,
-                position,
-                rotation
-                );
-            return go.GetComponent<IAvatarGalleryUI>();
-        }
-
         public static INameplateUI NewNameplate(GameObject bearer)
         {
             GameObject go;

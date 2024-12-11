@@ -49,7 +49,7 @@ namespace Arteranos.UI
             sldn_AvatarHeight.OnValueChanged += (float height) => dirty = true;
 
             btn_CreateAvatar.onClick.AddListener(OnCreateAvatarClicked);
-            btn_AvatarGallery.onClick.AddListener(OnAvatarGalleryClicked);
+            btn_AvatarGallery.onClick.AddListener(() => ActionRegistry.Call("avatarGallery"));
 
             bar_IconSelector.OnIconChanged += Bar_IconSelector_OnIconChanged;
         }
@@ -66,12 +66,6 @@ namespace Arteranos.UI
             }
 
             StartCoroutine(UploadIcon(obj));
-        }
-
-        private void OnAvatarGalleryClicked()
-        {
-            G.SysMenu.CloseSysMenus();
-            Factory.NewAvatarGallery();
         }
 
         private void OnCreateAvatarClicked()

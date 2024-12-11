@@ -20,6 +20,7 @@ namespace Arteranos.Core
         void Called(object data);
         bool CanBeCalled(object data);
         void OnEnterLeaveAction(bool onEnter);
+        (Vector3 position, Quaternion rotation) StartingLocation();
     }
 
     public class ActionPage : UIBehaviour, IActionPage 
@@ -50,6 +51,7 @@ namespace Arteranos.Core
         public virtual void BackingOut(ref object result) { }
 
         public virtual void OnEnterLeaveAction(bool onEnter) { gameObject.SetActive(onEnter); }
+        public (Vector3 position, Quaternion rotation) StartingLocation() => (Vector3.zero, Quaternion.identity);
     }
 
     [Serializable]
@@ -114,7 +116,8 @@ namespace Arteranos.Core
             {
                 if (page == null) throw new ArgumentNullException(nameof(callTo));
 
-                GameObject go = Object.Instantiate(page.gameObject);
+                var sp = page.StartingLocation();
+                GameObject go = Object.Instantiate(page.gameObject, sp.position, sp.rotation);
                 newItem.caller = go.GetComponent<IActionPage>();
             }
             else

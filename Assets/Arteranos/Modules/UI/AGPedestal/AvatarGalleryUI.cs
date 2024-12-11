@@ -15,7 +15,7 @@ using Arteranos.Avatar;
 
 namespace Arteranos.UI
 {
-    public class AvatarGalleryUI : MonoBehaviour
+    public class AvatarGalleryUI : MonoBehaviour, IActionPage
     {
         [SerializeField] private Renderer btn_prev = null;
         [SerializeField] private Renderer btn_next = null;
@@ -146,6 +146,27 @@ namespace Arteranos.UI
             btn.material.color = lit
                 ? Color.gray
                 : Color.black;
+        }
+
+        // ---------------------------------------------------------------
+        public virtual void BackingOut(ref object result) { }
+
+        public virtual void BackOut(object result) { ActionRegistry.Back(result); }
+
+        public virtual void Called(object data) { }
+
+        public virtual bool CanBeCalled(object data) { return true; }
+
+        public virtual void OnEnterLeaveAction(bool onEnter) { gameObject.SetActive(onEnter); }
+
+        public (Vector3 position, Quaternion rotation) StartingLocation()
+        {
+            Transform t = G.XRControl.rigTransform;
+            Vector3 position = t.position;
+            Quaternion rotation = t.rotation;
+            position += rotation * Vector3.forward * 2f;
+            
+            return (position, rotation);
         }
     }
 }

@@ -43,7 +43,6 @@ namespace Arteranos.Core
             public GameObject KickBan;
             public GameObject Progress;
             public GameObject TextMessage;
-            public GameObject SysMenu;
             public GameObject WorldEditor;
             public GameObject AddAvatar;
             public GameObject LicenseText;
@@ -56,7 +55,6 @@ namespace Arteranos.Core
         [Serializable]
         public struct InApp_
         {
-            public GameObject AvatarGalleryPedestal;
             public GameObject AvatarHitBox;
             public GameObject CameraDrone;
             public GameObject Nameplate;
