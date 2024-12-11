@@ -59,7 +59,7 @@ namespace Arteranos.UI
                         InstallEyeAnimation = true,
                     });
 
-                yield return ao.ExecuteCoroutine(co);
+                yield return ao.ExecuteAllCoroutines(co, (ex, _) => { if (ex != null) co = null; });
 
                 currentAvatar = G.AvatarDownloader.GetLoadedAvatar(co);
                 currentAvatar.transform.SetParent(transform, false);

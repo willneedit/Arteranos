@@ -217,7 +217,7 @@ namespace Arteranos.UI
                     ao.ProgressChanged += (ratio, msg) => lbl_Notice.text = $"{msg}";
 
                     AggregateException ex = null;
-                    yield return ao.ExecuteCoroutine(co, (_status, _) => ex = _status);
+                    yield return ao.ExecuteAllCoroutines(co, (_ex, _) => ex = _ex);
 
                     if (ex != null)
                     {
