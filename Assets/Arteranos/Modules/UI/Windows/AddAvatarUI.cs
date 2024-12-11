@@ -9,19 +9,16 @@
 using Arteranos.Avatar;
 using Arteranos.Core;
 using Arteranos.Core.Operations;
-using Arteranos.Services;
 using Ipfs;
 using System;
 using System.Collections;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Arteranos.UI
 {
-    public class AddAvatarUI : UIBehaviour
+    public class AddAvatarUI : ActionPage
     {
         [SerializeField] private Button btn_Close;
         [SerializeField] private TMP_Text lbl_DrawCalls;
@@ -77,7 +74,7 @@ namespace Arteranos.UI
             PreviewSpace = obj_Placeholder.transform.parent;
             obj_Placeholder.SetActive(false);
 
-            btn_Close.onClick.AddListener(() => Destroy(gameObject));
+            btn_Close.onClick.AddListener(() => BackOut(null));
             btn_AddAvatar.onClick.AddListener(OnAddAvatarClicked);
             btn_AddToGallery.onClick.AddListener(OnAddToGalleryClicked);
             txt_AddAvatarModelURL.onValueChanged.AddListener(OnAvatarURLChanged);

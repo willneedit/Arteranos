@@ -4,15 +4,11 @@ using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine;
-
 using Arteranos.Core;
 using System.Linq;
 using System.Collections;
-using Ipfs;
 using Ipfs.Unity;
 using System.IO;
-using Arteranos.Services;
-using System.Threading;
 
 namespace Arteranos.UI
 {
@@ -48,7 +44,7 @@ namespace Arteranos.UI
             txt_Nickname.onValueChanged.AddListener((string current) => dirty = true);
             sldn_AvatarHeight.OnValueChanged += (float height) => dirty = true;
 
-            btn_CreateAvatar.onClick.AddListener(OnCreateAvatarClicked);
+            btn_CreateAvatar.onClick.AddListener(() => ActionRegistry.Call("addAvatar"));
             btn_AvatarGallery.onClick.AddListener(() => ActionRegistry.Call("avatarGallery"));
 
             bar_IconSelector.OnIconChanged += Bar_IconSelector_OnIconChanged;
@@ -66,12 +62,6 @@ namespace Arteranos.UI
             }
 
             StartCoroutine(UploadIcon(obj));
-        }
-
-        private void OnCreateAvatarClicked()
-        {
-            G.SysMenu.CloseSysMenus();
-            AddAvatarUI.New();
         }
 
         // Using OnEnable() instead Start() because of the need to update the UserID from

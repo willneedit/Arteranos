@@ -33,3 +33,6 @@ MonoBehaviour:
   - Id: avatarGallery
     ActionGameObject: {fileID: 3879904410954356699, guid: 029ea5ee39836354f97cb7c946878aee,
       type: 3}
+  - Id: addAvatar
+    ActionGameObject: {fileID: 1889180529585697687, guid: 15a025e4ea26c034e8217fba633838d8,
+      type: 3}
