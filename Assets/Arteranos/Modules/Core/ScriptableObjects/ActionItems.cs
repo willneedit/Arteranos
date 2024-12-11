@@ -15,6 +15,7 @@ namespace Arteranos.Core
 {
     public interface IActionPage : IMonoBehaviour
     {
+        void BackingOut(ref object result);
         void BackOut(object result);
         void Called(object data);
         bool CanBeCalled(object data);
@@ -23,11 +24,30 @@ namespace Arteranos.Core
 
     public class ActionPage : UIBehaviour, IActionPage 
     { 
+        /// <summary>
+        /// Can this action be called?
+        /// </summary>
+        /// <param name="data">User data</param>
+        /// <returns>self explanatory</returns>
         public virtual bool CanBeCalled(object data) { return true; }
 
+        /// <summary>
+        /// Call action
+        /// </summary>
+        /// <param name="data">User data</param>
         public virtual void Called(object data) { }
 
+        /// <summary>
+        /// Gemeral purpose 'exit action' function, to return to the parent action
+        /// </summary>
+        /// <param name="result">User result, null for 'cancel'</param>
         public virtual void BackOut(object result) { ActionRegistry.Back(result); }
+
+        /// <summary>
+        /// Action is about to exit.
+        /// </summary>
+        /// <param name="result">Result, permissible to modify</param>
+        public virtual void BackingOut(ref object result) { }
 
         public virtual void OnEnterLeaveAction(bool onEnter)
         { 
@@ -123,7 +143,8 @@ namespace Arteranos.Core
         {
             while(_actionStack.TryPop(out StackItem item))
             {
-                if (!(item.caller as Object))
+                if (item.caller as Object) item.caller.BackingOut(ref result);
+                else
                 {
                     // Invalidate result because it loses its sense.
                     result = null;
@@ -145,6 +166,8 @@ namespace Arteranos.Core
         {
             while(_actionStack.Count > 0) Back(null);
         }
+
+        public static bool HasStackedActions => _actionStack.Count > 0;
 
         private static IActionPage GetAction(string actionId)
         {

@@ -66,7 +66,10 @@ namespace Arteranos.UI
 
             chk_Public.onValueChanged.AddListener(SetDirty);
 
-            btn_ContentPermissions.onClick.AddListener(OnContentPermissionsClicked);
+            btn_ContentPermissions.onClick.AddListener(() => ActionRegistry.Call(
+                "contentFilter",
+                Permissions,
+                callback: r => dirty = true));
 
             chk_Flying.onValueChanged.AddListener(SetDirty);
 
@@ -165,17 +168,6 @@ namespace Arteranos.UI
 
             // Send off the updated config to the server
             SettingsManager.EmitToServerCTSPacket(new CTSServerConfig() { config = ss });
-        }
-
-        private void OnContentPermissionsClicked()
-        {
-            G.SysMenu.CloseSysMenus();
-
-            ContentFilterUI cui = ContentFilterUI.New();
-
-            cui.spj = Permissions;
-
-            cui.OnFinishConfiguring += () => dirty = true;
         }
 
         private void OnClearCachesClicked()

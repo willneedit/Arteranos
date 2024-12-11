@@ -28,9 +28,12 @@ namespace Arteranos.UI
         {
             base.Awake();
 
-            btn_WorldGallery.onClick.AddListener(OnWorldGalleryClicked);
-            btn_ServerGallery.onClick.AddListener(OnServerGalleryClicked);
-            btn_SetContent.onClick.AddListener(OnSetContentClicked);
+            btn_WorldGallery.onClick.AddListener(() => ActionRegistry.Call("worldPanel"));
+            btn_ServerGallery.onClick.AddListener(() => ActionRegistry.Call("serverList"));
+            btn_SetContent.onClick.AddListener(() => ActionRegistry.Call(
+                "contentFilter",
+                G.Client.ContentFilterPreferences,
+                callback: r => G.Client?.Save()));
             chk_AllowCustomTOS.onValueChanged.AddListener(OnCustomTOSToggled);
         }
 
@@ -64,32 +67,6 @@ namespace Arteranos.UI
         {
             cs.AllowCustomTOS = chk_AllowCustomTOS.isOn;
             dirty = true;
-        }
-
-        private void OnWorldGalleryClicked()
-        {
-            G.SysMenu.CloseSysMenus();
-
-            ActionRegistry.Call("worldPanel");
-        }
-
-        private void OnServerGalleryClicked()
-        {
-            G.SysMenu.CloseSysMenus();
-
-            ActionRegistry.Call("serverList");
-        }
-
-        private void OnSetContentClicked()
-        {
-            G.SysMenu.CloseSysMenus();
-
-            ContentFilterUI cui = ContentFilterUI.New();
-
-            cui.spj = G.Client.ContentFilterPreferences;
-
-            cui.OnFinishConfiguring +=
-                () => G.Client?.Save();
         }
     }
 }

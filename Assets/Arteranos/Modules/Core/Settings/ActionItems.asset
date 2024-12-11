@@ -21,3 +21,9 @@ MonoBehaviour:
   - Id: serverList
     ActionGameObject: {fileID: 1943824474716096331, guid: de980c2889ea78249a5ed23529eca106,
       type: 3}
+  - Id: contentFilter
+    ActionGameObject: {fileID: 5167542839486902226, guid: 68f66881523bc704daf73f87819e7367,
+      type: 3}
+  - Id: sysMenu
+    ActionGameObject: {fileID: 7623647053694903475, guid: cc0253c76cfe89d428cb1feef9f9861f,
+      type: 3}

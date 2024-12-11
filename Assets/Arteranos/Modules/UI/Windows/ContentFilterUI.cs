@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 using Arteranos.Core;
@@ -19,7 +18,7 @@ using System.Reflection;
 
 namespace Arteranos.UI
 {
-    public class ContentFilterUI : UIBehaviour
+    public class ContentFilterUI : ActionPage
     {
         internal struct ContentFilterEntry
         {
@@ -35,12 +34,10 @@ namespace Arteranos.UI
             }
         };
 
-        public event Action OnFinishConfiguring;
-
         public Transform tbl_Table;
         public TextMeshProUGUI lbl_HelpText;
 
-        public ServerPermissions spj = null;
+        private ServerPermissions spj = null;
 
         // private readonly List<Button> btns_Help = new();
         // private readonly List<Spinner> spns_Config = new();
@@ -80,12 +77,6 @@ namespace Arteranos.UI
                 )
         };
     
-        public static ContentFilterUI New()
-        {
-            GameObject go = Instantiate(BP.I.UI.ContentFilter);
-            return go.GetComponent<ContentFilterUI>();
-        }
-
         protected override void Awake()
         {
             string[] spnOptions = new string[]
@@ -158,39 +149,38 @@ namespace Arteranos.UI
 
         private readonly Dictionary<string, FieldInfo> spjfields = new();
 
-        protected override void Start()
+        public override void Called(object data)
         {
-            base.Start();
+            base.Called(data);
+
+            spj = data as ServerPermissions;
 
             Debug.Assert(spj != null, "No association of the Content Filter UI");
 
             FieldInfo[] fields = spj.GetType().GetFields();
-            foreach(FieldInfo field in fields) spjfields[field.Name] = field;
+            foreach (FieldInfo field in fields) spjfields[field.Name] = field;
 
             Transform ConfigColumn = tbl_Table.GetChild(2);
 
-            for(int i = 0, c = Filters.Length; i < c; ++i)
+            for (int i = 0, c = Filters.Length; i < c; ++i)
             {
                 Spinner spn = ConfigColumn.GetChild(i).GetComponent<Spinner>();
                 spn.value = Bool2spn(spjfields[Filters[i].FieldName].GetValue(spj) as bool?);
             }
         }
 
-        protected override void OnDisable()
+        public override void BackingOut(ref object result)
         {
-            base.OnDisable();
-
-            Debug.Assert(spj != null, "No association of the Content Filter UI");
-
             Transform ConfigColumn = tbl_Table.GetChild(2);
 
-            for(int i = 0, c = Filters.Length; i < c; ++i)
+            for (int i = 0, c = Filters.Length; i < c; ++i)
             {
                 Spinner spn = ConfigColumn.GetChild(i).GetComponent<Spinner>();
                 spjfields[Filters[i].FieldName].SetValue(spj, Spn2bool(spn));
             }
 
-            OnFinishConfiguring?.Invoke();
+            result = spj;
+            base.BackingOut(ref result);
         }
     }
 }
