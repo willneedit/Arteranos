@@ -16,17 +16,17 @@ MonoBehaviour:
   - Id: embedded.fileBrowser
     ActionGameObject: {fileID: 0}
   - Id: worldPanel
-    ActionGameObject: {fileID: 3973834586187625388, guid: 30fa112d6d177534daae0ebc0159a434,
+    ActionGameObject: {fileID: 1889180529585697687, guid: 30fa112d6d177534daae0ebc0159a434,
       type: 3}
   - Id: serverList
-    ActionGameObject: {fileID: 1943824474716096331, guid: de980c2889ea78249a5ed23529eca106,
+    ActionGameObject: {fileID: 1889180529585697687, guid: de980c2889ea78249a5ed23529eca106,
       type: 3}
   - Id: contentFilter
-    ActionGameObject: {fileID: 5167542839486902226, guid: 68f66881523bc704daf73f87819e7367,
+    ActionGameObject: {fileID: 4304480360161841479, guid: 68f66881523bc704daf73f87819e7367,
       type: 3}
   - Id: sysMenu
-    ActionGameObject: {fileID: 7623647053694903475, guid: cc0253c76cfe89d428cb1feef9f9861f,
+    ActionGameObject: {fileID: 4193041269047191700, guid: cc0253c76cfe89d428cb1feef9f9861f,
       type: 3}
   - Id: fileBrowser
-    ActionGameObject: {fileID: 4729740998945837933, guid: 42873459c13e7eb4f9619b75288f031a,
+    ActionGameObject: {fileID: 4193041269047191700, guid: 42873459c13e7eb4f9619b75288f031a,
       type: 3}

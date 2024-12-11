@@ -49,17 +49,14 @@ namespace Arteranos.Core
         /// <param name="result">Result, permissible to modify</param>
         public virtual void BackingOut(ref object result) { }
 
-        public virtual void OnEnterLeaveAction(bool onEnter)
-        { 
-            gameObject.SetActive(onEnter);
-        }
+        public virtual void OnEnterLeaveAction(bool onEnter) { gameObject.SetActive(onEnter); }
     }
 
     [Serializable]
     public struct ActionItem
     {
         public string Id;
-        public ActionPage ActionGameObject;
+        public GameObject ActionGameObject;
     }
 
     [CreateAssetMenu(fileName = "ActionItems", menuName = "Scriptable Objects/Application/Action Items")]
@@ -82,9 +79,14 @@ namespace Arteranos.Core
 
         public static void Register(ActionItems items)
         {
-            foreach (ActionItem item in items.Items) _actionRegistry.Add(
-                item.Id, 
-                item.ActionGameObject);
+            foreach (ActionItem item in items.Items)
+            {
+                IActionPage actionPage = null;
+                if(item.ActionGameObject && !item.ActionGameObject.TryGetComponent(out actionPage))
+                    throw new InvalidCastException(nameof(actionPage));
+
+                _actionRegistry.Add(item.Id, actionPage);
+            }
         }
              
         public static bool CanCall(string actionId, object data = null, IActionPage callTo = null)
