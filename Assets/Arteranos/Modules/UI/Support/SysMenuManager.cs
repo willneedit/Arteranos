@@ -7,11 +7,8 @@
 
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Linq;
-using Arteranos.Services;
 using System;
 using Arteranos.Core;
-using UnityEditorInternal;
 
 namespace Arteranos.UI
 {

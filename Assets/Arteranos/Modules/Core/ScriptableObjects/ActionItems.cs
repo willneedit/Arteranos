@@ -154,12 +154,14 @@ namespace Arteranos.Core
                 if (item.floating) Object.Destroy(item.caller.gameObject);
                 else item.caller.OnEnterLeaveAction(false);
 
+                // Needed to enable because the callback might want to start a coroutine
+                // in the parent during the callbck.
+                if (_actionStack.TryPeek(out StackItem lowerItem))
+                    lowerItem.caller?.OnEnterLeaveAction(true);
+
                 item.callback?.Invoke(result);
                 break;
             }
-
-            if(_actionStack.TryPeek(out StackItem lowerItem))
-                lowerItem.caller?.OnEnterLeaveAction(true);
         }
 
         public static void Drop()

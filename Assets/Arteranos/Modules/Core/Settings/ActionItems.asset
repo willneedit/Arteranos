@@ -27,3 +27,6 @@ MonoBehaviour:
   - Id: sysMenu
     ActionGameObject: {fileID: 7623647053694903475, guid: cc0253c76cfe89d428cb1feef9f9861f,
       type: 3}
+  - Id: fileBrowser
+    ActionGameObject: {fileID: 4729740998945837933, guid: 42873459c13e7eb4f9619b75288f031a,
+      type: 3}

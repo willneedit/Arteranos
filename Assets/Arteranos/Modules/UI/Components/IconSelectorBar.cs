@@ -6,21 +6,18 @@
  */
 
 using Arteranos.Core;
-using Ipfs.Unity;
 using System;
 using System.Collections;
-using System.Linq;
-using TMPro;
+using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 namespace Arteranos.UI
 {
     public class IconSelectorBar : UIBehaviour
     {
-        public TMP_InputField txt_IconURL = null;
         public Button btn_Icon = null;
         public IPFSImage img_IconImage = null;
 
@@ -43,34 +40,37 @@ namespace Arteranos.UI
             base.Awake();
 
             btn_Icon.onClick.AddListener(OnIconClicked);
-            txt_IconURL.onSubmit.AddListener(_ => OnIconClicked());
         }
 
         private void OnIconClicked()
         {
+            void GotResult(object result)
+            {
+                if (result == null) return;
+
+                CommitSelection(result as string);
+            }
+            ActionRegistry.Call("fileBrowser", callback: GotResult);
+        }
+
+        private void CommitSelection(string fileName)
+        {
             IEnumerator DownloadIcon(string iconURL)
             {
-                // Strip quotes
-                if (iconURL.StartsWith("\"") && iconURL.EndsWith("\""))
-                    iconURL = iconURL[1..^1];
+                using Stream stream = File.OpenRead(iconURL);
+                stream.Seek(0, SeekOrigin.End);
+                long length = stream.Position;
+                stream.Seek(0, SeekOrigin.Begin);
 
-                // No protocol, naked file
-                if (!iconURL.Contains("://"))
-                    iconURL = "file:///" + iconURL;
+                byte[] data = new byte[length];
+                int n = stream.Read(data);
 
-                UnityWebRequest www = UnityWebRequestTexture.GetTexture(iconURL);
-                yield return www.SendWebRequest();
+                if(n != length) yield break;
 
-                if (www.result == UnityWebRequest.Result.Success)
-                {
-                    DownloadHandler dh = www.downloadHandler;
-                    byte[] data = dh.nativeData.ToArray();
-
-                    yield return UpdateIconCoroutine(data);
-                }
+                yield return UpdateIconCoroutine(data);
             }
 
-            StartCoroutine(DownloadIcon(txt_IconURL.text));
+            StartCoroutine(DownloadIcon(fileName));
         }
 
         private IEnumerator UpdateIconCoroutine(byte[] data)
@@ -80,9 +80,10 @@ namespace Arteranos.UI
             Texture2D tex = new(2, 2);
             bool result = false;
 
-            yield return Asyncs.Async2Coroutine(
-                () => AsyncImageLoader.LoadImageAsync(tex, IconData),
-                _r => result = _r);
+            // No Async2Coroutine. AsyncImageLoader's initializer needs the main task.
+            Task<bool> resultTask = AsyncImageLoader.LoadImageAsync(tex, data);
+            yield return new WaitUntil(() => resultTask.IsCompleted);
+            result = resultTask.Result;
 
             if (tex == null || !result) yield break;
 
