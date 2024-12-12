@@ -32,6 +32,7 @@ namespace Arteranos.UI
         [SerializeField] private TMP_Text lbl_Notice;
 
         [SerializeField] private TMP_InputField txt_AddAvatarModelURL;
+        [SerializeField] private Button btn_ToFileBrowser;
         [SerializeField] private Button btn_AddAvatar;
         [SerializeField] private Button btn_AddToGallery;
 
@@ -61,12 +62,9 @@ namespace Arteranos.UI
 
         public static AddAvatarUI New()
         {
-            BP.I.UI.AddAvatar.SetActive(false);
-            AddAvatarUI aaui = Instantiate(BP.I.UI.AddAvatar).GetComponent<AddAvatarUI>();
-            aaui.gameObject.SetActive(true);
-            return aaui;
-
+            throw new NotImplementedException();
         }
+
         protected override void Awake()
         {
             base.Awake();
@@ -77,6 +75,8 @@ namespace Arteranos.UI
             btn_Close.onClick.AddListener(() => BackOut(null));
             btn_AddAvatar.onClick.AddListener(OnAddAvatarClicked);
             btn_AddToGallery.onClick.AddListener(OnAddToGalleryClicked);
+            btn_ToFileBrowser.onClick.AddListener(() => ActionRegistry.Call("fileBrowser", callback: r => { if (r != null) txt_AddAvatarModelURL.text = r.ToString(); }));
+            
             txt_AddAvatarModelURL.onValueChanged.AddListener(OnAvatarURLChanged);
 
             btn_AddToGallery.gameObject.SetActive(false);
@@ -294,8 +294,9 @@ namespace Arteranos.UI
                 AvatarHeight = client.AvatarHeight,
             };
 
-            if(!client.Me.AvatarGallery.Contains(newAva))
-                client.Me.AvatarGallery.Add(newAva);
+            if (client.Me.AvatarGallery.Contains(newAva)) return;
+            
+            client.Me.AvatarGallery.Add(newAva);
             G.IPFSService.PinCid(AvatarCid, true);
 
             lbl_Notice.text = "Avatar stored in Gallery";
