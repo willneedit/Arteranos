@@ -75,7 +75,10 @@ namespace Arteranos.UI
             btn_Close.onClick.AddListener(() => BackOut(null));
             btn_AddAvatar.onClick.AddListener(OnAddAvatarClicked);
             btn_AddToGallery.onClick.AddListener(OnAddToGalleryClicked);
-            btn_ToFileBrowser.onClick.AddListener(() => ActionRegistry.Call("fileBrowser", callback: r => { if (r != null) txt_AddAvatarModelURL.text = r.ToString(); }));
+            btn_ToFileBrowser.onClick.AddListener(() => ActionRegistry.Call(
+                "fileBrowser",
+                new FileBrowserData() { Pattern = @".*\.(glb|gltf)" },
+                callback: r => { if (r != null) txt_AddAvatarModelURL.text = r.ToString(); }));
             
             txt_AddAvatarModelURL.onValueChanged.AddListener(OnAvatarURLChanged);
 

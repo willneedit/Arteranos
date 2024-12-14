@@ -12,6 +12,8 @@ using System;
 using System.IO;
 using UnityEngine.UI;
 using TMPro;
+using Arteranos.Core;
+using System.Text.RegularExpressions;
 
 namespace Arteranos.UI
 {
@@ -32,9 +34,22 @@ namespace Arteranos.UI
             }
         }
 
+        public string Pattern 
+        {
+            get => _pattern;
+            set
+            {
+                string old = _pattern;
+                _pattern = value != null ? $"^{value}$" : null; // Match whoie string
+
+                if (old != value && Chooser) Chooser.ShowPage(0);
+            }
+        }
+
         private ObjectChooser Chooser = null;
 
         private string _currentDirectory = null;
+        private string _pattern = null;
 
         protected override void Awake()
         {
@@ -61,6 +76,19 @@ namespace Arteranos.UI
             base.Start();
 
             Chooser.ShowPage(0);
+        }
+
+        public override void Called(object data)
+        {
+            base.Called(data);
+
+            if (data == null) return;
+
+            if (data is not FileBrowserData fbd)
+                throw new ArgumentException("FileBrowserData expected");
+
+            CurrentDirectory = fbd.Directory;
+            Pattern = fbd.Pattern;
         }
 
         struct FileListItem : IComparable<FileListItem>
@@ -99,7 +127,11 @@ namespace Arteranos.UI
 
                 tmp.Clear();
                 foreach (string item in Directory.EnumerateFiles(CurrentDirectory))
-                    tmp.Add(new() { IsDirectory = false, Name = Path.GetFileName(item), FullPath = item });
+                {
+                    string fileName = Path.GetFileName(item);
+                    if (Pattern == null || Regex.IsMatch(fileName, Pattern, RegexOptions.IgnoreCase))
+                        tmp.Add(new() { IsDirectory = false, Name = fileName, FullPath = item });
+                }
 
                 tmp.Sort();
                 DirectoryItems.AddRange(tmp);

@@ -6,11 +6,9 @@
  */
 
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 using Arteranos.Core;
 using System.Collections.Generic;
-using System;
 using System.Threading;
 using System.Collections;
 using Ipfs;
@@ -47,7 +45,10 @@ namespace Arteranos.UI
 
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
-            Chooser.OnAddingItem += _ => ActionRegistry.Call("embedded.fileBrowser", null, FileBrowser, GotFileBrowserSelection);
+            Chooser.OnAddingItem += _ => ActionRegistry.Call(
+                "embedded.fileBrowser", 
+                new FileBrowserData() { Pattern = @".*\.(tar|zip)" },
+                FileBrowser, GotFileBrowserSelection);
         }
 
         public override void OnEnterLeaveAction(bool onEnter)

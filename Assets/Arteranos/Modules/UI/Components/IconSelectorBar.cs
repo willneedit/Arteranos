@@ -50,7 +50,10 @@ namespace Arteranos.UI
 
                 CommitSelection(result as string);
             }
-            ActionRegistry.Call("fileBrowser", callback: GotResult);
+            ActionRegistry.Call(
+                "fileBrowser",
+                new FileBrowserData() { Pattern = @".*\.(png|jpg|jfif)" },
+                callback: GotResult);
         }
 
         private void CommitSelection(string fileName)

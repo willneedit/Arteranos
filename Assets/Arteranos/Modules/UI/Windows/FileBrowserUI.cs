@@ -11,6 +11,8 @@ namespace Arteranos.UI
 {
     public class FileBrowserUI : ActionPage
     {
+        public FileBrowser FileBrowser;
 
+        public override void Called(object data) => FileBrowser.Called(data);
     }
 }
