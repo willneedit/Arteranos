@@ -11,12 +11,14 @@ using UnityEngine;
 using System;
 using System.IO;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Arteranos.UI
 {
     public class FileBrowser : Core.ActionPage
     {
         public Button btn_Cancel = null;
+        public TMP_Text lbl_Path = null;
 
         public string CurrentDirectory
         {
@@ -77,6 +79,8 @@ namespace Arteranos.UI
             FileListItem SimpleGetDir(string d, bool full = true) => new() { IsDirectory = true, Name = full ? d : Path.GetFileName(d), FullPath = d };
 
             FileListItem GetWKD(Environment.SpecialFolder sf) => SimpleGetDir(Environment.GetFolderPath(sf), false);
+
+            lbl_Path.text = CurrentDirectory ?? string.Empty;
 
             DirectoryItems.Clear();
 
