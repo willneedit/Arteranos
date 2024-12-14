@@ -36,3 +36,12 @@ MonoBehaviour:
   - Id: addAvatar
     ActionGameObject: {fileID: 1889180529585697687, guid: 15a025e4ea26c034e8217fba633838d8,
       type: 3}
+  - Id: worldEditor
+    ActionGameObject: {fileID: 4193041269047191700, guid: cbe39bcf4d0a1164f9c749a18f894bbf,
+      type: 3}
+  - Id: embedded.worldEditor.addNew
+    ActionGameObject: {fileID: 0}
+  - Id: embedded.worldEditor.properties
+    ActionGameObject: {fileID: 0}
+  - Id: embedded.worldEditor.save
+    ActionGameObject: {fileID: 0}

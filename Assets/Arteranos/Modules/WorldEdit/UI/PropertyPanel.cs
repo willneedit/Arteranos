@@ -8,15 +8,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.EventSystems;
 using System;
 using System.Collections.Generic;
 using Arteranos.WorldEdit.Components;
 using Arteranos.UI;
+using Arteranos.Core;
 
 namespace Arteranos.WorldEdit
 {
-    public class PropertyPanel : UIBehaviour
+    public class PropertyPanel : ActionPage
     {
         public Button btn_ReturnToList;
         public TextMeshProUGUI lbl_Heading;
@@ -49,8 +49,6 @@ namespace Arteranos.WorldEdit
             }
         }
 
-        public event Action OnReturnToList;
-
         private WorldObjectComponent woc;
 
         private readonly Dictionary<string, WOCBase> OptionalComponents = new();
@@ -81,8 +79,6 @@ namespace Arteranos.WorldEdit
 
             Transform root = WorldEditorData.FindObjectByPath(null);
 
-            Populate();
-
             G.WorldEditorData.OnWorldChanged += GotWorldChanged;
         }
 
@@ -105,9 +101,13 @@ namespace Arteranos.WorldEdit
             base.OnDisable();
         }
 
-        protected override void OnDestroy()
+        public override void Called(object data)
         {
-            base.OnDestroy();
+            base.Called(data);
+
+            WorldObject = data as GameObject;
+
+            Populate();
         }
 
         private readonly Dictionary<string, bool> paneOpen = new();
@@ -200,10 +200,7 @@ namespace Arteranos.WorldEdit
                 WorldObject.MakePatch(false).EmitToServer();
         }
 
-        private void GotReturnToChooserClick()
-        {
-            OnReturnToList?.Invoke();
-        }
+        private void GotReturnToChooserClick() => BackOut(null);
 
         private void RebuildMissingComponentsList()
         {

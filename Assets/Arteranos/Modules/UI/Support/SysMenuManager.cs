@@ -54,7 +54,7 @@ namespace Arteranos.UI
                     ActionRegistry.Call("sysMenu");
                     break;
                 case MenuKind.WorldEdit:
-                    Instantiate(BP.I.UI.WorldEditor);
+                    ActionRegistry.Call("worldEditor");
                     break;
                 default:
                     throw new NotImplementedException();

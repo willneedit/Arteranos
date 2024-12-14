@@ -7,7 +7,6 @@
 
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.EventSystems;
 using System;
 using Arteranos.Core;
 using Arteranos.Services;
@@ -24,7 +23,7 @@ using Arteranos.Core.Managed;
 
 namespace Arteranos.WorldEdit
 {
-    public class SaveWorldPanel : UIBehaviour
+    public class SaveWorldPanel : ActionPage
     {
         public Button btn_ReturnToList;
         public TextMeshProUGUI lbl_Author;
@@ -42,8 +41,6 @@ namespace Arteranos.WorldEdit
         public Button btn_SaveInGallery;
 
         public GameObject bp_ScreenshotCamera;
-
-        public event Action OnReturnToList;
 
         private string templatePattern;
         private string worldTemplateCid;
@@ -339,9 +336,6 @@ namespace Arteranos.WorldEdit
             return await G.IPFSService.CreateDirectory(rootEntries, cancel: cancel).ConfigureAwait(false);
         }
 
-        private void GotRTLClick()
-        {
-            OnReturnToList?.Invoke();
-        }
+        private void GotRTLClick() => BackOut(null);
     }
 }

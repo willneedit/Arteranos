@@ -313,7 +313,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WorldObjectList: {fileID: 7768787534654081495}
   PropertyPanel: {fileID: 1153202325270435191}
-  NewObjectPicker: {fileID: 2353868542573665717}
+  NewObjectPicker: {fileID: 5136546008443067523}
   SaveWorldPanel: {fileID: 805653961182670338}
   btn_UILock: {fileID: 4450574457219050257}
   btn_UIUnlock: {fileID: 4472774723936435777}
@@ -1333,6 +1333,31 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: 1
   m_LayoutPriority: 1
+--- !u!114 &5136546008443067523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2353868542573665717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97c7e9cd3628a040a2a37ea06ad332f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ChoiceBook: {fileID: 2353868542573665723}
+--- !u!114 &2353868542573665723 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3995104435120682695, guid: eb0f181b1a1b18f488ef06bce2cd6653,
+    type: 3}
+  m_PrefabInstance: {fileID: 1719223485922110332}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2353868542573665717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbe3db6794cbe004d9ab1cc57eb0c9d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1719223486658727523
 PrefabInstance:
   m_ObjectHideFlags: 0
