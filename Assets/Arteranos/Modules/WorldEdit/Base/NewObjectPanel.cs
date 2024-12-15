@@ -12,10 +12,11 @@ using UnityEngine.EventSystems;
 using System;
 using Arteranos.UI;
 using UnityEngine.Events;
+using Arteranos.Core;
 
 namespace Arteranos.WorldEdit
 {
-    public class NewObjectPanel : UIBehaviour
+    public class NewObjectPanel : ActionPage
     {
         public event Action<WorldObjectInsertion> OnAddingNewObject;
 

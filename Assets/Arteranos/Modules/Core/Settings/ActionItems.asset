@@ -45,3 +45,5 @@ MonoBehaviour:
     ActionGameObject: {fileID: 0}
   - Id: embedded.worldEditor.save
     ActionGameObject: {fileID: 0}
+  - Id: embedded.worldEditor.kitItemChoice
+    ActionGameObject: {fileID: 0}

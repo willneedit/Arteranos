@@ -13,7 +13,7 @@ namespace Arteranos.WorldEdit
 {
     public class NewObjectPicker : ActionPage
     {
-        public ChoiceBook ChoiceBook;
+        public APChoiceBook ChoiceBook;
 
         public override void OnEnterLeaveAction(bool onEnter)
         {

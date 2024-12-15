@@ -18,7 +18,6 @@ namespace Arteranos.WorldEdit
 {
     public class Panel_KitItem : NewObjectPanel
     {
-        public NewObjectPanel ParentPanel { get; set; } = null;
         public Kit Item { get; set; } = null;
         public Dictionary<Guid, string> KitItemEntries { get; private set; } = default;
         public List<Guid> guids { get; private set; } = new();
@@ -39,36 +38,6 @@ namespace Arteranos.WorldEdit
             Chooser.OnPopulateTile -= PopulateTile;
 
             base.OnDestroy();
-        }
-
-        protected override void OnEnable()
-        {
-            IEnumerator Cor()
-            {
-                yield return Item.ItemMap.WaitFor();
-
-                KitItemEntries = Item.ItemMap.Result;
-
-                guids = KitItemEntries.Keys.ToList();
-
-                Chooser.ShowPage(0);
-            }
-            base.OnEnable();
-
-
-            StartCoroutine(Cor());
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-
-            //Chooser.ShowPage(0);
         }
 
         private void PreparePage(int obj)
@@ -109,16 +78,32 @@ namespace Arteranos.WorldEdit
             };
 
             // Defer to the kit selection panel, as this is registered by the choicebook
-            ParentPanel.AddingNewObject(new()
+            BackOut(new WorldObjectInsertion()
             {
                 asset = asset,
                 name = KitItemEntries[guid],
                 components = new()
             });
+        }
 
-            // And manually put it to sleep.
-            gameObject.SetActive(false);
-            ParentPanel.gameObject.SetActive(true);
+        public override void Called(object data)
+        {
+            base.Called(data);
+
+            Item = data as Kit;
+
+            IEnumerator Cor()
+            {
+                yield return Item.ItemMap.WaitFor();
+
+                KitItemEntries = Item.ItemMap.Result;
+
+                guids = KitItemEntries.Keys.ToList();
+
+                Chooser.ShowPage(0);
+            }
+
+            StartCoroutine(Cor());
         }
     }
 }

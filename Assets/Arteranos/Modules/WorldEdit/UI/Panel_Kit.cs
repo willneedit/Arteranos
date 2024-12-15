@@ -23,9 +23,7 @@ namespace Arteranos.WorldEdit
         public List<Kit> KitEntries { get; private set; } = null;
 
         public ObjectChooser Chooser;
-        public GameObject bp_KitItemGO;
-
-        private GameObject KitItemGO = null;
+        public GameObject KitItem;
 
         protected override void Awake()
         {
@@ -34,15 +32,6 @@ namespace Arteranos.WorldEdit
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
             Chooser.OnAddingItem += RequestToAdd;
-
-            ChoiceBook cb = transform.parent.parent.gameObject.GetComponent<ChoiceBook>();
-            cb.OnChoicePageChanged += GotPageChanged;
-        }
-
-        private void GotPageChanged(int arg1, int arg2)
-        {
-            // In any case, disable the subpage, too.
-            if (!gameObject.activeSelf && KitItemGO) KitItemGO.SetActive(false);
         }
 
         protected override void OnDestroy()
@@ -60,11 +49,6 @@ namespace Arteranos.WorldEdit
 
             KitEntries = (from kitCid in Kit.ListFavourites()
                          select new Kit(kitCid)).ToList();
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
         }
 
         protected override void Start()
@@ -129,16 +113,19 @@ namespace Arteranos.WorldEdit
         }
         private void OnTileClicked(int index)
         {
-            bp_KitItemGO.SetActive(false);
+            ActionRegistry.Call(
+                "embedded.worldEditor.kitItemChoice",
+                data: KitEntries[index],
+                KitItem.GetComponent<IActionPage>(),
+                callback: GotKitItem
+                );
+        }
 
-            if (!KitItemGO) KitItemGO = Instantiate(bp_KitItemGO, transform.parent);
+        private void GotKitItem(object obj)
+        {
+            if (obj == null) return;
 
-            KitItemGO.TryGetComponent(out Panel_KitItem kitItem);
-            kitItem.Item = KitEntries[index];
-            kitItem.ParentPanel = this;
-
-            gameObject.SetActive(false);
-            KitItemGO.SetActive(true);
+            AddingNewObject(obj as WorldObjectInsertion);
         }
     }
 }
