@@ -20,6 +20,7 @@ using System.Collections;
 using Ipfs.Unity;
 using UnityEngine;
 using Arteranos.Core.Managed;
+using System.Text.RegularExpressions;
 
 namespace Arteranos.WorldEdit
 {
@@ -46,6 +47,7 @@ namespace Arteranos.WorldEdit
         private string worldTemplateCid;
 
         private GameObject ScreenshotCamera;
+        private bool needUpdateTag = false;
 
         protected override void Awake()
         {
@@ -89,7 +91,11 @@ namespace Arteranos.WorldEdit
             G.NetworkStatus.OnNetworkStatusChanged -= GotNetworkStatusChange;
         }
 
-        private void GotWorldNameChange(string name) => G.WorldEditorData.WorldName = name;
+        private void GotWorldNameChange(string name)
+        {
+            G.WorldEditorData.WorldName = name;
+            needUpdateTag = false;
+        }
 
         private void GotWorldDescriptionChange(string description) => G.WorldEditorData.WorldDescription = description;
 
@@ -104,8 +110,10 @@ namespace Arteranos.WorldEdit
             {
                 if (!ScreenshotCamera) ScreenshotCamera = Instantiate(bp_ScreenshotCamera);
 
+                string worldName = G.WorldEditorData.WorldName;
+
                 lbl_Author.text = G.Client.MeUserID;
-                txt_WorldName.text = G.WorldEditorData.WorldName;
+                txt_WorldName.text = worldName;
                 txt_WorldDescription.text = G.WorldEditorData.WorldDescription;
 
                 //WorldDownloader's info may be outdated if we fell back to offline.
@@ -128,6 +136,9 @@ namespace Arteranos.WorldEdit
                         info.WorldCid[^12..],
                         info.WorldName);
                 }
+
+                // As long as the user changes the name, we need the "updated" tag.
+                needUpdateTag = true;
 
                 EnableSaveButtons();
 
@@ -239,12 +250,28 @@ namespace Arteranos.WorldEdit
 
         private WorldDecoration AssembleWorldDecoration()
         {
+            string worldName = G.WorldEditorData.WorldName;
+
+            if(needUpdateTag)
+            {
+                //dateTime.ToString("u")
+                string updatedPattern = @" \(updated ....-..-.. ..:..:..Z\)$";
+
+                // Remove existing tag
+                worldName = Regex.Replace(worldName, updatedPattern, "");
+
+                string nowStr = DateTime.UtcNow.ToString("u");
+
+                worldName = $"{worldName} (updated {nowStr})";
+            }
+
+
             WorldInfo wi = new()
             {
                 Author = G.Client.MeUserID,
                 ContentRating = G.WorldEditorData.ContentWarning,
                 Created = DateTime.UtcNow,
-                WorldName = G.WorldEditorData.WorldName,
+                WorldName = worldName,
                 WorldDescription = G.WorldEditorData.WorldDescription,
                 WorldCid = null, // Cannot create a self-reference, delay it to the WorldDownloader
                 Signature = null,
