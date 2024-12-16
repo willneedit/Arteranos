@@ -35,14 +35,14 @@ namespace Arteranos.WorldEdit
 
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
-            Chooser.OnAddingItem += RequestToAdd;
+            Chooser.OnAddingItem += GotRequestToAdd;
         }
 
         protected override void OnDestroy()
         {
             Chooser.OnShowingPage -= PreparePage;
             Chooser.OnPopulateTile -= PopulateTile;
-            Chooser.OnAddingItem -= RequestToAdd;
+            Chooser.OnAddingItem -= GotRequestToAdd;
 
             base.OnDestroy();
         }
@@ -93,8 +93,23 @@ namespace Arteranos.WorldEdit
             tile.btn_PaneButton.onClick.AddListener(() => OnTileClicked(index));
         }
 
-        private void RequestToAdd(string sourceURL)
+        private void GotRequestToAdd(string _)
         {
+            ActionRegistry.Call("fileBrowser",
+                            new FileBrowserData() { Pattern = @".*\.(glb|gltf)" },
+                            callback: GotAddingGltf);
+        }
+
+        private void GotAddingGltf(object obj)
+        {
+            if (obj == null)
+            {
+                Chooser.Btn_AddItem.interactable = true;
+                return;
+            }
+
+            string sourceURL = obj as string;
+
             IEnumerator Cor()
             {
                 Chooser.Btn_AddItem.interactable = false;

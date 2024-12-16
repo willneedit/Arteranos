@@ -31,14 +31,14 @@ namespace Arteranos.WorldEdit
 
             Chooser.OnShowingPage += PreparePage;
             Chooser.OnPopulateTile += PopulateTile;
-            Chooser.OnAddingItem += RequestToAdd;
+            Chooser.OnAddingItem += GotRequestToAdd;
         }
 
         protected override void OnDestroy()
         {
             Chooser.OnShowingPage -= PreparePage;
             Chooser.OnPopulateTile -= PopulateTile;
-            Chooser.OnAddingItem -= RequestToAdd;
+            Chooser.OnAddingItem -= GotRequestToAdd;
 
             base.OnDestroy();
         }
@@ -84,8 +84,23 @@ namespace Arteranos.WorldEdit
             StartCoroutine(Cor());
         }
 
-        private void RequestToAdd(string sourceURL)
+        private void GotRequestToAdd(string _)
         {
+            ActionRegistry.Call("fileBrowser",
+                            new FileBrowserData() { Pattern = @".*\.(tar|zip)" },
+                            callback: GotAddingKit);
+        }
+
+        private void GotAddingKit(object obj)
+        {
+            if (obj == null)
+            {
+                Chooser.Btn_AddItem.interactable = true;
+                return;
+            }
+
+            string sourceURL = obj as string;
+
             IEnumerator Cor()
             {
                 Chooser.Btn_AddItem.interactable = false;
