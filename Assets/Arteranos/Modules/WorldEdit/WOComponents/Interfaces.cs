@@ -18,7 +18,7 @@ namespace Arteranos.WorldEdit.Components
         void ServerGotClicked();
     }
 
-    public interface IRigidBody
+    public interface IRigidBody : IPhysicsWOC
     {
         // Object has been grabbed (a.k.a right-clicked, or with the grab button)
         void GotGrabbed();
@@ -41,5 +41,11 @@ namespace Arteranos.WorldEdit.Components
     public interface IMetaObject
     {
 
+    }
+
+    // Object which needs a hook on woc.UpdatePhysicsState()
+    public interface IPhysicsWOC
+    {
+        void UpdatePhysicsState(bool isInEditMode);
     }
 }

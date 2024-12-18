@@ -12,7 +12,7 @@ using UnityEngine;
 namespace Arteranos.WorldEdit.Components
 {
     [ProtoContract]
-    public class WOCTransform : WOCBase
+    public class WOCTransform : WOCBase, IPhysicsWOC
     {
         [ProtoMember(1)]
         public WOVector3 position;
@@ -105,6 +105,20 @@ namespace Arteranos.WorldEdit.Components
             rotation = t.rotation;
             scale = t.scale;
             isCollidable = t.isCollidable;
+        }
+
+        public void UpdatePhysicsState(bool isInEditMode)
+        {
+            static void RecursiveSetLayer(int layer, Transform t)
+            {
+                t.gameObject.layer = layer;
+                for (int i = 0; i < t.childCount; i++)
+                    RecursiveSetLayer(layer, t.GetChild(i));
+            }
+
+            RecursiveSetLayer((int)(isCollidable
+                ? ColliderType.Solid
+                : ColliderType.Intangible), transform);
         }
     }
 }

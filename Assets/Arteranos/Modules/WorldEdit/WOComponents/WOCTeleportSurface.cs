@@ -13,7 +13,7 @@ namespace Arteranos.WorldEdit.Components
 {
 
     [ProtoContract]
-    public class WOCTeleportSurface : WOCBase
+    public class WOCTeleportSurface : WOCBase, IPhysicsWOC
     {
         public void SetState()
         {
@@ -29,5 +29,14 @@ namespace Arteranos.WorldEdit.Components
             => ("Teleport target surface", BP.I.WorldEdit.NullInspector);
 
         public override void ReplaceValues(WOCBase wOCBase) { }
+
+        public void UpdatePhysicsState(bool isInEditMode)
+        {
+            if (!GameObject.TryGetComponent(out User.TeleportationArea area))
+                area = GameObject.AddComponent<User.TeleportationArea>();
+
+            // To prevent accidental teleports because of missed objects on grabbing
+            area.enabled = !isInEditMode;
+        }
     }
 }

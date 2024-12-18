@@ -56,7 +56,8 @@ namespace Arteranos.WorldEdit.Components
         public bool IsMovable => Grabbable;
         public Rigidbody Rigidbody = null;
 
-        // On client, suspend the Network Transform to stop receiving data.
+        // Client: Seize (or, release) object authority on grab/release to _reverse_ the
+        // data flow, on behalf of the user who holds the object.
         public void GotGrabbed()
         {
             if (G.Me != null)
@@ -73,13 +74,14 @@ namespace Arteranos.WorldEdit.Components
 
             if (G.Me != null)
             {
-                // TODO Pusk back after ArteranosGrabInteractable.Detach for the final results
                 G.Me.GotObjectReleased(GameObject, velocity, angularVelocity);
                 G.Me.ManageAuthorityOf(GameObject, false);
             }
             else ServerGotReleased(velocity, angularVelocity);
         }
 
+        // Server: On release, get the velocities (linear and angular) on release and
+        // import the data to the physics engine, as the server got the authority back.
         public void ServerGotGrabbed() { }
 
         // On server, receive the 'last seen' velocities and import to the physics engine
@@ -94,5 +96,22 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public void ServerGotObjectHeld(Vector3 position, Quaternion rotation) { }
+
+        // ---------------------------------------------------------------
+
+        public void UpdatePhysicsState(bool isInEditMode)
+        {
+            if (!Rigidbody && !GameObject.TryGetComponent(out Rigidbody)) return;
+
+            // Prevent physics shenanigans in the edit mode
+            Rigidbody.constraints = isInEditMode
+                ? RigidbodyConstraints.FreezeAll
+                : RigidbodyConstraints.None;
+
+            Rigidbody.useGravity = !isInEditMode && ObeysGravity;
+            Rigidbody.mass = Mass;
+            Rigidbody.drag = Drag;
+            Rigidbody.angularDrag = AngularDrag;
+        }
     }
 }

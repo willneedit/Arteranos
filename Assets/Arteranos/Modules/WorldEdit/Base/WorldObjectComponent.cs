@@ -14,6 +14,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 using Arteranos.WorldEdit.Components;
 using Arteranos.Services;
 using Arteranos.XR;
+using System.Linq;
 
 namespace Arteranos.WorldEdit
 {
@@ -207,6 +208,15 @@ namespace Arteranos.WorldEdit
             return (position, eulerRotation);
         }
 
+        public IEnumerable<T> GetWOCs<T>() where T : class
+        {
+            IEnumerable<T> results = Enumerable.Empty<T>();
+            foreach (object w in WOComponents) 
+                if (w is T woc) 
+                    results = results.Append(woc);
+            return results;
+        }
+
         public bool TryGetWOC<T>(out T woComponent) where T : class
         {
             foreach (object w in WOComponents)
@@ -260,13 +270,6 @@ namespace Arteranos.WorldEdit
 
         public void UpdatePhysicsState()
         {
-            static void RecursiveSetLayer(int layer, Transform t)
-            {
-                t.gameObject.layer = layer;
-                for(int i = 0; i < t.childCount; i++)
-                    RecursiveSetLayer(layer, t.GetChild(i));
-            }
-
             bool isInEditMode = G.WorldEditorData.IsInEditMode;
             bool needsKinematic = IsOnServer == false;
 
@@ -277,7 +280,6 @@ namespace Arteranos.WorldEdit
             if(TryGetWOC<IMetaObject>(out _))
                 gameObject.SetActive(isInEditMode);
 
-
             // Same as with the *parent* being the spawner object.
             if(transform.parent != null)
             {
@@ -285,6 +287,7 @@ namespace Arteranos.WorldEdit
                 if (parentWOC != null && parentWOC.TryGetWOC<WOCSpawner>(out _))
                     gameObject.SetActive(isInEditMode);
             }
+
             // Disable both of them to prevent the warning about conflicting interactables
             mover.enabled = false;
             clicker.enabled = false;
@@ -294,35 +297,13 @@ namespace Arteranos.WorldEdit
             foreach (MeshCollider collider in colliders)
                 needsKinematic |= !collider.convex;
 
+            // Fallbacks if we haven't the RigidBody component
             body.isKinematic = needsKinematic;
+            body.constraints = RigidbodyConstraints.FreezeAll;
+            body.useGravity = false;
 
-            TryGetWOC(out WOCTransform t);
-            TryGetWOC(out WOCRigidBody rb);
-            TryGetWOC(out WOCTeleportSurface ts);
-
-            // Prevent physics shenanigans in the edit mode
-            body.constraints = isInEditMode
-                ? RigidbodyConstraints.FreezeAll
-                : RigidbodyConstraints.None;
-
-            body.useGravity = !isInEditMode
-                && (rb?.ObeysGravity ?? false);
-            body.mass = rb?.Mass ?? 0;
-            body.drag = rb?.Drag ?? 0;
-            body.angularDrag = rb?.AngularDrag ?? 0;
-
-            RecursiveSetLayer((int)(t?.isCollidable ?? false
-                ? ColliderType.Solid
-                : ColliderType.Intangible), transform);           
-
-            if(ts != null)
-            {
-                if(!TryGetComponent(out User.TeleportationArea area))
-                    area = gameObject.AddComponent<User.TeleportationArea>();
-
-                // To prevent accidental teleports because of missed objects on grabbing
-                area.enabled = !isInEditMode;
-            }
+            foreach(IPhysicsWOC pwoc in GetWOCs<IPhysicsWOC>())
+                pwoc.UpdatePhysicsState(isInEditMode);
 
             // #153: If we're in edit mode in desktop, lock rotation in grab
             mover.trackRotation = !(G.WorldEditorData.IsInEditMode && !G.Client.VRMode);
