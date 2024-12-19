@@ -20,7 +20,7 @@ namespace Arteranos.User
         public void OnDestroy() => SpawnManager.UnregisterSpawnPoint(transform);
     }
 
-    public class SpawnManager
+    public static class SpawnManager
     {
         public static List<Transform> spawnPoints = new();
 
