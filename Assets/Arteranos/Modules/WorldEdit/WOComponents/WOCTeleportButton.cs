@@ -73,9 +73,19 @@ namespace Arteranos.WorldEdit.Components
 
         private static GameObject FindTeleportTarget(string location, Transform node)
         {
-            if (node.TryGetComponent(out WorldObjectComponent woc) 
-                && woc.TryGetWOC(out WOCTeleportMarker tm) 
-                && tm.location == location) return node.gameObject;
+            static bool FindEligibleTarget(string location, Transform node)
+            {
+                if(!node.TryGetComponent(out WorldObjectComponent woc)) return false;
+
+                // Both teleport markers and spawn points will serve.
+                if (!woc.TryGetWOC<WOCTeleportMarker>(out _)
+                    && !woc.TryGetWOC<WOCSpawnPoint>(out _)) return false;
+
+                // That's the ticket!
+                return woc.name == location;
+            }
+
+            if (FindEligibleTarget(location, node)) return node.gameObject;
 
             for (int i = 0; i < node.childCount; ++i)
             {

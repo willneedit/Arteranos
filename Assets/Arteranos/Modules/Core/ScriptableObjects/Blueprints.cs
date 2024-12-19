@@ -88,7 +88,6 @@ namespace Arteranos.Core
             public GameObject PhysicsInspector;
             public GameObject SpawnerInspector;
             public GameObject RigidBodyInspector;
-            public GameObject TeleportMarkerInspector;
             public GameObject TeleportButtonInspector;
             public GameObject NullInspector;
         }

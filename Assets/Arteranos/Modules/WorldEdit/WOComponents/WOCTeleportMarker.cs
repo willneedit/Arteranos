@@ -15,9 +15,6 @@ namespace Arteranos.WorldEdit.Components
     [ProtoContract]
     public class WOCTeleportMarker : WOCBase
     {
-        [ProtoMember(1)]
-        public string location = null;
-
         public void SetState()
         {
             Dirty = true;
@@ -29,13 +26,8 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Teleport Marker", BP.I.WorldEdit.TeleportMarkerInspector);
+            => ("Teleport Marker", BP.I.WorldEdit.NullInspector);
 
-        public override void ReplaceValues(WOCBase wOCBase)
-        {
-            WOCTeleportMarker s = wOCBase as WOCTeleportMarker;
-
-            s.location = location;
-        }
+        public override void ReplaceValues(WOCBase wOCBase) { }
     }
 }
