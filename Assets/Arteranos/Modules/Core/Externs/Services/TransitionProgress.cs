@@ -66,6 +66,9 @@ namespace Arteranos.Services
                     yield return EnterDownloadedWorld(World);
                     yield return World.WorldInfo.WaitFor();
                 }
+
+                // Reset UI flow
+                ActionRegistry.Drop();
             }
 
             G.XRVisualConfigurator.StartFading(1.0f);
