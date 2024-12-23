@@ -36,13 +36,6 @@ namespace Arteranos.WorldEdit.Components
         void ServerGotObjectHeld(Vector3 position, Quaternion rotation);
     }
 
-    // Object is a 'meta' object. Visible im editor, but inactive out of the edit mode
-    // e.g. a template for spawned objects or a teleport marker or respawn location
-    public interface IMetaObject
-    {
-
-    }
-
     // Object which needs a hook on woc.UpdatePhysicsState()
     public interface IPhysicsWOC
     {

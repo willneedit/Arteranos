@@ -276,11 +276,7 @@ namespace Arteranos.WorldEdit
             // It's in a not (yet) instantiated object, take it as-is within CommitState()
             if (!body || !mover || !clicker) return;
 
-            // Meta objects are inactive out of the edit mode
-            if(TryGetWOC<IMetaObject>(out _))
-                gameObject.SetActive(isInEditMode);
-
-            // Same as with the *parent* being the spawner object.
+            // Children of spawners are like 'blueprints', not actual in-use objects.
             if(transform.parent != null)
             {
                 WorldObjectComponent parentWOC = transform.parent.GetComponent<WorldObjectComponent>();
