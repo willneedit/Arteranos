@@ -33,7 +33,10 @@ namespace Arteranos.WorldEdit.Components
         public void UpdatePhysicsState(bool isInEditMode)
         {
             if (!GameObject.TryGetComponent(out User.TeleportationArea area))
+            {
                 area = GameObject.AddComponent<User.TeleportationArea>();
+                area.customReticle = BP.I.TeleportReticle;
+            }
 
             // To prevent accidental teleports because of missed objects on grabbing
             area.enabled = !isInEditMode;

@@ -23,6 +23,8 @@ MonoBehaviour:
   PrivacyTOSNotice: {fileID: 4900000, guid: 08362dfbee11cd14ea1658be30f19536, type: 3}
   NetworkedWorldObject: {fileID: 3405091302848977511, guid: 35adf32053f026f4e8fdda39b8ba49c1,
     type: 3}
+  TeleportReticle: {fileID: 1702488797507992324, guid: 52c04ffc7fbbb3b468ee09159d670f9d,
+    type: 3}
   UI:
     Dialog: {fileID: 1401308523161811021, guid: b08a789bff0e5e746b4efea304237fc2,
       type: 3}
@@ -34,29 +36,19 @@ MonoBehaviour:
       type: 3}
     TextMessage: {fileID: 2837209915542619872, guid: ba56c5a59ec4c2243896f8b46ca59647,
       type: 3}
-    SysMenu: {fileID: 4193041269047191700, guid: cc0253c76cfe89d428cb1feef9f9861f,
-      type: 3}
     WorldEditor: {fileID: 4193041269047191700, guid: cbe39bcf4d0a1164f9c749a18f894bbf,
       type: 3}
     AddAvatar: {fileID: 1889180529585697687, guid: 15a025e4ea26c034e8217fba633838d8,
-      type: 3}
-    ContentFilter: {fileID: 4304480360161841479, guid: 68f66881523bc704daf73f87819e7367,
       type: 3}
     LicenseText: {fileID: 7130032338797606157, guid: 821df0f4d152ed64e9d2f4d4a402c0a4,
       type: 3}
     ServerInfo: {fileID: 1889180529585697687, guid: bcddff2582d86f7448cf9d773fa3ae52,
       type: 3}
-    ServerList: {fileID: 1889180529585697687, guid: de980c2889ea78249a5ed23529eca106,
-      type: 3}
     ServerUserList: {fileID: 1889180529585697687, guid: c7129470c88799d48a0b89a3215be970,
       type: 3}
     UserHUD: {fileID: 7320566017384123864, guid: d4474b3215e621b4bbc707cb0c3e8d45,
       type: 3}
-    WorldPanel: {fileID: 1889180529585697687, guid: 30fa112d6d177534daae0ebc0159a434,
-      type: 3}
   InApp:
-    AvatarGalleryPedestal: {fileID: 3879904410954356699, guid: 029ea5ee39836354f97cb7c946878aee,
-      type: 3}
     AvatarHitBox: {fileID: 7338753451169802769, guid: aedac2686a239bc46895d027496d9261,
       type: 3}
     CameraDrone: {fileID: 1091690915500474784, guid: c2d31261000005e409d5d9c9fd479d32,
@@ -93,8 +85,6 @@ MonoBehaviour:
     SpawnerInspector: {fileID: 7349416676873975400, guid: a557680c6596fc04e8c8e807d8fa0ffa,
       type: 3}
     RigidBodyInspector: {fileID: 7349416676873975400, guid: 824bb6c36c87b514cb927d5e19b9b049,
-      type: 3}
-    TeleportMarkerInspector: {fileID: 7349416676873975400, guid: 4f46bfaf16e9e784388682e309b4a642,
       type: 3}
     TeleportButtonInspector: {fileID: 7349416676873975400, guid: 9ef39edf10608fd4b9351e43b6eab564,
       type: 3}
