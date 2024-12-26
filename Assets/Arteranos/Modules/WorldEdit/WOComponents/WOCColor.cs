@@ -6,8 +6,14 @@
  */
 
 using Arteranos.Core;
+using Ipfs.Unity;
 using ProtoBuf;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
+using TaskScheduler = Arteranos.Core.TaskScheduler;
 
 namespace Arteranos.WorldEdit.Components
 {
@@ -16,6 +22,9 @@ namespace Arteranos.WorldEdit.Components
     {
         [ProtoMember(1)]
         public WOColor color;
+
+        [ProtoMember(2)]
+        public string texturePNGCid;
 
         private Renderer renderer = null;
 
@@ -36,21 +45,49 @@ namespace Arteranos.WorldEdit.Components
             base.CommitState();
 
             if (renderer != null)
+            {
                 renderer.material.color = color;
+                if (texturePNGCid != null)
+                    TaskScheduler.ScheduleCoroutine(LoadTextureFromIPFS);
+                else
+                    renderer.material.mainTexture = null;
+            }
+
+            Dirty = false;
         }
 
-        public override void CheckState()
+        private IEnumerator LoadTextureFromIPFS()
         {
-            Dirty = false;
-            if (renderer != null && renderer.material.color != color)
-                Dirty = true;
+            if (texturePNGCid == null || renderer == null) yield break;
+
+            using CancellationTokenSource cts = new(8000);
+            byte[] data = null;
+            yield return Asyncs.Async2Coroutine(
+                () => G.IPFSService.ReadBinary(texturePNGCid, cancel: cts.Token),
+                _data => data = _data);
+
+            if (data?.Length <= 0) yield break;
+
+            bool result = false;
+            Texture2D tex = new(2, 2);
+
+            Task<bool> resultTask = AsyncImageLoader.LoadImageAsync(tex, data);
+            yield return new WaitUntil(() => resultTask.IsCompleted);
+            result = resultTask.Result;
+
+            if(result) renderer.material.mainTexture = tex;
         }
 
         public void SetState(Color color)
         {
             this.color = color;
+            Dirty = true;
+        }
 
-            CheckState();
+        public void SetState(string tex)
+        {
+            this.texturePNGCid = tex;
+            Dirty = true;
         }
 
         public override object Clone()
@@ -59,13 +96,21 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Color", BP.I.WorldEdit.ColorInspector);
+            => ("Appearance", BP.I.WorldEdit.ColorInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {
             WOCColor c = wOCBase as WOCColor;
 
             color = c.color;
+            texturePNGCid = c.texturePNGCid;
+        }
+
+        public override HashSet<AssetReference> GetAssetReferences()
+        {
+            if (texturePNGCid == null) return base.GetAssetReferences();
+
+            return new() { new("Textures", texturePNGCid) };
         }
     }
 }
