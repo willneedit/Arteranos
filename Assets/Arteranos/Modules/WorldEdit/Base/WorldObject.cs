@@ -9,14 +9,10 @@ using System.Collections;
 using System.Collections.Generic;
 using ProtoBuf;
 
-using Arteranos.Core;
 using UnityEngine;
 using System.IO;
 using System;
-using System.Threading;
-using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 using Arteranos.WorldEdit.Components;
-using Arteranos.Core.Managed;
 
 namespace Arteranos.WorldEdit
 {
@@ -76,50 +72,6 @@ namespace Arteranos.WorldEdit
 
         public IEnumerator Instantiate(Transform parent, Action<GameObject> callback = null)
         {
-            static IEnumerator LoadglTF(WOglTF WOglTF, GameObject LoadedObject)
-            {
-                using CancellationTokenSource cts = new(60000);
-                using IPFSGLTFObject obj = new(WOglTF.glTFCid, cts.Token)
-                {
-                    RootObject = LoadedObject,
-                    InitActive = false
-                };
-
-                yield return obj.GameObject.WaitFor();
-
-                // Add a box collider with with the approximated bounds.
-                Bounds? b = obj.Bounds;
-                if(b.HasValue)
-                {
-                    BoxCollider bc = LoadedObject.AddComponent<BoxCollider>();
-                    bc.center = b.Value.center;
-                    bc.size = b.Value.size;
-                }
-
-                LoadedObject.name = $"glTF {WOglTF.glTFCid}";
-            }
-            
-            static IEnumerator LoadKit(WOKitItem kitItem, GameObject LoadedObject)
-            {
-                LoadedObject.name = $"kit {kitItem.kitCid}, Item {kitItem.kitItemName}";
-
-                AsyncLazy<AssetBundle> KitAB = G.WorldEditorData.LoadKitAssetBundle(kitItem.kitCid);
-
-                yield return KitAB.WaitFor();
-
-                GameObject kit_blueprint = ((UnityEngine.AssetBundle) KitAB.Result).LoadAsset<GameObject>($"Assets/KitRoot/{kitItem.kitItemName}.prefab");
-
-                // Really scrubbing the asset bundle's blueprints' components.
-                ScrubComponents(kit_blueprint);
-
-                // And, reset its root transform.
-                // Kit builders who REALLY use offsets have to use empties.
-                kit_blueprint.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-                // kit_blueprint.transform.localScale = Vector3.one;
-
-                UnityEngine.Object.Instantiate(kit_blueprint, LoadedObject.transform);
-            }
-
             GameObject gob;
             if (asset == null)
             {
@@ -131,29 +83,8 @@ namespace Arteranos.WorldEdit
                 // Look up, or create a blueprint if none exist
                 if (!G.WorldEditorData.TryGetBlueprint(asset, out GameObject gobbo))
                 {
-                    switch (asset)
-                    {
-                        case WOPrimitive WOPR: // Pun intended :)
-                            gobbo = GameObject.CreatePrimitive(WOPR.primitive);
-                            gobbo.TryGetComponent(out Renderer renderer);
-                            renderer.material = BP.I.WorldEdit.DefaultWEMaterial;
-                            gobbo.SetActive(false);
-                            break;
-                        case WOglTF WOglTF:
-                            gobbo = new GameObject("Unleaded glTF world object"); // :)
-                            gobbo.SetActive(false);
-                            yield return LoadglTF(WOglTF, gobbo);
-                            break;
-                        case WOKitItem WOKitItem:
-                            gobbo = new GameObject("Unleaded kit world object"); // :)
-                            gobbo.SetActive(false);
-                            yield return LoadKit(WOKitItem, gobbo);
-                            break;
-                        default:
-                            gobbo = new GameObject("Unsupported world object");
-                            gobbo.SetActive(false);
-                            break;
-                    }
+                    gobbo = asset.Create();
+                    yield return asset.CreateCoroutine(gobbo);
 
                     gobbo.transform.position = new Vector3(0, -9000, 0);
                     G.WorldEditorData.AddBlueprint(asset, gobbo);
@@ -188,44 +119,6 @@ namespace Arteranos.WorldEdit
             yield return null;
 
             callback?.Invoke(gob);
-        }
-
-        private static void ScrubComponents(GameObject kit_blueprint)
-        {
-            kit_blueprint.SetActive(false);
-            ScrubComponents(kit_blueprint.transform);
-            kit_blueprint.SetActive(true);
-        }
-
-        private static void ScrubComponents(Transform kit_blueprint)
-        {
-            static bool IsValidComponent(Component component)
-            {
-                // Missing script or engine package - not OK.
-                if(component == null) return false;
-
-                // Not a script - OK.
-                if (component is not MonoBehaviour) return true;
-
-                string assname = component.GetType().Assembly.GetName().Name;
-
-                // Userspace namespace - OK
-                if(assname == "Arteranos.User") return true;
-
-                // Everything else - not OK.
-                return false;
-            }
-
-            Component[] components = kit_blueprint.GetComponents<Component>();
-            foreach (Component component in components)
-            {
-                if (IsValidComponent(component)) continue;
-
-                UnityEngine.Object.DestroyImmediate(component, true);
-            }
-
-            for (int i = 0; i < kit_blueprint.transform.childCount; i++)
-                ScrubComponents(kit_blueprint.transform.GetChild(i));
         }
 
         public void Patch()
