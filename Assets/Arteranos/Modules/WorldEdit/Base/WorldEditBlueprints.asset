@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ee55119e82852c4eb08d233c17a61c9, type: 3}
+  m_Name: WorldEditBlueprints
+  m_EditorClassIdentifier: 
+  Objects:
+    TranslationGizmo: {fileID: 3514764267099751670, guid: db82a18fd9bb8e640bff393355c40a25,
+      type: 3}
+    RotationGizmo: {fileID: 7843359847165770081, guid: e8e027968a53f54458a8640684c6d25b,
+      type: 3}
+    ScalingGizmo: {fileID: 3514764267099751670, guid: 3571a35d645f0b548aaec99b12e8196a,
+      type: 3}
+    DefaultWEMaterial: {fileID: 2100000, guid: 4006251228fedd944a2eaca76db7fccf, type: 2}
+    WorldObjectRoot: {fileID: 3930812342674554157, guid: 78ac987e7f9917742b4ea4b722779d23,
+      type: 3}
+    TransformInspector: {fileID: 7349416676873975400, guid: 46bfe1e3d1c151647a4426bcb65fef58,
+      type: 3}
+    ColorInspector: {fileID: 7327452052152048920, guid: 8e57a59cd593afa4996a324b4ab37983,
+      type: 3}
+    PhysicsInspector: {fileID: 7349416676873975400, guid: 903b47125d737be42873b40de0859c50,
+      type: 3}
+    SpawnerInspector: {fileID: 7349416676873975400, guid: a557680c6596fc04e8c8e807d8fa0ffa,
+      type: 3}
+    RigidBodyInspector: {fileID: 7349416676873975400, guid: 824bb6c36c87b514cb927d5e19b9b049,
+      type: 3}
+    TeleportButtonInspector: {fileID: 7349416676873975400, guid: 9ef39edf10608fd4b9351e43b6eab564,
+      type: 3}
+    NullInspector: {fileID: 7349416676873975400, guid: cb2aa97b5813f8642b87925d347b60dc,
+      type: 3}
+  Inspectors:
+    TranslationGizmo: {fileID: 3514764267099751670, guid: db82a18fd9bb8e640bff393355c40a25,
+      type: 3}
+    RotationGizmo: {fileID: 7843359847165770081, guid: e8e027968a53f54458a8640684c6d25b,
+      type: 3}
+    ScalingGizmo: {fileID: 3514764267099751670, guid: 3571a35d645f0b548aaec99b12e8196a,
+      type: 3}
+    DefaultWEMaterial: {fileID: 2100000, guid: 4006251228fedd944a2eaca76db7fccf, type: 2}
+    WorldObjectRoot: {fileID: 3930812342674554157, guid: 78ac987e7f9917742b4ea4b722779d23,
+      type: 3}
+    TransformInspector: {fileID: 7349416676873975400, guid: 46bfe1e3d1c151647a4426bcb65fef58,
+      type: 3}
+    ColorInspector: {fileID: 7327452052152048920, guid: 8e57a59cd593afa4996a324b4ab37983,
+      type: 3}
+    PhysicsInspector: {fileID: 7349416676873975400, guid: 903b47125d737be42873b40de0859c50,
+      type: 3}
+    SpawnerInspector: {fileID: 7349416676873975400, guid: a557680c6596fc04e8c8e807d8fa0ffa,
+      type: 3}
+    RigidBodyInspector: {fileID: 7349416676873975400, guid: 824bb6c36c87b514cb927d5e19b9b049,
+      type: 3}
+    TeleportButtonInspector: {fileID: 7349416676873975400, guid: 9ef39edf10608fd4b9351e43b6eab564,
+      type: 3}
+    NullInspector: {fileID: 7349416676873975400, guid: cb2aa97b5813f8642b87925d347b60dc,
+      type: 3}

@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Core;
 using Ipfs.Unity;
 using ProtoBuf;
 using System.Collections;
@@ -96,7 +95,7 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Appearance", BP.I.WorldEdit.ColorInspector);
+            => ("Appearance", WBP.I.Inspectors.ColorInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {

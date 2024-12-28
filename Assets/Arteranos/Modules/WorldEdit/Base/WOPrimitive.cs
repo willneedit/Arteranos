@@ -5,6 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
+using Arteranos.Core;
 using ProtoBuf;
 using System;
 using System.Collections;
@@ -23,7 +24,7 @@ namespace Arteranos.WorldEdit
         {
             GameObject gobbo = GameObject.CreatePrimitive(primitive);
             gobbo.TryGetComponent(out Renderer renderer);
-            renderer.material = Core.BP.I.WorldEdit.DefaultWEMaterial;
+            renderer.material =  WBP.I.Objects.DefaultWEMaterial;
             gobbo.SetActive(false);
 
             return gobbo;

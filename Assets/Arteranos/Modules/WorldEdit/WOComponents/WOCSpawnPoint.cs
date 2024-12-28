@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Core;
 using ProtoBuf;
 using UnityEngine;
 
@@ -26,7 +25,7 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Spawn Point", BP.I.WorldEdit.NullInspector);
+            => ("Spawn Point", WBP.I.Inspectors.NullInspector);
 
         public override void ReplaceValues(WOCBase wOCBase) { }
 

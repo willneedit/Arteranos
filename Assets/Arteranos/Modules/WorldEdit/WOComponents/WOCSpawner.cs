@@ -34,7 +34,7 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Spawner", BP.I.WorldEdit.SpawnerInspector);
+            => ("Spawner", WBP.I.Inspectors.SpawnerInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {

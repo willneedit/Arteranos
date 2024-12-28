@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a6bec223e9b1cc4d8ddf3f3b4f6d7d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Blueprints: {fileID: 11400000, guid: 155bcd7428de68943b9e4ae2fbd09121, type: 2}
   KMWorldEditorActions:
     m_ActionInput:
       m_UseReference: 1
@@ -87,8 +88,6 @@ MonoBehaviour:
         m_Flags: 0
       m_Reference: {fileID: -6409165881168128917, guid: 638fba651b9f90f4f8ad962121090576,
         type: 3}
-  isInEditMode: 0
-  usingGlobal: 0
 --- !u!114 &3930812342674554158
 MonoBehaviour:
   m_ObjectHideFlags: 0

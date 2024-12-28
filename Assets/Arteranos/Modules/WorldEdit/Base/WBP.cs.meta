@@ -1,10 +1,9 @@
 fileFormatVersion: 2
-guid: 4a6bec223e9b1cc4d8ddf3f3b4f6d7d0
+guid: 9ee55119e82852c4eb08d233c17a61c9
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences:
-  - Blueprints: {fileID: 11400000, guid: 155bcd7428de68943b9e4ae2fbd09121, type: 2}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -5,10 +5,7 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Avatar;
-using Arteranos.Core;
 using ProtoBuf;
-using System.IO;
 using UnityEngine;
 
 namespace Arteranos.WorldEdit.Components
@@ -38,7 +35,7 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Rigid Body", BP.I.WorldEdit.RigidBodyInspector);
+            => ("Rigid Body", WBP.I.Inspectors.RigidBodyInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {

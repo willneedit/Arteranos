@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Core;
 using ProtoBuf;
 using UnityEngine;
 
@@ -32,7 +31,7 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Teleport Button", BP.I.WorldEdit.TeleportButtonInspector);
+            => ("Teleport Button", WBP.I.Inspectors.TeleportButtonInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {

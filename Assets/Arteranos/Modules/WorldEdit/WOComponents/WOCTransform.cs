@@ -96,7 +96,7 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Transform", BP.I.WorldEdit.TransformInspector);
+            => ("Transform", WBP.I.Inspectors.TransformInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {

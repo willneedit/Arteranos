@@ -26,7 +26,7 @@ namespace Arteranos.WorldEdit.Components
         }
 
         public override (string name, GameObject gameObject) GetUI()
-            => ("Teleport target surface", BP.I.WorldEdit.NullInspector);
+            => ("Teleport target surface", WBP.I.Inspectors.NullInspector);
 
         public override void ReplaceValues(WOCBase wOCBase) { }
 

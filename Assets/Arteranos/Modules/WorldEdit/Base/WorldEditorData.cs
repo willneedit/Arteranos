@@ -27,6 +27,8 @@ namespace Arteranos.WorldEdit
             public List<byte[]> SerializedWorldObjects;
         }
 
+        public WBP Blueprints;
+
         public InputActionHandler KMWorldEditorActions;
         public InputActionHandler KMWorldEditorModeSelect;
         public InputActionHandler KMWorldEditorValueSelect;
@@ -91,8 +93,9 @@ namespace Arteranos.WorldEdit
 
         // ---------------------------------------------------------------
         #region Start/Stop
-        private void Awake()
+        public void Awake()
         {
+            WBP.I = Blueprints;
             G.WorldEditorData = this;
 
             if (KMWorldEditorActions == null) return;
@@ -130,14 +133,14 @@ namespace Arteranos.WorldEdit
             KMWorldEditorActions.CancelCallback = StopTransformAction;
         }
 
-        private void OnDestroy()
+        public void OnDestroy()
         {
             ClearBlueprints();
 
             ClearKitAssetBundles();
         }
 
-        private void OnEnable()
+        public void OnEnable()
         {
             if (KMWorldEditorActions == null) return;
 
@@ -146,7 +149,7 @@ namespace Arteranos.WorldEdit
             KMWorldEditorActions.BindAction();
         }
 
-        private void OnDisable()
+        public void OnDisable()
         {
             if (KMWorldEditorActions == null) return;
 
@@ -155,7 +158,7 @@ namespace Arteranos.WorldEdit
             KMWorldEditorActions.UnbindAction();
         }
 
-        private void Update()
+        public void Update()
         {
             HandleKMObjectEdit();
         }
@@ -515,9 +518,9 @@ namespace Arteranos.WorldEdit
 
             GameObject gobp = EditModes[EditModeIndex] switch
             {
-                WorldEditMode.Translation => BP.I.WorldEdit.TranslationGizmo,
-                WorldEditMode.Rotation => BP.I.WorldEdit.RotationGizmo,
-                WorldEditMode.Scale => BP.I.WorldEdit.ScalingGizmo,
+                WorldEditMode.Translation => WBP.I.Objects.TranslationGizmo,
+                WorldEditMode.Rotation => WBP.I.Objects.RotationGizmo,
+                WorldEditMode.Scale => WBP.I.Objects.ScalingGizmo,
                 _ => throw new NotImplementedException()
             };
 

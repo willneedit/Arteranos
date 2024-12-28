@@ -79,19 +79,7 @@ namespace Arteranos.Core
         [Serializable]
         public struct WorldEdit_
         {
-            public GameObject TranslationGizmo;
-            public GameObject RotationGizmo;
-            public GameObject ScalingGizmo;
-            public Material DefaultWEMaterial;
             public GameObject WorldObjectRoot;
-
-            public GameObject TransformInspector;
-            public GameObject ColorInspector;
-            public GameObject PhysicsInspector;
-            public GameObject SpawnerInspector;
-            public GameObject RigidBodyInspector;
-            public GameObject TeleportButtonInspector;
-            public GameObject NullInspector;
         }
 
         public WorldEdit_ WorldEdit;
