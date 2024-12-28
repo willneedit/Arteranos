@@ -13,7 +13,7 @@ namespace Arteranos.WorldEdit.Components
 {
 
     [ProtoContract]
-    public class WOCTeleportMarker : WOCBase
+    public class WOCTeleportMarker : WOCBase, IPhysicsWOC
     {
         public void SetState()
         {
@@ -29,5 +29,10 @@ namespace Arteranos.WorldEdit.Components
             => ("Teleport Marker", BP.I.WorldEdit.NullInspector);
 
         public override void ReplaceValues(WOCBase wOCBase) { }
+
+        public void UpdatePhysicsState(bool isInEditMode)
+        {
+            GameObject.SetActive(isInEditMode);
+        }
     }
 }

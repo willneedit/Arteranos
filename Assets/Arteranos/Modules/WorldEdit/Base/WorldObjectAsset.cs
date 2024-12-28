@@ -60,6 +60,7 @@ namespace Arteranos.WorldEdit
     [ProtoInclude(65537, typeof(WOglTF))]
     [ProtoInclude(65538, typeof(WOKitItem))]
     [ProtoInclude(65539, typeof(WOPrimitive))]
+    [ProtoInclude(65540, typeof(WOPrefab))]
     public abstract class WorldObjectAsset : IWorldObjectAsset, IHasAssetReferences
     {
         public abstract GameObject Create();
