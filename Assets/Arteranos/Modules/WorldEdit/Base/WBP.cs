@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Arteranos.WorldEdit
@@ -39,13 +40,33 @@ namespace Arteranos.WorldEdit
         }
 
         [Serializable]
-        public struct Prefabs_
+        public struct PrefabEntry
         {
-
+            public WOPrefabType Type;
+            public string Description;
+            public GameObject GameObject;
         }
 
         public Objects_ Objects;
         public Inspectors_ Inspectors;
-        public Prefabs_ Prefabs;
+        public PrefabEntry[] Prefabs;
+
+        // ---------------------------------------------------------------
+
+        private Dictionary<WOPrefabType, PrefabEntry> _prefabs = null;
+
+        public (string description, GameObject blueprint) GetPrefab(WOPrefabType type)
+        {
+            if(_prefabs == null)
+            {
+                _prefabs = new();
+                foreach (PrefabEntry entry in Prefabs) _prefabs[entry.Type] = entry;
+            }
+
+            if (!_prefabs.ContainsKey(type)) return (null, null);
+
+            PrefabEntry e = _prefabs[type];
+            return (e.Description, e.GameObject);
+        }
     }
 }

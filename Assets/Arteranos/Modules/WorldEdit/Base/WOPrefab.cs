@@ -30,12 +30,12 @@ namespace Arteranos.WorldEdit
 
         public override GameObject Create()
         {
-            throw new NotImplementedException();
+            return GameObject.Instantiate(WBP.I.GetPrefab(prefab).blueprint);
         }
 
         public override IEnumerator CreateCoroutine(GameObject gobbo)
         {
-            throw new NotImplementedException();
+            yield return null;
         }
 
         public override HashSet<AssetReference> GetAssetReferences()

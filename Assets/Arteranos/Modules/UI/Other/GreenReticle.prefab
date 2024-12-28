@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1140175677734125739}
   m_Layer: 0
-  m_Name: Reticle
+  m_Name: GreenReticle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -113,7 +113,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: f0aca6b9822e90544b02e2ef10cf3b20, type: 2}
+      objectReference: {fileID: 2100000, guid: eddbe69402d7a2d4a911ecfa689bcdd2, type: 2}
     - target: {fileID: 919132149155446097, guid: e5c779cd2f327d24f8ba00a584f30bb4,
         type: 3}
       propertyPath: m_Name

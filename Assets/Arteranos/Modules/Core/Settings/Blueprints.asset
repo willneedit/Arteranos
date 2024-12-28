@@ -23,7 +23,7 @@ MonoBehaviour:
   PrivacyTOSNotice: {fileID: 4900000, guid: 08362dfbee11cd14ea1658be30f19536, type: 3}
   NetworkedWorldObject: {fileID: 3405091302848977511, guid: 35adf32053f026f4e8fdda39b8ba49c1,
     type: 3}
-  TeleportReticle: {fileID: 1702488797507992324, guid: 52c04ffc7fbbb3b468ee09159d670f9d,
+  TeleportReticle: {fileID: 1702488797507992324, guid: f8fea6dc6ef8ee34b88bd8a90c79b833,
     type: 3}
   UI:
     Dialog: {fileID: 1401308523161811021, guid: b08a789bff0e5e746b4efea304237fc2,
@@ -67,26 +67,5 @@ MonoBehaviour:
     WorldPanelItem: {fileID: 7778222521524494029, guid: 6e18a6fd290cb374a9ea29b871d4b71a,
       type: 3}
   WorldEdit:
-    TranslationGizmo: {fileID: 3514764267099751670, guid: db82a18fd9bb8e640bff393355c40a25,
-      type: 3}
-    RotationGizmo: {fileID: 7843359847165770081, guid: e8e027968a53f54458a8640684c6d25b,
-      type: 3}
-    ScalingGizmo: {fileID: 3514764267099751670, guid: 3571a35d645f0b548aaec99b12e8196a,
-      type: 3}
-    DefaultWEMaterial: {fileID: 2100000, guid: 4006251228fedd944a2eaca76db7fccf, type: 2}
     WorldObjectRoot: {fileID: 3930812342674554157, guid: 78ac987e7f9917742b4ea4b722779d23,
-      type: 3}
-    TransformInspector: {fileID: 7349416676873975400, guid: 46bfe1e3d1c151647a4426bcb65fef58,
-      type: 3}
-    ColorInspector: {fileID: 7327452052152048920, guid: 8e57a59cd593afa4996a324b4ab37983,
-      type: 3}
-    PhysicsInspector: {fileID: 7349416676873975400, guid: 903b47125d737be42873b40de0859c50,
-      type: 3}
-    SpawnerInspector: {fileID: 7349416676873975400, guid: a557680c6596fc04e8c8e807d8fa0ffa,
-      type: 3}
-    RigidBodyInspector: {fileID: 7349416676873975400, guid: 824bb6c36c87b514cb927d5e19b9b049,
-      type: 3}
-    TeleportButtonInspector: {fileID: 7349416676873975400, guid: 9ef39edf10608fd4b9351e43b6eab564,
-      type: 3}
-    NullInspector: {fileID: 7349416676873975400, guid: cb2aa97b5813f8642b87925d347b60dc,
       type: 3}
