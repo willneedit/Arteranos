@@ -30,7 +30,9 @@ namespace Arteranos.WorldEdit
 
         public override GameObject Create()
         {
-            return GameObject.Instantiate(WBP.I.GetPrefab(prefab).blueprint);
+            GameObject gobbo = GameObject.Instantiate(WBP.I.GetPrefab(prefab).blueprint);
+            gobbo.SetActive(false);
+            return gobbo;
         }
 
         public override IEnumerator CreateCoroutine(GameObject gobbo)
@@ -70,6 +72,5 @@ namespace Arteranos.WorldEdit
         {
             return !(left == right);
         }
-
     }
 }

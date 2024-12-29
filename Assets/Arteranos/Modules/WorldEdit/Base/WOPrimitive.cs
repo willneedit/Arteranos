@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Core;
 using ProtoBuf;
 using System;
 using System.Collections;

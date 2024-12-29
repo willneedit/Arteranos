@@ -77,18 +77,14 @@ namespace Arteranos.WorldEdit
 
         private void OnTileClicked(int index)
         {
-            WOPrimitive newWOP = new()
-            {
-                primitive = primitives[index].prim
-            };
 
             AddingNewObject(new() 
-            { 
-                asset = newWOP, 
+            {
+                asset = new WOPrimitive() { primitive = primitives[index].prim },
                 name = primitives[index].name,
                 components = new() 
                 { 
-                    new WOCColor() { color = Color.gray }
+                    new WOCColor() { color = Color.gray } 
                 }
             });
         }

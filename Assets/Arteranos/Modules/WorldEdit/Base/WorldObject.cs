@@ -88,6 +88,10 @@ namespace Arteranos.WorldEdit
 
                     gobbo.transform.position = new Vector3(0, -9000, 0);
                     G.WorldEditorData.AddBlueprint(asset, gobbo);
+
+                    // Blueprints need to be inactive at its completion
+                    // because it's half-finished.
+                    Debug.Assert(gobbo.activeInHierarchy == false);
                 }
 
                 // Got it now, clone it.
