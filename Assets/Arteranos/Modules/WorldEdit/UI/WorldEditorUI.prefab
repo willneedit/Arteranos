@@ -2758,7 +2758,7 @@ PrefabInstance:
     - target: {fileID: -5340544057713590106, guid: 37478cdee5b057e4bbe9d30008fb6eb5,
         type: 3}
       propertyPath: ChoiceEntries.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: -5340544057713590106, guid: 37478cdee5b057e4bbe9d30008fb6eb5,
         type: 3}
@@ -2779,6 +2779,12 @@ PrefabInstance:
       objectReference: {fileID: 5077000609934848783}
     - target: {fileID: -5340544057713590106, guid: 37478cdee5b057e4bbe9d30008fb6eb5,
         type: 3}
+      propertyPath: ChoiceEntries.Array.data[3].UI
+      value: 
+      objectReference: {fileID: 3368665487890472473, guid: 7de751bfd825e0740a82ef91874728e1,
+        type: 3}
+    - target: {fileID: -5340544057713590106, guid: 37478cdee5b057e4bbe9d30008fb6eb5,
+        type: 3}
       propertyPath: ChoiceEntries.Array.data[0].name
       value: Primitives
       objectReference: {fileID: 0}
@@ -2791,6 +2797,11 @@ PrefabInstance:
         type: 3}
       propertyPath: ChoiceEntries.Array.data[2].name
       value: Kits
+      objectReference: {fileID: 0}
+    - target: {fileID: -5340544057713590106, guid: 37478cdee5b057e4bbe9d30008fb6eb5,
+        type: 3}
+      propertyPath: ChoiceEntries.Array.data[3].name
+      value: Tools
       objectReference: {fileID: 0}
     - target: {fileID: 3995104435120682696, guid: 37478cdee5b057e4bbe9d30008fb6eb5,
         type: 3}
