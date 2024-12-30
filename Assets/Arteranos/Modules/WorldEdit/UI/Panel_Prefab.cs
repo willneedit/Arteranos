@@ -14,12 +14,30 @@ namespace Arteranos.WorldEdit
 {
     public class Panel_Prefab : NewObjectPanel
     {
+        struct PrefabDefaults
+        {
+            public List<WOCBase> components;
+            public bool onGroundLevel;
+
+            public PrefabDefaults(List<WOCBase> components, bool onGroundLevel)
+            {
+                this.components = components;
+                this.onGroundLevel = onGroundLevel;
+            }
+        }
+
         [SerializeField] private ObjectChooser Chooser;
 
-        private static readonly Dictionary<WOPrefabType, List<WOCBase>> _additionalComponents = new()
+        private static readonly Dictionary<WOPrefabType, PrefabDefaults> _prefabDefaults = new()
         {
-            { WOPrefabType.SpawnPoint, new List<WOCBase>() { new WOCSpawnPoint() } },
-            { WOPrefabType.TeleportTarget, new List<WOCBase>() { new WOCTeleportMarker() } },
+            { WOPrefabType.SpawnPoint, new(
+                new List<WOCBase>() { new WOCSpawnPoint() }, 
+                true) 
+            },
+            { WOPrefabType.TeleportTarget, new(
+                new List<WOCBase>() { new WOCTeleportMarker() },
+                true) 
+            },
         };
 
         protected override void Awake()
@@ -65,11 +83,27 @@ namespace Arteranos.WorldEdit
 
         private void OnTileClicked(WOPrefabType type)
         {
-            BackOut(new WorldObjectInsertion()
+            List<WOCBase> components = new();
+
+            // If we want to set the object on the user's feet, negate the eye level offset
+            if (_prefabDefaults[type].onGroundLevel)
+            {
+                WOCTransform woct = new() 
+                { 
+                    position = -(G.XRControl.heightAdjustment),
+                    scale = Vector3.one,
+                };
+                components.Add(woct);
+            }
+
+            // And add the needed components
+            components.AddRange(_prefabDefaults[type].components);
+
+            base.BackOut(new WorldObjectInsertion()
             {
                 asset = new WOPrefab() { prefab = type },
                 name = WBP.I.GetPrefab(type).description,
-                components = _additionalComponents[type]
+                components = components
             });
         }
     }

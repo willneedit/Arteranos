@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -145,44 +144,32 @@ namespace Arteranos.WorldEdit
             Transform current = CurrentRoot.transform;
             woi.SetPathFromThere(current);
 
+            // TODO Custom up vector?
+            Transform ct = Camera.main.transform;
+
             // If we don't have a transform, add a new one as the first component.
-            if (woi.components.Count <= 0 || woi.components[0] is not WOCTransform)
+            if (woi.components.Count <= 0 || woi.components[0] is not WOCTransform newTransform)
             {
-                Transform ct = Camera.main.transform;
-
-                // TODO Custom up vector?
-                Vector3 facingAngles = new(
-                0,
-                ct.rotation.eulerAngles.y,
-                0);
-
-                // Add default components....
-
-                // ...Transform as the first component, and place it in front of the user
-                WOCTransform newTransform;
-
-                if (CurrentRoot == WORoot)
+                newTransform = new WOCTransform
                 {
-                    // Root resides at 0,0,0, global = local
-                    newTransform = new WOCTransform()
-                    {
-                        position = ct.position + ct.rotation * Vector3.forward * 2.5f,
-                        rotation = facingAngles,
-                        scale = Vector3.one
-                    };
-                }
-                else
-                {
-                    // leaf sprouting off right on its parent
-                    newTransform = new WOCTransform()
-                    {
-                        position = Vector3.zero,
-                        rotation = Vector3.zero,
-                        scale = Vector3.one
-                    };
-                }
-
+                    // in front of the user
+                    position = ct.rotation * Vector3.forward * 2.5f,
+                    scale = Vector3.one
+                };
                 woi.components.Insert(0, newTransform);
+            }
+
+            if (CurrentRoot == WORoot)
+            {
+                // Default: eye level
+                newTransform.position += ct.position;
+                newTransform.rotation = new Vector3(0, ct.rotation.eulerAngles.y, 0);
+            }
+            else
+            {
+                // leaf sprouting off right on its parent's origin
+                newTransform.position = Vector3.zero;
+                newTransform.rotation = Vector3.zero;
             }
 
             // Post the insertion request to the server, it should come back.
