@@ -36,6 +36,7 @@ namespace Arteranos.WorldEdit
             public GameObject SpawnerInspector;
             public GameObject RigidBodyInspector;
             public GameObject TeleportButtonInspector;
+            public GameObject LightInspector;
             public GameObject NullInspector;
         }
 

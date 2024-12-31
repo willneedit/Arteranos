@@ -27,6 +27,7 @@ namespace Arteranos.WorldEdit.Components
     [ProtoInclude(65543, typeof(WOCTeleportButton))]
     [ProtoInclude(65544, typeof(WOCTeleportSurface))]
     [ProtoInclude(65545, typeof(WOCSpawnPoint))]
+    [ProtoInclude(65546, typeof(WOCLight))]
     public abstract class WOCBase : ICloneable, IHasAssetReferences
     {
         public bool Dirty { get; protected set; } = false;
@@ -34,6 +35,11 @@ namespace Arteranos.WorldEdit.Components
         public virtual GameObject GameObject { get; set; } = null;
 
         public virtual bool IsRemovable => true;
+
+        /// <summary>
+        /// Set default values on creation
+        /// </summary>
+        public virtual void Reset() { }
 
         /// <summary>
         /// To make the changes to take effect.

@@ -62,6 +62,7 @@ namespace Arteranos.WorldEdit
 
             WOCBase[] oclist =
             {
+                new WOCLight(),
                 new WOCSpawnPoint(),
                 new WOCTeleportMarker(),
                 new WOCTeleportButton(),
@@ -237,6 +238,7 @@ namespace Arteranos.WorldEdit
 
             string newComponentName = spn_NewComponent.Options[spn_NewComponent.value];
             WOCBase newComponent = OptionalComponents[newComponentName];
+            newComponent.Reset();
 
             woc.AddOrReplaceComponent(newComponent);
 
