@@ -35,6 +35,8 @@ MonoBehaviour:
       type: 3}
     TeleportButtonInspector: {fileID: 7349416676873975400, guid: 9ef39edf10608fd4b9351e43b6eab564,
       type: 3}
+    LightInspector: {fileID: 7327452052152048920, guid: a47bb9c30974042429aabf30d5667440,
+      type: 3}
     NullInspector: {fileID: 7349416676873975400, guid: cb2aa97b5813f8642b87925d347b60dc,
       type: 3}
   Prefabs:
