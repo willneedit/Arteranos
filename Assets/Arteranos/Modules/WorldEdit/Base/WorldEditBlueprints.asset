@@ -48,3 +48,7 @@ MonoBehaviour:
     Description: Teleport Target
     GameObject: {fileID: 1702488797507992324, guid: f8fea6dc6ef8ee34b88bd8a90c79b833,
       type: 3}
+  - Type: 3
+    Description: Light Source
+    GameObject: {fileID: 5340718865968281272, guid: 1628a957f24c6b04b8017af8e5a6aa6e,
+      type: 3}

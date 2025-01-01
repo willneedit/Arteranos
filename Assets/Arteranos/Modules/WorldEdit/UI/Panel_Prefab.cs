@@ -14,6 +14,10 @@ namespace Arteranos.WorldEdit
 {
     public class Panel_Prefab : NewObjectPanel
     {
+#pragma warning disable IDE0044 // Modifizierer "readonly" hinzufügen
+        [SerializeField] private ObjectChooser Chooser;
+#pragma warning restore IDE0044 // Modifizierer "readonly" hinzufügen
+
         struct PrefabDefaults
         {
             public List<WOCBase> components;
@@ -26,18 +30,20 @@ namespace Arteranos.WorldEdit
             }
         }
 
-        [SerializeField] private ObjectChooser Chooser;
-
         private static readonly Dictionary<WOPrefabType, PrefabDefaults> _prefabDefaults = new()
         {
             { WOPrefabType.SpawnPoint, new(
-                new List<WOCBase>() { new WOCSpawnPoint() }, 
+                new() { new WOCSpawnPoint() }, 
                 true) 
             },
             { WOPrefabType.TeleportTarget, new(
-                new List<WOCBase>() { new WOCTeleportMarker() },
+                new() { new WOCTeleportMarker() },
                 true) 
             },
+            { WOPrefabType.Light, new(
+                new() { new WOCLight() }, 
+                false) 
+            }
         };
 
         protected override void Awake()
@@ -97,7 +103,12 @@ namespace Arteranos.WorldEdit
             }
 
             // And add the needed components
-            components.AddRange(_prefabDefaults[type].components);
+            foreach (WOCBase _entry in _prefabDefaults[type].components)
+            {
+                WOCBase entry = _entry.Clone() as WOCBase;
+                entry.Reset();
+                components.Add(entry);
+            }
 
             base.BackOut(new WorldObjectInsertion()
             {
