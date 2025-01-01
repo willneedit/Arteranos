@@ -11,28 +11,28 @@ using UnityEngine;
 namespace Arteranos.WorldEdit.Components
 {
     [ProtoContract]
-    public class WOCLight : WOCBase
+    public class WOCLight : WOCBase, IPhysicsWOC
     {
         [ProtoMember(1)]
         public WOColor color;
 
         [ProtoMember(2)]
-        public LightType type = 0;
+        public LightType type;
 
         [ProtoMember(3)]
-        public float intensity = 0;
+        public float intensity;
 
         [ProtoMember(4)]
-        public float range = 0;
+        public float range;
 
         [ProtoMember(5)]
-        public float angle = 0;
+        public float angle;
 
 
         public override void Reset()
         {
             color = Color.white;
-            type = LightType.Spot;
+            type = LightType.Point;
             intensity = 1;
             range = 10;
             angle = 30;
@@ -79,6 +79,12 @@ namespace Arteranos.WorldEdit.Components
             light.intensity = intensity;
             light.range = range;
             light.angle = angle;
+        }
+
+        public void UpdatePhysicsState(bool isInEditMode)
+        {
+            foreach (Renderer renderer in GameObject.GetComponentsInChildren<Renderer>())
+                renderer.enabled = isInEditMode;
         }
     }
 }

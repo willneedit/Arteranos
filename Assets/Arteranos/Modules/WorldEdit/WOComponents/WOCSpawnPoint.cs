@@ -31,10 +31,11 @@ namespace Arteranos.WorldEdit.Components
 
         public void UpdatePhysicsState(bool isInEditMode)
         {
-            if (!GameObject.TryGetComponent(out User.SpawnPoint area))
-                area = GameObject.AddComponent<User.SpawnPoint>();
+            if (!GameObject.TryGetComponent(out User.SpawnPoint _))
+                GameObject.AddComponent<User.SpawnPoint>();
 
-            GameObject.SetActive(isInEditMode);
+            foreach (Renderer renderer in GameObject.GetComponentsInChildren<Renderer>())
+                renderer.enabled = isInEditMode;
         }
     }
 }

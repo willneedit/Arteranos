@@ -31,7 +31,8 @@ namespace Arteranos.WorldEdit.Components
 
         public void UpdatePhysicsState(bool isInEditMode)
         {
-            GameObject.SetActive(isInEditMode);
+            foreach (Renderer renderer in GameObject.GetComponentsInChildren<Renderer>())
+                renderer.enabled = isInEditMode;
         }
     }
 }
