@@ -32,7 +32,7 @@ namespace Arteranos.WorldEdit.Components
         public override void Reset()
         {
             color = Color.white;
-            type = LightType.Point;
+            type = LightType.Spot;
             intensity = 1;
             range = 10;
             angle = 30;
@@ -66,9 +66,6 @@ namespace Arteranos.WorldEdit.Components
 
             //light.lightmapBakeType = LightmapBakeType.Realtime;
         }
-
-        public override (string name, GameObject gameObject) GetUI()
-            => ("Light", WBP.I.Inspectors.LightInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {

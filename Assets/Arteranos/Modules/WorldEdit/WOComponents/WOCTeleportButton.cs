@@ -30,9 +30,6 @@ namespace Arteranos.WorldEdit.Components
             return MemberwiseClone();
         }
 
-        public override (string name, GameObject gameObject) GetUI()
-            => ("Teleport Button", WBP.I.Inspectors.TeleportButtonInspector);
-
         public override void ReplaceValues(WOCBase wOCBase)
         {
             WOCTeleportButton s = wOCBase as WOCTeleportButton;

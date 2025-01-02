@@ -94,9 +94,6 @@ namespace Arteranos.WorldEdit.Components
             return MemberwiseClone();
         }
 
-        public override (string name, GameObject gameObject) GetUI()
-            => ("Appearance", WBP.I.Inspectors.ColorInspector);
-
         public override void ReplaceValues(WOCBase wOCBase)
         {
             WOCColor c = wOCBase as WOCColor;

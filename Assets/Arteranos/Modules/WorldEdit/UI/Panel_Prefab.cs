@@ -18,34 +18,6 @@ namespace Arteranos.WorldEdit
         [SerializeField] private ObjectChooser Chooser;
 #pragma warning restore IDE0044 // Modifizierer "readonly" hinzufügen
 
-        struct PrefabDefaults
-        {
-            public List<WOCBase> components;
-            public bool onGroundLevel;
-
-            public PrefabDefaults(List<WOCBase> components, bool onGroundLevel)
-            {
-                this.components = components;
-                this.onGroundLevel = onGroundLevel;
-            }
-        }
-
-        private static readonly Dictionary<WOPrefabType, PrefabDefaults> _prefabDefaults = new()
-        {
-            { WOPrefabType.SpawnPoint, new(
-                new() { new WOCSpawnPoint() }, 
-                true) 
-            },
-            { WOPrefabType.TeleportTarget, new(
-                new() { new WOCTeleportMarker() },
-                true) 
-            },
-            { WOPrefabType.Light, new(
-                new() { new WOCLight() }, 
-                false) 
-            }
-        };
-
         protected override void Awake()
         {
             base.Awake();
@@ -92,7 +64,7 @@ namespace Arteranos.WorldEdit
             List<WOCBase> components = new();
 
             // If we want to set the object on the user's feet, negate the eye level offset
-            if (_prefabDefaults[type].onGroundLevel)
+            if (WBP.PrefabDefaults[type].onGroundLevel)
             {
                 WOCTransform woct = new() 
                 { 
@@ -103,7 +75,7 @@ namespace Arteranos.WorldEdit
             }
 
             // And add the needed components
-            foreach (WOCBase _entry in _prefabDefaults[type].components)
+            foreach (WOCBase _entry in WBP.PrefabDefaults[type].components)
             {
                 WOCBase entry = _entry.Clone() as WOCBase;
                 entry.Reset();

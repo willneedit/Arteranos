@@ -25,9 +25,6 @@ namespace Arteranos.WorldEdit.Components
             return MemberwiseClone();
         }
 
-        public override (string name, GameObject gameObject) GetUI()
-            => ("Teleport target surface", WBP.I.Inspectors.NullInspector);
-
         public override void ReplaceValues(WOCBase wOCBase) { }
 
         public void UpdatePhysicsState(bool isInEditMode)

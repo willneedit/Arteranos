@@ -53,9 +53,6 @@ namespace Arteranos.WorldEdit.Components
             return MemberwiseClone();
         }
 
-        public override (string name, GameObject gameObject) GetUI()
-            => ("Physics", WBP.I.Inspectors.PhysicsInspector);
-
         public override void ReplaceValues(WOCBase wOCBase)
         {
             WOCPhysics p = wOCBase as WOCPhysics;

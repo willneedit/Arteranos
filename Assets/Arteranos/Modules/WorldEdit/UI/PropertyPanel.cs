@@ -51,28 +51,12 @@ namespace Arteranos.WorldEdit
 
         private WorldObjectComponent woc;
 
-        private readonly Dictionary<string, WOCBase> OptionalComponents = new();
-
         protected override void Awake()
         {
             base.Awake();
 
             btn_ReturnToList.onClick.AddListener(GotReturnToChooserClick);
             btn_NewComponent.onClick.AddListener(GotNewComponentClick);
-
-            WOCBase[] oclist =
-            {
-                new WOCLight(),
-                new WOCSpawnPoint(),
-                new WOCTeleportMarker(),
-                new WOCTeleportButton(),
-                new WOCTeleportSurface(),
-                new WOCSpawner(),
-                new WOCRigidBody()
-            };
-
-            foreach(var o in oclist)
-                OptionalComponents.Add(o.GetUI().name, o);
         }
 
         protected override void OnEnable()
@@ -142,18 +126,19 @@ namespace Arteranos.WorldEdit
             for (int i = 0; i < woc.WOComponents.Count; i++)
             {
                 WOCBase wocc = woc.WOComponents[i];
-                (string name, GameObject bp_contents) = wocc.GetUI();
-                if (bp_contents == null) continue;
+                WBP.ComponentUIData_ ui = WBP.I.ComponentUIs[wocc.GetType()];
+
+                if (ui.inspector == null) continue;
 
                 GameObject paneGO = Instantiate(bp_CollapsiblePane, grp_Component_List);
                 paneGO.TryGetComponent(out CollapsiblePane cp);
 
-                cp.Title = name;
+                cp.Title = ui.name;
                 cp.IsOpen = paneOpen.ContainsKey(cp.Title) && paneOpen[cp.Title];
                 cp.IsDeleteable = wocc.IsRemovable;
                 cp.OnDeleteClicked += MakeGotRemoveComponentClicked(i);
 
-                GameObject contentsGO = Instantiate(bp_contents, paneGO.transform);
+                GameObject contentsGO = Instantiate(ui.inspector, paneGO.transform);
                 contentsGO.TryGetComponent(out IInspector inspector);
                 if (inspector != null)
                 {
@@ -161,7 +146,7 @@ namespace Arteranos.WorldEdit
                     inspector.PropertyPanel = this;
                 }
                 else
-                    Debug.LogWarning($"{name} doen't provide a valid inspector");
+                    Debug.LogWarning($"{ui.name} doen't provide a valid inspector");
             }
 
             grp_Component_List.gameObject.SetActive(true);
@@ -213,7 +198,7 @@ namespace Arteranos.WorldEdit
                 "Add new component..."
             };
 
-            foreach(KeyValuePair<string, WOCBase> c in OptionalComponents)
+            foreach(KeyValuePair<string, WOCBase> c in WBP.OptionalComponents)
             {
                 bool isClickable = c.Value is IClickable;
                 bool isGrabbable = c.Value is IRigidBody;
@@ -237,7 +222,7 @@ namespace Arteranos.WorldEdit
             if (spn_NewComponent.value == 0) return;
 
             string newComponentName = spn_NewComponent.Options[spn_NewComponent.value];
-            WOCBase newComponent = OptionalComponents[newComponentName];
+            WOCBase newComponent = WBP.OptionalComponents[newComponentName];
             newComponent.Reset();
 
             woc.AddOrReplaceComponent(newComponent);

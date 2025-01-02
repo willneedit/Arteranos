@@ -33,9 +33,6 @@ namespace Arteranos.WorldEdit.Components
             return MemberwiseClone();
         }
 
-        public override (string name, GameObject gameObject) GetUI()
-            => ("Spawner", WBP.I.Inspectors.SpawnerInspector);
-
         public override void ReplaceValues(WOCBase wOCBase)
         {
             WOCSpawner s = wOCBase as WOCSpawner;

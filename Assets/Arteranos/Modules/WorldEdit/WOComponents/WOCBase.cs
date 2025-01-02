@@ -66,8 +66,6 @@ namespace Arteranos.WorldEdit.Components
 
         public abstract object Clone();
 
-        public abstract (string name, GameObject gameObject) GetUI();
-
         public virtual HashSet<AssetReference> GetAssetReferences() => new();
     }
 }

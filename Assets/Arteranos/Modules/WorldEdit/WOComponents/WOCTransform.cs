@@ -5,7 +5,6 @@
  * residing in the LICENSE.md file in the project's root directory.
  */
 
-using Arteranos.Core;
 using ProtoBuf;
 using UnityEngine;
 
@@ -94,9 +93,6 @@ namespace Arteranos.WorldEdit.Components
         {
             return MemberwiseClone();
         }
-
-        public override (string name, GameObject gameObject) GetUI()
-            => ("Transform", WBP.I.Inspectors.TransformInspector);
 
         public override void ReplaceValues(WOCBase wOCBase)
         {
