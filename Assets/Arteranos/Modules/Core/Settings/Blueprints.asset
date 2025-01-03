@@ -25,6 +25,8 @@ MonoBehaviour:
     type: 3}
   TeleportReticle: {fileID: 1702488797507992324, guid: f8fea6dc6ef8ee34b88bd8a90c79b833,
     type: 3}
+  ClickTargetReticle: {fileID: 7447682203216842484, guid: 3b2b68a23e16cec43a9c7372b247bb32,
+    type: 3}
   UI:
     Dialog: {fileID: 1401308523161811021, guid: b08a789bff0e5e746b4efea304237fc2,
       type: 3}

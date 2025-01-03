@@ -15,6 +15,7 @@ using Arteranos.WorldEdit.Components;
 using Arteranos.Services;
 using Arteranos.XR;
 using System.Linq;
+using Arteranos.Core;
 
 namespace Arteranos.WorldEdit
 {
@@ -78,7 +79,7 @@ namespace Arteranos.WorldEdit
         private XRSimpleInteractable clicker = null;
         private GameObject enclosingObject = null;
 
-        private void Awake()
+        public void Awake()
         {
             body = gameObject.AddComponent<Rigidbody>();
 
@@ -102,7 +103,7 @@ namespace Arteranos.WorldEdit
             UpdatePhysicsState();
         }
 
-        private void OnDestroy()
+        public void OnDestroy()
         {
             G.WorldEditorData.OnEditorModeChanged -= GotEditorModeChanged;
 
@@ -114,7 +115,7 @@ namespace Arteranos.WorldEdit
 
         private void GotEditorModeChanged(bool editing) => UpdatePhysicsState();
 
-        private void Update()
+        public void Update()
         {
             if (ExpirationTime < DateTime.UtcNow)
             {
@@ -130,7 +131,7 @@ namespace Arteranos.WorldEdit
                 component.Update();
         }
 
-        private void LateUpdate()
+        public void LateUpdate()
         {
             foreach (WOCBase component in WOComponents)
                 component.LateUpdate();
@@ -309,6 +310,7 @@ namespace Arteranos.WorldEdit
                 : IsGrabbable?.IsMovable ?? false;
 
             clicker.enabled = !isInEditMode && (IsClickable != null);
+            clicker.customReticle = !isInEditMode ? BP.I.ClickTargetReticle : null;
         }
 
         public WorldObjectPatch MakePatch(bool complete = false)

@@ -37,6 +37,8 @@ namespace Arteranos.Core
 
         public GameObject TeleportReticle;
 
+        public GameObject ClickTargetReticle;
+
         [Serializable]
         public struct UI_
         {
