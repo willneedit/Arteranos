@@ -93,6 +93,18 @@ namespace Arteranos.WorldEdit.Components
 
         // ---------------------------------------------------------------
 
+        public Vector3 InitForce
+        {
+            set
+            {
+                if (!Rigidbody && !GameObject.TryGetComponent(out Rigidbody)) return;
+
+                Rigidbody.velocity = value;
+            }
+        }
+
+        // ---------------------------------------------------------------
+
         public void UpdatePhysicsState(bool isInEditMode)
         {
             if (!Rigidbody && !GameObject.TryGetComponent(out Rigidbody)) return;

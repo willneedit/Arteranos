@@ -16,12 +16,21 @@ namespace Arteranos.WorldEdit.Components
     [ProtoContract]
     public class WOCSpawner : WOCBase, IClickable
     {
-        [ProtoMember(1, IsRequired = true)]
-        public int MaxItems = 1;
+        [ProtoMember(1)]
+        public int MaxItems;
         [ProtoMember(2)]
         public WOVector3 Force;
-        [ProtoMember(3, IsRequired = true)]
-        public float Lifetime = 10.0f;
+        [ProtoMember(3)]
+        public float Lifetime;
+
+        public override void Reset()
+        {
+            base.Reset();
+
+            MaxItems = 5;
+            Force = Vector3.zero;
+            Lifetime = 20.0f;
+        }
 
         public void SetState()
         {

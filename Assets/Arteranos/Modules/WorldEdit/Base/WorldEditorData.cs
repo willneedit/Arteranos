@@ -377,6 +377,8 @@ namespace Arteranos.WorldEdit
                 woc.ExpirationTime = DateTime.UtcNow + TimeSpan.FromSeconds(spawn.Lifetime);
                 woc.DataObject = spawnerT;
 
+                if (woc.TryGetWOC(out WOCRigidBody rb)) rb.InitForce = spawn.Force;
+
                 spawnedWO.name = $"{spawnedWO.name} (with {woc.EnclosingObject.name})";
 
                 callback?.Invoke(spawnedWO);
