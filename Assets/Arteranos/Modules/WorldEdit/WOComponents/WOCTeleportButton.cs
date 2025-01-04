@@ -34,9 +34,9 @@ namespace Arteranos.WorldEdit.Components
         {
             WOCTeleportButton s = wOCBase as WOCTeleportButton;
 
-            s.location = location;
-            s.targetWorldCid = targetWorldCid;
-            s.inServer = inServer;
+            location = s.location;
+            targetWorldCid = s.targetWorldCid;
+            inServer = s.inServer;
         }
 
         // ---------------------------------------------------------------

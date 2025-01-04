@@ -62,7 +62,6 @@ namespace Arteranos.WorldEdit.Components
             light.range = range;
             light.spotAngle = angle;
             light.innerSpotAngle = angle;
-            light.shadowAngle = angle;
 
             //light.lightmapBakeType = LightmapBakeType.Realtime;
         }
@@ -71,11 +70,11 @@ namespace Arteranos.WorldEdit.Components
         {
             WOCLight light = wOCBase as WOCLight;
 
-            light.color = color;
-            light.type = type;
-            light.intensity = intensity;
-            light.range = range;
-            light.angle = angle;
+            color = light.color;
+            type = light.type;
+            intensity = light.intensity;
+            range = light.range;
+            angle = light.angle;
         }
 
         public void UpdatePhysicsState(bool isInEditMode)

@@ -40,10 +40,8 @@ namespace Arteranos.WorldEdit
             yield return null;
         }
 
-        public override HashSet<AssetReference> GetAssetReferences()
-        {
-            throw new NotImplementedException();
-        }
+        // Having WOPrefabType is enough, same as with WOPrimitive
+        public override HashSet<AssetReference> GetAssetReferences() => new();
 
         // ---------------------------------------------------------------
 
