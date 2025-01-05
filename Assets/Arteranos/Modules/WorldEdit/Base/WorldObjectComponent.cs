@@ -302,13 +302,15 @@ namespace Arteranos.WorldEdit
             foreach(IPhysicsWOC pwoc in GetWOCs<IPhysicsWOC>())
                 pwoc.UpdatePhysicsState(isInEditMode);
 
-            // #153: If we're in edit mode in desktop, lock rotation in grab
+            // Configure Grab Interactor
             mover.trackRotation = !(G.WorldEditorData.IsInEditMode && !G.Client.VRMode);
-
             mover.enabled = isInEditMode
                 ? !IsLocked
                 : IsGrabbable?.IsMovable ?? false;
+            mover.customReticle = !isInEditMode && (IsGrabbable?.IsMovable ?? false)
+                ? BP.I.GrabTargetReticle : null;
 
+            // Configure Click (=Trigger) Interactor
             clicker.enabled = !isInEditMode && (IsClickable != null);
             clicker.customReticle = !isInEditMode ? BP.I.ClickTargetReticle : null;
         }

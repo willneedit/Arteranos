@@ -39,6 +39,8 @@ namespace Arteranos.Core
 
         public GameObject ClickTargetReticle;
 
+        public GameObject GrabTargetReticle;
+
         [Serializable]
         public struct UI_
         {

@@ -27,6 +27,8 @@ MonoBehaviour:
     type: 3}
   ClickTargetReticle: {fileID: 7447682203216842484, guid: 3b2b68a23e16cec43a9c7372b247bb32,
     type: 3}
+  GrabTargetReticle: {fileID: 5018831294794679314, guid: a9b76272317584d408462684c29b6132,
+    type: 3}
   UI:
     Dialog: {fileID: 1401308523161811021, guid: b08a789bff0e5e746b4efea304237fc2,
       type: 3}
