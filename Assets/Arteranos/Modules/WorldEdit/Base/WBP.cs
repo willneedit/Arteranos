@@ -59,11 +59,13 @@ namespace Arteranos.WorldEdit
         {
             public List<WOCBase> components;
             public bool onGroundLevel;
+            public bool rotateDown;
 
-            public PrefabDefaults_(List<WOCBase> components, bool onGroundLevel)
+            public PrefabDefaults_(List<WOCBase> components, bool onGroundLevel, bool rotateDown)
             {
                 this.components = components;
                 this.onGroundLevel = onGroundLevel;
+                this.rotateDown = rotateDown;
             }
         }
 
@@ -81,18 +83,9 @@ namespace Arteranos.WorldEdit
 
         public static readonly Dictionary<WOPrefabType, PrefabDefaults_> PrefabDefaults = new()
         {
-            { WOPrefabType.SpawnPoint, new(
-                new() { new WOCSpawnPoint() },
-                true)
-            },
-            { WOPrefabType.TeleportTarget, new(
-                new() { new WOCTeleportMarker() },
-                true)
-            },
-            { WOPrefabType.Light, new(
-                new() { new WOCLight() },
-                false)
-            }
+            { WOPrefabType.SpawnPoint, new( new() { new WOCSpawnPoint() }, true, false) },
+            { WOPrefabType.TeleportTarget, new( new() { new WOCTeleportMarker() }, true, false) },
+            { WOPrefabType.Light, new( new() { new WOCLight() }, false, true) }
         };
 
         public Dictionary<Type, ComponentUIData_> ComponentUIs

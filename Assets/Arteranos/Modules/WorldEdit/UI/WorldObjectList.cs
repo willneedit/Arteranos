@@ -154,6 +154,7 @@ namespace Arteranos.WorldEdit
                 {
                     // in front of the user
                     position = ct.rotation * Vector3.forward * 2.5f,
+                    rotation = Vector3.zero,
                     scale = Vector3.one
                 };
                 woi.components.Insert(0, newTransform);
@@ -161,9 +162,12 @@ namespace Arteranos.WorldEdit
 
             if (CurrentRoot == WORoot)
             {
+                Quaternion faceRotation = Quaternion.Euler(new Vector3(0, ct.rotation.eulerAngles.y, 0));
+                Quaternion rot = faceRotation * Quaternion.Euler(newTransform.rotation);
+
                 // Default: eye level
                 newTransform.position += ct.position;
-                newTransform.rotation = new Vector3(0, ct.rotation.eulerAngles.y, 0);
+                newTransform.rotation = rot.eulerAngles;
             }
             else
             {

@@ -64,11 +64,23 @@ namespace Arteranos.WorldEdit
             List<WOCBase> components = new();
 
             // If we want to set the object on the user's feet, negate the eye level offset
-            if (WBP.PrefabDefaults[type].onGroundLevel)
+            WBP.PrefabDefaults_ pd = WBP.PrefabDefaults[type];
+            if (pd.onGroundLevel || pd.rotateDown)
             {
+                Transform ct = Camera.main.transform;
+
                 WOCTransform woct = new() 
                 { 
-                    position = -(G.XRControl.heightAdjustment),
+                    // below your feet or in front of your eyes
+                    position = pd.onGroundLevel 
+                    ? -(G.XRControl.heightAdjustment) 
+                    : ct.rotation * Vector3.forward * 2.5f,
+
+                    // dipping below your sightline or straight away from you
+                    rotation = pd.rotateDown 
+                    ? new Vector3(45, 0, 0) 
+                    : Vector3.zero,
+
                     scale = Vector3.one,
                 };
                 components.Add(woct);
