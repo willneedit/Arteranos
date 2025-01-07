@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="1c4c21b9-e192-4ae9-9250-79d3149d850e" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters />
+	<Nodes>
+		<Node Guid="305c8754-d386-483c-a631-c9a0f8c0e4d2" NodeType="SystemNode" NodeTypeGUID="74716153-9685-4a42-8409-a9c79de5f8c4" Position="444 174" DisableInSubgraphs="True" ProcedureType="MeshCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Primitive">
+					<Items>
+						<Item Expanded="True" Label="Face">
+							<Fields>
+								<Field Expanded="True" Label="Boundary">
+									<Items>
+										<Item FixedValue="-0.5,-0.5,-0.5" Label="Point" />
+										<Item FixedValue="-0.5,0,0.5" Label="Point" />
+										<Item FixedValue="-0.5,0.5,-0.5" Label="Point" />
+									</Items>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cube">
+							<Fields>
+								<Field FixedValue="1" Label="Size" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="a9f0f5b0-70c0-4000-a7e2-1928f20ea214" NodeType="SystemNode" NodeTypeGUID="75cdfc0b-7cdd-485a-85d2-8a781b3a79bc" Position="451 315" DisableInSubgraphs="True" ProcedureType="MeshModifyProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Extrude">
+							<Fields>
+								<Field FixedValue="1" Label="Amount" />
+								<Field Expanded="True" Label="Method">
+									<Items>
+										<Item Expanded="True" Label="Normal">
+											<Fields>
+												<Field FixedValue="0" Label="Offset" />
+											</Fields>
+										</Item>
+									</Items>
+								</Field>
+								<Field FixedValue="True" Label="Cap" />
+								<Field FixedValue="" Label="Section" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="5a6bdfff-fd8b-45cd-8826-e361a584a673" NodeType="SystemNode" NodeTypeGUID="ac217afa-a4f7-4aec-bcd3-9eb26f8a4aae" Position="447 460" DisableInSubgraphs="True" ProcedureType="MeshSaveProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Inputs">
+					<Items>
+						<Item Expanded="True" Label="Collective">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+				<Argument Expanded="True" Label="Format">
+					<Items>
+						<Item Expanded="True" Label="Fbx">
+							<Fields>
+								<Field FixedValue="True" Label="Flip Faces" />
+								<Field FixedValue="D:/PrimitiveWedge_fbx.fbx" Label="File Location" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Obj">
+							<Fields>
+								<Field FixedValue="True" Label="Flip Faces" />
+								<Field FixedValue="" Label="Group Name" />
+								<Field FixedValue="True" Label="Export Materials" />
+								<Field FixedValue="D:/Users/carsten/Desktop/MyFile.obj" Label="File Location" />
+								<Field FixedValue="True" Label="Flip YZ" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="0#O#0" ToPort="1#I#0" FromNode="0" ToNode="1" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="1#O#0" ToPort="2#I#0" FromNode="1" ToNode="2" FromLabel="Output" ToLabel="Inputs[0].Collective.Collective" />
+	</Edges>
+</Graph>

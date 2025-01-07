@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Graph Guid="dcc222f9-5ed9-4e52-8a88-6a1f4013824d" Author="carsten" Description="A standard graph procedure." Color="ffffff" Version="1.0.0.0">
+	<Parameters />
+	<Nodes>
+		<Node Guid="7cb33e45-c02c-49ed-ace1-3411227b6d75" NodeType="SystemNode" NodeTypeGUID="74716153-9685-4a42-8409-a9c79de5f8c4" Position="319 143" DisableInSubgraphs="True" ProcedureType="MeshCreateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Primitive">
+					<Items>
+						<Item Expanded="True" Label="Cone">
+							<Fields>
+								<Field FixedValue="1" Label="Height" />
+								<Field FixedValue="0.5" Label="Radius" />
+								<Field FixedValue="16" Label="Segments" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cube">
+							<Fields>
+								<Field FixedValue="1" Label="Size" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="0" />
+			<OutputPorts Count="1" />
+		</Node>
+		<Node Guid="8b679dc2-b7d6-4425-a4d8-f4ac3a67038e" NodeType="SystemNode" NodeTypeGUID="ac217afa-a4f7-4aec-bcd3-9eb26f8a4aae" Position="362 316" DisableInSubgraphs="True" ProcedureType="MeshSaveProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Inputs">
+					<Items>
+						<Item Expanded="True" Label="Collective">
+							<Fields />
+						</Item>
+					</Items>
+				</Argument>
+				<Argument Expanded="True" Label="Format">
+					<Items>
+						<Item Expanded="True" Label="Fbx">
+							<Fields>
+								<Field FixedValue="True" Label="Flip Faces" />
+								<Field FixedValue="D:/PrimitiveCone_fbx.fbx" Label="File Location" />
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Obj">
+							<Fields>
+								<Field FixedValue="True" Label="Flip Faces" />
+								<Field FixedValue="" Label="Group Name" />
+								<Field FixedValue="True" Label="Export Materials" />
+								<Field FixedValue="D:/Primitive_Cone_fbx" Label="File Location" />
+								<Field FixedValue="True" Label="Flip YZ" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
+	</Nodes>
+	<Edges>
+		<Edge FromPort="0#O#0" ToPort="1#I#0" FromNode="0" ToNode="1" FromLabel="Output" ToLabel="Inputs[0].Collective.Collective" />
+	</Edges>
+</Graph>

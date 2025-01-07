@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-16"?>
+<Project>
+  <Author>carsten</Author>
+  <Company>Private</Company>
+  <Version>1.0.0.0</Version>
+  <Items>
+    <Item Path="Graphs" Nature="Folder" Guid="1e3d39a9-0cb8-42e6-996b-c4552a95f168" Expanded="True">
+      <Item Path="Graph1.slxg" Nature="File" Guid="1c4c21b9-e192-4ae9-9250-79d3149d850e" />
+    </Item>
+  </Items>
+</Project>
