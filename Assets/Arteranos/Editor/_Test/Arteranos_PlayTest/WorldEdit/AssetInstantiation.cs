@@ -35,9 +35,9 @@ namespace Arteranos.PlayTest.WorldEdit
             WOKitItem kitItem3 = new() { kitCid = "kit2", kitItemName = k1 };
             WOKitItem kitItem1_1 = new() { kitCid = "kit1", kitItemName = k1 };
 
-            WOPrimitive prim1 = new() { primitive = PrimitiveType.Sphere };
-            WOPrimitive prim2 = new() { primitive = PrimitiveType.Cube };
-            WOPrimitive prim1_1 = new() { primitive = PrimitiveType.Sphere };
+            WOPrimitive prim1 = new() { primitive = PrimitiveTypeEx.Sphere };
+            WOPrimitive prim2 = new() { primitive = PrimitiveTypeEx.Cube };
+            WOPrimitive prim1_1 = new() { primitive = PrimitiveTypeEx.Sphere };
 
             Assert.AreEqual(gltf1, gltf1);
             Assert.AreNotEqual(gltf1, gltf2);
@@ -73,9 +73,9 @@ namespace Arteranos.PlayTest.WorldEdit
             WOKitItem kitItem3 = new() { kitCid = "kit2", kitItemName = k1 };
             WOKitItem kitItem1_1 = new() { kitCid = "kit1", kitItemName = k1 };
 
-            WOPrimitive prim1 = new() { primitive = PrimitiveType.Sphere };
-            WOPrimitive prim2 = new() { primitive = PrimitiveType.Cube };
-            WOPrimitive prim1_1 = new() { primitive = PrimitiveType.Sphere };
+            WOPrimitive prim1 = new() { primitive = PrimitiveTypeEx.Sphere };
+            WOPrimitive prim2 = new() { primitive = PrimitiveTypeEx.Cube };
+            WOPrimitive prim1_1 = new() { primitive = PrimitiveTypeEx.Sphere };
 
             Dictionary<IWorldObjectAsset, string> dict = new()
             {

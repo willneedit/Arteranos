@@ -7,6 +7,5 @@
     <Item Path="Graphs" Nature="Folder" Guid="de1105ae-6102-46f8-a0fe-00437cae2f06" Expanded="True">
       <Item Path="Graph1.slxg" Nature="File" Guid="dcc222f9-5ed9-4e52-8a88-6a1f4013824d" />
     </Item>
-    <Item Path="Textures" Nature="Folder" Guid="05016fe7-8024-4cae-82f3-2b7436cd8148" Expanded="False" />
   </Items>
 </Project>

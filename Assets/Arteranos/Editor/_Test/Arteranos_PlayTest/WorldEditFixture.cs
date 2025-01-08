@@ -61,7 +61,7 @@ namespace Arteranos.PlayTest.WorldEdit
 
         public static WorldObject BuildSample()
         {
-            WorldObject cube = new(PrimitiveType.Cube)
+            WorldObject cube = new(PrimitiveTypeEx.Cube)
             {
                 name = "Test Cube",
                 components = new()
@@ -72,7 +72,7 @@ namespace Arteranos.PlayTest.WorldEdit
             };
             cube.GetWComponent<WOCTransform>().position = new Vector3(0, 1, 5);
 
-            WorldObject cube2 = new(PrimitiveType.Cube)
+            WorldObject cube2 = new(PrimitiveTypeEx.Cube)
             {
                 name = "Test Cube Right",
                 components = new()
@@ -83,7 +83,7 @@ namespace Arteranos.PlayTest.WorldEdit
             };
             cube2.GetWComponent<WOCTransform>().position = new Vector3(1.5f, 0, 0);
 
-            WorldObject sphere = new(PrimitiveType.Sphere)
+            WorldObject sphere = new(PrimitiveTypeEx.Sphere)
             {
                 name = "Test Sphere",
                 components = new()
@@ -94,7 +94,7 @@ namespace Arteranos.PlayTest.WorldEdit
             };
             sphere.GetWComponent<WOCTransform>().position = new Vector3(0, 1.5f, 0);
 
-            WorldObject capsule = new(PrimitiveType.Capsule)
+            WorldObject capsule = new(PrimitiveTypeEx.Capsule)
             {
                 name = "Test Capsule",
                 components = new()

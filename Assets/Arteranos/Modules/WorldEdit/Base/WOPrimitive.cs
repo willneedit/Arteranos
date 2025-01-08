@@ -17,12 +17,12 @@ namespace Arteranos.WorldEdit
     public class WOPrimitive : WorldObjectAsset, IEquatable<WOPrimitive>
     {
         [ProtoMember(1)]
-        public PrimitiveType primitive;
+        public PrimitiveTypeEx primitive;
 
         public override GameObject Create()
         {
-            GameObject gobbo = GameObject.CreatePrimitive(primitive);
-            gobbo.TryGetComponent(out Renderer renderer);
+            GameObject gobbo = CreatePrimitiveEx(primitive);
+            Renderer renderer = gobbo.GetComponentInChildren<Renderer>();
             renderer.material =  WBP.I.Objects.DefaultWEMaterial;
             gobbo.SetActive(false);
 
@@ -33,6 +33,20 @@ namespace Arteranos.WorldEdit
         {
             yield return null;
         }
+
+        public static GameObject CreatePrimitiveEx(PrimitiveTypeEx primitive)
+        {
+            if (primitive < PrimitiveTypeEx._SimpleEnd)
+                return GameObject.CreatePrimitive((PrimitiveType)primitive);
+
+            GameObject go = UnityEngine.Object.Instantiate(WBP.I.GetPrimitiveEx(primitive));
+            MeshCollider coll = go.GetComponentInChildren<MeshCollider>();
+            coll.convex = true;
+
+            return go;
+        }
+
+        // ---------------------------------------------------------------
 
         public override bool Equals(object obj)
         {

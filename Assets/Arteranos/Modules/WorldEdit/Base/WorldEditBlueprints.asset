@@ -52,3 +52,16 @@ MonoBehaviour:
     Description: Light Source
     GameObject: {fileID: 5340718865968281272, guid: 1628a957f24c6b04b8017af8e5a6aa6e,
       type: 3}
+  ExPrimitives:
+  - Type: 7
+    Primitive: {fileID: 8410709756544836113, guid: 8e3b95efb62f82d40bbf1e718fc81d9c,
+      type: 3}
+  - Type: 8
+    Primitive: {fileID: 1865184092338558808, guid: 7468e9117472c1a49ab8d84e98fbe870,
+      type: 3}
+  - Type: 9
+    Primitive: {fileID: 1702980797513470459, guid: 4497a6221849825409c481fc7520737c,
+      type: 3}
+  - Type: 10
+    Primitive: {fileID: 7509524104513623130, guid: da5a27c01a0aa934b84e755813df363a,
+      type: 3}

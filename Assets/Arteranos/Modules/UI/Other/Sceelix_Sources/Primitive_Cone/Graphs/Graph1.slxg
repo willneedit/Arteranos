@@ -24,7 +24,7 @@
 			<InputPorts Count="0" />
 			<OutputPorts Count="1" />
 		</Node>
-		<Node Guid="8b679dc2-b7d6-4425-a4d8-f4ac3a67038e" NodeType="SystemNode" NodeTypeGUID="ac217afa-a4f7-4aec-bcd3-9eb26f8a4aae" Position="362 316" DisableInSubgraphs="True" ProcedureType="MeshSaveProcedure">
+		<Node Guid="8b679dc2-b7d6-4425-a4d8-f4ac3a67038e" NodeType="SystemNode" NodeTypeGUID="ac217afa-a4f7-4aec-bcd3-9eb26f8a4aae" Position="320.0535 385.1553" DisableInSubgraphs="True" ProcedureType="MeshSaveProcedure">
 			<Arguments>
 				<Argument Expanded="True" Label="Inputs">
 					<Items>
@@ -56,8 +56,25 @@
 			<InputPorts Count="1" />
 			<OutputPorts Count="1" />
 		</Node>
+		<Node Guid="afbc456a-a9bb-43f3-a590-98ff07906e85" NodeType="SystemNode" NodeTypeGUID="930eb356-619d-4db7-b68a-016d9a6d1e97" Position="312.2242 267.9677" DisableInSubgraphs="True" ProcedureType="ActorTranslateProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Translate">
+							<Fields>
+								<Field FixedValue="0,0,-0.5" Label="Amount" />
+								<Field FixedValue="Scope" Label="Relative To" />
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
 	</Nodes>
 	<Edges>
-		<Edge FromPort="0#O#0" ToPort="1#I#0" FromNode="0" ToNode="1" FromLabel="Output" ToLabel="Inputs[0].Collective.Collective" />
+		<Edge FromPort="0#O#0" ToPort="2#I#0" FromNode="0" ToNode="2" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="2#O#0" ToPort="1#I#0" FromNode="2" ToNode="1" FromLabel="Output" ToLabel="Inputs[0].Collective.Collective" />
 	</Edges>
 </Graph>

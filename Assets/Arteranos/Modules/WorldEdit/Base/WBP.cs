@@ -49,9 +49,17 @@ namespace Arteranos.WorldEdit
             public GameObject GameObject;
         }
 
+        [Serializable]
+        public struct PrimitiveExEntry
+        {
+            public PrimitiveTypeEx Type;
+            public GameObject Primitive;
+        }
+
         public Objects_ Objects;
         public Inspectors_ Inspectors;
         public PrefabEntry[] Prefabs;
+        public PrimitiveExEntry[] ExPrimitives;
 
         // ---------------------------------------------------------------
 
@@ -138,6 +146,7 @@ namespace Arteranos.WorldEdit
         private Dictionary<Type, ComponentUIData_> _componentUIs = null;
         private Dictionary<WOPrefabType, PrefabEntry> _prefabs = null;
         private static Dictionary<string, WOCBase> _optionalComponents = null;
+        private Dictionary<PrimitiveTypeEx, GameObject> _prims = null;
 
         public (string description, GameObject blueprint) GetPrefab(WOPrefabType type)
         {
@@ -151,6 +160,19 @@ namespace Arteranos.WorldEdit
 
             PrefabEntry e = _prefabs[type];
             return (e.Description, e.GameObject);
+        }
+
+        public GameObject GetPrimitiveEx(PrimitiveTypeEx type)
+        {
+            if (_prims == null)
+            {
+                _prims = new();
+                foreach (PrimitiveExEntry entry in ExPrimitives) _prims[entry.Type] = entry.Primitive;
+            }
+
+            if(!_prims.ContainsKey(type)) return null;
+
+            return _prims[type];
         }
     }
 }

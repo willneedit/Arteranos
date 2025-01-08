@@ -14,12 +14,27 @@ using Arteranos.WorldEdit.Components;
 
 namespace Arteranos.WorldEdit
 {
+    public enum PrimitiveTypeEx
+    {
+        Sphere,     // Equals to PrimitiveType
+        Capsule,
+        Cylinder,
+        Cube,
+        Plane,
+        Quad,
+        _SimpleEnd, // Lynchpin
+        Cone,       // Additional primitive shapes
+        Prism,
+        Pyramid,
+        Wedge
+    }
+
     [Serializable]
     public struct Primitive
     {
-        public PrimitiveType prim;
+        public PrimitiveTypeEx prim;
         public string name;
-        public Texture2D texture;
+        public Texture2D preview;
     }
 
     public class Panel_Primitives : NewObjectPanel
@@ -64,7 +79,7 @@ namespace Arteranos.WorldEdit
             TMP_Text text = @object.GetComponentInChildren<TMP_Text>();
             Button button = @object.GetComponentInChildren<Button>();
 
-            image.texture = primitives[index].texture;
+            image.texture = primitives[index].preview;
             text.text = primitives[index].name;
 
             button.onClick.AddListener(() => OnTileClicked(index));

@@ -33,7 +33,7 @@ namespace Arteranos.WorldEdit.Components
             set
             {
                 base.GameObject = value;
-                GameObject.TryGetComponent(out renderer);
+                renderer = GameObject.GetComponentInChildren<Renderer>();
             }
         }
 

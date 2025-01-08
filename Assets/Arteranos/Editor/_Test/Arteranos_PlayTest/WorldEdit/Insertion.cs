@@ -48,7 +48,7 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
                 scale = Vector3.one
             };
 
-            WOPrimitive wop = new() { primitive = PrimitiveType.Cube };
+            WOPrimitive wop = new() { primitive = PrimitiveTypeEx.Cube };
 
             WorldObjectInsertion woi = new()
             {
@@ -87,7 +87,7 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
                 scale = Vector3.one
             };
 
-            WOPrimitive wop = new() { primitive = PrimitiveType.Cube };
+            WOPrimitive wop = new() { primitive = PrimitiveTypeEx.Cube };
 
             WorldObjectInsertion woi = new()
             {
@@ -132,7 +132,7 @@ namespace Arteranos.PlayTest.WorldEdit.WorldChange
                 scale = Vector3.one
             };
 
-            WOPrimitive wop = new() { primitive = PrimitiveType.Cube };
+            WOPrimitive wop = new() { primitive = PrimitiveTypeEx.Cube };
 
             WorldObjectInsertion woi = new()
             {

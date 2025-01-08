@@ -42,7 +42,7 @@ namespace Arteranos.WorldEdit
             Init();
         }
 
-        public WorldObject(PrimitiveType primitive)
+        public WorldObject(PrimitiveTypeEx primitive)
         {
             Init();
             asset = new WOPrimitive { primitive = primitive };
