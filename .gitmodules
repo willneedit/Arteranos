@@ -13,3 +13,6 @@
 [submodule "Packages/LiteNetLibTransportNG"]
 	path = Packages/LiteNetLibTransportNG
 	url = https://github.com/willneedit/LiteNetLibTransportNG.git
+[submodule "Packages/Unity_Sceelix_Plugin"]
+	path = Packages/Unity_Sceelix_Plugin
+	url = https://github.com/willneedit/Unity_Sceelix_Plugin.git

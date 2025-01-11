@@ -412,6 +412,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.willneedit.sceelix_plugin": {
+      "version": "file:Unity_Sceelix_Plugin",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "li.lightingtools.lightmapswitcher": {
       "version": "https://github.com/willneedit/lightmap-switching-tool.git#package",
       "depth": 0,
