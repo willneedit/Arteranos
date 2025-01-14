@@ -68,16 +68,16 @@ MonoBehaviour:
     preview: {fileID: 2800000, guid: d0f7f1cbe5f31404f8f2aaced41a47a6, type: 3}
   - prim: 7
     name: Cone
-    preview: {fileID: 2800000, guid: 938065b183f395644a9037b6602b5051, type: 3}
+    preview: {fileID: 2800000, guid: 0ceeeb6559a89bb41bd56f97e8144057, type: 3}
   - prim: 8
     name: Prism
-    preview: {fileID: 2800000, guid: 3edeb6f8e7b891f4eaafc05214f0e5b1, type: 3}
+    preview: {fileID: 2800000, guid: 0d0973269c56f81459bf3b2a502e7fbc, type: 3}
   - prim: 9
     name: Pyramid
-    preview: {fileID: 2800000, guid: 110db367394afec48bf02071c740701f, type: 3}
+    preview: {fileID: 2800000, guid: 8a4989472eb6af0409a1b2f598c13af3, type: 3}
   - prim: 10
     name: Wedge
-    preview: {fileID: 2800000, guid: cae7e0ec61469a24393346e41b12d5bc, type: 3}
+    preview: {fileID: 2800000, guid: ba58f61f12065cb4ca553023c3d92dbe, type: 3}
   Chooser: {fileID: 1342486449318903041}
 --- !u!1001 &2196078734974005103
 PrefabInstance:
