@@ -40,7 +40,7 @@
 			<InputPorts Count="1" />
 			<OutputPorts Count="1" />
 		</Node>
-		<Node Guid="894a8fdc-cbec-4fcb-98ab-dbbe1e13ae8d" NodeType="SystemNode" NodeTypeGUID="eba3dca6-953c-4e64-9e1d-cbc934eea38c" Position="254.429 603.0651" DisableInSubgraphs="True" ProcedureType="UnityEntityCreateProcedure">
+		<Node Guid="894a8fdc-cbec-4fcb-98ab-dbbe1e13ae8d" NodeType="SystemNode" NodeTypeGUID="eba3dca6-953c-4e64-9e1d-cbc934eea38c" Position="209.6265 782.275" DisableInSubgraphs="True" ProcedureType="UnityEntityCreateProcedure">
 			<Arguments>
 				<Argument FixedValue="Sceelix Game Object" Label="Name" />
 				<Argument FixedValue="True" Label="Enabled" />
@@ -71,7 +71,7 @@
 			<InputPorts Count="1" />
 			<OutputPorts Count="1" />
 		</Node>
-		<Node Guid="c039c00a-c748-4ef1-82f6-fd2f10de074e" NodeType="SystemNode" NodeTypeGUID="f4ddf1f0-64b2-4846-84fd-b919b480c492" Position="215.6449 726.9056" DisableInSubgraphs="True" ProcedureType="UnityEntityComponentProcedure">
+		<Node Guid="c039c00a-c748-4ef1-82f6-fd2f10de074e" NodeType="SystemNode" NodeTypeGUID="f4ddf1f0-64b2-4846-84fd-b919b480c492" Position="175.1093 891.1813" DisableInSubgraphs="True" ProcedureType="UnityEntityComponentProcedure">
 			<Arguments>
 				<Argument Expanded="True" Label="Components">
 					<Items>
@@ -192,6 +192,80 @@
 			<InputPorts Count="1" />
 			<OutputPorts Count="1" />
 		</Node>
+		<Node Guid="fad65ac7-983d-42c5-b975-7c0bd9f94b6f" NodeType="SystemNode" NodeTypeGUID="9470e48f-5ee8-4d84-a371-949f27786f0f" Position="236.6353 645.26" DisableInSubgraphs="True" ProcedureType="MeshUVMapProcedure">
+			<Arguments>
+				<Argument Expanded="True" Label="Operation">
+					<Items>
+						<Item Expanded="True" Label="Box UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Sphere UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Cylinder UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+						<Item Expanded="True" Label="Face UV">
+							<Fields>
+								<Field Expanded="True" Label="U">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+								<Field Expanded="True" Label="V">
+									<Fields>
+										<Field FixedValue="1" Label="Size" />
+										<Field FixedValue="True" Label="Absolute" />
+									</Fields>
+								</Field>
+							</Fields>
+						</Item>
+					</Items>
+				</Argument>
+			</Arguments>
+			<InputPorts Count="1" />
+			<OutputPorts Count="1" />
+		</Node>
 	</Nodes>
 	<Edges>
 		<Edge FromPort="0#O#0" ToPort="1#I#0" FromNode="0" ToNode="1" FromLabel="Output" ToLabel="Input" />
@@ -200,6 +274,7 @@
 		<Edge FromPort="5#O#1" ToPort="4#I#0" FromNode="5" ToNode="4" FromLabel="Mesh Selection[1].Direction.Output" ToLabel="Input" />
 		<Edge FromPort="4#O#0" ToPort="6#I#0" FromNode="4" ToNode="6" FromLabel="Output" ToLabel="Input[0].Collective.Collective" />
 		<Edge FromPort="5#O#0" ToPort="6#I#0" FromNode="5" ToNode="6" FromLabel="Mesh Selection[0].Direction.Output" ToLabel="Input[0].Collective.Collective" />
-		<Edge FromPort="6#O#0" ToPort="2#I#0" FromNode="6" ToNode="2" FromLabel="Output" ToLabel="Options[0].From Mesh.Input" />
+		<Edge FromPort="6#O#0" ToPort="7#I#0" FromNode="6" ToNode="7" FromLabel="Output" ToLabel="Input" />
+		<Edge FromPort="7#O#0" ToPort="2#I#0" FromNode="7" ToNode="2" FromLabel="Output" ToLabel="Options[0].From Mesh.Input" />
 	</Edges>
 </Graph>

@@ -10,17 +10,17 @@
 		<Node Guid="ede4008b-3734-4aaf-98db-88e690aee545" NodeType="ComponentNode" NodeTypeGUID="1c4c21b9-e192-4ae9-9250-79d3149d850e" Position="305 57" DisableInSubgraphs="True" RelativePath="Prim.Prism.slxg">
 			<Arguments />
 			<InputPorts Count="0" />
-			<OutputPorts Count="1" />
+			<OutputPorts Count="0" />
 		</Node>
 		<Node Guid="de6c73f0-0e18-45fb-8400-e3b55b011dc4" NodeType="ComponentNode" NodeTypeGUID="528b8e06-6cd4-4acc-a072-73bcffac05b7" Position="5 321" DisableInSubgraphs="True" RelativePath="Prim.Pyramid.slxg">
 			<Arguments />
 			<InputPorts Count="0" />
-			<OutputPorts Count="1" />
+			<OutputPorts Count="0" />
 		</Node>
 		<Node Guid="b77f3683-b613-49c8-89ec-53213f1da457" NodeType="ComponentNode" NodeTypeGUID="1c4c21b9-e192-4ae9-9250-79d3149d850e" Position="316 332" DisableInSubgraphs="True" RelativePath="Prim.Wedge.slxg">
 			<Arguments />
 			<InputPorts Count="0" />
-			<OutputPorts Count="1" />
+			<OutputPorts Count="0" />
 		</Node>
 	</Nodes>
 	<Edges />
