@@ -416,7 +416,9 @@
       "version": "file:Unity_Sceelix_Plugin",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.editorcoroutines": "1.0.0"
+      }
     },
     "li.lightingtools.lightmapswitcher": {
       "version": "https://github.com/willneedit/lightmap-switching-tool.git#package",
