@@ -123,7 +123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.9411765}
+  m_Color: {r: 0.0627451, g: 0.0627451, b: 0.0627451, a: 0.9411765}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -153,14 +153,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lbl_PageCount: {fileID: 6515710913033414531}
+  txt_AddItemURL: {fileID: 2270183836102845953}
+  btn_AddItem: {fileID: 2270183836209790365}
   btn_First: {fileID: 7831131404326186597}
   btn_FRev: {fileID: 6976207619472412692}
   btn_Previous: {fileID: 2172515231490638250}
   btn_Next: {fileID: 8796649210533328464}
   btn_FFwd: {fileID: 5552434944436080812}
   btn_Last: {fileID: 3192959411241975138}
-  txt_AddItemURL: {fileID: 2270183836102845953}
-  btn_AddItem: {fileID: 2270183836209790365}
   ItemsPerPage: 2
   TileBlueprint: {fileID: 6059210692641896560, guid: 33970dd6552a29745b3f4ac7be943b37,
     type: 3}

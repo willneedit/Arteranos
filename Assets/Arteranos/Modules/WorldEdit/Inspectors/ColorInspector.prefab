@@ -328,7 +328,7 @@ PrefabInstance:
     - target: {fileID: 8231778681636196198, guid: 4690c91a61ae7944b9ff755e33b11bc2,
         type: 3}
       propertyPath: m_text
-      value: Clear exture
+      value: Clear Texture
       objectReference: {fileID: 0}
     - target: {fileID: 8231778681636196198, guid: 4690c91a61ae7944b9ff755e33b11bc2,
         type: 3}
