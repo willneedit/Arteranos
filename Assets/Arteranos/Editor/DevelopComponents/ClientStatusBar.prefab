@@ -604,11 +604,6 @@ PrefabInstance:
       propertyPath: m_PreferredWidth
       value: -1
       objectReference: {fileID: 0}
-    - target: {fileID: 4885398810514336714, guid: 4690c91a61ae7944b9ff755e33b11bc2,
-        type: 3}
-      propertyPath: m_PreferredHeight
-      value: -1
-      objectReference: {fileID: 0}
     - target: {fileID: 5984833035051708155, guid: 4690c91a61ae7944b9ff755e33b11bc2,
         type: 3}
       propertyPath: m_Name
@@ -761,11 +756,6 @@ PrefabInstance:
       propertyPath: m_PreferredWidth
       value: -1
       objectReference: {fileID: 0}
-    - target: {fileID: 4885398810514336714, guid: 4690c91a61ae7944b9ff755e33b11bc2,
-        type: 3}
-      propertyPath: m_PreferredHeight
-      value: -1
-      objectReference: {fileID: 0}
     - target: {fileID: 5984833035051708155, guid: 4690c91a61ae7944b9ff755e33b11bc2,
         type: 3}
       propertyPath: m_Name
@@ -916,11 +906,6 @@ PrefabInstance:
     - target: {fileID: 4885398810514336714, guid: 4690c91a61ae7944b9ff755e33b11bc2,
         type: 3}
       propertyPath: m_PreferredWidth
-      value: -1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4885398810514336714, guid: 4690c91a61ae7944b9ff755e33b11bc2,
-        type: 3}
-      propertyPath: m_PreferredHeight
       value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 5984833035051708155, guid: 4690c91a61ae7944b9ff755e33b11bc2,
