@@ -29,6 +29,8 @@ namespace Arteranos.WorldEdit.Components
         public float angle;
 
 
+        public override bool IsRemovable => false;
+
         public override void Reset()
         {
             color = Color.white;

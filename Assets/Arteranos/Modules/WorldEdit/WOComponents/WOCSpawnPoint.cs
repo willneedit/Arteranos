@@ -14,6 +14,8 @@ namespace Arteranos.WorldEdit.Components
     [ProtoContract]
     public class WOCSpawnPoint : WOCBase, IPhysicsWOC
     {
+        public override bool IsRemovable => false;
+
         public void SetState()
         {
             Dirty = true;
