@@ -16,3 +16,6 @@
 [submodule "Packages/Unity_Sceelix_Plugin"]
 	path = Packages/Unity_Sceelix_Plugin
 	url = https://github.com/willneedit/Unity_Sceelix_Plugin.git
+[submodule "Packages/com.unity.xr.management"]
+	path = Packages/com.unity.xr.management
+	url = git@github.com:willneedit/com.unity.xr.management.git
