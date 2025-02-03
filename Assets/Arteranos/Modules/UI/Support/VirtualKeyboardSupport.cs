@@ -31,7 +31,9 @@ namespace Arteranos.UI
         {
             UnityAction<string> makeAttachmentFunc(TMP_InputField field)
                 => (string x) =>
-                {
+                {                  
+                    if (field.readOnly) return;
+
                     HookVirtualKB(field);
                     G.XRControl.FreezeControls(true);
                 };

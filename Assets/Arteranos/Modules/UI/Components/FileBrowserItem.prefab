@@ -215,6 +215,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1696087806524943870, guid: c7a2577cd497e6b4d8704f6d654e178e,
+        type: 3}
+      propertyPath: m_ReadOnly
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1696087806524943871, guid: c7a2577cd497e6b4d8704f6d654e178e,
         type: 3}
       propertyPath: m_MinWidth
