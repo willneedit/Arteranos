@@ -21,8 +21,8 @@ using System.Threading;
 using System.Collections;
 using Object = UnityEngine.Object;
 using Ipfs.Unity;
-using Arteranos.Core.Managed;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
+using ICSharpCode.SharpZipLib.Tar;
 
 namespace Arteranos.Core
 {
@@ -397,6 +397,41 @@ namespace Arteranos.Core
             return resultAB;
         }
 
+        public static async Task UnTarToDirectoryAsync(Stream fs, string path, CancellationToken token = default)
+        {
+            string common = null;
 
+            using (TarInputStream tar = new(fs, Encoding.UTF8))
+            {
+                tar.IsStreamOwner = false;
+                for (TarEntry entry = tar.GetNextEntry(); entry != null; entry = tar.GetNextEntry())
+                {
+                    if (entry.IsDirectory) continue;
+
+                    common ??= entry.Name;
+
+                    int i = common.CommonStart(entry.Name);
+                    common = entry.Name[0..i];
+                }
+            }
+
+            fs.Seek(0, SeekOrigin.Begin);
+            int cutoff = common.Length;
+
+            using (TarInputStream tar = new(fs, Encoding.UTF8))
+            {
+                for (TarEntry entry = tar.GetNextEntry(); entry != null; entry = tar.GetNextEntry())
+                {
+                    if (entry.IsDirectory) continue;
+
+                    string filePath = $"{path}/{entry.Name[cutoff..]}";
+                    string dirName = Path.GetDirectoryName(filePath);
+                    if (!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
+
+                    using Stream stream = File.Create(filePath);
+                    await tar.CopyEntryContentsAsync(stream, token);
+                }
+            }
+        }
     }
 }

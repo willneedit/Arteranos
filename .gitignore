@@ -79,8 +79,9 @@ sysinfo.txt
 *.unitypackage
 *.app
 
-# Embedded (kubo) IPFS daemon
+# Embedded (kubo) IPFS daemon, Windows + Linux
 ipfs.exe
+ipfs
 
 # Crashlytics generated file
 crashlytics-build.properties

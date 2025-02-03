@@ -19,12 +19,17 @@ using System.Collections;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.IO.Compression;
+using Arteranos.Core;
 
 namespace Arteranos.Editor
 {
 
     public class BuildPlayers
     {
+        private const string KUBO_EXECUTABLE_ROOT = "https://github.com/ipfs/kubo/releases/download/v0.32.0/kubo_v0.32.0";
+        private const string KUBO_ARCH_WIN64 = "windows-amd64";
+        private const string KUBO_ARCH_LINUX64 = "linux-amd64";
+
         // public static string appName = Application.productName;
         public static readonly string appName = "Arteranos";
 
@@ -113,13 +118,22 @@ public static class _dummy
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon", false, 90)]
+        [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon (Windows)", false, 90)]
         public static void RetrieveIPFSDaemon()
             => RetrieveIPFSDaemon(false);
 
         public static void RetrieveIPFSDaemon(bool silent)
         {
-            EditorCoroutineUtility.StartCoroutineOwnerless(AcquireIPFSExecutableCoroutine(silent));
+            EditorCoroutineUtility.StartCoroutineOwnerless(AcquireIPFSWinExeCoroutine(silent));
+        }
+
+        [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon (Linux)", false, 91)]
+        public static void RetrieveLinuxIPFSDaemon()
+            => RetrieveLinuxIPFSDaemon(false);
+
+        public static void RetrieveLinuxIPFSDaemon(bool silent)
+        {
+            EditorCoroutineUtility.StartCoroutineOwnerless(AcquireIPFSLinuxExeCoroutine(silent));
         }
 
 
@@ -160,6 +174,18 @@ public static class _dummy
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
         }
 
+        [MenuItem("Arteranos/Build/Build Linux64 Dedicated Server", false, 130)]
+        public static void BuildLinux64DedServ()
+        {
+            static IEnumerator SingleTask()
+            {
+                GetProjectGitVersion();
+                yield return BuildLinux64DSCoroutine();
+            }
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
+        }
+
         [MenuItem("Arteranos/Build Installation Package", false, 80)]
         public static void BuildInstallationPackage()
         {
@@ -167,23 +193,40 @@ public static class _dummy
             {
                 // Build Package wipes the build/ directory, and builds
                 // the version files itself.
-                yield return AcquireIPFSExecutableCoroutine(true);
+                yield return AcquireIPFSWinExeCoroutine(true);
                 yield return BuildInstallationPackageCoroutine();
             }
 
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
         }
 
-        private static IEnumerator AcquireIPFSExecutableCoroutine(bool silent)
+        private static IEnumerator AcquireIPFSWinExeCoroutine(bool silent)
         {
             string IPFSExe = "ipfs.exe";
+            string desiredFile = $"/kubo/{IPFSExe}";
+            string archiveFormat = "zip";
+            string source = $"{KUBO_EXECUTABLE_ROOT}_{KUBO_ARCH_WIN64}.{archiveFormat}";
 
-            string source = "https://github.com/ipfs/kubo/releases/download/v0.32.0/kubo_v0.32.0_windows-amd64.zip";
+            yield return DownloadExecutable(silent, IPFSExe, desiredFile, archiveFormat, source);
+        }
+
+        private static IEnumerator AcquireIPFSLinuxExeCoroutine(bool silent)
+        {
+            string IPFSExe = "ipfs";
+            string desiredFile = $"/{IPFSExe}";
+            string archiveFormat = "tar.gz";
+
+            string source = $"{KUBO_EXECUTABLE_ROOT}_{KUBO_ARCH_LINUX64}.{archiveFormat}";
+
+            yield return DownloadExecutable(silent, IPFSExe, desiredFile, archiveFormat, source);
+        }
+
+        private static IEnumerator DownloadExecutable(bool silent, string IPFSExe, string desiredFile, string archiveFormat, string source)
+        {
             // TODO sha512
-            string target = $"{Application.temporaryCachePath}/downloaded-kubo-ipfs.zip";
+            string target = $"{Application.temporaryCachePath}/downloaded-kubo-ipfs.{archiveFormat}";
             string targetDir = $"{target}.dir";
-            string desired = $"{targetDir}/kubo/ipfs.exe";
-            long totalBytes = 0;
+            string desired = $"{targetDir}{desiredFile}";
 
             // Earlier sessions may have it.
             if (File.Exists(IPFSExe))
@@ -200,8 +243,56 @@ public static class _dummy
 
             Debug.Log($"Downloading {source}...");
 
-            Task taskDownload = Task.Run(async () =>
+            Task taskDownload = DownloadFile(source, target);
+
+            yield return new WaitUntil(() => taskDownload.IsCompleted);
+
+            Debug.Log($"Unzipping {targetDir}...");
+
+            if (Directory.Exists(targetDir)) Directory.Delete(targetDir, true);
+
+            if (archiveFormat == "zip")
             {
+                Task taskUnzip = Task.Run(() =>
+                {
+                    try
+                    {
+                        ZipFile.ExtractToDirectory(target, targetDir);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogException(ex);
+                    }
+                });
+
+                yield return new WaitUntil(() => taskUnzip.IsCompleted);
+            }
+            else if (archiveFormat == "tar.gz")
+            {
+                using FileStream compressedFileStream = File.Open(target, FileMode.Open);
+                using MemoryStream outputFileStream = new();
+                using var decompressor = new GZipStream(compressedFileStream, CompressionMode.Decompress);
+                decompressor.CopyTo(outputFileStream);
+
+                outputFileStream.Position = 0;
+                Task taskUnzip = Utils.UnTarToDirectoryAsync(outputFileStream, targetDir);
+
+                yield return new WaitUntil(() => taskUnzip.IsCompleted);
+            }
+
+            if (File.Exists(desired))
+                File.Copy(desired, IPFSExe);
+            else
+                Debug.LogError($"{desired} not found.");
+
+            Debug.Log("Done.");
+        }
+
+        private static Task DownloadFile(string source, string target)
+        {
+            return Task.Run(async () =>
+            {
+                long totalBytes = 0;
                 if (File.Exists(target)) File.Delete(target);
 
                 using HttpClient client = new();
@@ -215,34 +306,8 @@ public static class _dummy
                 s.Flush();
                 s.Close();
             });
-
-            yield return new WaitUntil(() => taskDownload.IsCompleted);
-
-            Debug.Log($"Unzipping {targetDir}...");
-
-            Task taskUnzip = Task.Run(() =>
-            {
-                if (Directory.Exists(targetDir)) Directory.Delete(targetDir, true);
-
-                try
-                {
-                    ZipFile.ExtractToDirectory(target, targetDir);
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogException(ex);
-                }
-            });
-
-            yield return new WaitUntil(() => taskDownload.IsCompleted);
-
-            if (File.Exists(desired))
-                File.Copy(desired, IPFSExe);
-            else
-                Debug.LogError($"{desired} not found.");
-
-            Debug.Log("Done.");
         }
+
         public static string[] GetSceneNames()
         {
             return new[] {
@@ -285,6 +350,33 @@ public static class _dummy
                 scenes = GetSceneNames(),
                 locationPathName = $"build/Win64-Server/{appName}-Server.exe",
                 target = BuildTarget.StandaloneWindows64,
+                subtarget = (int)StandaloneBuildSubtarget.Server,
+
+                extraScriptingDefines = new[] { "UNITY_SERVER" },
+                options = BuildOptions.CleanBuildCache
+            };
+
+            yield return null;
+
+            CommenceBuild(bpo);
+        }
+
+        private static IEnumerator BuildLinux64DSCoroutine()
+        {
+            const string buildTargetRoot = "build/Linux64-Server";
+
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
+            EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Server;
+            EditorUserBuildSettings.SetBuildLocation(BuildTarget.StandaloneWindows64, $"{buildTargetRoot}/");
+
+            if(!Directory.Exists(buildTargetRoot)) Directory.CreateDirectory(buildTargetRoot);
+            if (!File.Exists($"{buildTargetRoot}/ipfs")) File.Copy("ipfs", $"{buildTargetRoot}/ipfs");
+
+            BuildPlayerOptions bpo = new()
+            {
+                scenes = GetSceneNames(),
+                locationPathName = $"{buildTargetRoot}/{appName}-Server",
+                target = BuildTarget.StandaloneLinux64,
                 subtarget = (int)StandaloneBuildSubtarget.Server,
 
                 extraScriptingDefines = new[] { "UNITY_SERVER" },
