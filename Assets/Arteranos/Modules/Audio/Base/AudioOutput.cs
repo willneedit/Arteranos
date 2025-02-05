@@ -1,7 +1,7 @@
 using UnityEngine;
 
-using POpusCodec;
-using POpusCodec.Enums;
+using Unity.Codecs.Opus;
+using Unity.Codecs.Opus.Enums;
 using Arteranos.Core;
 using UnityEngine.Audio;
 

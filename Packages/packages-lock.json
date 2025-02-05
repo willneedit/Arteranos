@@ -410,6 +410,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.willneedit.opus": {
+      "version": "file:Unity_Opus",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.willneedit.sceelix_plugin": {
       "version": "file:Unity_Sceelix_Plugin",
       "depth": 0,

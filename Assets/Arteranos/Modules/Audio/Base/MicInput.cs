@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using POpusCodec;
-using POpusCodec.Enums;
+using Unity.Codecs.Opus;
+using Unity.Codecs.Opus.Enums;
 using UnityEngine;
 
 namespace Arteranos.Audio
@@ -108,8 +108,8 @@ namespace Arteranos.Audio
                 Bitrate = SampleRate
             };
 
-            //encoder.ForceChannels = POpusCodec.Enums.ForceChannels.NoForce;
-            //encoder.Complexity = POpusCodec.Enums.Complexity.Complexity0;
+            //encoder.ForceChannels = Unity.Codecs.Opus.Enums.ForceChannels.NoForce;
+            //encoder.Complexity = Unity.Codecs.Opus.Enums.Complexity.Complexity0;
             //encoder.DtxEnabled = true;
             //encoder.ExpectedPacketLossPercentage = 0;
             //encoder.UseInbandFEC = true;

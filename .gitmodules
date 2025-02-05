@@ -22,3 +22,6 @@
 [submodule "Packages/com.unity.xr.openxr"]
 	path = Packages/com.unity.xr.openxr
 	url = https://github.com/willneedit/com.unity.xr.openxr.git
+[submodule "Packages/Unity_Opus"]
+	path = Packages/Unity_Opus
+	url = https://github.com/willneedit/Unity_Opus.git
