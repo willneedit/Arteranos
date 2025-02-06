@@ -24,6 +24,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Net.NetworkInformation;
 using Arteranos.Core.Managed;
+using System.Runtime.InteropServices;
 
 namespace Arteranos.Services
 {
@@ -345,8 +346,11 @@ namespace Arteranos.Services
                 if (uniCast.Count > 0)
                     foreach (UnicastIPAddressInformation uni in uniCast)
                     {
-                        if (uni.Address.IsIPv6LinkLocal
-                            || uni.PrefixOrigin == PrefixOrigin.WellKnown) continue;
+                        if (uni.Address.IsIPv6LinkLocal) continue;
+
+                        // Really, now?! Seen NotImplementedException on Linux! >:(
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                            if (uni.PrefixOrigin == PrefixOrigin.WellKnown) continue;
 
                         addr.Add(uni.Address);
                     }
@@ -412,7 +416,7 @@ namespace Arteranos.Services
             return result;
         }
 
-        #endregion
+#endregion
         // -------------------------------------------------------------------
         #region Connections
 
