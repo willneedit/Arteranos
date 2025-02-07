@@ -13,6 +13,7 @@ using Arteranos.UI;
 using Arteranos.WorldEdit;
 using Arteranos.XR;
 using Ipfs;
+using System.Collections.Generic;
 
 namespace Arteranos
 {
@@ -30,6 +31,12 @@ namespace Arteranos
             public Cid Male { get; set; } = null;
             public Cid Female { get; set; } = null;
 
+        }
+
+        public class CommandLineOptions_
+        {
+            public bool ClearServerUserBase { get; set; } = false;
+            public List<string> AddServerAdmins { get; set; } = new();
         }
 
         public static IWorldEditorData WorldEditorData { get; set; }
@@ -53,5 +60,7 @@ namespace Arteranos
         public static ServerUserBase ServerUsers { get; set; }
         // ---------------------------------------------------------------
         public static DefaultAvatar_ DefaultAvatar { get; } = new();
+        // ---------------------------------------------------------------
+        public static CommandLineOptions_ CommandLineOptions { get; set; } = new();
     }
 }

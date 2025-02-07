@@ -229,7 +229,7 @@ namespace Arteranos.Core
             Base.Add(user);
         }
 
-        private void AddRootSA()
+        private void AddRootSA(bool init)
         {
             Client cs = G.Client;
             if(cs == null)
@@ -247,28 +247,71 @@ namespace Arteranos.Core
                 remarks = "Auto-generated root user"
             };
 
-            RemoveUsers(user);
-            AddUser(user);
+            if(FindUsers(user).Any())
+            {
+                RemoveUsers(user);
+                init = true; // Just removed, re-add with the new UserID.
+            }
 
-            Save();
+            if (init)
+            {
+                AddUser(user);
+                Save();
+            }
         }
 
         public static ServerUserBase Load()
         {
             ServerUserBase sub = null;
 
-            try
+            if(G.CommandLineOptions.ClearServerUserBase)
             {
-                sub = JsonConvert.DeserializeObject<ServerUserBase>(ConfigUtils.ReadTextConfig(PATH_SERVER_USERBASE));
+                // Clear the Server User Base
+                sub = new();
             }
-            catch(Exception)
+            else
             {
+                try
+                {
+                    sub = JsonConvert.DeserializeObject<ServerUserBase>(ConfigUtils.ReadTextConfig(PATH_SERVER_USERBASE));
+                }
+                catch (Exception)
+                {
+                    sub = new();
+                    // New file, add the default server administrator
+                    sub.AddRootSA(true);
+                }
             }
 
-            sub ??= new();
+            // Refresh default server administrator, in case the nickname has been changed
+            sub.AddRootSA(false);
 
-            // It's the _local_ server instance, just update the local root user entry.
-            sub.AddRootSA();
+            bool needSave = false;
+            TypeConverter typeConverter = new UserIDConverter();
+            foreach (string entry in G.CommandLineOptions.AddServerAdmins)
+            {
+                try
+                {
+                    UserID userID = (UserID)typeConverter.ConvertFrom(entry);
+                    ServerUserState user = new()
+                    {
+                        userID = userID,
+                        userState = UserState.Srv_admin,
+                        address = null,
+                        deviceUID = null,
+                        remarks = $"Commandline added root user {(string)userID}"
+                    };
+
+                    sub.AddUser(user);
+                    needSave = true;
+                }
+                catch (Exception ex) 
+                { 
+                    Debug.LogException(ex);
+                }
+            }
+
+            if(needSave) sub.Save();
 
             return sub;
         }
