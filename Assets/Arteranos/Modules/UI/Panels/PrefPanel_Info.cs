@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2023, willneedit
  * 
- * Licensed by the Mozilla Public License 2.0,
+ * Licensed by the Mozilla [SerializeField] private License 2.0,
  * residing in the LICENSE.md file in the project's root directory.
  */
 
@@ -13,22 +13,24 @@ using UnityEngine.UI;
 using Arteranos.Services;
 using Arteranos.Core;
 using Ipfs;
+using System.ComponentModel;
 
 namespace Arteranos.UI
 {
     public class PrefPanel_Info : UIBehaviour
     {
-        public TMP_Text lbl_Version = null;
-        public TMP_Text lbl_DeviceName = null;
-        public TMP_Text lbl_DeviceType = null;
-        public TMP_Text lbl_GraphicsDevice = null;
-        public TMP_Text lbl_GraphicsVersion = null;
-        public TMP_Text lbl_ExternalIPAddr = null;
-        public TMP_Text lbl_LauncherLink = null;
+        [SerializeField] private TMP_Text lbl_Version = null;
+        [SerializeField] private TMP_Text lbl_DeviceName = null;
+        [SerializeField] private TMP_Text lbl_DeviceType = null;
+        [SerializeField] private TMP_Text lbl_GraphicsDevice = null;
+        [SerializeField] private TMP_Text lbl_GraphicsVersion = null;
+        [SerializeField] private TMP_Text lbl_LauncherLink = null;
+        [SerializeField] private TMP_Text lbl_PublicUserID = null;
 
-        public Button btn_CopyToClipboard = null;
-        public Button btn_license = null;
-        public Button btn_3rdParty = null;
+        [SerializeField] private Button btn_CopyLLToClipboard = null;
+        [SerializeField] private Button btn_CopyUIDToClipboard = null;
+        [SerializeField] private Button btn_license = null;
+        [SerializeField] private Button btn_3rdParty = null;
 
         protected override void Awake()
         {
@@ -36,16 +38,23 @@ namespace Arteranos.UI
 
             Version v = Version.Load();
 
+            Client cs = G.Client;
+            TypeConverter typeConverter = new UserIDConverter();
+            UserID userID = new(cs.UserSignPublicKey, cs.Me.Nickname);
+            string publicUIDstring = (string) typeConverter.ConvertTo(userID, typeof(string));
+
             lbl_Version.text = v.Full;
             lbl_DeviceName.text = SystemInfo.deviceName;
             lbl_DeviceType.text = SystemInfo.deviceType.ToString();
             lbl_GraphicsDevice.text = SystemInfo.graphicsDeviceName;
             lbl_GraphicsVersion.text = SystemInfo.graphicsDeviceVersion;
+            lbl_PublicUserID.text = publicUIDstring;
 
 
             btn_license.onClick.AddListener(() => OnLicenseClicked(false));
             btn_3rdParty.onClick.AddListener(() => OnLicenseClicked(true));
-            btn_CopyToClipboard.onClick.AddListener(OnClipboardClicked);
+            btn_CopyLLToClipboard.onClick.AddListener(() => OnClipboardClicked(lbl_LauncherLink));
+            btn_CopyUIDToClipboard.onClick.AddListener(() => OnClipboardClicked(lbl_PublicUserID));
         }
 
         protected override void OnEnable()
@@ -63,7 +72,7 @@ namespace Arteranos.UI
 
         private void Update()
         {
-            btn_CopyToClipboard.interactable = G.NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline;
+            btn_CopyLLToClipboard.interactable = G.NetworkStatus.GetOnlineLevel() != OnlineLevel.Offline;
         }
 
         private void OnLicenseClicked(bool thirdparty)
@@ -73,8 +82,8 @@ namespace Arteranos.UI
             LicenseTextUI.New(thirdparty);
         }
 
-        private void OnClipboardClicked() 
-            => GUIUtility.systemCopyBuffer = lbl_LauncherLink.text;
+        private void OnClipboardClicked(TMP_Text btn) 
+            => GUIUtility.systemCopyBuffer = btn.text;
 
     }
 }
