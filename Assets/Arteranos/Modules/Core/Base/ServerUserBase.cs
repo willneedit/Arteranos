@@ -238,13 +238,14 @@ namespace Arteranos.Core
                 return;
             }
 
+            UserID userID = new(cs.UserSignPublicKey, cs.Me.Nickname);
             ServerUserState user = new()
             {
-                userID = new(cs.UserSignPublicKey, cs.Me.Nickname),
+                userID = userID,
                 userState = UserState.Srv_admin,
                 address = null,
                 deviceUID = null,
-                remarks = "Auto-generated root user"
+                remarks = $"Auto-generated root user, derived from owner's ID ({(string) userID})"
             };
 
             if(FindUsers(user).Any())
@@ -263,11 +264,13 @@ namespace Arteranos.Core
         public static ServerUserBase Load()
         {
             ServerUserBase sub = null;
+            bool needSave = false;
 
-            if(G.CommandLineOptions.ClearServerUserBase)
+            if (G.CommandLineOptions.ClearServerUserBase)
             {
                 // Clear the Server User Base
                 sub = new();
+                needSave = true;
             }
             else
             {
@@ -286,7 +289,6 @@ namespace Arteranos.Core
             // Refresh default server administrator, in case the nickname has been changed
             sub.AddRootSA(false);
 
-            bool needSave = false;
             TypeConverter typeConverter = new UserIDConverter();
             foreach (string entry in G.CommandLineOptions.AddServerAdmins)
             {
@@ -299,7 +301,7 @@ namespace Arteranos.Core
                         userState = UserState.Srv_admin,
                         address = null,
                         deviceUID = null,
-                        remarks = $"Commandline added root user {(string)userID}"
+                        remarks = $"Commandline added root user ({(string)userID})"
                     };
 
                     sub.AddUser(user);
@@ -312,6 +314,13 @@ namespace Arteranos.Core
             }
 
             if(needSave) sub.Save();
+
+            // Just configure the server root admin database and quit.
+            if(G.CommandLineOptions.ClearServerUserBase || G.CommandLineOptions.AddServerAdmins.Count > 0)
+            {
+                Debug.Log("Server User Base modified by commandline options, remove the options and restart");
+                SettingsManager.Quit();
+            }
 
             return sub;
         }

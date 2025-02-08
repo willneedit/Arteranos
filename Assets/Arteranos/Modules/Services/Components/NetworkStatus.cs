@@ -149,7 +149,7 @@ namespace Arteranos.Services
 
             StopAllCoroutines();
 
-            device.Dispose();
+            device?.Dispose();
             device = null;
 
             NatUtility.StopDiscovery();

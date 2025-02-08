@@ -10,6 +10,7 @@ using Arteranos.Services;
 using Ipfs;
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 namespace Arteranos.Core
@@ -78,10 +79,23 @@ namespace Arteranos.Core
 
             G.Client = Client.Load();
             G.Server = Server.Load();
-            G.ServerUsers = ServerUserBase.Load();
             Command = ScriptableObject.CreateInstance<CommandLine>();
 
             Command.GetCommandlineArgs();
+
+            // Only for fiddling with dedicated servers.
+            if (ConfigUtils.Unity_Server)
+            {
+                G.CommandLineOptions.ClearServerUserBase = GetBoolArg("--clear-sub", false);
+                if (GetCmdArg("--add-root-users", out string uidlist))
+                {
+                    string[] parts = uidlist.Split(":");
+                    G.CommandLineOptions.AddServerAdmins = parts.ToList();
+                }
+            }
+
+            G.ServerUsers = ServerUserBase.Load();
+
 
             if(Command.PlainArgs.Count > 0)
             {

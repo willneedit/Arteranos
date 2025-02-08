@@ -34,6 +34,10 @@ namespace Arteranos.Core
 
             // Pick a server. Any server that suits your profile.
             // string[] args = { "Arteranos.exe", "arteranos://anyhost/" };
+
+            // Default invocation
+            // string[] args = { "Arteranos.exe", "--clear-sub", "--add-root-users", "[REDACTED_USERID_1]:[REDACTED_USERID_2]" };
+
 #else
             var args = System.Environment.GetCommandLineArgs();            
 #endif
