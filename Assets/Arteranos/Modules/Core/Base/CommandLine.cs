@@ -6,14 +6,16 @@
  */
 
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace Arteranos.Core
 {
     public class CommandLine : ScriptableObject
     {
-        public Dictionary<string, string> Commands = new();
-        public List<string> PlainArgs { get; internal set; } = new();
+        public static Dictionary<string, string> Commands { get; internal set; } = new();
+        public static List<string> PlainArgs { get; internal set; } = new();
+        public static string ProgDir { get; internal set; } = null;
 
         public Dictionary<string, string> GetCommandlineArgs()
         {
@@ -21,7 +23,7 @@ namespace Arteranos.Core
             // DEBUG: Commandline mocking in Editor
 
             // Default invocation
-            string[] args = { "Arteranos.exe" };
+            string[] args = { "./Arteranos.exe" };
 
             // Connect to server, loading the server's world
             // string[] args = { "Arteranos.exe", "arteranos://localhost/" };
@@ -42,15 +44,16 @@ namespace Arteranos.Core
             var args = System.Environment.GetCommandLineArgs();            
 #endif
 
-            Debug.Log("Invocation arguments:");
+            ProgDir = Path.GetDirectoryName(Path.GetFullPath(args[0]));
 
-            foreach(string d_args in args)
-                Debug.Log(d_args);
+            Debug.Log($"Program directory: {ProgDir}");
+            Debug.Log("Invocation arguments:");
 
             // Skip the 0th argument, the program name itself
             for (int i = 1; i < args.Length; ++i)
             {
                 string arg = args[i];
+                Debug.Log(arg);
                 if (arg.StartsWith("-"))
                 {
                     string value = i < args.Length - 1 ? args[i + 1] : null;

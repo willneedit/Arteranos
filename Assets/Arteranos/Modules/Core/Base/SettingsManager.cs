@@ -63,7 +63,7 @@ namespace Arteranos.Core
         {
             bool GetCmdArg(string key, out string val)
             {
-                return Command.Commands.TryGetValue(key, out val);
+                return CommandLine.Commands.TryGetValue(key, out val);
             }
 
             bool GetBoolArg(string key, bool def = false)
@@ -97,11 +97,11 @@ namespace Arteranos.Core
             G.ServerUsers = ServerUserBase.Load();
 
 
-            if(Command.PlainArgs.Count > 0)
+            if(CommandLine.PlainArgs.Count > 0)
             {
                 // arteranos:/[<PeerID>]/[<WorldCid>]
 
-                string[] parts = Command.PlainArgs[0].Split('/');
+                string[] parts = CommandLine.PlainArgs[0].Split('/');
                 if(parts.Length == 2 && parts[0] == "arteranos:")
                 {
                     TargetedPeerID = string.IsNullOrEmpty(parts[1]) ? parts[1] : null;

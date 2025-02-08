@@ -13,6 +13,7 @@ using Ipfs.Http;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -104,10 +105,9 @@ namespace Arteranos.Services
             if (_IPFSAccessible != null) 
                 return _IPFSAccessible.Value ? Status.OK : Status.NoDaemonExecutable;
 
-            if(SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows)
-                _IPFSExe = "ipfs.exe";
-            else
-                _IPFSExe = "./ipfs";
+            _IPFSExe = SystemInfo.operatingSystemFamily == OperatingSystemFamily.Windows ? "ipfs.exe" : "ipfs";
+
+            _IPFSExe = $"{CommandLine.ProgDir}/{_IPFSExe}";
 
             Debug.Log($"Probing for viable IPFS backend executable ({_IPFSExe})");
             // Just try 'ipfs.exe help'
