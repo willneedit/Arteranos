@@ -190,13 +190,11 @@ namespace Arteranos.Core
             remove {  if (Instance != null) Instance.OnClientReceivedServerConfigAnswer_ -= value; }
         }
 
+        // Schedule the shutdown on the first suitable moment
         public static void Quit()
         {
-#if UNITY_EDITOR
-                UnityEditor.EditorApplication.ExitPlaymode();
-#else
-                UnityEngine.Application.Quit();
-#endif
+            G.ToQuit = true;
+            if (Instance) Instance.enabled = true;
         }
     }
 }

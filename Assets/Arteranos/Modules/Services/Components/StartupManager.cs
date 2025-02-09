@@ -57,7 +57,7 @@ namespace Arteranos.Services
 
 
             // TODO Dedicated server: Startup world commandline argument processing
-            if (ConfigUtils.Unity_Server)
+            if (ConfigUtils.Unity_Server && !G.ToQuit)
             {
                 // Manually start the server, including with the initialization.
                 Task t = G.NetworkStatus.StartServer();
@@ -71,6 +71,17 @@ namespace Arteranos.Services
 
         protected void Update()
         {
+            // No TaskScheduler? Same reason as below in the same function...
+            if(G.ToQuit)
+            {
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.ExitPlaymode();
+#else
+                UnityEngine.Application.Quit();
+#endif
+                G.ToQuit = false;
+            }
+
             if (initialized) return;
 
             // Very first frame, every Awake() has been called, everything is a go.

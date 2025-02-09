@@ -62,5 +62,6 @@ namespace Arteranos
         public static DefaultAvatar_ DefaultAvatar { get; } = new();
         // ---------------------------------------------------------------
         public static CommandLineOptions_ CommandLineOptions { get; set; } = new();
+        public static bool ToQuit { get; set; } = false;
     }
 }
