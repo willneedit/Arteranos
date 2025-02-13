@@ -23,7 +23,7 @@ namespace Arteranos.Core
             // DEBUG: Commandline mocking in Editor
 
             // Default invocation
-            string[] args = { "./Arteranos.exe" };
+            string[] args = { "Arteranos.exe" };
 
             // Connect to server, loading the server's world
             // string[] args = { "Arteranos.exe", "arteranos://localhost/" };
@@ -40,11 +40,12 @@ namespace Arteranos.Core
             // Default invocation
             // string[] args = { "Arteranos.exe", "--clear-sub", "--add-root-users", "[REDACTED_USERID_1]:[REDACTED_USERID_2]" };
 
+            ProgDir = Path.GetFullPath(".");
 #else
             var args = System.Environment.GetCommandLineArgs();            
+            ProgDir = System.AppDomain.CurrentDomain.BaseDirectory;
 #endif
 
-            ProgDir = Path.GetDirectoryName(Path.GetFullPath(args[0]));
 
             Debug.Log($"Program directory: {ProgDir}");
             Debug.Log("Invocation arguments:");
