@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+action="$1"
+
+if [ "$action" != configure ]; then
+    exit 0
+fi
+
+getent passwd arteranos >/dev/null 2>&1 ||  adduser --system --group --disabled-password --home /var/arteranos --shell /usr/sbin/nologin arteranos
+chown arteranos:arteranos @MainExePath@
+chmod 750 @MainExePath@
+
+update-rc.d arteranos defaults >/dev/null

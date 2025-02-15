@@ -13,7 +13,7 @@
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 DESC="Arteranos dedicated server"
 NAME=arteranos
-DAEMON=/@TargetLibexecDir@/@MainExe@
+DAEMON=/usr/bin/Arteranos-Server-Start
 PIDFILE=/var/run/arteranos.pid
 SCRIPTNAME=/etc/init.d/"$NAME"
 
@@ -24,11 +24,11 @@ test -f $DAEMON || exit 0
 
 case "$1" in
 start)	log_daemon_msg "Starting arteranos server" "arteranos"
-        start_daemon -p $PIDFILE $DAEMON -P $EXTRA_OPTS
+        start-stop-daemon --start --quiet --oknodo --background --pidfile $PIDFILE --make-pidfile --exec $DAEMON 
         log_end_msg $?
 	;;
 stop)	log_daemon_msg "Stopping arteranos server" "arteranos"
-        killproc -p $PIDFILE $DAEMON
+        killall -u arteranos
         RETVAL=$?
         [ $RETVAL -eq 0 ] && [ -e "$PIDFILE" ] && rm -f $PIDFILE
         log_end_msg $RETVAL
