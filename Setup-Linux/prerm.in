@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+
+action="$1"
+
+update-rc.d -f arteranos remove >/dev/null

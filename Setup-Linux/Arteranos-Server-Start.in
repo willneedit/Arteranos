@@ -2,4 +2,4 @@
 
 [ "$(id -u)" -eq "0" ] || exit 100
 
-su -s /bin/bash -c @MainExePath@ arteranos
+su -s /bin/bash -c "@MainExePath@ $*" arteranos
