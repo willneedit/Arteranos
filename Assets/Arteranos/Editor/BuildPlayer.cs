@@ -26,12 +26,16 @@ namespace Arteranos.Editor
 
     public class BuildPlayers
     {
-        private const string KUBO_EXECUTABLE_ROOT = "https://github.com/ipfs/kubo/releases/download/v0.32.0/kubo_v0.32.0";
+        private const string KUBO_VERSION = "v0.32.0";
+
+        private static readonly string KUBO_EXECUTABLE_ROOT = $"https://github.com/ipfs/kubo/releases/download/{KUBO_VERSION}/kubo_{KUBO_VERSION}";
         private const string KUBO_ARCH_WIN64 = "windows-amd64";
         private const string KUBO_ARCH_LINUX64 = "linux-amd64";
 
         // public static string appName = Application.productName;
         public static readonly string appName = "Arteranos";
+
+        public static Core.Version version { get; private set; } = null;
 
         public static void GetProjectGitVersion()
         {
@@ -51,13 +55,14 @@ namespace Arteranos.Editor
 
             Debug.Log($"Git says: {data}");
 
-            Core.Version version = new();
 
             string[] parts = data.Split('-');
 
+            version = Core.Version.Parse(parts[0][1..]);
+
             version.Hash = parts[^1][1..^1];     // Remove the 'g' before the commit hash and the LF
             version.B = parts[^2];
-            version.MMP = parts[0][1..];          // Remove the 'v' before the version
+            version.MMP = $"{version.Major}.{version.Minor}.{version.Patch}";
             version.MMPB = $"{version.MMP}.{version.B}";
 
             if(parts.Length > 3)
@@ -118,24 +123,21 @@ public static class _dummy
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon (Windows)", false, 90)]
+        [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon (Windows + Linux)", false, 90)]
         public static void RetrieveIPFSDaemon()
             => RetrieveIPFSDaemon(false);
 
         public static void RetrieveIPFSDaemon(bool silent)
         {
-            EditorCoroutineUtility.StartCoroutineOwnerless(AcquireIPFSWinExeCoroutine(silent));
+            IEnumerator AquireIPFSExe(bool silent)
+            {
+                yield return AcquireIPFSWinExeCoroutine(silent);
+
+                yield return AcquireIPFSLinuxExeCoroutine(silent);
+            }
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(AquireIPFSExe(silent));
         }
-
-        [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon (Linux)", false, 91)]
-        public static void RetrieveLinuxIPFSDaemon()
-            => RetrieveLinuxIPFSDaemon(false);
-
-        public static void RetrieveLinuxIPFSDaemon(bool silent)
-        {
-            EditorCoroutineUtility.StartCoroutineOwnerless(AcquireIPFSLinuxExeCoroutine(silent));
-        }
-
 
         [MenuItem("Arteranos/Build/Update version and platform", false, 101)]
         public static void SetVersion()
@@ -186,15 +188,27 @@ public static class _dummy
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
         }
 
-        [MenuItem("Arteranos/Build Installation Package", false, 80)]
-        public static void BuildInstallationPackage()
+        [MenuItem("Arteranos/Build Installation Package (Windows)", false, 80)]
+        public static void BuildWinInstallationPackage()
         {
             static IEnumerator SingleTask()
             {
                 // Build Package wipes the build/ directory, and builds
                 // the version files itself.
                 yield return AcquireIPFSWinExeCoroutine(true);
-                yield return BuildInstallationPackageCoroutine();
+                yield return BuildWinInstallationPackageCoroutine();
+            }
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
+        }
+
+        [MenuItem("Arteranos/Build Installation Package (Linux)", false, 81)]
+        public static void BuildLinuxInstallationPackage()
+        {
+            static IEnumerator SingleTask()
+            {
+                yield return AcquireIPFSLinuxExeCoroutine(true);
+                yield return BuildDebianPackageCoroutine();
             }
 
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
@@ -319,19 +333,12 @@ public static class _dummy
 
         private static IEnumerator BuildWin64Coroutine()
         {
-            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
-            EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
-            EditorUserBuildSettings.SetBuildLocation(BuildTarget.StandaloneWindows64, "build/Win64/");
-
             BuildPlayerOptions bpo = new()
             {
                 scenes = GetSceneNames(),
                 locationPathName = $"build/Win64/{appName}.exe",
                 target = BuildTarget.StandaloneWindows64,
                 subtarget = (int)StandaloneBuildSubtarget.Player,
-
-                extraScriptingDefines = new string[0],
-                options = BuildOptions.CleanBuildCache
             };
 
             yield return null;
@@ -341,19 +348,12 @@ public static class _dummy
 
         private static IEnumerator BuildWin64DSCoroutine()
         {
-            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
-            EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Server;
-            EditorUserBuildSettings.SetBuildLocation(BuildTarget.StandaloneWindows64, "build/Win64-Server/");
-
             BuildPlayerOptions bpo = new()
             {
                 scenes = GetSceneNames(),
                 locationPathName = $"build/Win64-Server/{appName}-Server.exe",
                 target = BuildTarget.StandaloneWindows64,
                 subtarget = (int)StandaloneBuildSubtarget.Server,
-
-                extraScriptingDefines = new[] { "UNITY_SERVER" },
-                options = BuildOptions.CleanBuildCache
             };
 
             yield return null;
@@ -365,10 +365,6 @@ public static class _dummy
         {
             const string buildTargetRoot = "build/Linux64-Server";
 
-            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneLinux64);
-            EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Server;
-            EditorUserBuildSettings.SetBuildLocation(BuildTarget.StandaloneWindows64, $"{buildTargetRoot}/");
-
             if(!Directory.Exists(buildTargetRoot)) Directory.CreateDirectory(buildTargetRoot);
             if (!File.Exists($"{buildTargetRoot}/ipfs")) File.Copy("ipfs", $"{buildTargetRoot}/ipfs");
 
@@ -378,9 +374,6 @@ public static class _dummy
                 locationPathName = $"{buildTargetRoot}/{appName}-Server",
                 target = BuildTarget.StandaloneLinux64,
                 subtarget = (int)StandaloneBuildSubtarget.Server,
-
-                extraScriptingDefines = new[] { "UNITY_SERVER" },
-                options = BuildOptions.CleanBuildCache
             };
 
             yield return null;
@@ -388,30 +381,64 @@ public static class _dummy
             CommenceBuild(bpo);
         }
 
-        public static IEnumerator BuildInstallationPackageCoroutine()
+        private static IEnumerator Execute(string command, string argline, string cwd = "build")
         {
-            IEnumerator Execute(string command, string argline)
+            ProcessStartInfo psi = new()
             {
-                ProcessStartInfo psi = new()
+                FileName = command,
+                Arguments = argline,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                WorkingDirectory = cwd,
+                CreateNoWindow = true,
+            };
+
+            using Process process = Process.Start(psi);
+            using StreamReader reader = process.StandardOutput;
+
+            process.WaitForExit();
+            string data = reader.ReadToEnd();
+            Debug.Log(data);
+
+            yield return null;
+        }
+
+        public static IEnumerator BuildDebianPackageCoroutine()
+        {
+            int progressId = Progress.Start("Building...");
+
+            try
+            {
+                GetProjectGitVersion();
+
+                if (true)
                 {
-                    FileName = command,
-                    Arguments = argline,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    WorkingDirectory = "build",
-                    CreateNoWindow = true,
-                };
+                    if (Directory.Exists("build")) Directory.Delete("build", true);
 
-                using Process process = Process.Start(psi);
-                using StreamReader reader = process.StandardOutput;
+                    Progress.Report(progressId, 0.40f, "Build Linux Dedicated Server");
 
-                process.WaitForExit();
-                string data = reader.ReadToEnd();
-                Debug.Log(data);
+                    yield return BuildLinux64DSCoroutine();
 
-                yield return null;
+                }
+
+                Progress.Report(progressId, 0.40f, "Creating Debian Package");
+
+                string systemroot = Environment.GetEnvironmentVariable("SystemRoot");
+
+                yield return Execute($"{systemroot}\\system32\\cmd.exe", "/c build.bat" + $" {version.Major} {version.Minor} {version.Patch}", "Setup-Linux");
+
+                Debug.Log("Finished.");
+
+            }
+            finally
+            {
+                Progress.Remove(progressId);
             }
 
+        }
+
+        public static IEnumerator BuildWinInstallationPackageCoroutine()
+        {
             IEnumerator BuildSetup()
             {
                 string wixroot = Environment.GetEnvironmentVariable("wix");
@@ -500,6 +527,17 @@ public static class _dummy
         }
         private static void CommenceBuild(BuildPlayerOptions bpo)
         {
+            bpo.options = BuildOptions.CleanBuildCache;
+            bpo.extraScriptingDefines =
+                bpo.subtarget == (int)StandaloneBuildSubtarget.Server
+                ? new[] { "UNITY_SERVER" }
+                : new string[0];
+
+            string buildLocation = Path.GetDirectoryName(bpo.locationPathName);
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, bpo.target);
+            EditorUserBuildSettings.standaloneBuildSubtarget = (StandaloneBuildSubtarget)bpo.subtarget;
+            EditorUserBuildSettings.SetBuildLocation(BuildTarget.StandaloneWindows64, $"{buildLocation}/");
+
             BuildReport report = BuildPipeline.BuildPlayer(bpo);
             BuildSummary summary = report.summary;
 
