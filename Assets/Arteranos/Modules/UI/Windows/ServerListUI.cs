@@ -18,8 +18,10 @@ namespace Arteranos.UI
     public class ServerListUI : ActionPage
     {
 
-        public RectTransform lvc_ServerList;
-        public Button btn_Reload;
+        [SerializeField] private RectTransform lvc_ServerList;
+        [SerializeField] private Button btn_Reload;
+        [SerializeField] private GameObject grp_ServerList;
+        [SerializeField] private GameObject grp_NoServersNotice;
 
         private Client cs = null;
 
@@ -30,6 +32,10 @@ namespace Arteranos.UI
             base.Awake();
 
             btn_Reload.onClick.AddListener(OnReloadClicked);
+
+            grp_ServerList.SetActive(false);
+            btn_Reload.interactable = false;
+            grp_NoServersNotice.SetActive(true);
         }
 
         protected override void Start()
@@ -39,21 +45,32 @@ namespace Arteranos.UI
             IEnumerator PopulateCoroutine()
             {
                 yield return null;
+                bool hasServers = false;
 
                 cs = G.Client;
 
                 // Put these servers in this list in front
                 foreach (string PeerIDString in cs.ServerList)
+                {
                     ServerList[PeerIDString] = ServerListItem.New(lvc_ServerList.transform, PeerIDString);
+                    hasServers = true;
+                }
 
                 foreach (ServerInfo si in ServerInfo.Dump())
                 {
                     string PeerIDString = si.PeerID.ToString();
                     if (!ServerList.ContainsKey(PeerIDString))
+                    {
                         ServerList[PeerIDString] = ServerListItem.New(lvc_ServerList.transform, PeerIDString);
+                        hasServers = true;
+                    }
 
                     yield return null;
                 }
+
+                grp_ServerList.SetActive(hasServers);
+                btn_Reload.interactable = hasServers;
+                grp_NoServersNotice.SetActive(!hasServers);
             }
 
             StartCoroutine(PopulateCoroutine());

@@ -540,10 +540,10 @@ namespace Arteranos.Services
         {
             MultiHash SenderPeerID = message.Sender.Id;
 
-#if !UNITY_EDITOR
+//#if !UNITY_EDITOR
             // No self-gratification.
             if (SenderPeerID == self.Id) return;
-#endif
+//#endif
 
             try
             {
