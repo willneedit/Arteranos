@@ -92,12 +92,20 @@ namespace Arteranos.Core
                     string[] parts = uidlist.Split(":");
                     G.CommandLineOptions.AddServerAdmins = parts.ToList();
                 }
+
+                if(GetCmdArg("--set-server-name", out string newservername))
+                    G.CommandLineOptions.NewServerName = newservername;
             }
 
             G.ServerUsers = ServerUserBase.Load();
 
+            if(G.CommandLineOptions.NewServerName != null)
+            {
+                G.Server.Name = G.CommandLineOptions.NewServerName;
+                G.Server.Save();
+            }
 
-            if(CommandLine.PlainArgs.Count > 0)
+            if (CommandLine.PlainArgs.Count > 0)
             {
                 // arteranos:/[<PeerID>]/[<WorldCid>]
 

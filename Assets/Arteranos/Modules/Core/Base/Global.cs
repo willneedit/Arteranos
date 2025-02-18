@@ -37,6 +37,7 @@ namespace Arteranos
         {
             public bool ClearServerUserBase { get; set; } = false;
             public List<string> AddServerAdmins { get; set; } = new();
+            public string NewServerName { get; set; } = null;
         }
 
         public static IWorldEditorData WorldEditorData { get; set; }

@@ -64,6 +64,7 @@ namespace Arteranos.Services
                 while (!t.IsCompleted) yield return null;
                 yield return new WaitForSeconds(5);
                 Debug.Log($"Server is running, launch argument is: arteranos://{G.IPFSService.Self.Id}/");
+                Debug.Log($"Server Name : {G.Server.Name}");
             }
 
             enabled = false;
