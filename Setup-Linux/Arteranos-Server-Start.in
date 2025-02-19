@@ -2,4 +2,8 @@
 
 [ "$(id -u)" -eq "0" ] || exit 100
 
-su -s /bin/bash -c "@MainExePath@ $*" arteranos
+logfile=/var/arteranos/Server.log
+
+[ -f $logfile ] && mv $logfile $logfile.old
+
+su -s /bin/bash -c "@MainExePath@ $* >$logfile 2>&1" arteranos
