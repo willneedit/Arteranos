@@ -50,8 +50,8 @@ namespace Arteranos.Services
 
             if (DesiredWorldCid != null)
                 ServerSearcher.InitiateServerTransition(DesiredWorldCid);
-            else if (TargetedPeerID != null)
-                yield return G.ConnectionManager.ConnectToServer(TargetedPeerID, null);
+            else if (DesiredPeerID != null)
+                yield return G.ConnectionManager.ConnectToServer(DesiredPeerID, null);
             else
                 yield return TransitionProgress.TransitionTo(null);
 

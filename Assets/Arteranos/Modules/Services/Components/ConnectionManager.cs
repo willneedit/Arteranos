@@ -82,9 +82,21 @@ namespace Arteranos.Services
             // In any case, go into the transitional phase.
             yield return TransitionProgress.TransitionFrom();
 
-            G.TransitionProgress?.OnProgressChanged(0.10f, "Searching server");
+            // Server may be known, e.g. from commandline or previous sessions, but
+            // may not announced itself, or went offline. Wait for its connectivity.
+            int retrySeconds;
+            for (retrySeconds = 300; retrySeconds > 0; retrySeconds--)
+            {
+                G.TransitionProgress?.OnProgressChanged(0.10f, $"Searching server ({retrySeconds}s left)");
 
-            if(!si.IPAddresses.Any())
+                if (si.IPAddresses != null && si.IPAddresses.Any()) break;
+
+                yield return new WaitForSeconds(1);
+                si = new(si.PeerID);
+            }
+
+            // Well, we've tried...
+            if (retrySeconds <= 0)
             {
                 ConnectionResponse(false, "Server reports no IP address");
                 yield return TransitionProgress.TransitionTo(null);

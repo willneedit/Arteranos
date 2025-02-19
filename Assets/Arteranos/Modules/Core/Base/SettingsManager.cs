@@ -24,7 +24,7 @@ namespace Arteranos.Core
 
         private CommandLine Command;
 
-        protected static MultiHash TargetedPeerID = null;
+        protected static MultiHash DesiredPeerID = null;
         protected static Cid DesiredWorldCid = null;
 
         public static bool StartupTrigger { get; private set; } = false;
@@ -107,15 +107,15 @@ namespace Arteranos.Core
 
             if (CommandLine.PlainArgs.Count > 0)
             {
-                // arteranos:/[<PeerID>]/[<WorldCid>]
+                // arteranos://[<PeerID>]/[<WorldCid>]
 
                 string[] parts = CommandLine.PlainArgs[0].Split('/');
-                if(parts.Length == 2 && parts[0] == "arteranos:")
+                if(parts.Length >= 4 && parts[0] == "arteranos:")
                 {
-                    TargetedPeerID = string.IsNullOrEmpty(parts[1]) ? parts[1] : null;
-                    DesiredWorldCid = (string.IsNullOrEmpty(parts[2]) ? parts[2] : null);
+                    DesiredPeerID = !string.IsNullOrEmpty(parts[2]) ? parts[2] : null;
+                    DesiredWorldCid = (!string.IsNullOrEmpty(parts[3]) ? parts[3] : null);
 
-                    if(TargetedPeerID != null || DesiredWorldCid != null) 
+                    if(DesiredPeerID != null || DesiredWorldCid != null) 
                         StartupTrigger = true;
                 }
             }
