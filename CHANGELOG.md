@@ -1,3 +1,48 @@
+# Version 2.9.0 (preview)
+
+## New features
+- **World Editor**
+  - Uses Altspace-like...
+    - ...primitives (more than Altspace offered)
+    - ...kits (creation **AND** usage)
+    - ...world templates
+  - ... glTF objects
+  - 'Tool' objects and components like...
+    - ... lights
+    - ... spawn points
+    - ... **in-world teleport markers and buttons**
+    - ... Object dispenser (Object which spawn other objects click)
+  - **Object hierarchy**
+  - **Undo/Redo**
+  - **Cut** (while deleting objects) **& Paste**
+  - Keyboard & Mouse object movement in the desktop mode
+  - Easier screenshot on world save
+  - ...
+- Linux Dedicated Server
+  - Much lower system requirements - upcycle your old potato :)
+- In-app file dialog
+  - Easier way to use on-disk resources, like pictures
+
+## Fixes and improvements
+
+- **Network overhaul**
+  - UDP instead of TCP - more resilient
+  - **NAT/Firewall hole punching**
+    - Fussing with firewall rules, port forwarding or your DSL router? Maybe not as much anymore.
+- **UI rework**
+  - Dark theme (easier on your eyes in VR)
+  - Better control flow (using ESC/A button to go back, everytime)
+  - ...
+- IPFS backend moved to external process
+  - Maintenance is outsourced
+  - Better implementation, independent to the client itself - safer from stutter
+- Installation packages improvements
+  - Windows: Firewall exceptions for Arteranos and its embedded IPFS daemon
+  - Linux: Debian packages (new)
+- Grabbable/Kinematics synchronizastion
+- Avatar pose propagaion
+- ...
+
 # Version 2.0.0
 
 ## New Features

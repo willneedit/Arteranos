@@ -24,9 +24,6 @@ namespace Arteranos.Core
 
         private CommandLine Command;
 
-        protected static MultiHash DesiredPeerID = null;
-        protected static Cid DesiredWorldCid = null;
-
         public static bool StartupTrigger { get; private set; } = false;
 
         public static ServerJSON CurrentServer { get; set; } = null;
@@ -112,10 +109,10 @@ namespace Arteranos.Core
                 string[] parts = CommandLine.PlainArgs[0].Split('/');
                 if(parts.Length >= 4 && parts[0] == "arteranos:")
                 {
-                    DesiredPeerID = !string.IsNullOrEmpty(parts[2]) ? parts[2] : null;
-                    DesiredWorldCid = (!string.IsNullOrEmpty(parts[3]) ? parts[3] : null);
+                    G.CommandLineOptions.DesiredPeerID = !string.IsNullOrEmpty(parts[2]) ? parts[2] : null;
+                    G.CommandLineOptions.DesiredWorldCid = (!string.IsNullOrEmpty(parts[3]) ? parts[3] : null);
 
-                    if(DesiredPeerID != null || DesiredWorldCid != null) 
+                    if(G.CommandLineOptions.DesiredPeerID != null || G.CommandLineOptions.DesiredWorldCid != null) 
                         StartupTrigger = true;
                 }
             }

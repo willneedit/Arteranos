@@ -38,6 +38,8 @@ namespace Arteranos
             public bool ClearServerUserBase { get; set; } = false;
             public List<string> AddServerAdmins { get; set; } = new();
             public string NewServerName { get; set; } = null;
+            public MultiHash DesiredPeerID { get; set; } = null;
+            public Cid DesiredWorldCid { get; set; } = null;
         }
 
         public static IWorldEditorData WorldEditorData { get; set; }

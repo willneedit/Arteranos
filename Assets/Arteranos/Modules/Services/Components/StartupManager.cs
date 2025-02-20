@@ -48,10 +48,10 @@ namespace Arteranos.Services
             // First, wait for IPFS to come up.
             yield return new WaitUntil(() => G.IPFSService.Ipfs != null);
 
-            if (DesiredWorldCid != null)
-                ServerSearcher.InitiateServerTransition(DesiredWorldCid);
-            else if (DesiredPeerID != null)
-                yield return G.ConnectionManager.ConnectToServer(DesiredPeerID, null);
+            if (G.CommandLineOptions.DesiredWorldCid != null)
+                ServerSearcher.InitiateServerTransition(G.CommandLineOptions.DesiredWorldCid);
+            else if (G.CommandLineOptions.DesiredPeerID != null)
+                yield return G.ConnectionManager.ConnectToServer(G.CommandLineOptions.DesiredPeerID, null);
             else
                 yield return TransitionProgress.TransitionTo(null);
 

@@ -186,11 +186,11 @@ namespace Arteranos.UI
             HUDButtons[btn_dismisscd].Button.gameObject.SetActive(cameraCalled);
             HUDButtons[btn_editworld].Button.gameObject.SetActive(Utils.IsAbleTo(Social.UserCapabilities.CanEditWorld, null)
 
-#if !UNITY_EDITOR
+//#if !UNITY_EDITOR
                 // Attemping to edit a world without a template.
                 // In the Unity Editor, it's just for fiddling/testing.
                 && G.World.Cid != null
-#endif
+//#endif
                 );
         }
 
