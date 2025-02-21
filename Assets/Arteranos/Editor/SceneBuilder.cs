@@ -49,7 +49,6 @@ namespace Arteranos.Editor
 
             metadata.AuthorID = new(client.UserSignPublicKey, client.Me.Nickname);
             metadata.ContentRating = client.ContentFilterPreferences;
-            metadata.RequiresPassword = false;
 
             SceneBuilderGUI window = GetWindow<SceneBuilderGUI>("World building");
             window.Show();

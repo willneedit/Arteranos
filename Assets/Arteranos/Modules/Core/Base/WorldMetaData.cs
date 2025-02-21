@@ -20,7 +20,6 @@ namespace Arteranos.Core
         public string WorldDescription = string.Empty;
         public UserID AuthorID = null;
         public ServerPermissions ContentRating = null;
-        public bool RequiresPassword = false;
         public DateTime Created = DateTime.MinValue;
 
         public void SaveDefaults()

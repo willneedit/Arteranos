@@ -24,9 +24,13 @@ namespace Arteranos.Core
         public string Tag = "";         // Optional tag
         public string Full = "unknown"; // Full version string
 
+        [JsonIgnore]
         public int Major { get; private set; } = 0;
+        [JsonIgnore]
         public int Minor { get; private set; } = 0;
+        [JsonIgnore]
         public int Patch { get; private set; } = 0;
+        [JsonIgnore]
         public int Build { get; private set; } = 0;
 
         public static Version Load()
