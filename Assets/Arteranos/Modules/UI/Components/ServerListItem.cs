@@ -68,7 +68,11 @@ namespace Arteranos.UI
                 // Refresh data
                 si = new(PeerID);
 
-                btn_Visit.gameObject.SetActive(si.IsOnline);
+                TMP_Text btn_VisitText = btn_Visit.transform.GetChild(0).GetComponent<TMP_Text>(); ;
+                btn_VisitText.text = !si.IsOnline
+                    ? "Try to\nvisit"
+                    : "Visit";
+                btn_Visit.gameObject.SetActive(true); //  (si.IsOnline);
 
                 if (!si.IsOnline)
                     lbl_Caption.text = $"{si.Name} (Offline)";

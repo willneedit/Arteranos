@@ -63,6 +63,9 @@ namespace Arteranos.Core
         [ProtoMember(17)]
         public DateTime LastSeen; // Local only: Time last seen online
 
+        [ProtoMember(18)]
+        public string LastUsedIPAddress; // Client only: IP address to connect to this server
+
         public void Serialize(Stream stream)
             => Serializer.Serialize(stream, this);
 

@@ -75,6 +75,13 @@ namespace Arteranos.Core
         }
 
         public int ServerPort => DescriptionStruct?.ServerPort ?? 0;
+        public string LastUsedIPAddress => DescriptionStruct?.LastUsedIPAddress;
+        public void UpdateLastUsedIPAddress(IPAddress addr)
+        {
+            DescriptionStruct.LastUsedIPAddress = addr.ToString();
+            DescriptionStruct._DBInsert(DescriptionStruct.PeerID);
+        }
+
         public string SPKDBKey => DescriptionStruct.PeerID;
         public ServerPermissions Permissions => DescriptionStruct?.Permissions ?? new(true);
         public DateTime LastUpdated => DescriptionStruct?.LastModified ?? DateTime.MinValue;

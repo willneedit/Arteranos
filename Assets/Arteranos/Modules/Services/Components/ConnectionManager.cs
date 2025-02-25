@@ -57,6 +57,43 @@ namespace Arteranos.Services
 
         private IEnumerator CommenceConnection(ServerInfo si, Action<bool> callback)
         {
+            IEnumerator TryConnectLoop(IEnumerable<IPAddress> addrs)
+            {
+                // Get the scheme as we use it for outgoing connections as
+                // same as we use it ourselves as a server.
+                // Maybe to use the scheme same as with the port in the ServerDescription...?
+                string scheme = GetTransportScheme();
+
+                // Save it for now even before the connection negotiation and authentication
+                // During the remainder of the ongoing frame, we have to have the PeerID available --
+                // the complete login sequence can be commenced before WaitForEndOfFrame() let us continue.
+                G.NetworkStatus.RemotePeerId = si.PeerID;
+
+                int i = 0;
+                foreach (IPAddress addr in addrs)
+                {
+                    G.TransitionProgress?.OnProgressChanged(0.50f, $"Connecting ({++i})...");
+
+                    G.NetworkStatus.OnClientConnectionResponse = null;
+
+                    Uri connectionUri = addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
+                        ? new($"{scheme}://[{addr}]:{si.ServerPort}")
+                        : new($"{scheme}://{addr}:{si.ServerPort}");
+
+                    G.NetworkStatus.StartClient(connectionUri);
+
+                    // https://www.youtube.com/watch?v=dQw4w9WgXcQ
+                    while (G.NetworkStatus.IsClientConnecting) yield return new WaitForEndOfFrame();
+
+                    if (G.NetworkStatus.IsClientConnected)
+                    {
+                        // Success! Remember where we got so far.
+                        si.UpdateLastUsedIPAddress(addr);
+                        break;
+                    }
+                }
+            }
+
             Transport transport = Transport.active;
 
             if (transport is INatPunchAddon ina)
@@ -82,55 +119,40 @@ namespace Arteranos.Services
             // In any case, go into the transitional phase.
             yield return TransitionProgress.TransitionFrom();
 
-            // Server may be known, e.g. from commandline or previous sessions, but
-            // may not announced itself, or went offline. Wait for its connectivity.
-            int retrySeconds;
-            for (retrySeconds = 300; retrySeconds > 0; retrySeconds--)
+            // Attempt quick connect with its last successful connection.
+            if(si.LastUsedIPAddress != null)
             {
-                G.TransitionProgress?.OnProgressChanged(0.10f, $"Searching server ({retrySeconds}s left)");
+                List<IPAddress> addrs = new() { IPAddress.Parse(si.LastUsedIPAddress) };
 
-                if (si.IPAddresses != null && si.IPAddresses.Any()) break;
-
-                yield return new WaitForSeconds(1);
-                si = new(si.PeerID);
+                yield return TryConnectLoop(addrs);
             }
 
-            // Well, we've tried...
-            if (retrySeconds <= 0)
+            // If wi didn't connect so far (e.g. server changed its location from the last time)
+            // fall back with the IP addresses from the Online data
+            if(!G.NetworkStatus.IsClientConnected)
             {
-                ConnectionResponse(false, "Server reports no IP address");
-                yield return TransitionProgress.TransitionTo(null);
-                yield break;
-            }
+                // Server may be known, e.g. from commandline or previous sessions, but
+                // may not announced itself, or went offline. Wait for its connectivity.
+                int retrySeconds;
+                for (retrySeconds = 120; retrySeconds > 0; retrySeconds--)
+                {
+                    G.TransitionProgress?.OnProgressChanged(0.10f, $"Searching server ({retrySeconds}s left)");
 
-            // Get the scheme as we use it for outgoing connections as
-            // same as we use it ourselves as a server.
-            // Maybe to use the scheme same as with the port in the ServerDescription...?
-            string scheme = GetTransportScheme();
+                    if (si.IPAddresses != null && si.IPAddresses.Any()) break;
 
-            // Save it for now even before the connection negotiation and authentication
-            // During the remainder of the ongoing frame, we have to have the PeerID available --
-            // the complete login sequence can be commenced before WaitForEndOfFrame() let us continue.
-            G.NetworkStatus.RemotePeerId = si.PeerID;
+                    yield return new WaitForSeconds(1);
+                    si = new(si.PeerID);
+                }
 
-            int i = 0;
-            foreach (IPAddress addr in si.IPAddresses)
-            {
-                G.TransitionProgress?.OnProgressChanged(0.50f, $"Connecting ({++i})...");
+                // Well, we've tried...
+                if (retrySeconds <= 0)
+                {
+                    ConnectionResponse(false, "Server reports no IP address");
+                    yield return TransitionProgress.TransitionTo(null);
+                    yield break;
+                }
 
-                G.NetworkStatus.OnClientConnectionResponse = null;
-
-                Uri connectionUri = addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6
-                    ? new($"{scheme}://[{addr}]:{si.ServerPort}")
-                    : new($"{scheme}://{addr}:{si.ServerPort}");
-
-                G.NetworkStatus.StartClient(connectionUri);
-
-                // https://www.youtube.com/watch?v=dQw4w9WgXcQ
-                while (G.NetworkStatus.IsClientConnecting) yield return new WaitForEndOfFrame();
-
-                if(G.NetworkStatus.IsClientConnected)
-                    break;
+                yield return TryConnectLoop(si.IPAddresses);
             }
 
             // Client failed to connect. Maybe an invalid IP, or a misconfigured firewall.

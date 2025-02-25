@@ -60,6 +60,8 @@ namespace Arteranos.Core
             using (MemoryStream ms = new())
             {
                 signature = null;
+                LastUsedIPAddress = null;
+
                 Serializer.Serialize(ms, this);
                 ms.Position = 0;
                 serverPrivateKey.Sign(ms.ToArray(), out signature);
@@ -73,15 +75,20 @@ namespace Arteranos.Core
         {
             ServerDescription d = Serializer.Deserialize<ServerDescription>(stream);
             byte[] signature = d.signature;
+            string tmp = d.LastUsedIPAddress;
             using (MemoryStream ms = new())
             {
+                d.LastUsedIPAddress = null;
                 d.signature = null;
+
                 Serializer.Serialize(ms, d);
                 ms.Position = 0;
                 serverPublicKey.Verify(ms.ToArray(), signature);
 
-                // Restore the signature, to re-serialize without PeerID's private key.
+                // Restore the signature and IP address,
+                // to re-serialize without PeerID's private key.
                 d.signature = signature;
+                d.LastUsedIPAddress = tmp;
             }
 
             return d;
