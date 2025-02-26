@@ -99,7 +99,8 @@ namespace Arteranos.UI
             btn_Visit.gameObject.SetActive(G.NetworkStatus.GetOnlineLevel() != OnlineLevel.Host);
             btn_ChangeWorld.gameObject.SetActive(
                 Utils.IsAbleTo(Social.UserCapabilities.CanInitiateWorldTransition, null)
-                && AllowedForThis);
+                && AllowedForThis
+                && !G.World.ChangeInProgress);
 
             btn_Add.gameObject.SetActive(!World.IsFavourited);
             btn_Delete.gameObject.SetActive(World.IsFavourited);

@@ -30,6 +30,7 @@ namespace Arteranos.Core
     [ProtoInclude(65540, typeof(CTSMessage))]
     [ProtoInclude(65541, typeof(CTSServerConfig))]
     [ProtoInclude(65542, typeof(CTSWorldObjectChange))]
+    [ProtoInclude(65543, typeof(STCStartOfWorldChange))]
 
     public class CTSPacket
     {
@@ -108,6 +109,13 @@ namespace Arteranos.Core
     {
         [ProtoMember(1)]
         public byte[] changerequest; // Arteranos.WorldEdit.WorldChange, serialized
+    }
+
+    // S: Server announces its world change, right before loading
+    [ProtoContract]
+    public class STCStartOfWorldChange : CTSPacket
+    {
+        // Self explanatory, empty message.
     }
 
     public class CTSObjectSpawn

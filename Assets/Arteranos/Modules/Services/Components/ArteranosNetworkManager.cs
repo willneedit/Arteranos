@@ -470,13 +470,25 @@ namespace Arteranos.Services
             }
         }
 
+        private IDialogUI currentDialog = null;
         private IEnumerator ShowDialogCoroutine(string message)
         {
             yield return null;
 
-            IDialogUI dialog = Factory.NewDialog();
-            dialog.Text = message;
-            dialog.Buttons = new string[] { "OK" };
+            // First, dismiss pending/stale dialogs
+            if(currentDialog != null)
+            {
+                currentDialog.Close();
+                currentDialog = null;
+            }
+
+            // Put up if there's something to say
+            if(message != null)
+            {
+                currentDialog = Factory.NewDialog();
+                currentDialog.Text = message;
+                currentDialog.Buttons = new string[] { "OK" };
+            }
         }
 
         private void EmitCTSPacket(CTSPacket packet, IAvatarBrain to)
@@ -552,8 +564,17 @@ namespace Arteranos.Services
                 case STCUserInfo userInfo: _ = ClientQueryUserState(userInfo); break;
                 case CTSServerConfig serverConfig: ClientGotServerConfiguration(serverConfig); break;
                 case CTSWorldObjectChange wc: ClientGotWorldObjectChange(wc); break;
+                case STCStartOfWorldChange: ClientAnnounceStartOfWorldTransition(); break;
                 default: throw new NotImplementedException();
             }
+        }
+
+        #endregion
+        // ---------------------------------------------------------------
+        #region Pre World transition (all)
+        private void ClientAnnounceStartOfWorldTransition()
+        {
+            TransitionProgress.InitPreWorldTransition();
         }
 
         #endregion
@@ -577,6 +598,12 @@ namespace Arteranos.Services
         private IEnumerator MakeServerWorldTransition(UserID invoker, CTSPWorldChangeAnnouncement wca)
         {
             wca.invoker = invoker;
+
+            if (G.World.ChangeInProgress)
+            {
+                Debug.Log($"[Server] {(string)wca.invoker} wants to change the world, but there's already a change in progress.");
+                yield break;
+            }
 
             Debug.Log($"[Server] {(string)wca.invoker} wants to change the world to {wca.WorldRootCid}");
 
@@ -624,6 +651,14 @@ namespace Arteranos.Services
                     }
                 }
             }
+
+            // Put the message on the wall to announce the world transition.
+            // Block all clients to hit 'Change World' until they hit TransitionTo(),
+            // change server or go offline.
+            EmitToClientCTSPacket(new STCStartOfWorldChange()
+            {
+                invoker = invoker,
+            }, null);
 
             yield return TransitionProgress.TransitionFrom();
 

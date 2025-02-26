@@ -24,6 +24,7 @@ namespace Arteranos
             public World World { get; set; }
             public Cid Cid => World?.RootCid;
             public string Name => World?.WorldInfo.Result.WorldName ?? "Somewhere";
+            public bool ChangeInProgress { get; set; } = false;
         }
 
         public class DefaultAvatar_

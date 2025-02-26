@@ -13,12 +13,29 @@ using Arteranos.Core.Managed;
 using AssetBundle = Arteranos.Core.Managed.AssetBundle;
 using Arteranos.Core;
 using System;
+using Arteranos.UI;
 
 namespace Arteranos.Services
 {
     public static class TransitionProgress
     {
         public static event Action OnWorldFinished = null;
+
+        public static IDialogUI changeWorldDialog = null;
+
+        public static void InitPreWorldTransition()
+        {
+            // Only pure clients may be unsuspecting; offline or hosts are the instigators
+            // themselves....
+            if(G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Client)
+            {
+                changeWorldDialog = Factory.NewDialog();
+                changeWorldDialog.Text = "Changing world...";
+                changeWorldDialog.Buttons = new string[] { "OK" };
+            }
+
+            G.World.ChangeInProgress = true;
+        }
 
         public static IEnumerator TransitionFrom()
         {
@@ -70,6 +87,15 @@ namespace Arteranos.Services
                 // Reset UI flow
                 ActionRegistry.Drop();
             }
+
+            // However it is, we've arrived.
+            if(changeWorldDialog != null)
+            {
+                changeWorldDialog.Close();
+                changeWorldDialog = null;
+            }
+
+            G.World.ChangeInProgress = false;
 
             G.XRVisualConfigurator.StartFading(1.0f);
             yield return new WaitForSeconds(0.5f);
