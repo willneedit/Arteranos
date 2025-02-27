@@ -1,4 +1,4 @@
-# Version 2.9.0 (preview)
+# Version 2.9.0
 
 ## New features
 - **World Editor**
@@ -41,7 +41,9 @@
   - Linux: Debian packages (new)
 - Grabbable/Kinematics synchronizastion
 - Avatar pose propagaion
-- ...
+- Quick connect: Use last known good connection to establish a new connection
+- Quick connect allows to try connecting to a server with uncertain online state
+- Other small fixes and quality-of-life improvements
 
 # Version 2.0.0
 
