@@ -1,6 +1,8 @@
 # Traveling
 
-You can travel to world and servers with several methods, all with the "travel" pane in the System menu. ![Screenshot 2024-04-23 132748](https://github.com/willneedit/Arteranos/assets/13902647/86cef0a4-8d22-4138-979e-0a9d21f2bd47)
+You can travel to world and servers with several methods, all with the "travel" pane in the System menu. 
+
+![Screenshot 2024-04-23 132748](https://github.com/willneedit/Arteranos/assets/13902647/86cef0a4-8d22-4138-979e-0a9d21f2bd47)
 
 ### Travel to world...
 
