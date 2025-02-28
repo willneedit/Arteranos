@@ -1,10 +1,10 @@
 # Uploading content
 
-Uploading content, be it avatars, 2D icons or world ZIP file can be from the following sources:
+Content to be uploaded may be...
+* Icons
+* Avatars (directly from the web, like https://models.readyplayer.me/65abbb0520e510f61aa76dce.glb?pose=T )
+* World template Zip files
+* Object collection Zip files
+* Object glTF files
 
-* A web URL (e.g. https://example.com/myIcon.jpg or https://models.readyplayer.me/65abbb0520e510f61aa76dce.glb?pose=T)
-* A file on Your PC (e.g. "C:\Users\username\Downloads\65abbb0520e510f61aa76dce.glb")
-
-Desktop mode is recommended for convenience.
-
-Copy and paste works. If it's a file on your PC, look for the file in the _file_ explorer, **right**-click, and select `Copy Path`. Then, use CTRL-V on the appropiate text field.
+There's a little file browser to help to upload your content from your PC - click "Add new" where appropiate, and select the file you want to upload for further use.

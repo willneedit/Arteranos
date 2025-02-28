@@ -1,11 +1,11 @@
 # Table of contents
 
 * [Arteranos](README.md)
-  * [Build & Installation](arteranos/build-and-installation/README.md)
-    * [System requirements](arteranos/build-and-installation/system-requirements.md)
-    * [Build requirements](arteranos/build-and-installation/build-requirements.md)
-    * [Building](arteranos/build-and-installation/building.md)
-    * [Installation](arteranos/build-and-installation/installation.md)
+  * [Quick start](arteranos/quick-start/README.md)
+    * [System requirements](arteranos/quick-start/system-requirements.md)
+    * [Build requirements](arteranos/quick-start/build-requirements.md)
+    * [Building](arteranos/quick-start/building.md)
+    * [Installation](arteranos/quick-start/installation.md)
   * [Running](arteranos/running/README.md)
     * [Modes of operation](arteranos/running/modes-of-operation.md)
     * [Personalizing](arteranos/running/personalizing/README.md)
