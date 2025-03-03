@@ -6,8 +6,8 @@
  */
 
 using ProtoBuf;
-using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Arteranos.Core
 {
@@ -15,6 +15,9 @@ namespace Arteranos.Core
     [ProtoContract]
     public class WorldAccessInfo
     {
+        // Set on changing world on server
+        // Cleared on propagating from server to visitors
+        // NOT INCLUDED in signature, because it's only between the uploader and the server
         [ProtoMember(1)]
         public string Password; // Sent from author to the server, server asks the visitors
         
@@ -22,30 +25,92 @@ namespace Arteranos.Core
         public List<UserID> BannedUsers; // Self explanatory. Overrides everthing.
 
         [ProtoMember(3)]
-        public bool Viewable;           // if false, only users listed below can view
+        public bool EveryoneCanPin;     // On creation/Updating: Everyone can favourite
 
         [ProtoMember(4)]
-        public bool FriendsCanPin;      // On creation/Updating: Friends can favourite
+        public bool EveryoneCanEdit;    // On creation/Updating: Everyone can edit
 
-        [ProtoMember(5)]
-        public bool FriendsCanEdit;     // On creation/Updating: Friends can edit
+        [ProtoMember(5)] 
+        public bool EveryoneCanView;    // On creation/Updating: Everyone can view
 
-        [ProtoMember(6)] 
-        public bool FriendsCanView;     // On creation/Updating: Friends can view
+        [ProtoMember(6)]
+        public List<UserID> UserCanAdmin; // Users who can change access rights.
 
         [ProtoMember(7)]
-        public List<UserID> UserCanPin; // Additional users who can favourite
+        public List<UserID> UserCanPin; // Users who can favourite
 
         [ProtoMember(8)]
-        public List<UserID> UserCanEdit;// Additional users who can edit
+        public List<UserID> UserCanEdit;// Users who can edit
 
         [ProtoMember(9)]
-        public List<UserID> UserCanView;// Additional users who can view;
+        public List<UserID> UserCanView;// Users who can view;
 
         [ProtoMember(10)]
-        public UserID AccessAuthor;     // Creator of this data, generally the world creator
+        public UserID AccessAuthor;     // Creator of this data, the world creator or the delegates
 
         [ProtoMember(11)]
         public byte[] Signature;        // Against AccessAuthor's signing key
+
+        [ProtoMember(12)]
+        public UserID WorldAuthor;      // The world creator.
+
+        public void Serialize(Stream stream, bool changeAuthor = false)
+        {
+            // No self lock-out, no malicious admin hijacking the author's works.
+            if (UserCanAdmin == null)
+                UserCanAdmin = new();
+
+            if(UserCanAdmin.Contains(WorldAuthor)) 
+                UserCanAdmin.Add(WorldAuthor);
+
+            if (changeAuthor)
+            {
+                string tmpPassword = Password;
+                AccessAuthor = G.Client.MeUserID;
+                Signature = null;
+                Password = null;
+
+                using (MemoryStream ms = new())
+                {
+                    Serializer.Serialize(ms, this);
+                    ms.Position = 0;
+                    Client.Sign(ms.ToArray(), out Signature);
+                }
+
+                Password = tmpPassword;
+            }
+            else if (AccessAuthor == null)
+                throw new InvalidDataException("World Access Info without Author ID");
+
+            Serializer.Serialize(stream, this);
+            stream.Flush();
+        }
+
+        public static WorldAccessInfo Deserialize(byte[] data)
+        {
+            WorldAccessInfo wai = Serializer.Deserialize<WorldAccessInfo>(new MemoryStream(data));
+
+            using (MemoryStream ms = new()) 
+            {
+                byte[] signature = wai.Signature;
+                string tmpPassword = wai.Password;
+                wai.Signature = null;
+                wai.Password = null;
+
+                Serializer.Serialize(ms, wai);
+                ms.Position = 0;
+
+                // Throw if invalid signature
+                wai.AccessAuthor.SignPublicKey.Verify(ms.ToArray(), signature);
+
+                // Throw if key is not on approved list
+                if (!wai.UserCanAdmin.Contains(wai.AccessAuthor))
+                    throw new InvalidDataException("World Access data is owned by neither the world creator nor users who can admin.");
+
+                wai.Password = tmpPassword;
+            }
+
+            return wai;
+        }
     }
 }

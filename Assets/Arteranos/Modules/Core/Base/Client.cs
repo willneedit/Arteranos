@@ -9,11 +9,9 @@ using System;
 using UnityEngine;
 
 using Newtonsoft.Json;
-using System.IO;
 using System.ComponentModel;
 using System.Collections.Generic;
 using Arteranos.Social;
-using System.Linq;
 using Arteranos.Core.Cryptography;
 using Ipfs.Cryptography.Proto;
 using Ipfs;
@@ -419,13 +417,17 @@ namespace Arteranos.Core
 
         public void PingUserPrivacyChanged() => OnUserPrivacyChanged?.Invoke(UserPrivacy);
 
-        public string GetFingerprint(string fmt = null) => CryptoHelpers.ToString(fmt, UserSignPublicKey.Serialize());
+        #endregion
+        // ---------------------------------------------------------------
+        #region Crypto operations
 
+        public string GetFingerprint(string fmt = null) => CryptoHelpers.ToString(fmt, UserSignPublicKey.Serialize());
         public static void TransmitMessage(byte[] data, PublicKey receiver, out CMSPacket messageData)
             => G.Client.CMH.TransmitMessage(data, receiver, out messageData);
-
         public static void ReceiveMessage(CMSPacket messageData, out byte[] data, out PublicKey signerPublicKey)
             => G.Client.CMH.ReceiveMessage(messageData, out data, out signerPublicKey);
+        public static void Sign(byte[] data, out byte[] signature)
+            => G.Client.CMH.Sign(data, out signature);
 
         #endregion
         // ---------------------------------------------------------------
