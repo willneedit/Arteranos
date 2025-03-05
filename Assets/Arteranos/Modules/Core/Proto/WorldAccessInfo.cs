@@ -11,9 +11,19 @@ using System.IO;
 
 namespace Arteranos.Core
 {
+    // Access levels imply capabilities of lower levels
+    public enum WorldAccessInfoLevel
+    {
+        Nothing = 0,    // Nothing at all, server would even reject latecomers
+        View,           // User can visit on an already loaded world
+        Pin,            // User can favourite (=pin) would, and load it on his own
+        Edit,           // User can edit the world's contents
+        Admin           // All of the above, and can modify the access list
+    }
+
     // Ref. #89 - World access control
     [ProtoContract]
-    public class WorldAccessInfo
+    public partial class WorldAccessInfo
     {
         // Set on changing world on server
         // Cleared on propagating from server to visitors
@@ -22,28 +32,13 @@ namespace Arteranos.Core
         public string Password; // Sent from author to the server, server asks the visitors
         
         [ProtoMember(2)]
-        public List<UserID> BannedUsers; // Self explanatory. Overrides everthing.
+        public HashSet<UserID> BannedUsers = new(); // Self explanatory. Overrides everthing.
 
         [ProtoMember(3)]
-        public bool EveryoneCanPin;     // On creation/Updating: Everyone can favourite
-
-        [ProtoMember(4)]
-        public bool EveryoneCanEdit;    // On creation/Updating: Everyone can edit
-
-        [ProtoMember(5)] 
-        public bool EveryoneCanView;    // On creation/Updating: Everyone can view
+        public WorldAccessInfoLevel DefaultLevel; // Default access level for users not on the list
 
         [ProtoMember(6)]
-        public List<UserID> UserCanAdmin; // Users who can change access rights.
-
-        [ProtoMember(7)]
-        public List<UserID> UserCanPin; // Users who can favourite
-
-        [ProtoMember(8)]
-        public List<UserID> UserCanEdit;// Users who can edit
-
-        [ProtoMember(9)]
-        public List<UserID> UserCanView;// Users who can view;
+        public Dictionary<UserID, WorldAccessInfoLevel> UserALs = new(); // Access levels for individual users
 
         [ProtoMember(10)]
         public UserID AccessAuthor;     // Creator of this data, the world creator or the delegates
@@ -56,13 +51,6 @@ namespace Arteranos.Core
 
         public void Serialize(Stream stream, bool changeAuthor = false)
         {
-            // No self lock-out, no malicious admin hijacking the author's works.
-            if (UserCanAdmin == null)
-                UserCanAdmin = new();
-
-            if(UserCanAdmin.Contains(WorldAuthor)) 
-                UserCanAdmin.Add(WorldAuthor);
-
             if (changeAuthor)
             {
                 string tmpPassword = Password;
@@ -92,6 +80,7 @@ namespace Arteranos.Core
 
             using (MemoryStream ms = new()) 
             {
+                // Password and signature itself is NOT covered by the signature.
                 byte[] signature = wai.Signature;
                 string tmpPassword = wai.Password;
                 wai.Signature = null;
@@ -103,10 +92,7 @@ namespace Arteranos.Core
                 // Throw if invalid signature
                 wai.AccessAuthor.SignPublicKey.Verify(ms.ToArray(), signature);
 
-                // Throw if key is not on approved list
-                if (!wai.UserCanAdmin.Contains(wai.AccessAuthor))
-                    throw new InvalidDataException("World Access data is owned by neither the world creator nor users who can admin.");
-
+                wai.Signature = signature;
                 wai.Password = tmpPassword;
             }
 
