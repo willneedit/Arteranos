@@ -549,10 +549,8 @@ namespace Arteranos.Services
         {
             MultiHash SenderPeerID = message.Sender.Id;
 
-//#if !UNITY_EDITOR
-            // No self-gratification.
+            // Pubsub MAY loop back the messages, but no need.
             if (SenderPeerID == self.Id) return;
-//#endif
 
             try
             {
@@ -563,11 +561,10 @@ namespace Arteranos.Services
                 {
                     if (dm.ToPeerID != self.Id.ToString())
                     {
-                        Debug.Log("Discarding a message directed to another peer");
+                        // Debug.Log("Discarding a message directed to another peer");
                         return;
                     }
-                    else
-                        Debug.Log($"Directed message accepoted: {dm.ToPeerID}");
+                    // else Debug.Log($"Directed message accepoted: {dm.ToPeerID}");
                 }
 
                 // Maybe obsolete.
