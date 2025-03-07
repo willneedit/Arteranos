@@ -99,6 +99,12 @@ namespace Arteranos.Services
             return Status.OK;
         }
 
+        public static Status RunDaemonCommand(string arguments, bool synced)
+        {
+            ProcessStartInfo psi = BuildDaemonCommand(arguments);
+            return RunDaemonCommand(psi, synced);
+        }
+
         public static Status IPFSAccessible()
         {
             // Got it earlier?

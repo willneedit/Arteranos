@@ -47,11 +47,15 @@ namespace Arteranos.Services
 
         public static string CachedPTOSNotice { get; private set; } = null;
 
+        private const string ANNOUNCERTOPIC = "/X-Arteranos";
+        private readonly List<string> ARTERANOSBOOTSTRAP = new() 
+        { 
+            "/dns4/prime.arteranos.ddnss.eu/tcp/4001/p2p/12D3KooWA1qSpKLjHqWemSW1gU5wJQdP8piBbDSQi6EEgqPVVkyc" 
+        };
         private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
 
         private bool ForceIPFSShutdown = true;
 
-        private const string AnnouncerTopic = "/X-Arteranos";
         private IpfsClientEx ipfs = null;
         private Peer self = null;
         private SignKey serverKeyPair = null;
@@ -101,6 +105,11 @@ namespace Arteranos.Services
                             SettingsManager.Quit();
                             yield break;
                         }
+
+                        G.TransitionProgress?.OnProgressChanged(0.19f, "Setting bootstrap");
+
+                        foreach(string entry in ARTERANOSBOOTSTRAP)
+                            res = IPFSDaemonConnection.RunDaemonCommand($"bootstrap add {entry}", true);
 
                         G.TransitionProgress?.OnProgressChanged(0.20f, "Starting IPFS backend");
 
@@ -185,7 +194,7 @@ namespace Arteranos.Services
                     using CancellationTokenSource cts_sub = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
 
                     // Truly async.
-                    Task t = ipfs.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts_sub.Token);
+                    Task t = ipfs.PubSub.SubscribeAsync(ANNOUNCERTOPIC, ParseArteranosMessage, cts_sub.Token);
 
                     yield return new WaitForSeconds(5);
 
@@ -505,7 +514,7 @@ namespace Arteranos.Services
             sod.Serialize(ms);
 
             // Announce the server online data, too - fire and forget.
-            _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
+            _ = ipfs.PubSub.PublishAsync(ANNOUNCERTOPIC, ms.ToArray());
         }
 
         private void SendServerGoodbye_()
@@ -524,7 +533,7 @@ namespace Arteranos.Services
             sod.Serialize(ms);
 
             // Just wave a goodbye.
-            _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
+            _ = ipfs.PubSub.PublishAsync(ANNOUNCERTOPIC, ms.ToArray());
         }
 
 #endregion
@@ -533,7 +542,7 @@ namespace Arteranos.Services
 
         public void PostMessageTo(MultiHash peerID, byte[] message)
         {
-            _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, message);
+            _ = ipfs.PubSub.PublishAsync(ANNOUNCERTOPIC, message);
         }
 
         private void ParseArteranosMessage(IPublishedMessage message)
