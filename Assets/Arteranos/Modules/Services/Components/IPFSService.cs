@@ -38,9 +38,7 @@ namespace Arteranos.Services
         public IpfsClientEx Ipfs { get => ipfs; }
         public Peer Self { get => self; }
         public SignKey ServerKeyPair { get => serverKeyPair; }
-#if USE_IDENTIFY_CID
         public Cid IdentifyCid { get; protected set; }
-#endif
         public Cid CurrentSDCid { get; protected set; } = null;
 
         public bool EnableUploadDefaultAvatars = true;
@@ -246,33 +244,29 @@ namespace Arteranos.Services
                 sb.Append("Arteranos Server, built by willneedit\n");
                 sb.Append(Core.Version.VERSION_MIN);
 
-#if USE_IDENTIFY_CID
                 // Put up the identifier file
                 if (G.Server.Public)
                 {
-                    IdentifyCid = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString())).Id;
+                    IdentifyCid = (await ipfs.FileSystem.AddTextAsync(sb.ToString())).Id;
                 }
                 else
                 {
-                    // rm -f the identifier file
+                    // rm -f the identifier file to not to show the local node in other's FindProviders()
                     AddFileOptions ao = new() { OnlyHash = true };
-                    IdentifyCid = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString(), ao)).Id;
+                    IdentifyCid = (await ipfs.FileSystem.AddTextAsync(sb.ToString(), ao)).Id;
 
                     try
                     {
-                        await ipfsTmp.Pin.RemoveAsync(IdentifyCid).ConfigureAwait(false);
-                        await ipfsTmp.Block.RemoveAsync(IdentifyCid, true).ConfigureAwait(false);
+                        await ipfs.Pin.RemoveAsync(IdentifyCid).ConfigureAwait(false);
+                        await ipfs.Block.RemoveAsync(IdentifyCid, true).ConfigureAwait(false);
                     }
                     catch { }
                 }
-#endif
                 Debug.Log("---- IPFS Backend init complete ----\n" +
                     $"IPFS Node's ID\n" +
                     $"   {self.Id}\n"
-#if USE_IDENTIFY_CID
                     + $"Discovery identifier file's CID\n" +
                     $"   {IdentifyCid}\n"
-#endif
                     );
 
                 // Reuse the IPFS peer key for the multiplayer server to ensure its association
@@ -283,9 +277,8 @@ namespace Arteranos.Services
             }
 
             ipfs = null;
-#if USE_IDENTIFY_CID
             IdentifyCid = null;
-#endif
+
             last = DateTime.MinValue;
             cts = new();
 
