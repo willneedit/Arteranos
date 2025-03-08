@@ -176,8 +176,11 @@ namespace Arteranos.Services
                 // Start to emit the server online data.
                 StartCoroutine(EmitServerOnlineDataCoroutine());
 
-                // Start the Subscriber loop
+                // Start the subscriber loop
                 StartCoroutine(SubscriberCoroutine());
+
+                // Start the IPNS publisher loop
+                StartCoroutine(IPNSPublisherCoroutine());
 
                 // Ready to proceed, past the point we can manually shut down the IPFS backend
                 ForceIPFSShutdown = false;
@@ -202,6 +205,36 @@ namespace Arteranos.Services
                     Debug.LogWarning("Subscription task seems to be stuck, retrying...");
                     cts_sub.Cancel();
                     yield return new WaitForSeconds(1);
+                }
+            }
+
+            IEnumerator IPNSPublisherCoroutine()
+            {
+                Cid PreviousSDCid = null;
+                DateTime publishTime = DateTime.MinValue;
+
+                while(true)
+                {
+                    // Valid server description, and
+                    //  - differs from the last one or
+                    //  - older than one day
+                    if(CurrentSDCid != null && 
+                        (PreviousSDCid != CurrentSDCid 
+                        || publishTime < (DateTime.UtcNow - TimeSpan.FromDays(1))))
+                    {
+                        using CancellationTokenSource cts_pub = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+
+                        Debug.Log("Publishing new Server Description to IPNS...");
+
+                        Task t = ipfs.Name.PublishAsync(CurrentSDCid, cancel: cts_pub.Token);
+
+                        Debug.Log("... IPNS publish finished.");
+
+                        PreviousSDCid = CurrentSDCid;
+                        publishTime = DateTime.UtcNow;
+                    }
+
+                    yield return new WaitForSeconds(60);
                 }
             }
             
@@ -439,7 +472,7 @@ namespace Arteranos.Services
                     (await CreateLauncherHTMLFile().ConfigureAwait(false)).ToLink()
                 };
 
-                return await ipfs.FileSystemEx.CreateDirectoryAsync(list).ConfigureAwait(false);
+                return await CreateDirectory(list).ConfigureAwait(false);
             }
 
             IFileSystemNode fsn = await CreateServerDescription().ConfigureAwait(false);
