@@ -74,10 +74,13 @@ namespace Arteranos.Core
         public static ServerDescription Deserialize(PublicKey serverPublicKey, Stream stream)
         {
             ServerDescription d = Serializer.Deserialize<ServerDescription>(stream);
-            byte[] signature = d.signature;
-            string tmp = d.LastUsedIPAddress;
-            using (MemoryStream ms = new())
+            if(serverPublicKey != null)
             {
+                byte[] signature = d.signature;
+                string tmp = d.LastUsedIPAddress;
+
+                using MemoryStream ms = new();
+
                 d.LastUsedIPAddress = null;
                 d.signature = null;
 
