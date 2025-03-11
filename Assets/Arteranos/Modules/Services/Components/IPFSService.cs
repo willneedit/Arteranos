@@ -25,8 +25,6 @@ using IPAddress = System.Net.IPAddress;
 using Arteranos.Core.Operations;
 using TaskScheduler = Arteranos.Core.TaskScheduler;
 using Ipfs.CoreApi;
-
-using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 using System.Collections.Concurrent;
 
@@ -35,23 +33,26 @@ namespace Arteranos.Services
 {
     public class IPFSService : MonoBehaviour, IIPFSService
     {
+        public bool Ready { get; private set; } = false;
         public IpfsClientEx Ipfs { get => ipfs; }
         public Peer Self { get => self; }
         public SignKey ServerKeyPair { get => serverKeyPair; }
-#if USE_IDENTIFY_CID
         public Cid IdentifyCid { get; protected set; }
-#endif
         public Cid CurrentSDCid { get; protected set; } = null;
 
         public bool EnableUploadDefaultAvatars = true;
 
         public static string CachedPTOSNotice { get; private set; } = null;
 
+        private const string ANNOUNCERTOPIC = "/X-Arteranos";
+        private readonly List<string> ARTERANOSBOOTSTRAP = new() 
+        { 
+            "/dns4/prime.arteranos.ddnss.eu/tcp/4001/p2p/12D3KooWA1qSpKLjHqWemSW1gU5wJQdP8piBbDSQi6EEgqPVVkyc" 
+        };
         private const string PATH_USER_PRIVACY_NOTICE = "Privacy_TOS_Notice.md";
 
         private bool ForceIPFSShutdown = true;
 
-        private const string AnnouncerTopic = "/X-Arteranos";
         private IpfsClientEx ipfs = null;
         private Peer self = null;
         private SignKey serverKeyPair = null;
@@ -80,7 +81,7 @@ namespace Arteranos.Services
                     {
                         IPFSDaemonConnection.Status res = IPFSDaemonConnection.CheckRepository(false);
 
-                        if(res != IPFSDaemonConnection.Status.OK)
+                        if (res != IPFSDaemonConnection.Status.OK)
                         {
                             G.TransitionProgress?.OnProgressChanged(0.15f, "Initializing IPFS repository");
                             res = IPFSDaemonConnection.CheckRepository(true);
@@ -102,11 +103,16 @@ namespace Arteranos.Services
                             yield break;
                         }
 
+                        G.TransitionProgress?.OnProgressChanged(0.19f, "Setting bootstrap");
+
+                        foreach (string entry in ARTERANOSBOOTSTRAP)
+                            res = IPFSDaemonConnection.RunDaemonCommand($"bootstrap add {entry}", true);
+
                         G.TransitionProgress?.OnProgressChanged(0.20f, "Starting IPFS backend");
 
                         res = IPFSDaemonConnection.StartDaemon(false);
 
-                        if(res != IPFSDaemonConnection.Status.OK)
+                        if (res != IPFSDaemonConnection.Status.OK)
                         {
                             G.TransitionProgress?.OnProgressChanged(0.00f, "FAILED TO START DAEMON");
                             Debug.LogError(@"
@@ -163,41 +169,12 @@ namespace Arteranos.Services
                 // Default avatars
                 yield return UploadDefaultAvatars();
 
-                // Start to emit the server description.
-                StartCoroutine(EmitServerDescriptionCoroutine());
-
-                // Start to emit the server online data.
-                StartCoroutine(EmitServerOnlineDataCoroutine());
-
-                // Start the Subscriber loop
-                StartCoroutine(SubscriberCoroutine());
+                StartIPFSServices();
 
                 // Ready to proceed, past the point we can manually shut down the IPFS backend
                 ForceIPFSShutdown = false;
             }
 
-            IEnumerator SubscriberCoroutine()
-            {
-                Debug.Log("Subscribing Arteranos PubSub channel");
-
-                while (true)
-                {
-                    using CancellationTokenSource cts_sub = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
-
-                    // Truly async.
-                    Task t = ipfs.PubSub.SubscribeAsync(AnnouncerTopic, ParseArteranosMessage, cts_sub.Token);
-
-                    yield return new WaitForSeconds(5);
-
-                    if (t.IsCompleted)
-                        yield return new WaitUntil(() => false); // NOTREACHED, until Service is destroyed
-
-                    Debug.LogWarning("Subscription task seems to be stuck, retrying...");
-                    cts_sub.Cancel();
-                    yield return new WaitForSeconds(1);
-                }
-            }
-            
             async Task InitializeIPFS()
             {
                 ipfs = null;
@@ -237,33 +214,29 @@ namespace Arteranos.Services
                 sb.Append("Arteranos Server, built by willneedit\n");
                 sb.Append(Core.Version.VERSION_MIN);
 
-#if USE_IDENTIFY_CID
                 // Put up the identifier file
                 if (G.Server.Public)
                 {
-                    IdentifyCid = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString())).Id;
+                    IdentifyCid = (await ipfs.FileSystem.AddTextAsync(sb.ToString())).Id;
                 }
                 else
                 {
-                    // rm -f the identifier file
+                    // rm -f the identifier file to not to show the local node in other's FindProviders()
                     AddFileOptions ao = new() { OnlyHash = true };
-                    IdentifyCid = (await ipfsTmp.FileSystem.AddTextAsync(sb.ToString(), ao)).Id;
+                    IdentifyCid = (await ipfs.FileSystem.AddTextAsync(sb.ToString(), ao)).Id;
 
                     try
                     {
-                        await ipfsTmp.Pin.RemoveAsync(IdentifyCid).ConfigureAwait(false);
-                        await ipfsTmp.Block.RemoveAsync(IdentifyCid, true).ConfigureAwait(false);
+                        await ipfs.Pin.RemoveAsync(IdentifyCid).ConfigureAwait(false);
+                        await ipfs.Block.RemoveAsync(IdentifyCid, true).ConfigureAwait(false);
                     }
                     catch { }
                 }
-#endif
                 Debug.Log("---- IPFS Backend init complete ----\n" +
                     $"IPFS Node's ID\n" +
                     $"   {self.Id}\n"
-#if USE_IDENTIFY_CID
                     + $"Discovery identifier file's CID\n" +
                     $"   {IdentifyCid}\n"
-#endif
                     );
 
                 // Reuse the IPFS peer key for the multiplayer server to ensure its association
@@ -274,9 +247,8 @@ namespace Arteranos.Services
             }
 
             ipfs = null;
-#if USE_IDENTIFY_CID
             IdentifyCid = null;
-#endif
+
             last = DateTime.MinValue;
             cts = new();
 
@@ -332,7 +304,230 @@ namespace Arteranos.Services
             }
         }
 
-#endregion
+        #endregion
+        // ---------------------------------------------------------------
+        #region IPFS services
+        private void StartIPFSServices()
+        {
+            // Server description emitter
+            StartCoroutine(EmitServerDescriptionCoroutine());
+
+            // Server online data emitter
+            StartCoroutine(EmitServerOnlineDataCoroutine());
+
+            // Subscriber loop
+            StartCoroutine(SubscriberCoroutine());
+
+            // IPNS publisher loop
+            StartCoroutine(IPNSPublisherCoroutine());
+
+            // Peer discovery loop
+            StartCoroutine(PeerDiscoveryCoroutine());
+
+            // Server description downloader scheduler
+            StartCoroutine(SDDownloaderCoroutine());
+        }
+
+        private IEnumerator IPNSPublisherCoroutine()
+        {
+            Cid PreviousSDCid = null;
+            DateTime publishTime = DateTime.MinValue;
+
+            while (true)
+            {
+                if (CurrentSDCid == null)
+                {
+                    yield return new WaitForEndOfFrame();
+                    continue;
+                }
+
+                // Valid server description, and
+                //  - differs from the last one or
+                //  - older than one day
+                if (PreviousSDCid != CurrentSDCid || publishTime < (DateTime.UtcNow - TimeSpan.FromHours(23)))
+                {
+                    using CancellationTokenSource cts_pub = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+
+                    Debug.Log("Publishing new Server Description to IPNS...");
+
+                    Task t = ipfs.Name.PublishAsync(CurrentSDCid, cancel: cts_pub.Token);
+
+                    yield return new WaitUntil(() => t.IsCompleted);
+
+                    Debug.Log("... IPNS publish finished.");
+
+                    PreviousSDCid = CurrentSDCid;
+                    publishTime = DateTime.UtcNow;
+                }
+
+                yield return new WaitForSeconds(60);
+            }
+        }
+
+        private IEnumerator SubscriberCoroutine()
+        {
+            Debug.Log("Subscribing Arteranos PubSub channel");
+
+            while (true)
+            {
+                using CancellationTokenSource cts_sub = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+
+                // Truly async.
+                Task t = ipfs.PubSub.SubscribeAsync(ANNOUNCERTOPIC, ParseArteranosMessage, cts_sub.Token);
+
+                yield return new WaitForSeconds(5);
+
+                if (t.IsCompleted)
+                {
+                    Ready = true;
+                    yield return new WaitUntil(() => false); // NOTREACHED, until Service is destroyed
+                }
+
+                // Not completed within the five seconds?
+                Debug.LogWarning("Subscription task seems to be stuck, retrying...");
+                cts_sub.Cancel();
+                yield return new WaitForSeconds(1);
+            }
+        }
+
+        private IEnumerator PeerDiscoveryCoroutine()
+        {
+            HashSet<Peer> peers = new();
+
+            void ProvidersFound(Peer peer)
+            {
+                // Already discovered, or myself.
+                if (peers.Contains(peer) || peer.Id == self.Id) return;
+
+                Debug.Log($"Peer found: {peer.Id}");
+                ScheduleServerDescriptionDownload($"/ipns/{peer.Id}");
+                peers.Add(peer);
+            }
+
+            async Task<int> FindProviders(Cid idc, CancellationToken cancel = default)
+            {
+                // Roll up the results
+                IEnumerable<Peer> peers = await ipfs.Routing.FindProvidersAsync(idc, 1000, ProvidersFound, cancel).ConfigureAwait(false);
+
+                // Debug.Log($"... discovered peers: {peers.Count()}");
+                return peers.Count();
+            }
+
+            while(true)
+            {
+                if (IdentifyCid == null)
+                {
+                    yield return new WaitForEndOfFrame();
+                    continue;
+                }
+
+                using CancellationTokenSource cts_pd = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+
+                Task<int> t = FindProviders(IdentifyCid, cts_pd.Token);
+
+                yield return new WaitUntil(() => t.IsCompleted);
+
+                int timeout = 300;
+                if(t.Result == 0)
+                {
+                    Debug.Log($"No peers detected, discovery timeout shortened");
+                    timeout = 5;
+                }
+
+                yield return new WaitForSeconds(timeout); // 5 minutes before searching again
+            }
+        }
+
+        private readonly ConcurrentQueue<string> ServerDescriptionQueue = new();
+
+        private void ScheduleServerDescriptionDownload(string path)
+        {
+            if (!ServerDescriptionQueue.Contains(path))
+                ServerDescriptionQueue.Enqueue(path);
+        }
+
+        private IEnumerator SDDownloaderCoroutine()
+        {
+            ConcurrentBag<string> knownServerDescriptions = new();
+            int numDownloading = 0;
+
+            async Task DownloadServerDescription(string origpath, string guessedPeerID)
+            {
+                Interlocked.Increment(ref numDownloading);
+
+                string path = origpath;
+                try
+                {
+                    using CancellationTokenSource timeoutToken = new(5000);
+                    using CancellationTokenSource cts_dsd = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, timeoutToken.Token);
+
+                    if(path.StartsWith("/ipns/"))
+                    {
+                        guessedPeerID = path[6..];
+                        path = await ResolveToCid(path, cancel: cts_dsd.Token);
+                    }
+
+                    if (knownServerDescriptions.Contains(path)) return;
+
+                    using MemoryStream ms = new();
+                    using Stream s = await ipfs.FileSystem.ReadFileAsync(path + "/ServerDescription", cts_dsd.Token).ConfigureAwait(false);
+                    await s.CopyToAsync(ms).ConfigureAwait(false);
+                    ms.Position = 0;
+
+                    // Add resolved path. This wouldn't go anywhere, even if it's failing.
+                    knownServerDescriptions.Add(path);
+
+                    PublicKey pk = guessedPeerID != null ? PublicKey.FromId(guessedPeerID) : null;
+                    ServerDescription sd = ServerDescription.Deserialize(pk, ms);
+
+                    guessedPeerID = sd.PeerID;
+                    if (pk == null)
+                    {
+                        ms.Position = 0;
+                        PublicKey.FromId(guessedPeerID);
+                        sd = ServerDescription.Deserialize(pk, ms);
+                    }
+
+                    sd.LastSeen = DateTime.UtcNow;
+
+                    if (sd)
+                    {
+                        sd.DBUpdate();
+                        Debug.Log($"Successfully downloaded server description ({path}) from {guessedPeerID}");
+                    }
+                    else
+                        // Invalid, most probably outdated server. But, it just gave a sign of life.
+                        Debug.Log($"Rejecting server description ({path}) from {guessedPeerID}");
+                }
+                catch(Exception ex)
+                {
+                    Debug.LogWarning($"Failed to download server description {origpath}");
+                    Debug.LogException(ex);
+
+                    // Try again, put it in the back end again.
+                    ServerDescriptionQueue.Enqueue(origpath);
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref numDownloading);
+                }
+            }
+
+            while(true)
+            {
+                // Initial flood mitigation
+                if(numDownloading >= 5) continue;
+                
+                if(ServerDescriptionQueue.TryDequeue(out string toDownload))
+                {
+                    _ = Task.Run(() => DownloadServerDescription(toDownload, null));
+                }
+                else 
+                    yield return new WaitForSeconds(1);
+            }
+        }
+
+        #endregion
         // ---------------------------------------------------------------
         #region Server information publishing
 
@@ -437,7 +632,7 @@ namespace Arteranos.Services
                     (await CreateLauncherHTMLFile().ConfigureAwait(false)).ToLink()
                 };
 
-                return await ipfs.FileSystemEx.CreateDirectoryAsync(list).ConfigureAwait(false);
+                return await CreateDirectory(list).ConfigureAwait(false);
             }
 
             IFileSystemNode fsn = await CreateServerDescription().ConfigureAwait(false);
@@ -505,7 +700,7 @@ namespace Arteranos.Services
             sod.Serialize(ms);
 
             // Announce the server online data, too - fire and forget.
-            _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
+            _ = ipfs.PubSub.PublishAsync(ANNOUNCERTOPIC, ms.ToArray());
         }
 
         private void SendServerGoodbye_()
@@ -524,7 +719,7 @@ namespace Arteranos.Services
             sod.Serialize(ms);
 
             // Just wave a goodbye.
-            _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
+            _ = ipfs.PubSub.PublishAsync(ANNOUNCERTOPIC, ms.ToArray());
         }
 
 #endregion
@@ -533,17 +728,15 @@ namespace Arteranos.Services
 
         public void PostMessageTo(MultiHash peerID, byte[] message)
         {
-            _ = ipfs.PubSub.PublishAsync(AnnouncerTopic, message);
+            _ = ipfs.PubSub.PublishAsync(ANNOUNCERTOPIC, message);
         }
 
         private void ParseArteranosMessage(IPublishedMessage message)
         {
             MultiHash SenderPeerID = message.Sender.Id;
 
-//#if !UNITY_EDITOR
-            // No self-gratification.
+            // Pubsub MAY loop back the messages, but no need.
             if (SenderPeerID == self.Id) return;
-//#endif
 
             try
             {
@@ -554,23 +747,16 @@ namespace Arteranos.Services
                 {
                     if (dm.ToPeerID != self.Id.ToString())
                     {
-                        Debug.Log("Discarding a message directed to another peer");
+                        // Debug.Log("Discarding a message directed to another peer");
                         return;
                     }
-                    else
-                        Debug.Log($"Directed message accepoted: {dm.ToPeerID}");
+                    // else Debug.Log($"Directed message accepoted: {dm.ToPeerID}");
                 }
 
-                // Maybe obsolete.
-                if (pm is ServerDescriptionLink sdl) // Too big for pubsub, this is only a link
-                {
-                    // Debug.Log($"New server description from {SenderPeerID}");
-                    DownloadServerDescription(SenderPeerID, sdl.ServerDescriptionCid);
-                }
-                else if (pm is ServerOnlineData sod) // As-is.
+                if (pm is ServerOnlineData sod) // As-is.
                 {
                     // Debug.Log($"New server online data from {SenderPeerID}");
-                    DownloadServerDescription(SenderPeerID, sod.ServerDescriptionCid);
+                    ScheduleServerDescriptionDownload(sod.ServerDescriptionCid);
                     sod.LastOnline = DateTime.UtcNow; // Not serialized
                     sod.DBInsert(SenderPeerID.ToString());
                 }
@@ -591,103 +777,6 @@ namespace Arteranos.Services
         {
             public string path;         // CID of server description
             public DateTime lastSeen;   // Last seen on the network
-        }
-
-        private readonly ConcurrentDictionary<MultiHash, SDEntry> KnownServerDescriptions = new();
-
-        // Server description are generated by the Server Discovery
-        private void DownloadServerDescription(MultiHash SenderPeerID, string sddPath)
-        {
-
-            DateTime now = DateTime.UtcNow;
-
-            async Task DownloadSDAsync(MultiHash SenderPeerID, string sddPath)
-            {
-                try
-                {
-                    // Mark it now because download in progress.
-                    SDEntry newValue = new()
-                    {
-                        path = sddPath,
-                        lastSeen = now
-                    };
-
-                    KnownServerDescriptions.AddOrUpdate(SenderPeerID, newValue, (sender, value) => newValue);
-
-                    using CancellationTokenSource cts = new(20000);
-
-                    // Server description is published under the peer ID. (= self)
-                    // If it's cached, it's already in the local repo.
-                    // And the TTL reduce the traffic.
-                    using Stream s = await ipfs.FileSystem.ReadFileAsync(sddPath + "/ServerDescription", cts.Token).ConfigureAwait(false);
-
-                    // TODO Maybe unneccessary?
-                    PublicKey pk = PublicKey.FromId(SenderPeerID);
-                    ServerDescription sd = ServerDescription.Deserialize(pk, s);
-
-                    sd.LastSeen = now;
-
-                    // Invalid, most probably outdated server. But, it just given a sign of life.
-                    if (sd)
-                    {
-                        sd.DBUpdate();
-                        Debug.Log($"Successfully downloaded server description ({sddPath}) from {SenderPeerID}");
-                    }
-                    else
-                        Debug.Log($"Rejecting server description ({sddPath}) from {SenderPeerID}");
-
-                }
-                catch (Exception ex)
-                {
-                    // Debug.LogException(ex);
-                    Debug.LogWarning($"Failed downloading server description ({sddPath}) from {SenderPeerID}: {ex.Message}");
-
-                    // Remove the marking, the attempt or result is invalid.
-                    KnownServerDescriptions.TryRemove(SenderPeerID, out _);
-                }
-            }
-
-            Func<Task> MakeDownloadTask(MultiHash SenderPeerID, string sddPath)
-            {
-                Task a() => DownloadSDAsync(SenderPeerID, sddPath);
-                return a;
-            }
-
-            // Empty message, maybe just going online.
-            if (string.IsNullOrEmpty(sddPath)) return;
-
-            // Already known and saved, Or, attempting to.
-            if (KnownServerDescriptions.ContainsKey(SenderPeerID))
-            {
-                SDEntry entry = KnownServerDescriptions[SenderPeerID];
-                if (entry.path == sddPath)
-                {
-                    // Every thirty minutes, at most, refresh the entry without bothering the IPFS.
-                    if (entry.lastSeen <= now - TimeSpan.FromMinutes(30))
-                    {
-                        ServerDescription sd = ServerDescription.DBLookup(SenderPeerID.ToString());
-
-                        // Maybe already pruned, freshen only existing entries.
-                        if (sd != null)
-                        {
-                            sd.LastSeen = now;
-                            sd.DBUpdate();
-                        }
-
-                        SDEntry newValue = new()
-                        {
-                            path = sddPath,
-                            lastSeen = now
-                        };
-
-                        KnownServerDescriptions.AddOrUpdate(SenderPeerID, newValue, (sender, value) => newValue);
-                    }
-
-                    return;
-                }
-            }
-
-            TaskScheduler.Schedule(MakeDownloadTask(SenderPeerID, sddPath));
         }
 
         private void InitiateNatPunch(NatPunchRequestData nprd)

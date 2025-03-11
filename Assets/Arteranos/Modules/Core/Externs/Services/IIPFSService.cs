@@ -21,12 +21,11 @@ namespace Arteranos.Services
     public interface IIPFSService : IMonoBehaviour
     {
         Cid CurrentSDCid { get; }
-#if USE_IDENTIFY_CID
         Cid IdentifyCid { get; }
-#endif
         IpfsClientEx Ipfs { get; }
         Peer Self { get; }
         SignKey ServerKeyPair { get; }
+        bool Ready { get; }
 
         Task<IFileSystemNode> AddDirectory(string path, bool recursive = true, AddFileOptions options = null, CancellationToken cancel = default);
         Task<IFileSystemNode> AddStream(Stream stream, string name = "", AddFileOptions options = null, CancellationToken cancel = default);

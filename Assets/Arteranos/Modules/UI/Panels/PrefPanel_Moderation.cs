@@ -212,9 +212,7 @@ namespace Arteranos.UI
                 }
 
                 // Identification file and current server description
-#if USE_IDENTIFY_CID
                 toPin.Add(G.IPFSService.IdentifyCid);
-#endif
                 toPin.Add(G.IPFSService.CurrentSDCid);
 
                 // Default avatars

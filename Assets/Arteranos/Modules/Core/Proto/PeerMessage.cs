@@ -17,7 +17,7 @@ namespace Arteranos.Core
 
     [ProtoContract]
     [ProtoInclude(65538, typeof(ServerOnlineData))]
-    [ProtoInclude(65539, typeof(ServerDescriptionLink))]
+    // [ProtoInclude(65539, typeof(ServerDescriptionLink))]
     [ProtoInclude(65540, typeof(NatPunchRequestData))]
     public class PeerMessage
     {
