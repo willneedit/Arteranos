@@ -46,7 +46,7 @@ namespace Arteranos.Services
             G.IPFSService.enabled = true;
 
             // First, wait for IPFS to come up.
-            yield return new WaitUntil(() => G.IPFSService.Ipfs != null);
+            yield return new WaitUntil(() => G.IPFSService.Ready);
 
             if (G.CommandLineOptions.DesiredWorldCid != null)
                 ServerSearcher.InitiateServerTransition(G.CommandLineOptions.DesiredWorldCid);
