@@ -399,7 +399,7 @@ namespace Arteranos.Services
                 // Already discovered, or myself.
                 if (peers.Contains(peer) || peer.Id == self.Id) return;
 
-                Debug.Log($"Peer found: {peer.Id}");
+                // Debug.Log($"Peer found: {peer.Id}");
                 ScheduleServerDescriptionDownload($"/ipns/{peer.Id}");
                 peers.Add(peer);
             }
@@ -499,12 +499,12 @@ namespace Arteranos.Services
                         // Invalid, most probably outdated server. But, it just gave a sign of life.
                         Debug.Log($"Rejecting server description ({path}) from {guessedPeerID}");
                 }
-                catch(Exception ex)
+                catch // (Exception ex)
                 {
-                    Debug.LogWarning($"Failed to download server description {origpath}");
-                    Debug.LogException(ex);
+                    //Debug.LogWarning($"Failed to download server description {origpath}");
+                    //Debug.LogException(ex);
 
-                    // Try again, put it in the back end again.
+                    // Try again, put it in the back end of the queue again.
                     ServerDescriptionQueue.Enqueue(origpath);
                 }
                 finally
@@ -521,6 +521,7 @@ namespace Arteranos.Services
                 if(ServerDescriptionQueue.TryDequeue(out string toDownload))
                 {
                     _ = Task.Run(() => DownloadServerDescription(toDownload, null));
+                    yield return null;
                 }
                 else 
                     yield return new WaitForSeconds(1);

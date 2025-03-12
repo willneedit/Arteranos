@@ -1,3 +1,11 @@
+# Version 2.9.1
+
+## Fixes and improvements
+
+- More reliable server discovery, especially in the case of occasional use of the Host mode
+- Added Arteranos Prime as the hook enter the server network - faster startup
+- (For self-build) Easier deployment and sha256sums file creation
+
 # Version 2.9.0
 
 ## New features

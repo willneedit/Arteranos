@@ -123,7 +123,7 @@ public static class _dummy
             AssetDatabase.Refresh();
         }
 
-        [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon (Windows + Linux)", false, 90)]
+        [MenuItem("Arteranos/Build/Retrieve Kubo IPFS daemon (Windows + Linux)", false, 60)]
         public static void RetrieveIPFSDaemon()
             => RetrieveIPFSDaemon(false);
 
@@ -139,7 +139,7 @@ public static class _dummy
             EditorCoroutineUtility.StartCoroutineOwnerless(AquireIPFSExe(silent));
         }
 
-        [MenuItem("Arteranos/Build/Update version and platform", false, 101)]
+        [MenuItem("Arteranos/Build/Update version and platform", false, 120)]
         public static void SetVersion()
         {
             GetProjectGitVersion();
@@ -152,7 +152,7 @@ public static class _dummy
             Debug.Log($"Version detected: Full={v.Full}, M.M.P={v.MMP}");
         }
 
-        [MenuItem("Arteranos/Build/Build Windows64", false, 110)]
+        [MenuItem("Arteranos/Build/Build Windows64", false, 140)]
         public static void BuildWin64()
         {
             static IEnumerator SingleTask()
@@ -164,7 +164,7 @@ public static class _dummy
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
         }
 
-        [MenuItem("Arteranos/Build/Build Windows Dedicated Server", false, 120)]
+        [MenuItem("Arteranos/Build/Build Windows Dedicated Server", false, 150)]
         public static void BuildWin64DedServ()
         {
             static IEnumerator SingleTask()
@@ -176,7 +176,7 @@ public static class _dummy
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
         }
 
-        [MenuItem("Arteranos/Build/Build Linux64 Dedicated Server", false, 130)]
+        [MenuItem("Arteranos/Build/Build Linux64 Dedicated Server", false, 160)]
         public static void BuildLinux64DedServ()
         {
             static IEnumerator SingleTask()
@@ -188,7 +188,7 @@ public static class _dummy
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
         }
 
-        [MenuItem("Arteranos/Build Installation Package (Windows)", false, 80)]
+        [MenuItem("Arteranos/Build/Build Installation Package (Windows)", false, 80)]
         public static void BuildWinInstallationPackage()
         {
             static IEnumerator SingleTask()
@@ -202,13 +202,45 @@ public static class _dummy
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
         }
 
-        [MenuItem("Arteranos/Build Installation Package (Linux)", false, 81)]
+        [MenuItem("Arteranos/Build/Build Installation Package (Linux)", false, 81)]
         public static void BuildLinuxInstallationPackage()
         {
             static IEnumerator SingleTask()
             {
                 yield return AcquireIPFSLinuxExeCoroutine(true);
                 yield return BuildDebianPackageCoroutine();
+            }
+
+            EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
+        }
+
+        [MenuItem("Arteranos/Build/Build deployment directory", false, 100)]
+        public static void BuildDeploymentDirectory()
+        {
+            static IEnumerator SingleTask()
+            {
+                // For convenience, reset build settings to force domain reload
+                EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+                EditorUserBuildSettings.standaloneBuildSubtarget = StandaloneBuildSubtarget.Player;
+
+                GetProjectGitVersion();
+
+                if (Directory.Exists("Deployment")) Directory.Delete("Deployment", true);
+                string vstr = $"{version.Major}.{version.Minor}.{version.Patch}";
+
+                string nameWin64 = $"arteranos-{vstr}-Win64.exe";
+                string nameLinux64 = $"arteranos-server-{vstr}-Linux.deb";
+
+                Directory.CreateDirectory("Deployment");
+
+                File.Copy($"build/{nameWin64}", $"Deployment/{nameWin64}");
+                File.Copy($"build/{nameLinux64}", $"Deployment/{nameLinux64}");
+
+                yield return Execute("wsl", $"sha256sum >sha256sums {nameWin64} {nameLinux64} && echo \"SHA256 sums file created\"", "Deployment");
+
+                yield return Execute("cmd", "/c start .", "Deployment");
+
+                yield return Execute("cmd", "/c start notepad.exe CHANGELOG.md", ".");
             }
 
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
@@ -396,7 +428,10 @@ public static class _dummy
             using Process process = Process.Start(psi);
             using StreamReader reader = process.StandardOutput;
 
-            process.WaitForExit();
+            Task t = Task.Run(() => process.WaitForExit());
+
+            yield return new WaitUntil(() => t.IsCompleted);
+
             string data = reader.ReadToEnd();
             Debug.Log(data);
 
@@ -413,8 +448,6 @@ public static class _dummy
 
                 if (true)
                 {
-                    if (Directory.Exists("build")) Directory.Delete("build", true);
-
                     Progress.Report(progressId, 0.40f, "Build Linux Dedicated Server");
 
                     yield return BuildLinux64DSCoroutine();
@@ -439,6 +472,10 @@ public static class _dummy
 
         public static IEnumerator BuildWinInstallationPackageCoroutine()
         {
+            GetProjectGitVersion();
+
+            string SetupExeName = $"arteranos-{version.Major}.{version.Minor}.{version.Patch}-Win64.exe";
+
             IEnumerator BuildSetup()
             {
                 string wixroot = Environment.GetEnvironmentVariable("wix");
@@ -454,12 +491,7 @@ public static class _dummy
                 string wixroot = Environment.GetEnvironmentVariable("wix");
 
                 yield return Execute($"{wixroot}bin\\candle", "-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension ..\\Setup\\MainBurn.wxs");
-                yield return Execute($"{wixroot}bin\\light", "-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension MainBurn.wixobj -o ArteranosSetup");
-            }
-
-            IEnumerator BuildArchive()
-            {
-                yield return Execute("7z", "a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on ArteranosSetup.7z ArteranosSetup.exe");
+                yield return Execute($"{wixroot}bin\\light", $"-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension MainBurn.wixobj -o {SetupExeName}");
             }
 
             int progressId = Progress.Start("Building...");
@@ -470,10 +502,6 @@ public static class _dummy
                 // without building the actual executables
                 if(true)
                 {
-                    if (Directory.Exists("build")) Directory.Delete("build", true);
-
-                    GetProjectGitVersion();
-
                     Progress.Report(progressId, 0.40f, "Build Win64 Dedicated Server");
 
                     yield return BuildWin64DSCoroutine();
@@ -482,10 +510,10 @@ public static class _dummy
 
                     yield return BuildWin64Coroutine();
 
-                    Directory.Move("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", "build/Arteranos_BurstDebugInformation");
-                    Directory.Move("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", "build/Arteranos-Server_BurstDebugInformation");
+                    Directory.Delete("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", true);
+                    Directory.Delete("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", true);
 
-                    File.Copy("ipfs.exe", "build/ipfs.exe");
+                    File.Copy("ipfs.exe", "build/ipfs.exe", true);
 
                 }
 
@@ -495,8 +523,8 @@ public static class _dummy
                 Progress.Report(progressId, 0.80f, "Build setup wizard");
 
                 if (File.Exists("build/ArteranosSetup.msi")) File.Delete("build/ArteranosSetup.msi");
-                if (File.Exists("build/ArteranosSetup.exe")) File.Delete("build/ArteranosSetup.exe");
-                if (File.Exists("build/ArteranosSetup.7z")) File.Delete("build/ArteranosSetup.7z");
+                if (File.Exists($"build/{SetupExeName}")) File.Delete($"build/{SetupExeName}");
+
                 yield return BuildSetup();
 
                 File.Move("build/Arteranos.exe", "build/Win64/Arteranos.exe");
@@ -510,13 +538,11 @@ public static class _dummy
 
                 yield return BuildSetupExe();
 
-                if(!File.Exists("build/ArteranosSetup.exe"))
+                if(!File.Exists($"build/{SetupExeName}"))
                 {
                     Debug.LogError("Installation executable build failed - see logs");
                     yield break;
                 }
-
-                yield return BuildArchive();
 
                 Debug.Log("Build task finished.");
             }
