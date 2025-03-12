@@ -237,6 +237,10 @@ public static class _dummy
                 File.Copy($"build/{nameLinux64}", $"Deployment/{nameLinux64}");
 
                 yield return Execute("wsl", $"sha256sum >sha256sums {nameWin64} {nameLinux64} && echo \"SHA256 sums file created\"", "Deployment");
+
+                yield return Execute("cmd", "/c start .", "Deployment");
+
+                yield return Execute("cmd", "/c start notepad.exe CHANGELOG.md", ".");
             }
 
             EditorCoroutineUtility.StartCoroutineOwnerless(SingleTask());
@@ -506,10 +510,10 @@ public static class _dummy
 
                     yield return BuildWin64Coroutine();
 
-                    Directory.Move("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", "build/Arteranos_BurstDebugInformation");
-                    Directory.Move("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", "build/Arteranos-Server_BurstDebugInformation");
+                    Directory.Delete("build/Win64/Arteranos_BurstDebugInformation_DoNotShip", true);
+                    Directory.Delete("build/Win64-Server/Arteranos-Server_BurstDebugInformation_DoNotShip", true);
 
-                    File.Copy("ipfs.exe", "build/ipfs.exe");
+                    File.Copy("ipfs.exe", "build/ipfs.exe", true);
 
                 }
 
