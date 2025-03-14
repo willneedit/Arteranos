@@ -405,10 +405,11 @@ namespace Arteranos.Services
 
             void ProvidersFound(Peer peer)
             {
+                // Debug.Log($"Peer found: {peer.Id}");
+
                 // Already discovered, or myself.
                 if (peers.Contains(peer) || peer.Id == self.Id) return;
 
-                // Debug.Log($"Peer found: {peer.Id}");
                 ScheduleServerDescriptionDownload($"/ipns/{peer.Id}");
                 peers.Add(peer);
             }
@@ -437,9 +438,9 @@ namespace Arteranos.Services
                 yield return new WaitUntil(() => t.IsCompleted);
 
                 int timeout = 300;
-                if(t.Result == 0)
+                if(t.Result < 2)
                 {
-                    Debug.Log($"No peers detected, discovery timeout shortened");
+                    Debug.Log($"No other peers detected, discovery timeout shortened");
                     timeout = 5;
                 }
 

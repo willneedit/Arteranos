@@ -97,28 +97,9 @@ namespace Arteranos.Core
         }
 
         public int UserCount => OnlineData?.UserFingerprints?.Count ?? 0;
-        public int FriendCount
-        {
-            get
-            {
-                if (OnlineData?.UserFingerprints == null) return 0;
+        public IEnumerable<UserID> Friends => G.Community.FindFriends(PeerID);
+        public int FriendCount => Friends.Count();
 
-                int friend = 0;
-                IEnumerable<KeyValuePair<UserID, UserSocialEntryJSON>> friends = G.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.Value.State));
-
-                foreach (KeyValuePair<UserID, UserSocialEntryJSON> entry in friends)
-                {
-                    var q = from fpentry in OnlineData.UserFingerprints
-                            where Convert.ToBase64String(fpentry) == 
-                            CryptoHelpers.ToString(CryptoHelpers.FP_Base64, entry.Key)
-                            select fpentry;
-
-                    if (q.Any()) friend++;
-                }
-
-                return friend;
-            }
-        }
         public int MatchScore
         {
             get

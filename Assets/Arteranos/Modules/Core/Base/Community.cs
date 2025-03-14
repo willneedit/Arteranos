@@ -66,5 +66,21 @@ namespace Arteranos.Core
             return found;
         }
 
+        public IEnumerable<UserID> FindFriends(MultiHash peerID)
+        {
+            // None at all. Server is offline.
+            if(!UsersHosts.ContainsKey(peerID))
+                return Enumerable.Empty<UserID>();
+
+            // All of the friends
+            IEnumerable<(UserID friend, string fp)> friends =
+                from entry in G.Client.GetSocialList(null, arg => Social.SocialState.IsFriends(arg.Value.State))
+                select (entry.Key, HexString.Encode(entry.Key.Fingerprint));
+
+            // Intersect server's user list with the own friend list
+            return from entry in friends
+                   where UsersHosts[peerID].Item1.Contains(entry.fp)
+                   select entry.friend;
+        }
     }
 }
