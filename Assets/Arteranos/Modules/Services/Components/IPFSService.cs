@@ -57,8 +57,6 @@ namespace Arteranos.Services
         private Peer self = null;
         private SignKey serverKeyPair = null;
 
-        private DateTime last = DateTime.MinValue;
-
         private string versionString = null;
 
         private CancellationTokenSource cts = null;
@@ -249,7 +247,6 @@ namespace Arteranos.Services
             ipfs = null;
             IdentifyCid = null;
 
-            last = DateTime.MinValue;
             cts = new();
 
             StartCoroutine(InitializeIPFSCoroutine());
@@ -326,6 +323,18 @@ namespace Arteranos.Services
 
             // Server description downloader scheduler
             StartCoroutine(SDDownloaderCoroutine());
+        }
+
+        private readonly ConcurrentQueue<string> ServerDescriptionQueue = new();
+        private bool ServerOnlineDataLatch = false;
+        private void ScheduleServerDescriptionDownload(string path)
+        {
+            if (!ServerDescriptionQueue.Contains(path))
+                ServerDescriptionQueue.Enqueue(path);
+        }
+        public void BumpServerOnlineData() 
+        {
+            ServerOnlineDataLatch = true;
         }
 
         private IEnumerator IPNSPublisherCoroutine()
@@ -438,14 +447,6 @@ namespace Arteranos.Services
             }
         }
 
-        private readonly ConcurrentQueue<string> ServerDescriptionQueue = new();
-
-        private void ScheduleServerDescriptionDownload(string path)
-        {
-            if (!ServerDescriptionQueue.Contains(path))
-                ServerDescriptionQueue.Enqueue(path);
-        }
-
         private IEnumerator SDDownloaderCoroutine()
         {
             ConcurrentBag<string> knownServerDescriptions = new();
@@ -528,6 +529,79 @@ namespace Arteranos.Services
             }
         }
 
+        private IEnumerator EmitServerOnlineDataCoroutine()
+        {
+            DateTime earliestEmitting;
+            DateTime latestEmitting;
+            bool saidOnline = false;
+
+            while (true)
+            {
+                OnlineLevel ol = G.NetworkStatus.GetOnlineLevel();
+
+                if (!G.Server.Public)
+                {
+                    yield return new WaitForEndOfFrame();
+                    continue;
+                }
+
+                if (ol != OnlineLevel.Server && ol != OnlineLevel.Host && !saidOnline)
+                {
+                    yield return new WaitForEndOfFrame();
+                    continue;
+                }
+
+                List<IPAddress> addrs = G.NetworkStatus?.IPAddresses;
+                if(addrs == null || addrs.Count == 0)
+                {
+                    yield return new WaitForEndOfFrame();
+                    continue;
+                }
+
+                List<byte[]> UserFingerprints = (from user in G.NetworkStatus.GetOnlineUsers()
+                                                 where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
+                                                 select user.UserID.Fingerprint).ToList();
+
+                List<string> addrstrs = (from entry in addrs
+                                        where entry != null
+                                        select entry.ToString()).ToList();
+
+                ServerOnlineData sod = new()
+                {
+                    CurrentWorldCid = ol != OnlineLevel.Offline ? G.World.Cid : null,
+                    CurrentWorldName = ol != OnlineLevel.Offline ? G.World.Name : "Offline",
+                    UserFingerprints = ol != OnlineLevel.Offline ? UserFingerprints : null,
+                    ServerDescriptionCid = CurrentSDCid,
+                    // LastOnline = last, // Not serialized - set on receive
+                    OnlineLevel = ol,
+                    IPAddresses = addrstrs,
+                    Timestamp = DateTime.UtcNow,
+                    Firewalled = G.NetworkStatus.GetConnectivityLevel() != ConnectivityLevel.Unrestricted
+                };
+
+                using MemoryStream ms = new();
+                sod.Serialize(ms);
+
+                // Announce the server online data, too - fire and forget.
+                Task t = ipfs.PubSub.PublishAsync(ANNOUNCERTOPIC, ms.ToArray(), cts.Token);
+
+                // If the just emitted online data means being online, ensure the next
+                // emittance - even if it's being offline.
+                saidOnline = ol == OnlineLevel.Server || ol == OnlineLevel.Host;
+
+                earliestEmitting = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+                latestEmitting = DateTime.UtcNow + TimeSpan.FromSeconds(G.Server.AnnounceRefreshTime);
+
+                yield return new WaitUntil(() =>
+                    t.IsCompleted &&
+                        ((ServerOnlineDataLatch && DateTime.UtcNow > earliestEmitting) 
+                        || DateTime.UtcNow > latestEmitting)
+                );
+
+                ServerOnlineDataLatch = false;
+            }
+        }
+
         #endregion
         // ---------------------------------------------------------------
         #region Server information publishing
@@ -540,30 +614,6 @@ namespace Arteranos.Services
 
                 // One day
                 yield return new WaitForSeconds(24 * 60 * 60);
-            }
-            // NOTREACHED
-        }
-
-        private IEnumerator EmitServerOnlineDataCoroutine()
-        {
-            bool saidOnline = false;
-
-            while (true)
-            {
-                if (G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Server ||
-                    G.NetworkStatus.GetOnlineLevel() == OnlineLevel.Host)
-                {
-                    saidOnline = true;
-                    if(G.Server.Public) FlipServerOnlineData_();
-                }
-                else if(saidOnline)
-                {
-                    // First time after being online, wave the community goodbye.
-                    saidOnline = false;
-                    SendServerGoodbye_();
-                }
-
-                yield return new WaitForSeconds(G.Server.AnnounceRefreshTime);
             }
             // NOTREACHED
         }
@@ -639,88 +689,6 @@ namespace Arteranos.Services
             IFileSystemNode fsn = await CreateServerDescription().ConfigureAwait(false);
             CurrentSDCid = fsn.Id;
 
-// Definitely unnecessary, _for now_. We just need server descriptions if the server itself is online,
-// and it's sending online data.
-#if false
-            if (G.Server.Public)
-            {
-                Stopwatch sw = Stopwatch.StartNew();
-                // Submit the announce in Pubsub as well, for all who's listening
-                ServerDescriptionLink sdl = new() { ServerDescriptionCid = CurrentSDCid };
-                using MemoryStream ms = new();
-                sdl.Serialize(ms);
-                ms.Position = 0;
-
-                await ipfs.PubSub.PublishAsync(AnnouncerTopic, ms.ToArray());
-                Debug.Log($"Publishing server description via PubSub(): {sw.Elapsed}");
-            }
-            else
-                Debug.Log($"Server description CID would be: {CurrentSDCid}");
-#endif
-
-        }
-
-        private void FlipServerOnlineData_()
-        {
-            // If we're explicitely set the shorter time, we lower the flood throttling, too.
-            int floodmark = G.Server.AnnounceRefreshTime < 30 ? G.Server.AnnounceRefreshTime : 30;
-
-            // Flood mitigation
-            if (last > DateTime.UtcNow - TimeSpan.FromSeconds(floodmark)) return;
-            last = DateTime.UtcNow;
-
-            List<byte[]> UserFingerprints = (from user in G.NetworkStatus.GetOnlineUsers()
-                                where user.UserPrivacy != null && user.UserPrivacy.Visibility != Visibility.Invisible
-                                select CryptoHelpers.GetFingerprint(user.UserID)).ToList();
-
-            List<IPAddress> addrs = G.NetworkStatus?.IPAddresses;
-
-            if(addrs == null)
-            {
-                Debug.LogWarning("No IP addresses yet, skipping Server Online data for this turn");
-                return;
-            }
-
-            List<string> IPAddresses = new();
-            foreach (IPAddress entry in addrs) if(entry != null) IPAddresses.Add(entry.ToString());
-
-            ServerOnlineData sod = new()
-            {
-                CurrentWorldCid = G.World.Cid,
-                CurrentWorldName = G.World.Name,
-                UserFingerprints = UserFingerprints,
-                ServerDescriptionCid = CurrentSDCid,
-                // LastOnline = last, // Not serialized - set on receive
-                OnlineLevel = G.NetworkStatus.GetOnlineLevel(),
-                IPAddresses = IPAddresses,
-                Timestamp = DateTime.UtcNow,
-                Firewalled = G.NetworkStatus.GetConnectivityLevel() != ConnectivityLevel.Unrestricted
-            };
-
-            using MemoryStream ms = new();
-            sod.Serialize(ms);
-
-            // Announce the server online data, too - fire and forget.
-            _ = ipfs.PubSub.PublishAsync(ANNOUNCERTOPIC, ms.ToArray());
-        }
-
-        private void SendServerGoodbye_()
-        {
-            ServerOnlineData sod = new()
-            {
-                CurrentWorldCid = null,
-                CurrentWorldName = "Offline",
-                UserFingerprints = null,
-                ServerDescriptionCid = CurrentSDCid,
-                OnlineLevel = OnlineLevel.Offline,
-                IPAddresses = null,
-                Timestamp = DateTime.UtcNow,
-            };
-            using MemoryStream ms = new();
-            sod.Serialize(ms);
-
-            // Just wave a goodbye.
-            _ = ipfs.PubSub.PublishAsync(ANNOUNCERTOPIC, ms.ToArray());
         }
 
 #endregion
@@ -760,6 +728,19 @@ namespace Arteranos.Services
                     ScheduleServerDescriptionDownload(sod.ServerDescriptionCid);
                     sod.LastOnline = DateTime.UtcNow; // Not serialized
                     sod.DBInsert(SenderPeerID.ToString());
+
+                    if(sod.CurrentWorldCid == null && sod.UserFingerprints == null)
+                    {
+                        G.Community.DownServer(SenderPeerID);
+                    }
+                    else
+                    {
+                        HashSet<string> usersFP = new();
+                        foreach (byte[] entry in sod.UserFingerprints)
+                            usersFP.Add(HexString.Encode(entry));
+                        G.Community.UpdateServerWorld(SenderPeerID, sod.CurrentWorldCid);
+                        G.Community.UpdateServerUsers(SenderPeerID, usersFP, sod.Timestamp);
+                    }
                 }
                 else if (pm is NatPunchRequestData nprd)
                 {

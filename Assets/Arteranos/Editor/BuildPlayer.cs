@@ -35,7 +35,7 @@ namespace Arteranos.Editor
         // public static string appName = Application.productName;
         public static readonly string appName = "Arteranos";
 
-        public static Core.Version version { get; private set; } = null;
+        public static Core.Version Version { get; private set; } = null;
 
         public static void GetProjectGitVersion()
         {
@@ -58,19 +58,19 @@ namespace Arteranos.Editor
 
             string[] parts = data.Split('-');
 
-            version = Core.Version.Parse(parts[0][1..]);
+            Version = Core.Version.Parse(parts[0][1..]);
 
-            version.Hash = parts[^1][1..^1];     // Remove the 'g' before the commit hash and the LF
-            version.B = parts[^2];
-            version.MMP = $"{version.Major}.{version.Minor}.{version.Patch}";
-            version.MMPB = $"{version.MMP}.{version.B}";
+            Version.Hash = parts[^1][1..^1];     // Remove the 'g' before the commit hash and the LF
+            Version.B = parts[^2];
+            Version.MMP = $"{Version.Major}.{Version.Minor}.{Version.Patch}";
+            Version.MMPB = $"{Version.MMP}.{Version.B}";
 
             if(parts.Length > 3)
-                version.Tag = "-"+string.Join("-", parts[1..^2]);
+                Version.Tag = "-"+string.Join("-", parts[1..^2]);
 
-            version.Full = $"{version.MMP}.{version.B}{version.Tag}-{version.Hash}";
+            Version.Full = $"{Version.MMP}.{Version.B}{Version.Tag}-{Version.Hash}";
 
-            TextAsset textAsset = new(JsonConvert.SerializeObject(version, Formatting.Indented));
+            TextAsset textAsset = new(JsonConvert.SerializeObject(Version, Formatting.Indented));
 
             if(!Directory.Exists("Assets/Generated"))
                 AssetDatabase.CreateFolder("Assets", "Generated");
@@ -85,8 +85,8 @@ namespace Arteranos.Editor
             string WiXFileText =
 @"<?xml version='1.0' encoding='utf-8' ?>
 
-<?define version = """+ version.MMP + @""" ?>
-<?define fullversion = """+ version.Full + @""" ?>
+<?define version = """+ Version.MMP + @""" ?>
+<?define fullversion = """+ Version.Full + @""" ?>
 
 <Include xmlns='http://schemas.microsoft.com/wix/2006/wi'>
   
@@ -129,7 +129,7 @@ public static class _dummy
 
         public static void RetrieveIPFSDaemon(bool silent)
         {
-            IEnumerator AquireIPFSExe(bool silent)
+            static IEnumerator AquireIPFSExe(bool silent)
             {
                 yield return AcquireIPFSWinExeCoroutine(silent);
 
@@ -226,7 +226,7 @@ public static class _dummy
                 GetProjectGitVersion();
 
                 if (Directory.Exists("Deployment")) Directory.Delete("Deployment", true);
-                string vstr = $"{version.Major}.{version.Minor}.{version.Patch}";
+                string vstr = $"{Version.Major}.{Version.Minor}.{Version.Patch}";
 
                 string nameWin64 = $"arteranos-{vstr}-Win64.exe";
                 string nameLinux64 = $"arteranos-server-{vstr}-Linux.deb";
@@ -458,7 +458,7 @@ public static class _dummy
 
                 string systemroot = Environment.GetEnvironmentVariable("SystemRoot");
 
-                yield return Execute($"{systemroot}\\system32\\cmd.exe", "/c build.bat" + $" {version.Major} {version.Minor} {version.Patch}", "Setup-Linux");
+                yield return Execute($"{systemroot}\\system32\\cmd.exe", "/c build.bat" + $" {Version.Major} {Version.Minor} {Version.Patch}", "Setup-Linux");
 
                 Debug.Log("Finished.");
 
@@ -474,12 +474,11 @@ public static class _dummy
         {
             GetProjectGitVersion();
 
-            string SetupExeName = $"arteranos-{version.Major}.{version.Minor}.{version.Patch}-Win64.exe";
+            string SetupExeName = $"arteranos-{Version.Major}.{Version.Minor}.{Version.Patch}-Win64.exe";
+            string wixroot = Environment.GetEnvironmentVariable("wix");
 
             IEnumerator BuildSetup()
             {
-                string wixroot = Environment.GetEnvironmentVariable("wix");
-
                 yield return Execute($"{wixroot}bin\\heat", "dir Win64 -out Win64.wxi -scom -sfrag -sreg -svb6 -ag -dr AppDir -cg Pack_Win64 -srd -var var.BinDir");
                 yield return Execute($"{wixroot}bin\\heat", "dir Win64-Server -out Win64-Server.wxi -scom -sfrag -sreg -svb6 -ag -dr ServerDir -cg Pack_Win64_Server -srd -var var.SrvBinDir");
                 yield return Execute($"{wixroot}bin\\candle", "..\\Setup\\Main.wxs Win64-Server.wxi Win64.wxi -ext WixFirewallExtension -dBinDir=Win64 -dSrvBinDir=Win64-Server -arch x64");
@@ -488,8 +487,6 @@ public static class _dummy
 
             IEnumerator BuildSetupExe()
             {
-                string wixroot = Environment.GetEnvironmentVariable("wix");
-
                 yield return Execute($"{wixroot}bin\\candle", "-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension ..\\Setup\\MainBurn.wxs");
                 yield return Execute($"{wixroot}bin\\light", $"-ext WixNetFxExtension -ext WixBalExtension -ext WixUtilExtension MainBurn.wixobj -o {SetupExeName}");
             }

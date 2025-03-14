@@ -238,6 +238,9 @@ namespace Arteranos.Services
                 brain.AgreePublicKey = seq.request.ClientAgreePublicKey;
 
                 EmitToClientCurrentWorld(conn, brain.AgreePublicKey);
+
+                // Notify IPFS service to update the server online data... soon-ish.
+                G.IPFSService.BumpServerOnlineData();
             }
             else conn.Disconnect();  // No discussion, there'd be something fishy...
         }
@@ -257,6 +260,9 @@ namespace Arteranos.Services
 
             if (SCLastUpdatedToClient.ContainsKey(conn.connectionId))
                 SCLastUpdatedToClient.Remove(conn.connectionId);
+
+            // Notify IPFS service to update the server online data... soon-ish.
+            G.IPFSService.BumpServerOnlineData();
         }
 
         /// <summary>

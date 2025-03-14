@@ -40,6 +40,8 @@ namespace Arteranos.Core
         public static UserID Deserialize(byte[] data)
             => Serializer.Deserialize<UserID>(new MemoryStream(data));
 
+        public byte[] Fingerprint => CryptoHelpers.GetFingerprint(SignPublicKey);
+
         public bool Equals(UserID other)
         {
             if(other?.SignPublicKey == null || SignPublicKey == null) return false;

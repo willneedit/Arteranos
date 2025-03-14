@@ -41,5 +41,6 @@ namespace Arteranos.Services
         Task<FileSystemNode> CreateDirectory(IEnumerable<IFileSystemLink> links, bool pin = true, CancellationToken cancel = default);
         Task<MemoryStream> ReadIntoMS(string path, Action<long> reportProgress = null, CancellationToken cancel = default);
         void PostMessageTo(MultiHash peerID, byte[] message);
+        void BumpServerOnlineData();
     }
 }
