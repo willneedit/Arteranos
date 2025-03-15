@@ -58,9 +58,7 @@ namespace Arteranos.UI
 
         private void GotFileBrowserSelection(object result)
         {
-            string obj = result as string;
-
-            if (obj == null)
+            if (result is not string obj)
             {
                 Chooser.FinishAdding();
                 return;
@@ -152,18 +150,21 @@ namespace Arteranos.UI
             {
                 if(si.CurrentWorldCid == null) continue;
 
+                // Looking for the server where you meet up with most of your friends;
+                // sorry about for outliers.
+                int friendCount = si.FriendCount;
                 worldlist.AddOrUpdate(si.CurrentWorldCid, new Collection()
                 {
                     favourited = false,
                     current = false,
-                    friendsMax = 0,
+                    friendsMax = friendCount,
                     serversCount = 1,
                     usersCount = si.UserCount,
                     worldCid = si.CurrentWorldCid
                 },
                 (cid, coll) =>
                 {
-                    coll.friendsMax = si.FriendCount > coll.friendsMax ? si.FriendCount : coll.friendsMax;
+                    coll.friendsMax = friendCount > coll.friendsMax ? friendCount : coll.friendsMax;
                     coll.serversCount++;
                     coll.usersCount += si.UserCount;
                     return coll;
@@ -230,7 +231,7 @@ namespace Arteranos.UI
 
             score += list.usersCount * 5; // Users get five points.
 
-            score += list.friendsMax * 20; // Friends get twenty points.
+            score += list.friendsMax * 20; // Available friends bunched up in a single server get twenty points.
 
             score += list.favourited ? 100000 : 0; // A class for its own.
 

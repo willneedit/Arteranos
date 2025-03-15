@@ -62,6 +62,7 @@ namespace Arteranos
         public static Client Client { get; set; }
         public static Server Server { get; set; }
         public static ServerUserBase ServerUsers { get; set; }
+        public static Community Community { get; set; } = new();
         // ---------------------------------------------------------------
         public static DefaultAvatar_ DefaultAvatar { get; } = new();
         // ---------------------------------------------------------------

@@ -45,8 +45,6 @@ public static class CryptoHelpers
         return string.Join(" ", words);
     }
 
-    public static byte[] GetFingerprint(UserID userID)
-        => GetFingerprint(userID.SignPublicKey.Serialize());
     public static byte[] GetFingerprint(PublicKey publicKey) 
         => GetFingerprint(publicKey.Serialize());
     public static byte[] GetFingerprint(byte[] publicKey)
