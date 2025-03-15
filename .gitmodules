@@ -1,27 +1,27 @@
 [submodule "Packages/Mirror"]
 	path = Packages/Mirror
-	url = https://github.com/willneedit/Mirror.git
+	url = git@github.com:arteranos/Mirror.git
 [submodule "Packages/UnityAsyncImageLoader"]
 	path = Packages/UnityAsyncImageLoader
-	url = https://github.com/willneedit/UnityAsyncImageLoader.git
+	url = git@github.com:arteranos/UnityAsyncImageLoader.git
 [submodule "Packages/glTFast"]
 	path = Packages/glTFast
-	url = https://github.com/willneedit/glTFast.git
+	url = git@github.com:arteranos/glTFast.git
 [submodule "Packages/Arteranos-IPFS-interface"]
 	path = Packages/Arteranos-IPFS-interface
-	url = https://github.com/willneedit/Arteranos-IPFS-interface.git
+	url = git@github.com:arteranos/Arteranos-IPFS-interface.git
 [submodule "Packages/LiteNetLibTransportNG"]
 	path = Packages/LiteNetLibTransportNG
-	url = https://github.com/willneedit/LiteNetLibTransportNG.git
+	url = git@github.com:arteranos/LiteNetLibTransportNG.git
 [submodule "Packages/Unity_Sceelix_Plugin"]
 	path = Packages/Unity_Sceelix_Plugin
-	url = https://github.com/willneedit/Unity_Sceelix_Plugin.git
+	url = git@github.com:arteranos/Unity_Sceelix_Plugin.git
 [submodule "Packages/com.unity.xr.management"]
 	path = Packages/com.unity.xr.management
-	url = https://github.com/willneedit/com.unity.xr.management.git
+	url = git@github.com:arteranos/com.unity.xr.management.git
 [submodule "Packages/com.unity.xr.openxr"]
 	path = Packages/com.unity.xr.openxr
-	url = https://github.com/willneedit/com.unity.xr.openxr.git
+	url = git@github.com:arteranos/com.unity.xr.openxr.git
 [submodule "Packages/Unity_Opus"]
 	path = Packages/Unity_Opus
-	url = https://github.com/willneedit/Unity_Opus.git
+	url = git@github.com:arteranos/Unity_Opus.git
